@@ -7,7 +7,7 @@
 void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param)
 {    
 
-  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_index = segment_iters.index;
   // param.segment_index;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("segment_indexA = %d"),segment_index);
@@ -46,10 +46,10 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
 void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colour()
 {
   
-  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
     
 
-  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_index = segment_iters.index;
 
   // Set up colours
   // Brightness is generated internally, and rgbcct solid palettes are output values
@@ -64,21 +64,21 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
   if(!_segment_runtimes[segment_index].rgbcct_controller->getApplyBrightnessToOutput()){ // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
-      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
+      _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessRGB255(),
       _segment_runtimes[segment_index].rgbcct_controller->getBrightnessCCT255()
     );
   }
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour2=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  animation_colours_rgbcct.StartingColor = GetPixelColor(_segments[segment_iters._segment_index].pixel_range.start);
+  animation_colours_rgbcct.StartingColor = GetPixelColor(_segments[segment_iters.index].pixel_range.start);
 
   // AddLog(LOG_LEVEL_TEST, PSTR("%d StartingColour2=%d,%d,%d,%d,%d"),
-  // _segments[segment_iters._segment_index].pixel_range.start,
+  // _segments[segment_iters.index].pixel_range.start,
   //  animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
     
   // Call the animator to blend from previous to new
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){
       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
     }
@@ -90,7 +90,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
 void mAnimatorLight::AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param)
 {   
 
-  uint8_t segment_index = segment_iters._segment_index;  
+  uint8_t segment_index = segment_iters.index;  
   uint16_t start_pixel = _segments[segment_index].pixel_range.start;
   uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
 
@@ -136,14 +136,14 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester()
   _segments[0].flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
   Segments_UpdateStartingColourWithGetPixel();
   // Call the animator to blend from previous to new
 
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
     }
@@ -174,14 +174,14 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   _segments[0].flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
   Segments_UpdateStartingColourWithGetPixel();
   // Call the animator to blend from previous to new
 
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
     }
@@ -214,14 +214,14 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   
 
   // Pick new colours
-  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
   Segments_UpdateStartingColourWithGetPixel();
   // Call the animator to blend from previous to new
 
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
     }
@@ -246,7 +246,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 void mAnimatorLight::SubTask_Segment_Animate_Function__Step_Through_Palette()
 {
 
-  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_index = segment_iters.index;
 
   uint16_t* region_p          = &_segment_runtimes[segment_index].aux0;
   uint16_t* indexes_active_p  = &_segment_runtimes[segment_index].aux1; // shared_flasher_parameters_segments.indexes.active
@@ -262,7 +262,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Step_Through_Palette()
       // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_COLOUR_SELECT_ID"));
 
       _segments[0].flags.brightness_applied_during_colour_generation = true;
-      mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+      mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
         
       int16_t pixel_position = -2;
       uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
@@ -341,7 +341,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Step_Through_Palette()
       Segments_UpdateStartingColourWithGetPixel();
       // Call the animator to blend from previous to new
      
-      setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+      setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
         [this](const AnimationParam& param){ 
           this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
         }
@@ -375,7 +375,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential(){
   // flashersettings_segments.flag_finish_flasher_pair = false;
   // flashersettings_segments.flags.enable_random_rate = true;
   
-  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_index = segment_iters.index;
   uint16_t* region_p             = &_segment_runtimes[segment_index].aux0;
   uint16_t* movement_direction_p = &_segment_runtimes[segment_index].aux1; // flashersettings_segments.flags.movement_direction
   uint16_t* flag_finish_flasher_pair_p = &_segment_runtimes[segment_index].aux2;
@@ -388,7 +388,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential(){
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
         // #endif
 
-        Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters._segment_index].palette.id);
+        Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
         
         #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
         // Check if output multiplying has been set, if so, change desiredcolour array
@@ -409,7 +409,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential(){
         // Get starting positions already on show
         Segments_UpdateStartingColourWithGetPixel();
         
-        setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+        setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
           [this](const AnimationParam& param){ 
             this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
           }
@@ -430,7 +430,7 @@ void mAnimatorLight::Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift
 {
 
 //pixels_amount_to_shift loop this many times
-  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_index = segment_iters.index;
   uint16_t start_pixel = _segments[segment_index].pixel_range.start;
   uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
 
@@ -504,15 +504,15 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 
   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
-  uint8_t segment_index = segment_iters._segment_index;
+  uint8_t segment_index = segment_iters.index;
   uint16_t start_pixel = _segments[segment_index].pixel_range.start;
   uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
 
 
   // Set palette pointer
-  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
   // Brightness is generated internally, and rgbcct solid palettes are output values
-  _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = false;
+  _segments[segment_iters.index].flags.brightness_applied_during_colour_generation = false;
 
   /**
    * Solar data to use, defined here for testing or simulations
@@ -538,7 +538,7 @@ float sun_elevation = 0;
   /**
    * Get total pixels in palette
    * */
-  mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(_segments[segment_iters._segment_index].palette.id);
+  mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(_segments[segment_iters.index].palette.id);
   uint8_t pixels_max = mPaletteI->GetPixelsInMap(palette_p);
   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
@@ -681,18 +681,18 @@ float sun_elevation = 0;
    * Load new colour into animation
    * */
 
-  _segments[segment_iters._segment_index].flags.fForceUpdate = true;
+  _segments[segment_iters.index].flags.fForceUpdate = true;
 
   animation_colours_rgbcct.DesiredColour  = c_blended;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  if(!_segment_runtimes[segment_iters._segment_index].rgbcct_controller->getApplyBrightnessToOutput())
+  if(!_segment_runtimes[segment_iters.index].rgbcct_controller->getApplyBrightnessToOutput())
   { // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
-      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
-      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessCCT255()
+      _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessRGB255(),
+      _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessCCT255()
     );
   }
 
@@ -703,7 +703,7 @@ float sun_elevation = 0;
   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
         // Call the animator to blend from previous to new
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){
       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
     }
@@ -748,9 +748,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 
 
 
-  _segments[segment_iters._segment_index].palette.id = mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+  _segments[segment_iters.index].palette.id = mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
 
-  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
   // Set up colours
   // Brightness is generated internally, and rgbcct solid palettes are output values
 
@@ -765,11 +765,11 @@ float sun_elevation = 0;
 
   if(sun_elevation < -20)
   {
-    _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMax());      
+    _segment_runtimes[segment_iters.index].rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMax());      
   }else
   if(sun_elevation > 20)
   {
-    _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMin());      
+    _segment_runtimes[segment_iters.index].rgbcct_controller->setCCT(pCONT_iLight->get_CTRangeMin());      
   }else{
     // Convert elevation into percentage
     uint8_t elev_perc = map(sun_elevation,-20,20,0,100);
@@ -778,21 +778,21 @@ float sun_elevation = 0;
  
     // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "cct_val=%d"),cct_val);
     // Set the colour temp
-    _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(cct_val);    
+    _segment_runtimes[segment_iters.index].rgbcct_controller->setCCT(cct_val);    
   }
 
-  _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = false;
+  _segments[segment_iters.index].flags.brightness_applied_during_colour_generation = false;
   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
-  _segments[segment_iters._segment_index].flags.fForceUpdate = true;
+  _segments[segment_iters.index].flags.fForceUpdate = true;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-  if(!_segment_runtimes[segment_iters._segment_index].rgbcct_controller->getApplyBrightnessToOutput())
+  if(!_segment_runtimes[segment_iters.index].rgbcct_controller->getApplyBrightnessToOutput())
   { // If not already applied, do it using global values
     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
       animation_colours_rgbcct.DesiredColour, 
-      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
-      _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessCCT255()
+      _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessRGB255(),
+      _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessCCT255()
     );
   }
 
@@ -803,7 +803,7 @@ float sun_elevation = 0;
   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
         // Call the animator to blend from previous to new
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters._segment_index, 
+  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){
       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
     }
@@ -1617,7 +1617,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //       //   UpdateDesiredColourWithSingleColour(RgbcctColor(0));
 //       // }
 
-//       _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
+//       _segment_runtimes[segment_iters.index].rgbcct_controller->setBrightnessRGB255(map(flashersettings.brightness_min, 0,100, 0,255));
 
 
 //       UpdateDesiredColourFromPaletteSelected();
@@ -2127,7 +2127,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //         // Global brightness is already applied, and will be known as "max range"
 //         // Min range will be another map change here
-//         uint8_t max_brightness = _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255();
+//         uint8_t max_brightness = _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessRGB255();
 //         uint8_t min_brightness = flashersettings.brightness_min;
 //         uint8_t random_brightness = 0;
 
@@ -2859,12 +2859,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
-//   if(!_segment_runtimes[segment_iters._segment_index].rgbcct_controller->getApplyBrightnessToOutput())
+//   if(!_segment_runtimes[segment_iters.index].rgbcct_controller->getApplyBrightnessToOutput())
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessRGB255(),
-//       _segment_runtimes[segment_iters._segment_index].rgbcct_controller->getBrightnessCCT255()
+//       _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessRGB255(),
+//       _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessCCT255()
 //     );
 //   }
 
@@ -3031,7 +3031,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //     uint8_t blue =  map(sun_elevation,-50,10,255,0);
 
-//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setRGB(0,0,blue);
+//     _segment_runtimes[segment_iters.index].rgbcct_controller->setRGB(0,0,blue);
 
 //     // AddLog(LOG_LEVEL_INFO, PSTR("elevation=%d, cct_temp=%d %d"),(int)sun_elevation, elev_perc, cct_val);
 
@@ -3040,7 +3040,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 //     uint8_t brightness_255 = map(sun_elevation,-50,10,255,0);
 
-//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setBrightnessRGB255(brightness_255);
+//     _segment_runtimes[segment_iters.index].rgbcct_controller->setBrightnessRGB255(brightness_255);
 
 //   }
 
@@ -3056,12 +3056,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //     // Convert percentage into cct
 //     uint16_t cct_val = mapvalue(elev_perc, 0,100, pCONT_iLight->get_CTRangeMin(),pCONT_iLight->get_CTRangeMax());
 //     // Set the colour temp
-//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setCCT(cct_val);
+//     _segment_runtimes[segment_iters.index].rgbcct_controller->setCCT(cct_val);
 
 
 //     uint8_t brightness_255 = map(sun_elevation,-10,25,0,255);
 
-//     _segment_runtimes[segment_iters._segment_index].rgbcct_controller->setBrightnessCCT255(brightness_255);
+//     _segment_runtimes[segment_iters.index].rgbcct_controller->setBrightnessCCT255(brightness_255);
 
 //   }
 
@@ -4783,484 +4783,6 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 // }
 
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
- * @note : Randomly changes colours of pixels, and blends to the new one
- * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
- * 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
 
 
 
@@ -5287,7 +4809,7 @@ typedef struct Spark {
 } spark;
 
 
-    #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+    // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
 
 /****************************************************************************************************************************
@@ -5296,65 +4818,62 @@ typedef struct Spark {
  ****************************************************************************************************************************
  ****************************************************************************************************************************/
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-/*
- * No blinking. Just plain old static light.
- */
-uint16_t mAnimatorLight::seg_mode_static(void) {
-  /**
-   * Generate new colours
-   * */
-  handle_palette();
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-  seg_fill_ranged(SEGCOLOR(0));
-  return (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
-}
+// void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static()
+// {
+//   uint8_t segment_index  = segment_iters.index;
+//   uint8_t segment_length = _segments[segment_index].length();
+//   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+//   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+//   _virtualSegmentLength = segment_length;
 
+// /*
+//  * No blinking. Just plain old static light.
+//  */
+// // void mAnimatorLight::mode_static(void) {
+//   /**
+//    * Generate new colours
+//    * */
+//   handle_palette();
 
-/*
- * No blinking. Just plain old static light.
- */
-uint16_t mAnimatorLight::mode_static(void) {
-  /**
-   * Generate new colours
-   * */
-  handle_palette();
+//   fill_ranged(SEGCOLOR(0));
+//   // return 
+//   (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
 
-  fill_ranged(SEGCOLOR(0));
-  return (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
-}
-
-//Speed slider sets amount of LEDs lit, intensity() sets unlit
-uint16_t mAnimatorLight::mode_static_pattern()
-{
-  /**
-   * Generate new colours
-   * */
-  handle_palette();
-
-  uint16_t lit = 1 + _segments[segment_index].speed();
-  uint16_t unlit = 1 + _segments[segment_index].intensity();
-  bool drawingLit = true;
-  uint16_t cnt = 0;
-  uint16_t start_pixel = _segments[segment_index].start_pixel_index;
-
-  for (uint16_t i = 0; i < segment_length; i++) {
-    SetPixelColor(i+start_pixel, 
-      (drawingLit) ? 
-      pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : 
-      SEGCOLOR(1));
-    cnt++;
-    if (cnt >= ((drawingLit) ? lit : unlit)) {
-      cnt = 0;
-      drawingLit = !drawingLit;
-    }
-  }
   
-  return FRAMETIME;
-}
+//   _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+//   StripUpdate();
 
-uint16_t mAnimatorLight::mode_tri_static_pattern()
+// }
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+// void mAnimatorLight::mode_tri_static_pattern()
+// {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern()
 {
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
   /**
    * Generate new colours
    * */
@@ -5363,7 +4882,7 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
   uint8_t segSize = (_segments[segment_index].intensity() >> 5) +1;
   uint8_t currSeg = 0;
   uint16_t currSegCount = 0;
-  uint16_t start_pixel = _segments[segment_index].start_pixel_index;
+  // uint16_t start_pixel = _segments[segment_index].start_pixel_index;
 
   for (uint16_t i = 0; i < segment_length; i++) {
     if ( currSeg % 3 == 0 ) {
@@ -5380,7 +4899,9 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
     }
   }
 
-  return FRAMETIME;
+  // return FRAMETIME;
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
 }
 
 // /****************************************************************************************************************************
@@ -5389,146 +4910,262 @@ uint16_t mAnimatorLight::mode_tri_static_pattern()
 //  ****************************************************************************************************************************
 //  ****************************************************************************************************************************/
 
-// /*
-//  * Blink/strobe function
-//  * Alternate between color1 and color2
-//  * if(strobe == true) then create a strobe effect
-//  * NOTE: Maybe re-rework without timer
-//  */
-// uint16_t mAnimatorLight::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
-//   uint16_t stateTime = _segment_runtimes[segment_index].aux1;
-//   uint32_t cycleTime = (255 - _segments[segment_index].speed())*20;
-//   uint32_t onTime = 0;
-//   uint32_t offTime = cycleTime;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-//   if (!strobe) {
-//     onTime = (cycleTime * _segments[segment_index].intensity()) >> 8;
-//     offTime = cycleTime - onTime;
-//   }
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+/*
+ * Blink/strobe function
+ * Alternate between color1 and color2
+ * if(strobe == true) then create a strobe effect
+ * NOTE: Maybe re-rework without timer
+ */
+// void mAnimatorLight::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
+  uint16_t stateTime = _segment_runtimes[segment_index].aux1;
+  uint32_t cycleTime = (255 - _segments[segment_index].speed())*20;
+  uint32_t onTime = 0;
+  uint32_t offTime = cycleTime;
+
+  if (!strobe) {
+    onTime = (cycleTime * _segments[segment_index].intensity()) >> 8;
+    offTime = cycleTime - onTime;
+  }
   
-//   stateTime = ((_segment_runtimes[segment_index].aux0 & 1) == 0) ? onTime : offTime;
-//   stateTime += 20;
+  stateTime = ((_segment_runtimes[segment_index].aux0 & 1) == 0) ? onTime : offTime;
+  stateTime += 20;
     
-//   if (now - _segment_runtimes[segment_index].step > stateTime)
-//   {
-//     _segment_runtimes[segment_index].aux0++;
-//     _segment_runtimes[segment_index].aux1 = stateTime;
-//     _segment_runtimes[segment_index].step = now;
-//   }
+  if (now - _segment_runtimes[segment_index].step > stateTime)
+  {
+    _segment_runtimes[segment_index].aux0++;
+    _segment_runtimes[segment_index].aux1 = stateTime;
+    _segment_runtimes[segment_index].step = now;
+  }
 
-//   uint32_t color = ((_segment_runtimes[segment_index].aux0 & 1) == 0) ? color1 : color2;
-//   if (color == color1 && do_palette)
-//   {
-//     for(uint16_t i = 0; i < segment_length; i++) {
-//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//     }
-//   } else fill(color);
+  uint32_t color = ((_segment_runtimes[segment_index].aux0 & 1) == 0) ? color1 : color2;
+  if (color == color1 && do_palette)
+  {
+    for(uint16_t i = 0; i < segment_length; i++) {
+      SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    }
+  } else fill(color);
 
-//   return FRAMETIME;
-// }
-
-
-// /*
-//  * Normal blinking. 50% on/off time.
-//  */
-// uint16_t mAnimatorLight::mode_blink(void) {
-//   return blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
-// }
+  // return FRAMETIME;
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Classic Blink effect. Cycling through the rainbow.
-//  */
-// uint16_t mAnimatorLight::mode_blink_rainbow(void) {
-//   return blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), false, false);
-// }
-
-
-// /*
-//  * Classic Strobe effect.
-//  */
-// uint16_t mAnimatorLight::mode_strobe(void) {
-//   return blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
-// }
-
-
-// /*
-//  * Classic Strobe effect. Cycling through the rainbow.
-//  */
-// uint16_t mAnimatorLight::mode_strobe_rainbow(void) {
-//   return blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), true, false);
-// }
-
-// /*
-//  * Strobe effect with different strobe count and pause, controlled by speed().
-//  */
-// uint16_t mAnimatorLight::mode_multi_strobe(void) {
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
-//   }
-//   //blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
-
-//   uint16_t delay = 50 + 20*(uint16_t)(255-_segments[segment_index].speed());
-//   uint16_t count = 2 * ((_segments[segment_index].speed() / 10) + 1);
-//   if(_segment_runtimes[segment_index].step < count) {
-//     if((_segment_runtimes[segment_index].step & 1) == 0) {
-//       for(uint16_t i = 0; i < segment_length; i++) {
-//         SetPixelColor(i, SEGCOLOR(0));
-//       }
-//       delay = 20;
-//     } else {
-//       delay = 50;
-//     }
-//   }
-//   _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % (count + 1);
-//   return delay;
-// }
-
-
-/****************************************************************************************************************************
- **************************************************************************************************************************** 
- * color_wipe
- ****************************************************************************************************************************
- ****************************************************************************************************************************/
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
 /*
- * Color wipe function
- * LEDs are turned on (color1) in sequence, then turned off (color2) in sequence.
- * if (bool rev == true) then LEDs are turned off in reverse order
- */
-uint16_t mAnimatorLight::color_wipe(bool rev, bool useRandomColors) {
+ * Normal blinking. 50% on/off time.
+ *
+// void mAnimatorLight::mode_blink(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-  /**
-   * Generate new colours
-   * */
-  handle_palette();
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  // return 
+  SubTask_Segment_Flasher_Animate_Function__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
+  
+}
 
-  uint16_t start_pixel = _segments[segment_index].start_pixel_index;
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Classic Blink effect. Cycling through the rainbow.
+ *
+// void mAnimatorLight::mode_blink_rainbow(void) {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  // return 
+  SubTask_Segment_Flasher_Animate_Function__Base_Blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), false, false);
+  
+  
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Classic Strobe effect.
+ *
+// void mAnimatorLight::mode_strobe(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  // return blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
+  SubTask_Segment_Flasher_Animate_Function__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Classic Strobe effect. Cycling through the rainbow.
+ *
+// void mAnimatorLight::mode_strobe_rainbow(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  // return blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), true, false);
+  SubTask_Segment_Flasher_Animate_Function__Base_Blink(color_wheel(_segment_runtimes[segment_index].call & 0xFF), SEGCOLOR(1), true, false);
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Strobe effect with different strobe count and pause, controlled by speed().
+ *
+// void mAnimatorLight::mode_multi_strobe(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Multi()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+  }
+  //blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
+
+  uint16_t delay = 50 + 20*(uint16_t)(255-_segments[segment_index].speed());
+  uint16_t count = 2 * ((_segments[segment_index].speed() / 10) + 1);
+  if(_segment_runtimes[segment_index].step < count) {
+    if((_segment_runtimes[segment_index].step & 1) == 0) {
+      for(uint16_t i = 0; i < segment_length; i++) {
+        SetPixelColor(i, SEGCOLOR(0));
+      }
+      delay = 20;
+    } else {
+      delay = 50;
+    }
+  }
+  _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % (count + 1);
+  // return delay;
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+*******************************************************************************************************************************************************************************************************************
+   @brief: Colour_Wipe_Base
+   @note : Converted from WLED Effects
+           LEDs are turned on (color1) in sequence, then turned off (color2) in sequence.
+           if (bool rev == true) then LEDs are turned off in reverse order
+   @note   Rate: FRAME_RATE
+
+   @param rev             Reversed
+   @param useRandomColors 
+*******************************************************************************************************************************************************************************************************************
+********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(bool rev, bool useRandomColors)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  handle_palette(); 
+  
   uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
-  uint32_t perc = now % cycleTime;
+  uint32_t perc = millis() % cycleTime;
   uint16_t prog = (perc * 65535) / cycleTime;
   bool back = (prog > 32767);
-
   if (back) {
     prog -= 32767;
     if (_segment_runtimes[segment_index].step == 0) _segment_runtimes[segment_index].step = 1;
   } else {
     if (_segment_runtimes[segment_index].step == 2) _segment_runtimes[segment_index].step = 3; //trigger color change
   }
-
+  
   if (useRandomColors) {
     if (_segment_runtimes[segment_index].call == 0) {
       _segment_runtimes[segment_index].aux0 = random8();
       _segment_runtimes[segment_index].step = 3;
     }
     if (_segment_runtimes[segment_index].step == 1) { //if flag set, change to new random color
-      _segment_runtimes[segment_index].aux1 = 
-        pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+      _segment_runtimes[segment_index].aux1 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
       _segment_runtimes[segment_index].step = 2;
     }
     if (_segment_runtimes[segment_index].step == 3) {
-      _segment_runtimes[segment_index].aux0 = 
-        pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux1);
+      _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux1);
       _segment_runtimes[segment_index].step = 0;
     }
   }
@@ -5539,14 +5176,13 @@ uint16_t mAnimatorLight::color_wipe(bool rev, bool useRandomColors) {
   rem /= (_segments[segment_index].intensity() +1);
   if (rem > 255) rem = 255;
 
-  uint32_t col1 = useRandomColors ? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux1) : SEGCOLOR(1);
+  // uint32_t col1 = useRandomColors ? color_wheel(_segment_runtimes[segment_index].aux1) : SEGCOLOR(1);
+  uint32_t col1 = color_wheel(_segment_runtimes[segment_index].aux1);// : SEGCOLOR(1);
+
   for (uint16_t i = 0; i < segment_length; i++)
   {
     uint16_t index = (rev && back)? segment_length -1 -i : i;
-    uint32_t col0 = 
-      useRandomColors ? 
-      pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux0) : 
-      pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
+    uint32_t col0 = useRandomColors? color_wheel(_segment_runtimes[segment_index].aux0) : color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
     
     if (i < ledIndex) 
     {
@@ -5554,47 +5190,67 @@ uint16_t mAnimatorLight::color_wipe(bool rev, bool useRandomColors) {
     } else
     {
       SetPixelColor(index, back? col0 : col1);
-      if (i == ledIndex) 
-      {
-        SetPixelColor(index, pCONT_lAni->mEffects->color_blend(back? col0 : col1, back? col1 : col0, rem));
-      }
+      if (i == ledIndex) SetPixelColor(index, color_blend(back? col0 : col1, back? col1 : col0, rem));
     }
   } 
-  return FRAMETIME;
+
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
 
 }
 
-/*
- * Lights all LEDs one after another.
- */
-uint16_t mAnimatorLight::mode_color_wipe(void) {
-  return color_wipe(false, false);
+
+
+
+
+
+// /*
+//  * Lights all LEDs one after another.
+//  */
+// void mAnimatorLight::mode_color_wipe(void) { // the default calls directly
+//   return color_wipe(false, false);
+// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Wipe()
+{
+  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(false, false);
 }
 
-/*
- * Turns all LEDs after each other to a random color.
- * Then starts over with another color.
- */
-uint16_t mAnimatorLight::mode_color_wipe_random(void) {
-  return color_wipe(false, true);
-}
+// /*
+//  * Turns all LEDs after each other to a random color.
+//  * Then starts over with another color.
+//  */
+// void mAnimatorLight::mode_color_wipe_random(void) {
+//   return color_wipe(false, true);
+// }
 
-/*
- * Lights all LEDs one after another. Turns off opposite
- */
-uint16_t mAnimatorLight::mode_color_sweep(void) {
-  return color_wipe(true, false);
-}
-
-/*
- * Random color introduced alternating from start and end of strip->
- */
-uint16_t mAnimatorLight::mode_color_sweep_random(void) {
-  return color_wipe(true, true);
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random()
+{
+  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(false, true);
 }
 
 
-    #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+// /*
+//  * Lights all LEDs one after another. Turns off opposite
+//  */
+// void mAnimatorLight::mode_color_sweep(void) {
+//   return color_wipe(true, false);
+// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Sweep()
+{
+  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(true, false);
+}
+
+
+// /*
+//  * Random color introduced alternating from start and end of strip->
+//  */
+// void mAnimatorLight::mode_color_sweep_random(void) {
+//   return color_wipe(true, true);
+// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random()
+{
+  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(true, true);
+}
 
 
 /*
@@ -5614,9 +5270,9 @@ uint16_t mAnimatorLight::mode_color_sweep_random(void) {
 uint32_t mAnimatorLight::color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri)
 {
 
-currentPalette = RainbowColors_p; // always use rainbow for now
+  currentPalette = RainbowColors_p; // always use rainbow for now
 
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
 
   return RgbcctColor::GetU32Colour(RgbcctColor(0,255,2550));
 
@@ -5663,10 +5319,16 @@ uint32_t mAnimatorLight::color_blend(uint32_t color1, uint32_t color2, uint8_t b
  */
 uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
 
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
+
+  float hue_f = mSupport::mapfloat(pos, 0, 255, 0.0f, 1.0f);
+
+  // Serial.println(hue_f);
+
+  HsbColor colh = HsbColor(hue_f,1,1);
 
 
-  return RgbcctColor::GetU32Colour(RgbcctColor(0,255,2550));
+  return RgbcctColor::GetU32Colour(colh);
   // if (_segments[segment_index].palette) return color_from_palette(pos, false, true, 0);
   // pos = 255 - pos;
   // if(pos < 85) {
@@ -5691,7 +5353,7 @@ void mAnimatorLight::fill(uint32_t c) {
   //   SetPixelColor(i, c);
   // }
   
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
   uint8_t segment_length = _segments[segment_index].length();
   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
@@ -5705,7 +5367,7 @@ void mAnimatorLight::fill(uint32_t c) {
 
 void mAnimatorLight::fill_ranged(uint32_t c) 
 {
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
   uint8_t segment_length = _segments[segment_index].length();
   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
@@ -5719,7 +5381,7 @@ void mAnimatorLight::fill_ranged(uint32_t c)
 void mAnimatorLight::seg_fill_ranged(uint32_t c) 
 {
 
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
   uint8_t segment_length = _segments[segment_index].length();
   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
@@ -5734,285 +5396,432 @@ void mAnimatorLight::seg_fill_ranged(uint32_t c)
 
 
 
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Scan
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * Scan
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
 
 
-// /*
-//  * Scan mode parent function
-//  */
-// uint16_t mAnimatorLight::scan(bool dual)
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Base function for scanners
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool dual)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+/*
+ * Scan mode parent function
+ */
+// void mAnimatorLight::scan(bool dual)
 // {
-//   uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
-//   uint32_t perc = now % cycleTime;
-//   uint16_t prog = (perc * 65535) / cycleTime;
-//   uint16_t size = 1 + ((_segments[segment_index].intensity() * segment_length) >> 9);
-//   uint16_t ledIndex = (prog * ((segment_length *2) - size *2)) >> 16;
+  uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
+  uint32_t perc = now % cycleTime;
+  uint16_t prog = (perc * 65535) / cycleTime;
+  uint16_t size = 1 + ((_segments[segment_index].intensity() * segment_length) >> 9);
+  uint16_t ledIndex = (prog * ((segment_length *2) - size *2)) >> 16;
 
-//   fill(SEGCOLOR(1));
+  fill(SEGCOLOR(1));
 
-//   int led_offset = ledIndex - (segment_length - size);
-//   led_offset = abs(led_offset);
+  int led_offset = ledIndex - (segment_length - size);
+  led_offset = abs(led_offset);
 
-//   if (dual) {
-//     for (uint16_t j = led_offset; j < led_offset + size; j++) {
-//       uint16_t i2 = segment_length -1 -j;
-//       SetPixelColor(i2, pCONT_lAni->mEffects->color_from_palette(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
-//     }
-//   }
+  if (dual) {
+    for (uint16_t j = led_offset; j < led_offset + size; j++) {
+      uint16_t i2 = segment_length -1 -j;
+      SetPixelColor(i2, color_from_palette(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
+    }
+  }
 
-//   for (uint16_t j = led_offset; j < led_offset + size; j++) {
-//     SetPixelColor(j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
-//   }
+  for (uint16_t j = led_offset; j < led_offset + size; j++) {
+    SetPixelColor(j, color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
 
 
-// /*
-//  * Runs a single pixel back and forth.
-//  */
-// uint16_t mAnimatorLight::mode_scan(void) {
+/*
+ * Runs a single pixel back and forth.
+ */
+// void mAnimatorLight::mode_scan(void) {
 //   return scan(false);
 // }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Scan()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Scan(false);
+}
 
 
-// /*
-//  * Runs two pixel back and forth in opposite directions.
-//  */
-// uint16_t mAnimatorLight::mode_dual_scan(void) {
+
+/*
+ * Runs two pixel back and forth in opposite directions.
+ */
+// void mAnimatorLight::mode_dual_scan(void) {
 //   return scan(true);
 // }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Scan_Dual()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Scan(true);
+}
 
 
-// /*
-//  * K.I.T.T.
-//  */
-// uint16_t mAnimatorLight::mode_larson_scanner(void){
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+void mAnimatorLight::larson_scanner(bool dual) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(bool dual)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
+  uint16_t index = counter * segment_length  >> 16;
+
+  fade_out(_segments[segment_index].intensity());
+
+  if (_segment_runtimes[segment_index].step > index && _segment_runtimes[segment_index].step - index > segment_length/2) {
+    _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
+  }
+  
+  for (uint16_t i = _segment_runtimes[segment_index].step; i < index; i++) {
+    uint16_t j = (_segment_runtimes[segment_index].aux0)?i:segment_length-1-i;
+    SetPixelColor( j, color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+  }
+  if (dual) {
+    uint32_t c;
+    if (SEGCOLOR(2) != 0) {
+      c = SEGCOLOR(2);
+    } else {
+      c = color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
+    }
+
+    for (uint16_t i = _segment_runtimes[segment_index].step; i < index; i++) {
+      uint16_t j = (_segment_runtimes[segment_index].aux0)?segment_length-1-i:i;
+      SetPixelColor(j, c);
+    }
+  }
+
+  _segment_runtimes[segment_index].step = index;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+/*
+ * Creates two Larson scanners moving in opposite directions
+ * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/DualLarson.h
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Dual(void){
+  return SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(true);
+}
+
+/*
+ * K.I.T.T.
+ */
+// void mAnimatorLight::mode_larson_scanner(void){
 //   return larson_scanner(false);
 // }
-
-// uint16_t mAnimatorLight::larson_scanner(bool dual) {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
-//   uint16_t index = counter * segment_length  >> 16;
-
-//   fade_out(_segments[segment_index].intensity());
-
-//   if (_segment_runtimes[segment_index].step > index && _segment_runtimes[segment_index].step - index > segment_length/2) {
-//     _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
-//   }
-  
-//   for (uint16_t i = _segment_runtimes[segment_index].step; i < index; i++) {
-//     uint16_t j = (_segment_runtimes[segment_index].aux0)?i:segment_length-1-i;
-//     SetPixelColor( j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
-//   }
-//   if (dual) {
-//     uint32_t c;
-//     if (SEGCOLOR(2) != 0) {
-//       c = SEGCOLOR(2);
-//     } else {
-//       c = pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
-//     }
-
-//     for (uint16_t i = _segment_runtimes[segment_index].step; i < index; i++) {
-//       uint16_t j = (_segment_runtimes[segment_index].aux0)?segment_length-1-i:i;
-//       SetPixelColor(j, c);
-//     }
-//   }
-
-//   _segment_runtimes[segment_index].step = index;
-//   return FRAMETIME;
-// }
-
-// /*
-//  * Creates two Larson scanners moving in opposite directions
-//  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/DualLarson.h
-//  */
-// uint16_t mAnimatorLight::mode_dual_larson_scanner(void){
-//   return larson_scanner(true);
-// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Larson_Scanner()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(false);
+}
 
 
 
 
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Chase
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * Chase
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
 
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
 // /*
 //  * color chase function.
 //  * color1 = background color
 //  * color2 and color3 = colors of two adjacent leds
-//  */
-// uint16_t mAnimatorLight::chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette) {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) + 1);
-//   uint16_t a = counter * segment_length  >> 16;
+//  *
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   bool chase_random = (_segments[segment_index].mode == FX_MODE_CHASE_RANDOM);
-//   if (chase_random) {
-//     if (a < _segment_runtimes[segment_index].step) //we hit the start again, choose new color for Chase random
-//     {
-//       _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0; //store previous random color
-//       _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
-//     }
-//     color1 = color_wheel(_segment_runtimes[segment_index].aux0);
-//   }
-//   _segment_runtimes[segment_index].step = a;
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//   // Use intensity() setting to vary chase up to 1/2 string length
-//   uint8_t size = 1 + (_segments[segment_index].intensity() * segment_length >> 10);
+  
+// void mAnimatorLight::chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette) {
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 2) + 1);
+  uint16_t a = counter * segment_length  >> 16;
 
-//   uint16_t b = a + size; //"trail" of chase, filled with color1 
-//   if (b > segment_length) b -= segment_length;
-//   uint16_t c = b + size;
-//   if (c > segment_length) c -= segment_length;
+  bool chase_random = (_segments[segment_index].mode_id == EFFECTS_FUNCTION_WLED_CHASE_RANDOM_ID);
+  if (chase_random) {
+    if (a < _segment_runtimes[segment_index].step) //we hit the start again, choose new color for Chase random
+    {
+      _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0; //store previous random color
+      _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+    }
+    color1 = color_wheel(_segment_runtimes[segment_index].aux0);
+  }
+  _segment_runtimes[segment_index].step = a;
 
-//   //background
-//   if (do_palette)
-//   {
-//     for(uint16_t i = 0; i < segment_length; i++) {
-//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
-//     }
-//   } else fill(color1);
+  // Use intensity() setting to vary chase up to 1/2 string length
+  uint8_t size = 1 + (_segments[segment_index].intensity() * segment_length >> 10);
 
-//   //if random, fill old background between a and end
-//   if (chase_random)
-//   {
-//     color1 = color_wheel(_segment_runtimes[segment_index].aux1);
-//     for (uint16_t i = a; i < segment_length; i++)
-//       SetPixelColor(i, color1);
-//   }
+  uint16_t b = a + size; //"trail" of chase, filled with color1 
+  if (b > segment_length) b -= segment_length;
+  uint16_t c = b + size;
+  if (c > segment_length) c -= segment_length;
 
-//   //fill between points a and b with color2
-//   if (a < b)
-//   {
-//     for (uint16_t i = a; i < b; i++)
-//       SetPixelColor(i, color2);
-//   } else {
-//     for (uint16_t i = a; i < segment_length; i++) //fill until end
-//       SetPixelColor(i, color2);
-//     for (uint16_t i = 0; i < b; i++) //fill from start until b
-//       SetPixelColor(i, color2);
-//   }
+  //background
+  if (do_palette)
+  {
+    for(uint16_t i = 0; i < segment_length; i++) {
+      SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+    }
+  } else fill(color1);
 
-//   //fill between points b and c with color2
-//   if (b < c)
-//   {
-//     for (uint16_t i = b; i < c; i++)
-//       SetPixelColor(i, color3);
-//   } else {
-//     for (uint16_t i = b; i < segment_length; i++) //fill until end
-//       SetPixelColor(i, color3);
-//     for (uint16_t i = 0; i < c; i++) //fill from start until c
-//       SetPixelColor(i, color3);
-//   }
+  //if random, fill old background between a and end
+  if (chase_random)
+  {
+    color1 = color_wheel(_segment_runtimes[segment_index].aux1);
+    for (uint16_t i = a; i < segment_length; i++)
+      SetPixelColor(i, color1);
+  }
 
-//   return FRAMETIME;
-// }
+  //fill between points a and b with color2
+  if (a < b)
+  {
+    for (uint16_t i = a; i < b; i++)
+      SetPixelColor(i, color2);
+  } else {
+    for (uint16_t i = a; i < segment_length; i++) //fill until end
+      SetPixelColor(i, color2);
+    for (uint16_t i = 0; i < b; i++) //fill from start until b
+      SetPixelColor(i, color2);
+  }
+
+  //fill between points b and c with color2
+  if (b < c)
+  {
+    for (uint16_t i = b; i < c; i++)
+      SetPixelColor(i, color3);
+  } else {
+    for (uint16_t i = b; i < segment_length; i++) //fill until end
+      SetPixelColor(i, color3);
+    for (uint16_t i = 0; i < c; i++) //fill from start until c
+      SetPixelColor(i, color3);
+  }
+
+  // return FRAMETIME;
+  // return FRAMETIME;
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Bicolor chase, more primary color.
-//  */
-// uint16_t mAnimatorLight::mode_chase_color(void) {
+/*
+ * Bicolor chase, more primary color.
+ */
+// void mAnimatorLight::mode_chase_color(void) {
 //   return chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
 // }
 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Colour()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
+}
 
-// /*
-//  * Primary running followed by random color.
-//  */
-// uint16_t mAnimatorLight::mode_chase_random(void) {
+
+
+/*
+ * Primary running followed by random color.
+ */
+// void mAnimatorLight::mode_chase_random(void) {
 //   return chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), false);
 // }
 
-
-// /*
-//  * Primary, secondary running on rainbow.
-//  */
-// uint16_t mAnimatorLight::mode_chase_rainbow(void) {
-//   uint8_t color_sep = 256 / segment_length;
-//   uint8_t color_index = _segment_runtimes[segment_index].call & 0xFF;
-//   uint32_t color = color_wheel(((_segment_runtimes[segment_index].step * color_sep) + color_index) & 0xFF);
-
-//   return chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
+// void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Random()
+// {
+//   SubTask_Segment_Flasher_Animate_Function__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), false);
 // }
 
+/*
+ * Primary, secondary running on rainbow.
+ */
+// void mAnimatorLight::mode_chase_rainbow(void) {
+//   return chase();
+// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  uint8_t color_sep = 256 / segment_length;
+  uint8_t color_index = _segment_runtimes[segment_index].call & 0xFF;
+  uint32_t color = color_wheel(((_segment_runtimes[segment_index].step * color_sep) + color_index) & 0xFF);
 
-// /*
-//  * Sec flashes running on prim.
-//  */
+  SubTask_Segment_Flasher_Animate_Function__Base_Chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
+}
+
+
+/*
+ * Sec flashes running on prim.
+ */
 // #define FLASH_COUNT 4
-// uint16_t mAnimatorLight::mode_chase_flash(void) {
-//   uint8_t flash_step = _segment_runtimes[segment_index].call % ((FLASH_COUNT * 2) + 1);
 
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//   }
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-//   uint16_t delay = 10 + ((30 * (uint16_t)(255 - _segments[segment_index].speed())) / segment_length);
-//   if(flash_step < (FLASH_COUNT * 2)) {
-//     if(flash_step % 2 == 0) {
-//       uint16_t n = _segment_runtimes[segment_index].step;
-//       uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
-//       SetPixelColor( n, SEGCOLOR(1));
-//       SetPixelColor( m, SEGCOLOR(1));
-//       delay = 20;
-//     } else {
-//       delay = 30;
-//     }
-//   } else {
-//     _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % segment_length;
-//   }
-//   return delay;
-// }
+// /*
+//  * color chase function.
+//  * color1 = background color
+//  * color2 and color3 = colors of two adjacent leds
+//  *
+
+// void mAnimatorLight::mode_chase_flash(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Flash()
+// Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
 
+  uint8_t flash_step = _segment_runtimes[segment_index].call % ((FLASH_COUNT * 2) + 1);
 
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+  }
+
+  uint16_t delay = 10 + ((30 * (uint16_t)(255 - _segments[segment_index].speed())) / segment_length);
+  if(flash_step < (FLASH_COUNT * 2)) {
+    if(flash_step % 2 == 0) {
+      uint16_t n = _segment_runtimes[segment_index].step;
+      uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
+      SetPixelColor( n, SEGCOLOR(1));
+      SetPixelColor( m, SEGCOLOR(1));
+      delay = 20;
+    } else {
+      delay = 30;
+    }
+  } else {
+    _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % segment_length;
+  }
+  // return delay;
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 // /*
 //  * Prim flashes running, followed by random color.
-//  */
-// uint16_t mAnimatorLight::mode_chase_flash_random(void) {
-//   uint8_t flash_step = _segment_runtimes[segment_index].call % ((FLASH_COUNT * 2) + 1);
+//  *
+// void mAnimatorLight::mode_chase_flash_random(void) {
 
-//   for(uint16_t i = 0; i < _segment_runtimes[segment_index].step; i++) {
-//     SetPixelColor(i, color_wheel(_segment_runtimes[segment_index].aux0));
-//   }
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   uint16_t delay = 1 + ((10 * (uint16_t)(255 - _segments[segment_index].speed())) / segment_length);
-//   if(flash_step < (FLASH_COUNT * 2)) {
-//     uint16_t n = _segment_runtimes[segment_index].step;
-//     uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
-//     if(flash_step % 2 == 0) {
-//       SetPixelColor( n, SEGCOLOR(0));
-//       SetPixelColor( m, SEGCOLOR(0));
-//       delay = 20;
-//     } else {
-//       SetPixelColor( n, color_wheel(_segment_runtimes[segment_index].aux0));
-//       SetPixelColor( m, SEGCOLOR(1));
-//       delay = 30;
-//     }
-//   } else {
-//     _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % segment_length;
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Random()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//     if(_segment_runtimes[segment_index].step == 0) {
-//       _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
-//     }
-//   }
-//   return delay;
-// }
+  uint8_t flash_step = _segment_runtimes[segment_index].call % ((FLASH_COUNT * 2) + 1);
+
+  for(uint16_t i = 0; i < _segment_runtimes[segment_index].step; i++) {
+    SetPixelColor(i, color_wheel(_segment_runtimes[segment_index].aux0));
+  }
+
+  uint16_t delay = 1 + ((10 * (uint16_t)(255 - _segments[segment_index].speed())) / segment_length);
+  if(flash_step < (FLASH_COUNT * 2)) {
+    uint16_t n = _segment_runtimes[segment_index].step;
+    uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
+    if(flash_step % 2 == 0) {
+      SetPixelColor( n, SEGCOLOR(0));
+      SetPixelColor( m, SEGCOLOR(0));
+      delay = 20;
+    } else {
+      SetPixelColor( n, color_wheel(_segment_runtimes[segment_index].aux0));
+      SetPixelColor( m, SEGCOLOR(1));
+      delay = 30;
+    }
+  } else {
+    _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step + 1) % segment_length;
+
+    if(_segment_runtimes[segment_index].step == 0) {
+      _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+    }
+  }
+  // return delay;
+
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
 
 
 // /*
 //  * Primary running on rainbow.
 //  */
-// uint16_t mAnimatorLight::mode_chase_rainbow_white(void) {
+// void mAnimatorLight::mode_chase_rainbow_white(void) {
 //   uint16_t n = _segment_runtimes[segment_index].step;
 //   uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
 //   uint32_t color2 = color_wheel(((n * 256 / segment_length) + (_segment_runtimes[segment_index].call & 0xFF)) & 0xFF);
@@ -6020,360 +5829,623 @@ void mAnimatorLight::seg_fill_ranged(uint32_t c)
 
 //   return chase(SEGCOLOR(0), color2, color3, false);
 // }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_White()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t n = _segment_runtimes[segment_iters.index].step;
+  uint16_t m = (_segment_runtimes[segment_index].step + 1) % segment_length;
+  uint32_t color2 = color_wheel(((n * 256 / segment_length) + (_segment_runtimes[segment_index].call & 0xFF)) & 0xFF);
+  uint32_t color3 = color_wheel(((m * 256 / segment_length) + (_segment_runtimes[segment_index].call & 0xFF)) & 0xFF);
+
+  SubTask_Segment_Flasher_Animate_Function__Base_Chase(SEGCOLOR(0), color2, color3, false);
+}
 
 
-// /*
-//  * theater chase function
-//  */
-// uint16_t mAnimatorLight::theater_chase(uint32_t color1, uint32_t color2, bool do_palette) {
-//   byte gap = 2 + ((255 - _segments[segment_index].intensity()) >> 5);
-//   uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*2;
-//   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[segment_index].step) //new color
-//   {
-//     _segment_runtimes[segment_index].aux0 = (_segment_runtimes[segment_index].aux0 +1) % gap;
-//     _segment_runtimes[segment_index].step = it;
-//   }
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * theater chase function
+ *
+void mAnimatorLight::theater_chase(uint32_t color1, uint32_t color2, bool do_palette) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette)
+{
+
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  byte gap = 2 + ((255 - _segments[segment_index].intensity()) >> 5);
+  uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*2;
+  uint32_t it = now / cycleTime;
+  if (it != _segment_runtimes[segment_index].step) //new color
+  {
+    _segment_runtimes[segment_index].aux0 = (_segment_runtimes[segment_index].aux0 +1) % gap;
+    _segment_runtimes[segment_index].step = it;
+  }
   
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     if((i % gap) == _segment_runtimes[segment_index].aux0) {
-//       if (do_palette)
-//       {
-//         SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//       } else {
-//         SetPixelColor(i, color1);
-//       }
-//     } else {
-//       SetPixelColor(i, color2);
-//     }
-//   }
-//   return FRAMETIME;
-// }
+  for(uint16_t i = 0; i < segment_length; i++) {
+    if((i % gap) == _segment_runtimes[segment_index].aux0) {
+      if (do_palette)
+      {
+        SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+      } else {
+        SetPixelColor(i, color1);
+      }
+    } else {
+      SetPixelColor(i, color2);
+    }
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Theatre-style crawling lights.
-//  * Inspired by the Adafruit examples.
-//  */
-// uint16_t mAnimatorLight::mode_theater_chase(void) {
-//   return theater_chase(SEGCOLOR(0), SEGCOLOR(1), true);
-// }
+/*
+ * Theatre-style crawling lights.
+ * Inspired by the Adafruit examples.
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Theater(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(SEGCOLOR(0), SEGCOLOR(1), true);
+}
 
 
-// /*
-//  * Theatre-style crawling lights with rainbow effect.
-//  * Inspired by the Adafruit examples.
-//  */
-// uint16_t mAnimatorLight::mode_theater_chase_rainbow(void) {
-//   return theater_chase(color_wheel(_segment_runtimes[segment_index].step), SEGCOLOR(1), false);
-// }
-
-
-
-
-// /*
-//  * Tricolor chase function
-//  */
-// uint16_t mAnimatorLight::tricolor_chase(uint32_t color1, uint32_t color2) {
-//   uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*2;
-//   uint32_t it = now / cycleTime;
-//   uint8_t width = (1 + _segments[segment_index].intensity()/32) * 3; //value of 1-8 for each colour
-//   uint8_t index = it % width;
+/*
+ * Theatre-style crawling lights with rainbow effect.
+ * Inspired by the Adafruit examples.
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rainbow(void) {
   
-//   for(uint16_t i = 0; i < segment_length; i++, index++) {
-//     if(index > width-1) index = 0;
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//     uint32_t color = color1;
-//     if(index > width*2/3-1) color = pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
-//     else if(index > width/3-1) color = color2;
 
-//     SetPixelColor(segment_length - i -1, color);
-//   }
+  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(color_wheel(_segment_runtimes[segment_index].step), SEGCOLOR(1), false);
+}
 
-//   return FRAMETIME;
-// }
 
 
-// /*
-//  * Tricolor chase mode
-//  */
-// uint16_t mAnimatorLight::mode_tricolor_chase(void) {
-//   return tricolor_chase(SEGCOLOR(2), SEGCOLOR(0));
-// }
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Tricolor chase function
+ *
+void mAnimatorLight::tricolor_chase(uint32_t color1, uint32_t color2) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-// /*
-//  * Running random pixels
-//  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/RandomChase.h
-//  */
-// uint16_t mAnimatorLight::mode_random_chase(void)
-// {
-//   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[segment_index].speed()));
-//   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[segment_index].step == it) return FRAMETIME;
-
-//   for(uint16_t i = segment_length -1; i > 0; i--) {
-//     SetPixelColor(i, getPixelColor(i-1));
-//   }
-//   uint32_t color = getPixelColor(0);
-//   if (segment_length > 1) color = getPixelColor( 1);
-//   uint8_t r = random8(6) != 0 ? (color >> 16 & 0xFF) : random8();
-//   uint8_t g = random8(6) != 0 ? (color >> 8  & 0xFF) : random8();
-//   uint8_t b = random8(6) != 0 ? (color       & 0xFF) : random8();
-//   SetPixelColor(0, r, g, b);
-
-//   _segment_runtimes[segment_index].step = it;
-//   return FRAMETIME;
-// }
-
-
-// /*
-//  * Alternating white/red/black pixels running. PLACEHOLDER
-//  */
-// uint16_t mAnimatorLight::mode_circus_combustus(void) {
-//   return tricolor_chase(RED, WHITE);
-// }
-
-
-
-
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Noise
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
-
-
-// uint16_t mAnimatorLight::mode_fillnoise8()
-// {
-//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].step = random16(12345);
-//   CRGB fastled_col;
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     uint8_t index = inoise8(i * segment_length, _segment_runtimes[segment_index].step + i * segment_length);
-//     fastled_col = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-//   _segment_runtimes[segment_index].step += beatsin8(_segments[segment_index].speed(), 1, 6); //10,1,4
-
-//   return FRAMETIME;
-// }
-
-// uint16_t mAnimatorLight::mode_noise16_1()
-// {
-//   uint16_t scale = 320;                                      // the "zoom factor" for the noise
-//   CRGB fastled_col;
-//   _segment_runtimes[segment_index].step += (1 + _segments[segment_index].speed()/16);
-
-//   for (uint16_t i = 0; i < segment_length; i++) {
-
-//     uint16_t shift_x = beatsin8(11);                           // the x position of the noise field swings @ 17 bpm
-//     uint16_t shift_y = _segment_runtimes[segment_index].step/42;             // the y position becomes slowly incremented
-
-
-//     uint16_t real_x = (i + shift_x) * scale;                  // the x position of the noise field swings @ 17 bpm
-//     uint16_t real_y = (i + shift_y) * scale;                  // the y position becomes slowly incremented
-//     uint32_t real_z = _segment_runtimes[segment_index].step;                          // the z position becomes quickly incremented
-
-//     uint8_t noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
-
-//     uint8_t index = sin8(noise * 3);                         // map LED color based on noise data
-
-//     fastled_col = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// uint16_t mAnimatorLight::mode_noise16_2()
-// {
-//   uint16_t scale = 1000;                                       // the "zoom factor" for the noise
-//   CRGB fastled_col;
-//   _segment_runtimes[segment_index].step += (1 + (_segments[segment_index].speed() >> 1));
-
-//   for (uint16_t i = 0; i < segment_length; i++) {
-
-//     uint16_t shift_x = _segment_runtimes[segment_index].step >> 6;                         // x as a function of time
-//     uint16_t shift_y = _segment_runtimes[segment_index].step/42;
-
-//     uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
-
-//     uint8_t noise = inoise16(real_x, 0, 4223) >> 8;    // get the noise data and scale it down
-
-//     uint8_t index = sin8(noise * 3);                          // map led color based on noise data
-
-//     fastled_col = ColorFromPalette(currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// uint16_t mAnimatorLight::mode_noise16_3()
-// {
-//   uint16_t scale = 800;                                       // the "zoom factor" for the noise
-//   CRGB fastled_col;
-//   _segment_runtimes[segment_index].step += (1 + _segments[segment_index].speed());
-
-//   for (uint16_t i = 0; i < segment_length; i++) {
-
-//     uint16_t shift_x = 4223;                                  // no movement along x and y
-//     uint16_t shift_y = 1234;
-
-//     uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
-//     uint32_t real_y = (i + shift_y) * scale;                  // based on the precalculated positions
-//     uint32_t real_z = _segment_runtimes[segment_index].step*8;  
-
-//     uint8_t noise = inoise16(real_x, real_y, real_z) >> 8;    // get the noise data and scale it down
-
-//     uint8_t index = sin8(noise * 3);                          // map led color based on noise data
-
-//     fastled_col = ColorFromPalette(currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// //https://github.com/aykevl/ledstrip-spark/blob/master/ledstrip->ino
-// uint16_t mAnimatorLight::mode_noise16_4()
-// {
-//   CRGB fastled_col;
-//   uint32_t stp = (now * _segments[segment_index].speed()) >> 7;
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     int16_t index = inoise16(uint32_t(i) << 12, stp);
-//     fastled_col = ColorFromPalette(currentPalette, index);
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-//   return FRAMETIME;
-// }
-
-// // Peaceful noise that's slow and with gradually changing palettes. Does not support WLED palettes or default colours or controls.
-// uint16_t mAnimatorLight::mode_noisepal(void) {                                    // Slow noise palette by Andrew Tuline.
-//   uint16_t scale = 15 + (_segments[segment_index].intensity() >> 2); //default was 30
-//   //#define scale 30
-
-//   uint16_t dataSize = sizeof(CRGBPalette16) * 2; //allocate space for 2 Palettes
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
-
-//   CRGBPalette16* palettes = reinterpret_cast<CRGBPalette16*>(_segment_runtimes[segment_index].data);
-
-//   uint16_t changePaletteMs = 4000 + _segments[segment_index].speed() *10; //between 4 - 6.5sec
-//   if (millis() - _segment_runtimes[segment_index].step > changePaletteMs)
-//   {
-//     _segment_runtimes[segment_index].step = millis();
-
-//     uint8_t baseI = random8();
-//     palettes[1] = CRGBPalette16(CHSV(baseI+random8(64), 255, random8(128,255)), CHSV(baseI+128, 255, random8(128,255)), CHSV(baseI+random8(92), 192, random8(128,255)), CHSV(baseI+random8(92), 255, random8(128,255)));
-//   }
-
-//   CRGB color;
-
-//   //EVERY_N_MILLIS(10) { //(don't have to time this, effect function is only called every 24ms)
-//   nblendPaletteTowardPalette(palettes[0], palettes[1], 48);               // Blend towards the target palette over 48 iterations.
-
-//   if (_segments[segment_index].palette > 0) palettes[0] = currentPalette;
-
-//   for(int i = 0; i < segment_length; i++) {
-//     uint8_t index = inoise8(i*scale, _segment_runtimes[segment_index].aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
-//     color = ColorFromPalette(palettes[0], index, 255, LINEARBLEND);       // Use the my own palette.
-//     SetPixelColor(i, color.red, color.green, color.blue);
-//   }
-
-//   _segment_runtimes[segment_index].aux0 += beatsin8(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
-
-//   return FRAMETIME;
-// }
-
-// /*
-//  * Effects by Andrew Tuline
-//  */
-// uint16_t mAnimatorLight::phased_base(uint8_t moder) {                  // We're making sine waves here. By Andrew Tuline.
-
-//   uint8_t allfreq = 16;                                          // Base frequency.
-//   //float* phasePtr = reinterpret_cast<float*>(_segment_runtimes[segment_index].step);       // Phase change value gets calculated.
-//   static float phase = 0;//phasePtr[0];
-//   uint8_t cutOff = (255-_segments[segment_index].intensity());                      // You can change the number of pixels.  AKA intensity() (was 192).
-//   uint8_t modVal = 5;//_segments[segment_index].fft1/8+1;                         // You can change the modulus. AKA FFT1 (was 5).
-
-//   uint8_t index = now/64;                                    // Set color rotation speed()
-//   phase += _segments[segment_index].speed()/32.0;                                   // You can change the speed() of the wave. AKA SPEED (was .4)
-//   //phasePtr[0] = phase; 
-
-//   for (int i = 0; i < segment_length; i++) {
-//     if (moder == 1) modVal = (inoise8(i*10 + i*10) /16);         // Let's randomize our mod length with some Perlin noise.
-//     uint16_t val = (i+1) * allfreq;                              // This sets the frequency of the waves. The +1 makes sure that leds[0] is used.
-//     if (modVal == 0) modVal = 1;
-//     val += phase * (i % modVal +1) /2;                           // This sets the varying phase change of the waves. By Andrew Tuline.
-//     uint8_t b = cubicwave8(val);                                 // Now we make an 8 bit sinewave.
-//     b = (b > cutOff) ? (b - cutOff) : 0;                         // A ternary operator to cutoff the light.
-//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(index, false, false, 0), b));
-//     index += 256 / segment_length;
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// uint16_t mAnimatorLight::mode_phased_noise(void) {
-//   return phased_base(1);
-// }
-
-
-// uint16_t mAnimatorLight::mode_phased(void) {
-//   return phased_base(0);
-// }
-
-
-
-
-
-
-
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Breathe/Fade/Pulse
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
-
-
-// /*
-//  * Does the "standby-breathing" of well known i-Devices.
-//  */
-// uint16_t mAnimatorLight::mode_breath(void) {
-//   uint16_t var = 0;
-//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 3) +10));
-//   counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
-//   if (counter < 16384) {
-//     if (counter > 8192) counter = 8192 - (counter - 8192);
-//     var = sin16(counter) / 103; //close to parabolic in range 0-8192, max val. 23170
-//   }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(uint32_t color1, uint32_t color2)
+{
   
-//   uint8_t lum = 30 + var;
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
-//   }
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  
+  uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*2;
+  uint32_t it = now / cycleTime;
+  uint8_t width = (1 + _segments[segment_index].intensity()/32) * 3; //value of 1-8 for each colour
+  uint8_t index = it % width;
+  
+  for(uint16_t i = 0; i < segment_length; i++, index++) {
+    if(index > width-1) index = 0;
 
-//   return FRAMETIME;
-// }
+    uint32_t color = color1;
+    if(index > width*2/3-1) color = color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
+    else if(index > width/3-1) color = color2;
+
+    SetPixelColor(segment_length - i -1, color);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
 
 
-// /*
-//  * Fades the LEDs between two colors
-//  */
-// uint16_t mAnimatorLight::mode_fade(void) {
-//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 3) +10));
-//   uint8_t lum = triwave16(counter) >> 8;
+/*
+ * Tricolor chase mode
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_TriColour(void) {
 
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
-//   }
+  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(SEGCOLOR(2), SEGCOLOR(0));
+}
 
-//   return FRAMETIME;
-// }
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Running random pixels
+ * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/RandomChase.h
+ *
+void mAnimatorLight::mode_random_chase(void)
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Random()
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[segment_index].speed()));
+  uint32_t it = now / cycleTime;
+  if (_segment_runtimes[segment_index].step == it){return;}// return FRAMETIME;
+
+  for(uint16_t i = segment_length -1; i > 0; i--) {
+    SetPixelColor(i, GetPixelColor(i-1));
+  }
+  uint32_t color = RgbcctColor::GetU32Colour(GetPixelColor(0));
+  if (segment_length > 1) color = RgbcctColor::GetU32Colour(GetPixelColor( 1));
+  uint8_t r = random8(6) != 0 ? (color >> 16 & 0xFF) : random8();
+  uint8_t g = random8(6) != 0 ? (color >> 8  & 0xFF) : random8();
+  uint8_t b = random8(6) != 0 ? (color       & 0xFF) : random8();
+  SetPixelColor(0, r, g, b);
+
+  _segment_runtimes[segment_index].step = it;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+/*
+ * Alternating white/red/black pixels running. PLACEHOLDER
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Circus_Combustus(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(RED, WHITE);
+}
+
+
+
+
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * Noise
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+void mAnimatorLight::mode_fillnoise8()
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__FillNoise8()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].step = random16(12345);
+  CRGB fastled_col;
+  for (uint16_t i = 0; i < segment_length; i++) {
+    uint8_t index = inoise8(i * segment_length, _segment_runtimes[segment_index].step + i * segment_length);
+    fastled_col = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+  _segment_runtimes[segment_index].step += beatsin8(_segments[segment_index].speed(), 1, 6); //10,1,4
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+void mAnimatorLight::mode_noise16_1()
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_1()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t scale = 320;                                      // the "zoom factor" for the noise
+  CRGB fastled_col;
+  _segment_runtimes[segment_index].step += (1 + _segments[segment_index].speed()/16);
+
+  for (uint16_t i = 0; i < segment_length; i++) {
+
+    uint16_t shift_x = beatsin8(11);                           // the x position of the noise field swings @ 17 bpm
+    uint16_t shift_y = _segment_runtimes[segment_index].step/42;             // the y position becomes slowly incremented
+
+
+    uint16_t real_x = (i + shift_x) * scale;                  // the x position of the noise field swings @ 17 bpm
+    uint16_t real_y = (i + shift_y) * scale;                  // the y position becomes slowly incremented
+    uint32_t real_z = _segment_runtimes[segment_index].step;                          // the z position becomes quickly incremented
+
+    uint8_t noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
+
+    uint8_t index = sin8(noise * 3);                         // map LED color based on noise data
+
+    fastled_col = ColorFromPalette(currentPalette, index, 255, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+void mAnimatorLight::mode_noise16_2()
+{
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_2()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t scale = 1000;                                       // the "zoom factor" for the noise
+  CRGB fastled_col;
+  _segment_runtimes[segment_index].step += (1 + (_segments[segment_index].speed() >> 1));
+
+  for (uint16_t i = 0; i < segment_length; i++) {
+
+    uint16_t shift_x = _segment_runtimes[segment_index].step >> 6;                         // x as a function of time
+    uint16_t shift_y = _segment_runtimes[segment_index].step/42;
+
+    uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
+
+    uint8_t noise = inoise16(real_x, 0, 4223) >> 8;    // get the noise data and scale it down
+
+    uint8_t index = sin8(noise * 3);                          // map led color based on noise data
+
+    fastled_col = ColorFromPalette(currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+void mAnimatorLight::mode_noise16_3()
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_3()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t scale = 800;                                       // the "zoom factor" for the noise
+  CRGB fastled_col;
+  _segment_runtimes[segment_index].step += (1 + _segments[segment_index].speed());
+
+  for (uint16_t i = 0; i < segment_length; i++) {
+
+    uint16_t shift_x = 4223;                                  // no movement along x and y
+    uint16_t shift_y = 1234;
+
+    uint32_t real_x = (i + shift_x) * scale;                  // calculate the coordinates within the noise field
+    uint32_t real_y = (i + shift_y) * scale;                  // based on the precalculated positions
+    uint32_t real_z = _segment_runtimes[segment_index].step*8;  
+
+    uint8_t noise = inoise16(real_x, real_y, real_z) >> 8;    // get the noise data and scale it down
+
+    uint8_t index = sin8(noise * 3);                          // map led color based on noise data
+
+    fastled_col = ColorFromPalette(currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+
+//https://github.com/aykevl/ledstrip-spark/blob/master/ledstrip->ino
+void mAnimatorLight::mode_noise16_4()
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_4()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  CRGB fastled_col;
+  uint32_t stp = (now * _segments[segment_index].speed()) >> 7;
+  for (uint16_t i = 0; i < segment_length; i++) {
+    int16_t index = inoise16(uint32_t(i) << 12, stp);
+    fastled_col = ColorFromPalette(currentPalette, index);
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+// Peaceful noise that's slow and with gradually changing palettes. Does not support WLED palettes or default colours or controls.
+void mAnimatorLight::mode_noisepal(void) {                                    // Slow noise palette by Andrew Tuline.
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise_Pal()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t scale = 15 + (_segments[segment_index].intensity() >> 2); //default was 30
+  //#define scale 30
+
+  uint16_t dataSize = sizeof(CRGBPalette16) * 2; //allocate space for 2 Palettes
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){return;}// return mode_static(); //allocation failed
+
+  CRGBPalette16* palettes = reinterpret_cast<CRGBPalette16*>(_segment_runtimes[segment_index].data);
+
+  uint16_t changePaletteMs = 4000 + _segments[segment_index].speed() *10; //between 4 - 6.5sec
+  if (millis() - _segment_runtimes[segment_index].step > changePaletteMs)
+  {
+    _segment_runtimes[segment_index].step = millis();
+
+    uint8_t baseI = random8();
+    palettes[1] = CRGBPalette16(CHSV(baseI+random8(64), 255, random8(128,255)), CHSV(baseI+128, 255, random8(128,255)), CHSV(baseI+random8(92), 192, random8(128,255)), CHSV(baseI+random8(92), 255, random8(128,255)));
+  }
+
+  CRGB color;
+
+  //EVERY_N_MILLIS(10) { //(don't have to time this, effect function is only called every 24ms)
+  nblendPaletteTowardPalette(palettes[0], palettes[1], 48);               // Blend towards the target palette over 48 iterations.
+
+  if (_segments[segment_index].palette.id > 0) palettes[0] = currentPalette;
+
+  for(int i = 0; i < segment_length; i++) {
+    uint8_t index = inoise8(i*scale, _segment_runtimes[segment_index].aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
+    color = ColorFromPalette(palettes[0], index, 255, LINEARBLEND);       // Use the my own palette.
+    SetPixelColor(i, color.red, color.green, color.blue);
+  }
+
+  _segment_runtimes[segment_index].aux0 += beatsin8(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Effects by Andrew Tuline
+ *
+// void mAnimatorLight::phased_base(uint8_t moder) {                  // We're making sine waves here. By Andrew Tuline.
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8_t moder)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  
+
+  uint8_t allfreq = 16;                                          // Base frequency.
+  //float* phasePtr = reinterpret_cast<float*>(_segment_runtimes[segment_index].step);       // Phase change value gets calculated.
+  static float phase = 0;//phasePtr[0];
+  uint8_t cutOff = (255-_segments[segment_index].intensity());                      // You can change the number of pixels.  AKA intensity() (was 192).
+  uint8_t modVal = 5;//_segments[segment_index].fft1/8+1;                         // You can change the modulus. AKA FFT1 (was 5).
+
+  uint8_t index = now/64;                                    // Set color rotation speed()
+  phase += _segments[segment_index].speed()/32.0;                                   // You can change the speed() of the wave. AKA SPEED (was .4)
+  //phasePtr[0] = phase; 
+
+  for (int i = 0; i < segment_length; i++) {
+    if (moder == 1) modVal = (inoise8(i*10 + i*10) /16);         // Let's randomize our mod length with some Perlin noise.
+    uint16_t val = (i+1) * allfreq;                              // This sets the frequency of the waves. The +1 makes sure that leds[0] is used.
+    if (modVal == 0) modVal = 1;
+    val += phase * (i % modVal +1) /2;                           // This sets the varying phase change of the waves. By Andrew Tuline.
+    uint8_t b = cubicwave8(val);                                 // Now we make an 8 bit sinewave.
+    b = (b > cutOff) ? (b - cutOff) : 0;                         // A ternary operator to cutoff the light.
+    SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(index, false, false, 0), b));
+    index += 256 / segment_length;
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__PhasedNoise(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Phased(1);
+}
+
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Phased(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Phased(0);
+}
+
+
+
+
+
+
+
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * Breathe/Fade/Pulse
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Exploding fireworks effect
+ * @note : Converted from WLED Effect
+/*
+ * Does the "standby-breathing" of well known i-Devices.
+ *
+void mAnimatorLight::mode_breath(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Breath()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t var = 0;
+  uint16_t counter = (now * ((_segments[segment_index].speed() >> 3) +10));
+  counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
+  if (counter < 16384) {
+    if (counter > 8192) counter = 8192 - (counter - 8192);
+    var = sin16(counter) / 103; //close to parabolic in range 0-8192, max val. 23170
+  }
+  
+  uint8_t lum = 30 + var;
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Exploding fireworks effect
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Fades the LEDs between two colors
+ *
+void mAnimatorLight::mode_fade(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t counter = (now * ((_segments[segment_index].speed() >> 3) +10));
+  uint8_t lum = triwave16(counter) >> 8;
+
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 
@@ -6515,7 +6587,7 @@ void mAnimatorLight::fade_out(uint8_t rate)
  */
 void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks()
 {
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
   uint8_t segment_length = _segments[segment_index].length();
   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
@@ -6550,14 +6622,14 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks()
 
       
       // Set palette to be sure
-      mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+      mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
       uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
-      _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = true;
+      _segments[segment_iters.index].flags.brightness_applied_during_colour_generation = true;
 
 
       SetPixelColor(index, mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1)), 0);
       // SetPixelColor(index, mPaletteI->GetColourFromPalette(nullptr, 0));//random(0,pixels_in_palette-1)));
-      // SetPixelColor(index, pCONT_lAni->mEffects->color_from_palette(random8(), false, false, 0));
+      // SetPixelColor(index, color_from_palette(random8(), false, false, 0));
       _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0;
       _segment_runtimes[segment_index].aux0 = index;
     }
@@ -6574,126 +6646,148 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks()
 
 
 
-// /*
-// / Fireworks in starburst effect
-// / based on the video: https://www.reddit.com/r/arduino/comments/c3sd46/i_made_this_fireworks_effect_for_my_led_strips/
-// / Speed sets frequency of new starbursts, intensity() is the intensity() of the burst
-// */
-// #define STARBURST_MAX_FRAG 12
 
-// //each needs 64 byte
-// typedef struct particle {
-//   CRGB     color;
-//   uint32_t birth  =0;
-//   uint32_t last   =0;
-//   float    vel    =0;
-//   uint16_t pos    =-1;
-//   float    fragment[STARBURST_MAX_FRAG];
-// } star;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Fireworks Starburst
+ * @note : Converted from WLED Effects
+ * 
+// void mAnimatorLight::mode_starburst(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-// uint16_t mAnimatorLight::mode_starburst(void) {
-//   uint8_t numStars = 1 + (segment_length >> 3);
-//   if (numStars > 15) numStars = 15;
-//   uint16_t dataSize = sizeof(star) * numStars;
 
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+#define STARBURST_MAX_FRAG 12
+
+//each needs 64 byte
+typedef struct particle {
+  CRGB     color;
+  uint32_t birth  =0;
+  uint32_t last   =0;
+  float    vel    =0;
+  uint16_t pos    =-1;
+  float    fragment[STARBURST_MAX_FRAG];
+} star;
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint8_t numStars = 1 + (segment_length >> 3);
+  if (numStars > 15) numStars = 15;
+  uint16_t dataSize = sizeof(star) * numStars;
+
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){
+    return;
+  }
+  //return mode_static(); //allocation failed
   
-//   uint32_t it = millis();
+  uint32_t it = millis();
   
-//   star* stars = reinterpret_cast<star*>(_segment_runtimes[segment_index].data);
+  star* stars = reinterpret_cast<star*>(_segment_runtimes[segment_index].data);
   
-//   float          maxSpeed                = 375.0f;  // Max velocity
-//   float          particleIgnition        = 250.0f;  // How long to "flash"
-//   float          particleFadeTime        = 1500.0f; // Fade out time
+  float          maxSpeed                = 375.0f;  // Max velocity
+  float          particleIgnition        = 250.0f;  // How long to "flash"
+  float          particleFadeTime        = 1500.0f; // Fade out time
      
-//   for (int j = 0; j < numStars; j++)
-//   {
-//     // speed() to adjust chance of a burst, max is nearly always.
-//     if (random8((144-(_segments[segment_index].speed() >> 1))) == 0 && stars[j].birth == 0)
-//     {
-//       // Pick a random color and location.  
-//       uint16_t startPos = random16(segment_length-1);
-//       float multiplier = (float)(random8())/255.0 * 1.0;
+  for (int j = 0; j < numStars; j++)
+  {
+    // speed() to adjust chance of a burst, max is nearly always.
+    if (random8((144-(_segments[segment_index].speed() >> 1))) == 0 && stars[j].birth == 0)
+    {
+      // Pick a random color and location.  
+      uint16_t startPos = random16(segment_length-1);
+      float multiplier = (float)(random8())/255.0 * 1.0;
 
-//       stars[j].color = col_to_crgb(color_wheel(random8()));
-//       stars[j].pos = startPos; 
-//       stars[j].vel = maxSpeed * (float)(random8())/255.0 * multiplier;
-//       stars[j].birth = it;
-//       stars[j].last = it;
-//       // more fragments means larger burst effect
-//       int num = random8(3,6 + (_segments[segment_index].intensity() >> 5));
+      stars[j].color = col_to_crgb(color_wheel(random8()));
+      stars[j].pos = startPos; 
+      stars[j].vel = maxSpeed * (float)(random8())/255.0 * multiplier;
+      stars[j].birth = it;
+      stars[j].last = it;
+      // more fragments means larger burst effect
+      int num = random8(3,6 + (_segments[segment_index].intensity() >> 5));
 
-//       for (int i=0; i < STARBURST_MAX_FRAG; i++) {
-//         if (i < num) stars[j].fragment[i] = startPos;
-//         else stars[j].fragment[i] = -1;
-//       }
-//     }
-//   }
+      for (int i=0; i < STARBURST_MAX_FRAG; i++) {
+        if (i < num) stars[j].fragment[i] = startPos;
+        else stars[j].fragment[i] = -1;
+      }
+    }
+  }
   
-//   fill(SEGCOLOR(1));
+  fill(SEGCOLOR(1));
   
-//   for (int j=0; j<numStars; j++)
-//   {
-//     if (stars[j].birth != 0) {
-//       float dt = (it-stars[j].last)/1000.0;
+  for (int j=0; j<numStars; j++)
+  {
+    if (stars[j].birth != 0) {
+      float dt = (it-stars[j].last)/1000.0;
 
-//       for (int i=0; i < STARBURST_MAX_FRAG; i++) {
-//         int var = i >> 1;
+      for (int i=0; i < STARBURST_MAX_FRAG; i++) {
+        int var = i >> 1;
         
-//         if (stars[j].fragment[i] > 0) {
-//           //all fragments travel right, will be mirrored on other side
-//           stars[j].fragment[i] += stars[j].vel * dt * (float)var/3.0;
-//         }
-//       }
-//       stars[j].last = it;
-//       stars[j].vel -= 3*stars[j].vel*dt;
-//     }
+        if (stars[j].fragment[i] > 0) {
+          //all fragments travel right, will be mirrored on other side
+          stars[j].fragment[i] += stars[j].vel * dt * (float)var/3.0;
+        }
+      }
+      stars[j].last = it;
+      stars[j].vel -= 3*stars[j].vel*dt;
+    }
   
-//     CRGB c = stars[j].color;
+    CRGB c = stars[j].color;
 
-//     // If the star is brand new, it flashes white briefly.  
-//     // Otherwise it just fades over time.
-//     float fade = 0.0f;
-//     float age = it-stars[j].birth;
+    // If the star is brand new, it flashes white briefly.  
+    // Otherwise it just fades over time.
+    float fade = 0.0f;
+    float age = it-stars[j].birth;
 
-//     if (age < particleIgnition) {
-//       c = col_to_crgb(color_blend(WHITE, crgb_to_col(c), 254.5f*((age / particleIgnition))));
-//     } else {
-//       // Figure out how much to fade and shrink the star based on 
-//       // its age relative to its lifetime
-//       if (age > particleIgnition + particleFadeTime) {
-//         fade = 1.0f;                  // Black hole, all faded out
-//         stars[j].birth = 0;
-//         c = col_to_crgb(SEGCOLOR(1));
-//       } else {
-//         age -= particleIgnition;
-//         fade = (age / particleFadeTime);  // Fading star
-//         byte f = 254.5f*fade;
-//         c = col_to_crgb(color_blend(crgb_to_col(c), SEGCOLOR(1), f));
-//       }
-//     }
+    if (age < particleIgnition) {
+      c = col_to_crgb(color_blend(WHITE, crgb_to_col(c), 254.5f*((age / particleIgnition))));
+    } else {
+      // Figure out how much to fade and shrink the star based on 
+      // its age relative to its lifetime
+      if (age > particleIgnition + particleFadeTime) {
+        fade = 1.0f;                  // Black hole, all faded out
+        stars[j].birth = 0;
+        c = col_to_crgb(SEGCOLOR(1));
+      } else {
+        age -= particleIgnition;
+        fade = (age / particleFadeTime);  // Fading star
+        byte f = 254.5f*fade;
+        c = col_to_crgb(color_blend(crgb_to_col(c), SEGCOLOR(1), f));
+      }
+    }
     
-//     float particleSize = (1.0 - fade) * 2;
+    float particleSize = (1.0 - fade) * 2;
 
-//     for (uint8_t index=0; index < STARBURST_MAX_FRAG*2; index++) {
-//       bool mirrored = index & 0x1;
-//       uint8_t i = index >> 1;
-//       if (stars[j].fragment[i] > 0) {
-//         float loc = stars[j].fragment[i];
-//         if (mirrored) loc -= (loc-stars[j].pos)*2;
-//         int start = loc - particleSize;
-//         int end = loc + particleSize;
-//         if (start < 0) start = 0;
-//         if (start == end) end++;
-//         if (end > segment_length) end = segment_length;    
-//         for (int p = start; p < end; p++) {
-//           SetPixelColor(p, c.r, c.g, c.b);
-//         }
-//       }
-//     }
-//   }
-//   return FRAMETIME;
-// }
+    for (uint8_t index=0; index < STARBURST_MAX_FRAG*2; index++) {
+      bool mirrored = index & 0x1;
+      uint8_t i = index >> 1;
+      if (stars[j].fragment[i] > 0) {
+        float loc = stars[j].fragment[i];
+        if (mirrored) loc -= (loc-stars[j].pos)*2;
+        int start = loc - particleSize;
+        int end = loc + particleSize;
+        if (start < 0) start = 0;
+        if (start == end) end++;
+        if (end > segment_length) end = segment_length;    
+        for (int p = start; p < end; p++) {
+          SetPixelColor(p, c.r, c.g, c.b);
+        }
+      }
+    }
+  }
+  // return FRAMETIME;
+
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+
+  StripUpdate();
+
+
+}
 
 
 
@@ -6717,15 +6811,11 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks()
 
 void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks()
 {
-  uint8_t segment_index  = segment_iters._segment_index;
+  uint8_t segment_index  = segment_iters.index;
   uint8_t segment_length = _segments[segment_index].length();
   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
-
-  
-  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
-
 
 // AddLog(LOG_LEVEL_TEST, "segment_index=%d", segment_index);
 // AddLog(LOG_LEVEL_TEST, "_segment_runtimes[segment_index].anim_function_callback=%d", _segment_runtimes[segment_index].anim_function_callback);
@@ -6847,1097 +6937,1730 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Exploding_Firewor
 }
 
 
-// //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
-// uint16_t mAnimatorLight::mode_rain()
-// {
-//   _segment_runtimes[segment_index].step += FRAMETIME;
-//   if (_segment_runtimes[segment_index].step > SPEED_FORMULA_L) {
-//     _segment_runtimes[segment_index].step = 0;
-//     //shift all leds right
-//     uint32_t ctemp = getPixelColor(segment_length -1);
-//     for(uint16_t i = segment_length -1; i > 0; i--) {
-//       SetPixelColor(i, getPixelColor(i-1));
-//     }
-//     SetPixelColor(0, ctemp);
-//     _segment_runtimes[segment_index].aux0++;
-//     _segment_runtimes[segment_index].aux1++;
-//     if (_segment_runtimes[segment_index].aux0 == 0) _segment_runtimes[segment_index].aux0 = UINT16_MAX;
-//     if (_segment_runtimes[segment_index].aux1 == 0) _segment_runtimes[segment_index].aux0 = UINT16_MAX;
-//     if (_segment_runtimes[segment_index].aux0 == segment_length) _segment_runtimes[segment_index].aux0 = 0;
-//     if (_segment_runtimes[segment_index].aux1 == segment_length) _segment_runtimes[segment_index].aux1 = 0;
-//   }
-//   return mode_fireworks();
-// }
 
-
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Rain effect, which uses firework
+ * @note : Converted from WLED Effects
+ * 
 // /*
-//  * Fire flicker function
-//  */
-// uint16_t mAnimatorLight::mode_fire_flicker(void) {
-//   uint32_t cycleTime = 40 + (255 - _segments[segment_index].speed());
-//   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[segment_index].step == it) return FRAMETIME;
+//  * Exploding fireworks effect
+//  * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
+//  *
+
+ @param aux0 Current center index of firework (which blurs outwards)
+ @param aux1 Previous location of center index of firework
+ @param aux2 Iter to wrap palette
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+
+
+//Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rain() // Firework_Rain
+{
   
-//   byte w = (SEGCOLOR(0) >> 24) & 0xFF;
-//   byte r = (SEGCOLOR(0) >> 16) & 0xFF;
-//   byte g = (SEGCOLOR(0) >>  8) & 0xFF;
-//   byte b = (SEGCOLOR(0)        & 0xFF);
-//   byte lum = (_segments[segment_index].palette == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
-//   lum /= (((256-_segments[segment_index].intensity())/16)+1);
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     byte flicker = random8(lum);
-//     if (_segments[segment_index].palette == 0) {
-//       SetPixelColor(i, MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0));
-//     } else {
-//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
-//     }
-//   }
-
-//   _segment_runtimes[segment_index].step = it;
-//   return FRAMETIME;
-// }
-
-// #ifdef ENABLE_ADVANCED_EFFECTS
-
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Sparkle/Twinkle
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
 
-// /*
-//  * Blinks one LED at a time.
-//  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
-//  */
-// uint16_t mAnimatorLight::mode_sparkle(void) {
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
-//   }
-//   uint32_t cycleTime = 10 + (255 - _segments[segment_index].speed())*2;
-//   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[segment_index].step)
-//   {
-//     _segment_runtimes[segment_index].aux0 = random16(segment_length); // aux0 stores the random led index
-//     _segment_runtimes[segment_index].step = it;
-//   }
+
+  _segment_runtimes[segment_index].step += FRAMETIME;
+  if (_segment_runtimes[segment_index].step > SPEED_FORMULA_L) {
+    _segment_runtimes[segment_index].step = 0;
+    //shift all leds right
+    RgbcctColor ctemp = GetPixelColor(segment_length -1);
+    for(uint16_t i = segment_length -1; i > 0; i--) {
+      SetPixelColor(i, GetPixelColor(i-1));
+    }
+    SetPixelColor(0, ctemp);
+    _segment_runtimes[segment_index].aux0++;
+    _segment_runtimes[segment_index].aux1++;
+    if (_segment_runtimes[segment_index].aux0 == 0) _segment_runtimes[segment_index].aux0 = UINT16_MAX;
+    if (_segment_runtimes[segment_index].aux1 == 0) _segment_runtimes[segment_index].aux0 = UINT16_MAX;
+    if (_segment_runtimes[segment_index].aux0 == segment_length) _segment_runtimes[segment_index].aux0 = 0;
+    if (_segment_runtimes[segment_index].aux1 == segment_length) _segment_runtimes[segment_index].aux1 = 0;
+  }
   
-//   SetPixelColor(_segment_runtimes[segment_index].aux0, SEGCOLOR(0));
-//   return FRAMETIME;
-// }
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+
+  SubTask_Segment_Flasher_Animate_Function__Fireworks();
 
 
-// /*
-//  * Lights all LEDs in the color. Flashes single white pixels randomly.
-//  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
-//  */
-// uint16_t mAnimatorLight::mode_flash_sparkle(void) {
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//   }
+  // StripUpdate();
 
-//   if(random8(5) == 0) {
-//     _segment_runtimes[segment_index].aux0 = random16(segment_length); // aux0 stores the random led index
-//     SetPixelColor(_segment_runtimes[segment_index].aux0, SEGCOLOR(1));
-//     return 20;
-//   } 
-//   return 20 + (uint16_t)(255-_segments[segment_index].speed());
-// }
+  // return mode_fireworks();
+}
 
 
-// /*
-//  * Like flash sparkle. With more flash.
-//  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
-//  */
-// uint16_t mAnimatorLight::mode_hyper_sparkle(void) {
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//   }
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * Sparkle/Twinkle
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
 
-//   if(random8(5) < 2) {
-//     for(uint16_t i = 0; i < MAX(1, segment_length/3); i++) {
-//       SetPixelColor(random16(segment_length), SEGCOLOR(1));
-//     }
-//     return 20;
-//   }
-//   return 20 + (uint16_t)(255-_segments[segment_index].speed());
-// }
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Rain effect, which uses firework
+ * @note : Converted from WLED Effects
+ * 
+ * 
+/*
+ * Blinks one LED at a time.
+ * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
+ *
+// void mAnimatorLight::mode_sparkle(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
 
 
-
-
-
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * TO SORT UNDER
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
-
-
-
-
-
-
-// uint16_t mAnimatorLight::mode_twinkleup(void) {                 // A very short twinkle routine with fade-in and dual controls. By Andrew Tuline.
-//   random16_set_seed(535);                                 // The randomizer needs to be re-set each time through the loop in order for the same 'random' numbers to be the same each time through.
-
-//   for (int i = 0; i<segment_length; i++) {
-//     uint8_t ranstart = random8();                         // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
-//     uint8_t pixBri = sin8(ranstart + 16 * now/(256-_segments[segment_index].speed()));
-//     if (random8() > _segments[segment_index].intensity()) pixBri = 0;
-//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i*20, false, PALETTE_SOLID_WRAP, 0), pixBri));
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-
-
-
-// /*
-//  * Lights all LEDs in one random color up. Then switches them
-//  * to the next random color.
-//  */
-// uint16_t mAnimatorLight::mode_random_color(void) {
-//   uint32_t cycleTime = 200 + (255 - _segments[segment_index].speed())*50;
-//   uint32_t it = now / cycleTime;
-//   uint32_t rem = now % cycleTime;
-//   uint16_t fadedur = (cycleTime * _segments[segment_index].intensity()) >> 8;
-
-//   uint32_t fade = 255;
-//   if (fadedur) {
-//     fade = (rem * 255) / fadedur;
-//     if (fade > 255) fade = 255;
-//   }
-
-//   if (_segment_runtimes[segment_index].call == 0) {
-//     _segment_runtimes[segment_index].aux0 = random8();
-//     _segment_runtimes[segment_index].step = 2;
-//   }
-//   if (it != _segment_runtimes[segment_index].step) //new color
-//   {
-//     _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0;
-//     _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0); //aux0 will store our random color wheel index
-//     _segment_runtimes[segment_index].step = it;
-//   }
-
-//   fill(color_blend(color_wheel(_segment_runtimes[segment_index].aux1), color_wheel(_segment_runtimes[segment_index].aux0), fade));
-//   return FRAMETIME;
-// }
-
-
-// /*
-//  * Lights every LED in a random color. Changes all LED at the same time
-// // * to new random colors.
-//  */
-// uint16_t mAnimatorLight::mode_dynamic(void) {
-//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
+//Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle() // Firework_Rain
+{
   
-//   if(_segment_runtimes[segment_index].call == 0) {
-//     for (uint16_t i = 0; i < segment_length; i++) _segment_runtimes[segment_index].data[i] = random8();
-//   }
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//   uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*15;
-//   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[segment_index].step && _segments[segment_index].speed() != 0) //new color
-//   {
-//     for (uint16_t i = 0; i < segment_length; i++) {
-//       if (random8() <= _segments[segment_index].intensity()) _segment_runtimes[segment_index].data[i] = random8();
-//     }
-//     _segment_runtimes[segment_index].step = it;
-//   }
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+  }
+  uint32_t cycleTime = 10 + (255 - _segments[segment_index].speed())*2;
+  uint32_t it = now / cycleTime;
+  if (it != _segment_runtimes[segment_index].step)
+  {
+    _segment_runtimes[segment_index].aux0 = random16(segment_length); // aux0 stores the random led index
+    _segment_runtimes[segment_index].step = it;
+  }
   
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, color_wheel(_segment_runtimes[segment_index].data[i]));
-//   }
-//   return FRAMETIME;
-// }
-
-
-
-// /*
-//  * Cycles all LEDs at once through a rainbow.
-//  */
-// uint16_t mAnimatorLight::mode_rainbow(void) {
-//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 2) +2)) & 0xFFFF;
-//   counter = counter >> 8;
-
-//   if (_segments[segment_index].intensity() < 128){
-//     fill(color_blend(color_wheel(counter),WHITE,128-_segments[segment_index].intensity()));
-//   } else {
-//     fill(color_wheel(counter));
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// /*
-//  * Cycles a rainbow over the entire string of LEDs.
-//  */
-// uint16_t mAnimatorLight::mode_rainbow_cycle(void) {
-//   uint16_t counter = (now * ((_segments[segment_index].speed() >> 2) +2)) & 0xFFFF;
-//   counter = counter >> 8;
+  SetPixelColor(_segment_runtimes[segment_index].aux0, SEGCOLOR(0));
   
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     //intensity()/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
-//     uint8_t index = (i * (16 << (_segments[segment_index].intensity() /29)) / segment_length) + counter;
-//     SetPixelColor(i, color_wheel(index));
-//   }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
 
 
-// /*
-//  * Running lights effect with smooth sine transition base.
-//  */
-// uint16_t mAnimatorLight::running_base(bool saw) {
-//   uint8_t x_scale = _segments[segment_index].intensity() >> 2;
-//   uint32_t counter = (now * _segments[segment_index].speed()) >> 9;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Rain effect, which uses firework
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Lights all LEDs in the color. Flashes single white pixels randomly.
+ * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
+ *
 
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     uint8_t s = 0;
-//     uint8_t a = i*x_scale - counter;
-//     if (saw) {
-//       if (a < 16)
-//       {
-//         a = 192 + a*8;
-//       } else {
-//         a = map(a,16,255,64,192);
-//       }
-//     }
-//     s = sin8(a);
-//     SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
-//   }
-//   return FRAMETIME;
-// }
+//Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
+void mAnimatorLight::mode_flash_sparkle(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash() // Firework_Rain
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+  }
+
+  if(random8(5) == 0) {
+    _segment_runtimes[segment_index].aux0 = random16(segment_length); // aux0 stores the random led index
+    SetPixelColor(_segment_runtimes[segment_index].aux0, SEGCOLOR(1));
+    _segments[segment_index].transition.time_ms = 20;//return 20;
+  } 
+  _segments[segment_index].transition.time_ms =  20 + (uint16_t)(255-_segments[segment_index].speed());
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Rain effect, which uses firework
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Like flash sparkle. With more flash.
+ * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
+ *
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+//Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper() // Firework_Rain
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+  }
+
+  if(random8(5) < 2) {
+    for(uint16_t i = 0; i < MAX(1, segment_length/3); i++) {
+      SetPixelColor(random16(segment_length), SEGCOLOR(1));
+    }
+    _segments[segment_index].transition.time_ms =  20;
+  }
+  _segments[segment_index].transition.time_ms =  20 + (uint16_t)(255-_segments[segment_index].speed());
+}
+
+
+
+
+
+
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * TO SORT UNDER
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Rain effect, which uses firework
+ * @note : Converted from WLED Effects
+ * 
+void mAnimatorLight::mode_twinkleup(void) {                 // A very short twinkle routine with fade-in and dual controls. By Andrew Tuline.
+  
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+//Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Up() // Firework_Rain
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+random16_set_seed(535);                                 // The randomizer needs to be re-set each time through the loop in order for the same 'random' numbers to be the same each time through.
+
+  for (int i = 0; i<segment_length; i++) {
+    uint8_t ranstart = random8();                         // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
+    uint8_t pixBri = sin8(ranstart + 16 * now/(256-_segments[segment_index].speed()));
+    if (random8() > _segments[segment_index].intensity()) pixBri = 0;
+    SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i*20, false, PALETTE_SOLID_WRAP, 0), pixBri));
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Random_Colour()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+/*
+ * Lights all LEDs in one random color up. Then switches them
+ * to the next random color.
+ */
+// void mAnimatorLight::mode_random_color(void) {
+  uint32_t cycleTime = 200 + (255 - _segments[segment_index].speed())*50;
+  uint32_t it = now / cycleTime;
+  uint32_t rem = now % cycleTime;
+  uint16_t fadedur = (cycleTime * _segments[segment_index].intensity()) >> 8;
+
+  uint32_t fade = 255;
+  if (fadedur) {
+    fade = (rem * 255) / fadedur;
+    if (fade > 255) fade = 255;
+  }
+
+  if (_segment_runtimes[segment_index].call == 0) {
+    _segment_runtimes[segment_index].aux0 = random8();
+    _segment_runtimes[segment_index].step = 2;
+  }
+  if (it != _segment_runtimes[segment_index].step) //new color
+  {
+    _segment_runtimes[segment_index].aux1 = _segment_runtimes[segment_index].aux0;
+    _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0); //aux0 will store our random color wheel index
+    _segment_runtimes[segment_index].step = it;
+  }
+
+  fill(color_blend(color_wheel(_segment_runtimes[segment_index].aux1), color_wheel(_segment_runtimes[segment_index].aux0), fade));
+  // return FRAMETIME;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dynamic()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+/*
+ * Lights every LED in a random color. Changes all LED at the same time
+// * to new random colors.
+ */
+// void mAnimatorLight::mode_dynamic(void) {
+  if (!_segment_runtimes[segment_index].allocateData(segment_length))
+  {return;}
+  //return mode_static(); //allocation failed
+  
+  if(_segment_runtimes[segment_index].call == 0) {
+    for (uint16_t i = 0; i < segment_length; i++) _segment_runtimes[segment_index].data[i] = random8();
+  }
+
+  uint32_t cycleTime = 50 + (255 - _segments[segment_index].speed())*15;
+  uint32_t it = now / cycleTime;
+  if (it != _segment_runtimes[segment_index].step && _segments[segment_index].speed() != 0) //new color
+  {
+    for (uint16_t i = 0; i < segment_length; i++) {
+      if (random8() <= _segments[segment_index].intensity()) _segment_runtimes[segment_index].data[i] = random8();
+    }
+    _segment_runtimes[segment_index].step = it;
+  }
+  
+  for (uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_wheel(_segment_runtimes[segment_index].data[i]));
+  }
+  // return FRAMETIME;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rainbow()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+/*
+ * Cycles all LEDs at once through a rainbow.
+ */
+// void mAnimatorLight::mode_rainbow(void) {
+
+  uint16_t counter = (millis() * ((_segments[segment_index].speed() >> 2) +2)) & 0xFFFF;
+  counter = counter >> 8;
+
+  if (_segments[segment_index].intensity() < 128){
+    fill(color_blend(color_wheel(counter),WHITE,128-_segments[segment_index].intensity()));
+  } else {
+    fill(color_wheel(counter));
+  }
+
+  // return FRAMETIME;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+/*
+ * Cycles a rainbow over the entire string of LEDs.
+ */
+// void mAnimatorLight::mode_rainbow_cycle(void) {
+  uint16_t counter = (millis() * ((_segments[segment_index].speed() >> 2) +2)) & 0xFFFF;
+  counter = counter >> 8;
+  
+  for(uint16_t i = 0; i < segment_length; i++) {
+    //intensity()/29 = 0 (1/16) 1 (1/8) 2 (1/4) 3 (1/2) 4 (1) 5 (2) 6 (4) 7 (8) 8 (16)
+    uint8_t index = (i * (16 << (_segments[segment_index].intensity() /29)) / segment_length) + counter;
+    SetPixelColor(i, color_wheel(index));
+  }
+
+  // return FRAMETIME;
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+/*
+ * Running lights effect with smooth sine transition base.
+ */
+// void mAnimatorLight::running_base(bool saw) {
+  uint8_t x_scale = _segments[segment_index].intensity() >> 2;
+  uint32_t counter = (millis() * _segments[segment_index].speed()) >> 9;
+
+  for(uint16_t i = 0; i < segment_length; i++) {
+    uint8_t s = 0;
+    uint8_t a = i*x_scale - counter;
+    if (saw) {
+      if (a < 16)
+      {
+        a = 192 + a*8;
+      } else {
+        a = map(a,16,255,64,192);
+      }
+    }
+    s = sin8(a);
+    SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 // /*
 //  * Running lights effect with smooth sine transition.
 //  */
-// uint16_t mAnimatorLight::mode_running_lights(void) {
+// void mAnimatorLight::mode_running_lights(void) {
 //   return running_base(false);
 // }
 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Lights()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Running(false);
+}
 
 // /*
 //  * Running lights effect with sawtooth transition.
 //  */
-// uint16_t mAnimatorLight::mode_saw(void) {
+// void mAnimatorLight::mode_saw(void) {
 //   return running_base(true);
 // }
 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Saw()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Running(true);
+}
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
 // /*
 //  * Blink several LEDs in random colors on, reset, repeat.
 //  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
 //  */
-// uint16_t mAnimatorLight::mode_twinkle(void) {
-//   fill(SEGCOLOR(1));
+// void mAnimatorLight::mode_twinkle(void) {
+  fill(SEGCOLOR(1));
 
-//   uint32_t cycleTime = 20 + (255 - _segments[segment_index].speed())*5;
-//   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[segment_index].step)
-//   {
-//     uint16_t maxOn = map(_segments[segment_index].intensity(), 0, 255, 1, segment_length); // make sure at least one LED is on
-//     if (_segment_runtimes[segment_index].aux0 >= maxOn)
-//     {
-//       _segment_runtimes[segment_index].aux0 = 0;
-//       _segment_runtimes[segment_index].aux1 = random16(); //new seed for our PRNG
-//     }
-//     _segment_runtimes[segment_index].aux0++;
-//     _segment_runtimes[segment_index].step = it;
-//   }
+  uint32_t cycleTime = 20 + (255 - _segments[segment_index].speed())*5;
+  uint32_t it = now / cycleTime;
+  if (it != _segment_runtimes[segment_index].step)
+  {
+    uint16_t maxOn = map(_segments[segment_index].intensity(), 0, 255, 1, segment_length); // make sure at least one LED is on
+    if (_segment_runtimes[segment_index].aux0 >= maxOn)
+    {
+      _segment_runtimes[segment_index].aux0 = 0;
+      _segment_runtimes[segment_index].aux1 = random16(); //new seed for our PRNG
+    }
+    _segment_runtimes[segment_index].aux0++;
+    _segment_runtimes[segment_index].step = it;
+  }
   
-//   uint16_t PRNG16 = _segment_runtimes[segment_index].aux1;
+  uint16_t PRNG16 = _segment_runtimes[segment_index].aux1;
 
-//   for (uint16_t i = 0; i < _segment_runtimes[segment_index].aux0; i++)
-//   {
-//     PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
-//     uint32_t p = (uint32_t)segment_length * (uint32_t)PRNG16;
-//     uint16_t j = p >> 16;
-//     SetPixelColor(j, pCONT_lAni->mEffects->color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
-//   }
+  for (uint16_t i = 0; i < _segment_runtimes[segment_index].aux0; i++)
+  {
+    PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
+    uint32_t p = (uint32_t)segment_length * (uint32_t)PRNG16;
+    uint16_t j = p >> 16;
+    SetPixelColor(j, color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(uint32_t color)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 // /*
 //  * Dissolve function
 //  */
-// uint16_t mAnimatorLight::dissolve(uint32_t color) {
-//   bool wa = (SEGCOLOR(1) != 0 && _brightness < 255); //workaround, can't compare getPixel to color if not full brightness
-  
-//   for (uint16_t j = 0; j <= segment_length / 15; j++)
-//   {
-//     if (random8() <= _segments[segment_index].intensity()) {
-//       for (uint8_t times = 0; times < 10; times++) //attempt to spawn a new pixel 5 times
-//       {
-//         uint16_t i = random16(segment_length);
-//         if (_segment_runtimes[segment_index].aux0) { //dissolve to primary/palette
-//           if (getPixelColor(i) == SEGCOLOR(1) || wa) {
-//             if (color == SEGCOLOR(0))
-//             {
-//               SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//             } else { SetPixelColor(i, color); }     
-//             break; //only spawn 1 new pixel per frame per 50 LEDs
-//           }
-//         } else { //dissolve to secondary
-//           if (getPixelColor(i) != SEGCOLOR(1)) { SetPixelColor(i, SEGCOLOR(1)); break; }
-//         }
-//       }
-//     }
-//   }
 
-//   if (_segment_runtimes[segment_index].call > (255 - _segments[segment_index].speed()) + 15) 
-//   {
-//     _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
-//     _segment_runtimes[segment_index].call = 0;
-//   }
+//tmp added
+uint8_t _brightness = 255;
+
+// void mAnimatorLight::dissolve(uint32_t color) {
+  bool wa = (SEGCOLOR(1) != 0 && _brightness < 255); //workaround, can't compare getPixel to color if not full brightness
   
-//   return FRAMETIME;
-// }
+  for (uint16_t j = 0; j <= segment_length / 15; j++)
+  {
+    if (random8() <= _segments[segment_index].intensity()) {
+      for (uint8_t times = 0; times < 10; times++) //attempt to spawn a new pixel 5 times
+      {
+        uint16_t i = random16(segment_length);
+        if (_segment_runtimes[segment_index].aux0) { //dissolve to primary/palette
+          if (RgbcctColor::GetU32Colour(GetPixelColor(i)) == SEGCOLOR(1) || wa)
+          {
+            if (color == SEGCOLOR(0))
+            {
+              SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+            } else { SetPixelColor(i, color); }     
+            break; //only spawn 1 new pixel per frame per 50 LEDs
+          }
+        } else { //dissolve to secondary
+          if (RgbcctColor::GetU32Colour(GetPixelColor(i)) != SEGCOLOR(1)) { SetPixelColor(i, SEGCOLOR(1)); break; }
+        }
+      }
+    }
+  }
+
+  if (_segment_runtimes[segment_index].call > (255 - _segments[segment_index].speed()) + 15) 
+  {
+    _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
+    _segment_runtimes[segment_index].call = 0;
+  }
+  
+  // return FRAMETIME;
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 // /*
 //  * Blink several LEDs on and then off
 //  */
-// uint16_t mAnimatorLight::mode_dissolve(void) {
+// void mAnimatorLight::mode_dissolve(void) {
 //   return dissolve(SEGCOLOR(0));
 // }
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dissolve()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(SEGCOLOR(0));
+}
 
 
 // /*
 //  * Blink several LEDs on and then off in random colors
 //  */
-// uint16_t mAnimatorLight::mode_dissolve_random(void) {
+// void mAnimatorLight::mode_dissolve_random(void) {
 //   return dissolve(color_wheel(random8()));
 // }
 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dissolve_Random()
+{
+  SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(color_wheel(random8()));
+}
 
 
 
-// /*
-//  * Android loading circle
-//  */
-// uint16_t mAnimatorLight::mode_android(void) {
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Android loading circle
+ *
+// void mAnimatorLight::mode_android(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Android()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
   
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
-//   }
+  for(uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+  }
 
-//   if (_segment_runtimes[segment_index].aux1 > ((float)_segments[segment_index].intensity()/255.0)*(float)segment_length)
-//   {
-//     _segment_runtimes[segment_index].aux0 = 1;
-//   } else
-//   {
-//     if (_segment_runtimes[segment_index].aux1 < 2) _segment_runtimes[segment_index].aux0 = 0;
-//   }
+  if (_segment_runtimes[segment_index].aux1 > ((float)_segments[segment_index].intensity()/255.0)*(float)segment_length)
+  {
+    _segment_runtimes[segment_index].aux0 = 1;
+  } else
+  {
+    if (_segment_runtimes[segment_index].aux1 < 2) _segment_runtimes[segment_index].aux0 = 0;
+  }
 
-//   uint16_t a = _segment_runtimes[segment_index].step;
+  uint16_t a = _segment_runtimes[segment_index].step;
   
-//   if (_segment_runtimes[segment_index].aux0 == 0)
-//   {
-//     if (_segment_runtimes[segment_index].call %3 == 1) {a++;}
-//     else {_segment_runtimes[segment_index].aux1++;}
-//   } else
-//   {
-//     a++;
-//     if (_segment_runtimes[segment_index].call %3 != 1) _segment_runtimes[segment_index].aux1--;
-//   }
+  if (_segment_runtimes[segment_index].aux0 == 0)
+  {
+    if (_segment_runtimes[segment_index].call %3 == 1) {a++;}
+    else {_segment_runtimes[segment_index].aux1++;}
+  } else
+  {
+    a++;
+    if (_segment_runtimes[segment_index].call %3 != 1) _segment_runtimes[segment_index].aux1--;
+  }
   
-//   if (a >= segment_length) a = 0;
+  if (a >= segment_length) a = 0;
 
-//   if (a + _segment_runtimes[segment_index].aux1 < segment_length)
-//   {
-//     for(int i = a; i < a+_segment_runtimes[segment_index].aux1; i++) {
-//       SetPixelColor(i, SEGCOLOR(0));
-//     }
-//   } else
-//   {
-//     for(int i = a; i < segment_length; i++) {
-//       SetPixelColor(i, SEGCOLOR(0));
-//     }
-//     for(int i = 0; i < _segment_runtimes[segment_index].aux1 - (segment_length -a); i++) {
-//       SetPixelColor(i, SEGCOLOR(0));
-//     }
-//   }
-//   _segment_runtimes[segment_index].step = a;
+  if (a + _segment_runtimes[segment_index].aux1 < segment_length)
+  {
+    for(int i = a; i < a+_segment_runtimes[segment_index].aux1; i++) {
+      SetPixelColor(i, SEGCOLOR(0));
+    }
+  } else
+  {
+    for(int i = a; i < segment_length; i++) {
+      SetPixelColor(i, SEGCOLOR(0));
+    }
+    for(int i = 0; i < _segment_runtimes[segment_index].aux1 - (segment_length -a); i++) {
+      SetPixelColor(i, SEGCOLOR(0));
+    }
+  }
+  _segment_runtimes[segment_index].step = a;
 
-//   return 3 + ((8 * (uint32_t)(255 - _segments[segment_index].speed())) / segment_length);
-// }
-
-
-// /*
-//  * Red - Amber - Green - Blue lights running
-//  */
-// uint16_t mAnimatorLight::mode_colorful(void) {
-//   uint32_t cols[]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC,0x00FF0000,0x00EEBB00,0x0000EE00};
-//   if (_segments[segment_index].intensity() < 127) //pastel (easter) colors
-//   {
-//     cols[0] = 0x00FF8040;
-//     cols[1] = 0x00E5D241;
-//     cols[2] = 0x0077FF77;
-//     cols[3] = 0x0077F0F0;
-//     for (uint8_t i = 4; i < 7; i++) cols[i] = cols[i-4];
-//   }
+  // return 
   
-//   uint32_t cycleTime = 50 + (15 * (uint32_t)(255 - _segments[segment_index].speed()));
-//   uint32_t it = now / cycleTime;
-//   if (it != _segment_runtimes[segment_index].step)
-//   {
-//     if (_segments[segment_index].speed() > 0) _segment_runtimes[segment_index].aux0++;
-//     if (_segment_runtimes[segment_index].aux0 > 3) _segment_runtimes[segment_index].aux0 = 0;
-//     _segment_runtimes[segment_index].step = it;
-//   }
+  _segments[segment_index].transition.rate_ms =  3 + ((8 * (uint32_t)(255 - _segments[segment_index].speed())) / segment_length);
   
-//   uint16_t i = 0;
-//   for (i; i < segment_length -3; i+=4)
-//   {
-//     SetPixelColor(i, cols[_segment_runtimes[segment_index].aux0]);
-//     SetPixelColor(i+1, cols[_segment_runtimes[segment_index].aux0+1]);
-//     SetPixelColor(i+2, cols[_segment_runtimes[segment_index].aux0+2]);
-//     SetPixelColor(i+3, cols[_segment_runtimes[segment_index].aux0+3]);
-//   }
-//   if(i < segment_length)
-//   {
-//     SetPixelColor(i, cols[_segment_runtimes[segment_index].aux0]);
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Red - Amber - Green - Blue lights running
+ *
+// void mAnimatorLight::mode_colorful(void) {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ColourFul()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint32_t cols[]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC,0x00FF0000,0x00EEBB00,0x0000EE00};
+  if (_segments[segment_index].intensity() < 127) //pastel (easter) colors
+  {
+    cols[0] = 0x00FF8040;
+    cols[1] = 0x00E5D241;
+    cols[2] = 0x0077FF77;
+    cols[3] = 0x0077F0F0;
+    for (uint8_t i = 4; i < 7; i++) cols[i] = cols[i-4];
+  }
+  
+  uint32_t cycleTime = 50 + (15 * (uint32_t)(255 - _segments[segment_index].speed()));
+  uint32_t it = now / cycleTime;
+  if (it != _segment_runtimes[segment_index].step)
+  {
+    if (_segments[segment_index].speed() > 0) _segment_runtimes[segment_index].aux0++;
+    if (_segment_runtimes[segment_index].aux0 > 3) _segment_runtimes[segment_index].aux0 = 0;
+    _segment_runtimes[segment_index].step = it;
+  }
+  
+  uint16_t i = 0;
+  for (i; i < segment_length -3; i+=4)
+  {
+    SetPixelColor(i, cols[_segment_runtimes[segment_index].aux0]);
+    SetPixelColor(i+1, cols[_segment_runtimes[segment_index].aux0+1]);
+    SetPixelColor(i+2, cols[_segment_runtimes[segment_index].aux0+2]);
+    SetPixelColor(i+3, cols[_segment_runtimes[segment_index].aux0+3]);
+  }
+  if(i < segment_length)
+  {
+    SetPixelColor(i, cols[_segment_runtimes[segment_index].aux0]);
     
-//     if(i+1 < segment_length)
-//     {
-//       SetPixelColor(i+1, cols[_segment_runtimes[segment_index].aux0+1]);
+    if(i+1 < segment_length)
+    {
+      SetPixelColor(i+1, cols[_segment_runtimes[segment_index].aux0+1]);
       
-//       if(i+2 < segment_length)
-//       {
-//         SetPixelColor(i+2, cols[_segment_runtimes[segment_index].aux0+2]);
-//       }
-//     }
-//   }
+      if(i+2 < segment_length)
+      {
+        SetPixelColor(i+2, cols[_segment_runtimes[segment_index].aux0+2]);
+      }
+    }
+  }
   
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Emulates a traffic light.
-//  */
-// uint16_t mAnimatorLight::mode_traffic_light(void) {
-//   for(uint16_t i=0; i < segment_length; i++)
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
-//   uint32_t mdelay = 500;
-//   for (int i = 0; i < segment_length-2 ; i+=3)
-//   {
-//     switch (_segment_runtimes[segment_index].aux0)
-//     {
-//       case 0: SetPixelColor(i, 0x00FF0000); mdelay = 150 + (100 * (uint32_t)(255 - _segments[segment_index].speed()));break;
-//       case 1: SetPixelColor(i, 0x00FF0000); mdelay = 150 + (20 * (uint32_t)(255 - _segments[segment_index].speed())); SetPixelColor(i+1, 0x00EECC00); break;
-//       case 2: SetPixelColor(i+2, 0x0000FF00); mdelay = 150 + (100 * (uint32_t)(255 - _segments[segment_index].speed()));break;
-//       case 3: SetPixelColor(i+1, 0x00EECC00); mdelay = 150 + (20 * (uint32_t)(255 - _segments[segment_index].speed()));break;
-//     }
-//   }
 
-//   if (now - _segment_runtimes[segment_index].step > mdelay)
-//   {
-//     _segment_runtimes[segment_index].aux0++;
-//     if (_segment_runtimes[segment_index].aux0 == 1 && _segments[segment_index].intensity() > 140) _segment_runtimes[segment_index].aux0 = 2; //skip Red + Amber, to get US-style sequence
-//     if (_segment_runtimes[segment_index].aux0 > 3) _segment_runtimes[segment_index].aux0 = 0;
-//     _segment_runtimes[segment_index].step = now;
-//   }
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Emulates a traffic light.
+ *
+// void mAnimatorLight::mode_traffic_light(void) {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Traffic_Light()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  for(uint16_t i=0; i < segment_length; i++)
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+  uint32_t mdelay = 500;
+  for (int i = 0; i < segment_length-2 ; i+=3)
+  {
+    switch (_segment_runtimes[segment_index].aux0)
+    {
+      case 0: SetPixelColor(i, 0x00FF0000); mdelay = 150 + (100 * (uint32_t)(255 - _segments[segment_index].speed()));break;
+      case 1: SetPixelColor(i, 0x00FF0000); mdelay = 150 + (20 * (uint32_t)(255 - _segments[segment_index].speed())); SetPixelColor(i+1, 0x00EECC00); break;
+      case 2: SetPixelColor(i+2, 0x0000FF00); mdelay = 150 + (100 * (uint32_t)(255 - _segments[segment_index].speed()));break;
+      case 3: SetPixelColor(i+1, 0x00EECC00); mdelay = 150 + (20 * (uint32_t)(255 - _segments[segment_index].speed()));break;
+    }
+  }
+
+  if (now - _segment_runtimes[segment_index].step > mdelay)
+  {
+    _segment_runtimes[segment_index].aux0++;
+    if (_segment_runtimes[segment_index].aux0 == 1 && _segments[segment_index].intensity() > 140) _segment_runtimes[segment_index].aux0 = 2; //skip Red + Amber, to get US-style sequence
+    if (_segment_runtimes[segment_index].aux0 > 3) _segment_runtimes[segment_index].aux0 = 0;
+    _segment_runtimes[segment_index].step = now;
+  }
   
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 
-// /*
-//  * Alternating pixels running function.
-//  */
-// uint16_t mAnimatorLight::running(uint32_t color1, uint32_t color2) {
-//   uint8_t pxw = 1 + (_segments[segment_index].intensity() >> 5);
-//   uint32_t cycleTime = 35 + (255 - _segments[segment_index].speed());
-//   uint32_t it = now / cycleTime;
-//   if (_segments[segment_index].speed() == 0) it = 0;
 
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     if((i + _segment_runtimes[segment_index].aux0) % (pxw*2) < pxw) {
-//       if (color1 == SEGCOLOR(0))
-//       {
-//         SetPixelColor(segment_length -i -1, pCONT_lAni->mEffects->color_from_palette(segment_length -i -1, true, PALETTE_SOLID_WRAP, 0));
-//       } else
-//       {
-//         SetPixelColor(segment_length -i -1, color1);
-//       }
-//     } else {
-//       SetPixelColor(segment_length -i -1, color2);
-//     }
-//   }
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-//   if (it != _segment_runtimes[segment_index].step )
-//   {
-//     _segment_runtimes[segment_index].aux0 = (_segment_runtimes[segment_index].aux0 +1) % (pxw*2);
-//     _segment_runtimes[segment_index].step = it;
-//   }
-//   return FRAMETIME;
-// }
+/*
+ * Alternating pixels running function.
+ *
+// void mAnimatorLight::running(uint32_t color1, uint32_t color2) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-// /*
-//  * Alternating color/sec pixels running.
-//  */
-// uint16_t mAnimatorLight::mode_running_color(void) {
-//   return running(SEGCOLOR(0), SEGCOLOR(1));
-// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
+  uint8_t pxw = 1 + (_segments[segment_index].intensity() >> 5);
+  uint32_t cycleTime = 35 + (255 - _segments[segment_index].speed());
+  uint32_t it = now / cycleTime;
+  if (_segments[segment_index].speed() == 0) it = 0;
 
-// /*
-//  * Alternating red/blue pixels running.
-//  */
-// uint16_t mAnimatorLight::mode_running_red_blue(void) {
-//   return running(RED, BLUE);
-// }
+  for(uint16_t i = 0; i < segment_length; i++) {
+    if((i + _segment_runtimes[segment_index].aux0) % (pxw*2) < pxw) {
+      if (color1 == SEGCOLOR(0))
+      {
+        SetPixelColor(segment_length -i -1, color_from_palette(segment_length -i -1, true, PALETTE_SOLID_WRAP, 0));
+      } else
+      {
+        SetPixelColor(segment_length -i -1, color1);
+      }
+    } else {
+      SetPixelColor(segment_length -i -1, color2);
+    }
+  }
 
+  if (it != _segment_runtimes[segment_index].step )
+  {
+    _segment_runtimes[segment_index].aux0 = (_segment_runtimes[segment_index].aux0 +1) % (pxw*2);
+    _segment_runtimes[segment_index].step = it;
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
-// /*
-//  * Alternating red/green pixels running.
-//  */
-// uint16_t mAnimatorLight::mode_merry_christmas(void) {
-//   return running(RED, GREEN);
-// }
-
-
-// /*
-//  * Alternating orange/purple pixels running.
-//  */
-// uint16_t mAnimatorLight::mode_halloween(void) {
-//   return running(PURPLE, ORANGE);
-// }
+/*
+ * Alternating color/sec pixels running.
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Colour(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Running(SEGCOLOR(0), SEGCOLOR(1));
+}
 
 
-// /*
-//  * Random colored pixels running.
-//  */
-// uint16_t mAnimatorLight::mode_running_random(void) {
-//   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[segment_index].speed()));
-//   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[segment_index].aux1 == it) return FRAMETIME;
-
-//   for(uint16_t i=segment_length-1; i > 0; i--) {
-//     SetPixelColor( i, getPixelColor( i - 1));
-//   }
-
-//   if(_segment_runtimes[segment_index].step == 0) {
-//     _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
-//     SetPixelColor(0, color_wheel(_segment_runtimes[segment_index].aux0));
-//   }
-
-//   _segment_runtimes[segment_index].step++;
-//   if (_segment_runtimes[segment_index].step > ((255-_segments[segment_index].intensity()) >> 4))
-//   {
-//     _segment_runtimes[segment_index].step = 0;
-//   }
-
-//   _segment_runtimes[segment_index].aux1 = it;
-//   return FRAMETIME;
-// }
+/*
+ * Alternating red/blue pixels running.
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Running(RED, BLUE);
+}
 
 
-// /*
-//  * Firing comets from one end. "Lighthouse"
-//  */
-// uint16_t mAnimatorLight::mode_comet(void) {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >>2) +1);
-//   uint16_t index = counter * segment_length >> 16;
-//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = index;
+/*
+ * Alternating red/green pixels running.
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Merry_Christmas(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Running(RED, GREEN);
+}
 
-//   fade_out(_segments[segment_index].intensity());
 
-//   SetPixelColor( index, pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
-//   if (index > _segment_runtimes[segment_index].aux0) {
-//     for (uint16_t i = _segment_runtimes[segment_index].aux0; i < index ; i++) {
-//        SetPixelColor( i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//     }
-//   } else if (index < _segment_runtimes[segment_index].aux0 && index < 10) {
-//     for (uint16_t i = 0; i < index ; i++) {
-//        SetPixelColor( i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-//     }      
-//   }
-//   _segment_runtimes[segment_index].aux0 = index++;
-
-//   return FRAMETIME;
-// }
+/*
+ * Alternating orange/purple pixels running.
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Halloween(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Running(PURPLE, ORANGE);
+}
 
 
 
-// /*
-//  * Gradient run base function
-//  */
-// uint16_t mAnimatorLight::gradient_base(bool loading) {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) + 1);
-//   uint16_t pp = counter * segment_length >> 16;
-//   if (_segment_runtimes[segment_index].call == 0) pp = 0;
-//   float val; //0.0 = sec 1.0 = pri
-//   float brd = loading ? _segments[segment_index].intensity() : _segments[segment_index].intensity()/2;
-//   if (brd <1.0) brd = 1.0;
-//   int p1 = pp-segment_length;
-//   int p2 = pp+segment_length;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Random colored pixels running.
+ *
+// void mAnimatorLight::mode_running_random(void) {
 
-//   for(uint16_t i = 0; i < segment_length; i++)
-//   {
-//     if (loading)
-//     {
-//       val = abs(((i>pp) ? p2:pp) -i);
-//     } else {
-//       val = MIN(abs(pp-i),MIN(abs(p1-i),abs(p2-i)));
-//     }
-//     val = (brd > val) ? val/brd * 255 : 255;
-//     SetPixelColor(i, color_blend(SEGCOLOR(0), pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), val));
-//   }
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   return FRAMETIME;
-// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Random()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - _segments[segment_index].speed()));
+  uint32_t it = now / cycleTime;
+  if (_segment_runtimes[segment_index].aux1 == it){return;}// return FRAMETIME;
+
+  for(uint16_t i=segment_length-1; i > 0; i--) {
+    SetPixelColor( i, GetPixelColor( i - 1));
+  }
+
+  if(_segment_runtimes[segment_index].step == 0) {
+    _segment_runtimes[segment_index].aux0 = get_random_wheel_index(_segment_runtimes[segment_index].aux0);
+    SetPixelColor(0, color_wheel(_segment_runtimes[segment_index].aux0));
+  }
+
+  _segment_runtimes[segment_index].step++;
+  if (_segment_runtimes[segment_index].step > ((255-_segments[segment_index].intensity()) >> 4))
+  {
+    _segment_runtimes[segment_index].step = 0;
+  }
+
+  _segment_runtimes[segment_index].aux1 = it;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Gradient run
-//  */
-// uint16_t mAnimatorLight::mode_gradient(void) {
-//   return gradient_base(false);
-// }
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Firing comets from one end. "Lighthouse"
+ *
+// void mAnimatorLight::mode_comet(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Comet()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t counter = now * ((_segments[segment_index].speed() >>2) +1);
+  uint16_t index = counter * segment_length >> 16;
+  if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = index;
+
+  fade_out(_segments[segment_index].intensity());
+
+  SetPixelColor( index, color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+  if (index > _segment_runtimes[segment_index].aux0) {
+    for (uint16_t i = _segment_runtimes[segment_index].aux0; i < index ; i++) {
+       SetPixelColor( i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    }
+  } else if (index < _segment_runtimes[segment_index].aux0 && index < 10) {
+    for (uint16_t i = 0; i < index ; i++) {
+       SetPixelColor( i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    }      
+  }
+  _segment_runtimes[segment_index].aux0 = index++;
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Gradient run with hard transition
-//  */
-// uint16_t mAnimatorLight::mode_loading(void) {
-//   return gradient_base(true);
-// }
 
 
-// //American Police Light with all LEDs Red and Blue 
-// uint16_t mAnimatorLight::police_base(uint32_t color1, uint32_t color2, bool all)
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Gradient run base function
+ *
+// void mAnimatorLight::gradient_base(bool loading) {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 2) + 1);
+  uint16_t pp = counter * segment_length >> 16;
+  if (_segment_runtimes[segment_index].call == 0) pp = 0;
+  float val; //0.0 = sec 1.0 = pri
+  float brd = loading ? _segments[segment_index].intensity() : _segments[segment_index].intensity()/2;
+  if (brd <1.0) brd = 1.0;
+  int p1 = pp-segment_length;
+  int p2 = pp+segment_length;
+
+  for(uint16_t i = 0; i < segment_length; i++)
+  {
+    if (loading)
+    {
+      val = abs(((i>pp) ? p2:pp) -i);
+    } else {
+      val = MIN(abs(pp-i),MIN(abs(p1-i),abs(p2-i)));
+    }
+    val = (brd > val) ? val/brd * 255 : 255;
+    SetPixelColor(i, color_blend(SEGCOLOR(0), color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), val));
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+/*
+ * Gradient run
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Gradient(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Gradient(false);
+}
+
+
+/*
+ * Gradient run with hard transition
+ */
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Loading(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Gradient(true);
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+//American Police Light with all LEDs Red and Blue 
+// void mAnimatorLight::police_base(uint32_t color1, uint32_t color2, bool all)
 // {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +1);
-//   uint16_t idexR = (counter * segment_length) >> 16;
-//   if (idexR >= segment_length) idexR = 0;
 
-//   uint16_t topindex = segment_length >> 1;
-//   uint16_t idexB = (idexR > topindex) ? idexR - topindex : idexR + topindex;
-//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = idexR;
-//   if (idexB >= segment_length) idexB = 0; //otherwise overflow on odd number of LEDs
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   if (all) { //different algo, ensuring immediate fill
-//     if (idexB > idexR) {
-//       fill(color2);
-//       for (uint16_t i = idexR; i < idexB; i++) SetPixelColor(i, color1);
-//     } else {
-//       fill(color1);
-//       for (uint16_t i = idexB; i < idexR; i++) SetPixelColor(i, color2);
-//     } 
-//   } else { //regular dot-only mode
-//     uint8_t size = 1 + _segments[segment_index].intensity() >> 3;
-//     if (size > segment_length/2) size = 1+ segment_length/2;
-//     for (uint8_t i=0; i <= size; i++) {
-//       SetPixelColor(idexR+i, color1);
-//       SetPixelColor(idexB+i, color2);
-//     }
-//     if (_segment_runtimes[segment_index].aux0 != idexR) {
-//       uint8_t gap = (_segment_runtimes[segment_index].aux0 < idexR)? idexR - _segment_runtimes[segment_index].aux0:segment_length - _segment_runtimes[segment_index].aux0 + idexR;
-//       for (uint8_t i = 0; i <= gap ; i++) {
-//         if ((idexR - i) < 0) idexR = segment_length-1 + i;
-//         if ((idexB - i) < 0) idexB = segment_length-1 + i;
-//         SetPixelColor(idexR-i, color1);
-//         SetPixelColor(idexB-i, color2);
-//       }
-//       _segment_runtimes[segment_index].aux0 = idexR;
-//     }
-//   }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Police(uint32_t color1, uint32_t color2, bool all)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +1);
+  uint16_t idexR = (counter * segment_length) >> 16;
+  if (idexR >= segment_length) idexR = 0;
+
+  uint16_t topindex = segment_length >> 1;
+  uint16_t idexB = (idexR > topindex) ? idexR - topindex : idexR + topindex;
+  if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = idexR;
+  if (idexB >= segment_length) idexB = 0; //otherwise overflow on odd number of LEDs
+
+  if (all) { //different algo, ensuring immediate fill
+    if (idexB > idexR) {
+      fill(color2);
+      for (uint16_t i = idexR; i < idexB; i++) SetPixelColor(i, color1);
+    } else {
+      fill(color1);
+      for (uint16_t i = idexB; i < idexR; i++) SetPixelColor(i, color2);
+    } 
+  } else { //regular dot-only mode
+    uint8_t size = 1 + _segments[segment_index].intensity() >> 3;
+    if (size > segment_length/2) size = 1+ segment_length/2;
+    for (uint8_t i=0; i <= size; i++) {
+      SetPixelColor(idexR+i, color1);
+      SetPixelColor(idexB+i, color2);
+    }
+    if (_segment_runtimes[segment_index].aux0 != idexR) {
+      uint8_t gap = (_segment_runtimes[segment_index].aux0 < idexR)? idexR - _segment_runtimes[segment_index].aux0:segment_length - _segment_runtimes[segment_index].aux0 + idexR;
+      for (uint8_t i = 0; i <= gap ; i++) {
+        if ((idexR - i) < 0) idexR = segment_length-1 + i;
+        if ((idexB - i) < 0) idexB = segment_length-1 + i;
+        SetPixelColor(idexR-i, color1);
+        SetPixelColor(idexB-i, color2);
+      }
+      _segment_runtimes[segment_index].aux0 = idexR;
+    }
+  }
   
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// //American Police Light with all LEDs Red and Blue 
-// uint16_t mAnimatorLight::mode_police_all()
+//American Police Light with all LEDs Red and Blue 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Polce_All()
+{
+  return SubTask_Segment_Flasher_Animate_Function__Base_Police(RED, BLUE, true);
+}
+
+
+//Police Lights Red and Blue 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Police()
+{
+  fill(SEGCOLOR(1));
+
+  return SubTask_Segment_Flasher_Animate_Function__Base_Police(RED, BLUE, false);
+}
+
+
+//Police All with custom colors
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Two_Areas()
+{
+  return SubTask_Segment_Flasher_Animate_Function__Base_Police(SEGCOLOR(0), SEGCOLOR(1), true);
+}
+
+
+//Police Lights with custom colors 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Two_Dots()
+{
+  fill(SEGCOLOR(2));
+  uint32_t color2 = (SEGCOLOR(1) == SEGCOLOR(2)) ? SEGCOLOR(0) : SEGCOLOR(1);
+
+  return SubTask_Segment_Flasher_Animate_Function__Base_Police(SEGCOLOR(0), color2, false);
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * ICU mode
+ *
+// void mAnimatorLight::mode_icu(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ICU()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t dest = _segment_runtimes[segment_index].step & 0xFFFF;
+  uint8_t space = (_segments[segment_index].intensity() >> 3) +2;
+
+  fill(SEGCOLOR(1));
+
+  byte pindex = map(dest, 0, segment_length-segment_length/space, 0, 255);
+  uint32_t col = color_from_palette(pindex, false, false, 0);
+
+  SetPixelColor(dest, col);
+  SetPixelColor(dest + segment_length/space, col);
+
+  if(_segment_runtimes[segment_index].aux0 == dest) { // pause between eye movements
+    if(random8(6) == 0) { // blink once in a while
+      SetPixelColor(dest, SEGCOLOR(1));
+      SetPixelColor(dest + segment_length/space, SEGCOLOR(1));
+      _segments[segment_index].transition.rate_ms = 200;//return 200;
+    }
+    _segment_runtimes[segment_index].aux0 = random16(segment_length-segment_length/space);
+    _segments[segment_index].transition.rate_ms = 1000 + random16(2000);//return 1000 + random16(2000);
+  }
+
+  if(_segment_runtimes[segment_index].aux0 > _segment_runtimes[segment_index].step) {
+    _segment_runtimes[segment_index].step++;
+    dest++;
+  } else if (_segment_runtimes[segment_index].aux0 < _segment_runtimes[segment_index].step) {
+    _segment_runtimes[segment_index].step--;
+    dest--;
+  }
+
+  SetPixelColor(dest, col);
+  SetPixelColor(dest + segment_length/space, col);
+
+  // return SPEED_FORMULA_L;
+
+_segments[segment_index].transition.rate_ms = SPEED_FORMULA_L;
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Custom mode by Aircoookie. Color Wipe, but with 3 colors
+ *
+// void mAnimatorLight::mode_tricolor_wipe(void)
 // {
-//   return police_base(RED, BLUE, true);
-// }
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__TriColour()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
 
-// //Police Lights Red and Blue 
-// uint16_t mAnimatorLight::mode_police()
-// {
-//   fill(SEGCOLOR(1));
+  uint32_t cycleTime = 1000 + (255 - _segments[segment_index].speed())*200;
+  uint32_t perc = now % cycleTime;
+  uint16_t prog = (perc * 65535) / cycleTime;
+  uint16_t ledIndex = (prog * segment_length * 3) >> 16;
+  uint16_t ledOffset = ledIndex;
 
-//   return police_base(RED, BLUE, false);
-// }
-
-
-// //Police All with custom colors
-// uint16_t mAnimatorLight::mode_two_areas()
-// {
-//   return police_base(SEGCOLOR(0), SEGCOLOR(1), true);
-// }
-
-
-// //Police Lights with custom colors 
-// uint16_t mAnimatorLight::mode_two_dots()
-// {
-//   fill(SEGCOLOR(2));
-//   uint32_t color2 = (SEGCOLOR(1) == SEGCOLOR(2)) ? SEGCOLOR(0) : SEGCOLOR(1);
-
-//   return police_base(SEGCOLOR(0), color2, false);
-// }
-
-
-// /*
-//  * ICU mode
-//  */
-// uint16_t mAnimatorLight::mode_icu(void) {
-//   uint16_t dest = _segment_runtimes[segment_index].step & 0xFFFF;
-//   uint8_t space = (_segments[segment_index].intensity() >> 3) +2;
-
-//   fill(SEGCOLOR(1));
-
-//   byte pindex = map(dest, 0, segment_length-segment_length/space, 0, 255);
-//   uint32_t col = pCONT_lAni->mEffects->color_from_palette(pindex, false, false, 0);
-
-//   SetPixelColor(dest, col);
-//   SetPixelColor(dest + segment_length/space, col);
-
-//   if(_segment_runtimes[segment_index].aux0 == dest) { // pause between eye movements
-//     if(random8(6) == 0) { // blink once in a while
-//       SetPixelColor(dest, SEGCOLOR(1));
-//       SetPixelColor(dest + segment_length/space, SEGCOLOR(1));
-//       return 200;
-//     }
-//     _segment_runtimes[segment_index].aux0 = random16(segment_length-segment_length/space);
-//     return 1000 + random16(2000);
-//   }
-
-//   if(_segment_runtimes[segment_index].aux0 > _segment_runtimes[segment_index].step) {
-//     _segment_runtimes[segment_index].step++;
-//     dest++;
-//   } else if (_segment_runtimes[segment_index].aux0 < _segment_runtimes[segment_index].step) {
-//     _segment_runtimes[segment_index].step--;
-//     dest--;
-//   }
-
-//   SetPixelColor(dest, col);
-//   SetPixelColor(dest + segment_length/space, col);
-
-//   return SPEED_FORMULA_L;
-// }
-
-
-// /*
-//  * Custom mode by Aircoookie. Color Wipe, but with 3 colors
-//  */
-// uint16_t mAnimatorLight::mode_tricolor_wipe(void)
-// {
-//   uint32_t cycleTime = 1000 + (255 - _segments[segment_index].speed())*200;
-//   uint32_t perc = now % cycleTime;
-//   uint16_t prog = (perc * 65535) / cycleTime;
-//   uint16_t ledIndex = (prog * segment_length * 3) >> 16;
-//   uint16_t ledOffset = ledIndex;
-
-//   for (uint16_t i = 0; i < segment_length; i++)
-//   {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
-//   }
+  for (uint16_t i = 0; i < segment_length; i++)
+  {
+    SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
+  }
   
-//   if(ledIndex < segment_length) { //wipe from 0 to 1
-//     for (uint16_t i = 0; i < segment_length; i++)
-//     {
-//       SetPixelColor(i, (i > ledOffset)? SEGCOLOR(0) : SEGCOLOR(1));
-//     }
-//   } else if (ledIndex < segment_length*2) { //wipe from 1 to 2
-//     ledOffset = ledIndex - segment_length;
-//     for (uint16_t i = ledOffset +1; i < segment_length; i++)
-//     {
-//       SetPixelColor(i, SEGCOLOR(1));
-//     }
-//   } else //wipe from 2 to 0
-//   {
-//     ledOffset = ledIndex - segment_length*2;
-//     for (uint16_t i = 0; i <= ledOffset; i++)
-//     {
-//       SetPixelColor(i, SEGCOLOR(0));
-//     }
-//   }
+  if(ledIndex < segment_length) { //wipe from 0 to 1
+    for (uint16_t i = 0; i < segment_length; i++)
+    {
+      SetPixelColor(i, (i > ledOffset)? SEGCOLOR(0) : SEGCOLOR(1));
+    }
+  } else if (ledIndex < segment_length*2) { //wipe from 1 to 2
+    ledOffset = ledIndex - segment_length;
+    for (uint16_t i = ledOffset +1; i < segment_length; i++)
+    {
+      SetPixelColor(i, SEGCOLOR(1));
+    }
+  } else //wipe from 2 to 0
+  {
+    ledOffset = ledIndex - segment_length*2;
+    for (uint16_t i = 0; i <= ledOffset; i++)
+    {
+      SetPixelColor(i, SEGCOLOR(0));
+    }
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Fades between 3 colors
-//  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/TriFade.h
-//  * Modified by Aircoookie
-//  */
-// uint16_t mAnimatorLight::mode_tricolor_fade(void)
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Fades between 3 colors
+ * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/TriFade.h
+ * Modified by Aircoookie
+ *
+// void mAnimatorLight::mode_tricolor_fade(void)
 // {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 3) +1);
-//   uint32_t prog = (counter * 768) >> 16;
 
-//   uint32_t color1 = 0, color2 = 0;
-//   byte stage = 0;
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   if(prog < 256) {
-//     color1 = SEGCOLOR(0);
-//     color2 = SEGCOLOR(1);
-//     stage = 0;
-//   } else if(prog < 512) {
-//     color1 = SEGCOLOR(1);
-//     color2 = SEGCOLOR(2);
-//     stage = 1;
-//   } else {
-//     color1 = SEGCOLOR(2);
-//     color2 = SEGCOLOR(0);
-//     stage = 2;
-//   }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade_TriColour()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//   byte stp = prog; // % 256
-//   uint32_t color = 0;
-//   for(uint16_t i = 0; i < segment_length; i++) {
-//     if (stage == 2) {
-//       color = color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
-//     } else if (stage == 1) {
-//       color = color_blend(color1, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), stp);
-//     } else {
-//       color = color_blend(color1, color2, stp);
-//     }
-//     SetPixelColor(i, color);
-//   }
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 3) +1);
+  uint32_t prog = (counter * 768) >> 16;
 
-//   return FRAMETIME;
-// }
+  uint32_t color1 = 0, color2 = 0;
+  byte stage = 0;
+
+  if(prog < 256) {
+    color1 = SEGCOLOR(0);
+    color2 = SEGCOLOR(1);
+    stage = 0;
+  } else if(prog < 512) {
+    color1 = SEGCOLOR(1);
+    color2 = SEGCOLOR(2);
+    stage = 1;
+  } else {
+    color1 = SEGCOLOR(2);
+    color2 = SEGCOLOR(0);
+    stage = 2;
+  }
+
+  byte stp = prog; // % 256
+  uint32_t color = 0;
+  for(uint16_t i = 0; i < segment_length; i++) {
+    if (stage == 2) {
+      color = color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
+    } else if (stage == 1) {
+      color = color_blend(color1, color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), stp);
+    } else {
+      color = color_blend(color1, color2, stp);
+    }
+    SetPixelColor(i, color);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// /*
-//  * Creates random comets
-//  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/MultiComet.h
-//  */
-// uint16_t mAnimatorLight::mode_multi_comet(void)
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+ * Creates random comets
+ * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/MultiComet.h
+ *
+// void mAnimatorLight::mode_multi_comet(void)
 // {
-//   uint32_t cycleTime = 10 + (uint32_t)(255 - _segments[segment_index].speed());
-//   uint32_t it = now / cycleTime;
-//   if (_segment_runtimes[segment_index].step == it) return FRAMETIME;
-//   if (!_segment_runtimes[segment_index].allocateData(sizeof(uint16_t) * 8)) return mode_static(); //allocation failed
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Multi_Comet()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  uint32_t cycleTime = 10 + (uint32_t)(255 - _segments[segment_index].speed());
+  uint32_t it = now / cycleTime;
+  if (_segment_runtimes[segment_index].step == it){
+    // return FRAMETIME;
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+  }
+  if (!_segment_runtimes[segment_index].allocateData(sizeof(uint16_t) * 8)){return;}// return mode_static(); //allocation failed
   
-//   fade_out(_segments[segment_index].intensity());
+  fade_out(_segments[segment_index].intensity());
   
-//   uint16_t* comets = reinterpret_cast<uint16_t*>(_segment_runtimes[segment_index].data);
+  uint16_t* comets = reinterpret_cast<uint16_t*>(_segment_runtimes[segment_index].data);
 
-//   for(uint8_t i=0; i < 8; i++) {
-//     if(comets[i] < segment_length) {
-//       uint16_t index = comets[i];
-//       if (SEGCOLOR(2) != 0)
-//       {
-//         SetPixelColor(index, i % 2 ? pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
-//       } else
-//       {
-//         SetPixelColor(index, pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
-//       }
-//       comets[i]++;
-//     } else {
-//       if(!random(segment_length)) {
-//         comets[i] = 0;
-//       }
-//     }
-//   }
+  for(uint8_t i=0; i < 8; i++) {
+    if(comets[i] < segment_length) {
+      uint16_t index = comets[i];
+      if (SEGCOLOR(2) != 0)
+      {
+        SetPixelColor(index, i % 2 ? color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
+      } else
+      {
+        SetPixelColor(index, color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+      }
+      comets[i]++;
+    } else {
+      if(!random(segment_length)) {
+        comets[i] = 0;
+      }
+    }
+  }
 
-//   _segment_runtimes[segment_index].step = it;
-//   return FRAMETIME;
-// }
+  _segment_runtimes[segment_index].step = it;
+  // return FRAMETIME;
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 
-// typedef struct Oscillator {
-//   int16_t pos;
-//   int8_t  size;
-//   int8_t  dir;
-//   int8_t  speed();
-// } oscillator;
 
-// /*
-// /  Oscillating bars of color, updated with standard framerate
-// */
-// uint16_t mAnimatorLight::mode_oscillate(void)
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+/  Oscillating bars of color, updated with standard framerate
+*
+// void mAnimatorLight::mode_oscillate(void)
 // {
-//   uint8_t numOscillators = 3;
-//   uint16_t dataSize = sizeof(oscillator) * numOscillators;
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+typedef struct Oscillator {
+  int16_t pos;
+  int8_t  size;
+  int8_t  dir;
+  int8_t  speed;
+} oscillator;
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Oscillate()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  uint8_t numOscillators = 3;
+  uint16_t dataSize = sizeof(oscillator) * numOscillators;
+
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){return;}// return mode_static(); //allocation failed
   
-//   Oscillator* oscillators = reinterpret_cast<Oscillator*>(_segment_runtimes[segment_index].data);
+  Oscillator* oscillators = reinterpret_cast<Oscillator*>(_segment_runtimes[segment_index].data);
 
-//   if (_segment_runtimes[segment_index].call == 0)
-//   {
-//     oscillators[0] = {segment_length/4,   segment_length/8,  1, 1};
-//     oscillators[1] = {segment_length/4*3, segment_length/8,  1, 2};
-//     oscillators[2] = {segment_length/4*2, segment_length/8, -1, 1};
-//   }
+  if (_segment_runtimes[segment_index].call == 0)
+  {
+    // oscillators[0] = {(uint16_t)segment_length/4,   segment_length/8,  1, 1};
+    oscillators[0].pos = segment_length/4;
+    oscillators[0].size = segment_length/8;
+    oscillators[0].dir = 1;
+    oscillators[0].speed = 1;
+    // oscillators[1] = {segment_length/4*3, segment_length/8,  1, 2};
+    oscillators[0].pos = segment_length/4*3;
+    oscillators[0].size = segment_length/8;
+    oscillators[0].dir = 1;
+    oscillators[0].speed = 2;
+    // oscillators[2] = {segment_length/4*2, segment_length/8, -1, 1};
+    oscillators[0].pos = segment_length/4*2;
+    oscillators[0].size = segment_length/8;
+    oscillators[0].dir = -1;
+    oscillators[0].speed = 1;
 
-//   uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - _segments[segment_index].speed()));
-//   uint32_t it = now / cycleTime;
+    
+  }
 
-//   for(uint8_t i = 0; i < numOscillators; i++) {
-//     // if the counter has increased, move the oscillator by the random step
-//     if (it != _segment_runtimes[segment_index].step) oscillators[i].pos += oscillators[i].dir * oscillators[i].speed();
-//     oscillators[i].size = segment_length/(3+_segments[segment_index].intensity()/8);
-//     if((oscillators[i].dir == -1) && (oscillators[i].pos <= 0)) {
-//       oscillators[i].pos = 0;
-//       oscillators[i].dir = 1;
-//       // make bigger steps for faster speeds
-//       oscillators[i].speed() = _segments[segment_index].speed() > 100 ? random8(2, 4):random8(1, 3);
-//     }
-//     if((oscillators[i].dir == 1) && (oscillators[i].pos >= (segment_length - 1))) {
-//       oscillators[i].pos = segment_length - 1;
-//       oscillators[i].dir = -1;
-//       oscillators[i].speed() = _segments[segment_index].speed() > 100 ? random8(2, 4):random8(1, 3);
-//     }
-//   }
+  uint32_t cycleTime = 20 + (2 * (uint32_t)(255 - _segments[segment_index].speed()));
+  uint32_t it = now / cycleTime;
 
-//   for(uint16_t i=0; i < segment_length; i++) {
-//     uint32_t color = BLACK;
-//     for(uint8_t j=0; j < numOscillators; j++) {
-//       if(i >= oscillators[j].pos - oscillators[j].size && i <= oscillators[j].pos + oscillators[j].size) {
-//         color = (color == BLACK) ? SEGCOLOR(j) : color_blend(color, SEGCOLOR(j), 128);
-//       }
-//     }
-//     SetPixelColor(i, color);
-//   }
+  for(uint8_t i = 0; i < numOscillators; i++) {
+    // if the counter has increased, move the oscillator by the random step
+    if (it != _segment_runtimes[segment_index].step) oscillators[i].pos += oscillators[i].dir * oscillators[i].speed;
+    oscillators[i].size = segment_length/(3+_segments[segment_index].intensity()/8);
+    if((oscillators[i].dir == -1) && (oscillators[i].pos <= 0)) {
+      oscillators[i].pos = 0;
+      oscillators[i].dir = 1;
+      // make bigger steps for faster speeds
+      oscillators[i].speed = _segments[segment_index].speed() > 100 ? random8(2, 4):random8(1, 3);
+    }
+    if((oscillators[i].dir == 1) && (oscillators[i].pos >= (segment_length - 1))) {
+      oscillators[i].pos = segment_length - 1;
+      oscillators[i].dir = -1;
+      oscillators[i].speed = _segments[segment_index].speed() > 100 ? random8(2, 4):random8(1, 3);
+    }
+  }
+
+  for(uint16_t i=0; i < segment_length; i++) {
+    uint32_t color = BLACK;
+    for(uint8_t j=0; j < numOscillators; j++) {
+      if(i >= oscillators[j].pos - oscillators[j].size && i <= oscillators[j].pos + oscillators[j].size) {
+        color = (color == BLACK) ? SEGCOLOR(j) : color_blend(color, SEGCOLOR(j), 128);
+      }
+    }
+    SetPixelColor(i, color);
+  }
  
-//   _segment_runtimes[segment_index].step = it;
-//   return FRAMETIME;
-// }
+  _segment_runtimes[segment_index].step = it;
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// uint16_t mAnimatorLight::mode_lightning(void)
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * // void mAnimatorLight::mode_lightning(void)
 // {
-//   uint16_t ledstart = random16(segment_length);               // Determine starting location of flash
-//   uint16_t ledlen = 1 + random16(segment_length -ledstart);    // Determine length of flash (not to go beyond NUM_LEDS-1)
-//   uint8_t bri = 255/random8(1, 3);
 
-//   if (_segment_runtimes[segment_index].step == 0)
-//   {
-//     _segment_runtimes[segment_index].aux0 = random8(3, 3 + _segments[segment_index].intensity()/20); //number of flashes
-//     bri = 52;
-//     _segment_runtimes[segment_index].aux1 = 1;
-//   }
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   fill(SEGCOLOR(1));
-
-//   if (_segment_runtimes[segment_index].aux1) {
-//     for (int i = ledstart; i < ledstart + ledlen; i++)
-//     {
-//       if (_segments[segment_index].palette == 0)
-//       {
-//         SetPixelColor(i,bri,bri,bri,bri);
-//       } else {
-//         SetPixelColor(i,color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
-//       }
-//     }
-//     _segment_runtimes[segment_index].aux1 = 0;
-//     _segment_runtimes[segment_index].step++;
-//     return random8(4, 10);                                    // each flash only lasts 4-10 milliseconds
-//   }
-
-//   _segment_runtimes[segment_index].aux1 = 1;
-//   if (_segment_runtimes[segment_index].step == 1) return (200);                       // longer delay until next flash after the leader
-
-//   if (_segment_runtimes[segment_index].step <= _segment_runtimes[segment_index].aux0) return (50 + random8(100));  // shorter delay between strokes
-
-//   _segment_runtimes[segment_index].step = 0;
-//   return (random8(255 - _segments[segment_index].speed()) * 100);                            // delay between strikes
-// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Lightning()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
 
-// // Pride2015
-// // Animated, ever-changing rainbows.
-// // by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
-// uint16_t mAnimatorLight::mode_pride_2015(void)
-// {
-//   uint16_t duration = 10 + _segments[segment_index].speed();
-//   uint16_t sPseudotime = _segment_runtimes[segment_index].step;
-//   uint16_t sHue16 = _segment_runtimes[segment_index].aux0;
+  uint16_t ledstart = random16(segment_length);               // Determine starting location of flash
+  uint16_t ledlen = 1 + random16(segment_length -ledstart);    // Determine length of flash (not to go beyond NUM_LEDS-1)
+  uint8_t bri = 255/random8(1, 3);
 
-//   uint8_t sat8 = beatsin88( 87, 220, 250);
-//   uint8_t brightdepth = beatsin88( 341, 96, 224);
-//   uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
-//   uint8_t msmultiplier = beatsin88(147, 23, 60);
+  if (_segment_runtimes[segment_index].step == 0)
+  {
+    _segment_runtimes[segment_index].aux0 = random8(3, 3 + _segments[segment_index].intensity()/20); //number of flashes
+    bri = 52;
+    _segment_runtimes[segment_index].aux1 = 1;
+  }
 
-//   uint16_t hue16 = sHue16;//gHue * 256;
-//   uint16_t hueinc16 = beatsin88(113, 1, 3000);
+  fill(SEGCOLOR(1));
 
-//   sPseudotime += duration * msmultiplier;
-//   sHue16 += duration * beatsin88( 400, 5,9);
-//   uint16_t brightnesstheta16 = sPseudotime;
-//   CRGB fastled_col;
+  if (_segment_runtimes[segment_index].aux1) {
+    for (int i = ledstart; i < ledstart + ledlen; i++)
+    {
+      if (_segments[segment_index].palette.id == 0)
+      {
+        SetPixelColor(i,bri,bri,bri,bri);
+      } else {
+        SetPixelColor(i,color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
+      }
+    }
+    _segment_runtimes[segment_index].aux1 = 0;
+    _segment_runtimes[segment_index].step++;
+    // return random8(4, 10);                                    // each flash only lasts 4-10 milliseconds
+    _segments[segment_index].transition.rate_ms = random8(4, 10);                                    // each flash only lasts 4-10 milliseconds
+  }
 
-//   for (uint16_t i = 0 ; i < segment_length; i++) {
-//     hue16 += hueinc16;
-//     uint8_t hue8 = hue16 >> 8;
+  _segment_runtimes[segment_index].aux1 = 1;
+  if (_segment_runtimes[segment_index].step == 1) _segments[segment_index].transition.rate_ms = 200;//return (200);                       // longer delay until next flash after the leader
 
-//     brightnesstheta16  += brightnessthetainc16;
-//     uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
+  if (_segment_runtimes[segment_index].step <= _segment_runtimes[segment_index].aux0) _segments[segment_index].transition.rate_ms = /*return*/ (50 + random8(100));  // shorter delay between strokes
 
-//     uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
-//     uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
-//     bri8 += (255 - brightdepth);
-
-//     CRGB newcolor = CHSV( hue8, sat8, bri8);
-//     fastled_col = col_to_crgb(getPixelColor(i));
-
-//     nblend(fastled_col, newcolor, 64);
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-//   _segment_runtimes[segment_index].step = sPseudotime;
-//   _segment_runtimes[segment_index].aux0 = sHue16;
-//   return FRAMETIME;
-// }
-
-
-// //eight colored dots, weaving in and out of sync with each other
-// uint16_t mAnimatorLight::mode_juggle(void){
-//   fade_out(_segments[segment_index].intensity());
-//   CRGB fastled_col;
-//   byte dothue = 0;
-//   for ( byte i = 0; i < 8; i++) {
-//     uint16_t index = 0 + beatsin88((128 + _segments[segment_index].speed())*(i + 7), 0, segment_length -1);
-//     fastled_col = col_to_crgb(getPixelColor(index));
-//     fastled_col |= (_segments[segment_index].palette==0)?CHSV(dothue, 220, 255):ColorFromPalette(currentPalette, dothue, 255);
-//     SetPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
-//     dothue += 32;
-//   }
-//   return FRAMETIME;
-// }
-
-
-// uint16_t mAnimatorLight::mode_palette()
-// {
-//   uint16_t counter = 0;
-//   if (_segments[segment_index].speed() != 0) 
-//   {
-//     counter = (now * ((_segments[segment_index].speed() >> 3) +1)) & 0xFFFF;
-//     counter = counter >> 8;
-//   }
+  _segment_runtimes[segment_index].step = 0;
+  // return 
   
-//   bool noWrap = (paletteBlend == 2 || (paletteBlend == 0 && _segments[segment_index].speed() == 0));
-//   for (uint16_t i = 0; i < segment_length; i++)
-//   {
-//     uint8_t colorIndex = (i * 255 / segment_length) - counter;
+  
+  _segments[segment_index].transition.rate_ms = (random8(255 - _segments[segment_index].speed()) * 100);                            // delay between strikes
+
+
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+// Pride2015
+// Animated, ever-changing rainbows.
+// by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
+// void mAnimatorLight::mode_pride_2015(void)
+// {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Pride_2015()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  uint16_t duration = 10 + _segments[segment_index].speed();
+  uint16_t sPseudotime = _segment_runtimes[segment_index].step;
+  uint16_t sHue16 = _segment_runtimes[segment_index].aux0;
+
+  uint8_t sat8 = beatsin88( 87, 220, 250);
+  uint8_t brightdepth = beatsin88( 341, 96, 224);
+  uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
+  uint8_t msmultiplier = beatsin88(147, 23, 60);
+
+  uint16_t hue16 = sHue16;//gHue * 256;
+  uint16_t hueinc16 = beatsin88(113, 1, 3000);
+
+  sPseudotime += duration * msmultiplier;
+  sHue16 += duration * beatsin88( 400, 5,9);
+  uint16_t brightnesstheta16 = sPseudotime;
+  CRGB fastled_col;
+
+  for (uint16_t i = 0 ; i < segment_length; i++) {
+    hue16 += hueinc16;
+    uint8_t hue8 = hue16 >> 8;
+
+    brightnesstheta16  += brightnessthetainc16;
+    uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
+
+    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
+    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+    bri8 += (255 - brightdepth);
+
+    CRGB newcolor = CHSV( hue8, sat8, bri8);
+    fastled_col = col_to_crgb(RgbcctColor::GetU32Colour(GetPixelColor(i)));
+
+    nblend(fastled_col, newcolor, 64);
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+  _segment_runtimes[segment_index].step = sPseudotime;
+  _segment_runtimes[segment_index].aux0 = sHue16;
+  // return FRAMETIME;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+//eight colored dots, weaving in and out of sync with each other
+// void mAnimatorLight::mode_juggle(void){
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Juggle()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  fade_out(_segments[segment_index].intensity());
+  CRGB fastled_col;
+  byte dothue = 0;
+  for ( byte i = 0; i < 8; i++) {
+    uint16_t index = 0 + beatsin88((128 + _segments[segment_index].speed())*(i + 7), 0, segment_length -1);
+    fastled_col = RgbcctColor::GetU32Colour(GetPixelColor(index));
+    fastled_col |= (_segments[segment_index].palette.id==0)?CHSV(dothue, 220, 255):ColorFromPalette(currentPalette, dothue, 255);
+    SetPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
+    dothue += 32;
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+// void mAnimatorLight::mode_palette()
+// {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Palette()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t counter = 0;
+  if (_segments[segment_index].speed() != 0) 
+  {
+    counter = (now * ((_segments[segment_index].speed() >> 3) +1)) & 0xFFFF;
+    counter = counter >> 8;
+  }
+  
+  bool noWrap = (paletteBlend == 2 || (paletteBlend == 0 && _segments[segment_index].speed() == 0));
+  for (uint16_t i = 0; i < segment_length; i++)
+  {
+    uint8_t colorIndex = (i * 255 / segment_length) - counter;
     
-//     if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
+    if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
     
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(colorIndex, false, true, 255));
-//   }
-//   return FRAMETIME;
-// }
+    SetPixelColor(i, color_from_palette(colorIndex, false, true, 255));
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 // // WLED limitation: Analog Clock overlay will NOT work when Fire2012 is active
@@ -7970,814 +8693,1112 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Exploding_Firewor
 // // in step 3 above) (Effect intensity() = Sparking).
 
 
-// uint16_t mAnimatorLight::mode_fire_2012()
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+// void mAnimatorLight::mode_fire_2012()
 // {
-//   uint32_t it = now >> 5; //div 32
 
-//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
-  
-//   byte* heat = _segment_runtimes[segment_index].data;
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   if (it != _segment_runtimes[segment_index].step)
-//   {
-//     // Step 1.  Cool down every cell a little
-//     for (uint16_t i = 0; i < segment_length; i++) {
-//       _segment_runtimes[segment_index].data[i] = qsub8(heat[i],  random8(0, (((20 + _segments[segment_index].speed() /3) * 10) / segment_length) + 2));
-//     }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fire_2012()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint32_t it = now >> 5; //div 32
+
+  if (!_segment_runtimes[segment_index].allocateData(segment_length)){return;} // return mode_static(); //allocation failed
   
-//     // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-//     for (uint16_t k= segment_length -1; k > 1; k--) {
-//       heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
-//     }
+  byte* heat = _segment_runtimes[segment_index].data;
+
+  if (it != _segment_runtimes[segment_index].step)
+  {
+    // Step 1.  Cool down every cell a little
+    for (uint16_t i = 0; i < segment_length; i++) {
+      _segment_runtimes[segment_index].data[i] = qsub8(heat[i],  random8(0, (((20 + _segments[segment_index].speed() /3) * 10) / segment_length) + 2));
+    }
+  
+    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+    for (uint16_t k= segment_length -1; k > 1; k--) {
+      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+    }
     
-//     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-//     if (random8() <= _segments[segment_index].intensity()) {
-//       uint8_t y = random8(7);
-//       if (y < segment_length) heat[y] = qadd8(heat[y], random8(160,255));
-//     }
-//     _segment_runtimes[segment_index].step = it;
-//   }
+    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+    if (random8() <= _segments[segment_index].intensity()) {
+      uint8_t y = random8(7);
+      if (y < segment_length) heat[y] = qadd8(heat[y], random8(160,255));
+    }
+    _segment_runtimes[segment_index].step = it;
+  }
 
-//   // Step 4.  Map from heat cells to LED colors
-//   for (uint16_t j = 0; j < segment_length; j++) {
-//     CRGB color = ColorFromPalette(currentPalette, MIN(heat[j],240), 255, LINEARBLEND);
-//     SetPixelColor(j, color.red, color.green, color.blue);
-//   }
-//   return FRAMETIME;
-// }
+  // Step 4.  Map from heat cells to LED colors
+  for (uint16_t j = 0; j < segment_length; j++) {
+    CRGB color = ColorFromPalette(currentPalette, MIN(heat[j],240), 255, LINEARBLEND);
+    SetPixelColor(j, color.red, color.green, color.blue);
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// // ColorWavesWithPalettes by Mark Kriegsman: https://gist.github.com/kriegsman/8281905786e8b2632aeb
-// // This function draws color waves with an ever-changing,
-// // widely-varying set of parameters, using a color palette.
-// uint16_t mAnimatorLight::mode_colorwaves()
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+// ColorWavesWithPalettes by Mark Kriegsman: https://gist.github.com/kriegsman/8281905786e8b2632aeb
+// This function draws color waves with an ever-changing,
+// widely-varying set of parameters, using a color palette.
+// void mAnimatorLight::mode_colorwaves()
 // {
-//   uint16_t duration = 10 + _segments[segment_index].speed();
-//   uint16_t sPseudotime = _segment_runtimes[segment_index].step;
-//   uint16_t sHue16 = _segment_runtimes[segment_index].aux0;
 
-//   uint8_t brightdepth = beatsin88(341, 96, 224);
-//   uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
-//   uint8_t msmultiplier = beatsin88(147, 23, 60);
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   uint16_t hue16 = sHue16;//gHue * 256;
-//   // uint16_t hueinc16 = beatsin88(113, 300, 1500);
-//   uint16_t hueinc16 = beatsin88(113, 60, 300)*_segments[segment_index].intensity()*10/255;  // Use the intensity() Slider for the hues
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ColourWaves()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//   sPseudotime += duration * msmultiplier;
-//   sHue16 += duration * beatsin88(400, 5, 9);
-//   uint16_t brightnesstheta16 = sPseudotime;
-//   CRGB fastled_col;
+  uint16_t duration = 10 + _segments[segment_index].speed();
+  uint16_t sPseudotime = _segment_runtimes[segment_index].step;
+  uint16_t sHue16 = _segment_runtimes[segment_index].aux0;
 
-//   for ( uint16_t i = 0 ; i < segment_length; i++) {
-//     hue16 += hueinc16;
-//     uint8_t hue8 = hue16 >> 8;
-//     uint16_t h16_128 = hue16 >> 7;
-//     if ( h16_128 & 0x100) {
-//       hue8 = 255 - (h16_128 >> 1);
-//     } else {
-//       hue8 = h16_128 >> 1;
-//     }
+  uint8_t brightdepth = beatsin88(341, 96, 224);
+  uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
+  uint8_t msmultiplier = beatsin88(147, 23, 60);
 
-//     brightnesstheta16  += brightnessthetainc16;
-//     uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
+  uint16_t hue16 = sHue16;//gHue * 256;
+  // uint16_t hueinc16 = beatsin88(113, 300, 1500);
+  uint16_t hueinc16 = beatsin88(113, 60, 300)*_segments[segment_index].intensity()*10/255;  // Use the intensity() Slider for the hues
 
-//     uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
-//     uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
-//     bri8 += (255 - brightdepth);
+  sPseudotime += duration * msmultiplier;
+  sHue16 += duration * beatsin88(400, 5, 9);
+  uint16_t brightnesstheta16 = sPseudotime;
+  CRGB fastled_col;
 
-//     CRGB newcolor = ColorFromPalette(currentPalette, hue8, bri8);
-//     fastled_col = col_to_crgb(getPixelColor(i));
+  for ( uint16_t i = 0 ; i < segment_length; i++) {
+    hue16 += hueinc16;
+    uint8_t hue8 = hue16 >> 8;
+    uint16_t h16_128 = hue16 >> 7;
+    if ( h16_128 & 0x100) {
+      hue8 = 255 - (h16_128 >> 1);
+    } else {
+      hue8 = h16_128 >> 1;
+    }
 
-//     nblend(fastled_col, newcolor, 128);
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-//   _segment_runtimes[segment_index].step = sPseudotime;
-//   _segment_runtimes[segment_index].aux0 = sHue16;
-//   return FRAMETIME;
-// }
+    brightnesstheta16  += brightnessthetainc16;
+    uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
 
+    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
+    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+    bri8 += (255 - brightdepth);
 
-// // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-// uint16_t mAnimatorLight::mode_bpm()
-// {
-//   CRGB fastled_col;
-//   uint32_t stp = (now / 20) & 0xFF;
-//   uint8_t beat = beatsin8(_segments[segment_index].speed(), 64, 255);
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     fastled_col = ColorFromPalette(currentPalette, stp + (i * 2), beat - stp + (i * 10));
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-//   return FRAMETIME;
-// }
+    CRGB newcolor = ColorFromPalette(currentPalette, hue8, bri8);
+    fastled_col = RgbcctColor::GetU32Colour(GetPixelColor(i));
 
-
-
-
-// //based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
-// uint16_t mAnimatorLight::mode_colortwinkle()
-// {
-//   uint16_t dataSize = (segment_length+7) >> 3; //1 bit per LED
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+    nblend(fastled_col, newcolor, 128);
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+  _segment_runtimes[segment_index].step = sPseudotime;
+  _segment_runtimes[segment_index].aux0 = sHue16;
   
-//   CRGB fastled_col, prev;
-//   fract8 fadeUpAmount = 8 + (_segments[segment_index].speed()/4), fadeDownAmount = 5 + (_segments[segment_index].speed()/7);
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     fastled_col = col_to_crgb(getPixelColor(i));
-//     prev = fastled_col;
-//     uint16_t index = i >> 3;
-//     uint8_t  bitNum = i & 0x07;
-//     bool fadeUp = bitRead(_segment_runtimes[segment_index].data[index], bitNum);
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+// colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+// void mAnimatorLight::mode_bpm()
+// {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__BPM()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  CRGB fastled_col;
+  uint32_t stp = (now / 20) & 0xFF;
+  uint8_t beat = beatsin8(_segments[segment_index].speed(), 64, 255);
+  for (uint16_t i = 0; i < segment_length; i++) {
+    fastled_col = ColorFromPalette(currentPalette, stp + (i * 2), beat - stp + (i * 10));
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+//based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
+// void mAnimatorLight::mode_colortwinkle()
+// {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t dataSize = (segment_length+7) >> 3; //1 bit per LED
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){return;}// return mode_static(); //allocation failed
+  
+  CRGB fastled_col, prev;
+  fract8 fadeUpAmount = 8 + (_segments[segment_index].speed()/4), fadeDownAmount = 5 + (_segments[segment_index].speed()/7);
+  for (uint16_t i = 0; i < segment_length; i++) {
+    fastled_col = RgbcctColor::GetU32Colour(GetPixelColor(i));
+    prev = fastled_col;
+    uint16_t index = i >> 3;
+    uint8_t  bitNum = i & 0x07;
+    bool fadeUp = bitRead(_segment_runtimes[segment_index].data[index], bitNum);
     
-//     if (fadeUp) {
-//       CRGB incrementalColor = fastled_col;
-//       incrementalColor.nscale8_video( fadeUpAmount);
-//       fastled_col += incrementalColor;
+    if (fadeUp) {
+      CRGB incrementalColor = fastled_col;
+      incrementalColor.nscale8_video( fadeUpAmount);
+      fastled_col += incrementalColor;
 
-//       if (fastled_col.red == 255 || fastled_col.green == 255 || fastled_col.blue == 255) {
-//         bitWrite(_segment_runtimes[segment_index].data[index], bitNum, false);
-//       }
-//       SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+      if (fastled_col.red == 255 || fastled_col.green == 255 || fastled_col.blue == 255) {
+        bitWrite(_segment_runtimes[segment_index].data[index], bitNum, false);
+      }
+      SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 
-//       if (col_to_crgb(getPixelColor(i)) == prev) //fix "stuck" pixels
-//       {
-//         fastled_col += fastled_col;
-//         SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//       }
-//     } else {
-//       fastled_col.nscale8( 255 - fadeDownAmount);
-//       SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//     }
-//   }
+      // if (RgbcctColor::GetU32Colour(GetPixelColor(i)) == prev) //fix "stuck" pixels
+      // {
+      //   fastled_col += fastled_col;
+      //   SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+      // }
+    } else {
+      fastled_col.nscale8( 255 - fadeDownAmount);
+      SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+    }
+  }
 
-//   for (uint16_t j = 0; j <= segment_length / 50; j++)
-//   {
-//     if (random8() <= _segments[segment_index].intensity()) {
-//       for (uint8_t times = 0; times < 5; times++) //attempt to spawn a new pixel 5 times
-//       {
-//         int i = random16(segment_length);
-//         if(getPixelColor(i) == 0) {
-//           fastled_col = ColorFromPalette(currentPalette, random8(), 64, NOBLEND);
-//           uint16_t index = i >> 3;
-//           uint8_t  bitNum = i & 0x07;
-//           bitWrite(_segment_runtimes[segment_index].data[index], bitNum, true);
-//           SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//           break; //only spawn 1 new pixel per frame per 50 LEDs
-//         }
-//       }
-//     }
-//   }
-//   return FRAMETIME;
-// }
-
-
-// //Calm effect, like a lake at night
-// uint16_t mAnimatorLight::mode_lake() {
-//   uint8_t sp = _segments[segment_index].speed()/10;
-//   int wave1 = beatsin8(sp +2, -64,64);
-//   int wave2 = beatsin8(sp +1, -64,64);
-//   uint8_t wave3 = beatsin8(sp +2,   0,80);
-//   CRGB fastled_col;
-
-//   for (uint16_t i = 0; i < segment_length; i++)
-//   {
-//     int index = cos8((i*15)+ wave1)/2 + cubicwave8((i*23)+ wave2)/2;           
-//     uint8_t lum = (index > wave3) ? index - wave3 : 0;
-//     fastled_col = ColorFromPalette(currentPalette, map(index,0,255,0,240), lum, LINEARBLEND);
-//     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
-//   }
-//   return FRAMETIME;
-// }
+  for (uint16_t j = 0; j <= segment_length / 50; j++)
+  {
+    if (random8() <= _segments[segment_index].intensity()) {
+      for (uint8_t times = 0; times < 5; times++) //attempt to spawn a new pixel 5 times
+      {
+        int i = random16(segment_length);
+        if(RgbcctColor::GetU32Colour(GetPixelColor(i)) == 0) {
+          fastled_col = ColorFromPalette(currentPalette, random8(), 64, NOBLEND);
+          uint16_t index = i >> 3;
+          uint8_t  bitNum = i & 0x07;
+          bitWrite(_segment_runtimes[segment_index].data[index], bitNum, true);
+          SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+          break; //only spawn 1 new pixel per frame per 50 LEDs
+        }
+      }
+    }
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// // meteor effect
-// // send a meteor from begining to to the end of the strip with a trail that randomly decays.
-// // adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
-// uint16_t mAnimatorLight::mode_meteor() {
-//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
 
-//   byte* trail = _segment_runtimes[segment_index].data;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+//Calm effect, like a lake at night
+// void mAnimatorLight::mode_lake() {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Lake()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint8_t sp = _segments[segment_index].speed()/10;
+  int wave1 = beatsin8(sp +2, -64,64);
+  int wave2 = beatsin8(sp +1, -64,64);
+  uint8_t wave3 = beatsin8(sp +2,   0,80);
+  CRGB fastled_col;
+
+  for (uint16_t i = 0; i < segment_length; i++)
+  {
+    int index = cos8((i*15)+ wave1)/2 + cubicwave8((i*23)+ wave2)/2;           
+    uint8_t lum = (index > wave3) ? index - wave3 : 0;
+    fastled_col = ColorFromPalette(currentPalette, map(index,0,255,0,240), lum, LINEARBLEND);
+    SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+// meteor effect
+// send a meteor from begining to to the end of the strip with a trail that randomly decays.
+// adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
+// void mAnimatorLight::mode_meteor() {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Meteor()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  if (!_segment_runtimes[segment_index].allocateData(segment_length)){return;}// return mode_static(); //allocation failed
+
+  byte* trail = _segment_runtimes[segment_index].data;
   
-//   byte meteorSize= 1+ segment_length / 10;
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
-//   uint16_t in = counter * segment_length >> 16;
+  byte meteorSize= 1+ segment_length / 10;
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
+  uint16_t in = counter * segment_length >> 16;
 
-//   // fade all leds to colors[1] in LEDs one step
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     if (random8() <= 255 - _segments[segment_index].intensity())
-//     {
-//       byte meteorTrailDecay = 128 + random8(127);
-//       trail[i] = scale8(trail[i], meteorTrailDecay);
-//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(trail[i], false, true, 255));
-//     }
-//   }
+  // fade all leds to colors[1] in LEDs one step
+  for (uint16_t i = 0; i < segment_length; i++) {
+    if (random8() <= 255 - _segments[segment_index].intensity())
+    {
+      byte meteorTrailDecay = 128 + random8(127);
+      trail[i] = scale8(trail[i], meteorTrailDecay);
+      SetPixelColor(i, color_from_palette(trail[i], false, true, 255));
+    }
+  }
 
-//   // draw meteor
-//   for(int j = 0; j < meteorSize; j++) {
-//     uint16_t index = in + j;
-//     if(index >= segment_length) {
-//       index = (in + j - segment_length);
-//     }
+  // draw meteor
+  for(int j = 0; j < meteorSize; j++) {
+    uint16_t index = in + j;
+    if(index >= segment_length) {
+      index = (in + j - segment_length);
+    }
 
-//     trail[index] = 240;
-//     SetPixelColor(index, pCONT_lAni->mEffects->color_from_palette(trail[index], false, true, 255));
-//   }
+    trail[index] = 240;
+    SetPixelColor(index, color_from_palette(trail[index], false, true, 255));
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// // smooth meteor effect
-// // send a meteor from begining to to the end of the strip with a trail that randomly decays.
-// // adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
-// uint16_t mAnimatorLight::mode_meteor_smooth() {
-//   if (!_segment_runtimes[segment_index].allocateData(segment_length)) return mode_static(); //allocation failed
 
-//   byte* trail = _segment_runtimes[segment_index].data;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+// smooth meteor effect
+// send a meteor from begining to to the end of the strip with a trail that randomly decays.
+// adapted from https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectMeteorRain
+// void mAnimatorLight::mode_meteor_smooth() {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  if (!_segment_runtimes[segment_index].allocateData(segment_length)){return;}// return mode_static(); //allocation failed
+
+  byte* trail = _segment_runtimes[segment_index].data;
   
-//   byte meteorSize= 1+ segment_length / 10;
-//   uint16_t in = map((_segment_runtimes[segment_index].step >> 6 & 0xFF), 0, 255, 0, segment_length -1);
+  byte meteorSize= 1+ segment_length / 10;
+  uint16_t in = map((_segment_runtimes[segment_index].step >> 6 & 0xFF), 0, 255, 0, segment_length -1);
 
-//   // fade all leds to colors[1] in LEDs one step
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     if (trail[i] != 0 && random8() <= 255 - _segments[segment_index].intensity())
-//     {
-//       int change = 3 - random8(12); //change each time between -8 and +3
-//       trail[i] += change;
-//       if (trail[i] > 245) trail[i] = 0;
-//       if (trail[i] > 240) trail[i] = 240;
-//       SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(trail[i], false, true, 255));
-//     }
-//   }
+  // fade all leds to colors[1] in LEDs one step
+  for (uint16_t i = 0; i < segment_length; i++) {
+    if (trail[i] != 0 && random8() <= 255 - _segments[segment_index].intensity())
+    {
+      int change = 3 - random8(12); //change each time between -8 and +3
+      trail[i] += change;
+      if (trail[i] > 245) trail[i] = 0;
+      if (trail[i] > 240) trail[i] = 240;
+      SetPixelColor(i, color_from_palette(trail[i], false, true, 255));
+    }
+  }
   
-//   // draw meteor
-//   for(int j = 0; j < meteorSize; j++) {  
-//     uint16_t index = in + j;   
-//     if(in + j >= segment_length) {
-//       index = (in + j - segment_length);
-//     }
-//     SetPixelColor(index, color_blend(getPixelColor(index), pCONT_lAni->mEffects->color_from_palette(240, false, true, 255), 48));
-//     trail[index] = 240;
-//   }
+  // draw meteor
+  for(int j = 0; j < meteorSize; j++) {  
+    uint16_t index = in + j;   
+    if(in + j >= segment_length) {
+      index = (in + j - segment_length);
+    }
+    SetPixelColor(index, color_blend(RgbcctColor::GetU32Colour(GetPixelColor(index)), color_from_palette(240, false, true, 255), 48));
+    trail[index] = 240;
+  }
 
-//   _segment_runtimes[segment_index].step += _segments[segment_index].speed() +1;
-//   return FRAMETIME;
-// }
+  _segment_runtimes[segment_index].step += _segments[segment_index].speed() +1;
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// //Railway Crossing / Christmas Fairy lights
-// uint16_t mAnimatorLight::mode_railway()
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+//Railway Crossing / Christmas Fairy lights
+// void mAnimatorLight::mode_railway()
 // {
-//   uint16_t dur = 40 + (255 - _segments[segment_index].speed()) * 10;
-//   uint16_t rampdur = (dur * _segments[segment_index].intensity()) >> 8;
-//   if (_segment_runtimes[segment_index].step > dur)
-//   {
-//     //reverse direction
-//     _segment_runtimes[segment_index].step = 0;
-//     _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
-//   }
-//   uint8_t pos = 255;
-//   if (rampdur != 0)
-//   {
-//     uint16_t p0 = (_segment_runtimes[segment_index].step * 255) / rampdur;
-//     if (p0 < 255) pos = p0;
-//   }
-//   if (_segment_runtimes[segment_index].aux0) pos = 255 - pos;
-//   for (uint16_t i = 0; i < segment_length; i += 2)
-//   {
-//     SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(255 - pos, false, false, 255));
-//     if (i < segment_length -1)
-//     {
-//       SetPixelColor(i + 1, pCONT_lAni->mEffects->color_from_palette(pos, false, false, 255));
-//     }
-//   }
-//   _segment_runtimes[segment_index].step += FRAMETIME;
-//   return FRAMETIME;
-// }
 
 
-// //Water ripple
-// //propagation velocity from speed()
-// //drop rate from intensity()
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-// //4 bytes
-// typedef struct Ripple {
-//   uint8_t state;
-//   uint8_t color;
-//   uint16_t pos;
-// } ripple;
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Railway()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-// uint16_t mAnimatorLight::ripple_base(bool rainbow)
+  uint16_t dur = 40 + (255 - _segments[segment_index].speed()) * 10;
+  uint16_t rampdur = (dur * _segments[segment_index].intensity()) >> 8;
+  if (_segment_runtimes[segment_index].step > dur)
+  {
+    //reverse direction
+    _segment_runtimes[segment_index].step = 0;
+    _segment_runtimes[segment_index].aux0 = !_segment_runtimes[segment_index].aux0;
+  }
+  uint8_t pos = 255;
+  if (rampdur != 0)
+  {
+    uint16_t p0 = (_segment_runtimes[segment_index].step * 255) / rampdur;
+    if (p0 < 255) pos = p0;
+  }
+  if (_segment_runtimes[segment_index].aux0) pos = 255 - pos;
+  for (uint16_t i = 0; i < segment_length; i += 2)
+  {
+    SetPixelColor(i, color_from_palette(255 - pos, false, false, 255));
+    if (i < segment_length -1)
+    {
+      SetPixelColor(i + 1, color_from_palette(pos, false, false, 255));
+    }
+  }
+  _segment_runtimes[segment_index].step += FRAMETIME;
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+// void mAnimatorLight::ripple_base(bool rainbow)
 // {
-//   uint16_t maxRipples = 1 + (segment_length >> 2);
-//   if (maxRipples > 100) maxRipples = 100;
-//   uint16_t dataSize = sizeof(ripple) * maxRipples;
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+//Water ripple
+//propagation velocity from speed()
+//drop rate from intensity()
 
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+//4 bytes
+typedef struct Ripple {
+  uint8_t state;
+  uint8_t color;
+  uint16_t pos;
+} ripple;
+
+
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t maxRipples = 1 + (segment_length >> 2);
+  if (maxRipples > 100) maxRipples = 100;
+  uint16_t dataSize = sizeof(ripple) * maxRipples;
+
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){return;} //return mode_static(); //allocation failed
  
-//   Ripple* ripples = reinterpret_cast<Ripple*>(_segment_runtimes[segment_index].data);
+  Ripple* ripples = reinterpret_cast<Ripple*>(_segment_runtimes[segment_index].data);
 
-//   // ranbow background or chosen background, all very dim.
-//   if (rainbow) {
-//     if (_segment_runtimes[segment_index].call ==0) {
-//       _segment_runtimes[segment_index].aux0 = random8();
-//       _segment_runtimes[segment_index].aux1 = random8();
-//     }
-//     if (_segment_runtimes[segment_index].aux0 == _segment_runtimes[segment_index].aux1) {
-//       _segment_runtimes[segment_index].aux1 = random8();
-//     }
-//     else if (_segment_runtimes[segment_index].aux1 > _segment_runtimes[segment_index].aux0) {
-//       _segment_runtimes[segment_index].aux0++;
-//     } else {
-//       _segment_runtimes[segment_index].aux0--;
-//     }
-//     fill(color_blend(color_wheel(_segment_runtimes[segment_index].aux0),BLACK,235));
-//   } else {
-//     fill(SEGCOLOR(1));
-//   }
+  // ranbow background or chosen background, all very dim.
+  if (rainbow) {
+    if (_segment_runtimes[segment_index].call ==0) {
+      _segment_runtimes[segment_index].aux0 = random8();
+      _segment_runtimes[segment_index].aux1 = random8();
+    }
+    if (_segment_runtimes[segment_index].aux0 == _segment_runtimes[segment_index].aux1) {
+      _segment_runtimes[segment_index].aux1 = random8();
+    }
+    else if (_segment_runtimes[segment_index].aux1 > _segment_runtimes[segment_index].aux0) {
+      _segment_runtimes[segment_index].aux0++;
+    } else {
+      _segment_runtimes[segment_index].aux0--;
+    }
+    fill(color_blend(color_wheel(_segment_runtimes[segment_index].aux0),BLACK,235));
+  } else {
+    fill(SEGCOLOR(1));
+  }
   
-//   //draw wave
-//   for (uint16_t i = 0; i < maxRipples; i++)
-//   {
-//     uint16_t ripplestate = ripples[i].state;
-//     if (ripplestate)
-//     {
-//       uint8_t rippledecay = (_segments[segment_index].speed() >> 4) +1; //faster decay if faster propagation
-//       uint16_t rippleorigin = ripples[i].pos;
-//       uint32_t col = pCONT_lAni->mEffects->color_from_palette(ripples[i].color, false, false, 255);
-//       uint16_t propagation = ((ripplestate/rippledecay -1) * _segments[segment_index].speed());
-//       int16_t propI = propagation >> 8;
-//       uint8_t propF = propagation & 0xFF;
-//       int16_t left = rippleorigin - propI -1;
-//       uint8_t amp = (ripplestate < 17) ? triwave8((ripplestate-1)*8) : map(ripplestate,17,255,255,2);
+  //draw wave
+  for (uint16_t i = 0; i < maxRipples; i++)
+  {
+    uint16_t ripplestate = ripples[i].state;
+    if (ripplestate)
+    {
+      uint8_t rippledecay = (_segments[segment_index].speed() >> 4) +1; //faster decay if faster propagation
+      uint16_t rippleorigin = ripples[i].pos;
+      uint32_t col = color_from_palette(ripples[i].color, false, false, 255);
+      uint16_t propagation = ((ripplestate/rippledecay -1) * _segments[segment_index].speed());
+      int16_t propI = propagation >> 8;
+      uint8_t propF = propagation & 0xFF;
+      int16_t left = rippleorigin - propI -1;
+      uint8_t amp = (ripplestate < 17) ? triwave8((ripplestate-1)*8) : map(ripplestate,17,255,255,2);
 
-//       for (int16_t v = left; v < left +4; v++)
-//       {
-//         uint8_t mag = scale8(cubicwave8((propF>>2)+(v-left)*64), amp);
-//         if (v < segment_length && v >= 0)
-//         {
-//           SetPixelColor(v, color_blend(getPixelColor(v), col, mag));
-//         }
-//         int16_t w = left + propI*2 + 3 -(v-left);
-//         if (w < segment_length && w >= 0)
-//         {
-//           SetPixelColor(w, color_blend(getPixelColor(w), col, mag));
-//         }
-//       }  
-//       ripplestate += rippledecay;
-//       ripples[i].state = (ripplestate > 254) ? 0 : ripplestate;
-//     } else //randomly create new wave
-//     {
-//       if (random16(IBN + 10000) <= _segments[segment_index].intensity())
-//       {
-//         ripples[i].state = 1;
-//         ripples[i].pos = random16(segment_length);
-//         ripples[i].color = random8(); //color
-//       }
-//     }
-//   }
-//   return FRAMETIME;
-// }
+      for (int16_t v = left; v < left +4; v++)
+      {
+        uint8_t mag = scale8(cubicwave8((propF>>2)+(v-left)*64), amp);
+        if (v < segment_length && v >= 0)
+        {
+          SetPixelColor(v, color_blend(RgbcctColor::GetU32Colour(GetPixelColor(v)), col, mag));
+        }
+        int16_t w = left + propI*2 + 3 -(v-left);
+        if (w < segment_length && w >= 0)
+        {
+          SetPixelColor(w, color_blend(RgbcctColor::GetU32Colour(GetPixelColor(w)), col, mag));
+        }
+      }  
+      ripplestate += rippledecay;
+      ripples[i].state = (ripplestate > 254) ? 0 : ripplestate;
+    } else //randomly create new wave
+    {
+      if (random16(IBN + 10000) <= _segments[segment_index].intensity())
+      {
+        ripples[i].state = 1;
+        ripples[i].pos = random16(segment_length);
+        ripples[i].color = random8(); //color
+      }
+    }
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
-// uint16_t mAnimatorLight::mode_ripple(void) {
-//   return ripple_base(false);
-// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Ripple(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Ripple(false);
+}
 
-// uint16_t mAnimatorLight::mode_ripple_rainbow(void) {
-//   return ripple_base(true);
-// }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Ripple(true);
+}
 
 
 
-// //  TwinkleFOX by Mark Kriegsman: https://gist.github.com/kriegsman/756ea6dcae8e30845b5a
-// //
-// //  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
-// //  Colors are chosen from a palette. Read more about this effect using the link above!
-
-// // If COOL_LIKE_INCANDESCENT is set to 1, colors will
-// // fade out slighted 'reddened', similar to how
-// // incandescent bulbs change color as they get dim down.
-// #define COOL_LIKE_INCANDESCENT 1
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
 // CRGB mAnimatorLight::twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat)
 // {
-//   // Overall twinkle speed() (changed)
-//   uint16_t ticks = ms / _segment_runtimes[segment_index].aux0;
-//   uint8_t fastcycle8 = ticks;
-//   uint16_t slowcycle16 = (ticks >> 8) + salt;
-//   slowcycle16 += sin8(slowcycle16);
-//   slowcycle16 = (slowcycle16 * 2053) + 1384;
-//   uint8_t slowcycle8 = (slowcycle16 & 0xFF) + (slowcycle16 >> 8);
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+//  TwinkleFOX by Mark Kriegsman: https://gist.github.com/kriegsman/756ea6dcae8e30845b5a
+//
+//  TwinkleFOX: Twinkling 'holiday' lights that fade in and out.
+//  Colors are chosen from a palette. Read more about this effect using the link above!
+
+// If COOL_LIKE_INCANDESCENT is set to 1, colors will
+// fade out slighted 'reddened', similar to how
+// incandescent bulbs change color as they get dim down.
+#define COOL_LIKE_INCANDESCENT 1
+
+
+CRGB mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  // Overall twinkle speed() (changed)
+  uint16_t ticks = ms / _segment_runtimes[segment_index].aux0;
+  uint8_t fastcycle8 = ticks;
+  uint16_t slowcycle16 = (ticks >> 8) + salt;
+  slowcycle16 += sin8(slowcycle16);
+  slowcycle16 = (slowcycle16 * 2053) + 1384;
+  uint8_t slowcycle8 = (slowcycle16 & 0xFF) + (slowcycle16 >> 8);
   
-//   // Overall twinkle density.
-//   // 0 (NONE lit) to 8 (ALL lit at once).
-//   // Default is 5.
-//   uint8_t twinkleDensity = (_segments[segment_index].intensity() >> 5) +1;
+  // Overall twinkle density.
+  // 0 (NONE lit) to 8 (ALL lit at once).
+  // Default is 5.
+  uint8_t twinkleDensity = (_segments[segment_index].intensity() >> 5) +1;
 
-//   uint8_t bright = 0;
-//   if (((slowcycle8 & 0x0E)/2) < twinkleDensity) {
-//     uint8_t ph = fastcycle8;
-//     // This is like 'triwave8', which produces a
-//     // symmetrical up-and-down triangle sawtooth waveform, except that this
-//     // function produces a triangle wave with a faster attack and a slower decay
-//     if (cat) //twinklecat, variant where the leds instantly turn on
-//     {
-//       bright = 255 - ph;
-//     } else { //vanilla twinklefox
-//       if (ph < 86) {
-//       bright = ph * 3;
-//       } else {
-//         ph -= 86;
-//         bright = 255 - (ph + (ph/2));
-//       }
-//     }
-//   }
+  uint8_t bright = 0;
+  if (((slowcycle8 & 0x0E)/2) < twinkleDensity) {
+    uint8_t ph = fastcycle8;
+    // This is like 'triwave8', which produces a
+    // symmetrical up-and-down triangle sawtooth waveform, except that this
+    // function produces a triangle wave with a faster attack and a slower decay
+    if (cat) //twinklecat, variant where the leds instantly turn on
+    {
+      bright = 255 - ph;
+    } else { //vanilla twinklefox
+      if (ph < 86) {
+      bright = ph * 3;
+      } else {
+        ph -= 86;
+        bright = 255 - (ph + (ph/2));
+      }
+    }
+  }
 
-//   uint8_t hue = slowcycle8 - salt;
-//   CRGB c;
-//   if (bright > 0) {
-//     c = ColorFromPalette(currentPalette, hue, bright, NOBLEND);
-//     if(COOL_LIKE_INCANDESCENT == 1) {
-//       // This code takes a pixel, and if its in the 'fading down'
-//       // part of the cycle, it adjusts the color a little bit like the
-//       // way that incandescent bulbs fade toward 'red' as they dim.
-//       if (fastcycle8 >= 128) 
-//       {
-//         uint8_t cooling = (fastcycle8 - 128) >> 4;
-//         c.g = qsub8(c.g, cooling);
-//         c.b = qsub8(c.b, cooling * 2);
-//       }
-//     }
-//   } else {
-//     c = HTMLColorCode::Black;
-//   }
-//   return c;
-// }
+  uint8_t hue = slowcycle8 - salt;
+  CRGB c;
+  if (bright > 0) {
+    c = ColorFromPalette(currentPalette, hue, bright, NOBLEND);
+    if(COOL_LIKE_INCANDESCENT == 1) {
+      // This code takes a pixel, and if its in the 'fading down'
+      // part of the cycle, it adjusts the color a little bit like the
+      // way that incandescent bulbs fade toward 'red' as they dim.
+      if (fastcycle8 >= 128) 
+      {
+        uint8_t cooling = (fastcycle8 - 128) >> 4;
+        c.g = qsub8(c.g, cooling);
+        c.b = qsub8(c.b, cooling * 2);
+      }
+    }
+  } else {
+    c = HTMLColorCode::Black;
+  }
+  return c;
+  
+}
 
-// //  This function loops over each pixel, calculates the
-// //  adjusted 'clock' that this pixel should use, and calls
-// //  "CalculateOneTwinkle" on each pixel.  It then displays
-// //  either the twinkle color of the background color,
-// //  whichever is brighter.
-// uint16_t mAnimatorLight::twinklefox_base(bool cat)
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+//  This function loops over each pixel, calculates the
+//  adjusted 'clock' that this pixel should use, and calls
+//  "CalculateOneTwinkle" on each pixel.  It then displays
+//  either the twinkle color of the background color,
+//  whichever is brighter.
+// void mAnimatorLight::twinklefox_base(bool cat)
 // {
-//   // "PRNG16" is the pseudorandom number generator
-//   // It MUST be reset to the same starting value each time
-//   // this function is called, so that the sequence of 'random'
-//   // numbers that it generates is (paradoxically) stable.
-//   uint16_t PRNG16 = 11337;
 
-//   // Calculate speed()
-//   if (_segments[segment_index].speed() > 100) _segment_runtimes[segment_index].aux0 = 3 + ((255 - _segments[segment_index].speed()) >> 3);
-//   else _segment_runtimes[segment_index].aux0 = 22 + ((100 - _segments[segment_index].speed()) >> 1);
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   // Set up the background color, "bg".
-//   CRGB bg;
-//   bg = col_to_crgb(SEGCOLOR(1));
-//   uint8_t bglight = bg.getAverageLight();
-//   if (bglight > 64) {
-//     bg.nscale8_video(16); // very bright, so scale to 1/16th
-//   } else if (bglight > 16) {
-//     bg.nscale8_video(64); // not that bright, so scale to 1/4th
-//   } else {
-//     bg.nscale8_video(86); // dim, scale to 1/3rd.
-//   }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(bool cat)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//   uint8_t backgroundBrightness = bg.getAverageLight();
+  // "PRNG16" is the pseudorandom number generator
+  // It MUST be reset to the same starting value each time
+  // this function is called, so that the sequence of 'random'
+  // numbers that it generates is (paradoxically) stable.
+  uint16_t PRNG16 = 11337;
 
-//   for (uint16_t i = 0; i < segment_length; i++) {
+  // Calculate speed()
+  if (_segments[segment_index].speed() > 100) _segment_runtimes[segment_index].aux0 = 3 + ((255 - _segments[segment_index].speed()) >> 3);
+  else _segment_runtimes[segment_index].aux0 = 22 + ((100 - _segments[segment_index].speed()) >> 1);
+
+  // Set up the background color, "bg".
+  CRGB bg;
+  bg = col_to_crgb(SEGCOLOR(1));
+  uint8_t bglight = bg.getAverageLight();
+  if (bglight > 64) {
+    bg.nscale8_video(16); // very bright, so scale to 1/16th
+  } else if (bglight > 16) {
+    bg.nscale8_video(64); // not that bright, so scale to 1/4th
+  } else {
+    bg.nscale8_video(86); // dim, scale to 1/3rd.
+  }
+
+  uint8_t backgroundBrightness = bg.getAverageLight();
+
+  for (uint16_t i = 0; i < segment_length; i++) {
   
-//     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
-//     uint16_t myclockoffset16= PRNG16; // use that number as clock offset
-//     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
-//     // use that number as clock speed() adjustment factor (in 8ths, from 8/8ths to 23/8ths)
-//     uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
-//     uint32_t myclock30 = (uint32_t)((now * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
-//     uint8_t  myunique8 = PRNG16 >> 8; // get 'salt' value for this pixel
+    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
+    uint16_t myclockoffset16= PRNG16; // use that number as clock offset
+    PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; // next 'random' number
+    // use that number as clock speed() adjustment factor (in 8ths, from 8/8ths to 23/8ths)
+    uint8_t myspeedmultiplierQ5_3 =  ((((PRNG16 & 0xFF)>>4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
+    uint32_t myclock30 = (uint32_t)((now * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
+    uint8_t  myunique8 = PRNG16 >> 8; // get 'salt' value for this pixel
 
-//     // We now have the adjusted 'clock' for this pixel, now we call
-//     // the function that computes what color the pixel should be based
-//     // on the "brightness = f( time )" idea.
-//     CRGB c = twinklefox_one_twinkle(myclock30, myunique8, cat);
+    // We now have the adjusted 'clock' for this pixel, now we call
+    // the function that computes what color the pixel should be based
+    // on the "brightness = f( time )" idea.
+    CRGB c = SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(myclock30, myunique8, cat);
 
-//     uint8_t cbright = c.getAverageLight();
-//     int16_t deltabright = cbright - backgroundBrightness;
-//     if (deltabright >= 32 || (!bg)) {
-//       // If the new pixel is significantly brighter than the background color,
-//       // use the new color.
-//       SetPixelColor(i, c.red, c.green, c.blue);
-//     } else if (deltabright > 0) {
-//       // If the new pixel is just slightly brighter than the background color,
-//       // mix a blend of the new color and the background color
-//       SetPixelColor(i, color_blend(crgb_to_col(bg), crgb_to_col(c), deltabright * 8));
-//     } else {
-//       // if the new pixel is not at all brighter than the background color,
-//       // just use the background color.
-//       SetPixelColor(i, bg.r, bg.g, bg.b);
-//     }
-//   }
+    uint8_t cbright = c.getAverageLight();
+    int16_t deltabright = cbright - backgroundBrightness;
+    if (deltabright >= 32 || (!bg)) {
+      // If the new pixel is significantly brighter than the background color,
+      // use the new color.
+      SetPixelColor(i, c.red, c.green, c.blue);
+    } else if (deltabright > 0) {
+      // If the new pixel is just slightly brighter than the background color,
+      // mix a blend of the new color and the background color
+      SetPixelColor(i, color_blend(crgb_to_col(bg), crgb_to_col(c), deltabright * 8));
+    } else {
+      // if the new pixel is not at all brighter than the background color,
+      // just use the background color.
+      SetPixelColor(i, bg.r, bg.g, bg.b);
+    }
+  }
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Fox()
+{
+  return SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(false);
+}
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat()
+{
+  return SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(true);
+}
+
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16_t threshold)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+// void mAnimatorLight::spots_base(uint16_t threshold)
+// {
+  fill(SEGCOLOR(1));
+  
+  uint16_t maxZones = segment_length >> 2;
+  uint16_t zones = 1 + ((_segments[segment_index].intensity() * maxZones) >> 8);
+  uint16_t zoneLen = segment_length / zones;
+  uint16_t offset = (segment_length - zones * zoneLen) >> 1;
+
+  for (uint16_t z = 0; z < zones; z++)
+  {
+    uint16_t pos = offset + z * zoneLen;
+    for (uint16_t i = 0; i < zoneLen; i++)
+    {
+      uint16_t wave = triwave16((i * 0xFFFF) / zoneLen);
+      if (wave > threshold) {
+        uint16_t index = 0 + pos + i;
+        uint8_t s = (wave - threshold)*255 / (0xFFFF - threshold);
+        SetPixelColor(index, color_blend(color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255-s));
+      }
+    }
+  }
+  
 //   return FRAMETIME;
-// }
 
-// uint16_t mAnimatorLight::mode_twinklefox()
-// {
-//   return twinklefox_base(false);
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
 
-// uint16_t mAnimatorLight::mode_twinklecat()
-// {
-//   return twinklefox_base(true);
-// }
-
-
-// //inspired by https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectBlinkingHalloweenEyes
-// #define HALLOWEEN_EYE_SPACE 3
-// #define HALLOWEEN_EYE_WIDTH 1
-
-// uint16_t mAnimatorLight::mode_halloween_eyes()
-// {  
-//   uint16_t eyeLength = (2*HALLOWEEN_EYE_WIDTH) + HALLOWEEN_EYE_SPACE;
-//   if (eyeLength > segment_length) return mode_static(); //bail if segment too short
-
-//   fill(SEGCOLOR(1)); //fill background
-
-//   uint8_t state = _segment_runtimes[segment_index].aux1 >> 8;
-//   uint16_t stateTime = _segment_runtimes[segment_index].call;
-//   if (stateTime == 0) stateTime = 2000;
-
-//   if (state == 0) { //spawn eyes
-//     _segment_runtimes[segment_index].aux0 = random16(0, segment_length - eyeLength); //start pos
-//     _segment_runtimes[segment_index].aux1 = random8(); //color
-//     state = 1;
-//   }
-  
-//   if (state < 2) { //fade eyes
-//     uint16_t startPos    = _segment_runtimes[segment_index].aux0;
-//     uint16_t start2ndEye = startPos + HALLOWEEN_EYE_WIDTH + HALLOWEEN_EYE_SPACE;
-    
-//     uint32_t fadestage = (now - _segment_runtimes[segment_index].step)*255 / stateTime;
-//     if (fadestage > 255) fadestage = 255;
-//     uint32_t c = color_blend(color_from_palette(_segment_runtimes[segment_index].aux1 & 0xFF, false, false, 0), SEGCOLOR(1), fadestage);
-    
-//     for (uint16_t i = 0; i < HALLOWEEN_EYE_WIDTH; i++)
-//     {
-//       SetPixelColor(startPos    + i, c);
-//       SetPixelColor(start2ndEye + i, c);
-//     }
-//   }
-
-//   if (now - _segment_runtimes[segment_index].step > stateTime)
-//   {
-//     state++;
-//     if (state > 2) state = 0;
-    
-//     if (state < 2)
-//     {
-//       stateTime = 100 + (255 - _segments[segment_index].intensity())*10; //eye fade time
-//     } else {
-//       uint16_t eyeOffTimeBase = (255 - _segments[segment_index].speed())*10;
-//       stateTime = eyeOffTimeBase + random16(eyeOffTimeBase);
-//     }
-//     _segment_runtimes[segment_index].step = now;
-//     _segment_runtimes[segment_index].call = stateTime;
-//   }
-
-//   _segment_runtimes[segment_index].aux1 = (_segment_runtimes[segment_index].aux1 & 0xFF) + (state << 8); //save state
-  
-//   return FRAMETIME;
-// }
-
-
-
-
-// uint16_t mAnimatorLight::spots_base(uint16_t threshold)
-// {
-//   fill(SEGCOLOR(1));
-  
-//   uint16_t maxZones = segment_length >> 2;
-//   uint16_t zones = 1 + ((_segments[segment_index].intensity() * maxZones) >> 8);
-//   uint16_t zoneLen = segment_length / zones;
-//   uint16_t offset = (segment_length - zones * zoneLen) >> 1;
-
-//   for (uint16_t z = 0; z < zones; z++)
-//   {
-//     uint16_t pos = offset + z * zoneLen;
-//     for (uint16_t i = 0; i < zoneLen; i++)
-//     {
-//       uint16_t wave = triwave16((i * 0xFFFF) / zoneLen);
-//       if (wave > threshold) {
-//         uint16_t index = 0 + pos + i;
-//         uint8_t s = (wave - threshold)*255 / (0xFFFF - threshold);
-//         SetPixelColor(index, color_blend(color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255-s));
-//       }
-//     }
-//   }
-  
-//   return FRAMETIME;
-// }
+}
 
 
 // //intensity() slider sets number of "lights", speed() sets LEDs per light
-// uint16_t mAnimatorLight::mode_spots()
+// void mAnimatorLight::mode_spots()
 // {
 //   return spots_base((255 - _segments[segment_index].speed()) << 8);
 // }
 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Spots()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  SubTask_Segment_Flasher_Animate_Function__Base_Spots((255 - _segments[segment_index].speed()) << 8);
+}
+
 
 // //intensity() slider sets number of "lights", LEDs per light fade in and out
-// uint16_t mAnimatorLight::mode_spots_fade()
+// void mAnimatorLight::mode_spots_fade()
 // {
-//   uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
-//   uint16_t t = triwave16(counter);
-//   uint16_t tr = (t >> 1) + (t >> 2);
+// }
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade_Spots()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t counter = now * ((_segments[segment_index].speed() >> 2) +8);
+  uint16_t t = triwave16(counter);
+  uint16_t tr = (t >> 1) + (t >> 2);
 //   return spots_base(tr);
-// }
+  SubTask_Segment_Flasher_Animate_Function__Base_Spots(tr);
+}
 
 
-// //each needs 12 bytes
-// //Spark type is used for popcorn and 1D fireworks
-// typedef struct Ball {
-//   unsigned long lastBounceTime;
-//   float impactVelocity;
-//   float height;
-// } ball;
+//each needs 12 bytes
+//Spark type is used for popcorn and 1D fireworks
+typedef struct Ball {
+  unsigned long lastBounceTime;
+  float impactVelocity;
+  float height;
+} ball;
 
-// /*
-// *  Bouncing Balls Effect
-// */
-// uint16_t mAnimatorLight::mode_bouncing_balls(void) {
-//   //allocate segment data
-//   uint16_t maxNumBalls = 16; 
-//   uint16_t dataSize = sizeof(ball) * maxNumBalls;
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+*  Bouncing Balls Effect
+*
+void mAnimatorLight::mode_bouncing_balls(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  //allocate segment data
+  uint16_t maxNumBalls = 16; 
+  uint16_t dataSize = sizeof(ball) * maxNumBalls;
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)){return;}// return mode_static(); //allocation failed
   
-//   Ball* balls = reinterpret_cast<Ball*>(_segment_runtimes[segment_index].data);
+  Ball* balls = reinterpret_cast<Ball*>(_segment_runtimes[segment_index].data);
   
-//   // number of balls based on intensity() setting to max of 7 (cycles colors)
-//   // non-chosen color is a random color
-//   uint8_t numBalls = int(((_segments[segment_index].intensity() * (maxNumBalls - 0.8f)) / 255) + 1);
+  // number of balls based on intensity() setting to max of 7 (cycles colors)
+  // non-chosen color is a random color
+  uint8_t numBalls = int(((_segments[segment_index].intensity() * (maxNumBalls - 0.8f)) / 255) + 1);
   
-//   float gravity                           = -9.81; // standard value of gravity
-//   float impactVelocityStart               = sqrt( -2 * gravity);
+  float gravity                           = -9.81; // standard value of gravity
+  float impactVelocityStart               = sqrt( -2 * gravity);
 
-//   unsigned long time = millis();
+  unsigned long time = millis();
 
-//   if (_segment_runtimes[segment_index].call == 0) {
-//     for (uint8_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
-//   }
+  if (_segment_runtimes[segment_index].call == 0) {
+    for (uint8_t i = 0; i < maxNumBalls; i++) balls[i].lastBounceTime = time;
+  }
   
-//   bool hasCol2 = SEGCOLOR(2);
-//   fill(hasCol2 ? BLACK : SEGCOLOR(1));
+  bool hasCol2 = SEGCOLOR(2);
+  fill(hasCol2 ? BLACK : SEGCOLOR(1));
   
-//   for (uint8_t i = 0; i < numBalls; i++) {
-//     float timeSinceLastBounce = (time - balls[i].lastBounceTime)/((255-_segments[segment_index].speed())*8/256 +1);
-//     balls[i].height = 0.5 * gravity * pow(timeSinceLastBounce/1000 , 2.0) + balls[i].impactVelocity * timeSinceLastBounce/1000;
+  for (uint8_t i = 0; i < numBalls; i++) {
+    float timeSinceLastBounce = (time - balls[i].lastBounceTime)/((255-_segments[segment_index].speed())*8/256 +1);
+    balls[i].height = 0.5 * gravity * pow(timeSinceLastBounce/1000 , 2.0) + balls[i].impactVelocity * timeSinceLastBounce/1000;
 
-//     if (balls[i].height < 0) { //start bounce
-//       balls[i].height = 0;
-//       //damping for better effect using multiple balls
-//       float dampening = 0.90 - float(i)/pow(numBalls,2);
-//       balls[i].impactVelocity = dampening * balls[i].impactVelocity;
-//       balls[i].lastBounceTime = time;
+    if (balls[i].height < 0) { //start bounce
+      balls[i].height = 0;
+      //damping for better effect using multiple balls
+      float dampening = 0.90 - float(i)/pow(numBalls,2);
+      balls[i].impactVelocity = dampening * balls[i].impactVelocity;
+      balls[i].lastBounceTime = time;
 
-//       if (balls[i].impactVelocity < 0.015) {
-//         balls[i].impactVelocity = impactVelocityStart;
-//       }
-//     }
+      if (balls[i].impactVelocity < 0.015) {
+        balls[i].impactVelocity = impactVelocityStart;
+      }
+    }
     
-//     uint32_t color = SEGCOLOR(0);
-//     if (_segments[segment_index].palette) {
-//       color = color_wheel(i*(256/MAX(numBalls, 8)));
-//     } else if (hasCol2) {
-//       color = SEGCOLOR(i % NUM_COLORS);
-//     }
+    uint32_t color = SEGCOLOR(0);
+    if (_segments[segment_index].palette.id) {
+      color = color_wheel(i*(256/MAX(numBalls, 8)));
+    } else if (hasCol2) {
+      color = SEGCOLOR(i % NUM_COLORS);
+    }
 
-//     uint16_t pos = round(balls[i].height * (segment_length - 1));
-//     SetPixelColor(pos, color);
-//   }
+    uint16_t pos = round(balls[i].height * (segment_length - 1));
+    SetPixelColor(pos, color);
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
 
-
-// /*
-// * Sinelon stolen from FASTLED examples
-// */
-// uint16_t mAnimatorLight::sinelon_base(bool dual, bool rainbow=false) {
-//   fade_out(_segments[segment_index].intensity());
-//   uint16_t pos = beatsin16(_segments[segment_index].speed()/10,0,segment_length-1);
-//   if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = pos;
-//   uint32_t color1 = pCONT_lAni->mEffects->color_from_palette(pos, true, false, 0);
-//   uint32_t color2 = SEGCOLOR(2);
-//   if (rainbow) {
-//     color1 = color_wheel((pos & 0x07) * 32);
-//   }
-//   SetPixelColor(pos, color1);
-//   if (dual) {
-//     if (!color2) color2 = pCONT_lAni->mEffects->color_from_palette(pos, true, false, 0);
-//     if (rainbow) color2 = color1; //rainbow
-//     SetPixelColor(segment_length-1-pos, color2);
-//   }
-//   if (_segment_runtimes[segment_index].aux0 != pos) { 
-//     if (_segment_runtimes[segment_index].aux0 < pos) {
-//       for (uint16_t i = _segment_runtimes[segment_index].aux0; i < pos ; i++) {
-//         SetPixelColor(i, color1);
-//         if (dual) SetPixelColor(segment_length-1-i, color2);
-//       }
-//     } else {
-//       for (uint16_t i = _segment_runtimes[segment_index].aux0; i > pos ; i--) {
-//         SetPixelColor(i, color1);
-//         if (dual) SetPixelColor(segment_length-1-i, color2);
-//       }
-//     }
-//     _segment_runtimes[segment_index].aux0 = pos;
-//   }
-
-//   return FRAMETIME;
-// }
-
-// uint16_t mAnimatorLight::mode_sinelon(void) {
-//   return sinelon_base(false);
-// }
-
-// uint16_t mAnimatorLight::mode_sinelon_dual(void) {
-//   return sinelon_base(true);
-// }
-
-// uint16_t mAnimatorLight::mode_sinelon_rainbow(void) {
-//   return sinelon_base(true, true);
-// }
+}
 
 
-// //Rainbow with glitter, inspired by https://gist.github.com/kriegsman/062e10f7f07ba8518af6
-// uint16_t mAnimatorLight::mode_glitter()
-// {
-//   mode_palette();
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-//   if (_segments[segment_index].intensity() > random8())
-//   {
-//     SetPixelColor(random16(segment_length), ULTRAWHITE);
-//   }
+void mAnimatorLight::sinelon_base(bool dual, bool rainbow=false) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool dual, bool rainbow)
+{
+
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  fade_out(_segments[segment_index].intensity());
+  uint16_t pos = beatsin16(_segments[segment_index].speed()/10,0,segment_length-1);
+  if (_segment_runtimes[segment_index].call == 0) _segment_runtimes[segment_index].aux0 = pos;
+  uint32_t color1 = color_from_palette(pos, true, false, 0);
+  uint32_t color2 = SEGCOLOR(2);
+  if (rainbow) {
+    color1 = color_wheel((pos & 0x07) * 32);
+  }
+  SetPixelColor(pos, color1);
+  if (dual) {
+    if (!color2) color2 = color_from_palette(pos, true, false, 0);
+    if (rainbow) color2 = color1; //rainbow
+    SetPixelColor(segment_length-1-pos, color2);
+  }
+  if (_segment_runtimes[segment_index].aux0 != pos) { 
+    if (_segment_runtimes[segment_index].aux0 < pos) {
+      for (uint16_t i = _segment_runtimes[segment_index].aux0; i < pos ; i++) {
+        SetPixelColor(i, color1);
+        if (dual) SetPixelColor(segment_length-1-i, color2);
+      }
+    } else {
+      for (uint16_t i = _segment_runtimes[segment_index].aux0; i > pos ; i--) {
+        SetPixelColor(i, color1);
+        if (dual) SetPixelColor(segment_length-1-i, color2);
+      }
+    }
+    _segment_runtimes[segment_index].aux0 = pos;
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(false);
+}
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(true);
+}
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow(void) {
+  return SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(true, true);
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+//Rainbow with glitter, inspired by https://gist.github.com/kriegsman/062e10f7f07ba8518af6
+void mAnimatorLight::mode_glitter()
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Glitter()
+{
+
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  mode_palette();
+
+  if (_segments[segment_index].intensity() > random8())
+  {
+    SetPixelColor(random16(segment_length), ULTRAWHITE);
+  }
   
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
 
-// /*
-// *  POPCORN
-// *  modified from https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Popcorn.h
-// */
-// uint16_t mAnimatorLight::mode_popcorn(void) {
-//   //allocate segment data
-//   uint16_t maxNumPopcorn = 24; 
-//   uint16_t dataSize = sizeof(spark) * maxNumPopcorn;
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+*  POPCORN
+*  modified from https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Popcorn.h
+*
+// void mAnimatorLight::mode_popcorn(void) {#
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Popcorn()
+{
+
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  //allocate segment data
+  uint16_t maxNumPopcorn = 24; 
+  uint16_t dataSize = sizeof(spark) * maxNumPopcorn;
+  if (!_segment_runtimes[segment_index].allocateData(dataSize))
+  {
+    return;
+  }// return mode_static(); //allocation failed
   
-//   Spark* popcorn = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
+  Spark* popcorn = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
 
-//   float gravity = -0.0001 - (_segments[segment_index].speed()/200000.0); // m/s/s
-//   gravity *= segment_length;
+  float gravity = -0.0001 - (_segments[segment_index].speed()/200000.0); // m/s/s
+  gravity *= segment_length;
 
-//   bool hasCol2 = SEGCOLOR(2);
-//   fill(hasCol2 ? BLACK : SEGCOLOR(1));
+  bool hasCol2 = SEGCOLOR(2);
+  fill(hasCol2 ? BLACK : SEGCOLOR(1));
 
-//   uint8_t numPopcorn = _segments[segment_index].intensity()*maxNumPopcorn/255;
-//   if (numPopcorn == 0) numPopcorn = 1;
+  uint8_t numPopcorn = _segments[segment_index].intensity()*maxNumPopcorn/255;
 
-//   for(uint8_t i = 0; i < numPopcorn; i++) {
-//     bool isActive = popcorn[i].pos >= 0.0f;
+  if (numPopcorn == 0) numPopcorn = 1;
 
-//     if (isActive) { // if kernel is active, update its position
-//       popcorn[i].pos += popcorn[i].vel;
-//       popcorn[i].vel += gravity;
-//       uint32_t col = color_wheel(popcorn[i].colIndex);
-//       if (!_segments[segment_index].palette && popcorn[i].colIndex < NUM_COLORS) col = SEGCOLOR(popcorn[i].colIndex);
+  for(uint8_t i = 0; i < numPopcorn; i++) {
+    bool isActive = popcorn[i].pos >= 0.0f;
+
+    if (isActive) { // if kernel is active, update its position
+      popcorn[i].pos += popcorn[i].vel;
+      popcorn[i].vel += gravity;
+      uint32_t col = color_wheel(popcorn[i].colIndex);
+      if (!_segments[segment_index].palette.id && popcorn[i].colIndex < NUM_COLORS)
+      {
+        col = SEGCOLOR(popcorn[i].colIndex);
+      }
       
-//       uint16_t ledIndex = popcorn[i].pos;
-//       if (ledIndex < segment_length) SetPixelColor(ledIndex, col);
-//     } else { // if kernel is inactive, randomly pop it
-//       if (random8() < 2) { // POP!!!
-//         popcorn[i].pos = 0.01f;
+      uint16_t ledIndex = popcorn[i].pos;
+      if (ledIndex < segment_length) SetPixelColor(ledIndex, col);
+    } else { // if kernel is inactive, randomly pop it
+      if (random8() < 2) { // POP!!!
+        popcorn[i].pos = 0.01f;
         
-//         uint16_t peakHeight = 128 + random8(128); //0-255
-//         peakHeight = (peakHeight * (segment_length -1)) >> 8;
-//         popcorn[i].vel = sqrt(-2.0 * gravity * peakHeight);
+        uint16_t peakHeight = 128 + random8(128); //0-255
+        peakHeight = (peakHeight * (segment_length -1)) >> 8;
+        popcorn[i].vel = sqrt(-2.0 * gravity * peakHeight);
         
-//         if (_segments[segment_index].palette)
-//         {
-//           popcorn[i].colIndex = random8();
-//         } else {
-//           byte col = random8(0, NUM_COLORS);
-//           if (!hasCol2 || !SEGCOLOR(col)) col = 0;
-//           popcorn[i].colIndex = col;
-//         }
-//       }
-//     }
-//   }
+        if (_segments[segment_index].palette.id)
+        {
+          popcorn[i].colIndex = random8();
+        } else {
+          byte col = random8(0, NUM_COLORS);
+          if (!hasCol2 || !SEGCOLOR(col)) col = 0;
+          popcorn[i].colIndex = col;
+        }
+      }
+    }
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -8811,16 +9832,16 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Multi()
 void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi)
 {
 
-  uint8_t segment_index = segment_iters._segment_index;
-  uint8_t segment_length = _segments[segment_iters._segment_index].length();
+  uint8_t segment_index = segment_iters.index;
+  uint8_t segment_length = _segments[segment_iters.index].length();
   uint16_t start_pixel = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel = _segments[segment_index].pixel_range.stop;
 
   // Set palette pointer
-  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
   uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
   // Brightness is generated internally, and rgbcct solid palettes are output values
-  _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = true;
+  _segments[segment_iters.index].flags.brightness_applied_during_colour_generation = true;
 
   if (use_multi)
   {
@@ -9009,18 +10030,18 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
 void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette()
 {
 
-  uint8_t segment_index = segment_iters._segment_index;
-  uint8_t segment_length = _segments[segment_iters._segment_index].length();
+  uint8_t segment_index = segment_iters.index;
+  uint8_t segment_length = _segments[segment_iters.index].length();
   uint16_t start_pixel = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel = _segments[segment_index].pixel_range.stop;
 
   bool use_multi = true;
 
   // Set palette pointer
-  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters._segment_index].palette.id);
+  mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
   uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
   // Brightness is generated internally, and rgbcct solid palettes are output values
-  _segments[segment_iters._segment_index].flags.brightness_applied_during_colour_generation = true;
+  _segments[segment_iters.index].flags.brightness_applied_during_colour_generation = true;
 
   if (use_multi)
   {
@@ -9242,6 +10263,72 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 
 
 
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Fireworks Starburst
+ * @note : Converted from WLED Effects
+ * 
+// /*
+// / Fireworks in starburst effect
+// / based on the video: https://www.reddit.com/r/arduino/comments/c3sd46/i_made_this_fireworks_effect_for_my_led_strips/
+// / Speed sets frequency of new starbursts, intensity() is the intensity() of the burst
+// *
+ @param aux0 Current center index of firework (which blurs outwards)
+ @param aux1 Previous location of center index of firework
+ @param aux2 Iter to wrap palette
+
+This appear functionally identical to candle single, and I will likely delete it
+
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fire_Flicker()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+// /*
+//  * Fire flicker function
+//  */
+// void mAnimatorLight::mode_fire_flicker(void) {
+
+  uint32_t cycleTime = 40 + (255 - _segments[segment_index].speed());
+  uint32_t it = now / cycleTime;
+  if (_segment_runtimes[segment_index].step == it) return;// FRAMETIME;
+  
+  byte w = (SEGCOLOR(0) >> 24) & 0xFF;
+  byte r = (SEGCOLOR(0) >> 16) & 0xFF;
+  byte g = (SEGCOLOR(0) >>  8) & 0xFF;
+  byte b = (SEGCOLOR(0)        & 0xFF);
+  byte lum = (_segments[segment_index].palette.id == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
+  lum /= (((256-_segments[segment_index].intensity())/16)+1);
+  for(uint16_t i = 0; i < segment_length; i++) {
+    byte flicker = random8(lum);
+    if (_segments[segment_index].palette.id == 0) {
+      SetPixelColor(i, MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0));
+    } else {
+      SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
+    }
+  }
+
+  _segment_runtimes[segment_index].step = it;
+  // return FRAMETIME;
+
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+
+  StripUpdate();
+
+}
+
+// #ifdef ENABLE_ADVANCED_EFFECTS
+
+
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Drip Effect
@@ -9266,481 +10353,761 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Drip()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
 
-// /*
-//  * Drip Effect
-//  * ported of: https://www.youtube.com/watch?v=sru2fXh4r7k
-//  */
-// uint16_t mAnimatorLight::mode_drip(void)
-// {
-//   //allocate segment data
-//   uint16_t numDrops = 4; 
-//   uint16_t dataSize = sizeof(spark) * numDrops;
-//   if (!_segment_runtimes[segment_index].allocateData(dataSize)) return mode_static(); //allocation failed
+  //allocate segment data
+  uint16_t numDrops = 4; 
+  uint16_t dataSize = sizeof(spark) * numDrops;
+  if (!_segment_runtimes[segment_index].allocateData(dataSize)) 
+  {
+    return;
+   }
+   // mode_static(); //allocation failed
 
-//   fill(SEGCOLOR(1));
+  fill(SEGCOLOR(1));
   
-//   Spark* drops = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
+  Spark* drops = reinterpret_cast<Spark*>(_segment_runtimes[segment_index].data);
 
-//   numDrops = 1 + (_segments[segment_index].intensity() >> 6);
+  numDrops = 1 + (_segments[segment_index].intensity() >> 6);
 
-//   float gravity = -0.001 - (_segments[segment_index].speed()/50000.0);
-//   gravity *= segment_length;
-//   int sourcedrop = 12;
+  float gravity = -0.001 - (_segments[segment_index].speed()/50000.0);
+  gravity *= segment_length;
+  int sourcedrop = 12;
 
-//   for (int j=0;j<numDrops;j++) {
-//     if (drops[j].colIndex == 0) { //init
-//       drops[j].pos = segment_length-1;    // start at end
-//       drops[j].vel = 0;           // speed()
-//       drops[j].col = sourcedrop;  // brightness
-//       drops[j].colIndex = 1;      // drop state (0 init, 1 forming, 2 falling, 5 bouncing) 
-//     }
+  for (int j=0;j<numDrops;j++) {
+    if (drops[j].colIndex == 0) { //init
+      drops[j].pos = segment_length-1;    // start at end
+      drops[j].vel = 0;           // speed()
+      drops[j].col = sourcedrop;  // brightness
+      drops[j].colIndex = 1;      // drop state (0 init, 1 forming, 2 falling, 5 bouncing) 
+    }
     
-//     SetPixelColor(segment_length-1,color_blend(BLACK,SEGCOLOR(0), sourcedrop));// water source
-//     if (drops[j].colIndex==1) {
-//       if (drops[j].col>255) drops[j].col=255;
-//       SetPixelColor(int(drops[j].pos),color_blend(BLACK,SEGCOLOR(0),drops[j].col));
+    SetPixelColor(segment_length-1,color_blend(BLACK,SEGCOLOR(0), sourcedrop));// water source
+    if (drops[j].colIndex==1) {
+      if (drops[j].col>255) drops[j].col=255;
+      SetPixelColor(int(drops[j].pos),color_blend(BLACK,SEGCOLOR(0),drops[j].col));
       
-//       drops[j].col += map(_segments[segment_index].speed(), 0, 255, 1, 6); // swelling
+      drops[j].col += map(_segments[segment_index].speed(), 0, 255, 1, 6); // swelling
       
-//       if (random8() < drops[j].col/10) {               // random drop
-//         drops[j].colIndex=2;               //fall
-//         drops[j].col=255;
-//       }
-//     }  
-//     if (drops[j].colIndex > 1) {           // falling
-//       if (drops[j].pos > 0) {              // fall until end of segment
-//         drops[j].pos += drops[j].vel;
-//         if (drops[j].pos < 0) drops[j].pos = 0;
-//         drops[j].vel += gravity;
+      if (random8() < drops[j].col/10) {               // random drop
+        drops[j].colIndex=2;               //fall
+        drops[j].col=255;
+      }
+    }  
+    if (drops[j].colIndex > 1) {           // falling
+      if (drops[j].pos > 0) {              // fall until end of segment
+        drops[j].pos += drops[j].vel;
+        if (drops[j].pos < 0) drops[j].pos = 0;
+        drops[j].vel += gravity;
 
-//         for (int i=1;i<7-drops[j].colIndex;i++) { // some minor math so we don't expand bouncing droplets
-//           SetPixelColor(int(drops[j].pos)+i,color_blend(BLACK,SEGCOLOR(0),drops[j].col/i)); //spread pixel with fade while falling
-//         }
+        for (int i=1;i<7-drops[j].colIndex;i++) { // some minor math so we don't expand bouncing droplets
+          SetPixelColor(int(drops[j].pos)+i,color_blend(BLACK,SEGCOLOR(0),drops[j].col/i)); //spread pixel with fade while falling
+        }
         
-//         if (drops[j].colIndex > 2) {       // during bounce, some water is on the floor
-//           SetPixelColor(0,color_blend(SEGCOLOR(0),BLACK,drops[j].col));
-//         }
-//       } else {                             // we hit bottom
-//         if (drops[j].colIndex > 2) {       // already hit once, so back to forming
-//           drops[j].colIndex = 0;
-//           drops[j].col = sourcedrop;
+        if (drops[j].colIndex > 2) {       // during bounce, some water is on the floor
+          SetPixelColor(0,color_blend(SEGCOLOR(0),BLACK,drops[j].col));
+        }
+      } else {                             // we hit bottom
+        if (drops[j].colIndex > 2) {       // already hit once, so back to forming
+          drops[j].colIndex = 0;
+          drops[j].col = sourcedrop;
           
-//         } else {
+        } else {
 
-//           if (drops[j].colIndex==2) {      // init bounce
-//             drops[j].vel = -drops[j].vel/4;// reverse velocity with damping 
-//             drops[j].pos += drops[j].vel;
-//           } 
-//           drops[j].col = sourcedrop*2;
-//           drops[j].colIndex = 5;           // bouncing
-//         }
-//       }
-//     }
-//   }
+          if (drops[j].colIndex==2) {      // init bounce
+            drops[j].vel = -drops[j].vel/4;// reverse velocity with damping 
+            drops[j].pos += drops[j].vel;
+          } 
+          drops[j].col = sourcedrop*2;
+          drops[j].colIndex = 5;           // bouncing
+        }
+      }
+    }
+  }
 //   return FRAMETIME;  
-// }
+
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+
+  StripUpdate();
+}
 
 
-// /*
-// / Plasma Effect
-// / adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino
-// */
-// uint16_t mAnimatorLight::mode_plasma(void) {
-//   uint8_t thisPhase = beatsin8(6,-64,64);                       // Setting phase change for a couple of waves.
-//   uint8_t thatPhase = beatsin8(7,-64,64);
+/********************************************************************************************************************************************************************************************************************
+*******************************************************************************************************************************************************************************************************************
+   @brief: Plasma
+   @note : Converted from WLED Effects
+           Draws growing/shrinking spans of concentric faded light
+   @note   Rate: FRAME_RATE
 
-//   for (int i = 0; i < segment_length; i++) {   // For each of the LED's in the strand, set color &  brightness based on a wave as follows:
-//     uint8_t colorIndex = cubicwave8((i*(1+ 3*(_segments[segment_index].speed() >> 5)))+(thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
-//                              + cos8((i*(1+ 2*(_segments[segment_index].speed() >> 5)))+(thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
-//     uint8_t thisBright = qsub8(colorIndex, beatsin8(6,0, (255 - _segments[segment_index].intensity())|0x01 ));
-//     CRGB color = ColorFromPalette(currentPalette, colorIndex, thisBright, LINEARBLEND);
-//     SetPixelColor(i, color.red, color.green, color.blue);
-//   }
-
-//   return FRAMETIME;
-// } 
+   @param rev             Reversed
+   @param useRandomColors 
+*******************************************************************************************************************************************************************************************************************
+********************************************************************************************************************************************************************************************************************/
 
 
-// /*
-//  * Percentage display
-//  * Intesity values from 0-100 turn on the leds.
-//  */
-// uint16_t mAnimatorLight::mode_percent(void) {
 
-// 	uint8_t percent = MAX(0, MIN(200, _segments[segment_index].intensity()));
-// 	uint16_t active_leds = (percent < 100) ? segment_length * percent / 100.0
-//                                          : segment_length * (200 - percent) / 100.0;
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+/ Plasma Effect
+/ adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino
+*
+void mAnimatorLight::mode_plasma(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Plasma()
+{
+
+  uint8_t thisPhase = beatsin8(6,-64,64);                       // Setting phase change for a couple of waves.
+  uint8_t thatPhase = beatsin8(7,-64,64);
+
+  for (int i = 0; i < _segments[segment_iters.index].length(); i++) {   // For each of the LED's in the strand, set color &  brightness based on a wave as follows:
+    uint8_t colorIndex = cubicwave8((i*(1+ 3*(_segments[segment_iters.index].speed() >> 5)))+(thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
+                             + cos8((i*(1+ 2*(_segments[segment_iters.index].speed() >> 5)))+(thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
+    uint8_t thisBright = qsub8(colorIndex, beatsin8(6,0, (255 - _segments[segment_iters.index].intensity())|0x01 ));
+    CRGB color = ColorFromPalette(currentPalette, colorIndex, thisBright, LINEARBLEND);
+    SetPixelColor(i, color.red, color.green, color.blue);
+  }
+
+
+} 
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Percentage display
+ * Intesity values from 0-100 turn on the leds.
+ *
+void mAnimatorLight::mode_percent(void) {
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Percent()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+	uint8_t percent = MAX(0, MIN(200, _segments[segment_index].intensity()));
+	uint16_t active_leds = (percent < 100) ? segment_length * percent / 100.0
+                                         : segment_length * (200 - percent) / 100.0;
   
-//   uint8_t size = (1 + ((_segments[segment_index].speed() * segment_length) >> 11));
-//   if (_segments[segment_index].speed() == 255) size = 255;
+  uint8_t size = (1 + ((_segments[segment_index].speed() * segment_length) >> 11));
+  if (_segments[segment_index].speed() == 255) size = 255;
     
-//   if (percent < 100) {
-//     for (uint16_t i = 0; i < segment_length; i++) {
-// 	  	if (i < _segment_runtimes[segment_index].step) {
-//         SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-// 	  	}
-// 	  	else {
-//         SetPixelColor(i, SEGCOLOR(1));
-// 	  	}
-// 	  }
-//   } else {
-//     for (uint16_t i = 0; i < segment_length; i++) {
-// 	  	if (i < (segment_length - _segment_runtimes[segment_index].step)) {
-//         SetPixelColor(i, SEGCOLOR(1));
-// 	  	}
-// 	  	else {
-//         SetPixelColor(i, pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-// 	  	}
-// 	  }
-//   }
+  if (percent < 100) {
+    for (uint16_t i = 0; i < segment_length; i++) {
+	  	if (i < _segment_runtimes[segment_index].step) {
+        SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+	  	}
+	  	else {
+        SetPixelColor(i, SEGCOLOR(1));
+	  	}
+	  }
+  } else {
+    for (uint16_t i = 0; i < segment_length; i++) {
+	  	if (i < (segment_length - _segment_runtimes[segment_index].step)) {
+        SetPixelColor(i, SEGCOLOR(1));
+	  	}
+	  	else {
+        SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+	  	}
+	  }
+  }
 
-//   if(active_leds > _segment_runtimes[segment_index].step) {  // smooth transition to the target value
-//     _segment_runtimes[segment_index].step += size;
-//     if (_segment_runtimes[segment_index].step > active_leds) _segment_runtimes[segment_index].step = active_leds;
-//   } else if (active_leds < _segment_runtimes[segment_index].step) {
-//     if (_segment_runtimes[segment_index].step > size) _segment_runtimes[segment_index].step -= size; else _segment_runtimes[segment_index].step = 0;
-//     if (_segment_runtimes[segment_index].step < active_leds) _segment_runtimes[segment_index].step = active_leds;
-//   }
+  if(active_leds > _segment_runtimes[segment_index].step) {  // smooth transition to the target value
+    _segment_runtimes[segment_index].step += size;
+    if (_segment_runtimes[segment_index].step > active_leds) _segment_runtimes[segment_index].step = active_leds;
+  } else if (active_leds < _segment_runtimes[segment_index].step) {
+    if (_segment_runtimes[segment_index].step > size) _segment_runtimes[segment_index].step -= size; else _segment_runtimes[segment_index].step = 0;
+    if (_segment_runtimes[segment_index].step < active_leds) _segment_runtimes[segment_index].step = active_leds;
+  }
 
-//  	return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
-// /*
-// / Modulates the brightness similar to a heartbeat
-// */
-// uint16_t mAnimatorLight::mode_heartbeat(void) {
-//   uint8_t bpm = 40 + (_segments[segment_index].speed() >> 4);
-//   uint32_t msPerBeat = (60000 / bpm);
-//   uint32_t secondBeat = (msPerBeat / 3);
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+/*
+/ Modulates the brightness similar to a heartbeat
+*
+void mAnimatorLight::mode_heartbeat(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-//   uint32_t bri_lower = _segment_runtimes[segment_index].aux1;
-//   bri_lower = bri_lower * 2042 / (2048 + _segments[segment_index].intensity());
-//   _segment_runtimes[segment_index].aux1 = bri_lower;
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Heartbeat()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
 
-//   unsigned long beatTimer = millis() - _segment_runtimes[segment_index].step;
-//   if((beatTimer > secondBeat) && !_segment_runtimes[segment_index].aux0) { // time for the second beat?
-//     _segment_runtimes[segment_index].aux1 = UINT16_MAX; //full bri
-//     _segment_runtimes[segment_index].aux0 = 1;
-//   }
-//   if(beatTimer > msPerBeat) { // time to reset the beat timer?
-//     _segment_runtimes[segment_index].aux1 = UINT16_MAX; //full bri
-//     _segment_runtimes[segment_index].aux0 = 0;
-//     _segment_runtimes[segment_index].step = millis();
-//   }
+  uint8_t bpm = 40 + (_segments[segment_index].speed() >> 4);
+  uint32_t msPerBeat = (60000 / bpm);
+  uint32_t secondBeat = (msPerBeat / 3);
 
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255 - (_segment_runtimes[segment_index].aux1 >> 8)));
-//   }
+  uint32_t bri_lower = _segment_runtimes[segment_index].aux1;
+  bri_lower = bri_lower * 2042 / (2048 + _segments[segment_index].intensity());
+  _segment_runtimes[segment_index].aux1 = bri_lower;
 
-//   return FRAMETIME;
-// }
+  unsigned long beatTimer = millis() - _segment_runtimes[segment_index].step;
+  if((beatTimer > secondBeat) && !_segment_runtimes[segment_index].aux0) { // time for the second beat?
+    _segment_runtimes[segment_index].aux1 = UINT16_MAX; //full bri
+    _segment_runtimes[segment_index].aux0 = 1;
+  }
+  if(beatTimer > msPerBeat) { // time to reset the beat timer?
+    _segment_runtimes[segment_index].aux1 = UINT16_MAX; //full bri
+    _segment_runtimes[segment_index].aux0 = 0;
+    _segment_runtimes[segment_index].step = millis();
+  }
+
+  for (uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255 - (_segment_runtimes[segment_index].aux1 >> 8)));
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
 
 
-// //  "Pacifica"
-// //  Gentle, blue-green ocean waves.
-// //  December 2019, Mark Kriegsman and Mary Corey March.
-// //  For Dan.
-// //
-// //
-// // In this animation, there are four "layers" of waves of light.  
-// //
-// // Each layer moves independently, and each is scaled separately.
-// //
-// // All four wave layers are added together on top of each other, and then 
-// // another filter is applied that adds "whitecaps" of brightness where the 
-// // waves line up with each other more.  Finally, another pass is taken
-// // over the led array to 'deepen' (dim) the blues and greens.
-// //
-// // The speed() and scale and motion each layer varies slowly within independent 
-// // hand-chosen ranges, which is why the code has a lot of low-speed() 'beatsin8' functions
-// // with a lot of oddly specific numeric ranges.
-// //
-// // These three custom blue-green color palettes were inspired by the colors found in
-// // the waters off the southern coast of California, https://goo.gl/maps/QQgd97jjHesHZVxQ7
-// //
-// // Modified for WLED, based on https://github.com/FastLED/FastLED/blob/master/examples/Pacifica/Pacifica.ino
-// //
-// uint16_t mAnimatorLight::mode_pacifica()
-// {
-//   CRGBPalette16 pacifica_palette_1 = 
-//     { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
-//       0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x14554B, 0x28AA50 };
-//   CRGBPalette16 pacifica_palette_2 = 
-//     { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
-//       0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x0C5F52, 0x19BE5F };
-//   CRGBPalette16 pacifica_palette_3 = 
-//     { 0x000208, 0x00030E, 0x000514, 0x00061A, 0x000820, 0x000927, 0x000B2D, 0x000C33, 
-//       0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
+//  "Pacifica"
+//  Gentle, blue-green ocean waves.
+//  December 2019, Mark Kriegsman and Mary Corey March.
+//  For Dan.
+//
+//
+// In this animation, there are four "layers" of waves of light.  
+//
+// Each layer moves independently, and each is scaled separately.
+//
+// All four wave layers are added together on top of each other, and then 
+// another filter is applied that adds "whitecaps" of brightness where the 
+// waves line up with each other more.  Finally, another pass is taken
+// over the led array to 'deepen' (dim) the blues and greens.
+//
+// The speed() and scale and motion each layer varies slowly within independent 
+// hand-chosen ranges, which is why the code has a lot of low-speed() 'beatsin8' functions
+// with a lot of oddly specific numeric ranges.
+//
+// These three custom blue-green color palettes were inspired by the colors found in
+// the waters off the southern coast of California, https://goo.gl/maps/QQgd97jjHesHZVxQ7
+//
+// Modified for WLED, based on https://github.com/FastLED/FastLED/blob/master/examples/Pacifica/Pacifica.ino
+//
 
-//   if (_segments[segment_index].palette) {
-//     pacifica_palette_1 = currentPalette;
-//     pacifica_palette_2 = currentPalette;
-//     pacifica_palette_3 = currentPalette;
-//   }
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-//   // Increment the four "color index start" counters, one for each wave layer.
-//   // Each is incremented at a different speed(), and the speeds vary over time.
-//   uint16_t sCIStart1 = _segment_runtimes[segment_index].aux0, sCIStart2 = _segment_runtimes[segment_index].aux1, sCIStart3 = _segment_runtimes[segment_index].step, sCIStart4 = _segment_runtimes[segment_index].step >> 16;
-//   //static uint16_t sCIStart1, sCIStart2, sCIStart3, sCIStart4;
-//   uint32_t deltams = 26 + (_segments[segment_index].speed() >> 3);
+void mAnimatorLight::mode_pacifica()
+{
+/*
+*  Bouncing Balls Effect
+*
+void mAnimatorLight::mode_bouncing_balls(void) {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Pacifica()
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
   
-//   uint16_t speedfactor1 = beatsin16(3, 179, 269);
-//   uint16_t speedfactor2 = beatsin16(4, 179, 269);
-//   uint32_t deltams1 = (deltams * speedfactor1) / 256;
-//   uint32_t deltams2 = (deltams * speedfactor2) / 256;
-//   uint32_t deltams21 = (deltams1 + deltams2) / 2;
-//   sCIStart1 += (deltams1 * beatsin88(1011,10,13));
-//   sCIStart2 -= (deltams21 * beatsin88(777,8,11));
-//   sCIStart3 -= (deltams1 * beatsin88(501,5,7));
-//   sCIStart4 -= (deltams2 * beatsin88(257,4,6));
-//   _segment_runtimes[segment_index].aux0 = sCIStart1; _segment_runtimes[segment_index].aux1 = sCIStart2;
-//   _segment_runtimes[segment_index].step = sCIStart4; _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step << 16) + sCIStart3;
+  CRGBPalette16 pacifica_palette_1 = 
+    { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
+      0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x14554B, 0x28AA50 };
+  CRGBPalette16 pacifica_palette_2 = 
+    { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
+      0x000019, 0x00001C, 0x000026, 0x000031, 0x00003B, 0x000046, 0x0C5F52, 0x19BE5F };
+  CRGBPalette16 pacifica_palette_3 = 
+    { 0x000208, 0x00030E, 0x000514, 0x00061A, 0x000820, 0x000927, 0x000B2D, 0x000C33, 
+      0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
 
-//   // Clear out the LED array to a dim background blue-green
-//   //fill(132618);
+  if (_segments[segment_index].palette.id) {
+    pacifica_palette_1 = currentPalette;
+    pacifica_palette_2 = currentPalette;
+    pacifica_palette_3 = currentPalette;
+  }
 
-//   uint8_t basethreshold = beatsin8( 9, 55, 65);
-//   uint8_t wave = beat8( 7 );
+  // Increment the four "color index start" counters, one for each wave layer.
+  // Each is incremented at a different speed(), and the speeds vary over time.
+  uint16_t sCIStart1 = _segment_runtimes[segment_index].aux0, sCIStart2 = _segment_runtimes[segment_index].aux1, sCIStart3 = _segment_runtimes[segment_index].step, sCIStart4 = _segment_runtimes[segment_index].step >> 16;
+  //static uint16_t sCIStart1, sCIStart2, sCIStart3, sCIStart4;
+  uint32_t deltams = 26 + (_segments[segment_index].speed() >> 3);
   
-//   for( uint16_t i = 0; i < segment_length; i++) {
-//     CRGB c = CRGB(2, 6, 10);
-//     // Render each of four layers, with different scales and speeds, that vary over time
-//     c += pacifica_one_layer(i, pacifica_palette_1, sCIStart1, beatsin16(3, 11 * 256, 14 * 256), beatsin8(10, 70, 130), 0-beat16(301));
-//     c += pacifica_one_layer(i, pacifica_palette_2, sCIStart2, beatsin16(4,  6 * 256,  9 * 256), beatsin8(17, 40,  80),   beat16(401));
-//     c += pacifica_one_layer(i, pacifica_palette_3, sCIStart3,                         6 * 256 , beatsin8(9, 10,38)   , 0-beat16(503));
-//     c += pacifica_one_layer(i, pacifica_palette_3, sCIStart4,                         5 * 256 , beatsin8(8, 10,28)   ,   beat16(601));
+  uint16_t speedfactor1 = beatsin16(3, 179, 269);
+  uint16_t speedfactor2 = beatsin16(4, 179, 269);
+  uint32_t deltams1 = (deltams * speedfactor1) / 256;
+  uint32_t deltams2 = (deltams * speedfactor2) / 256;
+  uint32_t deltams21 = (deltams1 + deltams2) / 2;
+  sCIStart1 += (deltams1 * beatsin88(1011,10,13));
+  sCIStart2 -= (deltams21 * beatsin88(777,8,11));
+  sCIStart3 -= (deltams1 * beatsin88(501,5,7));
+  sCIStart4 -= (deltams2 * beatsin88(257,4,6));
+  _segment_runtimes[segment_index].aux0 = sCIStart1; _segment_runtimes[segment_index].aux1 = sCIStart2;
+  _segment_runtimes[segment_index].step = sCIStart4; _segment_runtimes[segment_index].step = (_segment_runtimes[segment_index].step << 16) + sCIStart3;
+
+  // Clear out the LED array to a dim background blue-green
+  //fill(132618);
+
+  uint8_t basethreshold = beatsin8( 9, 55, 65);
+  uint8_t wave = beat8( 7 );
+  
+  for( uint16_t i = 0; i < segment_length; i++) {
+    CRGB c = CRGB(2, 6, 10);
+    // Render each of four layers, with different scales and speeds, that vary over time
+    c += pacifica_one_layer(i, pacifica_palette_1, sCIStart1, beatsin16(3, 11 * 256, 14 * 256), beatsin8(10, 70, 130), 0-beat16(301));
+    c += pacifica_one_layer(i, pacifica_palette_2, sCIStart2, beatsin16(4,  6 * 256,  9 * 256), beatsin8(17, 40,  80),   beat16(401));
+    c += pacifica_one_layer(i, pacifica_palette_3, sCIStart3,                         6 * 256 , beatsin8(9, 10,38)   , 0-beat16(503));
+    c += pacifica_one_layer(i, pacifica_palette_3, sCIStart4,                         5 * 256 , beatsin8(8, 10,28)   ,   beat16(601));
     
-//     // Add extra 'white' to areas where the four layers of light have lined up brightly
-//     uint8_t threshold = scale8( sin8( wave), 20) + basethreshold;
-//     wave += 7;
-//     uint8_t l = c.getAverageLight();
-//     if (l > threshold) {
-//       uint8_t overage = l - threshold;
-//       uint8_t overage2 = qadd8(overage, overage);
-//       c += CRGB(overage, overage2, qadd8(overage2, overage2));
-//     }
+    // Add extra 'white' to areas where the four layers of light have lined up brightly
+    uint8_t threshold = scale8( sin8( wave), 20) + basethreshold;
+    wave += 7;
+    uint8_t l = c.getAverageLight();
+    if (l > threshold) {
+      uint8_t overage = l - threshold;
+      uint8_t overage2 = qadd8(overage, overage);
+      c += CRGB(overage, overage2, qadd8(overage2, overage2));
+    }
 
-//     //deepen the blues and greens
-//     c.blue  = scale8(c.blue,  145); 
-//     c.green = scale8(c.green, 200); 
-//     c |= CRGB( 2, 5, 7);
+    //deepen the blues and greens
+    c.blue  = scale8(c.blue,  145); 
+    c.green = scale8(c.green, 200); 
+    c |= CRGB( 2, 5, 7);
 
-//     SetPixelColor(i, c.red, c.green, c.blue);
-//   }
+    SetPixelColor(i, c.red, c.green, c.blue);
+  }
 
-//   return FRAMETIME;
-// }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
 
-// // Add one layer of waves into the led array
-// CRGB mAnimatorLight::pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
-// {
-//   uint16_t ci = cistart;
-//   uint16_t waveangle = ioff;
-//   uint16_t wavescale_half = (wavescale >> 1) + 20;
+}
+
+// Add one layer of waves into the led array
+CRGB mAnimatorLight::pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
+{
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  uint16_t ci = cistart;
+  uint16_t waveangle = ioff;
+  uint16_t wavescale_half = (wavescale >> 1) + 20;
   
-//   waveangle += ((120 + _segments[segment_index].intensity()) * i); //original 250 * i
-//   uint16_t s16 = sin16(waveangle) + 32768;
-//   uint16_t cs = scale16(s16, wavescale_half) + wavescale_half;
-//   ci += (cs * i);
-//   uint16_t sindex16 = sin16(ci) + 32768;
-//   uint8_t sindex8 = scale16(sindex16, 240);
-//   return ColorFromPalette(p, sindex8, bri, LINEARBLEND);
-// }
+  waveangle += ((120 + _segments[segment_index].intensity()) * i); //original 250 * i
+  uint16_t s16 = sin16(waveangle) + 32768;
+  uint16_t cs = scale16(s16, wavescale_half) + wavescale_half;
+  ci += (cs * i);
+  uint16_t sindex16 = sin16(ci) + 32768;
+  uint8_t sindex8 = scale16(sindex16, 240);
+  return ColorFromPalette(p, sindex8, bri, LINEARBLEND);
+}
 
-// //Solid colour background with glitter
-// uint16_t mAnimatorLight::mode_solid_glitter()
-// {
-//   fill(SEGCOLOR(0));
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
-//   if (_segments[segment_index].intensity() > random8())
-//   {
-//     SetPixelColor(random16(segment_length), ULTRAWHITE);
-//   }
-//   return FRAMETIME;
-// }
+//Solid colour background with glitter
+void mAnimatorLight::mode_solid_glitter()
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
 
-
-// /*
-//  * Mode simulates a gradual sunrise
-//  */
-// uint16_t mAnimatorLight::mode_sunrise() {
-//   //speed() 0 - static sun
-//   //speed() 1 - 60: sunrise time in minutes
-//   //speed() 60 - 120 : sunset time in minutes - 60;
-//   //speed() above: "breathing" rise and set
-//   if (_segment_runtimes[segment_index].call == 0 || _segments[segment_index].speed() != _segment_runtimes[segment_index].aux0) {
-// 	  _segment_runtimes[segment_index].step = millis(); //save starting time, millis() because now can change from sync
-//     _segment_runtimes[segment_index].aux0 = _segments[segment_index].speed();
-//   }
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Solid_Glitter()
+{
   
-//   fill(0);
-//   uint16_t stage = 0xFFFF;
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+  fill(SEGCOLOR(0));
+
+  if (_segments[segment_index].intensity() > random8())
+  {
+    SetPixelColor(random16(segment_length), ULTRAWHITE);
+  }
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * Mode simulates a gradual sunrise
+ *
+// void mAnimatorLight::mode_sunrise() {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sunrise()
+{
   
-//   uint32_t s10SinceStart = (millis() - _segment_runtimes[segment_index].step) /100; //tenths of seconds
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  //speed() 0 - static sun
+  //speed() 1 - 60: sunrise time in minutes
+  //speed() 60 - 120 : sunset time in minutes - 60;
+  //speed() above: "breathing" rise and set
+  if (_segment_runtimes[segment_index].call == 0 || _segments[segment_index].speed() != _segment_runtimes[segment_index].aux0) {
+	  _segment_runtimes[segment_index].step = millis(); //save starting time, millis() because now can change from sync
+    _segment_runtimes[segment_index].aux0 = _segments[segment_index].speed();
+  }
   
-//   if (_segments[segment_index].speed() > 120) { //quick sunrise and sunset
-// 	  uint16_t counter = (now >> 1) * (((_segments[segment_index].speed() -120) >> 1) +1);
-// 	  stage = triwave16(counter);
-//   } else if (_segments[segment_index].speed()) { //sunrise
-// 	  uint8_t durMins = _segments[segment_index].speed();
-// 	  if (durMins > 60) durMins -= 60;
-// 	  uint32_t s10Target = durMins * 600;
-// 	  if (s10SinceStart > s10Target) s10SinceStart = s10Target;
-// 	  stage = map(s10SinceStart, 0, s10Target, 0, 0xFFFF);
-// 	  if (_segments[segment_index].speed() > 60) stage = 0xFFFF - stage; //sunset
-//   }
+  fill(0);
+  uint16_t stage = 0xFFFF;
   
-//   for (uint16_t i = 0; i <= segment_length/2; i++)
-//   {
-//     //default palette is Fire
-//     uint32_t c = pCONT_lAni->mEffects->color_from_palette(0, false, true, 255); //background
-
-//     uint16_t wave = triwave16((i * stage) / segment_length);
-
-//     wave = (wave >> 8) + ((wave * _segments[segment_index].intensity()) >> 15);
-
-//     if (wave > 240) { //clipped, full white sun
-//       c = pCONT_lAni->mEffects->color_from_palette( 240, false, true, 255);
-//     } else { //transition
-//       c = pCONT_lAni->mEffects->color_from_palette(wave, false, true, 255);
-//     }
-//     SetPixelColor(i, c);
-//     SetPixelColor(segment_length - i - 1, c);
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// // Sine waves that have controllable phase change speed(), frequency and cutoff. By Andrew Tuline.
-// // _segments[segment_index].speed() ->Speed, _segments[segment_index].intensity() -> Frequency (_segments[segment_index].fft1 -> Color change, _segments[segment_index].fft2 -> PWM cutoff)
-// //
-// uint16_t mAnimatorLight::mode_sinewave(void) {             // Adjustable sinewave. By Andrew Tuline
-//   //#define qsuba(x, b)  ((x>b)?x-b:0)               // Analog Unsigned subtraction macro. if result <0, then => 0
-
-//   uint16_t colorIndex = now /32;//(256 - _segments[segment_index].fft1);  // Amount of colour change.
-
-//   _segment_runtimes[segment_index].step += _segments[segment_index].speed()/16;                   // Speed of animation.
-//   uint16_t freq = _segments[segment_index].intensity()/4;//_segments[segment_index].fft2/8;                       // Frequency of the signal.
-
-//   for (int i=0; i<segment_length; i++) {                   // For each of the LED's in the strand, set a brightness based on a wave as follows:
-//     int pixBri = cubicwave8((i*freq)+_segment_runtimes[segment_index].step);//qsuba(cubicwave8((i*freq)+_segment_runtimes[segment_index].step), (255-_segments[segment_index].intensity())); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
-//     //setPixCol(i, i*colorIndex/255, pixBri);
-//     SetPixelColor(i, color_blend(SEGCOLOR(1), pCONT_lAni->mEffects->color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// /*
-//  * Best of both worlds from Palette and Spot effects. By Aircoookie
-//  */
-// uint16_t mAnimatorLight::mode_flow(void)
-// {
-//   uint16_t counter = 0;
-//   if (_segments[segment_index].speed() != 0) 
-//   {
-//     counter = now * ((_segments[segment_index].speed() >> 2) +1);
-//     counter = counter >> 8;
-//   }
+  uint32_t s10SinceStart = (millis() - _segment_runtimes[segment_index].step) /100; //tenths of seconds
   
-//   uint16_t maxZones = segment_length / 6; //only looks good if each zone has at least 6 LEDs
-//   uint16_t zones = (_segments[segment_index].intensity() * maxZones) >> 8;
-//   if (zones & 0x01) zones++; //zones must be even
-//   if (zones < 2) zones = 2;
-//   uint16_t zoneLen = segment_length / zones;
-//   uint16_t offset = (segment_length - zones * zoneLen) >> 1;
-
-//   fill(color_from_palette(-counter, false, true, 255));
-
-//   for (uint16_t z = 0; z < zones; z++)
-//   {
-//     uint16_t pos = offset + z * zoneLen;
-//     for (uint16_t i = 0; i < zoneLen; i++)
-//     {
-//       uint8_t colorIndex = (i * 255 / zoneLen) - counter;
-//       uint16_t led = (z & 0x01) ? i : (zoneLen -1) -i;
-//       if (IS_REVERSE) led = (zoneLen -1) -led;
-//       SetPixelColor(pos + led, pCONT_lAni->mEffects->color_from_palette(colorIndex, false, true, 255));
-//     }
-//   }
-
-//   return FRAMETIME;
-// }
-
-
-// /*
-//  * Dots waving around in a sine/pendulum motion.
-//  * Little pixel birds flying in a circle. By Aircoookie
-//  */
-// uint16_t mAnimatorLight::mode_chunchun(void)
-// {
-//   fill(SEGCOLOR(1));
-//   uint16_t counter = now*(6 + (_segments[segment_index].speed() >> 4));
-//   uint16_t numBirds = segment_length >> 2;
-//   uint16_t span = _segments[segment_index].intensity() << 8;
-
-//   for (uint16_t i = 0; i < numBirds; i++)
-//   {
-//     counter -= span/numBirds;
-//     int megumin = sin16(counter) + 0x8000;
-//     uint32_t bird = (megumin * segment_length) >> 16;
-//     uint32_t c = pCONT_lAni->mEffects->color_from_palette((i * 255)/ numBirds, false, true, 0);
-//     SetPixelColor(bird, c);
-//   }
-//   return FRAMETIME;
-// }
-// // #endif // ENABLE_ADVANCED_EFFECTS
-
-
-
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * Static
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
-
-
-
-// /*
-//  * No blinking. Just plain old static light.
-//  */
-// uint16_t mAnimatorLight::mode_static(void)
-// {
-//   fill(SEGCOLOR2(0));
-//   return (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
-// }
-
-// //Speed slider sets amount of LEDs lit, intensity() sets unlit
-// uint16_t mAnimatorLight::mode_static_pattern()
-// {
-//   uint16_t lit = 1 + _segments[segment_index].speed();
-//   uint16_t unlit = 1 + _segments[segment_index].intensity();
-//   bool drawingLit = true;
-//   uint16_t cnt = 0;
-
-//   for (uint16_t i = 0; i < segment_length; i++) {
-//     SetPixelColor(i, 
-//       (drawingLit) ? 
-//       pCONT_lAni->mEffects->color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : 
-//       SEGCOLOR2(1)
-//     );
-//     cnt++;
-//     if (cnt >= ((drawingLit) ? lit : unlit)) {
-//       cnt = 0;
-//       drawingLit = !drawingLit;
-//     }
-//   }
+  if (_segments[segment_index].speed() > 120) { //quick sunrise and sunset
+	  uint16_t counter = (now >> 1) * (((_segments[segment_index].speed() -120) >> 1) +1);
+	  stage = triwave16(counter);
+  } else if (_segments[segment_index].speed()) { //sunrise
+	  uint8_t durMins = _segments[segment_index].speed();
+	  if (durMins > 60) durMins -= 60;
+	  uint32_t s10Target = durMins * 600;
+	  if (s10SinceStart > s10Target) s10SinceStart = s10Target;
+	  stage = map(s10SinceStart, 0, s10Target, 0, 0xFFFF);
+	  if (_segments[segment_index].speed() > 60) stage = 0xFFFF - stage; //sunset
+  }
   
-//   return FRAMETIME;
-// }
+  for (uint16_t i = 0; i <= segment_length/2; i++)
+  {
+    //default palette is Fire
+    uint32_t c = color_from_palette(0, false, true, 255); //background
+
+    uint16_t wave = triwave16((i * stage) / segment_length);
+
+    wave = (wave >> 8) + ((wave * _segments[segment_index].intensity()) >> 15);
+
+    if (wave > 240) { //clipped, full white sun
+      c = color_from_palette( 240, false, true, 255);
+    } else { //transition
+      c = color_from_palette(wave, false, true, 255);
+    }
+    SetPixelColor(i, c);
+    SetPixelColor(segment_length - i - 1, c);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
 
 
-// uint16_t mAnimatorLight::mode_tri_static_pattern()
+// Sine waves that have controllable phase change speed(), frequency and cutoff. By Andrew Tuline.
+// _segments[segment_index].speed() ->Speed, _segments[segment_index].intensity() -> Frequency (_segments[segment_index].fft1 -> Color change, _segments[segment_index].fft2 -> PWM cutoff)
+//
+void mAnimatorLight::mode_sinewave(void) {             // Adjustable sinewave. By Andrew Tuline
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinewave()
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  
+  //#define qsuba(x, b)  ((x>b)?x-b:0)               // Analog Unsigned subtraction macro. if result <0, then => 0
+
+  uint16_t colorIndex = now /32;//(256 - _segments[segment_index].fft1);  // Amount of colour change.
+
+  _segment_runtimes[segment_index].step += _segments[segment_index].speed()/16;                   // Speed of animation.
+  uint16_t freq = _segments[segment_index].intensity()/4;//_segments[segment_index].fft2/8;                       // Frequency of the signal.
+
+  for (int i=0; i<segment_length; i++) {                   // For each of the LED's in the strand, set a brightness based on a wave as follows:
+    int pixBri = cubicwave8((i*freq)+_segment_runtimes[segment_index].step);//qsuba(cubicwave8((i*freq)+_segment_runtimes[segment_index].step), (255-_segments[segment_index].intensity())); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
+    //setPixCol(i, i*colorIndex/255, pixBri);
+    SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
+  }
+
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+
+/*
+ * Best of both worlds from Palette and Spot effects. By Aircoookie
+ *
+// void mAnimatorLight::mode_flow(void)
 // {
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Flow()
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  
+  uint16_t counter = 0;
+  if (_segments[segment_index].speed() != 0) 
+  {
+    counter = now * ((_segments[segment_index].speed() >> 2) +1);
+    counter = counter >> 8;
+  }
+  
+  uint16_t maxZones = segment_length / 6; //only looks good if each zone has at least 6 LEDs
+  uint16_t zones = (_segments[segment_index].intensity() * maxZones) >> 8;
+  if (zones & 0x01) zones++; //zones must be even
+  if (zones < 2) zones = 2;
+  uint16_t zoneLen = segment_length / zones;
+  uint16_t offset = (segment_length - zones * zoneLen) >> 1;
+
+  fill(color_from_palette(-counter, false, true, 255));
+
+  for (uint16_t z = 0; z < zones; z++)
+  {
+    uint16_t pos = offset + z * zoneLen;
+    for (uint16_t i = 0; i < zoneLen; i++)
+    {
+      uint8_t colorIndex = (i * 255 / zoneLen) - counter;
+      uint16_t led = (z & 0x01) ? i : (zoneLen -1) -i;
+      if (IS_REVERSE) led = (zoneLen -1) -led;
+      SetPixelColor(pos + led, color_from_palette(colorIndex, false, true, 255));
+    }
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+
+/*
+ * Dots waving around in a sine/pendulum motion.
+ * Little pixel birds flying in a circle. By Aircoookie
+ *
+void mAnimatorLight::mode_chunchun(void)
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chunchun()
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+  
+  fill(SEGCOLOR(1));
+  uint16_t counter = now*(6 + (_segments[segment_index].speed() >> 4));
+  uint16_t numBirds = segment_length >> 2;
+  uint16_t span = _segments[segment_index].intensity() << 8;
+
+  for (uint16_t i = 0; i < numBirds; i++)
+  {
+    counter -= span/numBirds;
+    int megumin = sin16(counter) + 0x8000;
+    uint32_t bird = (megumin * segment_length) >> 16;
+    uint32_t c = color_from_palette((i * 255)/ numBirds, false, true, 0);
+    SetPixelColor(bird, c);
+  }
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+// #endif // ENABLE_ADVANCED_EFFECTS
+
+
+
+/****************************************************************************************************************************
+ **************************************************************************************************************************** 
+ * Static
+ ****************************************************************************************************************************
+ ****************************************************************************************************************************/
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+/*
+ * No blinking. Just plain old static light.
+ *
+void mAnimatorLight::mode_static(void)
+{
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static()
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  fill(SEGCOLOR(0));
+
+  // return 
+  _segments[segment_index].transition.time_ms = (_segments[segment_index].getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+//Speed slider sets amount of LEDs lit, intensity() sets unlit
+void mAnimatorLight::mode_static_pattern()
+{
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static_Pattern()
+{
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  uint16_t lit = 1 + _segments[segment_index].speed();
+  uint16_t unlit = 1 + _segments[segment_index].intensity();
+  bool drawingLit = true;
+  uint16_t cnt = 0;
+
+  for (uint16_t i = 0; i < segment_length; i++) {
+    SetPixelColor(i, 
+      (drawingLit) ? 
+      color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : 
+      SEGCOLOR(1)
+    );
+    cnt++;
+    if (cnt >= ((drawingLit) ? lit : unlit)) {
+      cnt = 0;
+      drawingLit = !drawingLit;
+    }
+  }
+  
+  // return FRAMETIME;  
+  _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  StripUpdate();
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Name
+ * @note : Converted from WLED Effects
+ * 
+
+void mAnimatorLight::mode_tri_static_pattern()
+{
+
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+// void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static_Pattern()
+// {
+  
+//   uint8_t segment_index  = segment_iters.index;
+//   uint8_t segment_length = _segments[segment_index].length();
+//   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+//   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+//   _virtualSegmentLength = segment_length;
+
 //   uint8_t segSize = (_segments[segment_index].intensity() >> 5) +1;
 //   uint8_t currSeg = 0;
 //   uint16_t currSegCount = 0;
@@ -9760,109 +11127,12 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
 //     }
 //   }
 
-//   return FRAMETIME;
-// }
-
-// /****************************************************************************************************************************
-//  **************************************************************************************************************************** 
-//  * color_wipe
-//  ****************************************************************************************************************************
-//  ****************************************************************************************************************************/
-
-// /*
-//  * Color wipe function
-//  * LEDs are turned on (color1) in sequence, then turned off (color2) in sequence.
-//  * if (bool rev == true) then LEDs are turned off in reverse order
-//  */
-// uint16_t mAnimatorLight::color_wipe(bool rev, bool useRandomColors) 
-// {
-
-//   /**
-//    * Generate new colours
-//    * */
-//   handle_palette();
-  
-//   uint32_t cycleTime = 750 + (255 - _segments[segment_index].speed())*150;
-//   uint32_t perc = now % cycleTime;
-//   uint16_t prog = (perc * 65535) / cycleTime;
-//   bool back = (prog > 32767);
-//   if (back) {
-//     prog -= 32767;
-//     if (_segment_runtimes[segment_index].step == 0) _segment_runtimes[segment_index].step = 1;
-//   } else {
-//     if (_segment_runtimes[segment_index].step == 2) _segment_runtimes[segment_index].step = 3; //trigger color change
-//   }
-
-//   if (useRandomColors) {
-//     if (_segment_runtimes[segment_index].call == 0) {
-//       _segment_runtimes[segment_index].aux0 = random8();
-//       _segment_runtimes[segment_index].step = 3;
-//     }
-//     if (_segment_runtimes[segment_index].step == 1) { //if flag set, change to new random color
-//       _segment_runtimes[segment_index].aux1 = pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux0);
-//       _segment_runtimes[segment_index].step = 2;
-//     }
-//     if (_segment_runtimes[segment_index].step == 3) {
-//       _segment_runtimes[segment_index].aux0 = pCONT_lAni->mEffects->get_random_wheel_index(_segment_runtimes[segment_index].aux1);
-//       _segment_runtimes[segment_index].step = 0;
-//     }
-//   }
-
-//   uint16_t ledIndex = (prog * segment_length) >> 15;
-//   uint16_t rem = 0;
-//   rem = (prog * segment_length) * 2; //mod 0xFFFF
-//   rem /= (_segments[segment_index].intensity() +1);
-//   if (rem > 255) rem = 255;
-
-//   uint32_t col1 = useRandomColors ? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux1) : SEGCOLOR(1);
-//   for (uint16_t i = 0; i < segment_length; i++)
-//   {
-//     uint16_t index = (rev && back)? segment_length -1 -i : i;
-//     uint32_t col0 = useRandomColors? pCONT_lAni->mEffects->color_wheel(_segment_runtimes[segment_index].aux0) : pCONT_lAni->mEffects->color_from_palette(index, true, PALETTE_SOLID_WRAP, 0);
-    
-//     if (i < ledIndex) 
-//     {
-//       SetPixelColor(index, back? col1 : col0);
-//     } else
-//     {
-//       SetPixelColor(index, back? col0 : col1);
-//       if (i == ledIndex) SetPixelColor(index, pCONT_lAni->mEffects->color_blend(back? col0 : col1, back? col1 : col0, rem));
-//     }
-//   } 
-//   return FRAMETIME;
+//   // return FRAMETIME;  
+//   _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+//   StripUpdate();
 
 // }
 
-
-// /*
-//  * Lights all LEDs one after another.
-//  */
-// uint16_t mAnimatorLight::mode_color_wipe(void) {
-//   return color_wipe(false, false);
-// }
-
-// /*
-//  * Turns all LEDs after each other to a random color.
-//  * Then starts over with another color.
-//  */
-// uint16_t mAnimatorLight::mode_color_wipe_random(void) {
-//   return color_wipe(false, true);
-// }
-
-// /*
-//  * Lights all LEDs one after another. Turns off opposite
-//  */
-// uint16_t mAnimatorLight::mode_color_sweep(void) {
-//   return color_wipe(true, false);
-// }
-
-
-// /*
-//  * Random color introduced alternating from start and end of strip->
-//  */
-// uint16_t mAnimatorLight::mode_color_sweep_random(void) {
-//   return color_wipe(true, true);
-// }
 
 
 

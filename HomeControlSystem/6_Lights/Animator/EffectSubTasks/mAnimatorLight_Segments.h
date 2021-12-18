@@ -8,12 +8,36 @@
 
     #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
+#define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
+
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
 #define MAX_NUM_SEGMENTS 5
+
+#define IBN 5100
+
+// options
+// bit    7: segment is in transition mode
+// bits 4-6: TBD
+// bit    3: mirror effect within segment
+// bit    2: segment is on
+// bit    1: reverse segment
+// bit    0: segment is selected
+#define NO_OPTIONS   (uint8_t)0x00
+#define TRANSITIONAL (uint8_t)0x80
+#define MIRROR       (uint8_t)0x08
+#define SEGMENT_ON   (uint8_t)0x04
+#define REVERSE      (uint8_t)0x02
+#define SELECTED     (uint8_t)0x01
+#define IS_TRANSITIONAL ((_segments[segment_iters.index].options & TRANSITIONAL) == TRANSITIONAL)
+#define IS_MIRROR       ((_segments[segment_iters.index].options & MIRROR      ) == MIRROR      )
+#define IS_SEGMENT_ON   ((_segments[segment_iters.index].options & SEGMENT_ON  ) == SEGMENT_ON  )
+#define IS_REVERSE      ((_segments[segment_iters.index].options & REVERSE     ) == REVERSE     )
+#define IS_SELECTED     ((_segments[segment_iters.index].options & SELECTED    ) == SELECTED    )
+
 
 /* How much data bytes all segments combined may allocate */
 #ifdef ESP8266
@@ -22,6 +46,7 @@
 #define MAX_SEGMENT_DATA 8192
 #endif
 
+#define FLASH_COUNT 4 
 #define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
 
@@ -48,12 +73,16 @@
 #define PINK       (uint32_t)0xFF1493
 #define ULTRAWHITE (uint32_t)0xFFFFFFFF
 
+#define NUM_COLORS 3
+#define SEGCOLOR(x)      _segments[segment_iters.index].colors[x]
 
-#define SEGCOLOR(x)      _segments[segment_index].colors[x]
+#define FRAMETIME 25
+
+#define SPEED_FORMULA_L  5 + (50*(255 - _segments[segment_index].speed()))/_virtualSegmentLength
 
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
-uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri);
+uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
 
 // void fill_ranged(uint32_t c) ;
 
@@ -241,24 +270,6 @@ void Init_Segments();
     // ******************************************************************************************************************************************************************************/
 
 
-    // /******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // *** Specialised: WLED Animations converted  ***************************************************************************************************************************************************************************
-    // **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************/
-
-
-    #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-    EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID,
-    EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
-    EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID,
-    EFFECTS_FUNCTION_WLED_FIREWORKS_ID,
-    EFFECTS_FUNCTION_WLED_FIREWORKS_EXPLODING_ID,
-
-    #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-
 
 
     // // Apply sinewave to brightness, 25% increasing, 50% decreasing, 25% off
@@ -346,6 +357,140 @@ void Init_Segments();
      * Designing and quick test of animations before creating its own animaiton profile
      * */
     EFFECTS_FUNCTION_TESTER_ID,
+    
+    // /******************************************************************************************************************************************************************************
+    // ******************************************************************************************************************************************************************************
+    // ******************************************************************************************************************************************************************************
+    // *** Specialised: WLED Animations converted  ***************************************************************************************************************************************************************************
+    // **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
+    // ******************************************************************************************************************************************************************************
+    // ******************************************************************************************************************************************************************************/
+
+
+    #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    // Static
+    EFFECTS_FUNCTION_WLED_STATIC_ID,
+    EFFECTS_FUNCTION_WLED_STATIC_PATTERN_ID,
+    EFFECTS_FUNCTION_WLED_TRI_STATIC_PATTERN_ID,
+    EFFECTS_FUNCTION_WLED_SPOTS_ID,
+    EFFECTS_FUNCTION_WLED_PERCENT_ID,
+    // One colour changes
+    EFFECTS_FUNCTION_WLED_RANDOM_COLOR_ID,
+    // Wipe/Sweep/Runners     
+    EFFECTS_FUNCTION_WLED_COLOR_WIPE_ID,
+    EFFECTS_FUNCTION_WLED_COLOR_WIPE_RANDOM_ID,
+    EFFECTS_FUNCTION_WLED_COLOR_SWEEP_ID,
+    EFFECTS_FUNCTION_WLED_COLOR_SWEEP_RANDOM_ID,
+    EFFECTS_FUNCTION_WLED_TRICOLOR_WIPE_ID,
+    EFFECTS_FUNCTION_WLED_ANDROID_ID,
+    EFFECTS_FUNCTION_WLED_RUNNING_RED_BLUE_ID,
+    EFFECTS_FUNCTION_WLED_RUNNING_COLOR_ID,
+    EFFECTS_FUNCTION_WLED_RUNNING_RANDOM_ID,
+    EFFECTS_FUNCTION_WLED_GRADIENT_ID,
+    EFFECTS_FUNCTION_WLED_LOADING_ID,
+    EFFECTS_FUNCTION_WLED_POLICE_ID,
+    EFFECTS_FUNCTION_WLED_POLICE_ALL_ID,
+    EFFECTS_FUNCTION_WLED_TWO_DOTS_ID,
+    EFFECTS_FUNCTION_WLED_TWO_AREAS_ID,
+    EFFECTS_FUNCTION_WLED_MULTI_COMET_ID,
+    EFFECTS_FUNCTION_WLED_OSCILLATE_ID,
+    EFFECTS_FUNCTION_WLED_BPM_ID,
+    EFFECTS_FUNCTION_WLED_JUGGLE_ID,
+    EFFECTS_FUNCTION_WLED_PALETTE_ID,
+    EFFECTS_FUNCTION_WLED_COLORWAVES_ID,
+    EFFECTS_FUNCTION_WLED_LAKE_ID,
+    EFFECTS_FUNCTION_WLED_GLITTER_ID,
+    EFFECTS_FUNCTION_WLED_METEOR_ID,
+    EFFECTS_FUNCTION_WLED_METEOR_SMOOTH_ID,
+    EFFECTS_FUNCTION_WLED_PRIDE_2015_ID,
+    EFFECTS_FUNCTION_WLED_RIPPLE_RAINBOW_ID,
+    EFFECTS_FUNCTION_WLED_PACIFICA_ID,
+    EFFECTS_FUNCTION_WLED_SUNRISE_ID,
+    EFFECTS_FUNCTION_WLED_SINEWAVE_ID,
+    EFFECTS_FUNCTION_WLED_FLOW_ID,
+    EFFECTS_FUNCTION_WLED_PHASEDNOISE_ID,
+    EFFECTS_FUNCTION_WLED_PHASED_ID,
+    EFFECTS_FUNCTION_WLED_RUNNING_LIGHTS_ID,
+    EFFECTS_FUNCTION_WLED_RAINBOW_CYCLE_ID,
+    EFFECTS_FUNCTION_WLED_MERRY_CHRISTMAS_ID,
+    EFFECTS_FUNCTION_WLED_HALLOWEEN_ID,
+    // Chase
+    EFFECTS_FUNCTION_WLED_CHASE_COLOR_ID,
+    EFFECTS_FUNCTION_WLED_CHASE_RANDOM_ID,
+    EFFECTS_FUNCTION_WLED_CHASE_RAINBOW_ID, 
+    EFFECTS_FUNCTION_WLED_CHASE_FLASH_ID,
+    EFFECTS_FUNCTION_WLED_CHASE_FLASH_RANDOM_ID, 
+    EFFECTS_FUNCTION_WLED_CHASE_RAINBOW_WHITE_ID,
+    EFFECTS_FUNCTION_WLED_CHASE_THEATER_ID,
+    EFFECTS_FUNCTION_WLED_CHASE_THEATER_RAINBOW_ID,
+    EFFECTS_FUNCTION_WLED_CHASE_TRICOLOR_ID,
+    EFFECTS_FUNCTION_WLED_CIRCUS_COMBUSTUS_ID,
+    // Breathe/Fade/Pulse
+    EFFECTS_FUNCTION_WLED_BREATH_ID,
+    EFFECTS_FUNCTION_WLED_FADE_ID,
+    EFFECTS_FUNCTION_WLED_FADE_TRICOLOR_ID,
+    EFFECTS_FUNCTION_WLED_FADE_SPOTS_ID,
+    // Fireworks
+    EFFECTS_FUNCTION_WLED_FIREWORKS_ID,
+    EFFECTS_FUNCTION_WLED_FIREWORKS_EXPLODING_ID,
+    EFFECTS_FUNCTION_WLED_FIREWORKS_STARBURST_ID,
+    EFFECTS_FUNCTION_WLED_RAIN_ID,
+    // Sparkle/Twinkle
+    EFFECTS_FUNCTION_WLED_SOLID_GLITTER_ID,
+    EFFECTS_FUNCTION_WLED_POPCORN_ID,
+    EFFECTS_FUNCTION_WLED_PLASMA_ID,
+    EFFECTS_FUNCTION_WLED_SPARKLE_ID,
+    EFFECTS_FUNCTION_WLED_FLASH_SPARKLE_ID,
+    EFFECTS_FUNCTION_WLED_HYPER_SPARKLE_ID,
+    EFFECTS_FUNCTION_WLED_TWINKLE_ID,
+    EFFECTS_FUNCTION_WLED_COLORTWINKLE_ID,
+    EFFECTS_FUNCTION_WLED_TWINKLEFOX_ID,
+    EFFECTS_FUNCTION_WLED_TWINKLECAT_ID,
+    EFFECTS_FUNCTION_WLED_TWINKLEUP_ID,
+    EFFECTS_FUNCTION_WLED_DYNAMIC_ID,
+    EFFECTS_FUNCTION_WLED_SAW_ID,
+    EFFECTS_FUNCTION_WLED_DISSOLVE_ID,
+    EFFECTS_FUNCTION_WLED_DISSOLVE_RANDOM_ID,
+    EFFECTS_FUNCTION_WLED_COLORFUL_ID,
+    EFFECTS_FUNCTION_WLED_TRAFFIC_LIGHT_ID,
+    EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID,
+    EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
+    EFFECTS_FUNCTION_WLED_FIRE_FLICKER_ID,
+    EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID,
+    // Blink/Strobe
+    EFFECTS_FUNCTION_WLED_BLINK_ID,
+    EFFECTS_FUNCTION_WLED_BLINK_RAINBOW_ID,
+    EFFECTS_FUNCTION_WLED_STROBE_ID,
+    EFFECTS_FUNCTION_WLED_MULTI_STROBE_ID,
+    EFFECTS_FUNCTION_WLED_STROBE_RAINBOW_ID, 
+    EFFECTS_FUNCTION_WLED_RAINBOW_ID,
+    EFFECTS_FUNCTION_WLED_LIGHTNING_ID,     
+    EFFECTS_FUNCTION_WLED_FIRE_2012_ID,
+    EFFECTS_FUNCTION_WLED_RAILWAY_ID,
+    EFFECTS_FUNCTION_WLED_HEARTBEAT_ID, 
+    // Noise
+    EFFECTS_FUNCTION_WLED_FILLNOISE8_ID,
+    EFFECTS_FUNCTION_WLED_NOISE16_1_ID,
+    EFFECTS_FUNCTION_WLED_NOISE16_2_ID,
+    EFFECTS_FUNCTION_WLED_NOISE16_3_ID,
+    EFFECTS_FUNCTION_WLED_NOISE16_4_ID,
+    EFFECTS_FUNCTION_WLED_NOISEPAL_ID,
+    // Scan
+    EFFECTS_FUNCTION_WLED_SCAN_ID,
+    EFFECTS_FUNCTION_WLED_DUAL_SCAN_ID,
+    EFFECTS_FUNCTION_WLED_LARSON_SCANNER_ID,
+    EFFECTS_FUNCTION_WLED_DUAL_LARSON_SCANNER_ID,
+    EFFECTS_FUNCTION_WLED_ICU_ID,
+    EFFECTS_FUNCTION_WLED_RIPPLE_ID,
+    EFFECTS_FUNCTION_WLED_COMET_ID,
+    EFFECTS_FUNCTION_WLED_CHUNCHUN_ID,
+    EFFECTS_FUNCTION_WLED_BOUNCINGBALLS_ID,
+    EFFECTS_FUNCTION_WLED_SINELON_ID,
+    EFFECTS_FUNCTION_WLED_SINELON_DUAL_ID,
+    EFFECTS_FUNCTION_WLED_SINELON_RAINBOW_ID,
+    EFFECTS_FUNCTION_WLED_DRIP_ID,     
+    #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+
     // Length
     EFFECTS_FUNCTION_LENGTH_ID
   };         
@@ -488,140 +633,8 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 #define DEFAULT_COLOR2      (uint32_t)0xFFAA00
 
 // #define NUM_COLORS       3 /* number of colors per segment */
-#define SEGCOLOR2(x)      _segments[_segment_index].colors[x]
+// #define SEGCOLOR2(x)      _segments[_segment_index].colors[x]
  
-//   // WLED functions I am merging, will use the 'ID' to select which animator to use, as I migrate between animator methods        
-//   enum EFFECTS_WLED_FUNCTION_IDS{
-//     EFFECTS_WLED_FUNCTION_01_ID = EFFECTS_FUNCTION_LENGTH_ID,
-// // Static
-//   FX_MODE_STATIC=0,
-//   FX_MODE_STATIC_PATTERN,
-//   FX_MODE_TRI_STATIC_PATTERN,
-//   FX_MODE_SPOTS,
-//   FX_MODE_PERCENT,
-//   // One colour changes
-//   FX_MODE_RANDOM_COLOR,
-//   // Wipe/Sweep/Runners 
-//   FX_MODE_COLOR_WIPE, 
-//   FX_MODE_COLOR_WIPE_RANDOM,
-//   FX_MODE_COLOR_SWEEP,
-//   FX_MODE_COLOR_SWEEP_RANDOM,
-//   FX_MODE_TRICOLOR_WIPE,
-//   FX_MODE_ANDROID,
-//   FX_MODE_RUNNING_RED_BLUE,
-//   FX_MODE_RUNNING_COLOR,
-//   FX_MODE_RUNNING_RANDOM,
-//   FX_MODE_GRADIENT,
-//   FX_MODE_LOADING,
-//   FX_MODE_POLICE,
-//   FX_MODE_POLICE_ALL,
-//   FX_MODE_TWO_DOTS,
-//   FX_MODE_TWO_AREAS,
-//   FX_MODE_MULTI_COMET,
-//   FX_MODE_OSCILLATE,
-//   FX_MODE_BPM,
-//   FX_MODE_JUGGLE,
-//   FX_MODE_PALETTE,
-//   FX_MODE_COLORWAVES,
-//   FX_MODE_LAKE,
-//   FX_MODE_GLITTER,
-//   FX_MODE_METEOR,
-//   FX_MODE_METEOR_SMOOTH,
-//   FX_MODE_PRIDE_2015,
-//   FX_MODE_RIPPLE_RAINBOW,
-//   FX_MODE_PACIFICA,
-//   FX_MODE_SUNRISE,
-//   FX_MODE_SINEWAVE,
-//   FX_MODE_FLOW,
-//   FX_MODE_PHASEDNOISE,
-//   FX_MODE_PHASED,
-//   FX_MODE_RUNNING_LIGHTS,
-//   FX_MODE_RAINBOW_CYCLE,
-//   FX_MODE_MERRY_CHRISTMAS,
-//   FX_MODE_HALLOWEEN,
-//   // Chase
-//   FX_MODE_CHASE_COLOR,
-//   FX_MODE_CHASE_RANDOM,
-//   FX_MODE_CHASE_RAINBOW, 
-//   FX_MODE_CHASE_FLASH,
-//   FX_MODE_CHASE_FLASH_RANDOM, 
-//   FX_MODE_CHASE_RAINBOW_WHITE,
-//   FX_MODE_THEATER_CHASE,
-//   FX_MODE_THEATER_CHASE_RAINBOW,
-//   FX_MODE_TRICOLOR_CHASE,
-//   FX_MODE_RANDOM_CHASE,
-//   FX_MODE_CIRCUS_COMBUSTUS,
-//   // Breathe/Fade/Pulse
-//   FX_MODE_BREATH,
-//   FX_MODE_FADE,
-//   FX_MODE_TRICOLOR_FADE,
-//   FX_MODE_SPOTS_FADE,
-//   // Fireworks
-//   FX_MODE_FIREWORKS,
-//   FX_MODE_STARBURST,
-//   FX_MODE_EXPLODING_FIREWORKS,
-//   FX_MODE_RAIN,
-//   // Sparkle/Twinkle
-//   FX_MODE_SOLID_GLITTER,
-//   FX_MODE_POPCORN,
-//   FX_MODE_PLASMA,
-//   FX_MODE_FIRE_FLICKER,
-//   FX_MODE_SPARKLE,
-//   FX_MODE_FLASH_SPARKLE,
-//   FX_MODE_HYPER_SPARKLE,
-//   FX_MODE_TWINKLE,
-//   FX_MODE_COLORTWINKLE,
-//   FX_MODE_TWINKLEFOX,
-//   FX_MODE_TWINKLECAT,
-//   FX_MODE_TWINKLEUP,
-//   FX_MODE_DYNAMIC,
-//   FX_MODE_SAW,
-//   FX_MODE_DISSOLVE,
-//   FX_MODE_DISSOLVE_RANDOM,
-//   FX_MODE_COLORFUL,
-//   FX_MODE_TRAFFIC_LIGHT,
-//   FX_MODE_CANDLE,
-//   FX_MODE_CANDLE_MULTI,
-//   FX_MODE_HALLOWEEN_EYES,
-//   #ifdef ENABLE_ADVANCED_EFFECTS  
-//   // Blink/Strobe
-//   FX_MODE_BLINK,
-//   FX_MODE_BLINK_RAINBOW,
-//   FX_MODE_STROBE,
-//   FX_MODE_MULTI_STROBE,
-//   FX_MODE_STROBE_RAINBOW, 
-//   FX_MODE_RAINBOW,
-//   FX_MODE_LIGHTNING,     
-//   FX_MODE_FIRE_2012,
-//   FX_MODE_RAILWAY,
-//   FX_MODE_HEARTBEAT, 
-//   // Noise
-//   FX_MODE_FILLNOISE8,
-//   FX_MODE_NOISE16_1,
-//   FX_MODE_NOISE16_2,
-//   FX_MODE_NOISE16_3,
-//   FX_MODE_NOISE16_4,
-//   FX_MODE_NOISEPAL,
-//   // Scan
-//   FX_MODE_SCAN,
-//   FX_MODE_DUAL_SCAN,
-//   FX_MODE_LARSON_SCANNER,
-//   FX_MODE_DUAL_LARSON_SCANNER,
-//   FX_MODE_ICU,
-//   FX_MODE_RIPPLE,
-//   FX_MODE_COMET,
-//   FX_MODE_CHUNCHUN,
-//   FX_MODE_BOUNCINGBALLS,
-//   FX_MODE_SINELON,
-//   FX_MODE_SINELON_DUAL,
-//   FX_MODE_SINELON_RAINBOW,
-//   FX_MODE_DRIP,      
-//   #endif // ENABLE_ADVANCED_EFFECTS   
-//   // Length of Effects
-//   MODE_COUNT,
-
-//     EFFECTS_WLED_FUNCTION_LENGTH_ID,
-//   };
 
 //realtime modes
 #define REALTIME_MODE_INACTIVE    0
@@ -653,144 +666,6 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     void seg_fill_ranged(uint32_t c);
 
 
-    // builtin modes
-    uint16_t
-      seg_mode_static(void),
-      mode_static(void),
-      // mode_blink(void),
-      // mode_blink_rainbow(void),
-      // mode_strobe(void),
-      // mode_strobe_rainbow(void),
-      mode_color_wipe(void),
-      mode_color_sweep(void),
-      mode_color_wipe_random(void),
-      mode_color_sweep_random(void),
-      // mode_random_color(void),
-      // mode_dynamic(void),
-      // mode_breath(void),
-      // mode_fade(void),
-      // mode_scan(void),
-      // mode_dual_scan(void),
-      // mode_theater_chase(void),
-      // mode_theater_chase_rainbow(void),
-      // mode_rainbow(void),
-      // mode_rainbow_cycle(void),
-      // mode_running_lights(void),
-      // mode_saw(void),
-      // mode_twinkle(void),
-      // mode_dissolve(void),
-      // mode_dissolve_random(void),
-      // mode_sparkle(void),
-      // mode_flash_sparkle(void),
-      // mode_hyper_sparkle(void),
-      // mode_multi_strobe(void),
-      // mode_android(void),
-      // mode_chase_color(void),
-      // mode_chase_random(void),
-      // mode_chase_rainbow(void),
-      // mode_chase_flash(void),
-      // mode_chase_flash_random(void),
-      // mode_chase_rainbow_white(void),
-      // mode_colorful(void),
-      // mode_traffic_light(void),
-      // mode_running_color(void),
-      // mode_running_red_blue(void),
-      // mode_running_random(void),
-      // mode_larson_scanner(void),
-      // mode_comet(void),
-      // mode_fireworks(void),
-      // mode_rain(void),
-      // mode_merry_christmas(void),
-      // mode_halloween(void),
-      // mode_fire_flicker(void),
-      // mode_gradient(void),
-      // mode_loading(void),
-      // mode_police(void),
-      // mode_police_all(void),
-      // mode_two_dots(void),
-      // mode_two_areas(void),
-      // mode_circus_combustus(void),
-      // mode_bicolor_chase(void),
-      // mode_tricolor_chase(void),
-      // mode_tricolor_wipe(void),
-      // mode_tricolor_fade(void),
-      // mode_lightning(void),
-      // mode_icu(void),
-      // mode_multi_comet(void),
-      // mode_dual_larson_scanner(void),
-      // mode_random_chase(void),
-      // mode_oscillate(void),
-      // mode_fire_2012(void),
-      // mode_pride_2015(void),
-      // mode_bpm(void),
-      // mode_juggle(void),
-      // mode_palette(void),
-      // mode_colorwaves(void),
-      // mode_fillnoise8(void),
-      // mode_noise16_1(void),
-      // mode_noise16_2(void),
-      // mode_noise16_3(void),
-      // mode_noise16_4(void),
-      // mode_colortwinkle(void),
-      // mode_lake(void),
-      // mode_meteor(void),
-      // mode_meteor_smooth(void),
-      // mode_railway(void),
-      // mode_ripple(void),
-      // mode_twinklefox(void),
-      // mode_twinklecat(void),
-      // mode_halloween_eyes(void),
-      mode_static_pattern(void),
-      mode_tri_static_pattern(void);//,
-      // mode_spots(void),
-      // mode_spots_fade(void),
-      // mode_glitter(void),
-      // mode_candle(void),
-      // mode_starburst(void),
-      // mode_exploding_fireworks(void),
-      // mode_bouncing_balls(void),
-      // mode_sinelon(void),
-      // mode_sinelon_dual(void),
-      // mode_sinelon_rainbow(void),
-      // mode_popcorn(void),
-      // mode_drip(void),
-      // mode_plasma(void),
-      // mode_percent(void),
-      // mode_ripple_rainbow(void),
-      // mode_heartbeat(void),
-      // mode_pacifica(void),
-      // mode_candle_multi(void),
-      // mode_solid_glitter(void),
-      // mode_sunrise(void),
-      // mode_phased(void),
-      // mode_twinkleup(void),
-      // mode_noisepal(void),
-      // mode_sinewave(void),
-      // mode_phased_noise(void),
-      // mode_flow(void),
-      // mode_chunchun(void);
-
-    // mode helper functions
-    uint16_t
-    //   blink(uint32_t, uint32_t, bool strobe, bool),
-    //   candle(bool),
-      color_wipe(bool, bool);//
-    //   scan(bool),
-    //   theater_chase(uint32_t, uint32_t, bool),
-    //   running_base(bool),
-    //   larson_scanner(bool),
-    //   sinelon_base(bool,bool),
-    //   dissolve(uint32_t),
-    //   chase(uint32_t, uint32_t, uint32_t, bool),
-    //   gradient_base(bool),
-    //   ripple_base(bool),
-    //   police_base(uint32_t, uint32_t, bool),
-    //   running(uint32_t, uint32_t),
-    //   tricolor_chase(uint32_t, uint32_t),
-    //   twinklefox_base(bool),
-    //   spots_base(uint16_t),
-    //   realPixelIndex(uint16_t i),
-    //   phased_base(uint8_t);
 
 
     #define NUM_COLORS2       3 /* number of colors per segment */
@@ -974,7 +849,12 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       }transition;
       uint8_t speed() //legacy for wled effects, made up from time/rate
       {
-        return 127;
+        return transition.speed;
+      }
+      void set_speed(uint8_t v) //legacy for wled effects, made up from time/rate
+      {
+        transition.speed = v;
+        // return 127;
       }
       uint8_t intensity() //legacy for wled effects, made up from time/rate
       {
@@ -1042,7 +922,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
      * */
     struct segment_shared_iters{
       // uint8_t index = 0;
-      uint8_t _segment_index = 0;
+      uint8_t index = 0;
       uint8_t _segment_index_palette_last = 99; //mine is longer
 
     }segment_iters;
@@ -1100,7 +980,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
        * */
       NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
 
-      bool animation_has_anim_callback = true;
+      bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
       
       // can I default this to nullptr when not used, will this actually reduce memory?
       RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
@@ -1225,24 +1105,158 @@ void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
     void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
     void SubTask_Flasher_Animate_Function_Tester();
 
-
-
+    
     #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    // Static
+    void SubTask_Segment_Flasher_Animate_Function__Static();
+    void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
+    void SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16_t threshold);
+    void SubTask_Segment_Flasher_Animate_Function__Spots();
+    void SubTask_Segment_Flasher_Animate_Function__Percent();
+    // One colour changes
+    void SubTask_Segment_Flasher_Animate_Function__Random_Colour();
+    // Wipe/Sweep/Runners 
+    void BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(bool rev, bool useRandomColors);
+    void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe();
+    void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random();
+    void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep();
+    void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
+    void SubTask_Segment_Flasher_Animate_Function__TriColour();
+    void SubTask_Segment_Flasher_Animate_Function__Android();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw);
+    void SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2);
+    void SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue();
+    void SubTask_Segment_Flasher_Animate_Function__Running_Colour();
+    void SubTask_Segment_Flasher_Animate_Function__Running_Random();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading);
+    void SubTask_Segment_Flasher_Animate_Function__Gradient();
+    void SubTask_Segment_Flasher_Animate_Function__Loading();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Police(uint32_t color1, uint32_t color2, bool all);
+    void SubTask_Segment_Flasher_Animate_Function__Police();
+    void SubTask_Segment_Flasher_Animate_Function__Polce_All();
+    void SubTask_Segment_Flasher_Animate_Function__Two_Dots();
+    void SubTask_Segment_Flasher_Animate_Function__Two_Areas();
+    void SubTask_Segment_Flasher_Animate_Function__Multi_Comet();
+    void SubTask_Segment_Flasher_Animate_Function__Oscillate();
+    void SubTask_Segment_Flasher_Animate_Function__BPM();
+    void SubTask_Segment_Flasher_Animate_Function__Juggle();
+    void SubTask_Segment_Flasher_Animate_Function__Palette();
+    void SubTask_Segment_Flasher_Animate_Function__ColourWaves();
+    void SubTask_Segment_Flasher_Animate_Function__Lake();
+    void SubTask_Segment_Flasher_Animate_Function__Glitter();
+    void SubTask_Segment_Flasher_Animate_Function__Meteor();
+    void SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth();    
+    void SubTask_Segment_Flasher_Animate_Function__Pride_2015();    
+    void SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(); 
+    CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
+    void SubTask_Segment_Flasher_Animate_Function__Pacifica();    
+    void SubTask_Segment_Flasher_Animate_Function__Sunrise();    
+    void SubTask_Segment_Flasher_Animate_Function__Sinewave();    
+    void SubTask_Segment_Flasher_Animate_Function__Flow();    
+    void SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8_t moder);
+    void SubTask_Segment_Flasher_Animate_Function__PhasedNoise();    
+    void SubTask_Segment_Flasher_Animate_Function__Phased();    
+    void SubTask_Segment_Flasher_Animate_Function__Running_Lights();    
+    void SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle();    
+    void SubTask_Segment_Flasher_Animate_Function__Merry_Christmas();    
+    void SubTask_Segment_Flasher_Animate_Function__Halloween();    
+    // Chase    
+    void SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Colour();
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Random();
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Flash();
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Random();
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_White();
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Theater();
+    void SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rainbow();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
+    void SubTask_Segment_Flasher_Animate_Function__Chase_TriColour();
+    void SubTask_Segment_Flasher_Animate_Function__Circus_Combustus();
+    // Breathe/Fade/Pulse
+    void SubTask_Segment_Flasher_Animate_Function__Breath();
+    void SubTask_Segment_Flasher_Animate_Function__Fade();
+    void SubTask_Segment_Flasher_Animate_Function__Fade_TriColour();
+    void SubTask_Segment_Flasher_Animate_Function__Fade_Spots();
+    // Fireworks
+    void SubTask_Segment_Flasher_Animate_Function__Fireworks();
+    void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
+    void SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst();
+    void SubTask_Segment_Flasher_Animate_Function__Rain();
+  // Sparkle/Twinkle
+    void SubTask_Segment_Flasher_Animate_Function__Solid_Glitter();
+    void SubTask_Segment_Flasher_Animate_Function__Popcorn();
+    void SubTask_Segment_Flasher_Animate_Function__Plasma();
+    void SubTask_Segment_Flasher_Animate_Function__Sparkle();
+    void SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash();
+    void SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper();
+    void SubTask_Segment_Flasher_Animate_Function__Twinkle();
+    CRGB SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
+    void SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(bool cat);
+    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour();
+    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Fox();
+    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat();
+    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Up();
+    void SubTask_Segment_Flasher_Animate_Function__Dynamic();
+    void SubTask_Segment_Flasher_Animate_Function__Saw();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(uint32_t color);
+    void SubTask_Segment_Flasher_Animate_Function__Dissolve();
+    void SubTask_Segment_Flasher_Animate_Function__Dissolve_Random();
+    void SubTask_Segment_Flasher_Animate_Function__ColourFul();
+    void SubTask_Segment_Flasher_Animate_Function__Traffic_Light();
     void SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi = false);
     void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
     void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
+    void SubTask_Segment_Flasher_Animate_Function__Fire_Flicker();
     void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
-    void SubTask_Segment_Flasher_Animate_Function__Fireworks();
-    void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
+    // Blink/Strobe
+    void SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
+    void SubTask_Segment_Flasher_Animate_Function__Blink();
+    void SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow();
+    void SubTask_Segment_Flasher_Animate_Function__Strobe();
+    void SubTask_Segment_Flasher_Animate_Function__Strobe_Multi();
+    void SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow();
+    void SubTask_Segment_Flasher_Animate_Function__Rainbow();
+    void SubTask_Segment_Flasher_Animate_Function__Lightning();
+    void SubTask_Segment_Flasher_Animate_Function__Fire_2012();
+    void SubTask_Segment_Flasher_Animate_Function__Railway();
+    void SubTask_Segment_Flasher_Animate_Function__Heartbeat();
+    //Noise
+    void SubTask_Segment_Flasher_Animate_Function__FillNoise8();
+    void SubTask_Segment_Flasher_Animate_Function__Noise16_1();
+    void SubTask_Segment_Flasher_Animate_Function__Noise16_2();
+    void SubTask_Segment_Flasher_Animate_Function__Noise16_3();
+    void SubTask_Segment_Flasher_Animate_Function__Noise16_4();
+    void SubTask_Segment_Flasher_Animate_Function__Noise_Pal();
+    // Scan
+    void SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool dual);
+    void SubTask_Segment_Flasher_Animate_Function__Scan();
+    void SubTask_Segment_Flasher_Animate_Function__Scan_Dual();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(bool dual);
+    void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner();
+    void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Dual();
+    void SubTask_Segment_Flasher_Animate_Function__ICU();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow);
+    void SubTask_Segment_Flasher_Animate_Function__Ripple();
+    void SubTask_Segment_Flasher_Animate_Function__Comet();
+    void SubTask_Segment_Flasher_Animate_Function__Chunchun();
+    void SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls();
+    void SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool dual, bool rainbow=false);
+    void SubTask_Segment_Flasher_Animate_Function__Sinelon();
+    void SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual();
+    void SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow();
+    void SubTask_Segment_Flasher_Animate_Function__Drip();
 
     // Temporary helper functions to be cleaned up and converted
     void blur(uint8_t blur_amount);
     void fade_out(uint8_t rate);
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);
-
-
-
+    uint8_t get_random_wheel_index(uint8_t pos);
+    uint16_t triwave16(uint16_t in);
+    uint16_t mode_palette();
 
     #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
