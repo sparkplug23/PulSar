@@ -21,6 +21,9 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   {
     snprintf(buffer, sizeof(buffer), "Segment%d", segment_i);
     if(jtok = obj[buffer]){ 
+
+
+
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
       AddLog(LOG_LEVEL_TEST, PSTR("Seg: \"%s\""),buffer);
       segments_found++;
@@ -698,6 +701,8 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value){
   flashersettings.function = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
   flashersettings.region = EFFECTS_REGION_COLOUR_SELECT_ID;
   pCONT_iLight->animation.flags.animator_first_run= true; // first run, so do extra things
+
+  
   
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset

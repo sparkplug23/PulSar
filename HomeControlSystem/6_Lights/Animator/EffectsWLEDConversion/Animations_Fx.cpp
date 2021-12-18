@@ -197,6 +197,16 @@ uint16_t WS2812FX::color_wipe(bool rev, bool useRandomColors) {
   uint32_t perc = now % cycleTime;
   uint16_t prog = (perc * 65535) / cycleTime;
   bool back = (prog > 32767);
+  
+  AddLog(LOG_LEVEL_TEST, PSTR("prog=%d"),prog); // progress
+
+  /**
+   * 0 to 32000 is forward sweep
+   * 32000 to 65000 is clear sweep
+   * 
+   * 
+   */
+// switch between colour to draw
   if (back) {
     prog -= 32767;
     if (_segment_runtimes[_segment_index].step == 0) _segment_runtimes[_segment_index].step = 1;
@@ -220,6 +230,10 @@ uint16_t WS2812FX::color_wipe(bool rev, bool useRandomColors) {
   }
 
   uint16_t ledIndex = (prog * SEGLEN) >> 15;
+
+
+  AddLog(LOG_LEVEL_TEST, PSTR("ledIndex=%d"),ledIndex); // progress
+
   uint16_t rem = 0;
   rem = (prog * SEGLEN) * 2; //mod 0xFFFF
   rem /= (_segments[_segment_index].intensity +1);
@@ -1256,6 +1270,9 @@ uint16_t WS2812FX::mode_fire_flicker(void) {
   _segment_runtimes[_segment_index].step = it;
   return FRAMETIME;
 }
+
+
+
 
 #ifdef ENABLE_ADVANCED_EFFECTS
 
