@@ -51,7 +51,7 @@ void mAnimatorLight::Init_Segments()
   // _segments[4].transition.order_id = TRANSITION_ORDER_RANDOM_ID;
 
   // _segments[0].effect_id = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  // _segments[1].effect_id = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
+  // _segments[1].effect_id = EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID;
   // _segments[2].effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
   // _segments[3].effect_id = EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID;
   // _segments[4].effect_id = EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID;
@@ -311,12 +311,12 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_SLOW_GLOW_ID:
             SubTask_Segment_Animate_Function__Slow_Glow();
           break;
-          // case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:
-          //   SubTask_Segment_Animate_Function__Step_Through_Palette();
-          // break;
-          // case EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID:
-          //   SubTask_Segment_Flasher_Animate_Function__Sequential();
-          // break;
+          case EFFECTS_FUNCTION_ROTATING_PALETTE_ID:
+            SubTask_Segment_Flasher_Animate_Function__Rotating_Palette();
+          break;
+          case EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID:
+            SubTask_Segment_Flasher_Animate_Function__Sequential_Palette();
+          break;
           // case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID:
           //   SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
           // break;
@@ -428,9 +428,6 @@ void mAnimatorLight::SubTask_Segments_Animation()
           break;
           case EFFECTS_FUNCTION_WLED_PRIDE_2015_ID:
             SubTask_Segment_Flasher_Animate_Function__Pride_2015();
-          break;
-          case EFFECTS_FUNCTION_WLED_RIPPLE_RAINBOW_ID:
-            SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow();
           break;
           case EFFECTS_FUNCTION_WLED_PACIFICA_ID:
             SubTask_Segment_Flasher_Animate_Function__Pacifica();
@@ -591,6 +588,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID:
             SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
           break;   
+          
+          #ifdef ENABLE_EXTRA_WLED_EFFECTS
           /**
            * Blink/Strobe
            **/
@@ -666,6 +665,9 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_RIPPLE_ID:
             SubTask_Segment_Flasher_Animate_Function__Ripple();
           break;
+          case EFFECTS_FUNCTION_WLED_RIPPLE_RAINBOW_ID:
+            SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow();
+          break;
           case EFFECTS_FUNCTION_WLED_COMET_ID:
             SubTask_Segment_Flasher_Animate_Function__Comet();
           break;
@@ -687,6 +689,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_DRIP_ID:
             SubTask_Segment_Flasher_Animate_Function__Drip();
           break;
+          #endif // ENABLE_EXTRA_WLED_EFFECTS
           #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
           /**
            * Development effects without full code 
@@ -772,7 +775,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
          **/
         if(
           (_segments[segment_iters.index].effect_id >= EFFECTS_FUNCTION_WLED_STATIC_ID) &&
-          (_segments[segment_iters.index].effect_id <= EFFECTS_FUNCTION_WLED_DRIP_ID)
+          (_segments[segment_iters.index].effect_id <= EFFECTS_FUNCTION_WLED_LENGTH_ID)
         ){          
           _segment_runtimes[segment_iters.index].animation_has_anim_callback = false; // When no animation callback is needed
           StripUpdate();
@@ -796,7 +799,16 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
 } // SubTask_Effects_PhaseOut
 
+uint8_t mAnimatorLight::GetSizeOfPixel(Colour_Type colour_type)
+{
+  switch(colour_type)
+  {
+    case COLOUR_TYPE_RGB_ID:     return 3;
+    case COLOUR_TYPE_RGBW_ID:    return 4;
+    case COLOUR_TYPE_RGBCCT_ID:  return 5;
+  }
 
+}
 
 bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, 
 Colour_Type pixel_type, RgbcctColor starting_colour)
@@ -1360,9 +1372,9 @@ void mAnimatorLight::EveryLoop(){
 
   
 // _segments[0].effect_id = EFFECTS_FUNCTION_SEQUENTIAL_ID;
-// _segments[1].effect_id = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
+// _segments[1].effect_id = EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID;
 // _segments[2].effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
-// _segments[3].effect_id = EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID;
+// _segments[3].effect_id = EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID;
 // _segments[4].effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
 
 
@@ -1509,14 +1521,23 @@ mAnimatorLight& mAnimatorLight::setAnimFunctionCallback_Segments_Indexed(uint8_t
 
 
 
-void mAnimatorLight::Segments_UpdateStartingColourWithGetPixel()
+/**
+ * @note The indexing here relates to the buffer storage, and should NOT be confused with pixel indexing
+ * 
+ */
+void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
 {
-  
-  uint16_t start_pixel = _segments[segment_iters.index].pixel_range.start;
-  uint16_t end_pixel = _segments[segment_iters.index].pixel_range.stop;
-  for (uint16_t pixel = start_pixel; pixel <= end_pixel; pixel++)
-  {
-    animation_colours[pixel].StartingColor = GetPixelColor(pixel);
+
+  for(int pixel_index=0;
+          pixel_index<_segments[segment_iters.index].length();
+          pixel_index++
+  ){
+    SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_iters.index].data, 
+                                _segment_runtimes[segment_iters.index]._dataLen,
+                                pixel_index, 
+                                _segments[segment_iters.index].colour_type, 
+                                RgbcctColor(GetPixelColor(pixel_index))
+                              );
   }
 
 }
@@ -2910,7 +2931,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_1D_01_ID; }
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID; }
   
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
@@ -2931,7 +2952,7 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     default:  snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);  break;
     case EFFECTS_FUNCTION_STATIC_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR);  break;
     case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
-    case EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR);  break;
+    // case EFFECTS_FUNCTION_ROTATING_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_ROTATING_PALETTE_CTR);  break;
     case EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
     case EFFECTS_FUNCTION_SOLID_COLOUR_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR);  break;
     case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR);  break;

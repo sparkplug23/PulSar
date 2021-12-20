@@ -93,7 +93,7 @@ uint32_t color_wheel(uint8_t pos);
 uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend);
 
 
-    void Segments_UpdateStartingColourWithGetPixel();
+    // void Segments_UpdateStartingColourWithGetPixel();
 void Init_Segments();
 
   /**
@@ -134,7 +134,7 @@ void Init_Segments();
      * 
      * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
      * */
-    EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID,
+    EFFECTS_FUNCTION_ROTATING_PALETTE_ID,
     /**
      * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
      *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
@@ -143,7 +143,7 @@ void Init_Segments();
      * 
      * Note: allocate_buffer is used as transition data
      * */
-    EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID,
+    EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID,
     
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -189,7 +189,6 @@ void Init_Segments();
     EFFECTS_FUNCTION_WLED_METEOR_ID,
     EFFECTS_FUNCTION_WLED_METEOR_SMOOTH_ID,
     EFFECTS_FUNCTION_WLED_PRIDE_2015_ID,
-    EFFECTS_FUNCTION_WLED_RIPPLE_RAINBOW_ID,
     EFFECTS_FUNCTION_WLED_PACIFICA_ID,
     EFFECTS_FUNCTION_WLED_SUNRISE_ID,
     EFFECTS_FUNCTION_WLED_SINEWAVE_ID,
@@ -243,6 +242,8 @@ void Init_Segments();
     EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
     EFFECTS_FUNCTION_WLED_FIRE_FLICKER_ID,
     EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID,
+    
+    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Blink/Strobe
     EFFECTS_FUNCTION_WLED_BLINK_ID,
     EFFECTS_FUNCTION_WLED_BLINK_RAINBOW_ID,
@@ -268,6 +269,7 @@ void Init_Segments();
     EFFECTS_FUNCTION_WLED_DUAL_LARSON_SCANNER_ID,
     EFFECTS_FUNCTION_WLED_ICU_ID,
     EFFECTS_FUNCTION_WLED_RIPPLE_ID,
+    EFFECTS_FUNCTION_WLED_RIPPLE_RAINBOW_ID,
     EFFECTS_FUNCTION_WLED_COMET_ID,
     EFFECTS_FUNCTION_WLED_CHUNCHUN_ID,
     EFFECTS_FUNCTION_WLED_BOUNCINGBALLS_ID,
@@ -275,6 +277,8 @@ void Init_Segments();
     EFFECTS_FUNCTION_WLED_SINELON_DUAL_ID,
     EFFECTS_FUNCTION_WLED_SINELON_RAINBOW_ID,
     EFFECTS_FUNCTION_WLED_DRIP_ID,     
+    #endif // ENABLE_EXTRA_WLED_EFFECTS    
+    EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect     
     #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
     /**
@@ -788,6 +792,12 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       };
     } ANIMATION_FLAGS;
 
+    enum Colour_Type{
+      COLOUR_TYPE_RGB_ID,
+      COLOUR_TYPE_RGBW_ID,
+      COLOUR_TYPE_RGBCCT_ID,
+    };
+    uint8_t GetSizeOfPixel(Colour_Type colour_type);
 
     /**
      * previous animation settings will be moved into here
@@ -809,6 +819,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
       uint16_t pixels_to_update_this_cycle = 0;
 
       HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;//[2];
+      Colour_Type colour_type = COLOUR_TYPE_RGB_ID; // default is RGB, this is used by animations to know what method to generate
   
     //   uint8_t opacity = 255; //??
 
@@ -864,7 +875,7 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
         /**
          * Time to new colours
          * */
-        uint16_t time_ms = 0;  
+        uint16_t time_ms = 1000;  
         /**
          * legacy value from wled, when updated via function, it will select the rate/time for animation
          * */
@@ -1040,12 +1051,6 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 
 
 
-  enum Colour_Type{
-    COLOUR_TYPE_RGB_ID,
-    COLOUR_TYPE_RGBW_ID,
-    COLOUR_TYPE_RGBCCT_ID,
-  };
-
   struct TransitionColourPairs
   {
     RgbcctColor StartingColour;
@@ -1123,12 +1128,10 @@ void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
     void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
     void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
 
+    bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, RgbcctColor starting_colour);
+    bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  Colour_Type pixel_type, RgbcctColor starting_colour);
 
-
-bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, 
-Colour_Type pixel_type, RgbcctColor starting_colour);
-bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, 
-Colour_Type pixel_type, RgbcctColor starting_colour);
+    void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
 
     void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
@@ -1140,8 +1143,8 @@ Colour_Type pixel_type, RgbcctColor starting_colour);
     void AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param);    
     void SubTask_Segment_Animate_Function__Static_Palette();
     void SubTask_Segment_Animate_Function__Slow_Glow();
-    void SubTask_Segment_Animate_Function__Step_Through_Palette();
-    void SubTask_Segment_Flasher_Animate_Function__Sequential();
+    void SubTask_Segment_Flasher_Animate_Function__Sequential_Palette();
+    void SubTask_Segment_Flasher_Animate_Function__Rotating_Palette();
     void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
     void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
     void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
@@ -1191,7 +1194,6 @@ Colour_Type pixel_type, RgbcctColor starting_colour);
     void SubTask_Segment_Flasher_Animate_Function__Meteor();
     void SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth();    
     void SubTask_Segment_Flasher_Animate_Function__Pride_2015();    
-    void SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(); 
     CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
     void SubTask_Segment_Flasher_Animate_Function__Pacifica();    
     void SubTask_Segment_Flasher_Animate_Function__Sunrise();    
@@ -1254,6 +1256,8 @@ Colour_Type pixel_type, RgbcctColor starting_colour);
     void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
     void SubTask_Segment_Flasher_Animate_Function__Fire_Flicker();
     void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
+    
+    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Blink/Strobe
     void SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
     void SubTask_Segment_Flasher_Animate_Function__Blink();
@@ -1283,6 +1287,7 @@ Colour_Type pixel_type, RgbcctColor starting_colour);
     void SubTask_Segment_Flasher_Animate_Function__ICU();
     void SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow);
     void SubTask_Segment_Flasher_Animate_Function__Ripple();
+    void SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(); 
     void SubTask_Segment_Flasher_Animate_Function__Comet();
     void SubTask_Segment_Flasher_Animate_Function__Chunchun();
     void SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls();
@@ -1291,6 +1296,7 @@ Colour_Type pixel_type, RgbcctColor starting_colour);
     void SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual();
     void SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow();
     void SubTask_Segment_Flasher_Animate_Function__Drip();
+    #endif // ENABLE_EXTRA_WLED_EFFECTS
 
     // Temporary helper functions to be cleaned up and converted
     void blur(uint8_t blur_amount);

@@ -35,6 +35,8 @@
 #include "6_Lights/Palette/mPalette.h"
 #include "mAnimatorLight_web.h"
 
+// #define DEBUG_ANIMATIONS_SEGMENT_EFFECTS
+
 #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
 #include "6_Lights/Animator/EffectsWLEDConversion/Animations.h"
 #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
@@ -234,7 +236,7 @@ class mAnimatorLight :
 
 
 
-    
+    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     // what is stored for state is specific to the need, in this case, the colors.
     // Basically what ever you need inside the animation update function
     // Can this be moved into the segment_runtime data?
@@ -244,6 +246,19 @@ class mAnimatorLight :
       RgbTypeColor DesiredColour;
     };
     AnimationColours animation_colours[STRIP_SIZE_MAX];
+    #endif // ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+    /**
+     * Make this definable, and or remove it, because it grows with pixel size and will waste memory
+     * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
+     * WARNING! : Significant memory usage, needs changed to dynamic runtime
+     * */
+    struct LEDOUTPUTSETTINGS{
+      uint16_t length = 0;
+      uint16_t index = 0;
+      uint16_t pattern[STRIP_SIZE_MAX];
+    }ledout;    
+    #endif
 
 
     void StartAnimation_AsAnimUpdateMemberFunction();
@@ -334,18 +349,6 @@ class mAnimatorLight :
     void StripUpdate();
     void SetPixelColor_All(RgbcctColor colour);
 
-    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
-    /**
-     * Make this definable, and or remove it, because it grows with pixel size and will waste memory
-     * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
-     * WARNING! : Significant memory usage, needs changed to dynamic runtime
-     * */
-    struct LEDOUTPUTSETTINGS{
-      uint16_t length = 0;
-      uint16_t index = 0;
-      uint16_t pattern[STRIP_SIZE_MAX];
-    }ledout;    
-    #endif
     
 
     HsbColor GetColourFromMapUsingType(
@@ -876,7 +879,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
     EFFECTS_FUNCTION_STATIC_PALETTE_ID,
     EFFECTS_FUNCTION_SEQUENTIAL_ID, //sequence after, so it takes the static pallette and moves it
     EFFECTS_FUNCTION_SLOW_GLOW_ID,
-    EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID,
+    EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID,
   };
 
   /**

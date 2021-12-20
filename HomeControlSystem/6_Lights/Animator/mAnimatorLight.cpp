@@ -259,8 +259,13 @@ void mAnimatorLight::Init(void){
 
   DEBUG_LINE;
 
+  #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
   // Clear stored light output
   memset(&animation_colours,0,sizeof(animation_colours));
+  
+  #endif //ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+
+
   // Start display
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
@@ -1793,6 +1798,7 @@ return 0;
 
 
 
+    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
 void mAnimatorLight::Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
                                                  RgbcctColor colour_circumference, 
                                                  uint16_t radius_pixel,
@@ -1996,6 +2002,7 @@ void mAnimatorLight::Remove_DesiredColour_LinearGradientMirrored(
 
 }
 
+    #endif // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
 
 
 

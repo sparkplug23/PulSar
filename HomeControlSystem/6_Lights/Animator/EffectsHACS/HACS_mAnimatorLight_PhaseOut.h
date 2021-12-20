@@ -97,7 +97,7 @@ void Init_WLED();
      * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
      * TODO: Add size of step as percentage ie to show 50% of 4 colours would be 2 of 4, 75% of 4 is 3
      * */
-    EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_ID,
+    EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID,
     /**
      * Desc: Twinkle on, fade off
      *      Random burst of pixels are turned on based on palette, then fade off

@@ -165,11 +165,23 @@
     #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
     #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+    #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    #define ENABLE_FREERAM_APPENDING_SERIAL
 
+    #define STRIP_SIZE_MAX 100
+
+    /**
+     * @brief 
+     * structs in headers
+     * 13k to 18k
+     * 
+     */
+  
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
 
   #endif 
   #ifdef USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+ #define STRIP_SIZE_MAX 50
     #define USE_BUILD_TYPE_LIGHTING
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
@@ -179,6 +191,7 @@
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   #endif 
   #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+ #define STRIP_SIZE_MAX 50
     #define USE_BUILD_TYPE_LIGHTING
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
@@ -211,7 +224,6 @@
  Without using a "Segment#" the commands will be assumed as for the entire strip and internally be segment0
  * 
  */
- #define STRIP_SIZE_MAX 50
  #define USE_LIGHTING_TEMPLATE
 
 //  #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
