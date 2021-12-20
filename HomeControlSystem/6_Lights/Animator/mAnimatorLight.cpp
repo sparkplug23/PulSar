@@ -180,7 +180,7 @@ void mAnimatorLight::Init_NeoPixelBus()
 
 void mAnimatorLight::Init(void){ 
     
-  ledout.length = STRIP_SIZE_MAX; 
+  // ledout.length = STRIP_SIZE_MAX; 
   
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
@@ -251,11 +251,11 @@ void mAnimatorLight::Init(void){
   // flashersettings.flags.enable_endingcolour_as_alternate = true;
   #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
   
-  for(ledout.index=0;
-    ledout.index<STRIP_SIZE_MAX;
-    ledout.index++){ 
-    ledout.pattern[ledout.index] = ledout.index; 
-  }
+  // for(ledout.index=0;
+  //   ledout.index<STRIP_SIZE_MAX;
+  //   ledout.index++){ 
+  //   ledout.pattern[ledout.index] = ledout.index; 
+  // }
 
   DEBUG_LINE;
 
@@ -1656,7 +1656,7 @@ return 0;
 
   JBI->Start();
 
-    JBI->Add("ledout_length", ledout.length);
+    // JBI->Add("ledout_length", ledout.length);
     JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
 
   return JBI->End();

@@ -153,6 +153,8 @@ void Init_WLED();
      * rename from fireplace to another name, simply fire
      * */
 
+// this will likely just use candle effect, maybe forced colour palette?/
+
      EFFECTS_FUNCTION_FIREPLACE_1D_01_ID, // solid colours, 1 100%, moving from previous to next
 
     /******************************************************************************************************************************************************************************

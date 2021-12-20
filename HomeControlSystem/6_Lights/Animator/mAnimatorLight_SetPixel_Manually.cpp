@@ -1,4 +1,4 @@
-#include "../mAnimatorLight.h"
+#include "mAnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -10,10 +10,22 @@ void mAnimatorLight::SubTask_Manual_SetPixel(){
 
   // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Manual_SetPixel"));
 
-  //  pCONT_iLight->animation.transition.rate_ms = 1000;
-  //  pCONT_iLight->animation.transition.time_ms.val = 0;
+  _segments[0].transition.rate_ms = 1000;
+  _segments[0].transition.time_ms = 0;
 
   // SubTask_Flasher_Animate_Function__Slow_Glow();
+
+  
+  // for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++)
+  // {
+  //   SetPixelColor(pixel, animation_colours[pixel].DesiredColour);
+  // }
+
+  
+  // _segment_runtimes[0].animation_has_anim_callback = false; // When no animation callback is needed
+  // StripUpdate();
+
+
 
   // //run function once
 
@@ -121,12 +133,12 @@ uint8_t mAnimatorLight::ConstructJSON_Manual_SetPixel(uint8_t json_level){
       uint16_t pixels_added = 0;
 
       JsonBuilderI->Array_Start("PixelsOn");
-      for(uint16_t i=0;i<settings.light_size_count;i++){ 
+      for(uint16_t i=0;i<_segments[0].length();i++){ 
         if(pCONT_iLight->RgbColorto32bit(GetPixelColor(i))){
           JsonBuilderI->Add(i); 
-          if(pixels_added++>50){
-            break; // to stop overflow
-          }
+          // if(pixels_added++>50){
+          //   break; // to stop overflow
+          // }
         }      
       }
       JsonBuilderI->Array_End();  

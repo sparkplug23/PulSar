@@ -1,4 +1,4 @@
-#include "../mAnimatorLight.h"
+#include "mAnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
@@ -24,6 +24,72 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
     RgbTypeColor updatedColor = RgbTypeColor::LinearBlend(
         animation_colours[pixel].StartingColor,
         animation_colours[pixel].DesiredColour,
+        param.progress);    
+    SetPixelColor(pixel, updatedColor, segment_index);
+  }
+  
+}
+
+/**
+ * @brief New allocated buffers must contain colour info
+ * 
+ * @param param 
+ */
+void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param)
+{    
+
+  uint8_t segment_index = segment_iters.index;
+  // param.segment_index;
+
+  // DEBUG_LINE_HERE;
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("segment_indexA = %d"),segment_index);
+
+  // segment_index = constrain(segment_index,0,2); //tmp in testing
+  // AddLog(LOG_LEVEL_TEST, PSTR("segment_indexB = %d"),segment_index);
+  
+  uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+  uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
+
+  if(_segment_runtimes[segment_index].data == nullptr)
+  { 
+    AddLog(LOG_LEVEL_TEST, PSTR("_segment_runtimes[segment_index].data == nullptr = %d"),segment_index);
+    return;
+  }
+
+  // byte* data =  _segment_runtimes[segment_index].data;
+  // uint16_t data_size = _segment_runtimes[segment_index]._dataLen;
+
+
+  RgbcctColor start_colour = RgbcctColor(0);
+  RgbcctColor desired_colour = RgbcctColor(0);
+  RgbcctColor updatedColor = RgbcctColor(0);
+  
+
+  Colour_Type pixel_type = COLOUR_TYPE_RGB_ID;
+
+  TransitionColourPairs colour_pair2;
+
+  uint16_t pixel_within_data_iter = 0;
+
+  for (uint16_t pixel = start_pixel; pixel <= end_pixel; pixel++)
+  {
+
+    /**
+     * @brief 
+     * Get colours from buffer
+     * 
+     */
+    GetTransitionColourBuffer(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_within_data_iter, pixel_type, &colour_pair2);
+
+    pixel_within_data_iter++;
+
+    start_colour = colour_pair2.StartingColour;
+    desired_colour = colour_pair2.DesiredColour;
+
+    updatedColor = RgbTypeColor::LinearBlend(
+        start_colour,
+        desired_colour,
         param.progress);    
     SetPixelColor(pixel, updatedColor, segment_index);
   }
@@ -129,25 +195,25 @@ void mAnimatorLight::AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const 
 void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester()
 {
 
-  // this should probably force order as random, then introduce static "inorder" option
-  _segments[0].transition.order_id = TRANSITION_ORDER_INORDER_ID;
+  // // this should probably force order as random, then introduce static "inorder" option
+  // _segments[0].transition.order_id = TRANSITION_ORDER_INORDER_ID;
   
-  // So colour region does not need to change each loop to prevent colour crushing
-  _segments[0].flags.brightness_applied_during_colour_generation = true;
+  // // So colour region does not need to change each loop to prevent colour crushing
+  // _segments[0].flags.brightness_applied_during_colour_generation = true;
   
-  // Pick new colours
-  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
-  // Check if output multiplying has been set, if so, change desiredcolour array
-  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
-  // Get starting positions already on show
-  Segments_UpdateStartingColourWithGetPixel();
-  // Call the animator to blend from previous to new
+  // // Pick new colours
+  // Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
+  // // Check if output multiplying has been set, if so, change desiredcolour array
+  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // // Get starting positions already on show
+  // Segments_UpdateStartingColourWithGetPixel();
+  // // Call the animator to blend from previous to new
 
-  setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
-    }
-  );
+  // setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
+  //   [this](const AnimationParam& param){ 
+  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+  //   }
+  // );
 
 }
 
@@ -173,19 +239,202 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   // So colour region does not need to change each loop to prevent colour crushing
   _segments[0].flags.brightness_applied_during_colour_generation = true;
   
-  // Pick new colours
-  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
-  // Check if output multiplying has been set, if so, change desiredcolour array
-  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
-  // Get starting positions already on show
-  Segments_UpdateStartingColourWithGetPixel();
-  // Call the animator to blend from previous to new
+  
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+// it must only allocate this if the data was previous empty
+
+  // struct AnimationColours2
+  // {
+  //   RgbColor StartingColor;
+  //   RgbColor DesiredColour;
+  // };
+
+
+  // byte buffer[20];
+  // uint16_t pixel_index = 0;
+
+  uint16_t dataSize = sizeof(TransitionColourPairs) * segment_length; //allocate space for 10 test pixels
+
+
+
+  // uint16_t pixel_pair_index_location_in_buffer = 0;pixel_index*sizeof(TransitionColourPairs);
+
+  // // TransitionColourPairs*
+  //  colour_pair2 = reinterpret_cast<TransitionColourPairs*>(_segment_runtimes[segment_index].data);
+
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
+  //   pixel_index,
+  //   colour_pair->DesiredColour.R,
+  //   colour_pair->DesiredColour.G,
+  //   colour_pair->DesiredColour.B,
+  //   colour_pair->StartingColour.R,
+  //   colour_pair->StartingColour.G,
+  //   colour_pair->StartingColour.B
+  // );
+
+
+
+  // 6 byte chunks, so create databuffer of structsize * segment length
+
+
+  if (_segment_runtimes[segment_index].allocateData(dataSize))
+  {
+    // AddLog(LOG_LEVEL_TEST, PSTR("Succesfully (or already) added AnimationColours2 to databuffer size %d"), dataSize);
+    
+    // uint16_t pixel_index = 0;
+      // AddLog_Array(LOG_LEVEL_TEST, PSTR("allocateData"), _segment_runtimes[segment_index].data, 100);
+
+    // for(int pixel_index=0;pixel_index<segment_length;pixel_index++)
+    // {
+
+      // SetTransitionColourBuffer(_segment_runtimes[segment_index].data, 
+      //                           dataSize,
+      //                           pixel_index, 
+      //                           COLOUR_TYPE_RGB_ID, 
+      //                           RgbcctColor(10,20,30,40,map(pixel_index,0,segment_length,0,255)), 
+      //                           RgbcctColor(
+      //                             map(pixel_index,0,segment_length,0,255),
+      //                             255-map(pixel_index,0,segment_length,0,255),
+      //                             random(0,10)*25,
+      //                             0,
+      //                             // pixel_index,
+      //                             // pixel_index,
+      //                             0
+      //                             // 
+      //                             // 
+                                  
+      //                             // 0,0
+      //                             )
+      //                         );
+
+
+    //   float hue = mSupport::mapfloat(random(0,255), 0,255, 0.0f, 1.0f);
+    //   HsbColor hsb = HsbColor(hue,1,1);
+
+    //   SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, 
+    //                             dataSize,
+    //                             pixel_index, 
+    //                             COLOUR_TYPE_RGB_ID, 
+    //                             RgbcctColor(hsb)
+    //                               // map(pixel_index,0,segment_length,0,255),
+    //                               // 255-map(pixel_index,0,segment_length,0,255),
+    //                               // random(0,10)*25,
+    //                               // 0,
+    //                               // 0
+    //                               // )
+    //                           );
+    // }
+
+  }
+  else
+  {
+    return; //allocation failed
+  }
+
+
+  /**
+   * @brief 
+   * As example, increment the red part of the colour, then use setpixel directly
+   * 
+   */
+  
+/**
+ * @brief 
+ * Insert starting colours
+ * 
+ */
+
+ for(int pixel_index=0;pixel_index<segment_length;pixel_index++)
+    {
+
+      
+
+      SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_index].data, 
+                                dataSize,
+                                pixel_index, 
+                                COLOUR_TYPE_RGB_ID, 
+                                RgbcctColor(GetPixelColor(pixel_index))
+                              );
+    }
+
+
+
+
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[0].transition.order_id = TRANSITION_ORDER_RANDOM_ID;
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[0].flags.brightness_applied_during_colour_generation = true;
+  
+
+  // // Pick new colours
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id, segment_index);
+  // // Check if output multiplying has been set, if so, change desiredcolour array
+  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // // Get starting positions already on show
+  // Segments_UpdateStartingColourWithGetPixel();
+  // // Call the animator to blend from previous to new
 
   setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
   );
+
+/**
+ * @brief 
+ * Take the desired, and use as output directly
+ * This needs moved into an animator for blending, so need a special buffer method for blending
+ */
+
+
+
+  // Colour_Type pixel_type = COLOUR_TYPE_RGB_ID;
+
+  // TransitionColourPairs colour_pair2;
+
+
+  // for(int pixel_index2=0;pixel_index2<segment_length;pixel_index2++)
+  // {
+
+  //   GetTransitionColourBuffer(_segment_runtimes[segment_index].data, dataSize, pixel_index2, pixel_type, &colour_pair2);
+
+  //   // AddLog(LOG_LEVEL_TEST, PSTR("READ colour_pair2[%d] = %d,%d,%d, %d,%d,%d"), 
+  //   //   pixel_index2,
+  //   //   colour_pair2.DesiredColour.R, colour_pair2.DesiredColour.G, colour_pair2.DesiredColour.B, colour_pair2.DesiredColour.WC, colour_pair2.DesiredColour.WW,
+  //   //   colour_pair2.StartingColour.R, colour_pair2.StartingColour.G, colour_pair2.StartingColour.B, colour_pair2.StartingColour.WC, colour_pair2.StartingColour.WW
+  //   // );
+
+  //   SetPixelColor(pixel_index2, colour_pair2.DesiredColour);
+
+  // }
+
+
+
+  // _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  // StripUpdate();
+
+
+  // // Pick new colours
+  // Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
+  // // Check if output multiplying has been set, if so, change desiredcolour array
+  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // // Get starting positions already on show
+  // Segments_UpdateStartingColourWithGetPixel();
+  // // Call the animator to blend from previous to new
+
+  // setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
+  //   [this](const AnimationParam& param){ 
+  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+  //   }
+  // );
 
 }
 
@@ -195,16 +444,155 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
  *******************************************************************************************************************************************************************************************************************
  * @name : Slow Glow
  * @note : Randomly changes colours of pixels, and blends to the new one
+ *  
+ * To develop if it is possible to put animation_colours inside the data of runtimes
  * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
+    
+    // what is stored for state is specific to the need, in this case, the colors.
+    // Basically what ever you need inside the animation update function
+    // Can this be moved into the segment_runtime data?
+    struct AnimationColours
+    {
+      RgbTypeColor StartingColor; // or should this be a pointer buffer only
+      RgbTypeColor DesiredColour;
+    };
+    AnimationColours animation_colours[STRIP_SIZE_MAX];
+
+    // create a maximum of 100 leds, held in storage, then repeat their output (Write into setpixel) wrapping around
+
  * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
+
 void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 {
+
+  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_length = _segments[segment_index].length();
+  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
+  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+
+// it must only allocate this if the data was previous empty
+
+  // struct AnimationColours2
+  // {
+  //   RgbColor StartingColor;
+  //   RgbColor DesiredColour;
+  // };
+
+
+  // byte buffer[20];
+  // uint16_t pixel_index = 0;
+
+  uint16_t dataSize = sizeof(TransitionColourPairs) * segment_length; //allocate space for 10 test pixels
+
+
+
+  // uint16_t pixel_pair_index_location_in_buffer = 0;pixel_index*sizeof(TransitionColourPairs);
+
+  // // TransitionColourPairs*
+  //  colour_pair2 = reinterpret_cast<TransitionColourPairs*>(_segment_runtimes[segment_index].data);
+
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("colour_pair[%d] = %d,%d,%d, %d,%d,%d"), 
+  //   pixel_index,
+  //   colour_pair->DesiredColour.R,
+  //   colour_pair->DesiredColour.G,
+  //   colour_pair->DesiredColour.B,
+  //   colour_pair->StartingColour.R,
+  //   colour_pair->StartingColour.G,
+  //   colour_pair->StartingColour.B
+  // );
+
+
+
+  // 6 byte chunks, so create databuffer of structsize * segment length
+
+
+  if (_segment_runtimes[segment_index].allocateData(dataSize))
+  {
+    // AddLog(LOG_LEVEL_TEST, PSTR("Succesfully (or already) added AnimationColours2 to databuffer size %d"), dataSize);
+    
+    // uint16_t pixel_index = 0;
+      // AddLog_Array(LOG_LEVEL_TEST, PSTR("allocateData"), _segment_runtimes[segment_index].data, 100);
+
+    // for(int pixel_index=0;pixel_index<segment_length;pixel_index++)
+    // {
+
+      // SetTransitionColourBuffer(_segment_runtimes[segment_index].data, 
+      //                           dataSize,
+      //                           pixel_index, 
+      //                           COLOUR_TYPE_RGB_ID, 
+      //                           RgbcctColor(10,20,30,40,map(pixel_index,0,segment_length,0,255)), 
+      //                           RgbcctColor(
+      //                             map(pixel_index,0,segment_length,0,255),
+      //                             255-map(pixel_index,0,segment_length,0,255),
+      //                             random(0,10)*25,
+      //                             0,
+      //                             // pixel_index,
+      //                             // pixel_index,
+      //                             0
+      //                             // 
+      //                             // 
+                                  
+      //                             // 0,0
+      //                             )
+      //                         );
+
+
+    //   float hue = mSupport::mapfloat(random(0,255), 0,255, 0.0f, 1.0f);
+    //   HsbColor hsb = HsbColor(hue,1,1);
+
+    //   SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, 
+    //                             dataSize,
+    //                             pixel_index, 
+    //                             COLOUR_TYPE_RGB_ID, 
+    //                             RgbcctColor(hsb)
+    //                               // map(pixel_index,0,segment_length,0,255),
+    //                               // 255-map(pixel_index,0,segment_length,0,255),
+    //                               // random(0,10)*25,
+    //                               // 0,
+    //                               // 0
+    //                               // )
+    //                           );
+    // }
+
+  }
+  else
+  {
+    return; //allocation failed
+  }
+
+
+  /**
+   * @brief 
+   * As example, increment the red part of the colour, then use setpixel directly
+   * 
+   */
+  
+/**
+ * @brief 
+ * Insert starting colours
+ * 
+ */
+
+ for(int pixel_index=0;pixel_index<segment_length;pixel_index++)
+    {
+
+      
+
+      SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_index].data, 
+                                dataSize,
+                                pixel_index, 
+                                COLOUR_TYPE_RGB_ID, 
+                                RgbcctColor(GetPixelColor(pixel_index))
+                              );
+    }
+
+
+
 
   // this should probably force order as random, then introduce static "inorder" option
   _segments[0].transition.order_id = TRANSITION_ORDER_RANDOM_ID;
@@ -213,19 +601,70 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   _segments[0].flags.brightness_applied_during_colour_generation = true;
   
 
-  // Pick new colours
-  Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
-  // Check if output multiplying has been set, if so, change desiredcolour array
-  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
-  // Get starting positions already on show
-  Segments_UpdateStartingColourWithGetPixel();
-  // Call the animator to blend from previous to new
+  // // Pick new colours
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id, segment_index);
+  // // Check if output multiplying has been set, if so, change desiredcolour array
+  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // // Get starting positions already on show
+  // Segments_UpdateStartingColourWithGetPixel();
+  // // Call the animator to blend from previous to new
 
   setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
   );
+
+/**
+ * @brief 
+ * Take the desired, and use as output directly
+ * This needs moved into an animator for blending, so need a special buffer method for blending
+ */
+
+
+
+  // Colour_Type pixel_type = COLOUR_TYPE_RGB_ID;
+
+  // TransitionColourPairs colour_pair2;
+
+
+  // for(int pixel_index2=0;pixel_index2<segment_length;pixel_index2++)
+  // {
+
+  //   GetTransitionColourBuffer(_segment_runtimes[segment_index].data, dataSize, pixel_index2, pixel_type, &colour_pair2);
+
+  //   // AddLog(LOG_LEVEL_TEST, PSTR("READ colour_pair2[%d] = %d,%d,%d, %d,%d,%d"), 
+  //   //   pixel_index2,
+  //   //   colour_pair2.DesiredColour.R, colour_pair2.DesiredColour.G, colour_pair2.DesiredColour.B, colour_pair2.DesiredColour.WC, colour_pair2.DesiredColour.WW,
+  //   //   colour_pair2.StartingColour.R, colour_pair2.StartingColour.G, colour_pair2.StartingColour.B, colour_pair2.StartingColour.WC, colour_pair2.StartingColour.WW
+  //   // );
+
+  //   SetPixelColor(pixel_index2, colour_pair2.DesiredColour);
+
+  // }
+
+
+
+  // _segment_runtimes[segment_index].animation_has_anim_callback = false; // When no animation callback is needed
+  // StripUpdate();
+}
+
+
+/**
+ * @brief 
+ * I need to create a SetTransitionColourBuffer_StartingColour (only version, so it just modifies that part of the buffer, then another for desired)
+ * 
+ */
+void mAnimatorLight::Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel()
+{
+  
+  uint16_t start_pixel = _segments[segment_iters.index].pixel_range.start;
+  uint16_t end_pixel = _segments[segment_iters.index].pixel_range.stop;
+
+  for (uint16_t pixel = start_pixel; pixel <= end_pixel; pixel++)
+  {
+    animation_colours[pixel].StartingColor = GetPixelColor(pixel);
+  }
 
 }
 
@@ -370,64 +809,66 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Step_Through_Palette()
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential(){
 
-  _segments[0].flags.brightness_applied_during_colour_generation = true;
+  // _segments[0].flags.brightness_applied_during_colour_generation = true;
   
-  // flashersettings_segments.flag_finish_flasher_pair = false;
-  // flashersettings_segments.flags.enable_random_rate = true;
+  // // flashersettings_segments.flag_finish_flasher_pair = false;
+  // // flashersettings_segments.flags.enable_random_rate = true;
   
-  uint8_t segment_index = segment_iters.index;
-  uint16_t* region_p             = &_segment_runtimes[segment_index].aux0;
-  uint16_t* movement_direction_p = &_segment_runtimes[segment_index].aux1; // flashersettings_segments.flags.movement_direction
-  uint16_t* flag_finish_flasher_pair_p = &_segment_runtimes[segment_index].aux2;
-  uint16_t* force_finish_flasher_pair_once_p = &_segment_runtimes[segment_index].aux3;
+  // uint8_t segment_index = segment_iters.index;
+  // uint16_t* region_p             = &_segment_runtimes[segment_index].aux0;
+  // uint16_t* movement_direction_p = &_segment_runtimes[segment_index].aux1; // flashersettings_segments.flags.movement_direction
+  // uint16_t* flag_finish_flasher_pair_p = &_segment_runtimes[segment_index].aux2;
+  // uint16_t* force_finish_flasher_pair_once_p = &_segment_runtimes[segment_index].aux3;
   
-  // do{ //must complete the pair together //move inside functions
-    switch(*region_p){
-      case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
-        // #endif
+  // // do{ //must complete the pair together //move inside functions
+  //   switch(*region_p){
+  //     case EFFECTS_REGION_COLOUR_SELECT_ID: //set colours
+  //       // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  //       // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
+  //       // #endif
 
-        Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);
+  //       Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_iters.index].palette.id);   // change to new method
         
-        #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-        // Check if output multiplying has been set, if so, change desiredcolour array
-        OverwriteUpdateDesiredColourIfMultiplierIsEnabled();      
-        #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+  //       #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+  //       // Check if output multiplying has been set, if so, change desiredcolour array
+  //       OverwriteUpdateDesiredColourIfMultiplierIsEnabled();      
+  //       #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
-        // Get starting positions already on show
-        Segments_UpdateStartingColourWithGetPixel();
+  //       // Get starting positions already on show
+  //       Segments_UpdateStartingColourWithGetPixel();
         
-        *region_p = EFFECTS_REGION_ANIMATE_ID;
-      // break; not into next right away
-      case EFFECTS_REGION_ANIMATE_ID: //shift along
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
-        // #endif
-        Segments_RotateDesiredColour(1, *movement_direction_p);//flashersettings_segments.flags.movement_direction);
+  //       *region_p = EFFECTS_REGION_ANIMATE_ID;
+  //     // break; not into next right away
+  //     case EFFECTS_REGION_ANIMATE_ID: //shift along
+  //       // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  //       // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_ANIMATE"));
+  //       // #endif
+  //       Segments_RotateDesiredColour(1, *movement_direction_p);//flashersettings_segments.flags.movement_direction);
 
-        // Get starting positions already on show
-        Segments_UpdateStartingColourWithGetPixel();
+  //       // Get starting positions already on show
+  //       Segments_UpdateStartingColourWithGetPixel();
         
-        setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
-          [this](const AnimationParam& param){ 
-            this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
-          }
-        );
+  //       setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
+  //         [this](const AnimationParam& param){ 
+  //           this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(param); 
+  //         }
+  //       );
 
-        // if(*force_finish_flasher_pair_once_p){
-        //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
-        //   *force_finish_flasher_pair_once_p = false;
-        // }
-      break;
-    }
-  // }while(*flag_finish_flasher_pair_p || *force_finish_flasher_pair_once_p);
+  //       // if(*force_finish_flasher_pair_once_p){
+  //       //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+  //       //   *force_finish_flasher_pair_once_p = false;
+  //       // }
+  //     break;
+  //   }
+  // // }while(*flag_finish_flasher_pair_p || *force_finish_flasher_pair_once_p);
 
 }
 
 
 void mAnimatorLight::Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction)
 {
+
+  #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
 
 //pixels_amount_to_shift loop this many times
   uint8_t segment_index = segment_iters.index;
@@ -468,6 +909,8 @@ direction=1;
     // Put first pixel on the end (wrap around)
     animation_colours[ledout.index-1].DesiredColour = colourfirst;
   }
+
+  #endif // ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
 
 }
 

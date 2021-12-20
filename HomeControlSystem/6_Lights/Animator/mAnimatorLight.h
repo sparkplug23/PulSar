@@ -41,11 +41,9 @@
 
 
 #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-#define FASTLED_INTERNAL //remove annoying pragma messages
+#define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/FastLED_Modified/FastLED.h"
 #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-
-
 
 // #define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
@@ -126,38 +124,14 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR)     "setpixe
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR)   "debug/animation_details";
 
 
-
 #define D_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR "Colour Select"
 #define D_EFFECTS_REGION_ANIMATE_NAME_CTR "Animate"
 
-
 /**
- * Effects Function names (Giving multiple names using delimeter)
- * */
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)                        "Slow Glow|Blend";    
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)                   "Static Glow|Static|InOrder";     
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR)                       "Sequential"; 
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR)                     D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR;//"Solid RGBCCT"; 
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)                  "Step Palette";
+ * Effect Names
+ **/
+#include "6_Lights/Animator/mAnimatorLight_ProgMem_Defines.h"
 
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_NAME_CTR)         "SLOW_FADE_BRIGHTNESS_ALL";
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_NAME_CTR)         "SLOW_FADE_SATURATION_ALL";
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_NAME_CTR)      "SLOW_FADE_BRIGHTNESS_RANDOM";
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SLOW_FADE_SATURATION_RANDOM_NAME_CTR)      "SLOW_FADE_SATURATION_RANDOM";
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FLASH_TWINKLE_RANDOM_NAME_CTR)             "FLASH_TWINKLE_RANDOM";                   
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_NAME_CTR)         "FLASH_TWINKLE_SEQUENTIAL";                          
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FLASH_GLIMMER_RANDOM_NAME_CTR)             "FLASH_GLIMMER_RANDOM"; 
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)                  D_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR;//   "FirePlace01";     
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_TESTER_NAME_CTR)                           "Tester";
-
-DEFINE_PGM_CTR(PM_EFFECTS_REGION_SLOW_FADE_NAME_CTR)                          "SLOW_FADE";
-DEFINE_PGM_CTR(PM_EFFECTS_REGION_TWINKLE_FLASH_NAME_CTR)                      "TWINKLE_FLASH";
-DEFINE_PGM_CTR(PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR)                      D_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR;
-DEFINE_PGM_CTR(PM_EFFECTS_REGION_ANIMATE_NAME_CTR)                            D_EFFECTS_REGION_ANIMATE_NAME_CTR;
-
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR;
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR;
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR) D_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR;
 
 #include <functional>
 #define ANIM_FUNCTION_SIGNATURE                     std::function<void(const AnimationParam& param)>                              anim_function_callback
@@ -176,8 +150,7 @@ class mAnimatorLight :
     mAnimatorLight(){};
     void Pre_Init(void);
     void Init(void);
-    
-    
+        
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
       return sizeof(mAnimatorLight);
@@ -190,7 +163,6 @@ class mAnimatorLight :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
 
-
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
@@ -202,7 +174,6 @@ class mAnimatorLight :
     void parse_JSONCommand(JsonParserObject obj);
     uint8_t subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index = 255);
       
-
     // Put settings at top of class from now on, use it for common settings
     struct SETTINGS{
       struct FLAGS{
@@ -257,16 +228,16 @@ class mAnimatorLight :
      * @brief 
      * Tmp wled conversions
      * 
-     */
-    
-void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint8_t segment_length = 0);  
-void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length = 0);
+     */    
+    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint8_t segment_length = 0);  
+    void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length = 0);
 
 
 
     
     // what is stored for state is specific to the need, in this case, the colors.
     // Basically what ever you need inside the animation update function
+    // Can this be moved into the segment_runtime data?
     struct AnimationColours
     {
       RgbTypeColor StartingColor; // or should this be a pointer buffer only
@@ -363,7 +334,7 @@ void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length =
     void StripUpdate();
     void SetPixelColor_All(RgbcctColor colour);
 
-
+    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
     /**
      * Make this definable, and or remove it, because it grows with pixel size and will waste memory
      * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
@@ -374,6 +345,7 @@ void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length =
       uint16_t index = 0;
       uint16_t pattern[STRIP_SIZE_MAX];
     }ledout;    
+    #endif
     
 
     HsbColor GetColourFromMapUsingType(
@@ -387,6 +359,7 @@ void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length =
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
 
+    void DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(uint16_t palette_id, uint8_t runtime_segment_index);
 
     #ifndef DISABLE_WEBSERVER
     #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
@@ -510,6 +483,9 @@ void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length =
         +1
       #endif
       #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+        +1
+      #endif
+      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
         +1
       #endif
       #if defined(ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT) || defined(ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS)
@@ -812,7 +788,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 ******************************************************************************************************************************************************************************/
 
 #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-#include "6_Lights/Animator/EffectSubTasks/mAnimatorLight_Segments.h"   
+#include "6_Lights/Animator/mAnimatorLight_Segments.h"   
 #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /******************************************************************************************************************************************************************************

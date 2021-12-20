@@ -134,6 +134,7 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
     CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
@@ -174,7 +175,6 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   } 
 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000);
     data_buffer.isserviced++;
@@ -1126,11 +1126,13 @@ getBrightnessRGB255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
+#ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** BrtCCT *****************************************************************************************
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
+
 
 void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
     
@@ -1188,6 +1190,8 @@ setCCT(ct);
 getCCT());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
 
 /**
  * direct percentage version

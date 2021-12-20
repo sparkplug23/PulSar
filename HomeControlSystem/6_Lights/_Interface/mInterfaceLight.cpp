@@ -601,7 +601,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
 // {
 //   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].colour_map_id[i]);
 // }
-Serial.println("every second");
+// Serial.println("every second");
 
 // (&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index])
 
@@ -802,7 +802,7 @@ void mInterfaceLight::EveryLoop(){
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
       case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
-        pCONT_ladd->SubTask_Manual_SetPixel();
+        pCONT_lAni-> SubTask_Manual_SetPixel();
         // light_power_state = true;
       break;
       #endif

@@ -20,7 +20,7 @@
  * nodemcu v3
  * */
 //#define DEVICE_RGBSTRING_CONTROLLER_01
-//#define DEVICE_RGBSTRING_UTILITY_SHELF
+// #define DEVICE_RGBSTRING_UTILITY_SHELF
 /**
  * Jacqueline and Paula, programmed to be exact, never change
  * nodemuc v3
@@ -34,6 +34,7 @@
  * */
 // #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
 // #define DEVICE_OUTSIDETREE_CONTROLLER_BASIC_02
+// #define DEVICE_OUTSIDETREE_CONTROLLER_ESP32_DEBUG
 
 
 // #define DEVICE_LIVINGROOM_TREE_WATER_SENSOR
@@ -167,6 +168,8 @@
   #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
   //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
   // #define USE_DEVFEATURE_METHOD_WLED_BUILD
+
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
  
  
   #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
@@ -278,16 +281,50 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
-    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"ColourPalette\":10," 
     "\"Effects\":{"
-      "\"Function\":108"
+      "\"Function\":109"
     "},"
     "\"Transition\":{"
       "\"TimeMs\":0,"
-      "\"RateMs\":30"
+      "\"RateMs\":20"
     "},"    
+    "\"Hue\":12,"
+    "\"Sat\":100,"
+    "\"CCT_TempPercentage\":100,"
+    "\"BrightnessCCT\":100,"
     "\"BrightnessRGB\":100"
   "}";
+
+//   {
+//     "PixelRange": [
+//       0,
+//       49
+//     ],
+//     "Effects": {
+//       "Function": 109,
+//       "Speed": 127,
+//       "Current": 127,
+//       "Palette": "Christmas 21",
+//       "Intensity": 127,
+//       "Mode": 6
+//     },
+//     "ColourPalette": 10,
+//     "Hue":20,
+//     "Sat":100,
+//     "BrightnessCCT":100,
+//     "CCT_TempPercentage":100,
+//     "ColourOrder": "grbwc",
+//     "Transition": {
+//       "TimeMs": 900,
+//       "RateMs": 20
+//     },
+//     "BrightnessRGB": 100
+// }
+
+
+
+
   #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
 
 
@@ -1066,6 +1103,176 @@
       "]"
     "}"
   "}";
+
+#endif
+
+
+/**
+ * Outside tree, ie testbed for esp32 controller with wifi if possible
+ * */
+#ifdef DEVICE_OUTSIDETREE_CONTROLLER_ESP32_DEBUG
+  // #define DEVICENAME_CTR          "testbed_rgboutide_tree_controller_01"
+  #define DEVICENAME_CTR          "outsidetree_esp32_debug"
+  #define DEVICENAME_FRIENDLY_CTR "Outside Tree ESP32 Basic" // Basic version used until I redo the animations later
+
+  #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+  //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+  // #define USE_DEVFEATURE_METHOD_WLED_BUILD
+ 
+ 
+  #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    // enable some wled conerted aniamtions
+    #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+    #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+    // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+
+  #endif 
+
+
+
+  // /***
+  //  * Use bh1520 lux sensor to control brightness
+  //  * 
+  //  * 
+  //  * ie, goes from upper boundary (before dark), then slowly drops brightness.
+  //  * probably better to use sun elevation for this instead? ie <10 degrees below horizon, then turn brightness down
+  //  * */
+
+
+  // /***                               Total
+  //  * 4 sets of 5v black              (200)   4
+  //  * 7 sets of 5v green              (350)   7
+  //  * 15 sets of 12v green            (750) ONE FAULT    14
+  //  * 
+  //  *                                 (1300)  used to be 1000?   25
+  //  * */
+
+  // // #define USE_MODULE_SENSORS_BUTTONS
+  // // #define ENABLE_DEVFEATURE_ANIMATOR_BASIC_BUTTON_CONTROLLER // ie Basic button controls for others, christmas controller
+  // // #define USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+  // #define ENABLE_DEVFEATURE_RELAY_CONTROLLED_VIA_ANIMATIONS_OUTPUT
+
+  // #define USE_MODULE_DRIVERS_RELAY
+  // #define MAX_RELAYS 1
+  // #define USE_MODULE_DRIVERS_INTERFACE
+
+
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  // #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"22\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\"" // not using "un"inverted, as I want the power to stay on by default
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+                                                                  
+  #define STRIP_SIZE_MAX 1400 // (26 sets)
+  #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"Function\":\"Static Glow\""
+  //   "},"    
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     "\"" D_JSON_TIME_MS "\":0,"
+  //     "\"" D_JSON_RATE_MS "\":1000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+  //   "},"
+  //   "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+  //   "\"BrightnessRGB\":0"
+  // "}";
+
+#define LIGHTING_TEMPLATE_DEBUG_SINGLE_PIXEL
+
+
+  #ifdef LIGHTING_TEMPLATE_DEBUG_SINGLE_PIXEL
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":," 
+  //   "\"ColourPalette\":\"Christmas 06\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":1"
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":3000,"
+  //     "\"RateMs\":10000"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}"
+  
+  
+  R"=====({"PixelRange":[0,1000],
+  "AnimationMode": 3,
+  "Strip": {
+    "ClearTo": [0,0,0,0,0],
+    "ManualSetPixelToScene":[0,1,2,3,4,5,40,41,42,43,44,45,46,47,48,49]
+  },
+  "Effects": {
+    "Function": 109
+  },
+  "ColourPalette": 10,
+  "Hue": 20,
+  "Sat": 100,
+  "BrightnessCCT": 100,
+  "CCT_TempPercentage": 100,
+  "ColourOrder": "grbwc",
+  "Transition": {
+    "TimeMs": 900,
+    "RateMs": 20
+  },
+  "BrightnessRGB": 100"})====="
+
+
+  ;
+
+
+  #endif
+
+
+  
+  // #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+  //     "]"
+  //   "}"
+  // "}";
 
 #endif
 

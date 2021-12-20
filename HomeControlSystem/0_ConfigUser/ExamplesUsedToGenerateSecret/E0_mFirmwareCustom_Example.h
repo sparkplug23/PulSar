@@ -381,4 +381,54 @@
 
 #endif
 
+
+// #ifdef DEVICE_RGBSTRING_EXAMPLE_SEGMENT
+//   #define DEVICENAME_CTR          "testbed_string_segment_01"
+//   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+  
+//   #define USE_BUILD_TYPE_LIGHTING
+//   #define USE_MODULE_LIGHTS_INTERFACE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
+//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+//   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//   #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+//   #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+//   #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+//   #define DEBUG_WLED_EFFECT_FUNCTIONS
+
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "}";
+
+//  #define STRIP_SIZE_MAX 50
+//  #define USE_LIGHTING_TEMPLATE
+
+//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+//     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+//     "\"ColourPalette\":\"Christmas 06\"," 
+//     "\"Effects\":{"
+//       "\"Function\":1"
+//     "},"
+//     "\"Transition\":{"
+//       "\"TimeMs\":3000,"
+//       "\"RateMs\":10000"
+//     "},"    
+//     "\"BrightnessRGB\":100"
+//   "}";
+
+// #endif
+
+
 #endif // MFIRMWARECUSTOM_EXAMPLE_HEADER

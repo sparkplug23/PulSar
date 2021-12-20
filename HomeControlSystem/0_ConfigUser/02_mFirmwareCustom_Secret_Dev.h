@@ -162,6 +162,12 @@
     // enable some wled conerted aniamtions
     #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
     #define DEBUG_WLED_EFFECT_FUNCTIONS
+    #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+    #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+
+    // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+
   #endif 
   #ifdef USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
     #define USE_BUILD_TYPE_LIGHTING
@@ -590,6 +596,37 @@
     },
     "BrightnessRGB": 100
   }
+}
+
+{
+  "PixelRange": [
+    0,
+    49
+  ],
+  "AnimationMode": 3,
+  "Strip": {
+    "ClearTo": [
+      0,
+      0,
+      0,
+      0,0
+    ],
+    "ManualSetPixelToScene":[0,1,2,3,4,5,40,41,42,43,44,45,46,47,48,49]
+  },
+  "Effects": {
+    "Function": 109
+  },
+  "ColourPalette": 10,
+  "Hue": 20,
+  "Sat": 100,
+  "BrightnessCCT": 100,
+  "CCT_TempPercentage": 100,
+  "ColourOrder": "grbwc",
+  "Transition": {
+    "TimeMs": 900,
+    "RateMs": 20
+  },
+  "BrightnessRGB": 100
 }
 
 */

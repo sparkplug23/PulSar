@@ -1,4 +1,4 @@
-#include "../mAnimatorLight.h"
+#include "mAnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
