@@ -22,38 +22,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       break;
     case FUNC_INIT:
       Init();
-
-
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-
       #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
       // Init_HACS();
       #endif
       #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
       Init_WLED();
       #endif
-
-      
-      // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      //   init();
-      // #endif
-      // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-      //   Init_WLED();
-      // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-      
-
       break;
   }
   
@@ -711,22 +685,25 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
  * Alternate SetPixelColor to make WLED conversion easier, but to be phased out later
  */
 
-void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint8_t segment_length)
+void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint16_t segment_length)
 {
   SetPixelColor(indexPixel, RgbColor(red,green,blue));
 }
   
-void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length)
+void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint32_t color, uint16_t segment_length)
 {
-  RgbcctColor col;
+  RgbcctColor col = RgbcctColor(0);
   col.red =   (color >> 16 & 0xFF);
   col.green = (color >> 8  & 0xFF);
   col.blue =  (color       & 0xFF);
+
+  // AddLog(LOG_LEVEL_DEBUG, PSTR("color=%d\t%X"),indexPixel,color);
+
   SetPixelColor(indexPixel, col);
 }
 
 
-void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, uint8_t segment_length)
+void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, uint16_t segment_length)
 {
 
   #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS

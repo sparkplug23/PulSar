@@ -67,54 +67,54 @@
 #endif
 
 
-enum TIME_MAP_SECS_IDS{
-  TIME_MAP_SECS_0_ID = 0,
-  TIME_MAP_SECS_1_ID,
-  TIME_MAP_SECS_2_ID,
-  TIME_MAP_SECS_4_ID,
-  TIME_MAP_SECS_6_ID,
-  TIME_MAP_SECS_10_ID,
-  TIME_MAP_SECS_15_ID,
-  TIME_MAP_SECS_20_ID,
-  TIME_MAP_SECS_30_ID,
-  TIME_MAP_SECS_60_ID,
-  TIME_MAP_SECS_LENGTH_ID
-};
-const uint8_t time_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
+// enum TIME_MAP_SECS_IDS{
+//   TIME_MAP_SECS_0_ID = 0,
+//   TIME_MAP_SECS_1_ID,
+//   TIME_MAP_SECS_2_ID,
+//   TIME_MAP_SECS_4_ID,
+//   TIME_MAP_SECS_6_ID,
+//   TIME_MAP_SECS_10_ID,
+//   TIME_MAP_SECS_15_ID,
+//   TIME_MAP_SECS_20_ID,
+//   TIME_MAP_SECS_30_ID,
+//   TIME_MAP_SECS_60_ID,
+//   TIME_MAP_SECS_LENGTH_ID
+// };
+// const uint8_t time_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
 
-enum RATE_MAP_SECS_IDS{
-  RATE_MAP_SECS_0_ID = 0,
-  RATE_MAP_SECS_1_ID,
-  RATE_MAP_SECS_2_ID,
-  RATE_MAP_SECS_4_ID,
-  RATE_MAP_SECS_6_ID,
-  RATE_MAP_SECS_10_ID,
-  RATE_MAP_SECS_15_ID,
-  RATE_MAP_SECS_20_ID,
-  RATE_MAP_SECS_30_ID,
-  RATE_MAP_SECS_60_ID,
-  RATE_MAP_SECS_LENGTH_ID
-};
-const uint8_t rate_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
+// enum RATE_MAP_SECS_IDS{
+//   RATE_MAP_SECS_0_ID = 0,
+//   RATE_MAP_SECS_1_ID,
+//   RATE_MAP_SECS_2_ID,
+//   RATE_MAP_SECS_4_ID,
+//   RATE_MAP_SECS_6_ID,
+//   RATE_MAP_SECS_10_ID,
+//   RATE_MAP_SECS_15_ID,
+//   RATE_MAP_SECS_20_ID,
+//   RATE_MAP_SECS_30_ID,
+//   RATE_MAP_SECS_60_ID,
+//   RATE_MAP_SECS_LENGTH_ID
+// };
+// const uint8_t rate_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
 
-enum PIXELS_UPDATE_PERCENTAGE_IDS{
-  PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
-  PIXELS_UPDATE_PERCENTAGE_5_ID,
-  PIXELS_UPDATE_PERCENTAGE_10_ID,
-  PIXELS_UPDATE_PERCENTAGE_15_ID,
-  PIXELS_UPDATE_PERCENTAGE_20_ID,
-  PIXELS_UPDATE_PERCENTAGE_30_ID,
-  PIXELS_UPDATE_PERCENTAGE_40_ID,
-  PIXELS_UPDATE_PERCENTAGE_50_ID,
-  PIXELS_UPDATE_PERCENTAGE_60_ID,
-  PIXELS_UPDATE_PERCENTAGE_70_ID,
-  PIXELS_UPDATE_PERCENTAGE_80_ID,
-  PIXELS_UPDATE_PERCENTAGE_90_ID,
-  PIXELS_UPDATE_PERCENTAGE_100_ID,
-  PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
-};
-const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
-  {0,5,10,15,20,30,40,50,60,70,80,90,100};
+// enum PIXELS_UPDATE_PERCENTAGE_IDS{
+//   PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
+//   PIXELS_UPDATE_PERCENTAGE_5_ID,
+//   PIXELS_UPDATE_PERCENTAGE_10_ID,
+//   PIXELS_UPDATE_PERCENTAGE_15_ID,
+//   PIXELS_UPDATE_PERCENTAGE_20_ID,
+//   PIXELS_UPDATE_PERCENTAGE_30_ID,
+//   PIXELS_UPDATE_PERCENTAGE_40_ID,
+//   PIXELS_UPDATE_PERCENTAGE_50_ID,
+//   PIXELS_UPDATE_PERCENTAGE_60_ID,
+//   PIXELS_UPDATE_PERCENTAGE_70_ID,
+//   PIXELS_UPDATE_PERCENTAGE_80_ID,
+//   PIXELS_UPDATE_PERCENTAGE_90_ID,
+//   PIXELS_UPDATE_PERCENTAGE_100_ID,
+//   PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
+// };
+// const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
+//   {0,5,10,15,20,30,40,50,60,70,80,90,100};
 
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR)     "ambilight";
@@ -223,7 +223,7 @@ class mAnimatorLight :
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
     uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;  // This may not be the right thing I want animation.transition.pixels_to_update_as_number
     
-    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, uint8_t segment_length = 0);
+    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, uint16_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
 
     /**
@@ -231,10 +231,8 @@ class mAnimatorLight :
      * Tmp wled conversions
      * 
      */    
-    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint8_t segment_length = 0);  
-    void SetPixelColor(uint16_t indexPixel, uint32_t color, uint8_t segment_length = 0);
-
-
+    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint16_t segment_length = 0);  
+    void SetPixelColor(uint16_t indexPixel, uint32_t color, uint16_t segment_length = 0);
 
     #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     // what is stored for state is specific to the need, in this case, the colors.
@@ -348,8 +346,7 @@ class mAnimatorLight :
     void SetRefreshLEDs();    
     void StripUpdate();
     void SetPixelColor_All(RgbcctColor colour);
-
-    
+        
 
     HsbColor GetColourFromMapUsingType(
       uint16_t pixel_I_want,

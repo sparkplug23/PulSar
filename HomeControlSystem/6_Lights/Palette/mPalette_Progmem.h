@@ -2207,7 +2207,7 @@ DEF_PGM_UINT8(PM_SOLID__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__
 
 
 
-
+#ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
 
 
 
@@ -3753,6 +3753,7 @@ const byte* const gGradientPalettes[] PROGMEM = {
   Atlantica_gp,                 //51-38 Atlantica
 };
 
+#endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
 
 

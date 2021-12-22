@@ -133,6 +133,35 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
+/**
+ * @brief 
+ * *WLED added
+ * 
+ */
+if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
+  { 
+
+    _segments[segment_index].set_intensity(jtok.getInt());
+    
+    
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  
+if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
+  { 
+
+    _segments[segment_index].set_speed(jtok.getInt());
+    
+    
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  
+
+
   // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_DIRECTION])
   // { 
   //   CommandSet_Flasher_Flags_Movement_Direction(jtok.getInt());
@@ -1382,7 +1411,9 @@ void mAnimatorLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uin
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "SEGEMTNS" D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), _segment_runtimes[segment_index].rgbcct_controller->getHue360());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
   
-pCONT_lAni->mqtthandler_flasher_teleperiod.flags.SendNow = true;
+  #ifdef USE_MODULE_NETWORK_MQTT
+  pCONT_lAni->mqtthandler_flasher_teleperiod.flags.SendNow = true;
+  #endif // USE_MODULE_NETWORK_MQTT
 
 }
 

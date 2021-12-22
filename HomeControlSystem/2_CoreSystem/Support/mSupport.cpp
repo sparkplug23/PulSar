@@ -154,7 +154,7 @@ void mSupport::ArduinoOTAInit(void)
       // #endif  // USE_MODULE_NETWORK_WEBSERVER
       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
     // #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
     // #endif// ENABLE_LOG_LEVEL_INFO
     // #endif
     arduino_ota_triggered = true;
@@ -217,7 +217,7 @@ void mSupport::ArduinoOTAInit(void)
   ArduinoOTA.onEnd([this]()
   {
     //#ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "OTA " D_SUCCESSFUL ". " D_RESTARTING));
     //#endif
     ESP.restart();
 	});

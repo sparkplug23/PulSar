@@ -40,6 +40,7 @@
  * */
 // #define DEVICE_EXAMPLE_RGB_ADDRESSABLE
 // #define DEVICE_EXAMPLE_H801
+// #define DEVICE_RGBSTRING_TESTBED_SEGMENT2
 
 
 /************************************************************************************************************************************************************
@@ -429,6 +430,84 @@
 //   "}";
 
 // #endif
+
+
+
+
+// Working: 21/12/2021
+#ifdef DEVICE_RGBSTRING_TESTBED_SEGMENT2
+  #define DEVICENAME_CTR          "testbed_example_segment_01"
+  #define DEVICENAME_FRIENDLY_CTR "Segment Example 01"
+  
+  #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+
+  #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    
+    #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+    #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+    #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+    #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    #define ENABLE_FREERAM_APPENDING_SERIAL
+
+    #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+    #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+
+    #define ENABLE_CRGBPALETTES_IN_PROGMEM
+
+    #define STRIP_SIZE_MAX 100
+    
+    // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+
+  #endif 
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+      //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief 
+ Segment command for single segment to replace old effects
+ Without using a "Segment#" the commands will be assumed as for the entire strip and internally be segment0
+ * 
+ */
+ #define USE_LIGHTING_TEMPLATE
+
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Static Palette\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":3000,"
+      "\"RateMs\":10000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+
 
 
 #endif // MFIRMWARECUSTOM_EXAMPLE_HEADER

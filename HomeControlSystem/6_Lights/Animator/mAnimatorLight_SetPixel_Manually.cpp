@@ -134,6 +134,9 @@ uint8_t mAnimatorLight::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 
       JsonBuilderI->Array_Start("PixelsOn");
       for(uint16_t i=0;i<_segments[0].length();i++){ 
+
+        if(i>20){ break; } // causes crash, really I need to make so JBI cant add more than its length
+
         if(pCONT_iLight->RgbColorto32bit(GetPixelColor(i))){
           JsonBuilderI->Add(i); 
           // if(pixels_added++>50){

@@ -126,7 +126,9 @@ char* GetPtr();
         (*writer.length>1)&&
         (writer.buffer[*writer.length-1]!='{')&&
         (writer.buffer[*writer.length-1]!='[')      
-      ){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+      ){ 
+        
+        *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,","); }
 
       #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
@@ -164,7 +166,8 @@ char* GetPtr();
         (*writer.length>1)&&
         (writer.buffer[*writer.length-1]!='{')&&
         (writer.buffer[*writer.length-1]!='[')      
-      ){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+      ){ 
+        *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
       #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
