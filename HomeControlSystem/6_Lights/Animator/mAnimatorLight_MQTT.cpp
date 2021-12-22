@@ -71,7 +71,7 @@ DEBUG_LINE_HERE;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_State;
   
-  #if defined(ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT) || defined(ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS)
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   mqtthandler_ptr = &mqtthandler_flasher_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();

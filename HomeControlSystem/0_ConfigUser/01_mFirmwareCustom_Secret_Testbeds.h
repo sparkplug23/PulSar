@@ -715,7 +715,7 @@
   // #define DISABLE_WEBSERVER 
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
-  // #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
   // //#define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
 
   #define STRIP_SIZE_MAX 93// 750   *15 //changing gazebo to be 12v
@@ -795,7 +795,7 @@
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
 
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // new method for 2022
-  #define ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT      // current method for xmas 2021
+        // current method for xmas 2021
 
   // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   

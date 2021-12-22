@@ -45,13 +45,7 @@ void mInterfaceLight::Settings_Default(){
 
 RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
 
-  // Update pointer of struct
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  mPaletteI->SetPaletteListPtrFromID(animation.palette.id);
-#else
   mPaletteI->SetPaletteListPtrFromID(pCONT_lAni->_segments[0].palette.id);
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
   
   uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
           
@@ -84,39 +78,12 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
   //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    JsonBuilderI->Add_P(PM_JSON_HUE, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getHue360());
-    JsonBuilderI->Add_P(PM_JSON_SAT, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getSat255());
-    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getBrightnessRGB255());
+    JsonBuilderI->Add_P(PM_JSON_HUE, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getHue360());
+    JsonBuilderI->Add_P(PM_JSON_SAT, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
+    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
 
-    
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(animation.transition.time_ms/1000));
-    JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
-#else
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->_segments[0].transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->_segments[0].transition.time_ms);
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-
 
 
   return JsonBuilderI->End();
@@ -139,27 +106,12 @@ bool mInterfaceLight::Pre_Init(void)
     }
   }
 
-  
-
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
-  order->red = 0;
-  order->green = 1;
-  order->blue = 2;
-  order->white_cold = 3;
-  order->white_warm = 4;
-
-
-#else
-  
+    
   pCONT_lAni->_segments[0].hardware_element_colour_order.red = 0;
   pCONT_lAni->_segments[0].hardware_element_colour_order.green = 1;
   pCONT_lAni->_segments[0].hardware_element_colour_order.blue = 2;
   pCONT_lAni->_segments[0].hardware_element_colour_order.white_cold = 3;
   pCONT_lAni->_segments[0].hardware_element_colour_order.white_warm = 4;
-
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
 
   //temp fix
   if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
@@ -443,30 +395,8 @@ setCCT(153);
 
 void mInterfaceLight::init_Animations(){
 
-// add these into settings as defaults as these currently overwrite templates
-
-  // // Set default values (ifdef below sets specific)
-  // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  // animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-  // #endif // USE_MODULE_LIGHTS_ANIMATOR
-  // // animation.palette.id = PALETTELIST_VARIABLE_USER_01_ID;
-  // animation.mode_id = ANIMATION_MODE_EFFECTS_ID;
-  // // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  // animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
-  // #endif // USE_MODULE_LIGHTS_ANIMATOR
-  // animation.flags.fForceUpdate = true;
-  // animation.transition.time_ms.val = 1000;
-  // animation.transition.rate_ms = 20*1000;
-
-  #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fEnable_Animation = true;
-  animation.flags.NewAnimationRequiringCompleteRefresh = true;
-  #else
   pCONT_lAni->_segments[0].flags.fEnable_Animation = true;
   pCONT_lAni->_segments[0].flags.NewAnimationRequiringCompleteRefresh = true;
-  #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
 
 }
 
@@ -729,19 +659,15 @@ void mInterfaceLight::EveryLoop(){
   if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
      (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
      
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    switch(animation.mode_id)
-#else
-    switch(pCONT_lAni->_segments[0].mode_id)    
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      {
-      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Effects_PhaseOut();
-      break;
-      #endif
-      case ANIMATION_MODE_NONE_ID: default: break; // resting position
-    }
+    // switch(pCONT_lAni->_segments[0].mode_id)    
+    //   {
+    //   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    //   case ANIMATION_MODE_EFFECTS_ID:
+    //     pCONT_lAni->SubTask_Effects_PhaseOut();
+    //   break;
+    //   #endif
+    //   case ANIMATION_MODE_NONE_ID: default: break; // resting position
+    // }
   
   }
   
@@ -750,20 +676,8 @@ void mInterfaceLight::EveryLoop(){
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    switch(animation.mode_id)
-#else
     switch(pCONT_lAni->_segments[0].mode_id)    
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
     {
-      /**
-       * HACS Original: animations using neopixel animator (to be phased into segments)
-       * */
-      #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Effects_PhaseOut();
-      break;
-      #endif
       /**
        * WLED Original: Based on WLED direct port (to be phased into segments)
        * */
@@ -968,15 +882,7 @@ getBrightnessCCT255());
 
   // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
-
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, animation.transition.pixels_to_update_as_number);
-#else 
   JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->_segments[0].transition.pixels_to_update_as_number);
-#endif
-
-
- // GetPixelsToUpdateAsNumberFromPercentage(animation.transition.pixels_to_update_as_percentage));
   #endif // USE_MODULE_LIGHTS_ANIMATOR
 
   return JsonBuilderI->End();
@@ -1000,32 +906,12 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
     JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("type");
     
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    JsonBuilderI->Add("R", pCONT_lAni->_segments[0].hardware_element_colour_order.r); 
+    JsonBuilderI->Add("G", pCONT_lAni->_segments[0].hardware_element_colour_order.g); 
+    JsonBuilderI->Add("B", pCONT_lAni->_segments[0].hardware_element_colour_order.b); 
+    JsonBuilderI->Add("WW", pCONT_lAni->_segments[0].hardware_element_colour_order.w); 
+    JsonBuilderI->Add("WC", pCONT_lAni->_segments[0].hardware_element_colour_order.c); 
 
-      JsonBuilderI->Add("R", hardware_element_colour_order.r); 
-      JsonBuilderI->Add("G", hardware_element_colour_order.g); 
-      JsonBuilderI->Add("B", hardware_element_colour_order.b); 
-      JsonBuilderI->Add("WW", hardware_element_colour_order.w); 
-      JsonBuilderI->Add("WC", hardware_element_colour_order.c); 
-
-
-  // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
-  // order->red = 0;
-  // order->green = 1;
-  // order->blue = 2;
-  // order->white_cold = 3;
-  // order->white_warm = 4;
-
-
-#else
-
-      JsonBuilderI->Add("R", pCONT_lAni->_segments[0].hardware_element_colour_order.r); 
-      JsonBuilderI->Add("G", pCONT_lAni->_segments[0].hardware_element_colour_order.g); 
-      JsonBuilderI->Add("B", pCONT_lAni->_segments[0].hardware_element_colour_order.b); 
-      JsonBuilderI->Add("WW", pCONT_lAni->_segments[0].hardware_element_colour_order.w); 
-      JsonBuilderI->Add("WC", pCONT_lAni->_segments[0].hardware_element_colour_order.c); 
-
-#endif
 
     JsonBuilderI->Level_End();
 

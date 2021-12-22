@@ -37,19 +37,19 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
   
   for (uint16_t i = 0; i < MAX_NUM_SEGMENTS; i++)
   {
-  _segment_runtimes[i].rgbcct_controller->setSubType(LST_RGBCW);
-  _segment_runtimes[i].rgbcct_controller->setApplyBrightnessToOutput(false);
-  if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
-    _segment_runtimes[i].rgbcct_controller->setColorMode(LCM_RGB);
-  }else{
-    _segment_runtimes[i].rgbcct_controller->setColorMode(LCM_BOTH);
-  }
-  _segment_runtimes[i].rgbcct_controller->Sync();    // calculate the initial values (#8058)
-  // RGB parts
-  _segment_runtimes[i].rgbcct_controller->setRGB(1,2,3);
-  // CCT parts
-  _segment_runtimes[i].rgbcct_controller->setRGBCCTLinked(false);
-  _segment_runtimes[i].rgbcct_controller->setCCT(153);
+    _segment_runtimes[i].rgbcct_controller->setSubType(LST_RGBCW);
+    _segment_runtimes[i].rgbcct_controller->setApplyBrightnessToOutput(false);
+    if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
+      _segment_runtimes[i].rgbcct_controller->setColorMode(LCM_RGB);
+    }else{
+      _segment_runtimes[i].rgbcct_controller->setColorMode(LCM_BOTH);
+    }
+    _segment_runtimes[i].rgbcct_controller->Sync();    // calculate the initial values (#8058)
+    // RGB parts
+    _segment_runtimes[i].rgbcct_controller->setRGB(1,2,3);
+    // CCT parts
+    _segment_runtimes[i].rgbcct_controller->setRGBCCTLinked(false);
+    _segment_runtimes[i].rgbcct_controller->setCCT(153);
   }
 
 

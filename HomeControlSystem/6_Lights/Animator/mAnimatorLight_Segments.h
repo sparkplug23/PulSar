@@ -84,21 +84,19 @@
 
 #define SPEED_FORMULA_L  5 + (50*(255 - _segments[segment_index].speed()))/_virtualSegmentLength
 
-    CRGBPalette16 currentPalette;
-    CRGBPalette16 targetPalette;
-uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
+  CRGBPalette16 currentPalette;
+  CRGBPalette16 targetPalette;
 
-// void fill_ranged(uint32_t c) ;
+  uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
 
-void fill(uint32_t c);
-// void seg_fill_ranged(uint32_t c) ;
+  void fill(uint32_t c);
+  void fill_ranged(uint32_t c);
+  void seg_fill_ranged(uint32_t c);
 
-uint32_t color_wheel(uint8_t pos);
-uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend);
+  uint32_t color_wheel(uint8_t pos);
+  uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend);
 
-
-    // void Segments_UpdateStartingColourWithGetPixel();
-void Init_Segments();
+  void Init_Segments();
 
   /**
    * Minor Code version 96 onwards requires names, as reshuffle is happening. Any old device will not respond to the correct command via number until remap is performed
@@ -636,55 +634,55 @@ void Init_Segments();
  * *//////
 
 
-  void SubTask_Segments_Animation();
-void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
-/**
- * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
- * */
+    void SubTask_Segments_Animation();
+    void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
+    /**
+     * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
+     * */
 
-/**
- * how a section (single animation) is configured -- my HACS needs to change to conform to this
- * */
-  
-// options
-// bit    7: segment is in transition mode
-// bits 4-6: TBD
-// bit    3: mirror effect within segment
-// bit    2: segment is on
-// bit    1: reverse segment
-// // bit    0: segment is selected
-// #define NO_OPTIONS2   (uint8_t)0x00
-// #define TRANSITIONAL2 (uint8_t)0x80
-// #define MIRROR2       (uint8_t)0x08
-// #define SEGMENT_ON2   (uint8_t)0x04
-// #define REVERSE2      (uint8_t)0x02
-// #define SELECTED2     (uint8_t)0x01
-// // #define IS_TRANSITIONAL2 ((_segments[_segment_index].options & TRANSITIONAL2) == TRANSITIONAL2)
-// // #define IS_MIRROR2       ((_segments[_segment_index].options & MIRROR2      ) == MIRROR2      )
-// // #define IS_SEGMENT_ON2   ((_segments[_segment_index].options & SEGMENT_ON2  ) == SEGMENT_ON2  )
-// // #define IS_REVERSE2      ((_segments[_segment_index].options & REVERSE2     ) == REVERSE2     )
-// // #define IS_SELECTED2     ((_segments[_segment_index].options & SELECTED2    ) == SELECTED2    )
+    /**
+     * how a section (single animation) is configured -- my HACS needs to change to conform to this
+     * */
 
-// #define DEFAULT_BRIGHTNESS2 (uint8_t)127
-// #define DEFAULT_MODE2       (uint8_t)0
-// #define DEFAULT_SPEED2      (uint8_t)128
-// #define DEFAULT_COLOR2      (uint32_t)0xFFAA00
+    // options
+    // bit    7: segment is in transition mode
+    // bits 4-6: TBD
+    // bit    3: mirror effect within segment
+    // bit    2: segment is on
+    // bit    1: reverse segment
+    // // bit    0: segment is selected
+    // #define NO_OPTIONS2   (uint8_t)0x00
+    // #define TRANSITIONAL2 (uint8_t)0x80
+    // #define MIRROR2       (uint8_t)0x08
+    // #define SEGMENT_ON2   (uint8_t)0x04
+    // #define REVERSE2      (uint8_t)0x02
+    // #define SELECTED2     (uint8_t)0x01
+    // // #define IS_TRANSITIONAL2 ((_segments[_segment_index].options & TRANSITIONAL2) == TRANSITIONAL2)
+    // // #define IS_MIRROR2       ((_segments[_segment_index].options & MIRROR2      ) == MIRROR2      )
+    // // #define IS_SEGMENT_ON2   ((_segments[_segment_index].options & SEGMENT_ON2  ) == SEGMENT_ON2  )
+    // // #define IS_REVERSE2      ((_segments[_segment_index].options & REVERSE2     ) == REVERSE2     )
+    // // #define IS_SELECTED2     ((_segments[_segment_index].options & SELECTED2    ) == SELECTED2    )
+
+    // #define DEFAULT_BRIGHTNESS2 (uint8_t)127
+    // #define DEFAULT_MODE2       (uint8_t)0
+    // #define DEFAULT_SPEED2      (uint8_t)128
+    // #define DEFAULT_COLOR2      (uint32_t)0xFFAA00
 
 
-//realtime modes
-#define REALTIME_MODE_INACTIVE    0
-#define REALTIME_MODE_GENERIC     1
-#define REALTIME_MODE_UDP         2
-#define REALTIME_MODE_HYPERION    3
-#define REALTIME_MODE_E131        4
-#define REALTIME_MODE_ADALIGHT    5
-#define REALTIME_MODE_ARTNET      6
-#define REALTIME_MODE_TPM2NET     7
+    //realtime modes
+    #define REALTIME_MODE_INACTIVE    0
+    #define REALTIME_MODE_GENERIC     1
+    #define REALTIME_MODE_UDP         2
+    #define REALTIME_MODE_HYPERION    3
+    #define REALTIME_MODE_E131        4
+    #define REALTIME_MODE_ADALIGHT    5
+    #define REALTIME_MODE_ARTNET      6
+    #define REALTIME_MODE_TPM2NET     7
 
-//realtime override modes
-#define REALTIME_OVERRIDE_NONE    0
-#define REALTIME_OVERRIDE_ONCE    1
-#define REALTIME_OVERRIDE_ALWAYS  2
+    //realtime override modes
+    #define REALTIME_OVERRIDE_NONE    0
+    #define REALTIME_OVERRIDE_ONCE    1
+    #define REALTIME_OVERRIDE_ALWAYS  2
 
 
     // #define SEGLEN           _virtualSegmentLength
@@ -695,9 +693,6 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
      * Slow Glow (50%)
      * Solid (50%) with random colour changes
      * */
-
-    void fill_ranged(uint32_t c);
-    void seg_fill_ranged(uint32_t c);
 
     #define NUM_COLORS2       3 /* number of colors per segment */
 
@@ -1073,17 +1068,17 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
   bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
 
 
-    enum EFFECTSREGION
-    {
-        EFFECTS_REGION_COLOUR_SELECT_ID=0,
-        EFFECTS_REGION_ANIMATE_ID
-    };      
+  enum EFFECTSREGION
+  {
+      EFFECTS_REGION_COLOUR_SELECT_ID=0,
+      EFFECTS_REGION_ANIMATE_ID
+  };      
 
-    /**
-     * @brief 
-     *to be sorted
-     * 
-     */
+  /**
+   * @brief 
+   *to be sorted
+    * 
+    */
   #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
     #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 55
     uint16_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
@@ -1118,293 +1113,285 @@ void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 
 
 
-    void Init_Segments_RgbcctControllers();
+  void Init_Segments_RgbcctControllers();
 
 
-    mAnimatorLight& setAnimFunctionCallback_Segments_Indexed(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
-    void StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index = 0);
+  mAnimatorLight& setAnimFunctionCallback_Segments_Indexed(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
+  void StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index = 0);
 
 
-    void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
+  void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
 
 
-    void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
-    void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
-    void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
+  void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
+  void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
+  void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
 
-    bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, RgbcctColor starting_colour);
-    bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  Colour_Type pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  Colour_Type pixel_type, RgbcctColor starting_colour);
 
-    void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
-
-
-    void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
-
-    /**
-     * My animations (and their animators where applicable)
-     * */
-    void SubTask_Segment_Animate_Function__Solid_Static_Single_Colour();
-    void AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param);    
-    void SubTask_Segment_Animate_Function__Static_Palette();
-    void SubTask_Segment_Animate_Function__Slow_Glow();
-    void SubTask_Segment_Flasher_Animate_Function__Sequential_Palette();
-    void SubTask_Segment_Flasher_Animate_Function__Rotating_Palette();
-    void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
-    void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-    void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-    void SubTask_Flasher_Animate_Function_Tester();
-    // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
-
-    
-    #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-    // Static
-    void SubTask_Segment_Flasher_Animate_Function__Static();
-    void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
-    void SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16_t threshold);
-    void SubTask_Segment_Flasher_Animate_Function__Spots();
-    void SubTask_Segment_Flasher_Animate_Function__Percent();
-    // One colour changes
-    void SubTask_Segment_Flasher_Animate_Function__Random_Colour();
-    // Wipe/Sweep/Runners 
-    void BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(bool rev, bool useRandomColors);
-    void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe();
-    void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random();
-    void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep();
-    void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
-    void SubTask_Segment_Flasher_Animate_Function__TriColour();
-    void SubTask_Segment_Flasher_Animate_Function__Android();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw);
-    void SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2);
-    void SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue();
-    void SubTask_Segment_Flasher_Animate_Function__Running_Colour();
-    void SubTask_Segment_Flasher_Animate_Function__Running_Random();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading);
-    void SubTask_Segment_Flasher_Animate_Function__Gradient();
-    void SubTask_Segment_Flasher_Animate_Function__Loading();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Police(uint32_t color1, uint32_t color2, bool all);
-    void SubTask_Segment_Flasher_Animate_Function__Police();
-    void SubTask_Segment_Flasher_Animate_Function__Polce_All();
-    void SubTask_Segment_Flasher_Animate_Function__Two_Dots();
-    void SubTask_Segment_Flasher_Animate_Function__Two_Areas();
-    void SubTask_Segment_Flasher_Animate_Function__Multi_Comet();
-    void SubTask_Segment_Flasher_Animate_Function__Oscillate();
-    void SubTask_Segment_Flasher_Animate_Function__BPM();
-    void SubTask_Segment_Flasher_Animate_Function__Juggle();
-    void SubTask_Segment_Flasher_Animate_Function__Palette();
-    void SubTask_Segment_Flasher_Animate_Function__ColourWaves();
-    void SubTask_Segment_Flasher_Animate_Function__Lake();
-    void SubTask_Segment_Flasher_Animate_Function__Glitter();
-    void SubTask_Segment_Flasher_Animate_Function__Meteor();
-    void SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth();    
-    void SubTask_Segment_Flasher_Animate_Function__Pride_2015();    
-    CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
-    void SubTask_Segment_Flasher_Animate_Function__Pacifica();    
-    void SubTask_Segment_Flasher_Animate_Function__Sunrise();    
-    void SubTask_Segment_Flasher_Animate_Function__Sinewave();    
-    void SubTask_Segment_Flasher_Animate_Function__Flow();    
-    void SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8_t moder);
-    void SubTask_Segment_Flasher_Animate_Function__PhasedNoise();    
-    void SubTask_Segment_Flasher_Animate_Function__Phased();    
-    void SubTask_Segment_Flasher_Animate_Function__Running_Lights();    
-    void SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle();    
-    void SubTask_Segment_Flasher_Animate_Function__Merry_Christmas();    
-    void SubTask_Segment_Flasher_Animate_Function__Halloween();    
-    // Chase    
-    void SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Colour();
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Random();
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Flash();
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Random();
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_White();
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Theater();
-    void SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rainbow();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
-    void SubTask_Segment_Flasher_Animate_Function__Chase_TriColour();
-    void SubTask_Segment_Flasher_Animate_Function__Circus_Combustus();
-    // Breathe/Fade/Pulse
-    void SubTask_Segment_Flasher_Animate_Function__Breath();
-    void SubTask_Segment_Flasher_Animate_Function__Fade();
-    void SubTask_Segment_Flasher_Animate_Function__Fade_TriColour();
-    void SubTask_Segment_Flasher_Animate_Function__Fade_Spots();
-    // Fireworks
-    void SubTask_Segment_Flasher_Animate_Function__Fireworks();
-    void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
-    void SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst();
-    void SubTask_Segment_Flasher_Animate_Function__Rain();
-  // Sparkle/Twinkle
-    void SubTask_Segment_Flasher_Animate_Function__Solid_Glitter();
-    void SubTask_Segment_Flasher_Animate_Function__Popcorn();
-    void SubTask_Segment_Flasher_Animate_Function__Plasma();
-    void SubTask_Segment_Flasher_Animate_Function__Sparkle();
-    void SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash();
-    void SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper();
-    void SubTask_Segment_Flasher_Animate_Function__Twinkle();
-    CRGB SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
-    void SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(bool cat);
-    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour();
-    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Fox();
-    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat();
-    void SubTask_Segment_Flasher_Animate_Function__Twinkle_Up();
-    void SubTask_Segment_Flasher_Animate_Function__Dynamic();
-    void SubTask_Segment_Flasher_Animate_Function__Saw();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(uint32_t color);
-    void SubTask_Segment_Flasher_Animate_Function__Dissolve();
-    void SubTask_Segment_Flasher_Animate_Function__Dissolve_Random();
-    void SubTask_Segment_Flasher_Animate_Function__ColourFul();
-    void SubTask_Segment_Flasher_Animate_Function__Traffic_Light();
-    void SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi = false);
-    void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
-    void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
-    void SubTask_Segment_Flasher_Animate_Function__Fire_Flicker();
-    void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
-    
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
-    // Blink/Strobe
-    void SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
-    void SubTask_Segment_Flasher_Animate_Function__Blink();
-    void SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow();
-    void SubTask_Segment_Flasher_Animate_Function__Strobe();
-    void SubTask_Segment_Flasher_Animate_Function__Strobe_Multi();
-    void SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow();
-    void SubTask_Segment_Flasher_Animate_Function__Rainbow();
-    void SubTask_Segment_Flasher_Animate_Function__Lightning();
-    void SubTask_Segment_Flasher_Animate_Function__Fire_2012();
-    void SubTask_Segment_Flasher_Animate_Function__Railway();
-    void SubTask_Segment_Flasher_Animate_Function__Heartbeat();
-    //Noise
-    void SubTask_Segment_Flasher_Animate_Function__FillNoise8();
-    void SubTask_Segment_Flasher_Animate_Function__Noise16_1();
-    void SubTask_Segment_Flasher_Animate_Function__Noise16_2();
-    void SubTask_Segment_Flasher_Animate_Function__Noise16_3();
-    void SubTask_Segment_Flasher_Animate_Function__Noise16_4();
-    void SubTask_Segment_Flasher_Animate_Function__Noise_Pal();
-    // Scan
-    void SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool dual);
-    void SubTask_Segment_Flasher_Animate_Function__Scan();
-    void SubTask_Segment_Flasher_Animate_Function__Scan_Dual();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(bool dual);
-    void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner();
-    void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Dual();
-    void SubTask_Segment_Flasher_Animate_Function__ICU();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow);
-    void SubTask_Segment_Flasher_Animate_Function__Ripple();
-    void SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(); 
-    void SubTask_Segment_Flasher_Animate_Function__Comet();
-    void SubTask_Segment_Flasher_Animate_Function__Chunchun();
-    void SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls();
-    void SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool dual, bool rainbow=false);
-    void SubTask_Segment_Flasher_Animate_Function__Sinelon();
-    void SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual();
-    void SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow();
-    void SubTask_Segment_Flasher_Animate_Function__Drip();
-    #endif // ENABLE_EXTRA_WLED_EFFECTS
-
-    // Temporary helper functions to be cleaned up and converted
-    void blur(uint8_t blur_amount);
-    void fade_out(uint8_t rate);
-    uint32_t crgb_to_col(CRGB fastled);
-    CRGB col_to_crgb(uint32_t);
-    uint8_t get_random_wheel_index(uint8_t pos);
-    uint16_t triwave16(uint16_t in);
-    uint16_t mode_palette();
-
-    #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+  void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
 
-#ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-void load_gradient_palette(uint8_t index);
-#endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+  void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
+
+  /**
+   * My animations (and their animators where applicable)
+   * */
+  void SubTask_Segment_Animate_Function__Solid_Static_Single_Colour();
+  void AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param);    
+  void SubTask_Segment_Animate_Function__Static_Palette();
+  void SubTask_Segment_Animate_Function__Slow_Glow();
+  void SubTask_Segment_Flasher_Animate_Function__Sequential_Palette();
+  void SubTask_Segment_Flasher_Animate_Function__Rotating_Palette();
+  void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
+  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+  void SubTask_Flasher_Animate_Function_Tester();
+  // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
+
+  
+  #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+  // Static
+  void SubTask_Segment_Flasher_Animate_Function__Static();
+  void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
+  void SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16_t threshold);
+  void SubTask_Segment_Flasher_Animate_Function__Spots();
+  void SubTask_Segment_Flasher_Animate_Function__Percent();
+  // One colour changes
+  void SubTask_Segment_Flasher_Animate_Function__Random_Colour();
+  // Wipe/Sweep/Runners 
+  void BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(bool rev, bool useRandomColors);
+  void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe();
+  void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random();
+  void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep();
+  void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
+  void SubTask_Segment_Flasher_Animate_Function__TriColour();
+  void SubTask_Segment_Flasher_Animate_Function__Android();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw);
+  void SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2);
+  void SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue();
+  void SubTask_Segment_Flasher_Animate_Function__Running_Colour();
+  void SubTask_Segment_Flasher_Animate_Function__Running_Random();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading);
+  void SubTask_Segment_Flasher_Animate_Function__Gradient();
+  void SubTask_Segment_Flasher_Animate_Function__Loading();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Police(uint32_t color1, uint32_t color2, bool all);
+  void SubTask_Segment_Flasher_Animate_Function__Police();
+  void SubTask_Segment_Flasher_Animate_Function__Polce_All();
+  void SubTask_Segment_Flasher_Animate_Function__Two_Dots();
+  void SubTask_Segment_Flasher_Animate_Function__Two_Areas();
+  void SubTask_Segment_Flasher_Animate_Function__Multi_Comet();
+  void SubTask_Segment_Flasher_Animate_Function__Oscillate();
+  void SubTask_Segment_Flasher_Animate_Function__BPM();
+  void SubTask_Segment_Flasher_Animate_Function__Juggle();
+  void SubTask_Segment_Flasher_Animate_Function__Palette();
+  void SubTask_Segment_Flasher_Animate_Function__ColourWaves();
+  void SubTask_Segment_Flasher_Animate_Function__Lake();
+  void SubTask_Segment_Flasher_Animate_Function__Glitter();
+  void SubTask_Segment_Flasher_Animate_Function__Meteor();
+  void SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth();    
+  void SubTask_Segment_Flasher_Animate_Function__Pride_2015();    
+  CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
+  void SubTask_Segment_Flasher_Animate_Function__Pacifica();    
+  void SubTask_Segment_Flasher_Animate_Function__Sunrise();    
+  void SubTask_Segment_Flasher_Animate_Function__Sinewave();    
+  void SubTask_Segment_Flasher_Animate_Function__Flow();    
+  void SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8_t moder);
+  void SubTask_Segment_Flasher_Animate_Function__PhasedNoise();    
+  void SubTask_Segment_Flasher_Animate_Function__Phased();    
+  void SubTask_Segment_Flasher_Animate_Function__Running_Lights();    
+  void SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle();    
+  void SubTask_Segment_Flasher_Animate_Function__Merry_Christmas();    
+  void SubTask_Segment_Flasher_Animate_Function__Halloween();    
+  // Chase    
+  void SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Colour();
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Random();
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Flash();
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Random();
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_White();
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Theater();
+  void SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rainbow();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
+  void SubTask_Segment_Flasher_Animate_Function__Chase_TriColour();
+  void SubTask_Segment_Flasher_Animate_Function__Circus_Combustus();
+  // Breathe/Fade/Pulse
+  void SubTask_Segment_Flasher_Animate_Function__Breath();
+  void SubTask_Segment_Flasher_Animate_Function__Fade();
+  void SubTask_Segment_Flasher_Animate_Function__Fade_TriColour();
+  void SubTask_Segment_Flasher_Animate_Function__Fade_Spots();
+  // Fireworks
+  void SubTask_Segment_Flasher_Animate_Function__Fireworks();
+  void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
+  void SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst();
+  void SubTask_Segment_Flasher_Animate_Function__Rain();
+// Sparkle/Twinkle
+  void SubTask_Segment_Flasher_Animate_Function__Solid_Glitter();
+  void SubTask_Segment_Flasher_Animate_Function__Popcorn();
+  void SubTask_Segment_Flasher_Animate_Function__Plasma();
+  void SubTask_Segment_Flasher_Animate_Function__Sparkle();
+  void SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash();
+  void SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper();
+  void SubTask_Segment_Flasher_Animate_Function__Twinkle();
+  CRGB SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
+  void SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(bool cat);
+  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour();
+  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Fox();
+  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat();
+  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Up();
+  void SubTask_Segment_Flasher_Animate_Function__Dynamic();
+  void SubTask_Segment_Flasher_Animate_Function__Saw();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(uint32_t color);
+  void SubTask_Segment_Flasher_Animate_Function__Dissolve();
+  void SubTask_Segment_Flasher_Animate_Function__Dissolve_Random();
+  void SubTask_Segment_Flasher_Animate_Function__ColourFul();
+  void SubTask_Segment_Flasher_Animate_Function__Traffic_Light();
+  void SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi = false);
+  void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
+  void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
+  void SubTask_Segment_Flasher_Animate_Function__Fire_Flicker();
+  void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
+  
+  #ifdef ENABLE_EXTRA_WLED_EFFECTS
+  // Blink/Strobe
+  void SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
+  void SubTask_Segment_Flasher_Animate_Function__Blink();
+  void SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow();
+  void SubTask_Segment_Flasher_Animate_Function__Strobe();
+  void SubTask_Segment_Flasher_Animate_Function__Strobe_Multi();
+  void SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow();
+  void SubTask_Segment_Flasher_Animate_Function__Rainbow();
+  void SubTask_Segment_Flasher_Animate_Function__Lightning();
+  void SubTask_Segment_Flasher_Animate_Function__Fire_2012();
+  void SubTask_Segment_Flasher_Animate_Function__Railway();
+  void SubTask_Segment_Flasher_Animate_Function__Heartbeat();
+  //Noise
+  void SubTask_Segment_Flasher_Animate_Function__FillNoise8();
+  void SubTask_Segment_Flasher_Animate_Function__Noise16_1();
+  void SubTask_Segment_Flasher_Animate_Function__Noise16_2();
+  void SubTask_Segment_Flasher_Animate_Function__Noise16_3();
+  void SubTask_Segment_Flasher_Animate_Function__Noise16_4();
+  void SubTask_Segment_Flasher_Animate_Function__Noise_Pal();
+  // Scan
+  void SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool dual);
+  void SubTask_Segment_Flasher_Animate_Function__Scan();
+  void SubTask_Segment_Flasher_Animate_Function__Scan_Dual();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(bool dual);
+  void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner();
+  void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Dual();
+  void SubTask_Segment_Flasher_Animate_Function__ICU();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow);
+  void SubTask_Segment_Flasher_Animate_Function__Ripple();
+  void SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(); 
+  void SubTask_Segment_Flasher_Animate_Function__Comet();
+  void SubTask_Segment_Flasher_Animate_Function__Chunchun();
+  void SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls();
+  void SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool dual, bool rainbow=false);
+  void SubTask_Segment_Flasher_Animate_Function__Sinelon();
+  void SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual();
+  void SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow();
+  void SubTask_Segment_Flasher_Animate_Function__Drip();
+  #endif // ENABLE_EXTRA_WLED_EFFECTS
+
+  // Temporary helper functions to be cleaned up and converted
+  void blur(uint8_t blur_amount);
+  void fade_out(uint8_t rate);
+  uint32_t crgb_to_col(CRGB fastled);
+  CRGB col_to_crgb(uint32_t);
+  uint8_t get_random_wheel_index(uint8_t pos);
+  uint16_t triwave16(uint16_t in);
+  uint16_t mode_palette();
+
+  #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
 
 
-
-
-// #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
-
-// byte displayMode = 1;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
-
-// byte lastSecond = 0;
-// uint16_t testnum = 0;
-// byte startColor = 0;                             // "index" for the palette color used for drawing
-// // byte displayMode = 0;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
-// byte colorOffset = 29;//32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
-
-
-// void LCDDisplay_colorOverlay() ;
-// void LCDDisplay_updateDisplay(byte color, byte colorSpacing) ;
-
-
-// #define LED_PWR_LIMIT 750                        // 750mA - Power limit in mA (voltage is set in setup() to 5v)
-// #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
-// // notice 3 less below since I soldered, no single strip
-// #define LED_PER_DIGITS_STRIP 44//47                  // ...two digits are made out of one piece of led strip with 47 leds...
-// #define LED_BETWEEN_DIGITS_STRIPS 5              // 5 leds between above strips - and all this gives us LED_COUNT... :D
-// #define LED_COUNT ( LED_DIGITS / 2 ) * LED_PER_DIGITS_STRIP + ( LED_DIGITS / 3 ) * LED_BETWEEN_DIGITS_STRIPS
-
-// byte segGroups[14][2] = {         // 14 segments per strip, each segment has 1-x led(s). So lets assign them in a way we get something similar for both digits
-//   // right (seen from front) digit. This is which led(s) can be seen in which of the 7 segments (two numbers: First and last led inside the segment, same on TE):
-//   {  13,  15 },                     // top, a
-//   {  10, 12 },                     // top right, b
-//   { 6, 8 },                     // bottom right, c
-//   { 3, 5 },                     // bottom, d
-//   { 0, 2 },                     // bottom left, e
-//   {  16,  18 },                     // top left, f
-//   {  19,  21 },                     // center, g
-//   // left (seen from front) digit
-//   { 35, 37 },                     // top, a
-//   { 38, 40 },                     // top right, b
-//   { 22, 24 },                     // bottom right, c
-//   { 25, 27 },                     // bottom, d
-//   { 28, 30 },                     // bottom left, e
-//   { 32, 34 },                     // top left, f
-//   { 41, 43 }                      // center, g
-// };
-
-
-// // Using above arrays it's very easy to "talk" to the segments. Simply use 0-6 for the first 7 segments, add 7 (7-13) for the following ones per strip/two digits
-// byte digits[14][7] = {                    // Lets define 10 numbers (0-9) with 7 segments each, 1 = segment is on, 0 = segment is off
-//   {   1,   1,   1,   1,   1,   1,   0 },  // 0 -> Show segments a - f, don't show g (center one)
-//   {   0,   1,   1,   0,   0,   0,   0 },  // 1 -> Show segments b + c (top and bottom right), nothing else
-//   {   1,   1,   0,   1,   1,   0,   1 },  // 2 -> and so on...
-//   {   1,   1,   1,   1,   0,   0,   1 },  // 3
-//   {   0,   1,   1,   0,   0,   1,   1 },  // 4
-//   {   1,   0,   1,   1,   0,   1,   1 },  // 5
-//   {   1,   0,   1,   1,   1,   1,   1 },  // 6
-//   {   1,   1,   1,   0,   0,   0,   0 },  // 7
-//   {   1,   1,   1,   1,   1,   1,   1 },  // 8
-//   {   1,   1,   1,   1,   0,   1,   1 },  // 9
-//   {   0,   0,   0,   1,   1,   1,   1 },  // t -> some letters from here on (index 10-13, so this won't interfere with using digits 0-9 by using index 0-9
-//   {   0,   0,   0,   0,   1,   0,   1 },  // r
-//   {   0,   1,   1,   1,   0,   1,   1 },  // y
-//   {   0,   1,   1,   1,   1,   0,   1 }   // d
-// };
-
-//   void SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
-//   void SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
-//   void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-//   void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
-//   void LCDDisplay_showDigit(byte digit, byte color, byte pos);
-//   void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
-//   void LCDDisplay_showDots(byte dots, byte color);
-//   RgbcctColor ColorFromPalette(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
-//   uint8_t tempcol = 0;
-//   uint16_t lcd_display_show_number = 0;
-
-//   #endif // ENABLE_DEVFEATURE_RGB_CLOCK
+  #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+  void load_gradient_palette(uint8_t index);
+  #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
 
 
+
+  // #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
+
+  // byte displayMode = 1;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
+
+  // byte lastSecond = 0;
+  // uint16_t testnum = 0;
+  // byte startColor = 0;                             // "index" for the palette color used for drawing
+  // // byte displayMode = 0;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
+  // byte colorOffset = 29;//32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
+
+
+  // void LCDDisplay_colorOverlay() ;
+  // void LCDDisplay_updateDisplay(byte color, byte colorSpacing) ;
+
+
+  // #define LED_PWR_LIMIT 750                        // 750mA - Power limit in mA (voltage is set in setup() to 5v)
+  // #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
+  // // notice 3 less below since I soldered, no single strip
+  // #define LED_PER_DIGITS_STRIP 44//47                  // ...two digits are made out of one piece of led strip with 47 leds...
+  // #define LED_BETWEEN_DIGITS_STRIPS 5              // 5 leds between above strips - and all this gives us LED_COUNT... :D
+  // #define LED_COUNT ( LED_DIGITS / 2 ) * LED_PER_DIGITS_STRIP + ( LED_DIGITS / 3 ) * LED_BETWEEN_DIGITS_STRIPS
+
+  // byte segGroups[14][2] = {         // 14 segments per strip, each segment has 1-x led(s). So lets assign them in a way we get something similar for both digits
+  //   // right (seen from front) digit. This is which led(s) can be seen in which of the 7 segments (two numbers: First and last led inside the segment, same on TE):
+  //   {  13,  15 },                     // top, a
+  //   {  10, 12 },                     // top right, b
+  //   { 6, 8 },                     // bottom right, c
+  //   { 3, 5 },                     // bottom, d
+  //   { 0, 2 },                     // bottom left, e
+  //   {  16,  18 },                     // top left, f
+  //   {  19,  21 },                     // center, g
+  //   // left (seen from front) digit
+  //   { 35, 37 },                     // top, a
+  //   { 38, 40 },                     // top right, b
+  //   { 22, 24 },                     // bottom right, c
+  //   { 25, 27 },                     // bottom, d
+  //   { 28, 30 },                     // bottom left, e
+  //   { 32, 34 },                     // top left, f
+  //   { 41, 43 }                      // center, g
+  // };
+
+
+  // // Using above arrays it's very easy to "talk" to the segments. Simply use 0-6 for the first 7 segments, add 7 (7-13) for the following ones per strip/two digits
+  // byte digits[14][7] = {                    // Lets define 10 numbers (0-9) with 7 segments each, 1 = segment is on, 0 = segment is off
+  //   {   1,   1,   1,   1,   1,   1,   0 },  // 0 -> Show segments a - f, don't show g (center one)
+  //   {   0,   1,   1,   0,   0,   0,   0 },  // 1 -> Show segments b + c (top and bottom right), nothing else
+  //   {   1,   1,   0,   1,   1,   0,   1 },  // 2 -> and so on...
+  //   {   1,   1,   1,   1,   0,   0,   1 },  // 3
+  //   {   0,   1,   1,   0,   0,   1,   1 },  // 4
+  //   {   1,   0,   1,   1,   0,   1,   1 },  // 5
+  //   {   1,   0,   1,   1,   1,   1,   1 },  // 6
+  //   {   1,   1,   1,   0,   0,   0,   0 },  // 7
+  //   {   1,   1,   1,   1,   1,   1,   1 },  // 8
+  //   {   1,   1,   1,   1,   0,   1,   1 },  // 9
+  //   {   0,   0,   0,   1,   1,   1,   1 },  // t -> some letters from here on (index 10-13, so this won't interfere with using digits 0-9 by using index 0-9
+  //   {   0,   0,   0,   0,   1,   0,   1 },  // r
+  //   {   0,   1,   1,   1,   0,   1,   1 },  // y
+  //   {   0,   1,   1,   1,   1,   0,   1 }   // d
+  // };
+
+  //   void SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
+  //   void SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
+  //   void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+  //   void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
+  //   void LCDDisplay_showDigit(byte digit, byte color, byte pos);
+  //   void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
+  //   void LCDDisplay_showDots(byte dots, byte color);
+  //   RgbcctColor ColorFromPalette(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
+  //   uint8_t tempcol = 0;
+  //   uint16_t lcd_display_show_number = 0;
+
+  //   #endif // ENABLE_DEVFEATURE_RGB_CLOCK
 
 
     void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
-
-
-    void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0);
-      
-
-
+    void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
     void resetSegments();
     void handle_palette(void);
     
@@ -1469,18 +1456,13 @@ void load_gradient_palette(uint8_t index);
     // void CommandSet_AnimationModeID(uint8_t value);
 
 
-/***************
- * END
- * 
- * Command List 
- * 
- * *********************/
+    /***************
+     * END
+     * 
+     * Command List 
+     * 
+     * *********************/
 
-    // uint32_t tSaved_Test_Segment_Animation = 0;
-
-    // byte getSameCodeLength(char code, int index, char const cronixieDisplay[]);
-
-    // void _setRandomColor(bool _sec,bool fromButton=false);
 
     void setValuesFromMainSeg();
     void resetTimebase();
@@ -1498,32 +1480,6 @@ void load_gradient_palette(uint8_t index);
     void relativeChangeWhite(int8_t amount, byte lowerBoundary = 0);
     void colorHStoRGB(uint16_t hue, byte sat, byte* rgb); //hue, sat to rgb
     void colorCTtoRGB(uint16_t mired, byte* rgb); //white spectrum to rgb
-
-    // effects
-    // byte effectCurrent = 0;
-    // byte effectSpeed = 128;
-    // byte effectIntensity = 128;
-    // byte effectPalette = 0;
-
-    // preset cycling
-    // bool presetCyclingEnabled = false;
-    // byte presetCycleMin = 1, presetCycleMax = 5;
-    // uint16_t presetCycleTime = 12;
-    // unsigned long presetCycledTime = 0;
-    // byte presetCycCurr = presetCycleMin;
-    // bool presetApplyBri = true;
-    // bool saveCurrPresetCycConf = false;
-
-    // // presets
-    // uint16_t savedPresets = 0;
-    // int8_t currentPreset = -1;
-    // bool isPreset = false;
-
-    // // realtime
-    // byte realtimeMode = REALTIME_MODE_INACTIVE;
-    // byte realtimeOverride = REALTIME_OVERRIDE_NONE;
-    // unsigned long realtimeTimeout = 0;
-    // uint16_t tpmFirstFrameSize = 0;
 
     void colorFromDecOrHexString(byte* rgb, char* in);
     void colorRGBtoRGBW(byte* rgb); //rgb to rgbw (http://codewelt.com/rgbw). (RGBW_MODE_LEGACY)

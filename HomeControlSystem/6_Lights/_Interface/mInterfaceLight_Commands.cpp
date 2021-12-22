@@ -35,23 +35,23 @@ DEBUG_LINE_HERE;
    * */
   int val = 0;
 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
-    if(jtok.isStr()){
-      if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-        CommandSet_PaletteID(tmp_id);
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){
-      CommandSet_PaletteID(jtok.getInt());
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
+//     if(jtok.isStr()){
+//       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+//         CommandSet_PaletteID(tmp_id);
+//         data_buffer.isserviced++;
+//       }
+//     }else
+//     if(jtok.isNum()){
+//       CommandSet_PaletteID(jtok.getInt());
+//       data_buffer.isserviced++;
+//     }
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
   
@@ -134,108 +134,108 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
-    CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
-    CommandSet_BrtCT_255(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+//     CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
+//     CommandSet_BrtCT_255(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
 
 
-// Flip these so default is 0 to 100%, and the other is range controlled
-  if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
-    CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }else
-  if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
-    CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+// // Flip these so default is 0 to 100%, and the other is range controlled
+//   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
+//     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
+//     CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
 
-  if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
-    CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  } 
+//   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
+//     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   } 
 
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
-    CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000);
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }else
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME_MS]){
-    CommandSet_Animation_Transition_Time_Ms(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
+//     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000);
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME_MS]){
+//     CommandSet_Animation_Transition_Time_Ms(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
   
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
-    CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000);
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)),animation.transition.rate_ms);  
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }else
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE_MS]){
-    CommandSet_Animation_Transition_Rate_Ms(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.rate_ms);  
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
+//     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000);
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)),animation.transition.rate_ms);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE_MS]){
+//     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.rate_ms);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
   
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_NUMBER]){
-    CommandSet_LightsCountToUpdateAsNumber(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
-    #endif
-  }else
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
-    CommandSet_LightsCountToUpdateAsPercentage(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), animation.transition.pixels_to_update_as_number);
-    #endif
-  }
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_NUMBER]){
+//     CommandSet_LightsCountToUpdateAsNumber(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
+//     #endif
+//   }else
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
+//     CommandSet_LightsCountToUpdateAsPercentage(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), animation.transition.pixels_to_update_as_number);
+//     #endif
+//   }
   
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_ORDER]){
-    if(jtok.isStr()){
-      if((tmp_id=GetTransitionOrderIDbyName(jtok.getStr()))>=0){
-        CommandSet_TransitionOrderID(tmp_id);
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){
-      CommandSet_TransitionOrderID(jtok.getInt());
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_ORDER]){
+//     if(jtok.isStr()){
+//       if((tmp_id=GetTransitionOrderIDbyName(jtok.getStr()))>=0){
+//         CommandSet_TransitionOrderID(tmp_id);
+//         data_buffer.isserviced++;
+//       }
+//     }else
+//     if(jtok.isNum()){
+//       CommandSet_TransitionOrderID(jtok.getInt());
+//       data_buffer.isserviced++;
+//     }
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   if(jtok = obj[PM_JSON_TIME_ON]){ // default to secs
     CommandSet_Auto_Time_Off_Secs(jtok.getInt());
@@ -309,37 +309,38 @@ DEBUG_LINE_HERE;
       state = jtok.getInt(); 
     }
     
-    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
-    #else
-    ModifyStateNumberIfToggled(&state, pCONT_lAni->_segments[0].flags.fEnable_Animation);
-    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+    // ModifyStateNumberIfToggled(&state, animation.flags.fEnable_Animation);
+    // #else
+    // ModifyStateNumberIfToggled(&state, pCONT_lAni->_segments[0].flags.fEnable_Animation);
+    // #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-    CommandSet_EnabledAnimation_Flag(state);
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    // CommandSet_EnabledAnimation_Flag(state);
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_iLight->animation.flags.fEnable_Animation);    
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
+
   }
 
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
-    if(jtok.isStr()){
-      // if((tmp_id=GetHardwareColourTypeIDbyName(jtok.getStr()))>=0){
-        CommandSet_HardwareColourOrderTypeByStr(jtok.getStr());
-        data_buffer.isserviced++;
-      // }
-    }
-    // else
-    // if(jtok.isNum()){      
-    //   CommandSet_HardwareColourOrderTypeID(jtok.getInt());
-    //   data_buffer.isserviced++;
-    // }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
+//     if(jtok.isStr()){
+//       // if((tmp_id=GetHardwareColourTypeIDbyName(jtok.getStr()))>=0){
+//         CommandSet_HardwareColourOrderTypeByStr(jtok.getStr());
+//         data_buffer.isserviced++;
+//       // }
+//     }
+//     // else
+//     // if(jtok.isNum()){      
+//     //   CommandSet_HardwareColourOrderTypeID(jtok.getInt());
+//     //   data_buffer.isserviced++;
+//     // }
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   // if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER2]){
   //   if(jtok.isStr()){
@@ -397,16 +398,9 @@ DEBUG_LINE_HERE;
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI){
 
-    
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    animation_override.time_ms = 100;
-#else
- pCONT_lAni->segment_animation_override.time_ms = 100;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  pCONT_lAni->segment_animation_override.time_ms = 100;
 
-
-
-  }
+}
 
 #ifdef USE_MODULE_NETWORK_MQTT
   mqtthandler_debug_teleperiod.flags.SendNow = true;
@@ -414,18 +408,8 @@ DEBUG_LINE_HERE;
   
 #endif //ifdef USE_MODULE_NETWORK_MQTT
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
-   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-
-    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-DEBUG_LINE_HERE;
-      #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
+  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+  
 }
 
 
@@ -468,213 +452,116 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
-  char buffer[60];
-  // settings.pixel_hardware_color_order_id = value; 
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// void mInterfaceLight::CommandSet_HardwareColourOrderTypeByStr(const char* c){
+//   char buffer[60];
+//   // settings.pixel_hardware_color_order_id = value; 
 
-  // return;
+//   // return;
     
-  if(!c){ return; }
-  if(strlen(c)<=5){
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
-  }else{
-    AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
-    return;
-  }
+//   if(!c){ return; }
+//   if(strlen(c)<=5){
+//     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
+//   }else{
+//     AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
+//     return;
+//   }
 
 
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
-  mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
+//   mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
 
-  order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-  order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-  order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-  order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-  order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
 
-  for(uint8_t index=0;index<strlen(c);index++){
-    // if(c[index]==0){ break; }
+//   for(uint8_t index=0;index<strlen(c);index++){
+//     // if(c[index]==0){ break; }
 
-    if((c[index]=='R')||(c[index]=='r')){
-      order->r = index;
-    }else
-    if((c[index]=='G')||(c[index]=='g')){
-      order->g = index;
-    }else
-    if((c[index]=='B')||(c[index]=='b')){
-      order->b = index;
-    }else
-    if((c[index]=='C')||(c[index]=='c')){
-      order->c = index;
-    }else
-    if((c[index]=='W')||(c[index]=='w')){
-      order->w = index;
-    }
+//     if((c[index]=='R')||(c[index]=='r')){
+//       order->r = index;
+//     }else
+//     if((c[index]=='G')||(c[index]=='g')){
+//       order->g = index;
+//     }else
+//     if((c[index]=='B')||(c[index]=='b')){
+//       order->b = index;
+//     }else
+//     if((c[index]=='C')||(c[index]=='c')){
+//       order->c = index;
+//     }else
+//     if((c[index]=='W')||(c[index]=='w')){
+//       order->w = index;
+//     }
 
-  }
+//   }
 
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
-    order->r,
-    order->g,
-    order->b,
-    order->c,
-    order->w
-  );
+//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+//     order->r,
+//     order->g,
+//     order->b,
+//     order->c,
+//     order->w
+//   );
 
-#else
+// #else
 
-pCONT_lAni->_segments[0].hardware_element_colour_order.red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
- pCONT_lAni-> _segments[0].hardware_element_colour_order.b = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
- pCONT_lAni-> _segments[0].hardware_element_colour_order.blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
- pCONT_lAni-> _segments[0].hardware_element_colour_order.white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-pCONT_lAni->  _segments[0].hardware_element_colour_order.white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-
-
-  for(uint8_t index=0;index<strlen(c);index++){
-    // if(c[index]==0){ break; }
-
-    if((c[index]=='R')||(c[index]=='r')){
-      pCONT_lAni->_segments[0].hardware_element_colour_order.r = index;
-    }else
-    if((c[index]=='G')||(c[index]=='g')){
-     pCONT_lAni-> _segments[0].hardware_element_colour_order.g = index;
-    }else
-    if((c[index]=='B')||(c[index]=='b')){
-     pCONT_lAni-> _segments[0].hardware_element_colour_order.b = index;
-    }else
-    if((c[index]=='C')||(c[index]=='c')){
-     pCONT_lAni-> _segments[0].hardware_element_colour_order.c = index;
-    }else
-    if((c[index]=='W')||(c[index]=='w')){
-    pCONT_lAni->  _segments[0].hardware_element_colour_order.w = index;
-    }
-
-  }
-
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
-   pCONT_lAni-> _segments[0].hardware_element_colour_order.r,
-   pCONT_lAni-> _segments[0].hardware_element_colour_order.g,
-   pCONT_lAni-> _segments[0].hardware_element_colour_order.b,
-   pCONT_lAni-> _segments[0].hardware_element_colour_order.c,
-  pCONT_lAni->  _segments[0].hardware_element_colour_order.w
-  );
+// pCONT_lAni->_segments[0].hardware_element_colour_order.red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//  pCONT_lAni-> _segments[0].hardware_element_colour_order.b = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//  pCONT_lAni-> _segments[0].hardware_element_colour_order.blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//  pCONT_lAni-> _segments[0].hardware_element_colour_order.white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// pCONT_lAni->  _segments[0].hardware_element_colour_order.white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
 
 
+//   for(uint8_t index=0;index<strlen(c);index++){
+//     // if(c[index]==0){ break; }
 
+//     if((c[index]=='R')||(c[index]=='r')){
+//       pCONT_lAni->_segments[0].hardware_element_colour_order.r = index;
+//     }else
+//     if((c[index]=='G')||(c[index]=='g')){
+//      pCONT_lAni-> _segments[0].hardware_element_colour_order.g = index;
+//     }else
+//     if((c[index]=='B')||(c[index]=='b')){
+//      pCONT_lAni-> _segments[0].hardware_element_colour_order.b = index;
+//     }else
+//     if((c[index]=='C')||(c[index]=='c')){
+//      pCONT_lAni-> _segments[0].hardware_element_colour_order.c = index;
+//     }else
+//     if((c[index]=='W')||(c[index]=='w')){
+//     pCONT_lAni->  _segments[0].hardware_element_colour_order.w = index;
+//     }
 
+//   }
 
-
-
-
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+//    pCONT_lAni-> _segments[0].hardware_element_colour_order.r,
+//    pCONT_lAni-> _segments[0].hardware_element_colour_order.g,
+//    pCONT_lAni-> _segments[0].hardware_element_colour_order.b,
+//    pCONT_lAni-> _segments[0].hardware_element_colour_order.c,
+//   pCONT_lAni->  _segments[0].hardware_element_colour_order.w
+//   );
 
 
 
 
 
 
-  //tmp fix, copy, flip 1 and 2
-
-  // memcpy(&pCONT_iLight->hardware_element_colour_order[1],&pCONT_iLight->hardware_element_colour_order[0],sizeof(mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER));
-
-  
-  // pCONT_iLight->hardware_element_colour_order[1].r = pCONT_iLight->hardware_element_colour_order[0].g;
-  // pCONT_iLight->hardware_element_colour_order[1].g = pCONT_iLight->hardware_element_colour_order[0].r;
-
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
-  // #endif
 
 
-
-}
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
 
 
-const char* mInterfaceLight::GetHardwareColourTypeName(char* buffer, uint8_t buflen){
 
-  
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  return GetHardwareColourTypeNameByID(animation.mode_id, buffer, buflen);
-#else
-  return GetHardwareColourTypeNameByID(pCONT_lAni->_segments[0].mode_id, buffer, buflen);
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-
-
-}
-const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen){
-  sprintf(buffer, D_NO_MATCH_CTR);
-  // switch(id){
-  //   default:
-  //   case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
-  //   case PIXEL_HARDWARE_COLOR_ORDER_RGB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)); break;
-  //   case PIXEL_HARDWARE_COLOR_ORDER_BRG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)); break;
-  //   case PIXEL_HARDWARE_COLOR_ORDER_RBG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)); break;
-  // }
-  return buffer;
-}
-// uint16_t mInterfaceLight::GetHardwareColourTypeIDbyName(const char* c){
-//   // if(!c){ return -1; }
-//   //3 PIXEL TYPE
-//   // if(     strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_GRB_ID; }
-//   // else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_RGB_ID; }
-//   // else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_BRG_ID; }
-//   // else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_RBG_ID; }   
-
-//   // if(!c){ return -1; }
-//   // if(strlen(c)<=5){
-//   //   AddLog(LOG_LEVEL_TEST, PSTR("Valid Length"));
-//   // }else{
-//   //   AddLog(LOG_LEVEL_TEST, PSTR("INVALID Length"));
-//   //   return -1;
-//   // }
-
-//   // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
-
-//   // order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   // order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   // order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   // order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   // order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-
-//   // for(uint8_t index=0;index<strlen(c);index++){
-//   //   if(c[index]==0){ break; }
-
-//   //   if((c[index]=='R')||(c[index]=='r')){
-//   //     order->r = index;
-//   //   }else
-//   //   if((c[index]=='G')||(c[index]=='g')){
-//   //     order->g = index;
-//   //   }else
-//   //   if((c[index]=='B')||(c[index]=='b')){
-//   //     order->b = index;
-//   //   }else
-//   //   if((c[index]=='C')||(c[index]=='c')){
-//   //     order->c = index;
-//   //   }else
-//   //   if((c[index]=='W')||(c[index]=='w')){
-//   //     order->w = index;
-//   //   }
-
-//   // }
-
-//   // AddLog(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
-//   //   order->r,
-//   //   order->g,
-//   //   order->b,
-//   //   order->c,
-//   //   order->w
-//   // );
-
-//   // //tmp fix, copy, flip 1 and 2
+//   //tmp fix, copy, flip 1 and 2
 
 //   // memcpy(&pCONT_iLight->hardware_element_colour_order[1],&pCONT_iLight->hardware_element_colour_order[0],sizeof(mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER));
 
@@ -682,21 +569,118 @@ const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buf
 //   // pCONT_iLight->hardware_element_colour_order[1].r = pCONT_iLight->hardware_element_colour_order[0].g;
 //   // pCONT_iLight->hardware_element_colour_order[1].g = pCONT_iLight->hardware_element_colour_order[0].r;
 
+//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+//   // #endif
 
 
-//   // return -1;
+
 // }
 
-/**
- * Fall back to default if invalid 
- **/
-void mInterfaceLight::CheckHardwareElementColourOrder(){
+
+
+
+
+// const char* mInterfaceLight::GetHardwareColourTypeName(char* buffer, uint8_t buflen){
+
   
-  // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   return GetHardwareColourTypeNameByID(animation.mode_id, buffer, buflen);
+// #else
+//   return GetHardwareColourTypeNameByID(pCONT_lAni->_segments[0].mode_id, buffer, buflen);
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-}
 
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+// }
+// const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen){
+//   sprintf(buffer, D_NO_MATCH_CTR);
+//   // switch(id){
+//   //   default:
+//   //   case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
+//   //   case PIXEL_HARDWARE_COLOR_ORDER_RGB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)); break;
+//   //   case PIXEL_HARDWARE_COLOR_ORDER_BRG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)); break;
+//   //   case PIXEL_HARDWARE_COLOR_ORDER_RBG_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)); break;
+//   // }
+//   return buffer;
+// }
+// // uint16_t mInterfaceLight::GetHardwareColourTypeIDbyName(const char* c){
+// //   // if(!c){ return -1; }
+// //   //3 PIXEL TYPE
+// //   // if(     strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_GRB_ID; }
+// //   // else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_RGB_ID; }
+// //   // else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_BRG_ID; }
+// //   // else if(strcmp_P(c,PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)==0){ return PIXEL_HARDWARE_COLOR_ORDER_RBG_ID; }   
+
+// //   // if(!c){ return -1; }
+// //   // if(strlen(c)<=5){
+// //   //   AddLog(LOG_LEVEL_TEST, PSTR("Valid Length"));
+// //   // }else{
+// //   //   AddLog(LOG_LEVEL_TEST, PSTR("INVALID Length"));
+// //   //   return -1;
+// //   // }
+
+// //   // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+
+// //   // order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// //   // order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// //   // order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// //   // order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// //   // order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+
+// //   // for(uint8_t index=0;index<strlen(c);index++){
+// //   //   if(c[index]==0){ break; }
+
+// //   //   if((c[index]=='R')||(c[index]=='r')){
+// //   //     order->r = index;
+// //   //   }else
+// //   //   if((c[index]=='G')||(c[index]=='g')){
+// //   //     order->g = index;
+// //   //   }else
+// //   //   if((c[index]=='B')||(c[index]=='b')){
+// //   //     order->b = index;
+// //   //   }else
+// //   //   if((c[index]=='C')||(c[index]=='c')){
+// //   //     order->c = index;
+// //   //   }else
+// //   //   if((c[index]=='W')||(c[index]=='w')){
+// //   //     order->w = index;
+// //   //   }
+
+// //   // }
+
+// //   // AddLog(LOG_LEVEL_TEST, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+// //   //   order->r,
+// //   //   order->g,
+// //   //   order->b,
+// //   //   order->c,
+// //   //   order->w
+// //   // );
+
+// //   // //tmp fix, copy, flip 1 and 2
+
+// //   // memcpy(&pCONT_iLight->hardware_element_colour_order[1],&pCONT_iLight->hardware_element_colour_order[0],sizeof(mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER));
+
+  
+// //   // pCONT_iLight->hardware_element_colour_order[1].r = pCONT_iLight->hardware_element_colour_order[0].g;
+// //   // pCONT_iLight->hardware_element_colour_order[1].g = pCONT_iLight->hardware_element_colour_order[0].r;
+
+
+
+// //   // return -1;
+// // }
+
+// /**
+//  * Fall back to default if invalid 
+//  **/
+// void mInterfaceLight::CheckHardwareElementColourOrder(){
+  
+//   // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
+
+// }
+
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 // /******************************************************************************************************************************
@@ -979,14 +963,8 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
 setRGB(colour.R, colour.G, colour.B);
 
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-
+  
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getrgb());
@@ -1012,54 +990,36 @@ setRGB(colour.R, colour.G, colour.B);
 }
  
 
-  #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** Hue *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+//   #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** Hue *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
-  // Serial.println("HER"); Serial.flush();
-  rgbcct_controller.setHue360(hue_new);
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
-  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// void mInterfaceLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new){
+//   // Serial.println("HER"); Serial.flush();
+//   rgbcct_controller.setHue360(hue_new);
+//   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getHue360());
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+//   #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** Sat *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** Sat *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setSat255(sat_new);
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setSat255(sat_new);
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)),   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getSat255());
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1071,26 +1031,12 @@ getSat255());
 
 void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setBrightness255(brt_new);
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setBrightness255(brt_new);
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   setBriRGB_Global(brt_new);
+
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)),   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getBrightness255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightness255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1102,95 +1048,82 @@ getBrightness255());
 
 void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setBrightnessRGB255(bri);
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setBrightnessRGB255(bri);
   _briRGB_Global = bri;
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)),   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getBrightnessRGB255());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
-#ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** BrtCCT *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+// #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** BrtCCT *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
 
-void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
+// void mInterfaceLight::CommandSet_BrtCT_255(uint8_t bri) {
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setBrightnessCCT255(bri);
-  _briCT_Global = bri;
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
-  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  setBriCT_Global(bri);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)),   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getBrightnessCCT255());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setBrightnessCCT255(bri);
+//   _briCT_Global = bri;
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   setBriCT_Global(bri);
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)),   
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// getBrightnessCCT255());
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
 
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** BrtCCT *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** BrtCCT *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
+// void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setCCT(ct);
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
-  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)),   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getCCT());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setCCT(ct);
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)),   
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// getCCT());
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
 /**
@@ -1212,17 +1145,9 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_
  * */
 void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setCCT(ct);
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setCCT(ct);
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
 }
 
 /******************************************************************************************************************************
@@ -1233,25 +1158,12 @@ setCCT(ct);
 
 bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked) {
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setRGBCCTLinked(ct_rgb_linked);
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRGBCCTLinked(ct_rgb_linked);
+
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)),   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-getRGBCCTLinked());
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getRGBCCTLinked());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
@@ -1267,17 +1179,10 @@ getRGBCCTLinked());
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc){
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setChannelsRaw(r,g,b,ww,wc);  
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setChannelsRaw(r,g,b,ww,wc);  
+
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
   // #ifdef ENABLE_LOG_LEVEL_INFO
   // char buffer[30];
   // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
@@ -1287,17 +1192,10 @@ setChannelsRaw(r,g,b,ww,wc);
 
 void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setChannelsRaw(values);    
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setChannelsRaw(values);    
+
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+  
   #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[30];
   snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
@@ -1313,93 +1211,80 @@ setChannelsRaw(values);
 
 void mInterfaceLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
 
-
-  
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fEnable_Animation = value;
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), animation.flags.fEnable_Animation);    
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-#else
   pCONT_lAni->_segments[0].flags.fEnable_Animation = value;
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_ANIMATIONENABLE)), pCONT_lAni->_segments[0].flags.fEnable_Animation);    
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-
 }
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** Animation_Transition_Time_Ms *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** Animation_Transition_Time_Ms *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value){
+// void mInterfaceLight::CommandSet_Animation_Transition_Time_Ms(uint16_t value){
     
   
 
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.transition.time_ms = value;
-#else
-  pCONT_lAni->_segments[0].transition.time_ms = value;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.transition.time_ms = value;
+// #else
+//   pCONT_lAni->_segments[0].transition.time_ms = value;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
 
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)),animation.transition.time_ms);  
-  // #endif
+//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)),animation.transition.time_ms);  
+//   // #endif
 
-}
+// }
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** Animation_Transition_Rate_Ms *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** Animation_Transition_Rate_Ms *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
+// void mInterfaceLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value){
     
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.transition.rate_ms = value;
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.transition.rate_ms = value;
   
-  if(animation.transition.rate_ms<animation.transition.time_ms){ 
-    animation.transition.time_ms = animation.transition.rate_ms;
-  }
+//   if(animation.transition.rate_ms<animation.transition.time_ms){ 
+//     animation.transition.time_ms = animation.transition.rate_ms;
+//   }
 
-#else
-  pCONT_lAni->_segments[0].transition.rate_ms = value;
+// #else
+//   pCONT_lAni->_segments[0].transition.rate_ms = value;
 
   
-  if(pCONT_lAni->_segments[0].transition.rate_ms<pCONT_lAni->_segments[0].transition.time_ms){ 
-    pCONT_lAni->_segments[0].transition.time_ms = pCONT_lAni->_segments[0].transition.rate_ms;
-  }
+//   if(pCONT_lAni->_segments[0].transition.rate_ms<pCONT_lAni->_segments[0].transition.time_ms){ 
+//     pCONT_lAni->_segments[0].transition.time_ms = pCONT_lAni->_segments[0].transition.rate_ms;
+//   }
 
 
 
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.time_ms);  
-  // #endif
+//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.time_ms);  
+//   // #endif
 
-}
+// }
 
 
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 /******************************************************************************************************************************
@@ -1469,86 +1354,82 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** LightsCountToUpdateAsNumber DUPLICATED EFFECT 1/2*****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** LightsCountToUpdateAsNumber DUPLICATED EFFECT 1/2*****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
+
+// void mInterfaceLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value){
   
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-.transition.pixels_to_update_as_number = value;
-  // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation
+// #else
+//   pCONT_lAni->_segments[0]
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// .transition.pixels_to_update_as_number = value;
+//   // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
 
-  // Tmp fix until I merge them - UNTESTED HOW THIS WILL AFFECT CODE
-  // pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
-  // AddLog(LOG_LEVEL_WARN, PSTR("pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ; COULD CAUSE ERROR "));
-  // SetLEDOutAmountByPercentage(animation.transition.pixels_to_update_as_number)
+//   // Tmp fix until I merge them - UNTESTED HOW THIS WILL AFFECT CODE
+//   // pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+//   // AddLog(LOG_LEVEL_WARN, PSTR("pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ; COULD CAUSE ERROR "));
+//   // SetLEDOutAmountByPercentage(animation.transition.pixels_to_update_as_number)
 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), value);
-  #endif
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), value);
+//   #endif
 
-}
-// /**
-//  * Duplicate parameter, needs merging with above in long term if it is really the same
-//  * */
-// uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
+// }
+// // /**
+// //  * Duplicate parameter, needs merging with above in long term if it is really the same
+// //  * */
+// // uint16_t mAnimatorLight::SetLEDOutAmountByPercentage(uint8_t percentage){
 
-//   strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+// //   strip_size_requiring_update = mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
 
-// // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
+// // // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
 
-//   return strip_size_requiring_update; // also return the count
+// //   return strip_size_requiring_update; // also return the count
+
+// // }
+
+
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** LightsCountToUpdateAsPercentage DUPLICATED EFFECT 2/2*****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
+
+// void mInterfaceLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value){
+
+  
+//   pCONT_lAni->_segments[0].transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
+//   // animation.transition.pixels_to_update_as_percentage = value;
+  
+//   // TEMP FIX!! - UNTESTED HOW THIS WILL AFFECT CODE
+//   // AddLog(LOG_LEVEL_WARN, PSTR("pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number COULD CAUSE ERROR "));
+//   // pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+
+
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
+//   #endif
 
 // }
 
+// uint16_t mInterfaceLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage){
+//   return mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
+// }
+// uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
+//   return mapvalue(number ,0,pCONT_iLight->settings.light_size_count, 0,100);
+// }
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** LightsCountToUpdateAsPercentage DUPLICATED EFFECT 2/2*****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mInterfaceLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value){
-
-  
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-.transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
-  // animation.transition.pixels_to_update_as_percentage = value;
-  
-  // TEMP FIX!! - UNTESTED HOW THIS WILL AFFECT CODE
-  // AddLog(LOG_LEVEL_WARN, PSTR("pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number COULD CAUSE ERROR "));
-  // pCONT_lAni->strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
-
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
-  #endif
-
-}
-
-uint16_t mInterfaceLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage){
-  return mapvalue(percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
-}
-uint8_t mInterfaceLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number){
-  return mapvalue(number ,0,pCONT_iLight->settings.light_size_count, 0,100);
-}
-
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 
@@ -1586,12 +1467,7 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
 
   char buffer[50];
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-.palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
+  pCONT_lAni->_segments[0].palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
 
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
@@ -1608,20 +1484,8 @@ void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
   #endif
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), 
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-.palette.id);
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-.palette.id, buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), pCONT_lAni->_segments[0].palette.id);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(pCONT_lAni->_segments[0].palette.id, buffer, sizeof(buffer)));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1663,11 +1527,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   memcpy(palette_buffer,buffer,buflen);
 
   // rgbcct_controller.UpdateFromExternalBuffer();
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
@@ -1680,21 +1540,11 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
    memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
 
    
-  // Add to select correct buffer depending on palette type
-  memcpy(palette_buffer,buffer,buflen);
+    // Add to select correct buffer depending on palette type
+    memcpy(palette_buffer,buffer,buflen);
 
-  
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-UpdateFromExternalBuffer();
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation.flags.fForceUpdate = true;
-#else
+  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->UpdateFromExternalBuffer();
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID)){
     // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
@@ -1753,12 +1603,7 @@ void mInterfaceLight::CommandSet_AnimationModeID(uint8_t value){
 
   char buffer[60];
   
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-.mode_id = value;        
+  pCONT_lAni->_segments[0].mode_id = value;        
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
   #endif
@@ -1767,13 +1612,7 @@ void mInterfaceLight::CommandSet_AnimationModeID(uint8_t value){
 
 
 const char* mInterfaceLight::GetAnimationModeName(char* buffer, uint16_t buflen){
-  return GetAnimationModeNameByID(
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  animation
-#else
-  pCONT_lAni->_segments[0]
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-.mode_id, buffer, buflen);
+  return GetAnimationModeNameByID(  pCONT_lAni->_segments[0].mode_id, buffer, buflen);
 }
 const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen){
   switch(id){
@@ -1819,39 +1658,6 @@ int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
   return -1;
 }
 
-
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-void mInterfaceLight::CommandSet_TransitionOrderID(uint8_t value)
-{
-  animation.transition.order_id = value;
-
-  char buffer[50];
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-#ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-int8_t mInterfaceLight::GetTransitionOrderIDbyName(const char* c)
-{
-  if(c=='\0'){ return -1; }
-  if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){
-    return mAnimatorLight::TRANSITION_ORDER_RANDOM_ID;
-  }else if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){
-    return mAnimatorLight::TRANSITION_ORDER_INORDER_ID;
-  }
-
-  // if(strstr(c,D_TRANSITION_ORDER_RANDOM_NAME_CTR)){ return TRANSITION_ORDER_RANDOM_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)){ return TRANSITION_ORDER_CENTRE_OUT_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER_INORDER_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_FIXED_NAME_CTR)){ return TRANSITION_ORDER_FIXED_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_ROTATE_NAME_CTR)){ return TRANSITION_ORDER_ROTATE_ID; }
-  return -1;
-}
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
 #endif // USE_MODULE_LIGHTS_INTERFACE

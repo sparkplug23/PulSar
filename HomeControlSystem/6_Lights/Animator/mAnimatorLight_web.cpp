@@ -33,34 +33,32 @@ int8_t mAnimatorLight::Tasker_Web(uint8_t function){
 
 void mAnimatorLight::WebAppend_Root_ControlUI(){
 
-  char buffer[50];
+  // char buffer[50];
 
-  BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
+  // BufferWriterI->Append_P(HTTP_MSG_SLIDER_TITLE_JUSTIFIED,PSTR("Animation Mode Select"),"");
 
-  uint8_t animation_mode_list_ids[] = {
-    #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    pCONT_iLight->ANIMATION_MODE_EFFECTS_ID, 
-    #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    //pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
-    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    ANIMATION_MODE_NOTIFICATIONS_ID,
-    #endif    
-    pCONT_iLight->ANIMATION_MODE_NONE_ID
-  };
+  // uint8_t animation_mode_list_ids[] = {
+    //removed hacs
+  //   //pCONT_iLight->ANIMATION_MODE_SCENE_ID, 
+  //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  //   ANIMATION_MODE_NOTIFICATIONS_ID,
+  //   #endif    
+  //   pCONT_iLight->ANIMATION_MODE_NONE_ID
+  // };
 
-  BufferWriterI->Append_P(PSTR("{t}<tr>"));
-  for(uint8_t button_id=0;button_id<sizeof(animation_mode_list_ids);button_id++){
-    BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
-                              100/sizeof(animation_mode_list_ids),
-                              "", //no span
-                              "animod" " " "buttonh",
-                              D_JSON_ANIMATIONMODE, 
-                              pCONT_iLight->GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
-                              pCONT_iLight->GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
-                              ""
-                            );                   
-  }
-  BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
+  // BufferWriterI->Append_P(PSTR("{t}<tr>"));
+  // for(uint8_t button_id=0;button_id<sizeof(animation_mode_list_ids);button_id++){
+  //   BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
+  //                             100/sizeof(animation_mode_list_ids),
+  //                             "", //no span
+  //                             "animod" " " "buttonh",
+  //                             D_JSON_ANIMATIONMODE, 
+  //                             pCONT_iLight->GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
+  //                             pCONT_iLight->GetAnimationModeNameByID(animation_mode_list_ids[button_id], buffer, sizeof(buffer)),
+  //                             ""
+  //                           );                   
+  // }
+  // BufferWriterI->Append_P("%s",PSTR("</tr>{t2}"));
   
 }
 
@@ -99,9 +97,9 @@ void mAnimatorLight::WebAppend_Root_Status_Table(){
         break;
         case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
         case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
-        #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-        case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer, sizeof(buffer))); break;
-        #endif
+        // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOU T
+        // case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer, sizeof(buffer))); break;
+        // #endif
         case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
       } //switch
     
@@ -361,7 +359,7 @@ void mAnimatorLight::WebSave_RGBColourSelector(void)
 //   //         pCONT_iLight->animation.palette.id = arg_value;
 //   //         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_COLOUR_PALETTE,GetPaletteFriendlyName());
 //   //       break;
-//   //     #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   //     #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOU T
 //   //       case WEBHANDLE_RGBCONTROLS_ITEM_IDS_EFFECTS: 
 //   //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %s"),arg_ctr,arg_value,"EFFECTS");
 //   //         flashersettings.function = arg_value;  
@@ -1007,7 +1005,7 @@ void mAnimatorLight::HandleParameters_RGBLightSettings(AsyncWebServerRequest *re
 ********************************************************************************************************************/
 
 
-// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOU T
 
 // /******** Page items *****
 //  * 
