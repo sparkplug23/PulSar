@@ -64,6 +64,10 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
+  /**
+   * @brief Critical this is always parsed first, as many other commands rely on this value
+   * 
+   */
   if(segment_index == 255)
   {
     AddLog(LOG_LEVEL_TEST, PSTR("segment_index was unset/default, setting segment_index to 0 for backwards compatability!!"));
@@ -82,6 +86,25 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     _segments[0].pixel_range.stop  = STRIP_SIZE_MAX-1;
   }
 
+  /**
+   * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
+   * 
+   */
+  if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
+    if(jtok.isStr()){
+      if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+        CommandSet_PaletteID(tmp_id, segment_index);
+        data_buffer.isserviced++;
+      }
+    }else
+    if(jtok.isNum()){
+      CommandSet_PaletteID(jtok.getInt(), segment_index);
+      data_buffer.isserviced++;
+    }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
   
   if(jtok = obj["PixelRange"]){ 
     if(jtok.isArray()){
@@ -208,21 +231,6 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   // }
 
   
-  if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
-    if(jtok.isStr()){
-      if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-        CommandSet_PaletteID(tmp_id, segment_index);
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){
-      CommandSet_PaletteID(jtok.getInt(), segment_index);
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
 
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
     if(jtok.isStr()){
@@ -1170,9 +1178,6 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)
   &&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID))
   {
-    // for stability and legacy
-    pCONT_iLight->CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
-    //new
     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
   }
 
@@ -1186,10 +1191,8 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
   #endif
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), 
-  _segments[segment_index].palette.id);
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), 
-  mPaletteI->GetPaletteNameByID(_segments[segment_index].palette.id, buffer, sizeof(buffer)));
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), _segments[segment_index].palette.id);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(_segments[segment_index].palette.id, buffer, sizeof(buffer)));
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
 }
@@ -1410,6 +1413,9 @@ void mAnimatorLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uin
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "SEGEMTNS" D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), _segment_runtimes[segment_index].rgbcct_controller->getHue360());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
+  
+  RgbcctColor c = _segment_runtimes[segment_index].rgbcct_controller->GetColourFullRange();
+  AddLog(LOG_LEVEL_TEST, PSTR("desired_colour=%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WC,c.WW);
   
   #ifdef USE_MODULE_NETWORK_MQTT
   pCONT_lAni->mqtthandler_flasher_teleperiod.flags.SendNow = true;

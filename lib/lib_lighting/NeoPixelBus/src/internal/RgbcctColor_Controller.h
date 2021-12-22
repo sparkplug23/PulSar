@@ -11,22 +11,6 @@
 
 //#define ENABLE_RGBCCT_DEBUG
 
-enum _LightColorModes {
-  LIGHT_MODE_RGB = 1, 
-  LIGHT_MODE_CCT = 2, 
-  LIGHT_MODE_BOTH = 3 
-};
-
-
-enum _LightSubtypes_IDS{ 
-  LIGHT_TYPE_NONE_ID, 
-  LIGHT_TYPE_SINGLE_ID, 
-  LIGHT_TYPE_COLDWARM_ID, 
-  LIGHT_TYPE_RGB_ID,   
-  LIGHT_TYPE_RGBW_ID, 
-  LIGHT_TYPE_RGBWC_ID, 
-  LIGHT_TYPE_RGBCW_ID
-};
 
 // CT min and max
 #define CCT_MIN_DEFAULT 153          // 6500K
@@ -48,7 +32,7 @@ private:
     R = r;
     if(external_rgbcct_memory_writer != nullptr){ *(external_rgbcct_memory_writer+0) = R; 
     
-    // Serial.printf("external_rgbcct_memory_writer = %d", external_rgbcct_memory_writer[0]);
+    // Serial.printf("external_rgbcct_memory_writer = %d ", external_rgbcct_memory_writer[0]);
     
     
     } else {
@@ -85,7 +69,7 @@ private:
   // Color or mono
   uint8_t  _color_mode = LIGHT_MODE_BOTH;
   // Using rgbcct partially, for RGB, RGBW, RGBWW, RGBCCT etc with the unused channel turned off
-  uint8_t  _subtype = 0;
+  uint8_t  _subtype = LIGHT_TYPE_RGBCCT;
   // are RGB and CT linked, i.e. if we set CT then RGB channels are off
   bool     _cct_rgb_linked = true;
   uint16_t _cct = CCT_MIN_DEFAULT;  // 153..500, default to 153 (cold white)
@@ -130,11 +114,14 @@ private:
     //   briRGB,briCCT
     // );
     // #endif // ENABLE_RGBCCT_DEBUG
+    
+    Serial.printf("getSubType %d\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r", _subtype);
 
     switch (_subtype) {
       default:
       // Turn all channels off
       case LIGHT_TYPE_NONE_ID:
+      Serial.println("Light type is not set, or known?");
         set_R(0);
         set_G(0);
         set_B(0);
@@ -158,6 +145,7 @@ private:
         break;
       case LIGHT_TYPE_RGBW_ID:
       case LIGHT_TYPE_RGBCW_ID:
+      case LIGHT_TYPE_RGBCCT:
         if (LIGHT_TYPE_RGBCW_ID == _subtype) {
           set_WC(colour_out.WC);
           set_WW(colour_out.WW);
@@ -193,6 +181,26 @@ private:
 
 
 public:
+
+
+enum LightSubType{ 
+  LIGHT_TYPE_NONE_ID=0, 
+  LIGHT_TYPE_SINGLE_ID, // likely never used for me, remove
+  LIGHT_TYPE_COLDWARM_ID,  //CCT Only
+  LIGHT_TYPE_RGB_ID,   
+  LIGHT_TYPE_RGBW_ID, 
+  LIGHT_TYPE_RGBCCT, // CW/WW 
+  
+  // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
+  LIGHT_TYPE_RGBWC_ID, 
+  LIGHT_TYPE_RGBCW_ID
+};
+
+enum LightColorModes {
+  LIGHT_MODE_RGB = 1, 
+  LIGHT_MODE_CCT = 2, 
+  LIGHT_MODE_BOTH = 3 
+};
 
   RgbcctColor_Controller(){
     // Set defaults
@@ -325,6 +333,7 @@ public:
    * ********************************************************************************************************************************/
   
   void setSubType(uint8_t sub_type) {
+    Serial.printf("setSubType %d\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r", sub_type);
     _subtype = sub_type;
   }
 
@@ -364,6 +373,7 @@ public:
         break;
       case LIGHT_TYPE_RGBW_ID:
       case LIGHT_TYPE_RGBCW_ID:
+      case LIGHT_TYPE_RGBCCT:
         _color_mode = cm;
         break;
     }

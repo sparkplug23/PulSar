@@ -177,7 +177,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   device = pCONT_set->devices_present;
   
   //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
-  subtype = LST_RGBCW;
+  subtype = RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGBCCT;
   
   pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
 
@@ -225,73 +225,73 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
 
 
-
-  DEBUG_LINE_HERE;
-  /***
-   * Configure RgbcctController Instance
-   * */
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+// moved
+//   DEBUG_LINE_HERE;
+//   /***
+//    * Configure RgbcctController Instance
+//    * */
+//   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setSubType(subtype);
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setSubType(subtype);
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setApplyBrightnessToOutput(false);
-  if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setApplyBrightnessToOutput(false);
+//   if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setColorMode(LCM_RGB);
-  }else{
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setColorMode(LCM_RGB);
+//   }else{
     
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setColorMode(LCM_BOTH);
-  }
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setColorMode(LCM_BOTH);
+//   }
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-Sync();    // calculate the initial values (#8058)
-  // RGB parts
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// Sync();    // calculate the initial values (#8058)
+//   // RGB parts
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setRGB(1,2,3);
-  // CCT parts
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setRGB(1,2,3);
+//   // CCT parts
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setRGBCCTLinked(false);
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setRGBCCTLinked(false);
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setCCT(153);
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+// #else
+//       rgbcct_controller.
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// setCCT(153);
   
 
 
@@ -439,22 +439,22 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
 
       mPaletteI->init_PresetColourPalettes();
       
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
-      // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
-      // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
-      CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
-#else
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+//       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
+//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+// #else
 
-      rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
-      // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
-      // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
-      CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
-  DEBUG_LINE_HERE;
+//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+//       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
+//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+//   DEBUG_LINE_HERE;
 
 
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     break;
     case FUNC_PRE_INIT:

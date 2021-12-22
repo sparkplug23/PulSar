@@ -1435,27 +1435,27 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 
 
 // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** ActiveRgbcctColourPaletteIDUsedAsScene *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** ActiveRgbcctColourPaletteIDUsedAsScene *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id){
+// void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id){
 
-  uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID;  
+//   uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID;  
   
-  //mPaletteI->active_scene_palette_id = palette_id;
-  #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
-  #endif //  ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//   //mPaletteI->active_scene_palette_id = palette_id;
+//   #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//   active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+//   #endif //  ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
 
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
-}
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
+// }
 
-// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1463,32 +1463,32 @@ void mInterfaceLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t 
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
+// void mInterfaceLight::CommandSet_PaletteID(uint8_t value){
 
-  char buffer[50];
+//   char buffer[50];
   
-  pCONT_lAni->_segments[0].palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
+//   pCONT_lAni->_segments[0].palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
 
-  //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
-  if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
-    CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
-  }
+//   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
+//   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)&&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID)){
+//     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
+//   }
 
-  // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
-  //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
-  // }
-  // #endif
-  #ifdef ENABLE_PALETTE_FORCED_MODE
-  //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
-  #endif
+//   // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+//   // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
+//   //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
+//   // }
+//   // #endif
+//   #ifdef ENABLE_PALETTE_FORCED_MODE
+//   //  animation.mode_id = ANIMATION_MODE_PRESETS_ID;
+//   #endif
   
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), pCONT_lAni->_segments[0].palette.id);
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(pCONT_lAni->_segments[0].palette.id, buffer, sizeof(buffer)));
-  #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)), pCONT_lAni->_segments[0].palette.id);
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), mPaletteI->GetPaletteNameByID(pCONT_lAni->_segments[0].palette.id, buffer, sizeof(buffer)));
+//   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
-}
+// }
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
