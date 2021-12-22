@@ -61,6 +61,16 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       //   );
       // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap0", mPaletteI->palettelist.rgbcct_users[0].colour_map_id, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap1", mPaletteI->palettelist.rgbcct_users[1].colour_map_id, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap2", mPaletteI->palettelist.rgbcct_users[2].colour_map_id, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap3", mPaletteI->palettelist.rgbcct_users[3].colour_map_id, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap4", mPaletteI->palettelist.rgbcct_users[4].colour_map_id, 5);
+
+
+
+
+
     }break;
     case FUNC_LOOP: 
       #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION

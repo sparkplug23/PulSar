@@ -20,59 +20,50 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
 {
   
   mPaletteI->SetPaletteListPtrFromID(_segments[segment_iters.index].palette.id);
-    
+
+  switch(pCONT_set->Settings.light_settings.type)
+  {
+    default:
+    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGB_ID: _segments[segment_iters.index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGB_ID; break;
+    // case LST_RGBW: _segments[segment_iters.index].colour_type = COLOUR_TYPE_RGBW_ID; break;
+    // case LST_RGBCCT: _segments[segment_iters.index].colour_type = COLOUR_TYPE_RGBW_ID; break;
+  }
+  
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_iters.index].colour_type) * 2; // allocate space for single colour pair
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!_segment_runtimes[segment_iters.index].allocateData(dataSize))
+  {
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    _segments[segment_iters.index].mode_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
+  }
+
   // Brightness is generated internally, and rgbcct solid palettes are output values
   _segments[segment_iters.index].flags.brightness_applied_during_colour_generation = false;
 
-  animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+  RgbcctColor desired_colour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+  
+  // AddLog(LOG_LEVEL_TEST, PSTR("desired_colour=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
   if(!_segment_runtimes[segment_iters.index].rgbcct_controller->getApplyBrightnessToOutput()){ // If not already applied, do it using global values
-    animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
-      animation_colours_rgbcct.DesiredColour, 
+    desired_colour = ApplyBrightnesstoRgbcctColour(
+      desired_colour, 
       _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessRGB255(),
       _segment_runtimes[segment_iters.index].rgbcct_controller->getBrightnessCCT255()
     );
   }
-
-  animation_colours_rgbcct.StartingColor = GetPixelColor(_segments[segment_iters.index].pixel_range.start);
-
-  #ifdef DEBUG_ANIMATIONS_SEGMENT_EFFECTS
-  // AddLog(LOG_LEVEL_TEST, PSTR("%d StartingColour2=%d,%d,%d,%d,%d"),
-  // _segments[segment_iters.index].pixel_range.start,
-  //  animation_colours_rgbcct.StartingColor.R,animation_colours_rgbcct.StartingColor.G,animation_colours_rgbcct.StartingColor.B,animation_colours_rgbcct.StartingColor.WC,animation_colours_rgbcct.StartingColor.WW);
-  #endif // DEBUG_ANIMATIONS_SEGMENT_EFFECTS
   
+  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_iters.index].data, _segment_runtimes[segment_iters.index]._dataLen, 0, _segments[segment_iters.index].colour_type, desired_colour); 
+  SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_iters.index].data, _segment_runtimes[segment_iters.index]._dataLen, 0, _segments[segment_iters.index].colour_type, GetPixelColor(0));
+
   // Call the animator to blend from previous to new
   setAnimFunctionCallback_Segments_Indexed(  segment_iters.index, 
-    [this](const AnimationParam& param){
-      this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
   );
 
-}
-
-
-void mAnimatorLight::AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param)
-{   
-
-  uint8_t segment_index = segment_iters.index;  
-  uint16_t start_pixel = _segments[segment_iters.index].pixel_range.start;
-  uint16_t end_pixel = _segments[segment_iters.index].pixel_range.stop;
-
-  RgbcctColor output_colour = RgbcctColor::LinearBlend(
-    animation_colours_rgbcct.StartingColor,
-    animation_colours_rgbcct.DesiredColour,
-    param.progress);
-
-  for (
-    uint16_t pixel = _segments[segment_iters.index].pixel_range.start; 
-    pixel <= _segments[segment_iters.index].pixel_range.stop; 
-    pixel++)
-  {
-    SetPixelColor(pixel, output_colour, segment_index);
-  }
-
-  
 }
 
 
@@ -193,6 +184,48 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
     pixel_within_data_iter++;
 
     updatedColor = RgbTypeColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
+    SetPixelColor(pixel, updatedColor, segment_iters.index);
+
+  }
+  
+}
+
+/**
+ * @brief New allocated buffers must contain colour info
+ * 
+ * @param param 
+ */
+void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param)
+{    
+
+  if(_segment_runtimes[segment_iters.index].data == nullptr)
+  { 
+    AddLog(LOG_LEVEL_TEST, PSTR("_segment_runtimes[%d].data == nullptr = %d"),segment_iters.index);
+    return;
+  }
+
+  RgbcctColor updatedColor = RgbcctColor(0);
+  TransitionColourPairs colour_pairs;
+  //uint16_t pixel_within_data_iter = 0;
+
+  /**
+   * @brief Replicate one colour across whole string (ie scences for h801 or addressable)
+   * 
+   */
+
+GetTransitionColourBuffer(_segment_runtimes[segment_iters.index].data, _segment_runtimes[segment_iters.index]._dataLen, 0, _segments[segment_iters.index].colour_type, &colour_pairs);
+    //pixel_within_data_iter++;
+
+    updatedColor = RgbTypeColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
+    
+
+
+
+  for (uint16_t pixel =  _segments[segment_iters.index].pixel_range.start; 
+                pixel <= _segments[segment_iters.index].pixel_range.stop; 
+                pixel++
+  ){ 
+
     SetPixelColor(pixel, updatedColor, segment_iters.index);
 
   }
@@ -459,6 +492,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
 void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01()
 {
  
+ #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
@@ -642,7 +676,8 @@ float sun_elevation = 0;
 
   _segments[segment_iters.index].flags.fForceUpdate = true;
 
-  animation_colours_rgbcct.DesiredColour  = c_blended;
+//set desired colour
+  // _segment_runtimes[segment_iters.index].active_rgbcct_colour_p->  = c_blended;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
@@ -667,6 +702,8 @@ float sun_elevation = 0;
       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
     }
   );
+
+  #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
    
 }
 
@@ -704,7 +741,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
  
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05"));
 
-
+#ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 
 
   _segments[segment_iters.index].palette.id = mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
@@ -768,6 +805,8 @@ float sun_elevation = 0;
     }
   );
    
+#endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
+
 }
 
 

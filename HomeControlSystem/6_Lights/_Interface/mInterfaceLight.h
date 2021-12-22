@@ -96,15 +96,16 @@ enum LightTypes_IDS{
 };
 
 
-enum LightSubtypes{ 
-  LST_NONE, 
-  LST_SINGLE, 
-  LST_COLDWARM, 
-  LST_RGB,   
-  LST_RGBW, 
-  LST_RGBWC, 
-  LST_RGBCW
-};
+// enum LightSubtypes{ 
+//   LST_NONE, 
+//   LST_SINGLE, 
+//   LST_COLDWARM, 
+//   LST_RGB,   
+//   LST_RGBW, 
+//   LST_RGBWC, 
+//   LST_RGBCCT, 
+//   LST_RGBCW
+// };
 
 
 
@@ -136,10 +137,6 @@ enum LightSubtypes{
 
 typedef unsigned long power_t;              // Power (Relay) type
 
-// Light color mode, either RGB alone, or white-CT alone, or both only available if ct_rgb_linked is false
-enum LightColorModes {
-  LCM_RGB = 1, LCM_CT = 2, LCM_BOTH = 3 
-};
 
 #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 // New version of Gamma correction compute
@@ -377,13 +374,13 @@ class mInterfaceLight :
     void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
     void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    void CommandSet_PaletteID(uint8_t value);
+    // void CommandSet_PaletteID(uint8_t value);
     void CommandSet_AnimationModeID(uint8_t value);
     
     void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
     void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
-    void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
+    // void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
     
     /******************************************************************************************************************************
     ****************** CommandGet_x *************************************************************************************************************
@@ -433,14 +430,14 @@ class mInterfaceLight :
     void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
     void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
 
-#ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-    // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
-    RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
+//     // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
+//     RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
-    RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
+//     RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
     
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     void Template_Load();
 

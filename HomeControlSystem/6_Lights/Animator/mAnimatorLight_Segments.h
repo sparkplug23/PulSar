@@ -549,14 +549,17 @@
   /**
    * @brief 
    * Phased out since new dyanmic buffer can hold this data
+   * not needed when blend can now record full rgbcct type
    * 
    */
+  #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
   struct AnimationColours_SOLID_COLOUR
   {
     RgbcctColor StartingColor;
     RgbcctColor DesiredColour;
   };
   AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
+  #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 
 
 /*****************************************
@@ -792,12 +795,12 @@
       };
     } ANIMATION_FLAGS;
 
-    enum Colour_Type{
-      COLOUR_TYPE_RGB_ID,
-      COLOUR_TYPE_RGBW_ID,
-      COLOUR_TYPE_RGBCCT_ID,
-    };
-    uint8_t GetSizeOfPixel(Colour_Type colour_type);
+    // enum Colour_Type{
+    //   COLOUR_TYPE_RGB_ID,
+    //   COLOUR_TYPE_RGBW_ID,
+    //   COLOUR_TYPE_RGBCCT_ID,
+    // };
+    uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
 
     /**
      * previous animation settings will be moved into here
@@ -819,7 +822,7 @@
       uint16_t pixels_to_update_this_cycle = 0;
 
       HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
-      Colour_Type colour_type = COLOUR_TYPE_RGB_ID; // default is RGB, this is used by animations to know what method to generate
+      RgbcctColor_Controller::LightSubType colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGB_ID; // default is RGB, this is used by animations to know what method to generate
   
     //   uint8_t opacity = 255; //??
 
@@ -1064,8 +1067,8 @@
   };
   
   // TransitionColourPairs* 
-  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
-  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
+  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
+  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
 
 
   enum EFFECTSREGION
@@ -1126,9 +1129,10 @@
   void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
   void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
   void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
+  void AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
 
-  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, Colour_Type pixel_type, RgbcctColor starting_colour);
-  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  Colour_Type pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
@@ -1138,8 +1142,7 @@
   /**
    * My animations (and their animators where applicable)
    * */
-  void SubTask_Segment_Animate_Function__Solid_Static_Single_Colour();
-  void AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(const AnimationParam& param);    
+  void SubTask_Segment_Animate_Function__Solid_Static_Single_Colour(); 
   void SubTask_Segment_Animate_Function__Static_Palette();
   void SubTask_Segment_Animate_Function__Slow_Glow();
   void SubTask_Segment_Flasher_Animate_Function__Sequential_Palette();
