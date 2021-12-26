@@ -36,7 +36,7 @@
 /**
  * New devices
  * */
-#define DEVICE_RGBSTRING_TESTBED_SEGMENT
+// #define DEVICE_RGBSTRING_TESTBED_SEGMENT
 // #define DEVICE_RGBSTRING_TESTBED_SEGMENT_ESP32
 // #define DEVICE_BUCKET_WATER_LEVEL
 /**
@@ -150,6 +150,31 @@
  
  
   #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+    // #define USE_BUILD_TYPE_LIGHTING
+    // #define USE_MODULE_LIGHTS_INTERFACE
+    // #define USE_MODULE_LIGHTS_ANIMATOR
+    // #define USE_MODULE_LIGHTS_ADDRESSABLE
+    // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+    // // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+    // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    // // enable some wled conerted aniamtions
+    // #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    // #define DEBUG_WLED_EFFECT_FUNCTIONS
+    // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+    // #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+    // #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+    // #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+    // #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+
+    // #define ENABLE_CRGBPALETTES_IN_PROGMEM
+
+    // #define STRIP_SIZE_MAX 100
+    
     #define USE_BUILD_TYPE_LIGHTING
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
@@ -171,9 +196,15 @@
     #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
     #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
 
+    // to merge h801 rgbcct animation into the new method
+    #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
+
     #define ENABLE_CRGBPALETTES_IN_PROGMEM
 
-    #define STRIP_SIZE_MAX 100
+    #define STRIP_SIZE_MAX 1300
+  
+    // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+
 
     /**
      * @brief 
@@ -662,6 +693,16 @@
   //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
   // #define USE_DEVFEATURE_METHOD_WLED_BUILD
  
+/**
+ * @brief 
+ * 
+ * Outside show
+ * 
+ * 6 - red/green
+ * 12
+ * 31
+ */
+
  
   #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
 
@@ -691,7 +732,7 @@
 
     #define ENABLE_CRGBPALETTES_IN_PROGMEM
 
-    #define STRIP_SIZE_MAX 50
+    #define STRIP_SIZE_MAX 1300
   
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
 
@@ -787,7 +828,7 @@
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
     "\"ColourPalette\":\"Christmas 06\"," 
     "\"Effects\":{"
@@ -2107,6 +2148,118 @@
       
       // "\"D5\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       // "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Room"
+  // #define D_DEVICE_DRIVER_RELAY_1_NAME "Desk"
+  // #define D_DEVICE_DRIVER_RELAY_2_NAME "Test1"
+  // #define D_DEVICE_DRIVER_RELAY_3_NAME "Test2"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Room"
+  // #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Desk"
+  // #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Test1"
+  // #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Test2"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Room_DHT"
+  // #define D_DEVICE_SENSOR_DHT_1_NAME "Desk_DHT"
+
+  // #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
+  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+  // #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"
+  // #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,135,126,242]"
+  // #define D_DEVICE_SENSOR_DB18S20_3_NAME        "Immersion_Heater"
+  // #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,195,135,215,193]"
+  // #define D_DEVICE_SENSOR_DB18S20_4_NAME        "Tank_Top"
+  // #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,205,202,237,231]"
+  // #define D_DEVICE_SENSOR_DB18S20_5_NAME        "Tank_Middle"
+  // #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,205,206,170,25]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
+      "]"
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\",\"Cooling\"" "]"
+        "}"
+      "]"
+    "}"
+  "}";
+  
+#endif
+
+
+/**
+ * New heating controller, designed to work from single device to multizone system
+ * */
+#ifdef DEVICE_HVAC_KITCHEN
+  #define DEVICENAME_CTR          "hvac_kitchen"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Kitchen"
+
+  //#define FORCE_TEMPLATE_LOADING
+  // #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+   
+  // #define ENABLE_BUG_TRACING
+  //#define ENABLE_MQTT_DEBUG_MESSAGES
+
+  //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
+  // #define ENABLE_HVAC_DEBUG_TIMES
+  // #define DISABLE_WEBSERVER
+  
+  // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  // #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+
+  #define HEATING_DEVICE_MAX 1
+
+
+  #define USE_MODULE_CONTROLLER_HVAC
+  
+  #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_REMOTE_DEVICE
+
+  // #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  // #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{" 
+      #if defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_SENSORS_BME)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      "\"D6\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";

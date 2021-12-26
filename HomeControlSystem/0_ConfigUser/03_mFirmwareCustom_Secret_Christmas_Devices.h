@@ -1889,7 +1889,7 @@
   "}";
 
                                                                   
-  #define STRIP_SIZE_MAX 1400 // (26 sets)
+  #define STRIP_SIZE_MAX 1300 // (26 sets)
   #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // "{"
@@ -1915,43 +1915,43 @@
 
   #ifdef LIGHTING_TEMPLATE_DEBUG_SINGLE_PIXEL
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-  //   "\"" D_JSON_ANIMATIONMODE    "\":," 
-  //   "\"ColourPalette\":\"Christmas 06\"," 
-  //   "\"Effects\":{"
-  //     "\"Function\":1"
-  //   "},"
-  //   "\"Transition\":{"
-  //     "\"TimeMs\":3000,"
-  //     "\"RateMs\":10000"
-  //   "},"    
-  //   "\"BrightnessRGB\":100"
-  // "}"
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":3000,"
+      "\"RateMs\":10000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}"
   
   
-  R"=====({"PixelRange":[0,1000],
-  "AnimationMode": 3,
-  "Strip": {
-    "ClearTo": [0,0,0,0,0],
-    "ManualSetPixelToScene":[0,1,2,3,4,5,40,41,42,43,44,45,46,47,48,49]
-  },
-  "Effects": {
-    "Function": 109
-  },
-  "ColourPalette": 10,
-  "Hue": 20,
-  "Sat": 100,
-  "BrightnessCCT": 100,
-  "CCT_TempPercentage": 100,
-  "ColourOrder": "grbwc",
-  "Transition": {
-    "TimeMs": 900,
-    "RateMs": 20
-  },
-  "BrightnessRGB": 100"})====="
+  // R"=====({"PixelRange":[0,1000],
+  // "AnimationMode": 3,
+  // "Strip": {
+  //   "ClearTo": [0,0,0,0,0],
+  //   "ManualSetPixelToScene":[0,1,2,3,4,5,40,41,42,43,44,45,46,47,48,49]
+  // },
+  // "Effects": {
+  //   "Function": 109
+  // },
+  // "ColourPalette": 10,
+  // "Hue": 20,
+  // "Sat": 100,
+  // "BrightnessCCT": 100,
+  // "CCT_TempPercentage": 100,
+  // "ColourOrder": "grbwc",
+  // "Transition": {
+  //   "TimeMs": 900,
+  //   "RateMs": 20
+  // },
+  // "BrightnessRGB": 100"})====="
 
 
   ;

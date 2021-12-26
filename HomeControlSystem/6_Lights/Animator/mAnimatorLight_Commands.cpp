@@ -727,6 +727,146 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 //   } 
 
 
+
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+//     CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
+//     CommandSet_BrtCT_255(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+
+
+// // Flip these so default is 0 to 100%, and the other is range controlled
+//   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
+//     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
+//     CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+
+//   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
+//     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   } 
+
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
+//     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000);
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME_MS]){
+//     CommandSet_Animation_Transition_Time_Ms(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME)),animation.transition.time_ms.val);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+  
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
+//     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000);
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)),animation.transition.rate_ms);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE_MS]){
+//     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),animation.transition.rate_ms);  
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+  
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_NUMBER]){
+//     CommandSet_LightsCountToUpdateAsNumber(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), animation.transition.pixels_to_update_as_percentage.val);
+//     #endif
+//   }else
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
+//     CommandSet_LightsCountToUpdateAsPercentage(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), animation.transition.pixels_to_update_as_number);
+//     #endif
+//   }
+  
+//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_ORDER]){
+//     if(jtok.isStr()){
+//       if((tmp_id=GetTransitionOrderIDbyName(jtok.getStr()))>=0){
+//         CommandSet_TransitionOrderID(tmp_id);
+//         data_buffer.isserviced++;
+//       }
+//     }else
+//     if(jtok.isNum()){
+//       CommandSet_TransitionOrderID(jtok.getInt());
+//       data_buffer.isserviced++;
+//     }
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
+//     if(jtok.isStr()){
+//       // if((tmp_id=GetHardwareColourTypeIDbyName(jtok.getStr()))>=0){
+//         CommandSet_HardwareColourOrderTypeByStr(jtok.getStr());
+//         data_buffer.isserviced++;
+//       // }
+//     }
+//     // else
+//     // if(jtok.isNum()){      
+//     //   CommandSet_HardwareColourOrderTypeID(jtok.getInt());
+//     //   data_buffer.isserviced++;
+//     // }
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+
+  // if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER2]){
+  //   if(jtok.isStr()){
+  //     if((tmp_id=GetHardwareColourTypeIDbyName2(jtok.getStr()))>=0){
+  //       CommandSet_HardwareColourOrderTypeID2(tmp_id);
+  //       data_buffer.isserviced++;
+  //     }
+  //   }else
+  //   if(jtok.isNum()){      
+  //     CommandSet_HardwareColourOrderTypeID2(jtok.getInt());
+  //     data_buffer.isserviced++;
+  //   }
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName2(buffer, sizeof(buffer)));
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+
 }
 
 

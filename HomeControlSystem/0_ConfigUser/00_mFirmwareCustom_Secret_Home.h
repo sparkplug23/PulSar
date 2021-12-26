@@ -940,7 +940,7 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D4\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
       #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -981,7 +981,7 @@ Bathroom
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"State\":2" // Started
       "}"
     "}"
   "}";
@@ -1815,7 +1815,7 @@ Bathroom
 #endif
 
 #ifdef DEVICE_HEATING
-  #define DEVICENAME_CTR          "heating"
+  #define DEVICENAME_CTR          "heating
   #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
 
   //#define FORCE_TEMPLATE_LOADING

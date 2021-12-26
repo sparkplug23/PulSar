@@ -279,8 +279,8 @@ void mDS18X::Init(void){
 
 
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin Group %d, count %d, sensor count %d"),sensor_group_id,sensor_id,sensor_count);
-          WDT_FEED();
-          WDT_RESET();
+          // WDT_FEED();
+          // WDT_RESET();
           sensor_count++; // increment how many is found
           //limit if number of sensors is reached
           if(sensor_count>DB18_SENSOR_MAX){ break; }

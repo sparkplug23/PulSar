@@ -19,6 +19,8 @@
 /**
  *  TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- 
  * Special hardware, shelly, sonoff
+ * 
+ TESTBEDs can use flag to swap between esp8266 and esp32 varaints, so hardware may be tested on both
 **/
 // #define DEVICE_TESTBED_SHELLY1_01
 // #define DEVICE_TESTBED_SHELLY2P5_01
@@ -28,6 +30,7 @@
  * Generic hardware eg nodemcu
  * */
 // #define DEVICE_TESTBED_MOTION
+// #define DEVICE_TESTBED_DS18XX
 // #define DEVICE_TESTBED_RGBCLOCK
 // #define DEVICE_RGBSTRING_ANIMATOR_01
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
@@ -42,6 +45,9 @@
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
+
+/**
+ * 
 
 // Include the home devices, which should ONLY contain final hardware
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
@@ -606,7 +612,6 @@
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"D6\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\","
-      // "\"D7\":\"" D_GPIO_FUNCTION_SWT2_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
       "\"D5\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
@@ -619,6 +624,17 @@
     
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Motion0"
   #define D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "Motion1"
+
+  /**
+   * @brief 
+   * On value/off value (use | naming) ie On|Off,Open|Closed,Locked|unlocked, 1|0
+   *  
+   */
+
+
+  // #define D_DEVICE_SENSOR_DOOR_OPENING_FRIENDLY_NAME_LONG "Motion1"  // what the motion will say when it opens
+  // #define D_DEVICE_SENSOR_DOOR_POSITION_FRIENDLY_NAME_LONG "Motion1" // open/closed?
+  // #define D_DEVICE_SENSOR_DOOR_LOCK_FRIENDLY_NAME_LONG "Motion1"     // locked/unlock
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -678,6 +694,74 @@
 
 
 
+/**
+ * New heating controller, designed to work from single device to multizone system
+ * */
+#ifdef DEVICE_TESTBED_DS18XX
+  #define DEVICENAME_CTR          "testbed_ds18xx" APPEND_ESP_TYPE_MQTT_STRING  
+  #define DEVICENAME_FRIENDLY_CTR "Testbed DS18XX" APPEND_ESP_TYPE_NAME_STRING
+
+  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+  
+  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_DS18X
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      "\"D5\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+  #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"
+  #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,135,126,242]"
+  #define D_DEVICE_SENSOR_DB18S20_3_NAME        "Immersion_Heater"
+  #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,195,135,215,193]"
+  #define D_DEVICE_SENSOR_DB18S20_4_NAME        "Tank_Top"
+  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,205,202,237,231]"
+  #define D_DEVICE_SENSOR_DB18S20_5_NAME        "Tank_Middle"
+  #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,205,206,170,25]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
+      "]"  
+    "}"
+  "}";
+  
+#endif
 
 
 

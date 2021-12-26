@@ -58,6 +58,18 @@
 #define DEBUG_DELAY(x)
 #endif
 
+#ifdef ESP8266
+  #define APPEND_ESP_TYPE_MQTT_STRING "_esp8266"
+  #define APPEND_ESP_TYPE_NAME_STRING " ESP8266"
+#endif
+#ifdef ESP32
+  #define APPEND_ESP_TYPE_MQTT_STRING "_esp32"
+  #define APPEND_ESP_TYPE_NAME_STRING " ESP32"
+#endif
+
+
+
+
 
 /*
 // ArduinoJson relies on the type const __FlashStringHelper* to detect if a string is in Flash.
