@@ -52,7 +52,8 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
     break;  
     case FUNC_EVERY_SECOND:{
 
-AddLog(LOG_LEVEL_INFO, PSTR("\t\t\tcount=%d"), sensor_group[0].dallas->getDeviceCount());
+
+// AddLog(LOG_LEVEL_INFO, PSTR("\t\t\tcount=%d"), sensor_group[0].dallas->getDeviceCount());
 
 // uint8_t sensor_group_count = 0;
 // sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
@@ -166,18 +167,42 @@ AddLog(LOG_LEVEL_INFO, PSTR("\t\t\tcount=%d"), sensor_group[0].dallas->getDevice
 }//end function
 
 
+/**
+ * @brief 
+ * For now I need to disable multiple pin support, as the hardwarepins_templateparsing would need to check and start multiple twowire if that was set
+ * forcing only one this time
+ * 
+ */
 void mDS18X::Pre_Init(){
+
+
 
   uint8_t sensor_count = 0;
   uint8_t sensor_group_count = 0;
   settings.nSensorsFound = 0;
 
   if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)) {  // not set when 255
+  
+
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
-    sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
-    sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
+
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "pCONT_pins->GetPin(GPIO_DSB_1OF2_ID) 1 Valid %d"),
+    pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
+    // sensor_group[sensor_group_count].pin);
+    
+    //sensor_group[0].onewire = new OneWire(15); 
+     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
+
+     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
+    //sensor_group[0].dallas  = new DallasTemperature(sensor_group[0].onewire);   
+
+     
+    sensor_group[sensor_group_count].dallas->begin();
+
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas->begin();
+
+AddLog(LOG_LEVEL_INFO, PSTR("GPIO_DSB_1OF2_ID\t\t\tcount=%d"), sensor_group[sensor_group_count].dallas->getDeviceCount());
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
     #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT
@@ -190,31 +215,32 @@ void mDS18X::Pre_Init(){
       sensor_group_count++;
     }else{
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
+      // delay(5000);
     }
   }
 
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
 
-  if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
-    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
-    sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
-    sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
-    sensor_group[sensor_group_count].dallas->begin();
-    // Get sensors connected to this pin
-    sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
-    #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT
-    sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT;
-    #endif
-    //increment that we have another sensor group added IF we have sensors attached
-    if(sensor_group[sensor_group_count].sensor_count){
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
-      settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
-      sensor_group_count++;
-    }else{
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
-    }
-  }
+  // if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
+  //   sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
+  //   sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
+  //   sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
+  //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
+  //   sensor_group[sensor_group_count].dallas->begin();
+  //   // Get sensors connected to this pin
+  //   sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
+  //   #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT
+  //   sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT;
+  //   #endif
+  //   //increment that we have another sensor group added IF we have sensors attached
+  //   if(sensor_group[sensor_group_count].sensor_count){
+  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
+  //     settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
+  //     sensor_group_count++;
+  //   }else{
+  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
+  //   }
+  // }
 
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
   if(settings.nSensorsFound){
@@ -223,7 +249,12 @@ void mDS18X::Pre_Init(){
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "settings.fEnableSensor, %d sensors"),settings.nSensorsFound);
   }
 
-  // delay(2000);
+
+  //   sensor_group[0].onewire = new OneWire(15);
+  //   sensor_group[0].dallas  = new DallasTemperature(sensor_group[0].onewire);     
+  //   sensor_group[0].dallas->begin();
+
+  // delay(5000);
 
 }
 
@@ -333,6 +364,7 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
                 sensor_id++){
 
           if(sensor[sensor_id].sensor_group_id == sensor_group_id){
+
 
             if((tmp_float = sensor_group[sensor_group_id].dallas->getTempC(sensor[sensor_id].address))!=DEVICE_DISCONNECTED_C){
               if(sensor[sensor_id].reading.val != tmp_float){ 

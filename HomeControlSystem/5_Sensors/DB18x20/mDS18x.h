@@ -9,8 +9,8 @@
 
 #define REQUIRESALARMS false //turn off
 
-#include <DallasTemperature.h>
-#include <OneWire.h>
+#include "DallasTemperature.h"
+#include "OneWire.h"
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -105,7 +105,7 @@ class mDS18X :
     struct SENSOR_GROUP_INFO{ // from a single pin
       uint8_t fSensorFound = false;
       uint8_t sensor_count = 0;
-      int8_t  pin = -1;
+      uint8_t  pin = 0;
       OneWire* onewire = nullptr;
       DallasTemperature* dallas = nullptr;
     }sensor_group[2];

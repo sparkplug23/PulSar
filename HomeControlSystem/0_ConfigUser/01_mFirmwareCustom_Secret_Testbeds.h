@@ -40,17 +40,509 @@
 // #define DEVICE_TESTBED_9AXIS_GRYO_GY89
 // #define DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
 // #define DEVICE_TESTBED_6DOF_ECOMPASS_LSM303D
-
+#define DEVICE_TESTBED_ANIMATION_SEGMENTS
 
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
 
 /**
- * 
+ */ 
 
 // Include the home devices, which should ONLY contain final hardware
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
+
+
+#ifdef DEVICE_TESTBED_ANIMATION_SEGMENTS
+  #define DEVICENAME_CTR          "testbed_animation_segment_01"
+  #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"
+  
+
+  #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+  //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+  // #define USE_DEVFEATURE_METHOD_WLED_BUILD
+ 
+/**
+ * @brief 
+ * 
+ * Outside show
+ * 
+ * 6 - red/green
+ * 12
+ * 31
+ */
+
+ 
+  #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
+
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    // enable some wled conerted aniamtions
+    #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+    #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+
+    #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+    #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    #define ENABLE_FREERAM_APPENDING_SERIAL
+
+    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+
+    // to merge h801 rgbcct animation into the new method
+    #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
+
+    #define ENABLE_CRGBPALETTES_IN_PROGMEM
+
+    #define STRIP_SIZE_MAX 50
+
+    #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  
+    // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+
+  #endif 
+  #ifdef USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    
+    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #endif 
+  #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+    #define USE_BUILD_TYPE_LIGHTING
+    #define USE_MODULE_LIGHTS_INTERFACE
+    #define USE_MODULE_LIGHTS_ANIMATOR
+    #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION  // to test existing effects in wled
+    
+    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+    #define LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
+    #define D_EFFECT_INSIDE_TEMPLATE "WLED"
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
+  #endif
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief 
+ Segment command for single segment to replace old effects
+ Without using a "Segment#" the commands will be assumed as for the entire strip and internally be segment0
+ * 
+ */
+//  #define STRIP_SIZE_MAX 1300
+ #define USE_LIGHTING_TEMPLATE
+
+//  #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":3000,"
+      "\"RateMs\":10000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 21\"," 
+    "\"Effects\":{"
+      "\"Function\":30"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Static\""
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":3000,"
+        "\"RateMs\":10000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":\"Solid RGBCCT\""
+      "},"
+      "\"ColourPalette\":\"Solid Rgbcct 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":29"
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":23"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":28"
+      "},"
+      "\"ColourPalette\":11,"
+      "\"Hue\":20,"
+      "\"Sat\":90,"
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":25"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  /** Copy from mqtt broker
+   * 
+   * {
+  "Segment0": {
+    "PixelRange": [
+      31,
+      40
+    ],
+    "Effects": {
+      "Function":1
+    },
+    "ColourPalette": "Christmas 06",
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 1500,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment1": {
+    "PixelRange": [
+      21,
+      30
+    ],
+    "Effects": {
+      "Function": 28
+    },
+    "ColourPalette": 11,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      0,
+      20
+    ],
+    "Effects": {
+      "Function": 29
+    },
+    "ColourPalette": "Christmas 06",
+    "Hue": 120,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  }
+}
+
+
+  {
+  "Segment0": {
+    "PixelRange": [
+      40,
+      49
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    }
+  },
+  "Segment1": {
+    "PixelRange": [
+      0,
+      39
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 10,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB":100
+  },
+    "Hue": 120,
+    "Sat": 90,
+  "Segment1": {
+    "PixelRange": [
+      11,
+      49
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 25,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 20
+    },
+    "BrightnessRGB": 10
+  },
+  "Segment1": {
+    "PixelRange": [
+      11,
+      20
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 11,
+    "Hue": 240,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      25,
+      40
+    ],
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 14,
+    "Hue": 120,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  }
+}
+
+*/
+
+#endif
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -716,15 +1208,20 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
+      #ifdef ESP8266
       "\"D5\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+      #else
+      // "\"22\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      #endif // esp8266
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
 
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
-  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,121,172,3,0,0,0,138]"
   #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
   #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
   #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"

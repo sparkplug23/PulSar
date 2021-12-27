@@ -8829,6 +8829,18 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
       if (fadeStep == 0) fadeStep = 1;
     }
 
+
+    // /**
+    //  * @brief 
+    //  * Trying here, can rgbbrightness be used as constraint on fadestep? and thus, its maximum brightness
+    //  * 
+    //  */
+    // #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+    // AddLog(LOG_LEVEL_TEST, PSTR("s1 = %d"), s);
+    // s = constrain(s,0,pCONT_iLight->getBriRGB_Global());
+    // AddLog(LOG_LEVEL_TEST, PSTR("\t\t\ts2 = %d"), s);
+    // #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+
     // uint8_t palette_with_multi_is_random = 1;
 
 
@@ -8891,6 +8903,21 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
     //              p++
     //   ){
         colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+
+        /**
+         * @brief 
+         * To apply constrain, should I change the "full" colour brightness? this might work (at least temporarily)
+         * 
+         */
+        #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+        colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
+        #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+
+
+
+
+
+
         colour2 = RgbcctColor(0);
         colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
 
@@ -8927,6 +8954,17 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
                  p++
       ){
         colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+        
+        /**
+         * @brief 
+         * To apply constrain, should I change the "full" colour brightness? this might work (at least temporarily)
+         * 
+         */
+        #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+        colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
+        #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+
+
         colour2 = RgbcctColor(0);
         colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
 

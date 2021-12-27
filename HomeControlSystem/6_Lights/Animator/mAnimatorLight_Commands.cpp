@@ -114,6 +114,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       for(auto v : arrobj) {
         if(arrlen > 2){ break; }
 
+        
+
         switch(arrlen)
         {
           case 0: _segments[segment_index].pixel_range.start = v.getInt(); break;
@@ -123,9 +125,26 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         array[arrlen++] = v.getInt();
         // #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange Segment[%d] = %d -> %d"),
+          segment_index,
+          _segments[segment_index].pixel_range.start,
+          _segments[segment_index].pixel_range.stop
+        );
+        
+
+
+
         // #endif// ENABLE_LOG_LEVEL_DEBUG          
       }
       // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
+
+      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
+      {
+        AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
+        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX;
+      }
+
+
       
       data_buffer.isserviced++;
     }

@@ -3,7 +3,7 @@
 
 /*********************************************************************************************\
  * Developing for home only: 
- *  - Devices to be put into home, but not yet ready for install. These are NOT "Testbeds" (examples) but meant for actual developing of devices
+ *  - Devices to be put into home, but not yet ready for install. These are NOT "Devboards" (examples) but meant for actual developing of devices
 \*********************************************************************************************/
 
 
@@ -36,8 +36,8 @@
 /**
  * New devices
  * */
-// #define DEVICE_RGBSTRING_TESTBED_SEGMENT
-// #define DEVICE_RGBSTRING_TESTBED_SEGMENT_ESP32
+// #define DEVICE_RGBSTRING_DEVBOARD_SEGMENT
+// #define DEVICE_RGBSTRING_DEVBOARD_SEGMENT_ESP32
 // #define DEVICE_BUCKET_WATER_LEVEL
 /**
  *  SHORT TERM DEVICES IN BEDROOM -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- 
@@ -139,8 +139,8 @@
 
 
 
-#ifdef DEVICE_RGBSTRING_TESTBED_SEGMENT
-  #define DEVICENAME_CTR          "testbed_string_segment_01"
+#ifdef DEVICE_RGBSTRING_DEVBOARD_SEGMENT
+  #define DEVICENAME_CTR          "devboard_string_segment_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
   
 
@@ -684,8 +684,8 @@
 
 
 
-#ifdef DEVICE_RGBSTRING_TESTBED_SEGMENT_ESP32
-  #define DEVICENAME_CTR          "testbed_string_segment_01"
+#ifdef DEVICE_RGBSTRING_DEVBOARD_SEGMENT_ESP32
+  #define DEVICENAME_CTR          "devboard_string_segment_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
   
 
@@ -733,6 +733,8 @@
     #define ENABLE_CRGBPALETTES_IN_PROGMEM
 
     #define STRIP_SIZE_MAX 1300
+
+    #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
   
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
 
@@ -5107,14 +5109,14 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 
 /**
- *  TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- 
+ *  DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- DEVBOARDS   -- 
 **/
 
 
 
-// #ifdef DEVICE_TESTBED_SHELLY2P5_01
-//   #define DEVICENAME_CTR          "testbed_shelly25_01"
-//   #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly 2.5 #01"
+// #ifdef DEVICE_DEVBOARD_SHELLY2P5_01
+//   #define DEVICENAME_CTR          "devboard_shelly25_01"
+//   #define DEVICENAME_FRIENDLY_CTR "Devboard Shelly 2.5 #01"
 
 //   // #define USE_MODULE_SENSORS_MOTION
 //   // #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Test"
@@ -7105,8 +7107,8 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // // // #define DEVICE_ADC_PIN_INTERRUPT_TRIGGER_TEST
 // // // #define DEVICE_RECEIVE_RSS_STREAM_FROM_PIC32_INTO_ESP32_BUFFER_TEST
 // // // #define DEVICE_I2S_ADC_TESTER
-// // // #define DEVICE_TESTBED_I2S_MEASUREMENT
-// // // #define DEVICE_TESTBED_I2S_MEASUREMENT_SINGLE_CHANNEL
+// // // #define DEVICE_DEVBOARD_I2S_MEASUREMENT
+// // // #define DEVICE_DEVBOARD_I2S_MEASUREMENT_SINGLE_CHANNEL
 
 // // /**
 // //  * PhD systems
@@ -8852,7 +8854,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // //  * 
 // //  * 
 // //  * */
-// // #ifdef DEVICE_TESTBED_I2S_MEASUREMENT
+// // #ifdef DEVICE_DEVBOARD_I2S_MEASUREMENT
 // //   #define DEVICENAME_CTR            "system_1_alpha"
 
 // //   // #define DEVICENAME_FRIENDLY_CTR   "Device 2"
@@ -9070,7 +9072,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 // //  * 
 // //  * */
-// // #ifdef DEVICE_TESTBED_I2S_MEASUREMENT_SINGLE_CHANNEL
+// // #ifdef DEVICE_DEVBOARD_I2S_MEASUREMENT_SINGLE_CHANNEL
 // //   #define DEVICENAME_CTR            "system_1_alpha"
 
 // //   // #define DEVICENAME_FRIENDLY_CTR   "Device 2"
@@ -9540,7 +9542,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 // //  * 
 // //  * */
-// // #ifdef DEVICE_TESTBED_I2S_MEASUREMENT_SINGLE_CHANNEL2
+// // #ifdef DEVICE_DEVBOARD_I2S_MEASUREMENT_SINGLE_CHANNEL2
 // //   #define DEVICENAME_CTR            "system_1_alpha"
 
 // //   // #define DEVICENAME_FRIENDLY_CTR   "Device 2"
