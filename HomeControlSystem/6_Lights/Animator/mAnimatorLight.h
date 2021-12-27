@@ -42,10 +42,10 @@
 #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION 
 
 
-#ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/FastLED_Modified/FastLED.h"
-#endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 // #define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 #define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
@@ -234,29 +234,29 @@ class mAnimatorLight :
     void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint16_t segment_length = 0);  
     void SetPixelColor(uint16_t indexPixel, uint32_t color, uint16_t segment_length = 0);
 
-    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-    // what is stored for state is specific to the need, in this case, the colors.
-    // Basically what ever you need inside the animation update function
-    // Can this be moved into the segment_runtime data?
-    struct AnimationColours
-    {
-      RgbTypeColor StartingColor; // or should this be a pointer buffer only
-      RgbTypeColor DesiredColour;
-    };
-    AnimationColours animation_colours[STRIP_SIZE_MAX];
-    #endif // ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-    #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
-    /**
-     * Make this definable, and or remove it, because it grows with pixel size and will waste memory
-     * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
-     * WARNING! : Significant memory usage, needs changed to dynamic runtime
-     * */
-    struct LEDOUTPUTSETTINGS{
-      uint16_t length = 0;
-      uint16_t index = 0;
-      uint16_t pattern[STRIP_SIZE_MAX];
-    }ledout;    
-    #endif
+    // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    // // what is stored for state is specific to the need, in this case, the colors.
+    // // Basically what ever you need inside the animation update function
+    // // Can this be moved into the segment_runtime data?
+    // struct AnimationColours
+    // {
+    //   RgbTypeColor StartingColor; // or should this be a pointer buffer only
+    //   RgbTypeColor DesiredColour;
+    // };
+    // AnimationColours animation_colours[STRIP_SIZE_MAX];
+    // #endif // ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+    // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
+    // /**
+    //  * Make this definable, and or remove it, because it grows with pixel size and will waste memory
+    //  * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
+    //  * WARNING! : Significant memory usage, needs changed to dynamic runtime
+    //  * */
+    // struct LEDOUTPUTSETTINGS{
+    //   uint16_t length = 0;
+    //   uint16_t index = 0;
+    //   uint16_t pattern[STRIP_SIZE_MAX];
+    // }ledout;    
+    // #endif
 
 
     void StartAnimation_AsAnimUpdateMemberFunction();

@@ -63,6 +63,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
+  char buffer[50];
 
   /**
    * @brief Critical this is always parsed first, as many other commands rely on this value
@@ -204,6 +205,49 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   
 
 
+  if(jtok = obj["PixelRange"]){ 
+    if(jtok.isArray()){
+      uint8_t array[2];
+      uint8_t arrlen = 0;
+      JsonParserArray arrobj = jtok;
+      for(auto v : arrobj) {
+        if(arrlen > 2){ break; }
+
+        
+
+        switch(arrlen)
+        {
+          case 0: _segments[segment_index].pixel_range.start = v.getInt(); break;
+          case 1: _segments[segment_index].pixel_range.stop  = v.getInt(); break;
+        }
+
+        array[arrlen++] = v.getInt();
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
+        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange Segment[%d] = %d -> %d"),
+          segment_index,
+          _segments[segment_index].pixel_range.start,
+          _segments[segment_index].pixel_range.stop
+        );
+        
+
+
+
+        // #endif// ENABLE_LOG_LEVEL_DEBUG          
+      }
+      // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
+
+      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
+      {
+        AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
+        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX;
+      }
+
+
+      
+      data_buffer.isserviced++;
+    }
+  }
   // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_DIRECTION])
   // { 
   //   CommandSet_Flasher_Flags_Movement_Direction(jtok.getInt());
@@ -249,7 +293,33 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
-  
+  #ifdef ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+  /**
+   * @brief These are for WLED effects basic 3 colour system, eventually to be merged into mine (likely use the 3 rgbcct options? or add another? or simply more of rgbcct users * 
+   */
+  for(uint8_t colour_id=0;colour_id<3;colour_id++)
+  {
+    snprintf(buffer,sizeof(buffer),"Colour%d",colour_id);
+    if(jtok = obj["WLED"].getObject()[buffer]){ 
+      if(jtok.isArray()){
+        uint8_t array[4] = {0};
+        uint8_t arrlen = 0;
+        JsonParserArray arrobj = jtok;
+        for(auto v : arrobj) {
+          if(arrlen > 4){ break; }
+          array[arrlen++] = v.getInt();       
+        }
+        // w,r,g,b packed 32 bit colour
+        uint32_t colour32_bit = (((uint32_t)array[3] << 24) | ((uint32_t)array[0] << 16) | ((uint32_t)array[1] << 8) | (uint32_t)array[2]);
+        _segments[segment_index].colors[colour_id] = colour32_bit;      
+        data_buffer.isserviced++;
+      }
+    }
+  }
+  #endif // ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+
+
+
 
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
     if(jtok.isStr()){

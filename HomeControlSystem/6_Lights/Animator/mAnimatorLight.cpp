@@ -221,11 +221,11 @@ void mAnimatorLight::Init(void){
 
   DEBUG_LINE;
 
-  #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-  // Clear stored light output
-  memset(&animation_colours,0,sizeof(animation_colours));
+  // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+  // // Clear stored light output
+  // memset(&animation_colours,0,sizeof(animation_colours));
   
-  #endif //ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
+  // #endif //ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
 
 
   // Start display

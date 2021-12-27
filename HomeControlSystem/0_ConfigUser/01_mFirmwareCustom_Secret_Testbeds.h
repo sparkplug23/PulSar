@@ -97,37 +97,28 @@
   // #define USE_DEVFEATURE_METHOD_WLED_BUILD
 
   #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
-
     #define USE_BUILD_TYPE_LIGHTING
     #define USE_MODULE_LIGHTS_INTERFACE
     #define USE_MODULE_LIGHTS_ANIMATOR
     #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-
     /**
      * @brief defines to be tested and incorporated fully
      * 
      */
-    #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
-    #define DEBUG_WLED_EFFECT_FUNCTIONS
-    #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-    #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
-    #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-    #define ENABLE_FREERAM_APPENDING_SERIAL
     #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-    #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+    #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS //add commands
     #define ENABLE_CRGBPALETTES_IN_PROGMEM
     #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
-    #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-
+    #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
     /**
      * @brief Debug flags, used mostly be me
      * 
      */  
-    //?
-
+    #define ENABLE_FREERAM_APPENDING_SERIAL
+    #define DEBUG_WLED_EFFECT_FUNCTIONS
   #endif 
   #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
     #define USE_BUILD_TYPE_LIGHTING
@@ -190,6 +181,11 @@
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
     "\"ColourPalette\":\"Christmas 06\"," 
+    "\"WLED\":{"
+      "\"Colour0\":[255,0,0,0]" // R,G,B,W in 255 range
+      "\"Colour1\":[0,255,0,0]" // R,G,B,W in 255 range
+      "\"Colour2\":[0,0,255,0]" // R,G,B,W in 255 range
+    "},"
     "\"Effects\":{"
       "\"Function\":1"
     "},"

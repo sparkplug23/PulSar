@@ -207,7 +207,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           // case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:
           //   SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
           // break;        
-          #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+          #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
           /**
            * Static
            **/
@@ -574,7 +574,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
             SubTask_Segment_Flasher_Animate_Function__Drip();
           break;
           #endif // ENABLE_EXTRA_WLED_EFFECTS
-          #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+          #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
           /**
            * Development effects without full code 
            * 

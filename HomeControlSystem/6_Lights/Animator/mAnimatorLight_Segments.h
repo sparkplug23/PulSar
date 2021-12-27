@@ -64,6 +64,7 @@
 #define SEG_OPTION_TRANSITIONAL   7
 
 // some common colors
+// white, red, green, blue
 #define RED        (uint32_t)0xFF0000
 #define GREEN      (uint32_t)0x00FF00
 #define BLUE       (uint32_t)0x0000FF
@@ -156,7 +157,7 @@
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     // Static
     EFFECTS_FUNCTION_WLED_STATIC_ID,
     EFFECTS_FUNCTION_WLED_STATIC_PATTERN_ID,
@@ -282,7 +283,7 @@
     EFFECTS_FUNCTION_WLED_DRIP_ID,     
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
     EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect     
-    #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+    #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     /**
      * Development effects
@@ -546,20 +547,20 @@
   }; 
   
 
-  /**
-   * @brief 
-   * Phased out since new dyanmic buffer can hold this data
-   * not needed when blend can now record full rgbcct type
-   * 
-   */
-  #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-  struct AnimationColours_SOLID_COLOUR
-  {
-    RgbcctColor StartingColor;
-    RgbcctColor DesiredColour;
-  };
-  AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
-  #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
+  // /**
+  //  * @brief 
+  //  * Phased out since new dyanmic buffer can hold this data
+  //  * not needed when blend can now record full rgbcct type
+  //  * 
+  //  */
+  // #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
+  // struct AnimationColours_SOLID_COLOUR
+  // {
+  //   RgbcctColor StartingColor;
+  //   RgbcctColor DesiredColour;
+  // };
+  // AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
+  // #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 
 
 /*****************************************
@@ -1154,7 +1155,7 @@
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
 
   
-  #ifdef ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   // Static
   void SubTask_Segment_Flasher_Animate_Function__Static();
   void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
@@ -1309,7 +1310,7 @@
   uint16_t triwave16(uint16_t in);
   uint16_t mode_palette();
 
-  #endif // ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
+  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
   #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
