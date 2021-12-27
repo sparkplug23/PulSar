@@ -52,27 +52,50 @@
 // Include the home devices, which should ONLY contain final hardware
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
 
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #ifdef DEVICE_TESTBED_ANIMATION_SEGMENTS
-  #define DEVICENAME_CTR          "testbed_animation_segment_01"
-  #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"
+  #define DEVICENAME_CTR          "testbed_animation_segment_01"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
   
+  #define STRIP_SIZE_MAX 50                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+ 
+  
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   * 
+   */
 
   #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
-  //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
   // #define USE_DEVFEATURE_METHOD_WLED_BUILD
- 
-/**
- * @brief 
- * 
- * Outside show
- * 
- * 6 - red/green
- * 12
- * 31
- */
 
- 
   #ifdef USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
 
     #define USE_BUILD_TYPE_LIGHTING
@@ -80,42 +103,31 @@
     #define USE_MODULE_LIGHTS_ANIMATOR
     #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
-    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
-    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-    // enable some wled conerted aniamtions
+
+    /**
+     * @brief defines to be tested and incorporated fully
+     * 
+     */
     #define ENABLE_DEVFEATURE_WLED_CONVERTED_TO_SEGMENTS
     #define DEBUG_WLED_EFFECT_FUNCTIONS
     #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-
     #define ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
     #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     #define ENABLE_FREERAM_APPENDING_SERIAL
-
-    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
-
-    // to merge h801 rgbcct animation into the new method
-    #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-
+    #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+    #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
     #define ENABLE_CRGBPALETTES_IN_PROGMEM
-
-    #define STRIP_SIZE_MAX 50
-
     #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
-  
+    #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
 
-  #endif 
-  #ifdef USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
-    #define USE_BUILD_TYPE_LIGHTING
-    #define USE_MODULE_LIGHTS_INTERFACE
-    #define USE_MODULE_LIGHTS_ANIMATOR
-    #define USE_MODULE_LIGHTS_ADDRESSABLE
-    
-    #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
-    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    /**
+     * @brief Debug flags, used mostly be me
+     * 
+     */  
+    //?
+
   #endif 
   #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
     #define USE_BUILD_TYPE_LIGHTING
@@ -123,10 +135,6 @@
     #define USE_MODULE_LIGHTS_ANIMATOR
     #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION  // to test existing effects in wled
-    
-    // #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
-    #define LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
-    // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT
     #define D_EFFECT_INSIDE_TEMPLATE "WLED"
     #define DEBUG_WLED_EFFECT_FUNCTIONS
   #endif
@@ -139,9 +147,9 @@
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
     #ifdef ESP8266 // default pins for ws28xx
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     #else
-      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -149,17 +157,32 @@
 
 /**
  * @brief 
- Segment command for single segment to replace old effects
- Without using a "Segment#" the commands will be assumed as for the entire strip and internally be segment0
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
  * 
  */
-//  #define STRIP_SIZE_MAX 1300
- #define USE_LIGHTING_TEMPLATE
 
-//  #define LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
 
+  #define USE_LIGHTING_TEMPLATE
 
-  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
@@ -324,6 +347,13 @@
   "}";
   #endif
   
+  /**
+   * @brief For easy copy and pasting (as backup for mqtt explorer commands)
+   * These are simply copies of commands, that may or may not be translated into future templates
+   * 
+   */
+
+
   /** Copy from mqtt broker
    * 
    * {
