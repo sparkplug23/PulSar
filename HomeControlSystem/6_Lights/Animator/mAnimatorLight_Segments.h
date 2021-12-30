@@ -31,11 +31,11 @@
 #define SEGMENT_ON   (uint8_t)0x04
 #define REVERSE      (uint8_t)0x02
 #define SELECTED     (uint8_t)0x01
-#define IS_TRANSITIONAL ((_segments[segment_iters.index].options & TRANSITIONAL) == TRANSITIONAL)
-#define IS_MIRROR       ((_segments[segment_iters.index].options & MIRROR      ) == MIRROR      )
-#define IS_SEGMENT_ON   ((_segments[segment_iters.index].options & SEGMENT_ON  ) == SEGMENT_ON  )
-#define IS_REVERSE      ((_segments[segment_iters.index].options & REVERSE     ) == REVERSE     )
-#define IS_SELECTED     ((_segments[segment_iters.index].options & SELECTED    ) == SELECTED    )
+#define IS_TRANSITIONAL ((_segments[segment_active_index].options & TRANSITIONAL) == TRANSITIONAL)
+#define IS_MIRROR       ((_segments[segment_active_index].options & MIRROR      ) == MIRROR      )
+#define IS_SEGMENT_ON   ((_segments[segment_active_index].options & SEGMENT_ON  ) == SEGMENT_ON  )
+#define IS_REVERSE      ((_segments[segment_active_index].options & REVERSE     ) == REVERSE     )
+#define IS_SELECTED     ((_segments[segment_active_index].options & SELECTED    ) == SELECTED    )
 
 #define DEFAULT_BRIGHTNESS (uint8_t)127
 #define DEFAULT_MODE       (uint8_t)0
@@ -79,19 +79,17 @@
 #define ULTRAWHITE (uint32_t)0xFFFFFFFF
 
 #define NUM_COLORS 3
-#define SEGCOLOR(x)      _segments[segment_iters.index].colors[x]
+#define SEGCOLOR(x)      _segments[segment_active_index].colors[x]
 
 #define FRAMETIME 25
 
 #define SPEED_FORMULA_L  5 + (50*(255 - _segments[segment_index].speed()))/_virtualSegmentLength
 
-  CRGBPalette16 currentPalette;
-  CRGBPalette16 targetPalette;
 
   uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
 
   void fill(uint32_t c);
-  void fill_ranged(uint32_t c);
+  void fill_ranged(uint32_t c); 
   void seg_fill_ranged(uint32_t c);
 
   uint32_t color_wheel(uint8_t pos);
@@ -157,12 +155,13 @@
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     // Static
     EFFECTS_FUNCTION_WLED_STATIC_ID,
     EFFECTS_FUNCTION_WLED_STATIC_PATTERN_ID,
     EFFECTS_FUNCTION_WLED_TRI_STATIC_PATTERN_ID,
+    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     EFFECTS_FUNCTION_WLED_SPOTS_ID,
+    #endif // ENABLE_EXTRA_WLED_EFFECTS   
     EFFECTS_FUNCTION_WLED_PERCENT_ID,
     // One colour changes
     EFFECTS_FUNCTION_WLED_RANDOM_COLOR_ID,
@@ -171,6 +170,7 @@
     EFFECTS_FUNCTION_WLED_COLOR_WIPE_RANDOM_ID,
     EFFECTS_FUNCTION_WLED_COLOR_SWEEP_ID,
     EFFECTS_FUNCTION_WLED_COLOR_SWEEP_RANDOM_ID,
+    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     EFFECTS_FUNCTION_WLED_TRICOLOR_WIPE_ID,
     EFFECTS_FUNCTION_WLED_ANDROID_ID,
     EFFECTS_FUNCTION_WLED_RUNNING_RED_BLUE_ID,
@@ -217,11 +217,13 @@
     EFFECTS_FUNCTION_WLED_FADE_ID,
     EFFECTS_FUNCTION_WLED_FADE_TRICOLOR_ID,
     EFFECTS_FUNCTION_WLED_FADE_SPOTS_ID,
+    #endif // ENABLE_EXTRA_WLED_EFFECTS    
     // Fireworks
     EFFECTS_FUNCTION_WLED_FIREWORKS_ID,
     EFFECTS_FUNCTION_WLED_FIREWORKS_EXPLODING_ID,
     EFFECTS_FUNCTION_WLED_FIREWORKS_STARBURST_ID,
     EFFECTS_FUNCTION_WLED_RAIN_ID,
+    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Sparkle/Twinkle
     EFFECTS_FUNCTION_WLED_SOLID_GLITTER_ID,
     EFFECTS_FUNCTION_WLED_POPCORN_ID,
@@ -240,6 +242,7 @@
     EFFECTS_FUNCTION_WLED_DISSOLVE_RANDOM_ID,
     EFFECTS_FUNCTION_WLED_COLORFUL_ID,
     EFFECTS_FUNCTION_WLED_TRAFFIC_LIGHT_ID,
+    #endif // ENABLE_EXTRA_WLED_EFFECTS    
     EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID,
     EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
     EFFECTS_FUNCTION_WLED_FIRE_FLICKER_ID,
@@ -282,8 +285,7 @@
     EFFECTS_FUNCTION_WLED_SINELON_RAINBOW_ID,
     EFFECTS_FUNCTION_WLED_DRIP_ID,     
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
-    EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect     
-    #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect   
 
     /**
      * Development effects
@@ -511,6 +513,13 @@
      * Create special musical christmas lights, that will only be available on esp32 with a speaker (larger RAM)
      * */
 
+    /**
+     * Palette developing
+     * */
+    #ifdef ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+    // Step 1 of palette merging: Making it so any palette can span the entire segment, static, no effect.
+    EFFECTS_FUNCTION_STATIC_PALETTE_SPANNING_SEGMENT_ID,
+    #endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
     /**
      * Designing and quick test of animations before creating its own animaiton profile
      * */
@@ -964,9 +973,11 @@
     struct segment_shared_iters
     {
       // uint8_t index = 0;
-      uint8_t index = 0;
+      // uint8_t index = 0; segment_active_index
       uint8_t index_palette_last = 99; //mine is longer
     }segment_iters;
+
+    uint8_t segment_active_index = 0;
       
     /**
      * Runtime data for that segment, ie holds animation data
@@ -1072,6 +1083,17 @@
   bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
 
 
+  /**
+   * @brief New method that allows getting WLED basic 3 colours, but also applying the colour when getting, the same as my palette method
+   * 
+   */
+  RgbcctColor GetSegmentColour(uint8_t colour_index, uint8_t segment_index = 0);
+// #define SEGCOLOR(x)      _segments[segment_active_index].colors[x]
+
+
+
+
+
   enum EFFECTSREGION
   {
       EFFECTS_REGION_COLOUR_SELECT_ID=0,
@@ -1155,7 +1177,6 @@
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
 
   
-  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   // Static
   void SubTask_Segment_Flasher_Animate_Function__Static();
   void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
@@ -1171,6 +1192,7 @@
   void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random();
   void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep();
   void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
+  #ifdef ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Flasher_Animate_Function__TriColour();
   void SubTask_Segment_Flasher_Animate_Function__Android();
   void SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw);
@@ -1228,12 +1250,14 @@
   void SubTask_Segment_Flasher_Animate_Function__Fade();
   void SubTask_Segment_Flasher_Animate_Function__Fade_TriColour();
   void SubTask_Segment_Flasher_Animate_Function__Fade_Spots();
+  #endif // ENABLE_EXTRA_WLED_EFFECTS
   // Fireworks
   void SubTask_Segment_Flasher_Animate_Function__Fireworks();
   void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
   void SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst();
   void SubTask_Segment_Flasher_Animate_Function__Rain();
 // Sparkle/Twinkle
+  #ifdef ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Flasher_Animate_Function__Solid_Glitter();
   void SubTask_Segment_Flasher_Animate_Function__Popcorn();
   void SubTask_Segment_Flasher_Animate_Function__Plasma();
@@ -1254,6 +1278,7 @@
   void SubTask_Segment_Flasher_Animate_Function__Dissolve_Random();
   void SubTask_Segment_Flasher_Animate_Function__ColourFul();
   void SubTask_Segment_Flasher_Animate_Function__Traffic_Light();
+  #endif // ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi = false);
   void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
   void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
@@ -1310,12 +1335,11 @@
   uint16_t triwave16(uint16_t in);
   uint16_t mode_palette();
 
-  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
-  #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-  void load_gradient_palette(uint8_t index);
-  #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+  // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+  // void load_gradient_palette(uint8_t index);
+  // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
 
 
@@ -1397,7 +1421,7 @@
     void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
     void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
     void resetSegments();
-    void handle_palette(void);
+    // void UpdatePalette_FastLED_TargetPalette(void);
     
 
     /***************
