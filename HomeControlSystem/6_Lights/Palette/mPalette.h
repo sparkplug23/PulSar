@@ -33,37 +33,73 @@ Change option to make all palettes gradient mode or node, or how to use it
 #include "2_CoreSystem/Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"
 
+#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+#define FASTLED_INTERNAL // suppress pragma warning messages
+#include "6_Lights/FastLED_Modified/FastLED.h"
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 //Remember to sync with what is in palette_progmem.h
-enum fMapIDs_Type_IDS{
-  MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID=0,
-  MAPIDS_TYPE_HSBCOLOUR_NOINDEX_ID,
-  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID,
-  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID, //phase out
+enum fMapIDs_Type__IDS{
+  MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID=0,
+  MAPIDS_TYPE_HSBCOLOUR_NOINDEX__ID,
+  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX__ID,
+  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out
   
-  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID,
-  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID,
+  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID,
+  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID,
   
-  MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID,
-  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_ID,
-  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID, //phase out, assume max index IS set all
+  MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID,
+  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX__ID,
+  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out, assume max index IS set all
 
-  MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID,
-  MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID,
+  MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID,
+  MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID,
 
-  MAPIDS_TYPE_RGBCOLOUR_LENGTH_ID
+  MAPIDS_TYPE_RGBCOLOUR_LENGTH__ID
 };
 
-enum fIndexs_Type_IDS{
+/**
+ * @brief 
+ * Likely phase out, as any effect that knows to treat the userdefined palette as "direct" (eg shelf hearts) will just know that the gradient positions are simply positions, and does not need a type to say this
+ * This will reduce memory waste
+ * 
+ */
+enum fIndexs_Type__IDS{
   // INDEX_TYPE_NONE = 0,
   INDEX_TYPE_SCALED_255 = 0, //default option (to be used elsewhere, as preset is cleared to 0, these will be defaults)
   INDEX_TYPE_DIRECT,
   INDEX_TYPE_SCALED_100 
 };
 
+// #define ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
+
 class mPalette 
-// :
-//   public mTaskerInterface
+
+// #ifdef ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
+// // :
+// //   public mTaskerInterface
+// {
+//   // private:
+//     /* Prevent others from being created */
+//     // mPalette(mPalette const& other) = delete;
+//     // mPalette(mPalette&& other) = delete;
+//     /* Private constructor to prevent instancing. */
+//   public:
+//     // // External function to get instance
+//     // static mPalette* GetInstance();
+//     // /* Here will be the instance stored. */
+//     // static mPalette* instance;
+
+//     mPalette(){};
+
+
+
+
+
+
+//     #else
+
+ 
 {
   private:
     /* Prevent others from being created */
@@ -76,6 +112,9 @@ class mPalette
     static mPalette* GetInstance();
     /* Here will be the instance stored. */
     static mPalette* instance;
+
+
+    // #endif
         
     RgbcctColor GetActiveFirstColourFromCurrentPalette();
     
@@ -180,109 +219,107 @@ class mPalette
   // 20*10 = 200 bytes
   // 5*5   = 20 bytes
   //       = 100 bytes
-  enum PALETTELIST_VARIABLE_HSBID_IDS{ // 20 TOTAL variable and can be deleted by the user, saved in memory
-    PALETTELIST_VARIABLE_HSBID_01_ID = 0,
-    PALETTELIST_VARIABLE_HSBID_02_ID,
-    PALETTELIST_VARIABLE_HSBID_03_ID,
-    PALETTELIST_VARIABLE_HSBID_04_ID,
-    PALETTELIST_VARIABLE_HSBID_05_ID,
-    PALETTELIST_VARIABLE_HSBID_06_ID,
-    PALETTELIST_VARIABLE_HSBID_07_ID,
-    PALETTELIST_VARIABLE_HSBID_08_ID,
-    PALETTELIST_VARIABLE_HSBID_09_ID,
-    PALETTELIST_VARIABLE_HSBID_10_ID, 
-
-    //reduce to 10, use saved 20*10 bytes (100) for new generic palette
-    // PALETTELIST_VARIABLE_HSBID_11_ID, 
-    // PALETTELIST_VARIABLE_HSBID_12_ID,  
-    // PALETTELIST_VARIABLE_HSBID_13_ID, 
-    // PALETTELIST_VARIABLE_HSBID_14_ID, 
-    // PALETTELIST_VARIABLE_HSBID_15_ID, 
-    // PALETTELIST_VARIABLE_HSBID_16_ID, 
-    // PALETTELIST_VARIABLE_HSBID_17_ID, 
-    // PALETTELIST_VARIABLE_HSBID_18_ID, 
-    // PALETTELIST_VARIABLE_HSBID_19_ID, 
-    // PALETTELIST_VARIABLE_HSBID_20_ID, 
-    // Count of total handlers and starting point for other modules
-    PALETTELIST_VARIABLE_HSBID_LENGTH_ID 
+  enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
+    PALETTELIST_VARIABLE_HSBID_01__ID = 0,
+    PALETTELIST_VARIABLE_HSBID_02__ID,
+    PALETTELIST_VARIABLE_HSBID_03__ID,
+    PALETTELIST_VARIABLE_HSBID_04__ID,
+    PALETTELIST_VARIABLE_HSBID_05__ID,
+    PALETTELIST_VARIABLE_HSBID_06__ID,
+    PALETTELIST_VARIABLE_HSBID_07__ID,
+    PALETTELIST_VARIABLE_HSBID_08__ID,
+    PALETTELIST_VARIABLE_HSBID_09__ID,
+    PALETTELIST_VARIABLE_HSBID_10__ID,
+    PALETTELIST_VARIABLE_HSBID_LENGTH__ID  // Count of total handlers and starting point for other modules
   };
-  enum PALETTELIST_VARIABLE_RGBCCT_IDS{
-    PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID = PALETTELIST_VARIABLE_HSBID_LENGTH_ID, // New scene colour, static
-    PALETTELIST_VARIABLE_RGBCCT_COLOUR_02_ID,
-    PALETTELIST_VARIABLE_RGBCCT_COLOUR_03_ID,
-    PALETTELIST_VARIABLE_RGBCCT_COLOUR_04_ID,
-    PALETTELIST_VARIABLE_RGBCCT_COLOUR_05_ID,
-    PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID
+  enum PALETTELIST_VARIABLE_RGBCCT__IDS{
+    PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
+    PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID,
+    PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID,
+    PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID,
+    PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID,
+    PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID
   };
+  // Primary use of this is segments colours, and thus default will be 3 colours per option
+  // enum PALETTELIST_VARIABLE_RGBCCT_LIST__IDS{
+  //   PALETTELIST_VARIABLE_RGBCCT_COLOUR_LIST_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
+  //   PALETTELIST_VARIABLE_RGBCCT_COLOUR_LIST_02__ID,
+  //   PALETTELIST_VARIABLE_RGBCCT_COLOUR_LIST_03__ID,
+  //   PALETTELIST_VARIABLE_RGBCCT_COLOUR_LIST_04__ID,
+  //   PALETTELIST_VARIABLE_RGBCCT_COLOUR_LIST_05__ID,
+  //   PALETTELIST_VARIABLE_RGBCCT_LENGTH_LIST__ID
+  // };
   // One special buffer, block of memory allows any format of pallete (eg)
   // This will also require encoding of type of palette into the buffer somehow
   // shared, with overlapping memory
   // first X amounts of the original buffer will be used for encoding type, but colour_map_id pointer will remain the same
-  enum PALETTELIST_VARIABLE_GENERIC_IDS{
-    PALETTELIST_VARIABLE_GENERIC_01_ID = PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID, // New scene colour, static
-    PALETTELIST_VARIABLE_GENERIC_LENGTH_ID
-
-    // PALETTELIST_VARIABLE_GENERIC_LENGTH_ID = PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID // New scene colour, static
-    
+  enum PALETTELIST_VARIABLE_GENERIC__IDS{
+    PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID, // New scene colour, static
+    // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
+    PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
   };
-  enum PALETTELIST_STATIC_IDS{
+  enum PALETTELIST_STATIC__IDS{
     // Shelf Lights ie has some static leds
-    PALETTELIST_STATIC_SHELF_HEARTS_ID = PALETTELIST_VARIABLE_GENERIC_LENGTH_ID,//PALETTELIST_VARIABLE_HSBID_LENGTH_ID,
+    PALETTELIST_STATIC_SHELF_HEARTS__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,//PALETTELIST_VARIABLE_HSBID_LENGTH__ID,
+    
+    // to be moved to top of list later
+    PALETTELIST__DEFAULT___ID,
+    
     // Special patterns
-    PALETTELIST_STATIC_HOLLOWEEN_OP_ID,
-    PALETTELIST_STATIC_HOLLOWEEN_OGP_ID,
-    PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY_ID,
-    PALETTELIST_STATIC_RAINBOW_ID,
-    PALETTELIST_STATIC_RAINBOW_INVERTED_ID,
-    PALETTELIST_STATIC_PASTEL_ID, //PASTEL
-    PALETTELIST_STATIC_WINTER_ID,
-    PALETTELIST_STATIC_AUTUMN_ID,
-    PALETTELIST_STATIC_AUTUMN_RED_ID,
-    PALETTELIST_STATIC_GRADIENT_01_ID,
-    PALETTELIST_STATIC_GRADIENT_02_ID,
-    PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE_ID,
-    PALETTELIST_STATIC_BERRY_GREEN_ID,
-    PALETTELIST_STATIC_CHRISTMAS_01_ID,
-    PALETTELIST_STATIC_CHRISTMAS_02_ID,
-    PALETTELIST_STATIC_CHRISTMAS_03_ID,
-    PALETTELIST_STATIC_CHRISTMAS_04_ID,
-    PALETTELIST_STATIC_CHRISTMAS_05_ID,
-    PALETTELIST_STATIC_CHRISTMAS_06_ID,
-    PALETTELIST_STATIC_CHRISTMAS_07_ID,
-    PALETTELIST_STATIC_CHRISTMAS_08_ID,
-    PALETTELIST_STATIC_CHRISTMAS_09_ID,
-    PALETTELIST_STATIC_CHRISTMAS_10_ID,
-    PALETTELIST_STATIC_CHRISTMAS_11_ID,
-    PALETTELIST_STATIC_CHRISTMAS_12_ID,
-    PALETTELIST_STATIC_CHRISTMAS_13_ID,
-    PALETTELIST_STATIC_CHRISTMAS_14_ID,
-    PALETTELIST_STATIC_CHRISTMAS_15_ID,
-    PALETTELIST_STATIC_CHRISTMAS_16_ID,
-    PALETTELIST_STATIC_CHRISTMAS_17_ID,
-    PALETTELIST_STATIC_CHRISTMAS_18_ID,
-    PALETTELIST_STATIC_CHRISTMAS_19_ID,
-    PALETTELIST_STATIC_CHRISTMAS_20_ID,
-    PALETTELIST_STATIC_CHRISTMAS_21_ID,
-    PALETTELIST_STATIC_SUNRISE_01_ID,
-    PALETTELIST_STATIC_SUNRISE_02_ID,
-    PALETTELIST_STATIC_SUNRISE_03_ID,
-    PALETTELIST_STATIC_SUNRISE_04_ID,
-    PALETTELIST_STATIC_SUNSET_01_ID,
-    PALETTELIST_STATIC_SUNSET_02_ID,
-    PALETTELIST_STATIC_CANDLE_FLAME_01_ID,
-    PALETTELIST_STATIC_GRADIENT_FIRE_01_ID,
+    PALETTELIST_STATIC_HOLLOWEEN_OP__ID,
+    PALETTELIST_STATIC_HOLLOWEEN_OGP__ID,
+    PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID,
+    PALETTELIST_STATIC_RAINBOW__ID,
+    PALETTELIST_STATIC_RAINBOW_INVERTED__ID,
+    PALETTELIST_STATIC_PASTEL__ID, //PASTEL
+    PALETTELIST_STATIC_WINTER__ID,
+    PALETTELIST_STATIC_AUTUMN__ID,
+    PALETTELIST_STATIC_AUTUMN_RED__ID,
+    PALETTELIST_STATIC_GRADIENT_01__ID,
+    PALETTELIST_STATIC_GRADIENT_02__ID,
+    PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID,
+    PALETTELIST_STATIC_BERRY_GREEN__ID,
+    PALETTELIST_STATIC_CHRISTMAS_01__ID,
+    PALETTELIST_STATIC_CHRISTMAS_02__ID,
+    PALETTELIST_STATIC_CHRISTMAS_03__ID,
+    PALETTELIST_STATIC_CHRISTMAS_04__ID,
+    PALETTELIST_STATIC_CHRISTMAS_05__ID,
+    PALETTELIST_STATIC_CHRISTMAS_06__ID,
+    PALETTELIST_STATIC_CHRISTMAS_07__ID,
+    PALETTELIST_STATIC_CHRISTMAS_08__ID,
+    PALETTELIST_STATIC_CHRISTMAS_09__ID,
+    PALETTELIST_STATIC_CHRISTMAS_10__ID,
+    PALETTELIST_STATIC_CHRISTMAS_11__ID,
+    PALETTELIST_STATIC_CHRISTMAS_12__ID,
+    PALETTELIST_STATIC_CHRISTMAS_13__ID,
+    PALETTELIST_STATIC_CHRISTMAS_14__ID,
+    PALETTELIST_STATIC_CHRISTMAS_15__ID,
+    PALETTELIST_STATIC_CHRISTMAS_16__ID,
+    PALETTELIST_STATIC_CHRISTMAS_17__ID,
+    PALETTELIST_STATIC_CHRISTMAS_18__ID,
+    PALETTELIST_STATIC_CHRISTMAS_19__ID,
+    PALETTELIST_STATIC_CHRISTMAS_20__ID,
+    PALETTELIST_STATIC_CHRISTMAS_21__ID,
+    PALETTELIST_STATIC_SUNRISE_01__ID,
+    PALETTELIST_STATIC_SUNRISE_02__ID,
+    PALETTELIST_STATIC_SUNRISE_03__ID,
+    PALETTELIST_STATIC_SUNRISE_04__ID,
+    PALETTELIST_STATIC_SUNSET_01__ID,
+    PALETTELIST_STATIC_SUNSET_02__ID,
+    PALETTELIST_STATIC_CANDLE_FLAME_01__ID,
+    PALETTELIST_STATIC_GRADIENT_FIRE_01__ID,
     /**
      * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
      * Effect will go through these to form a rising/falling sun
      * */
     //add below horizon gradients (5 below), for black/blue
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID,
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ID,
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_ID,
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_ID,
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_ID,
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_ID,
-    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01__ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02__ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03__ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_04__ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_05__ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_06__ID,
+    PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07__ID,
     /**
      * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
      * */
@@ -291,25 +328,25 @@ class mPalette
     // Another palette which does the same, but applies CCT by AZ position 
     // Do as effect
 
-//like grad 1, order of using these will produce sunrising/falling
-//linear gradient sunlevel below (dark with no sun point above horizon)
-//linear gradient sunlevel low (dark red center, orange sides)
-//linear gradient sunlevel med (light red/orange center, orange, then yellow sides, pale blue on farest edges)
-//linear gradient sunlevel high (orange sun center, yellow slightly, largely light blue)
-//linear gradient sunlevel highest/midday (orange sun center, white edges... pale blue rest)
+    //like grad 1, order of using these will produce sunrising/falling
+    //linear gradient sunlevel below (dark with no sun point above horizon)
+    //linear gradient sunlevel low (dark red center, orange sides)
+    //linear gradient sunlevel med (light red/orange center, orange, then yellow sides, pale blue on farest edges)
+    //linear gradient sunlevel high (orange sun center, yellow slightly, largely light blue)
+    //linear gradient sunlevel highest/midday (orange sun center, white edges... pale blue rest)
 
 
-    PALETTELIST_STATIC_OCEAN_01_ID,
-    PALETTELIST_STATIC_CUSTOM_USER_01_ID,
-    PALETTELIST_STATIC_SINGLE_FIRE_01_ID,
+    PALETTELIST_STATIC_OCEAN_01__ID,
+    PALETTELIST_STATIC_CUSTOM_USER_01__ID,
+    PALETTELIST_STATIC_SINGLE_FIRE_01__ID,
 
     /**
      * Patterns for Gazebo
      * */
-    PALETTELIST_STATIC_FLOWER_SWEATPEAS_01_ID,
-    PALETTELIST_STATIC_FLOWER_SWEATPEAS_02_ID,
-    PALETTELIST_STATIC_PINK_PURPLE_01_ID,
-    PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID,
+    PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID,
+    PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID,
+    PALETTELIST_STATIC_PINK_PURPLE_01__ID,
+    PALETTELIST_STATIC_MICROLEDS_PASTEL_01__ID,
 
     /**
      * Create a few palettes that are updated/calculated using sun/azimuth
@@ -320,18 +357,90 @@ class mPalette
     /**
      * Specialised palettes: Solid single colour
      * */
-    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID,
-    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02_ID,
-    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03_ID,
-    PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04_ID,
+    PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,
+    PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02__ID,
+    PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03__ID,
+    PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04__ID,
     /**
      * Rgbcct colour pairs: For ambilight top/bottom arrangement
      * */
-    PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID,
+    PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,
 
     // Count of total handlers and starting point for other modules
-    PALETTELIST_STATIC_LENGTH_ID 
+    PALETTELIST_STATIC_LENGTH__ID 
   };
+  enum PALETTELIST_VARIABLE_FASTLED_PALETTES__IDS{ // to be renamed/moved, these palettes are colours stored inside segments
+    PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID = PALETTELIST_STATIC_LENGTH__ID,
+    PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_02__ID, // this will likely some how be merged with rgbcct user palettes later, especially if it needs to be variable to segment count
+    PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_03__ID,
+    //to be added
+    PALETTELIST_VARIABLE_FASTLED__LENGTH__ID    
+  };
+  enum PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
+    PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID = PALETTELIST_VARIABLE_FASTLED__LENGTH__ID,
+    PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID,
+    PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID,
+    PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,
+    PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID,
+    PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID    
+  };
+  enum PALETTELIST_STATIC_CRGBPALETTE16__IDS{
+    
+    PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID= PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIBE_COLOUR__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__HEAT_COLOUR__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID
+  };
+
+  enum PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+  { //39 of them 
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID = PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__RIVENDELL__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__OCEAN_BREEZE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__RED_AND_BLUE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__YELLOWOUT__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ANALOGOUS__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__PINK_SPLASH__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET_YELLOW__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ANOTHER__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__BEECH__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__VINTAGE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__DEPARTURE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__LANDSCAPE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__BEACH__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__RAINBOW_SHERBET__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__HULT__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__HULT64__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__DRYWET__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__JUL__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__GRINTAGE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__REWHI__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__LAVA_FIRE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ICE_FIRE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__CYANE__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__LIGHT_PINK__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__AUTUMN__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__BLUE_MAGENTA__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__BLACK_MAGENTA_RED__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__BLACK_RED_MAGENTA_YELLOW__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__BLUE_CYAN_YELLOW__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ORANGE_TEAL__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__TIAMAT__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__APRIL_NIGHT__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ORANGERY__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__C9__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SAKURA__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__AURORA__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ATLANTICA__ID,
+    PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
+  };
+
+  #define PALETTELIST_TOTAL_LENGTH PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
 
     #define PALETTELIST_COLOUR_AMOUNT_MAX 20//15 new max
 
@@ -342,17 +451,17 @@ class mPalette
         //random palettes will require estimations of nearest hues
         //uint16_t fColours_from_mapTBR : 1;
          // randomise between the hue and saturation values
-        uint16_t fRandomise_Between_Colour_Pairs : 1;
+        uint16_t fRandomise_Between_Colour_Pairs : 1;                                     // should this really be a palette option, and not an effect option?
          // Scaled between first and second colour, ignores the rest
         //uint16_t fLinearBlend_Between_Colour_Pairs : 1; //in gradient?
         // Enable the brightness parameter from colourmap, scale with animation.brightness
-        uint16_t fUse_Brightness_From_ColourMap_As_Ratio_Of_Global_Brightness : 1; 
+        uint16_t fUse_Brightness_From_ColourMap_As_Ratio_Of_Global_Brightness : 1;        // should this really be a palette option, and not an effect option?      
         // Use mapped IDs as RGB values, {R,G,B...}
         //uint16_t fMapIDs_Are_RGB_TripletsTBR : 1; 
         // (max 255 length string, if string>255, assume percentage)
         //uint16_t fIndexs_Are_Percentage : 1;
         // Override Saturation and randomise, skewed high for visual similarity.
-        uint16_t fOverride_Saturation_To_Random : 1;
+        uint16_t fOverride_Saturation_To_Random : 1;                                      // should this really be a palette option, and not an effect option?
         // Blends colours between indexs (used for fMapIDs_Type=4)
         //uint16_t fIndexs_Are_Gradient : 1;
         // Hold type of map
@@ -366,9 +475,9 @@ class mPalette
           // 6 - HsbColors only
           // 7 - HsbColors only      
           // 8- 
-          // 9 - MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID
+          // 9 - MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID
           // phase down to be only RGB, HSB?  
-        uint16_t fIndexs_Type : 2;
+        //uint16_t fIndexs_Type : 2; // these shall be removed and assumed ALWAYS to be 255, unless the effect knows to treat them as indexes (eg shelf hearts)
         // 0 - exact
         // 1 - gradient range 0-255
         // 2 - gradient range 0-100%
@@ -467,7 +576,7 @@ class mPalette
     }palettelist;
 
     // One of the variable rgbcct is used as the function colour manipulators
-    // uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+    // uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 
     const char* GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen);
     const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer, uint8_t buflen);
@@ -488,13 +597,34 @@ class mPalette
 
     
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
- uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
-    
-uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
-              
-              
+    uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
+
+    uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
+
+    CRGBPalette16 currentPalette;
+    CRGBPalette16 targetPalette;
+
     RgbcctColor GetColourFromPalette(uint16_t palette_id,       uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
     RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
+
+    /**
+     * @brief Next method to merge fastled and my methods together
+     * 
+     */
+    #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
+    uint32_t color_from_palette_internal(uint16_t palette_id, uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255, uint16_t palette_spread_length__virtualSegmentLength = 50);  
+    RgbcctColor GetColourFromPalette_Joint(uint16_t palette_id, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr, /*uint16_t i, is pixel_id*/ bool mapping = false, bool wrap = true, uint8_t mcol = 0, uint8_t pbri = 255, TBlendType blendType=NOBLEND, uint16_t palette_spread_length__virtualSegmentLength = 50);
+    RgbcctColor GetColourFromPalette_Gradient(uint16_t palette_id, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr, /*uint16_t i, is pixel_id*/ bool mapping = false, bool wrap = true, uint8_t mcol = 0, uint8_t pbri = 255, TBlendType blendType=NOBLEND, uint16_t palette_spread_length__virtualSegmentLength = 50);
+    #endif //ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
+
+
+    // #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+
+    void UpdatePalette_FastLED_TargetPalette(void);
+    void load_gradient_palette(uint8_t index);
+
+    // #endif // ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+
 
     PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
           
@@ -510,7 +640,7 @@ uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
 
     
     // One of the variable rgbcct is used as the function colour manipulators
-    // uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+    // uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 
 //     const char* GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen);
 //     const char* GetColourMapNameNearestbyColour(HsbColor c, char* buffer, uint8_t buflen);
@@ -538,7 +668,9 @@ uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
 };
 
 
+// #ifndef ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
 #define mPaletteI mPalette::GetInstance()
+// #endif  // ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
 
 
 

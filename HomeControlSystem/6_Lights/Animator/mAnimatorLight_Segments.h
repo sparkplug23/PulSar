@@ -155,13 +155,12 @@
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
+    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     // Static
     EFFECTS_FUNCTION_WLED_STATIC_ID,
     EFFECTS_FUNCTION_WLED_STATIC_PATTERN_ID,
     EFFECTS_FUNCTION_WLED_TRI_STATIC_PATTERN_ID,
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     EFFECTS_FUNCTION_WLED_SPOTS_ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS   
     EFFECTS_FUNCTION_WLED_PERCENT_ID,
     // One colour changes
     EFFECTS_FUNCTION_WLED_RANDOM_COLOR_ID,
@@ -170,10 +169,10 @@
     EFFECTS_FUNCTION_WLED_COLOR_WIPE_RANDOM_ID,
     EFFECTS_FUNCTION_WLED_COLOR_SWEEP_ID,
     EFFECTS_FUNCTION_WLED_COLOR_SWEEP_RANDOM_ID,
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     EFFECTS_FUNCTION_WLED_TRICOLOR_WIPE_ID,
     EFFECTS_FUNCTION_WLED_ANDROID_ID,
     EFFECTS_FUNCTION_WLED_RUNNING_RED_BLUE_ID,
+    #ifdef ENABLE_EXTRA_WLED_EFFECTS
     EFFECTS_FUNCTION_WLED_RUNNING_COLOR_ID,
     EFFECTS_FUNCTION_WLED_RUNNING_RANDOM_ID,
     EFFECTS_FUNCTION_WLED_GRADIENT_ID,
@@ -285,7 +284,8 @@
     EFFECTS_FUNCTION_WLED_SINELON_RAINBOW_ID,
     EFFECTS_FUNCTION_WLED_DRIP_ID,     
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
-    EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect   
+    EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect     
+    #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     /**
      * Development effects
@@ -516,10 +516,8 @@
     /**
      * Palette developing
      * */
-    #ifdef ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
     // Step 1 of palette merging: Making it so any palette can span the entire segment, static, no effect.
     EFFECTS_FUNCTION_STATIC_PALETTE_SPANNING_SEGMENT_ID,
-    #endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
     /**
      * Designing and quick test of animations before creating its own animaiton profile
      * */
@@ -1177,6 +1175,7 @@
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
 
   
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   // Static
   void SubTask_Segment_Flasher_Animate_Function__Static();
   void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
@@ -1192,12 +1191,12 @@
   void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random();
   void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep();
   void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
-  #ifdef ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Flasher_Animate_Function__TriColour();
   void SubTask_Segment_Flasher_Animate_Function__Android();
   void SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw);
   void SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2);
   void SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue();
+  #ifdef ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Flasher_Animate_Function__Running_Colour();
   void SubTask_Segment_Flasher_Animate_Function__Running_Random();
   void SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading);
@@ -1335,6 +1334,7 @@
   uint16_t triwave16(uint16_t in);
   uint16_t mode_palette();
 
+  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
   // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM

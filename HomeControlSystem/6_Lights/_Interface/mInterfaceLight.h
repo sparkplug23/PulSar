@@ -249,6 +249,8 @@ enum RGB_VIEW_SHOW_TYPE_IDS{
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+// #define mPaletteI (pCONT_iLight->mpalette)
+// class mPalette;
 
 class mInterfaceLight :
   public mTaskerInterface
@@ -269,6 +271,8 @@ class mInterfaceLight :
       return sizeof(mInterfaceLight);
     };
     #endif
+
+    // mPalette* mpalette = nullptr;//new mPalette();
 
     /**
      * Module settings other tasks/module may need

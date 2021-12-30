@@ -40,6 +40,9 @@ extern const TProgmemRGBPalette16 RainbowStripeColors_p FL_PROGMEM;
 /// lighting at a club or party, where it'll be shining on people.
 extern const TProgmemRGBPalette16 PartyColors_p FL_PROGMEM;
 
+
+extern const TProgmemRGBPalette16 Test_p FL_PROGMEM;
+
 /// Approximate "black body radiation" palette, akin to
 /// the FastLED 'HeatColor' function.
 /// Recommend that you use values 0-240 rather than

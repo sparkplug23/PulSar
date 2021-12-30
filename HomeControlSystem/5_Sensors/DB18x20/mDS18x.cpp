@@ -186,8 +186,8 @@ void mDS18X::Pre_Init(){
 
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
 
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "pCONT_pins->GetPin(GPIO_DSB_1OF2_ID) 1 Valid %d"),
-    pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
+    // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "pCONT_pins->GetPin(GPIO_DSB_1OF2_ID) 1 Valid %d"),
+    // pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
     // sensor_group[sensor_group_count].pin);
     
     //sensor_group[0].onewire = new OneWire(15); 
@@ -199,10 +199,10 @@ void mDS18X::Pre_Init(){
      
     sensor_group[sensor_group_count].dallas->begin();
 
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
+    // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas->begin();
 
-AddLog(LOG_LEVEL_INFO, PSTR("GPIO_DSB_1OF2_ID\t\t\tcount=%d"), sensor_group[sensor_group_count].dallas->getDeviceCount());
+// AddLog(LOG_LEVEL_INFO, PSTR("GPIO_DSB_1OF2_ID\t\t\tcount=%d"), sensor_group[sensor_group_count].dallas->getDeviceCount());
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
     #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT
@@ -221,26 +221,26 @@ AddLog(LOG_LEVEL_INFO, PSTR("GPIO_DSB_1OF2_ID\t\t\tcount=%d"), sensor_group[sens
 
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
 
-  // if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
-  //   sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
-  //   sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
-  //   sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
-  //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
-  //   sensor_group[sensor_group_count].dallas->begin();
-  //   // Get sensors connected to this pin
-  //   sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
-  //   #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT
-  //   sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT;
-  //   #endif
-  //   //increment that we have another sensor group added IF we have sensors attached
-  //   if(sensor_group[sensor_group_count].sensor_count){
-  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
-  //     settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
-  //     sensor_group_count++;
-  //   }else{
-  //     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
-  //   }
-  // }
+  if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
+    sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
+    sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
+    sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
+    sensor_group[sensor_group_count].dallas->begin();
+    // Get sensors connected to this pin
+    sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
+    #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT
+    sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT;
+    #endif
+    //increment that we have another sensor group added IF we have sensors attached
+    if(sensor_group[sensor_group_count].sensor_count){
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
+      settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
+      sensor_group_count++;
+    }else{
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
+    }
+  }
 
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
   if(settings.nSensorsFound){

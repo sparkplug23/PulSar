@@ -49,11 +49,11 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
 
 
 
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID, 0);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_02_ID, 1);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_03_ID, 2);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_04_ID, 3);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_05_ID, 4);
+  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID, 0);
+  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID, 1);
+  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID, 2);
+  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID, 3);
+  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID, 4);
 
   CommandSet_ActiveSolidPalette_Hue_360(123, 0);
   CommandSet_ActiveSolidPalette_Hue_360(120, 1);
@@ -145,46 +145,49 @@ void mAnimatorLight::SubTask_Segments_Animation()
    * 
    * Test1: Apply slow glow on segment 0-50%, apply random solid to 50-100%
    * */
+  #ifdef ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+  return;
+  #endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
   
     /**
      * Subtask to handle by each segment ie "flasher" function for each segment
      * */
     for(
-      segment_iters.index = 0; 
-      segment_iters.index<MAX_NUM_SEGMENTS; 
-      segment_iters.index++
+      segment_active_index = 0; 
+      segment_active_index<MAX_NUM_SEGMENTS; 
+      segment_active_index++
     ){
       // if(mTime::TimeReached(&tSaved_Test_Segment_Animation, 2000))
       // {
         
-      if(_segments[segment_iters.index].isActive())
+      if(_segments[segment_active_index].isActive())
       {
 
 
-        if((mTime::TimeReached(&_segments[segment_iters.index].tSaved_AnimateRunTime, _segments[segment_iters.index].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
+        if((mTime::TimeReached(&_segments[segment_active_index].tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
         {
 
           if(_segments[0].flags.fForceUpdate){ _segments[0].flags.fForceUpdate=false;
-            _segments[segment_iters.index].tSaved_AnimateRunTime = millis();
+            _segments[segment_active_index].tSaved_AnimateRunTime = millis();
           }
           
-        _virtualSegmentLength = _segments[segment_iters.index].virtualLength();
+        _virtualSegmentLength = _segments[segment_active_index].virtualLength();
           
         #ifdef ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
         /**
          * If effect is from WLED, then Generate new colours
          **/
         if(
-          (_segments[segment_iters.index].effect_id >= EFFECTS_FUNCTION_WLED_STATIC_ID) &&
-          (_segments[segment_iters.index].effect_id <= EFFECTS_FUNCTION_WLED_LENGTH_ID)
+          (_segments[segment_active_index].effect_id >= EFFECTS_FUNCTION_WLED_STATIC_ID) &&
+          (_segments[segment_active_index].effect_id <= EFFECTS_FUNCTION_WLED_LENGTH_ID)
         ){          
-          handle_palette();
+          mPaletteI->UpdatePalette_FastLED_TargetPalette();
         }
         #endif // ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
         
 
 
-        switch(_segments[segment_iters.index].effect_id){
+        switch(_segments[segment_active_index].effect_id){
           default:
           case EFFECTS_FUNCTION_SOLID_COLOUR_ID:
             SubTask_Segment_Animate_Function__Solid_Static_Single_Colour();
@@ -220,9 +223,11 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_TRI_STATIC_PATTERN_ID:
             SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern();
           break;
+          #ifdef ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION_WLED_SPOTS_ID:
             SubTask_Segment_Flasher_Animate_Function__Spots();
           break;
+          #endif // ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION_WLED_PERCENT_ID:
             SubTask_Segment_Flasher_Animate_Function__Percent();
           break;
@@ -247,6 +252,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_COLOR_SWEEP_RANDOM_ID:
             SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
           break;
+          #ifdef ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION_WLED_TRICOLOR_WIPE_ID:
             SubTask_Segment_Flasher_Animate_Function__TriColour();
           break;
@@ -385,6 +391,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_FADE_SPOTS_ID:
             SubTask_Segment_Flasher_Animate_Function__Fade_Spots();
           break;
+          #endif // ENABLE_EXTRA_WLED_EFFECTS
           /**
            * Fireworks
            **/
@@ -403,6 +410,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           /**
            * Sparkle/Twinkle
            **/
+          #ifdef ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION_WLED_SOLID_GLITTER_ID:
             SubTask_Segment_Flasher_Animate_Function__Solid_Glitter();
           break;
@@ -454,6 +462,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION_WLED_TRAFFIC_LIGHT_ID:
             SubTask_Segment_Flasher_Animate_Function__Traffic_Light();
           break;
+          #endif // ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID:
             SubTask_Segment_Flasher_Animate_Function__Candle_Single();
           break;     
@@ -648,7 +657,12 @@ void mAnimatorLight::SubTask_Segments_Animation()
           // case EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID:
           //   SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
           // break;
-          #endif // ENABLE_DEVFEATURE_RGB_CLOCK          
+          #endif // ENABLE_DEVFEATURE_RGB_CLOCK     
+          #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2    
+          case EFFECTS_FUNCTION_STATIC_PALETTE_SPANNING_SEGMENT_ID:
+            SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
+          break; 
+          #endif // ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
           case EFFECTS_FUNCTION_TESTER_ID:
             SubTask_Flasher_Animate_Function_Tester();
           break; 
@@ -658,21 +672,21 @@ void mAnimatorLight::SubTask_Segments_Animation()
          * If effect is from WLED, then disable animator and write output
          **/
         if(
-          (_segments[segment_iters.index].effect_id >= EFFECTS_FUNCTION_WLED_STATIC_ID) &&
-          (_segments[segment_iters.index].effect_id <= EFFECTS_FUNCTION_WLED_LENGTH_ID)
+          (_segments[segment_active_index].effect_id >= EFFECTS_FUNCTION_WLED_STATIC_ID) &&
+          (_segments[segment_active_index].effect_id <= EFFECTS_FUNCTION_WLED_LENGTH_ID)
         ){          
-          _segment_runtimes[segment_iters.index].animation_has_anim_callback = false; // When no animation callback is needed
+          _segment_runtimes[segment_active_index].animation_has_anim_callback = false; // When no animation callback is needed
           StripUpdate();
         }
 
         // Configure animator to show output
-        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_iters.index);       
+        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_active_index);       
 
-        _segment_runtimes[segment_iters.index].call++; // Used as progress counter for animations eg rainbow across all hues
+        _segment_runtimes[segment_active_index].call++; // Used as progress counter for animations eg rainbow across all hues
                  
       }//end if update reached
 
-    } //  if(_segments[segment_iters.index].isActive())
+    } //  if(_segments[segment_active_index].isActive())
 
    _segments[0].flags.animator_first_run = false;
 
@@ -682,6 +696,32 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
 
 } // SubTask_Effects_PhaseOut
+
+
+
+
+RgbcctColor mAnimatorLight::GetSegmentColour(uint8_t colour_index, uint8_t segment_index)
+{
+
+AddLog(LOG_LEVEL_TEST, PSTR("segment_index=%d"),segment_index);
+
+  RgbcctColor colour = RgbcctColor(0);
+
+  uint8_t white = (uint8_t)(_segments[segment_index].colors[colour_index] >> 24);
+  uint8_t red   = (uint8_t)(_segments[segment_index].colors[colour_index] >> 16);
+  uint8_t green = (uint8_t)(_segments[segment_index].colors[colour_index] >> 8);
+  uint8_t blue  = (uint8_t)(_segments[segment_index].colors[colour_index] >> 0);
+
+  colour = RgbcctColor(red, green, blue, white);
+
+  colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
+
+  return colour;
+
+}
+
+
+
 
 uint8_t mAnimatorLight::GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type)
 {
@@ -1065,18 +1105,18 @@ void mAnimatorLight::EveryLoop(){
     /**
      * Each ACTIVE segment will have its own animator to run
      * */
-    for (segment_iters.index =0;segment_iters.index<MAX_NUM_SEGMENTS;segment_iters.index++)
+    for (segment_active_index =0;segment_active_index<MAX_NUM_SEGMENTS;segment_active_index++)
     {
 
-      if(_segments[segment_iters.index].isActive())
+      if(_segments[segment_active_index].isActive())
       {
 
-        if (_segment_runtimes[segment_iters.index].animator->IsAnimating())
+        if (_segment_runtimes[segment_active_index].animator->IsAnimating())
         {
           // for now, a global segment_index needs set before each animation update
 
           // DEBUG_LINE_HERE;
-          _segment_runtimes[segment_iters.index].animator->UpdateAnimations(segment_iters.index);
+          _segment_runtimes[segment_active_index].animator->UpdateAnimations(segment_active_index);
           // DEBUG_LINE_HERE;
           flag_animations_needing_updated++; // channels needing updated
 
@@ -1208,13 +1248,13 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
 {
 
   for(int pixel_index=0;
-          pixel_index<_segments[segment_iters.index].length();
+          pixel_index<_segments[segment_active_index].length();
           pixel_index++
   ){
-    SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_iters.index].data, 
-                                _segment_runtimes[segment_iters.index]._dataLen,
+    SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_active_index].data, 
+                                _segment_runtimes[segment_active_index]._dataLen,
                                 pixel_index, 
-                                _segments[segment_iters.index].colour_type, 
+                                _segments[segment_active_index].colour_type, 
                                 RgbcctColor(GetPixelColor(pixel_index))
                               );
   }
@@ -1298,7 +1338,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),mPaletteI->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
   // AddLog(LOG_LEVEL_DEBUG_MORE
 
-  uint8_t segment_index = segment_iters.index;
+  uint8_t segment_index = segment_active_index;
   
 //tmp force
   // _segments[segment_index].transition.order_id = TRANSITION_ORDER_INORDER_ID;
@@ -1314,9 +1354,9 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
     // case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
 
     default:
-    case MAPIDS_TYPE_RGBCOLOUR_NOINDEX_ID:
-    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX_ID:
-    case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX_ID: ///to be tested
+    case MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID:
+    case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID:
+    case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID: ///to be tested
     {
     //get colour above
 
@@ -1411,7 +1451,13 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
           desired_pixel=0;
           for (uint16_t pixel = start_pixel; pixel <= end_pixel; pixel++)
           {
-            RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+
+            
+  #ifdef ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+   RgbcctColor colour = mPaletteI->GetColourFromPalette_Joint(_segments[segment_active_index].palette.id,desired_pixel,&pixel_position);
+  #else
+ RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+  #endif // ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
             
             #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
             AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
@@ -1433,10 +1479,10 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
 
 
     }break;
-    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_ID:
-    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_ID:
-    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL_ID:
-    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL_ID:{
+    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX__ID:
+    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX__ID:
+    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID:
+    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL__ID:{
 
       // Get active pixels in map
       uint16_t active_pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //width 2
@@ -1498,9 +1544,9 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
       // return;
     }
     break;
-    case MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT_ID:
-    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID:
-    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID:{
+    case MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID:
+    case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID:
+    case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID:{
 
       //#ifdef ENABLE_LOG_LEVEL_DEBUG
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID"));
@@ -1540,21 +1586,21 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
         //  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "e%d,%d %d %d"),HueF2N(end_colour.H),SatF2N(end_colour.S),BrtF2N(end_colour.B),end_pixel_position);
         // #endif
 
-        uint16_t start_pixel = _segments[segment_iters.index].pixel_range.start;
-        uint16_t stop_pixel = _segments[segment_iters.index].pixel_range.stop;
+        uint16_t start_pixel = _segments[segment_active_index].pixel_range.start;
+        uint16_t stop_pixel = _segments[segment_active_index].pixel_range.stop;
 
-        switch(mPaletteI->palettelist.ptr->flags.fIndexs_Type){
-          case INDEX_TYPE_DIRECT: break; //remains the same
-          case INDEX_TYPE_SCALED_255: 
+        // switch(mPaletteI->palettelist.ptr->flags.fIndexs_Type){
+        //   case INDEX_TYPE_DIRECT: break; //remains the same
+        //   case INDEX_TYPE_SCALED_255: 
             start_pixel_position = map(start_pixel_position,0,255,start_pixel,stop_pixel);
             end_pixel_position   = map(end_pixel_position,0,255,start_pixel,stop_pixel);
-            // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "255 %d %d"),start_pixel_position,end_pixel_position);
-          break;
-          case INDEX_TYPE_SCALED_100: 
-            start_pixel_position = map(start_pixel_position,0,100,start_pixel,stop_pixel);
-            end_pixel_position   = map(end_pixel_position,0,100,start_pixel,stop_pixel);          
-          break;
-        }
+        //     // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "255 %d %d"),start_pixel_position,end_pixel_position);
+        //   break;
+        //   case INDEX_TYPE_SCALED_100: 
+        //     start_pixel_position = map(start_pixel_position,0,100,start_pixel,stop_pixel);
+        //     end_pixel_position   = map(end_pixel_position,0,100,start_pixel,stop_pixel);          
+        //   break;
+        // }
 
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
@@ -1721,135 +1767,166 @@ uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level)
 
 
 
+// #ifndef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
 
+// /*
+//  * FastLED palette modes helper function. Limitation: Due to memory reasons, multiple active segments with FastLED will disable the Palette transitions
 
-/*
- * FastLED palette modes helper function. Limitation: Due to memory reasons, multiple active segments with FastLED will disable the Palette transitions
- */
-void mAnimatorLight::handle_palette(void)
-{
+//  Really this is the same as my "Setpalette" as it simply changes the pointer to the new palette
+//  */
+// void mAnimatorLight::UpdatePalette_FastLED_TargetPalette(void)
+// {
 
-  bool singleSegmentMode = (segment_iters.index == segment_iters.index_palette_last);
-  segment_iters.index_palette_last = segment_iters.index;
+//   bool singleSegmentMode = (segment_active_index == segment_iters.index_palette_last);
+//   segment_iters.index_palette_last = segment_active_index;
 
-  byte paletteIndex = _segments[segment_iters.index].palette.id;
-  if (paletteIndex == 0) //default palette. Differs depending on effect
-  {
-    switch (_segments[segment_iters.index].mode_id)
-    {
-      case EFFECTS_FUNCTION_WLED_COLORWAVES_ID : paletteIndex = 26; break; //landscape 33
-      case EFFECTS_FUNCTION_WLED_GLITTER_ID    : paletteIndex = 11; break; //rainbow colors
-      case EFFECTS_FUNCTION_WLED_SUNRISE_ID    : paletteIndex = 35; break; //heat palette
-      case EFFECTS_FUNCTION_WLED_FLOW_ID       : paletteIndex =  6; break; //party
-      #ifdef ENABLE_EXTRA_WLED_EFFECTS
-      case FX_MODE_FIRE_2012  : paletteIndex = 35; break; //heat palette
-      case EFFECTS_FUNCTION_WLED_FILLNOISE8_ID : paletteIndex =  9; break; //ocean colors
-      case EFFECTS_FUNCTION_WLED_NOISE16_1_ID  : paletteIndex = 20; break; //Drywet
-      case EFFECTS_FUNCTION_WLED_NOISE16_2_ID  : paletteIndex = 43; break; //Blue cyan yellow
-      case EFFECTS_FUNCTION_WLED_NOISE16_3_ID  : paletteIndex = 35; break; //heat palette
-      case EFFECTS_FUNCTION_WLED_NOISE16_4_ID  : paletteIndex = 26; break; //landscape 33
-      #endif // ENABLE_EXTRA_WLED_EFFECTS
-    }
-  }
-  if (_segments[segment_iters.index].mode_id >= EFFECTS_FUNCTION_WLED_METEOR_ID && paletteIndex == 0) paletteIndex = 4;
-   
-  // paletteIndex = 43;
-  //Serial.printf("_segments[_segment_index].palette %d %d\n\r",_segments[_segment_index].palette, paletteIndex);
-
-  switch (paletteIndex)
-  {
-    case 0: //default palette. Exceptions for specific effects above
-      targetPalette = PartyColors_p; 
-      
-  //Serial.printf( "targetPalette = PartyColors_p \n\r");
-      
-      break;
-    case 1:
-    {//periodically replace palette with a random one. Doesn't work with multiple FastLED segments
-      if (!singleSegmentMode)
-      {
-        targetPalette = PartyColors_p; break; //fallback
-      }
-      if (millis() - _lastPaletteChange > 1000 + ((uint32_t)(255-_segments[segment_iters.index].intensity()))*100)
-      {
-        targetPalette = CRGBPalette16(
-                        CHSV(random8(), 255, random8(128, 255)),
-                        CHSV(random8(), 255, random8(128, 255)),
-                        CHSV(random8(), 192, random8(128, 255)),
-                        CHSV(random8(), 255, random8(128, 255)));
-        _lastPaletteChange = millis();
-      }
-      break;
-    }
-    case 2: {//primary color only
-      CRGB prim = col_to_crgb(SEGCOLOR(0));
-      targetPalette = CRGBPalette16(prim); break;}
-    case 3: {//primary + secondary
-    
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("case 3: {//primary + secondary paletteIndex=%d"),paletteIndex);
-      CRGB prim = col_to_crgb(SEGCOLOR(0));
-      CRGB sec  = col_to_crgb(SEGCOLOR(1));
-      targetPalette = CRGBPalette16(prim,prim,sec,sec); break;}
-    case 4: {//primary + secondary + tertiary
-      CRGB prim = col_to_crgb(SEGCOLOR(0));
-      CRGB sec  = col_to_crgb(SEGCOLOR(1));
-      CRGB ter  = col_to_crgb(SEGCOLOR(2));
-      targetPalette = CRGBPalette16(ter,sec,prim); break;}
-    case 5: {//primary + secondary (+tert if not off), more distinct
-      CRGB prim = col_to_crgb(SEGCOLOR(0));
-      CRGB sec  = col_to_crgb(SEGCOLOR(1));
-      if (SEGCOLOR(2)) {
-        CRGB ter = col_to_crgb(SEGCOLOR(2));
-        targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
-      } else {
-        targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
-      }
-      break;}
-    case 6: //Party colors
-      targetPalette = PartyColors_p; break;
-    case 7: //Cloud colors
-      targetPalette = CloudColors_p; break;
-    case 8: //Lava colors
-      targetPalette = LavaColors_p; break;
-    case 9: //Ocean colors
-      targetPalette = OceanColors_p; break;
-    case 10: //Forest colors
-      targetPalette = ForestColors_p; break;
-    case 11: //Rainbow colors
-      targetPalette = RainbowColors_p; break;
-    case 12: //Rainbow stripe colors
-      targetPalette = RainbowStripeColors_p; break;
-    default: //progmem palettes
-      #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-      load_gradient_palette(paletteIndex -13);
-      #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
-      break;
-  }
+//   byte paletteIndex = _segments[segment_active_index].palette.id;
   
-  if (singleSegmentMode && paletteFade) //only blend if just one segment uses FastLED mode
-  {
-    nblendPaletteTowardPalette(currentPalette, targetPalette, 48);
-  } else
-  {
-    currentPalette = targetPalette;
-  }
+//   AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
 
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("handle_palette paletteIndex=%d"),paletteIndex);
+//   /**
+//    * @brief If effect should use its default, then this will internally fix to the desired type based on effect (I likely want to phase this out or move elsewhere)
+//    */
+//   if (paletteIndex == mPalette::PALETTELIST__DEFAULT__ID) //default palette. Differs depending on effect
+//   {
+//     switch (_segments[segment_active_index].mode_id)
+//     {
+//       case EFFECTS_FUNCTION_WLED_COLORWAVES_ID : paletteIndex = mPalette::PALETTELIST_STATIC_WLED_GRADIENT__BEACH__ID; break; //landscape 33
+//       case EFFECTS_FUNCTION_WLED_GLITTER_ID    : paletteIndex = mPalette::PALETTELIST_STATIC_WLED_GRADIENT__RAINBOW_SHERBET__ID; break; //rainbow colors
+//       case EFFECTS_FUNCTION_WLED_SUNRISE_ID    : paletteIndex = mPalette::PALETTELIST_STATIC_FASTLED_HEAT_COLOUR_ID; break; //heat palette
+//       case EFFECTS_FUNCTION_WLED_FLOW_ID       : paletteIndex = mPalette::PALETTELIST_STATIC_FASTLED_PARTY_COLOUR_ID; break; //party
+//       #ifdef ENABLE_EXTRA_WLED_EFFECTS
+//       case FX_MODE_FIRE_2012  : paletteIndex = 35; break; //heat palette
+//       case EFFECTS_FUNCTION_WLED_FILLNOISE8_ID : paletteIndex =  9; break; //ocean colors
+//       case EFFECTS_FUNCTION_WLED_NOISE16_1_ID  : paletteIndex = 20; break; //Drywet
+//       case EFFECTS_FUNCTION_WLED_NOISE16_2_ID  : paletteIndex = 43; break; //Blue cyan yellow
+//       case EFFECTS_FUNCTION_WLED_NOISE16_3_ID  : paletteIndex = 35; break; //heat palette
+//       case EFFECTS_FUNCTION_WLED_NOISE16_4_ID  : paletteIndex = 26; break; //landscape 33
+//       #endif // ENABLE_EXTRA_WLED_EFFECTS
+//     }
+//   }
+//   if (_segments[segment_active_index].mode_id >= EFFECTS_FUNCTION_WLED_METEOR_ID && paletteIndex == mPalette::PALETTELIST__DEFAULT__ID) paletteIndex = mPalette::PALETTELIST_STATIC_FASTLED_FOREST_COLOUR_ID;
+   
+//   // paletteIndex = 43;
+//   //Serial.printf("_segments[_segment_index].palette %d %d\n\r",_segments[_segment_index].palette, paletteIndex);
 
-}
+//   switch (paletteIndex)
+//   {
+//     /**
+//      * @brief WLED palettes
+//      * 
+//      */
+//     default:
+//     case mPalette::PALETTELIST_STATIC_FASTLED_PARTY_COLOUR_ID: //Party colors
+//       targetPalette = PartyColors_p; 
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_CLOUD_COLOURS_ID: //Cloud colors
+//       targetPalette = CloudColors_p; 
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_LAVA_COLOURS_ID: //Lava colors
+//       targetPalette = LavaColors_p; 
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_OCEAN_COLOUR_ID: //Ocean colors
+//       targetPalette = OceanColors_p; 
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_FOREST_COLOUR_ID: //Forest colors
+//       targetPalette = ForestColors_p; 
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_RAINBOW_COLOUR_ID: //Rainbow colors
+//       targetPalette = RainbowColors_p; 
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_RAINBOW_STRIBE_COLOUR_ID: //Rainbow stripe colors
+//       targetPalette = RainbowStripeColors_p;
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED_RANDOMISE_COLOURS_ID:
+//     {// periodically replace palette with a random one. Doesn't work with multiple FastLED segments
+//       if (!singleSegmentMode)
+//       {
+//         targetPalette = PartyColors_p; break; //fallback
+//       }
+//       if (millis() - _lastPaletteChange > 1000 + ((uint32_t)(255-_segments[segment_active_index].intensity()))*100)
+//       {
+//         targetPalette = CRGBPalette16(
+//                         CHSV(random8(), 255, random8(128, 255)),
+//                         CHSV(random8(), 255, random8(128, 255)),
+//                         CHSV(random8(), 192, random8(128, 255)),
+//                         CHSV(random8(), 255, random8(128, 255)));
+//         _lastPaletteChange = millis();
+//       }
+//       break;
+//     }
+//     case mPalette::PALETTELIST_STATIC_FASTLED__BASIC_COLOURS_PRIMARY__ID: 
+//     { //primary color only
+//       CRGB prim = col_to_crgb(SEGCOLOR(0)); //is this stable to do? maybe since its not a pointer but instead an instance of a class
+//       targetPalette = CRGBPalette16(prim); 
+//     }
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED__BASIC_COLOURS_PRIMARY_SECONDARY__ID:
+//     { //primary + secondary
+//       CRGB prim = col_to_crgb(SEGCOLOR(0));
+//       CRGB sec  = col_to_crgb(SEGCOLOR(1));
+//       targetPalette = CRGBPalette16(prim,prim,sec,sec); 
+//     }
+//     break;
+//     case mPalette::PALETTELIST_STATIC_FASTLED__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID:
+//     { //primary + secondary + tertiary
+//       CRGB prim = col_to_crgb(SEGCOLOR(0));
+//       CRGB sec  = col_to_crgb(SEGCOLOR(1));
+//       CRGB ter  = col_to_crgb(SEGCOLOR(2));
+//       targetPalette = CRGBPalette16(ter,sec,prim); 
+//     }
+//     break;    
+//     case  mPalette::PALETTELIST_STATIC_FASTLED__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID:
+//     { //primary + secondary (+tert if not off), more distinct
+//       CRGB prim = col_to_crgb(SEGCOLOR(0));
+//       CRGB sec  = col_to_crgb(SEGCOLOR(1));
+//       if (SEGCOLOR(2)) {
+//         CRGB ter = col_to_crgb(SEGCOLOR(2));
+//         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
+//       } else {
+//         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
+//       }
+//     }
+//     break;
+//   }//end fo switch
+
+//   /**
+//    * @brief Fastled palettes
+//    * 
+//    */
+//   if(IsWithinRange(paletteIndex, mPalette::PALETTELIST_STATIC_WLED_GRADIENT__SUNSET__ID,mPalette::PALETTELIST_STATIC_WLED_GRADIENT__ATLANTICA__ID))
+//   {
+//     uint16_t gradient_id = paletteIndex - mPalette::PALETTELIST_STATIC_WLED_GRADIENT__SUNSET__ID;
+//     // AddLog(LOG_LEVEL_TEST, PSTR("gradient_id=%d"),gradient_id);
+//     #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+//     load_gradient_palette(gradient_id);
+//     #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+//   }
+  
+//   if (singleSegmentMode && paletteFade) // Only blend if just one segment uses FastLED mode
+//   {
+//     nblendPaletteTowardPalette(currentPalette, targetPalette, 48);
+//   } else
+//   {
+//     currentPalette = targetPalette;
+//   }
+
+//   // AddLog(LOG_LEVEL_DEBUG, PSTR("UpdatePalette_FastLED_TargetPalette paletteIndex=%d"),paletteIndex);
+
+// }
 
 
-#ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-void mAnimatorLight::load_gradient_palette(uint8_t index)
-{
-  byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
-  byte tcp[72]; //support gradient palettes with up to 18 entries
-  memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
-  targetPalette.loadDynamicGradientPalette(tcp);
-}
-#endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+// void mAnimatorLight::load_gradient_palette(uint8_t index)
+// {
+//   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
+//   byte tcp[72]; //support gradient palettes with up to 18 entries
+//   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
+//   targetPalette.loadDynamicGradientPalette(tcp);
+// }
+// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
-
+// #endif // ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
 
 
 
@@ -1891,14 +1968,14 @@ uint16_t mAnimatorLight::triwave16(uint16_t in)
 
 uint16_t mAnimatorLight::mode_palette()
 {
-  uint8_t segment_index  = segment_iters.index;
+  uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_index].length();
   uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
   uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
 
   uint16_t counter = 0;
-  if (_segments[segment_iters.index].speed() != 0) 
+  if (_segments[segment_active_index].speed() != 0) 
   {
     counter = (millis() * ((_segments[segment_index].speed() >> 3) +1)) & 0xFFFF;
     counter = counter >> 8;
@@ -1952,6 +2029,9 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
   // if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_1D_01_ID; }
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID; }
+
+
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SHIMMERING_PALETTE_NAME_CTR)){ return EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID; }
   
   // if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
   // if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
@@ -1982,6 +2062,7 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     // case EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR);  break;
   
   
+    case EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SHIMMERING_PALETTE_NAME_CTR);  break;
 
     case EFFECTS_FUNCTION_TESTER_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_TESTER_NAME_CTR);  break;
 

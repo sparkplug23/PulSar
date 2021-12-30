@@ -30,11 +30,11 @@ void mInterfaceLight::Settings_Default(){
 
   // }else{
     
-  //   #ifdef DEFAULT_LIGHTING_ANIMATION_MODE_ID
-  //     animation.mode_id = DEFAULT_LIGHTING_ANIMATION_MODE_ID<ANIMATION_MODE_LENGTH_ID?
-  //                           DEFAULT_LIGHTING_ANIMATION_MODE_ID:ANIMATION_MODE_EFFECTS_ID;
+  //   #ifdef DEFAULT_LIGHTING_ANIMATION_MODE__ID
+  //     animation.mode_id = DEFAULT_LIGHTING_ANIMATION_MODE__ID<ANIMATION_MODE_LENGTH__ID?
+  //                           DEFAULT_LIGHTING_ANIMATION_MODE__ID:ANIMATION_MODE_EFFECTS__ID;
   //   #else
-  //     animation.mode_id = ANIMATION_MODE_EFFECTS_ID;
+  //     animation.mode_id = ANIMATION_MODE_EFFECTS__ID;
   //   #endif
 
   // }
@@ -195,15 +195,15 @@ void mInterfaceLight::Init(void) //LightInit(void)
   
   char buffer[30];
   // Default user names for palette
-  for (int ii=mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID);ii++){ 
+  for (int ii=mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID);ii++){ 
     sprintf(buffer, "User Test %02d", ii);
     DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
-  for (int ii=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID);ii++){ 
+  for (int ii=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID);ii++){ 
     sprintf(buffer, "Solid Rgbcct %02d", ii);
     DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
-  for (int ii=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID);ii++){ 
+  for (int ii=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID);ii++){ 
     sprintf(buffer, "Encoded %02d", ii);
     DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
   }
@@ -230,7 +230,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   /***
 //    * Configure RgbcctController Instance
 //    * */
-//   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+//   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 //       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
@@ -437,20 +437,22 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_POINTER_INIT:
 
+      // mpalette = new mPalette();
+
       mPaletteI->init_PresetColourPalettes();
       
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 //       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
-//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
-//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
 // #else
 
 //       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
-//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID;
+//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
-//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID);
+//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
 //   DEBUG_LINE_HERE;
 
 
@@ -512,6 +514,85 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
 
       //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
+
+#ifdef ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+      uint8_t pbri = 255;
+
+uint8_t paletteIndex = 0; 
+CRGB colour;
+//  = ColorFromPalette( Test_p, paletteIndex, pbri, NOBLEND);
+// AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+
+
+uint8_t index = 15;
+
+paletteIndex = ((255/16)*index)-1; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+
+paletteIndex = 225; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 226; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 227; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+
+
+paletteIndex = 239;//(((255/16)*index)-1)+15; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+
+
+paletteIndex = 250; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 251; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 252; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 253; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 254; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+paletteIndex = 255; 
+colour = ColorFromPalette( Test_p, paletteIndex, pbri, LINEARBLEND);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g,colour.b);
+
+
+ mPaletteI->currentPalette = Test_p;
+ pCONT_lAni->_virtualSegmentLength = 50;
+ pCONT_lAni->paletteBlend = 3;
+ uint16_t j = 0;
+  for(uint16_t i = 0; i < 50; i++) {
+    
+    j = i;//map(i,0,50,0,255);
+    pCONT_lAni->SetPixelColor(j, pCONT_lAni->color_from_palette(i, true, false, 10));
+    // pCONT_lAni->SetPixelColor(i, mPaletteI->color_from_palette_internal(i, true, true, 10));
+  }
+    // pCONT_lAni->SetPixelColor(0, RgbColor(255,0,0));
+  pCONT_lAni->_segment_runtimes[0].animation_has_anim_callback = false; // When no animation callback is needed
+  pCONT_lAni->StripUpdate();
+
+#endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+    #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
+uint16_t paletteIndex= mPalette::PALETTELIST_STATIC_CHRISTMAS_01__ID;
+RgbcctColor colour = mPaletteI->GetColourFromPalette_Gradient(paletteIndex, 0);
+AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G,colour.B);
+    #endif // ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
+
+
+// RgbcctColor mPalette::GetColourFromPalette_Gradient(uint16_t palette_id, uint16_t pixel_num, int16_t *pixel_position, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri, TBlendType blendType, uint16_t palette_spread_length__virtualSegmentLength)
+// {
+
 
 
 // Serial.println("palette_rgbcct_users_colour_map");
@@ -662,11 +743,11 @@ void mInterfaceLight::EveryLoop(){
     // switch(pCONT_lAni->_segments[0].mode_id)    
     //   {
     //   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    //   case ANIMATION_MODE_EFFECTS_ID:
+    //   case ANIMATION_MODE_EFFECTS__ID:
     //     pCONT_lAni->SubTask_Effects_PhaseOut();
     //   break;
     //   #endif
-    //   case ANIMATION_MODE_NONE_ID: default: break; // resting position
+    //   case ANIMATION_MODE_NONE__ID: default: break; // resting position
     // }
   
   }
@@ -682,7 +763,7 @@ void mInterfaceLight::EveryLoop(){
        * WLED Original: Based on WLED direct port (to be phased into segments)
        * */
       #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-      case ANIMATION_MODE_WLED_ID:
+      case ANIMATION_MODE_WLED__ID:
         pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
       break;
       #endif
@@ -698,7 +779,7 @@ void mInterfaceLight::EveryLoop(){
        * Notifications: Single pixel basic animations (pulse, flash, on/off)
        * */
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-      case ANIMATION_MODE_NOTIFICATIONS_ID:
+      case ANIMATION_MODE_NOTIFICATIONS__ID:
         pCONT_lAni->SubTask_Notifications();
       break;
       #endif
@@ -706,7 +787,7 @@ void mInterfaceLight::EveryLoop(){
        * Ambilight: Light strips for behind monitors, either static, sunelevation animations, getting TCP/HTTP/Serial data for the pixels from a computer (Eg wallpapers with putty or movies)
        * */
       #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
-      case ANIMATION_MODE_AMBILIGHT_ID:
+      case ANIMATION_MODE_AMBILIGHT__ID:
         pCONT_lAni->SubTask_Ambilight_Main();
       break;
       #endif
@@ -715,7 +796,7 @@ void mInterfaceLight::EveryLoop(){
        * */
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
       case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS_ID"));
+        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS__ID"));
         pCONT_lAni-> SubTask_Manual_SetPixel();
         // light_power_state = true;
       break;
@@ -741,7 +822,7 @@ void mInterfaceLight::EverySecond_AutoOff(){
 
   //AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
   if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
-    // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF_ID;
+    // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "animation.auto_off_settings.time_decounter_secs==1 and disable"));
     #endif       
@@ -1209,7 +1290,7 @@ void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
 
 // #ifdef ESP8266
 //     if (
-//       // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
+//       // (MODULE_PHILIPS__ID == pCONT_set->my_module_type) || 
 //       (pCONT_set->Settings.flag4.pwm_ct_mode)) {   // channel 1 is the color tone, mapped to cold channel (0..255)
 //       // Xiaomi Philips bulbs follow a different scheme:
 //       cur_col_10[cw1] = getCT10bits();
@@ -1256,7 +1337,7 @@ bool mInterfaceLight::isChannelGammaCorrected(uint32_t channel) {
   if (channel >= subtype) { return false; }     // Out of range
 #ifdef ESP8266
 //   if (
-//     // (MODULE_PHILIPS_ID == pCONT_set->my_module_type) || 
+//     // (MODULE_PHILIPS__ID == pCONT_set->my_module_type) || 
 //   (pCONT_set->Settings.flag4.pwm_ct_mode)) {
 //     if ((LST_COLDWARM == subtype) && (1 == channel)) { return false; }   // PMW reserved for CT
 //     if ((LST_RGBCW == subtype) && (4 == channel)) { return false; }   // PMW reserved for CT

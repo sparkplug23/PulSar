@@ -113,12 +113,17 @@
     #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
     // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
     #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+    // #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+    // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+    // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+    // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
     /**
      * @brief Debug flags, used mostly be me
      * 
      */  
     #define ENABLE_FREERAM_APPENDING_SERIAL
     #define DEBUG_WLED_EFFECT_FUNCTIONS
+    // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
   #endif 
   #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
     #define USE_BUILD_TYPE_LIGHTING
@@ -182,9 +187,9 @@
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
     "\"ColourPalette\":\"Christmas 06\"," 
     "\"WLED\":{"
-      "\"Colour0\":[255,0,0,0]" // R,G,B,W in 255 range
-      "\"Colour1\":[0,255,0,0]" // R,G,B,W in 255 range
-      "\"Colour2\":[0,0,255,0]" // R,G,B,W in 255 range
+      "\"Colour0\":[255,255,0,0]" // R,G,B,W in 255 range
+      "\"Colour1\":[0,255,255,0]" // R,G,B,W in 255 range
+      "\"Colour2\":[255,0,255,0]" // R,G,B,W in 255 range
     "},"
     "\"Effects\":{"
       "\"Function\":1"
@@ -193,7 +198,7 @@
       "\"TimeMs\":3000,"
       "\"RateMs\":10000"
     "},"    
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRGB\":0"
   "}";
   #endif
 
@@ -564,6 +569,46 @@
     },
     "BrightnessRGB": 100
   }
+}
+{
+  "PixelRange": [
+    0,
+    1300
+  ],
+  "Effects": {
+    "Function":21,
+    "Speed": 10,
+    "Intensity": 255
+  },
+  "ColourPalette": 95,
+  "WLED": {
+    "Colour0": [
+      255,
+      0,
+      0,
+      0
+    ],
+    "Colour1": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "Colour2": [
+      0,0,
+      255,
+      0
+    ]
+  },
+  "Hue": 10,
+  "Sat": 100,
+  "ColourOrder": "grbwc",
+  "Transition": {
+    "TimeMs": 0,
+    "RateMs": 23
+  },
+  "BrightnessRGB": 0,
+  "BrightnessCCT": 100
 }
 
 */

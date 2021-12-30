@@ -264,6 +264,16 @@ struct RgbcctColor
         return c_out;
     }
 
+    static RgbcctColor GetRgbcctFromU32Colour(uint32_t c)
+    {
+        
+        uint8_t white = (uint8_t)(c >> 24);
+        uint8_t red   = (uint8_t)(c >> 16);
+        uint8_t green = (uint8_t)(c >> 8);
+        uint8_t blue  = (uint8_t)(c);
+        return RgbcctColor(red,green,blue,white);
+    }
+
     // Unions allow overlapping of parameters, size of parameters below is only 5 bytes, but can be accessed by multiple ways
     union {
 		struct {

@@ -140,6 +140,15 @@ extern const TProgmemRGBPalette16 PartyColors_p FL_PROGMEM =
     0x8F0071, 0x5F00A1, 0x2F00D0, 0x0007F9
 };
 
+extern const TProgmemRGBPalette16 Test_p FL_PROGMEM =
+{
+    0xFF0000, 0x00FF00, 0x0000FF, 0xFF00FF,
+    0x300000, 0x003000, 0x000030, 0x300030,
+    0xAA0000, 0x00AA00, 0x0000AA, 0xAA00AA,
+    0x010000, 0x000100, 0x000001, 0xFFFFFF
+};
+
+
 /// Approximate "black body radiation" palette, akin to
 /// the FastLED 'HeatColor' function.
 /// Recommend that you use values 0-240 rather than

@@ -61,6 +61,7 @@
 // #define DEVICE_RGBBEDROOM_H801_2
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
+// #define DEVICE_HVAC_KITCHEN
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -2220,47 +2221,26 @@
   #define DEVICENAME_CTR          "hvac_kitchen"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Kitchen"
 
-  //#define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
-   
-  // #define ENABLE_BUG_TRACING
-  //#define ENABLE_MQTT_DEBUG_MESSAGES
-
-  //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
-  // #define ENABLE_HVAC_DEBUG_TIMES
-  // #define DISABLE_WEBSERVER
-  
-  // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  // #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
-
   #define HEATING_DEVICE_MAX 1
 
-
-  #define USE_MODULE_CONTROLLER_HVAC
-  
   #define USE_MODULE_SENSORS_INTERFACE  
-  // #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_DS18X
-  // #define USE_MODULE_SENSORS_REMOTE_DEVICE
-
-  // #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
-  // #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+  #define USE_MODULE_SENSORS_SWITCHES
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  
+  #define USE_MODULE_CONTROLLER_HVAC
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{" 
-      #if defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_SENSORS_BME)
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      #endif
+    "\"" D_JSON_GPIOC "\":{"   
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"D2\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      #endif 
       "\"D6\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -2319,6 +2299,40 @@
           "\"" "HVAC_Type" "\":[" "\"Heating\",\"Cooling\"" "]"
         "}"
       "]"
+    "}"
+  "}";
+
+  
+  //#define USE_RULES_TEMPLATE // Rules, like the other templates, will be feed into the same command structure, so can actually be combined with `FUNCTION_TEMPLATE`
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":0"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":1}}\""
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
+      "}"
     "}"
   "}";
   

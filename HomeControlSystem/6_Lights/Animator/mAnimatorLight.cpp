@@ -1599,7 +1599,7 @@ return 0;
   
   JsonBuilderI->Start();  
     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
-    JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH_ID);
+    JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
     JBI->Add("ColourPaletteID", pCONT_lAni->_segments[0].palette.id );
     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( _segments[0].palette.id, buffer, sizeof(buffer)));
     // JsonBuilderI->Array_Start("rgb");

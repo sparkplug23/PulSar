@@ -1401,11 +1401,11 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 
   char buffer[50];
 
-  _segments[segment_index].palette.id = value < mPalette::PALETTELIST_STATIC_LENGTH_ID ? value : 0;
+  _segments[segment_index].palette.id = value < mPalette::PALETTELIST_TOTAL_LENGTH ? value : 0;
 
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
-  if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID)
-  &&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH_ID))
+  if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)
+  &&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID))
   {
     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
   }
@@ -1609,7 +1609,7 @@ uint8_t mAnimatorLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number,
 void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index)
 {
 
-  uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID;  
+  uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;  
   
   // mPaletteI->active_scene_palette_id = palette_id; // not used?
 
