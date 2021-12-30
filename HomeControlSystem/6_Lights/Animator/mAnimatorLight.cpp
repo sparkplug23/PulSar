@@ -22,9 +22,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       break;
     case FUNC_INIT:
       Init();
-      #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-      Init_WLED();
-      #endif
       break;
   }
   
@@ -73,11 +70,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
     }break;
     case FUNC_LOOP: 
-      #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-       SubTask_WLED_Animation_PhaseOut();
-      #else
-        EveryLoop();
-      #endif
+      EveryLoop();
     break;    
     /************
      * COMMANDS SECTION * 
@@ -192,10 +185,10 @@ void mAnimatorLight::Init(void){
   _segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
   _segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
     
-  #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-    flashersettings.brightness_max = 255;
-    flashersettings.brightness_min = 0;
-  #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+  //   flashersettings.brightness_max = 255;
+  //   flashersettings.brightness_min = 0;
+  // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
   // #ifdef ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET // move to proper command options
   //   // pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = true; // FIX
@@ -934,22 +927,22 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   if(_segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice)
   {
 
-    #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-    uint8_t temp_max_brightness = flashersettings.brightness_max;
-    #else
+    // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+    // uint8_t temp_max_brightness = flashersettings.brightness_max;
+    // #else
     uint8_t temp_max_brightness = 255;
-    #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+    // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
     if(_segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB)
     {
       temp_max_brightness = pCONT_iLight->getBriRGB_Global();
     }
-    #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-    new_brightness_255 = random(flashersettings.brightness_min, temp_max_brightness);
-    #else
+    // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+    // new_brightness_255 = random(flashersettings.brightness_min, temp_max_brightness);
+    // #else
     new_brightness_255 = random(0, temp_max_brightness);
 
-    #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
+    // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   }
   // Default: apply global brightness
   else{
@@ -1548,7 +1541,10 @@ return 0;
     JBI->Level_Start(D_JSON_TRANSITION);
     //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
     //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
-      JBI->Add(D_JSON_TIME_MS, _segments[0].transition.time_ms);
+    
+#ifndef USE_DEVFEATURE_METHOD_WLED_BUILD
+      JBI->Add(D_JSON_TIME_MS, _segments[0].transition.time_ms);   
+#endif //  USE_DEVFEATURE_METHOD_WLED_BUILD
     //   transitionobj[D_JSON_TIME_MS] = ;
     //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
     //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;

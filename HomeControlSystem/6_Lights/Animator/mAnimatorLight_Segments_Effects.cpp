@@ -24,7 +24,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
   switch(pCONT_set->Settings.light_settings.type)
   {
     default:
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGB_ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGB_ID; break;
+    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; break;
     // case LST_RGBW: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
     // case LST_RGBCCT: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
   }
@@ -36,7 +36,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
     AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
-    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
 
   // Brightness is generated internally, and rgbcct solid palettes are output values
@@ -92,11 +92,11 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
     AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
-    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
   
   // this should probably force order as random, then introduce static "inorder" option
-  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER_INORDER_ID;  
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__INORDER__ID;  
   // So colour region does not need to change each loop to prevent colour crushing
   _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
   
@@ -136,11 +136,11 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
     AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
-    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
   
   // this should probably force order as random, then introduce static "inorder" option
-  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER_RANDOM_ID;  
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
   // So colour region does not need to change each loop to prevent colour crushing
   _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
   
@@ -372,7 +372,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
         if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
         {
           AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
-          _segments[segment_active_index].mode_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID; // Default
+          _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
         }
 
 

@@ -25,6 +25,7 @@ Change option to make all palettes gradient mode or node, or how to use it
  */
 
 
+
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
@@ -33,6 +34,10 @@ Change option to make all palettes gradient mode or node, or how to use it
 #include "2_CoreSystem/Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"
 
+#ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+#define FASTLED_INTERNAL // suppress pragma warning messages
+#include "6_Lights/FastLED_Modified/FastLED.h"
+#endif // USE_DEVFEATURE_METHOD_WLED_BUILD
 #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/FastLED_Modified/FastLED.h"

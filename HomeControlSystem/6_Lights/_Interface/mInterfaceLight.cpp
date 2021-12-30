@@ -177,7 +177,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   device = pCONT_set->devices_present;
   
   //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
-  subtype = RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGBCCT;
+  subtype = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID;
   
   pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
 
@@ -759,14 +759,6 @@ void mInterfaceLight::EveryLoop(){
     
     switch(pCONT_lAni->_segments[0].mode_id)    
     {
-      /**
-       * WLED Original: Based on WLED direct port (to be phased into segments)
-       * */
-      #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-      case ANIMATION_MODE_WLED__ID:
-        pCONT_lAni->SubTask_WLED_Animation_PhaseOut();
-      break;
-      #endif
       /**
        * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
        * */

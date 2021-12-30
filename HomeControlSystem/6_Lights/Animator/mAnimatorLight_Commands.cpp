@@ -1489,9 +1489,9 @@ const char* mAnimatorLight::GetTransitionOrderName(char* buffer, uint8_t buflen,
 const char* mAnimatorLight::GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen)
 {
   switch(id){  default:    
-    case TRANSITION_ORDER_NONE_ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
-    case TRANSITION_ORDER_RANDOM_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
-    case TRANSITION_ORDER_INORDER_ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
+    case TRANSITION_ORDER__NONE__ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
+    case TRANSITION_ORDER__RANDOM__ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
+    case TRANSITION_ORDER__INORDER__ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
     // case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
     // case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
     // case TRANSITION_ORDER_FIXED_ID:      memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
@@ -1502,9 +1502,9 @@ int8_t mAnimatorLight::GetTransitionOrderIDbyName(const char* c)
 {
   if(c=='\0'){ return -1; }
   if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){
-    return TRANSITION_ORDER_RANDOM_ID;
+    return TRANSITION_ORDER__RANDOM__ID;
   }else if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){
-    return TRANSITION_ORDER_INORDER_ID;
+    return TRANSITION_ORDER__INORDER__ID;
   }
 
   // if(strstr(c,D_TRANSITION_ORDER_RANDOM_NAME_CTR)){ return TRANSITION_ORDER_RANDOM_ID; }

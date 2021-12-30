@@ -100,7 +100,7 @@
   /**
    * Minor Code version 96 onwards requires names, as reshuffle is happening. Any old device will not respond to the correct command via number until remap is performed
    * */
-  enum EFFECTS_FUNCTION_IDS
+  enum EFFECTS_FUNCTION__IDS
   {
     /**
      * Default
@@ -109,15 +109,15 @@
      * 
      * no transition pair, draw directly (or maybe optional flag to use dynamic transition if memory allows, otherwise conserve memory for other segments)
      * */
-    EFFECTS_FUNCTION_SOLID_COLOUR_ID,
+    EFFECTS_FUNCTION__SOLID_COLOUR__ID,
     /**
-     * Desc: Using EFFECTS_FUNCTION_SLOW_GLOW_ID, with pixel order set to "inorder"
+     * Desc: Using EFFECTS_FUNCTION__SLOW_GLOW__ID, with pixel order set to "inorder"
      *       Each sequential pixel will repeat the palette if type is list, if gradient, then palette is linear blended across output
      * Parameters: Palette, time to blend, rate of new colours, percentage of new colours changed
      * 
      * no transition pair, draw directly (or maybe optional flag to use dynamic transition if memory allows, otherwise conserve memory for other segments)
      * */
-    EFFECTS_FUNCTION_STATIC_PALETTE_ID,
+    EFFECTS_FUNCTION__STATIC_PALETTE__ID,
     /**
      * Desc: Random change of colours (pixel order is random)
      *       Pixel elements randomly select colour from palette, then slowly blend those pixels to the new colour
@@ -129,14 +129,14 @@
      * 
      * Note: allocate_buffer is used as transition data
      * */
-    EFFECTS_FUNCTION_SLOW_GLOW_ID,
+    EFFECTS_FUNCTION__SLOW_GLOW__ID,
     /**
      * Desc: pixels are rotated
      * Para: direction of motion, speed, instant or blend change
      * 
      * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
      * */
-    EFFECTS_FUNCTION_ROTATING_PALETTE_ID,
+    EFFECTS_FUNCTION__ROTATING_PALETTE__ID,
     /**
      * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
      *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
@@ -145,7 +145,7 @@
      * 
      * Note: allocate_buffer is used as transition data
      * */
-    EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID,
+    EFFECTS_FUNCTION__SEQUENTIAL_PALETTE__ID,
     
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -157,134 +157,134 @@
 
     #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     // Static
-    EFFECTS_FUNCTION_WLED_STATIC_ID,
-    EFFECTS_FUNCTION_WLED_STATIC_PATTERN_ID,
-    EFFECTS_FUNCTION_WLED_TRI_STATIC_PATTERN_ID,
-    EFFECTS_FUNCTION_WLED_SPOTS_ID,
-    EFFECTS_FUNCTION_WLED_PERCENT_ID,
+    EFFECTS_FUNCTION__WLED_STATIC__ID,
+    EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
+    EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,
+    EFFECTS_FUNCTION__WLED_SPOTS__ID,
+    EFFECTS_FUNCTION__WLED_PERCENT__ID,
     // One colour changes
-    EFFECTS_FUNCTION_WLED_RANDOM_COLOR_ID,
+    EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,
     // Wipe/Sweep/Runners     
-    EFFECTS_FUNCTION_WLED_COLOR_WIPE_ID,
-    EFFECTS_FUNCTION_WLED_COLOR_WIPE_RANDOM_ID,
-    EFFECTS_FUNCTION_WLED_COLOR_SWEEP_ID,
-    EFFECTS_FUNCTION_WLED_COLOR_SWEEP_RANDOM_ID,
-    EFFECTS_FUNCTION_WLED_TRICOLOR_WIPE_ID,
-    EFFECTS_FUNCTION_WLED_ANDROID_ID,
-    EFFECTS_FUNCTION_WLED_RUNNING_RED_BLUE_ID,
+    EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID,
+    EFFECTS_FUNCTION__WLED_ANDROID__ID,
+    EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID,
     #ifdef ENABLE_EXTRA_WLED_EFFECTS
-    EFFECTS_FUNCTION_WLED_RUNNING_COLOR_ID,
-    EFFECTS_FUNCTION_WLED_RUNNING_RANDOM_ID,
-    EFFECTS_FUNCTION_WLED_GRADIENT_ID,
-    EFFECTS_FUNCTION_WLED_LOADING_ID,
-    EFFECTS_FUNCTION_WLED_POLICE_ID,
-    EFFECTS_FUNCTION_WLED_POLICE_ALL_ID,
-    EFFECTS_FUNCTION_WLED_TWO_DOTS_ID,
-    EFFECTS_FUNCTION_WLED_TWO_AREAS_ID,
-    EFFECTS_FUNCTION_WLED_MULTI_COMET_ID,
-    EFFECTS_FUNCTION_WLED_OSCILLATE_ID,
-    EFFECTS_FUNCTION_WLED_BPM_ID,
-    EFFECTS_FUNCTION_WLED_JUGGLE_ID,
-    EFFECTS_FUNCTION_WLED_PALETTE_ID,
-    EFFECTS_FUNCTION_WLED_COLORWAVES_ID,
-    EFFECTS_FUNCTION_WLED_LAKE_ID,
-    EFFECTS_FUNCTION_WLED_GLITTER_ID, //outside tree
-    EFFECTS_FUNCTION_WLED_METEOR_ID,  //outside tree
-    EFFECTS_FUNCTION_WLED_METEOR_SMOOTH_ID,
-    EFFECTS_FUNCTION_WLED_PRIDE_2015_ID,
-    EFFECTS_FUNCTION_WLED_PACIFICA_ID, //outside tree
-    EFFECTS_FUNCTION_WLED_SUNRISE_ID, //outside tree
-    EFFECTS_FUNCTION_WLED_SINEWAVE_ID, //outside tree
-    EFFECTS_FUNCTION_WLED_FLOW_ID, //outside tree
-    EFFECTS_FUNCTION_WLED_RUNNING_LIGHTS_ID,
-    EFFECTS_FUNCTION_WLED_RAINBOW_CYCLE_ID,
-    EFFECTS_FUNCTION_WLED_MERRY_CHRISTMAS_ID,
-    EFFECTS_FUNCTION_WLED_HALLOWEEN_ID,
+    EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID,
+    EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_GRADIENT__ID,
+    EFFECTS_FUNCTION__WLED_LOADING__ID,
+    EFFECTS_FUNCTION__WLED_POLICE__ID,
+    EFFECTS_FUNCTION__WLED_POLICE_ALL__ID,
+    EFFECTS_FUNCTION__WLED_TWO_DOTS__ID,
+    EFFECTS_FUNCTION__WLED_TWO_AREAS__ID,
+    EFFECTS_FUNCTION__WLED_MULTI_COMET__ID,
+    EFFECTS_FUNCTION__WLED_OSCILLATE__ID,
+    EFFECTS_FUNCTION__WLED_BPM__ID,
+    EFFECTS_FUNCTION__WLED_JUGGLE__ID,
+    EFFECTS_FUNCTION__WLED_PALETTE__ID,
+    EFFECTS_FUNCTION__WLED_COLORWAVES__ID,
+    EFFECTS_FUNCTION__WLED_LAKE__ID,
+    EFFECTS_FUNCTION__WLED_GLITTER__ID, //outside tree
+    EFFECTS_FUNCTION__WLED_METEOR__ID,  //outside tree
+    EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID,
+    EFFECTS_FUNCTION__WLED_PRIDE_2015__ID,
+    EFFECTS_FUNCTION__WLED_PACIFICA__ID, //outside tree
+    EFFECTS_FUNCTION__WLED_SUNRISE__ID, //outside tree
+    EFFECTS_FUNCTION__WLED_SINEWAVE__ID, //outside tree
+    EFFECTS_FUNCTION__WLED_FLOW__ID, //outside tree
+    EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID,
+    EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID,
+    EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID,
+    EFFECTS_FUNCTION__WLED_HALLOWEEN__ID,
     // Chase
-    EFFECTS_FUNCTION_WLED_CHASE_COLOR_ID,
-    EFFECTS_FUNCTION_WLED_CHASE_RANDOM_ID,
-    EFFECTS_FUNCTION_WLED_CHASE_RAINBOW_ID, 
-    EFFECTS_FUNCTION_WLED_CHASE_FLASH_ID,
-    EFFECTS_FUNCTION_WLED_CHASE_FLASH_RANDOM_ID, 
-    EFFECTS_FUNCTION_WLED_CHASE_RAINBOW_WHITE_ID,
-    EFFECTS_FUNCTION_WLED_CHASE_THEATER_ID,
-    EFFECTS_FUNCTION_WLED_CHASE_THEATER_RAINBOW_ID,
-    EFFECTS_FUNCTION_WLED_CHASE_TRICOLOR_ID,
-    EFFECTS_FUNCTION_WLED_CIRCUS_COMBUSTUS_ID,
+    EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID,
+    EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID, 
+    EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID,
+    EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID, 
+    EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID,
+    EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID,
+    EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID,
+    EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID,
+    EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID,
     // Breathe/Fade/Pulse
-    EFFECTS_FUNCTION_WLED_BREATH_ID,
-    EFFECTS_FUNCTION_WLED_FADE_ID,
-    EFFECTS_FUNCTION_WLED_FADE_TRICOLOR_ID,
-    EFFECTS_FUNCTION_WLED_FADE_SPOTS_ID,
+    EFFECTS_FUNCTION__WLED_BREATH__ID,
+    EFFECTS_FUNCTION__WLED_FADE__ID,
+    EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,
+    EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID,
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
     // Fireworks
-    EFFECTS_FUNCTION_WLED_FIREWORKS_ID,
-    EFFECTS_FUNCTION_WLED_FIREWORKS_EXPLODING_ID,
-    EFFECTS_FUNCTION_WLED_FIREWORKS_STARBURST_ID,
-    EFFECTS_FUNCTION_WLED_RAIN_ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
+    EFFECTS_FUNCTION__WLED_RAIN__ID,
     #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Sparkle/Twinkle
-    EFFECTS_FUNCTION_WLED_SOLID_GLITTER_ID,
-    EFFECTS_FUNCTION_WLED_POPCORN_ID,
-    EFFECTS_FUNCTION_WLED_PLASMA_ID,
-    EFFECTS_FUNCTION_WLED_SPARKLE_ID,
-    EFFECTS_FUNCTION_WLED_FLASH_SPARKLE_ID,
-    EFFECTS_FUNCTION_WLED_HYPER_SPARKLE_ID,
-    EFFECTS_FUNCTION_WLED_TWINKLE_ID,
-    EFFECTS_FUNCTION_WLED_COLORTWINKLE_ID,
-    EFFECTS_FUNCTION_WLED_TWINKLEFOX_ID,
-    EFFECTS_FUNCTION_WLED_TWINKLECAT_ID,
-    EFFECTS_FUNCTION_WLED_TWINKLEUP_ID,
-    EFFECTS_FUNCTION_WLED_DYNAMIC_ID,
-    EFFECTS_FUNCTION_WLED_SAW_ID,
-    EFFECTS_FUNCTION_WLED_DISSOLVE_ID,
-    EFFECTS_FUNCTION_WLED_DISSOLVE_RANDOM_ID,
-    EFFECTS_FUNCTION_WLED_COLORFUL_ID,
-    EFFECTS_FUNCTION_WLED_TRAFFIC_LIGHT_ID,
+    EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID,
+    EFFECTS_FUNCTION__WLED_POPCORN__ID,
+    EFFECTS_FUNCTION__WLED_PLASMA__ID,
+    EFFECTS_FUNCTION__WLED_SPARKLE__ID,
+    EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID,
+    EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID,
+    EFFECTS_FUNCTION__WLED_TWINKLE__ID,
+    EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID,
+    EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID,
+    EFFECTS_FUNCTION__WLED_TWINKLECAT__ID,
+    EFFECTS_FUNCTION__WLED_TWINKLEUP__ID,
+    EFFECTS_FUNCTION__WLED_DYNAMIC__ID,
+    EFFECTS_FUNCTION__WLED_SAW__ID,
+    EFFECTS_FUNCTION__WLED_DISSOLVE__ID,
+    EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_COLORFUL__ID,
+    EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
-    EFFECTS_FUNCTION_WLED_CANDLE_SINGLE_ID,
-    EFFECTS_FUNCTION_WLED_CANDLE_MULTI_ID,
-    EFFECTS_FUNCTION_WLED_FIRE_FLICKER_ID,
-    EFFECTS_FUNCTION_WLED_SHIMMERING_PALETTE_ID,
+    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
+    EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
+    EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID,
+    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
     
     #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Blink/Strobe
-    EFFECTS_FUNCTION_WLED_BLINK_ID,
-    EFFECTS_FUNCTION_WLED_BLINK_RAINBOW_ID,
-    EFFECTS_FUNCTION_WLED_STROBE_ID,
-    EFFECTS_FUNCTION_WLED_MULTI_STROBE_ID,
-    EFFECTS_FUNCTION_WLED_STROBE_RAINBOW_ID, 
-    EFFECTS_FUNCTION_WLED_RAINBOW_ID,
-    EFFECTS_FUNCTION_WLED_LIGHTNING_ID,     
-    EFFECTS_FUNCTION_WLED_FIRE_2012_ID,
-    EFFECTS_FUNCTION_WLED_RAILWAY_ID,
-    EFFECTS_FUNCTION_WLED_HEARTBEAT_ID, 
+    EFFECTS_FUNCTION__WLED_BLINK__ID,
+    EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,
+    EFFECTS_FUNCTION__WLED_STROBE__ID,
+    EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID,
+    EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID, 
+    EFFECTS_FUNCTION__WLED_RAINBOW__ID,
+    EFFECTS_FUNCTION__WLED_LIGHTNING__ID,     
+    EFFECTS_FUNCTION__WLED_FIRE_2012__ID,
+    EFFECTS_FUNCTION__WLED_RAILWAY__ID,
+    EFFECTS_FUNCTION__WLED_HEARTBEAT__ID, 
     // Noise
-    EFFECTS_FUNCTION_WLED_FILLNOISE8_ID,
-    EFFECTS_FUNCTION_WLED_NOISE16_1_ID,
-    EFFECTS_FUNCTION_WLED_NOISE16_2_ID,
-    EFFECTS_FUNCTION_WLED_NOISE16_3_ID,
-    EFFECTS_FUNCTION_WLED_NOISE16_4_ID,
-    EFFECTS_FUNCTION_WLED_NOISEPAL_ID,
-    EFFECTS_FUNCTION_WLED_PHASEDNOISE_ID,
-    EFFECTS_FUNCTION_WLED_PHASED_ID,
+    EFFECTS_FUNCTION__WLED_FILLNOISE8__ID,
+    EFFECTS_FUNCTION__WLED_NOISE16_1__ID,
+    EFFECTS_FUNCTION__WLED_NOISE16_2__ID,
+    EFFECTS_FUNCTION__WLED_NOISE16_3__ID,
+    EFFECTS_FUNCTION__WLED_NOISE16_4__ID,
+    EFFECTS_FUNCTION__WLED_NOISEPAL__ID,
+    EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID,
+    EFFECTS_FUNCTION__WLED_PHASED__ID,
     // Scan
-    EFFECTS_FUNCTION_WLED_SCAN_ID,
-    EFFECTS_FUNCTION_WLED_DUAL_SCAN_ID,
-    EFFECTS_FUNCTION_WLED_LARSON_SCANNER_ID,
-    EFFECTS_FUNCTION_WLED_DUAL_LARSON_SCANNER_ID,
-    EFFECTS_FUNCTION_WLED_ICU_ID,
-    EFFECTS_FUNCTION_WLED_RIPPLE_ID,
-    EFFECTS_FUNCTION_WLED_RIPPLE_RAINBOW_ID,
-    EFFECTS_FUNCTION_WLED_COMET_ID,
-    EFFECTS_FUNCTION_WLED_CHUNCHUN_ID,
-    EFFECTS_FUNCTION_WLED_BOUNCINGBALLS_ID,
-    EFFECTS_FUNCTION_WLED_SINELON_ID,
-    EFFECTS_FUNCTION_WLED_SINELON_DUAL_ID,
-    EFFECTS_FUNCTION_WLED_SINELON_RAINBOW_ID,
-    EFFECTS_FUNCTION_WLED_DRIP_ID,     
+    EFFECTS_FUNCTION__WLED_SCAN__ID,
+    EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID,
+    EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID,
+    EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID,
+    EFFECTS_FUNCTION__WLED_ICU__ID,
+    EFFECTS_FUNCTION__WLED_RIPPLE__ID,
+    EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID,
+    EFFECTS_FUNCTION__WLED_COMET__ID,
+    EFFECTS_FUNCTION__WLED_CHUNCHUN__ID,
+    EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID,
+    EFFECTS_FUNCTION__WLED_SINELON__ID,
+    EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID,
+    EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID,
+    EFFECTS_FUNCTION__WLED_DRIP__ID,     
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
-    EFFECTS_FUNCTION_WLED_LENGTH_ID, // to show end of declared animation, this will have no actual effect     
+    EFFECTS_FUNCTION__WLED_LENGTH__ID, // to show end of declared animation, this will have no actual effect     
     #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     /**
@@ -303,9 +303,9 @@
     //  *         Intensity1: will dictate how many pixels are turned on
     //  *         Intensity2: may dictate the decay rate (ie much slower would leave pixels on for longer meaning more of the lights remain on) 
     //  * NotActive
-    //  * EFFECTS_FUNCTION_PULSE_RANDOM_ON_FADE_OFF_ID
+    //  * EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
     //  * */
-    // EFFECTS_FUNCTION_TWINKLE_RANDOM_BURSTS_ON_WITH_SLOW_FADE_OFF_ID,
+    // EFFECTS_FUNCTION__TWINKLE_RANDOM_BURSTS_ON_WITH_SLOW_FADE_OFF__ID,
     // /**
     //  * Palette is first drawn with certain lower brightness level, then
     //  * additional changes takes those colours and bumbs their brightness up to desired brightness
@@ -313,7 +313,7 @@
     //  * Check if their brightness is <upper, before asserting them brighter (or convert to hsbcolour, flick up brightness if needed then change back to rgb)
     //  * Goes from low to high then stops
     //  * */
-    // EFFECTS_FUNCTION_POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY,
+    // EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY,
     // /**
     //  * Desc: Twinkle
     //  *  Random pixels will turn off for random times (ie apply inorder palette always, then random turn colours to off and on(brightness) again)
@@ -328,12 +328,12 @@
     //  * 0/100% animaiton progress is low brightness, 50% flips to upper brightness
     //  * ie randomly change pixels between two brightness levels, with optional boundaries only or as range
     // */
-    // EFFECTS_FUNCTION_TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK,
+    // EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK,
 
     // /**
     //  *  Instead of just applying new colours, also randomise the brightness levels between range
     //  * */
-    // EFFECTS_FUNCTION_SLOW_GLOW_ON_BRIGHTNESS_ID,
+    // EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID,
 
     // /**
     //  * Desc: randomly slow glow with triangular brightness between colours
@@ -349,7 +349,7 @@
     //  * */
 
     // this will likely just use candle effect, maybe forced colour palette?/
-    //  EFFECTS_FUNCTION_FIREPLACE_1D_01_ID, // solid colours, 1 100%, moving from previous to next
+    //  EFFECTS_FUNCTION__FIREPLACE_1D_01__ID, // solid colours, 1 100%, moving from previous to next
 
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -361,12 +361,12 @@
 
 
 
-    // EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_ALL_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_SLOW_FADE_SATURATION_ALL_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_SLOW_FADE_BRIGHTNESS_RANDOM_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_SLOW_FADE_SATURATION_RANDOM_ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
-    // EFFECTS_FUNCTION_FLASH_TWINKLE_PALETTE_COLOUR_RANDOM_ID,   
+    // EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID, // change ALL, 0 - 100%
+    // EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID, // change ALL, 0 - 100%
+    // EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_RANDOM__ID, // change ALL, 0 - 100%
+    // EFFECTS_FUNCTION__SLOW_FADE_SATURATION_RANDOM__ID, // change ALL, 0 - 100%
+    // EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
+    // EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID,   
    
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -377,36 +377,36 @@
     ******************************************************************************************************************************************************************************/
 
     // //linear palette group colour, changing by triggered and over a period of time (eg an alarm -30 minutes)
-    // EFFECTS_FUNCTION_SUNPOSITIONS_SUNRISE_ALARM_01, //group01? bring all together, have settings to configure how the effect runs
+    // EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01, //group01? bring all together, have settings to configure how the effect runs
     // //linear palettes group colour, enabled by a time window, but sets linear gradient by sun azimuth
-    // EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_01, //this is elevation only
+    // EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_01, //this is elevation only
     // //enabled by a time window, GENERATE manually, brightness by sun elevaltion, sun position from left to right by azimuth
     // //far left = east from position, and far right = wast from position using sunset position
-    // EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01,
-    // EFFECTS_FUNCTION_SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_2D_01, // If matrix/grid is connected, enable drawing this
+    // EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_2D_01, // If matrix/grid is connected, enable drawing this
 
-    // EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01_ID,
-    // EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02_ID,
-    // EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03_ID, // Using stored rgbcct palette
-    // EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04_ID, // Using stored rgbcct palette
-    // EFFECTS_FUNCTION_SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05_ID, // CCT only, mapped directly, no palette
+    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID, // Using stored rgbcct palette
+    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID, // Using stored rgbcct palette
+    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID, // CCT only, mapped directly, no palette
     
     // /**
     //  * Eleveation controls that use rgbcct palette (that has elevation in its index byte) to display solid colour only
     //  * */
-    // EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID,
-    // EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID,
 
     // /**
     //  * Elevation controls the CCT channels only
     //  **/
-    // EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID,
 
 
     // // palette to step through, which gives single colour sun
-    // EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
     // //enabled CCT by azimuth 
-    // EFFECTS_FUNCTION_SUNPOSITIONS_STEP_RGBCCT_SUN_ELEVATION_01,
+    // EFFECTS_FUNCTION__SUNPOSITIONS_STEP_RGBCCT_SUN_ELEVATION_01,
 
     // /******************************************************************************************************************************************************************************
     // ******************************************************************************************************************************************************************************
@@ -416,9 +416,9 @@
     // ******************************************************************************************************************************************************************************
     // ******************************************************************************************************************************************************************************/
 
-    // EFFECTS_FUNCTION_LCD_CLOCK_BASIC_01_ID,
-    // EFFECTS_FUNCTION_LCD_CLOCK_BASIC_02_ID,
-    // EFFECTS_FUNCTION_LCD_DISPLAY_BASIC_01_ID, // show number commanded via mqtt
+    // EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
+    // EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID,
+    // EFFECTS_FUNCTION__LCD_DISPLAY_BASIC_01__ID, // show number commanded via mqtt
 
 
     // /******************************************************************************************************************************************************************************
@@ -433,20 +433,20 @@
 
 
     // // Apply sinewave to brightness, 25% increasing, 50% decreasing, 25% off
-    // EFFECTS_FUNCTION_PULSE_SINE_WAVE_BRIGHTNESS, //pul
+    // EFFECTS_FUNCTION__PULSE_SINE_WAVE_BRIGHTNESS, //pul
     // // The one when applybrightness was broke
     // // done by applying new cl/brightness to some, then each call reducing the colour crushing it
     // //do with percent to show on at one time
-    // EFFECTS_FUNCTION_PULSE_RANDOM_ON, 
-    // EFFECTS_FUNCTION_PULSE_RANDOM_ON_TWO_ID,    
-    // EFFECTS_FUNCTION_FLASH_TWINKLE_SEQUENTIAL_ID, // sequential flash of white on x leds 
-    // EFFECTS_FUNCTION_FADE_GRADIENT_ID, //single pixels: static, twinkle, pick from palette
+    // EFFECTS_FUNCTION__PULSE_RANDOM_ON, 
+    // EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID,    
+    // EFFECTS_FUNCTION__FLASH_TWINKLE_SEQUENTIAL__ID, // sequential flash of white on x leds 
+    // EFFECTS_FUNCTION__FADE_GRADIENT__ID, //single pixels: static, twinkle, pick from palette
     // //another flash to "off" or simple set flash colour to off??
-    // EFFECTS_FUNCTION_FLASH_GLIMMER_RANDOM_ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
+    // EFFECTS_FUNCTION__FLASH_GLIMMER_RANDOM__ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
     /**
      * Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
      * */
-    // EFFECTS_FUNCTION_SHOWING_MULTIPLES_OF_COLOURS_ID,
+    // EFFECTS_FUNCTION__SHOWING_MULTIPLES_OF_COLOURS__ID,
     /**
      * Sun positional effects
      */
@@ -465,7 +465,7 @@
       basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), BUT "off" section in between IS INSTEAD INVERTING WITH ON SECTION
       basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), but no off section, instead it blends evening between the two colours with varying blend weights (ie even blend, or only 10% of pixel length blend of each colour group)
 
-    EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
 
 
      * */
@@ -482,15 +482,15 @@
       7 - Twinkle / Flash
       8 - Steady on (already added)
      * */
-    // EFFECTS_FUNCTION_XMAS_IN_WAVES_ID
-    // EFFECTS_FUNCTION_XMAS_SEQUENTIAL_ID
-    // EFFECTS_FUNCTION_XMAS_SLO_GLO_ID
-    // EFFECTS_FUNCTION_XMAS_CHASING_AND_FLASHING_ID
-    // EFFECTS_FUNCTION_XMAS_SLOW_FADE_ID
-    // EFFECTS_FUNCTION_XMAS_TWINKLE_AND_FLASH_ID
-    // EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION_XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__XMAS_IN_WAVES_ID
+    // EFFECTS_FUNCTION__XMAS_SEQUENTIAL_ID
+    // EFFECTS_FUNCTION__XMAS_SLO_GLO_ID
+    // EFFECTS_FUNCTION__XMAS_CHASING_AND_FLASHING_ID
+    // EFFECTS_FUNCTION__XMAS_SLOW_FADE_ID
+    // EFFECTS_FUNCTION__XMAS_TWINKLE_AND_FLASH_ID
+    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
 
     /**
      * Development methods
@@ -498,7 +498,7 @@
 
     /**
      * Functional methods of sunrise
-     * EFFECTS_FUNCTION_SUNPOSITIONS_<SOLIDCOLOUR/2D_ARRAY>
+     * EFFECTS_FUNCTION__SUNPOSITIONS_<SOLIDCOLOUR/2D_ARRAY>
      * */
     //create a palette to leave on ALL the time, ie deep red at night instead of blue... testing for the clocks later I guess
 
@@ -517,20 +517,20 @@
      * Palette developing
      * */
     // Step 1 of palette merging: Making it so any palette can span the entire segment, static, no effect.
-    EFFECTS_FUNCTION_STATIC_PALETTE_SPANNING_SEGMENT_ID,
+    EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID,
     /**
      * Designing and quick test of animations before creating its own animaiton profile
      * */
-    EFFECTS_FUNCTION_TESTER_ID,
+    EFFECTS_FUNCTION__TESTER__ID,
     /**
      * @brief Testing can animation_colours be moved into the dynamic data array
      * 
      */
-    // EFFECTS_FUNCTION_STATIC_PALETTE_DYNAMIC_METHOD_ID,
-    // EFFECTS_FUNCTION_SLOW_GLOW_DYNAMIC_METHOD_ID,
+    // EFFECTS_FUNCTION__STATIC_PALETTE_DYNAMIC_METHOD__ID,
+    // EFFECTS_FUNCTION__SLOW_GLOW_DYNAMIC_METHOD__ID,
 
     // Length
-    EFFECTS_FUNCTION_LENGTH_ID
+    EFFECTS_FUNCTION__LENGTH__ID
   };         
 
 
@@ -543,11 +543,14 @@
    *    -- Repeated X times   * 
    * MAPPED -
   **************/ 
-
+/**
+ * This should be phased out as an option, instead be part of effects only
+ * perhaps moved into "getting palette colour" instead of how its displayed
+ * */
   enum PALETTE_PATTERN_IDS{ //TRANSITION_ORDER{
-    TRANSITION_ORDER_NONE_ID=0,
-    TRANSITION_ORDER_RANDOM_ID,
-    TRANSITION_ORDER_INORDER_ID,
+    TRANSITION_ORDER__NONE__ID=0,
+    TRANSITION_ORDER__RANDOM__ID,
+    TRANSITION_ORDER__INORDER__ID,
     // TRANSITION_ORDER_CENTRE_OUT_ID,
     // TRANSITION_ORDER_GRADIENT_ID,
     TRANSITION_ORDER_LENGTH_ID
@@ -600,7 +603,7 @@
   // Segments runtime??
   struct EFFECTSSETTINGS{
     // Flashing function
-    uint8_t function = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
+    uint8_t function = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     // Section of animation
     uint8_t region = 1;//EFFECTS_REGION_COLOUR_SELECT_ID;
     // flag needed to force completion between regions
@@ -825,12 +828,13 @@
       uint8_t spacing = 0;
       uint32_t tSaved_AnimateRunTime = millis();
 
-      uint8_t effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
+      uint8_t effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
 
       uint16_t pixels_to_update_this_cycle = 0;
 
       HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
-      RgbcctColor_Controller::LightSubType colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGB_ID; // default is RGB, this is used by animations to know what method to generate
+      RgbcctColor_Controller::LightSubType colour_type = 
+      RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
   
     //   uint8_t opacity = 255; //??
 
@@ -870,11 +874,11 @@
         /**
          * Pixel order (eg Random, InOrder)
          * */
-        uint8_t order_id = 0;
+        uint8_t order_id = 0; // Is this still needed? it probably just needs passing as a method for getting colours from palette
         /**
          * Change method (eg Blend, Instant)
          * */
-        uint8_t method_id = 2;
+        uint8_t method_id = 2;  // Is this still needed?
         /**
          * Pixels to change up to maximum of segment
          * */
@@ -1056,7 +1060,7 @@
         // transition.rate_ms = 100;
         // transition.time_ms = 80;
         // transition.order_id = TRANSITION_ORDER_INORDER_ID;
-        // effect_id = EFFECTS_FUNCTION_STATIC_PALETTE_ID;
+        // effect_id = EFFECTS_FUNCTION__STATIC_PALETTE_ID;
         // aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
 
         deallocateData();

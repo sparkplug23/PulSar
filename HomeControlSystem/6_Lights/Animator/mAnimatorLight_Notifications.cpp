@@ -2,6 +2,10 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+// Can this become its own segment??
+// The data regarding the pixel effect can be saved as a typedeffed struct, commands will have to know its started.
+
+
 #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
 
 void mAnimatorLight::init_Notifications(){

@@ -69,7 +69,7 @@ private:
   // Color or mono
   uint8_t  _color_mode = LIGHT_MODE_BOTH;
   // Using rgbcct partially, for RGB, RGBW, RGBWW, RGBCCT etc with the unused channel turned off
-  uint8_t  _subtype = LIGHT_TYPE_RGBCCT;
+  uint8_t  _subtype = LIGHT_TYPE__RGBCCT__ID;
   // are RGB and CT linked, i.e. if we set CT then RGB channels are off
   bool     _cct_rgb_linked = true;
   uint16_t _cct = CCT_MIN_DEFAULT;  // 153..500, default to 153 (cold white)
@@ -120,7 +120,7 @@ private:
     switch (_subtype) {
       default:
       // Turn all channels off
-      case LIGHT_TYPE_NONE_ID:
+      case LIGHT_TYPE__NONE__ID:
       Serial.println("Light type is not set, or known?");
         set_R(0);
         set_G(0);
@@ -129,24 +129,24 @@ private:
         set_WW(0);
         break;
       // Use RGB brightness for all channels
-      case LIGHT_TYPE_SINGLE_ID:
+      case LIGHT_TYPE__SINGLE__ID:
         set_R(briRGB);
         set_G(briRGB);
         set_B(briRGB);
         set_WC(briRGB);
         set_WW(briRGB);
         break;
-      case LIGHT_TYPE_COLDWARM_ID:
+      case LIGHT_TYPE__COLDWARM__ID:
         set_R(0);
         set_G(0);
         set_B(0);
         set_WC(colour_out.WC);
         set_WW(colour_out.WW);
         break;
-      case LIGHT_TYPE_RGBW_ID:
-      case LIGHT_TYPE_RGBCW_ID:
-      case LIGHT_TYPE_RGBCCT:
-        if (LIGHT_TYPE_RGBCW_ID == _subtype) {
+      case LIGHT_TYPE__RGBW__ID:
+      case LIGHT_TYPE__RGBCW__ID:
+      case LIGHT_TYPE__RGBCCT__ID:
+        if (LIGHT_TYPE__RGBCW__ID == _subtype) {
           set_WC(colour_out.WC);
           set_WW(colour_out.WW);
         } else {
@@ -154,7 +154,7 @@ private:
           set_WW(briCCT);
         }
         // continue
-      case LIGHT_TYPE_RGB_ID:
+      case LIGHT_TYPE__RGB__ID:
         set_R(colour_out.R);
         set_G(colour_out.G);
         set_B(colour_out.B);
@@ -184,16 +184,16 @@ public:
 
 
 enum LightSubType{ 
-  LIGHT_TYPE_NONE_ID=0, 
-  LIGHT_TYPE_SINGLE_ID, // likely never used for me, remove
-  LIGHT_TYPE_COLDWARM_ID,  //CCT Only
-  LIGHT_TYPE_RGB_ID,   
-  LIGHT_TYPE_RGBW_ID, 
-  LIGHT_TYPE_RGBCCT, // CW/WW 
+  LIGHT_TYPE__NONE__ID=0, 
+  LIGHT_TYPE__SINGLE__ID, // likely never used for me, remove
+  LIGHT_TYPE__COLDWARM__ID,  //CCT Only
+  LIGHT_TYPE__RGB__ID,   
+  LIGHT_TYPE__RGBW__ID, 
+  LIGHT_TYPE__RGBCCT__ID, // CW/WW 
   
   // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
-  LIGHT_TYPE_RGBWC_ID, 
-  LIGHT_TYPE_RGBCW_ID
+  LIGHT_TYPE__RGBWC__ID, 
+  LIGHT_TYPE__RGBCW__ID
 };
 
 enum LightColorModes {
@@ -362,18 +362,18 @@ enum LightColorModes {
     uint8_t maxbri = (_briRGB >= _briCCT) ? _briRGB : _briCCT;
 
     switch (_subtype) {
-      case LIGHT_TYPE_COLDWARM_ID:
+      case LIGHT_TYPE__COLDWARM__ID:
         _color_mode = LIGHT_MODE_CCT;
         break;
-      case LIGHT_TYPE_NONE_ID:
-      case LIGHT_TYPE_SINGLE_ID:
-      case LIGHT_TYPE_RGB_ID:
+      case LIGHT_TYPE__NONE__ID:
+      case LIGHT_TYPE__SINGLE__ID:
+      case LIGHT_TYPE__RGB__ID:
       default:
         _color_mode = LIGHT_MODE_RGB;
         break;
-      case LIGHT_TYPE_RGBW_ID:
-      case LIGHT_TYPE_RGBCW_ID:
-      case LIGHT_TYPE_RGBCCT:
+      case LIGHT_TYPE__RGBW__ID:
+      case LIGHT_TYPE__RGBCW__ID:
+      case LIGHT_TYPE__RGBCCT__ID:
         _color_mode = cm;
         break;
     }
@@ -622,7 +622,7 @@ enum LightColorModes {
       * ct = 500 = 2000K = Warm = CCWW = 00FF
       */
     // don't set CT if not supported
-    if ((LIGHT_TYPE_COLDWARM_ID != _subtype) && (LIGHT_TYPE_RGBW_ID > _subtype)) {
+    if ((LIGHT_TYPE__COLDWARM__ID != _subtype) && (LIGHT_TYPE__RGBW__ID > _subtype)) {
       return;
     }
     setCCT(new_cct);
@@ -656,7 +656,7 @@ enum LightColorModes {
 
   uint16_t getCTifEnabled(){
     // don't calculate CT for unsupported devices
-    if ((LIGHT_TYPE_COLDWARM_ID != _subtype) && (LIGHT_TYPE_RGBCW_ID != _subtype)) {
+    if ((LIGHT_TYPE__COLDWARM__ID != _subtype) && (LIGHT_TYPE__RGBCW__ID != _subtype)) {
       return 0;
     }
     return (getColorMode() & LIGHT_MODE_CCT) ? getCCT() : 0;
