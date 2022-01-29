@@ -101,6 +101,10 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVENT_MOTION_ENDED_ID:
       CommandEvent_Motion(0);
     break; 
+    #ifdef ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES    
+    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+      MQTT_Report_Event_Button();
+    #endif
     /************
      * RULES SECTION * 
     *******************/
@@ -381,6 +385,50 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
   return JsonBuilderI->End();
     
 }
+
+
+void mSensorsInterface::MQTT_Report_Event_Button()
+{
+
+    char event_ctr[20]; memset(event_ctr,0,sizeof(event_ctr));
+
+  JsonBuilderI->Start();
+  
+  // if(pCONT_rules->event_triggered.device_id == 0)
+  // {
+    sprintf(event_ctr,"%s-%d","Button",pCONT_rules->event_triggered.device_id);
+
+  // }
+
+
+
+    JsonBuilderI->Add("Event", event_ctr);
+
+    JsonBuilderI->Add("Device", pCONT_rules->event_triggered.device_id);
+    JsonBuilderI->Add("Function", "ButtonPress");
+
+    JsonBuilderI->Add("Task", "Button");
+    // JsonBuilderI->Add("Task", "Button");
+
+    JsonBuilderI->Add("State", "SHORT_PRESS");// : "LONG_PRESS");
+    
+    // JsonBuilderI->Add("value", (tSavedTimeSincePressOn<LONG_PRESS_DURATION) ? "SHORT_PRESS" : "LONG_PRESS");
+    JsonBuilderI->Add("Duration", 0);//tSavedTimeSincePressOn);
+  JsonBuilderI->End();
+
+
+
+  pCONT_mqtt->ppublish("status/sensors_interface/event",JsonBuilderI->GetBufferPtr(),false);
+
+
+  /**
+   * If event was serviced, then clear it
+   * */
+  pCONT_rules->Reset(&pCONT_rules->event_triggered);
+
+}
+
+
 
 
 

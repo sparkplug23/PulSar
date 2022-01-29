@@ -108,6 +108,12 @@ enum XsnsFunctions {
   // FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC,  //ie check for the topic (in the future use module name are set/<moduclename>)
   FUNC_JSON_COMMAND_CHECK_TOPIC_ID,
   FUNC_JSON_COMMAND_ID,  //ie check for the topic (in the future use module name are set/<moduclename>)
+  /**
+   * @brief This assumes JBI is configured, and assuming the buffer is valid, will continue to append information related to scanning of sensors.
+   * Example: DS18XX will scan both busses and search for addresses of connected devices. Note this also may require the init process (or force it) to run again (or preinit?) so anything that truly must happen once should be in its own section 
+   * 
+   */
+  FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID,
   // FUNC_JSON_COMMAND_START_PARSER_ID,
   // Wifi 
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,

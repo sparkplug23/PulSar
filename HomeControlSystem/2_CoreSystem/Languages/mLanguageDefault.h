@@ -839,8 +839,10 @@
 // #define D_TOPIC_RELAYS "/relays"
 // #define D_TOPIC_RADIATORFAN "/radiatorfan"
 // #define D_TOPIC_BLINDS "/blinds"
+
 #define D_TOPIC_COMMAND "set" //to be "command"
 #define D_TOPIC_STATUS "status" //to be "command"
+#define D_TOPIC_RESPONSE "response"
 
 
 /**
@@ -990,11 +992,11 @@
 #define D_GPIO_FUNCTION_GPS_SERIAL2_TX_CTR "GPS Serial2 TX"
 #define D_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR "GPS Serial2 RX"
 
-#define D_GPIO_FUNCTION_LED1_CTR           D_GPIO_FUNCTION_LED_CTR "1"
-#define D_GPIO_FUNCTION_LED2_CTR           D_GPIO_FUNCTION_LED_CTR "2"
-#define D_GPIO_FUNCTION_LED3_CTR           D_GPIO_FUNCTION_LED_CTR "3"
-#define D_GPIO_FUNCTION_LED4_CTR           D_GPIO_FUNCTION_LED_CTR "4"
-#define D_GPIO_FUNCTION_LED5_CTR           D_GPIO_FUNCTION_LED_CTR "5"
+#define D_GPIO_FUNCTION_LED1_CTR              D_GPIO_FUNCTION_LED_CTR "1"
+#define D_GPIO_FUNCTION_LED2_CTR              D_GPIO_FUNCTION_LED_CTR "2"
+#define D_GPIO_FUNCTION_LED3_CTR              D_GPIO_FUNCTION_LED_CTR "3"
+#define D_GPIO_FUNCTION_LED4_CTR              D_GPIO_FUNCTION_LED_CTR "4"
+#define D_GPIO_FUNCTION_LED5_CTR              D_GPIO_FUNCTION_LED_CTR "5"
 #define D_GPIO_FUNCTION_LED1_INV_CTR           D_GPIO_FUNCTION_LED_CTR "1" " Inv"
 #define D_GPIO_FUNCTION_LED2_INV_CTR           D_GPIO_FUNCTION_LED_CTR "2" " Inv"
 #define D_GPIO_FUNCTION_LED3_INV_CTR           D_GPIO_FUNCTION_LED_CTR "3" " Inv"

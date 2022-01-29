@@ -1,6 +1,14 @@
 
 #include "mNextionPanel.h"
 
+/**
+ * @brief 
+ * commands held in esp 
+ * 
+ * auto timeout for setting the display to sleep (off or else dimmer brightness level)
+ * 
+ */
+
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
 const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_CTR = D_MODULE_DISPLAYS_NEXTION_CTR;
@@ -132,8 +140,27 @@ void mNextionPanel::Pre_Init(void){
 }
 
 
+/**
+ * @brief 
+ * Create a init command for the nextion panels, that can be stored in progmem
+ * 
+ */
+
+
+
 void mNextionPanel::init()
 { 
+
+/**
+ * @brief 
+ * Create a init command for the nextion panels, that can be stored in progmem
+ * 
+ */
+  // char buffer_init[] = {
+  //   ""
+
+
+  // };
   
   // init variables
   memset(nextionSuffix,0xFF,sizeof(nextionSuffix));
@@ -174,11 +201,49 @@ void mNextionPanel::init()
 
   Command_SetPage(settings.page);
 
+  #ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+    Template_Load_Init_Display_Command();
+  #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+
 }
 
 
+#ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+void mNextionPanel::Template_Load_Init_Display_Command(){
+
+  #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  AddLog(LOG_LEVEL_DEBUG, PSTR("mInterfaceLight::Template_Load()"));
+  #endif
+
+  #ifdef USE_LIGHTING_TEMPLATE
+  // load from progmem into local
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Template_Load SettingsMerge\n\r\n\r\n\r\n\r"
+  //     //Test data
+  //     "%d:%d:%d:%d"
+  //   ),
+  //     //Testdata
+  //      pCONT_set->Settings.animation_settings.xmas_controller_params[0]
+  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[1]
+  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
+  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
+  // );
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
+  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  #endif // USE_LIGHTING_TEMPLATE
+
+}
 
 
+  #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
 
 
 void mNextionPanel::EveryLoop(){

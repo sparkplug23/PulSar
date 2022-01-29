@@ -141,7 +141,7 @@ bool mNextionPanel::nextionHandleInput()
 
   if (serial_available())
   {
-    //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION " if (Serial.available())"));
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION " if (Serial.available())"));
     lcdConnected = true;
     byte nextionCommandByte = serial_read();
 
@@ -172,7 +172,15 @@ bool mNextionPanel::nextionHandleInput()
     // }
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX " %s"),hmiDebug.c_str());
     hmiDebug = "";
+
+    
+DEBUG_LINE_HERE;
+Serial.println(hmiDebug);
+
   }
+
+
+
   return nextionCommandComplete;
 }
 

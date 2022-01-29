@@ -844,7 +844,7 @@
 
 
     #ifndef D_PALETTE_CHRISTMAS_06_NAME_CTR
-    #define D_PALETTE_CHRISTMAS_06_NAME_CTR                       "Christmas MultiColoured Warmer|Christmas 06"   
+    #define D_PALETTE_CHRISTMAS_06_NAME_CTR                       "Coloured MultiColoured Warmer|Christmas MultiColoured Warmer|Christmas 06"   
     #endif
     #define        D_PALETTE_CHRISTMAS_06_COLOUR_MAP__ID_ENCODING  MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_06_NAME_CTR)               D_PALETTE_CHRISTMAS_06_NAME_CTR;
@@ -877,7 +877,7 @@
 
 
     #ifndef D_PALETTE_CHRISTMAS_07_NAME_CTR
-    #define D_PALETTE_CHRISTMAS_07_NAME_CTR        "Christmas Warm White|Christmas 07"   
+    #define D_PALETTE_CHRISTMAS_07_NAME_CTR        "Solid Warm White|Christmas Warm White|Christmas 07"   
     #endif
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_07_NAME_CTR)        D_PALETTE_CHRISTMAS_07_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_07_COLOUR_MAP__IDS)
@@ -1212,6 +1212,7 @@
     
     };
 
+    // Confirmed at 2021 Tree colours
     #ifndef D_PALETTE_CHRISTMAS_20_NAME_CTR
     #define D_PALETTE_CHRISTMAS_20_NAME_CTR        "MultiColoured Snow Tree Dinning Room|Christmas 20"   
     #endif
@@ -1242,8 +1243,7 @@
       D_RGB255_ORANGE_DEEP
       D_RGB255_PURPLE_DEEP
       D_RGB255_PINK_HOT3
-      D_RGB255_CYAN_FADED3
-      
+      D_RGB255_CYAN_FADED3      
     };
 
 
@@ -1326,10 +1326,9 @@
       D_RGB255_ORANGE_DEEP
       D_RGB255_YELLOW_WARM
       #else 
-      // D_RGB255_RED
-      // D_RGB255_GREEN_FADED2
-      // D_RGB255_BLUE_FADED3
-      // D_RGB255_ORANGE_LIGHT
+      /**
+       * @brief Personal Default
+       **/
       D_RGB255_RED
       D_RGB255_GREEN_FADED2
       D_RGB255_PINK_WARM
@@ -1341,23 +1340,19 @@
       D_RGB255_RED_PASTEL
       D_RGB255_ORANGE_DEEP
       D_RGB255_YELLOW_WARM
-      // Repeated with tweaks
       D_RGB255_RED_ALT
       D_RGB255_GREEN_FADED2
       D_RGB255_PINK_WARM
       D_RGB255_BLUE_FADED3
-      // D_RGB255_ORANGE_LIGHT   
       D_RGB255_GREEN_PASTEL_FADED
       D_RGB255_PINK_HOT2
       D_RGB255_CYAN_FADED3
       D_RGB255_RED_PASTEL
       D_RGB255_ORANGE_DEEP
-      //D_RGB255_YELLOW_WARM
       D_RGB255_PURPLE_DEEP
       D_RGB255_PINK_HOT3
       D_RGB255_CYAN_FADED3
-
-      #endif // USE_CUSTOM_USER_JACQUELINE
+      #endif
 
 
     };

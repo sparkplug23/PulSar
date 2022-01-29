@@ -138,10 +138,10 @@ void mAnimatorLight::Init_NeoPixelBus()
 
   // if pixel size changes, free and init again
   uint16_t strip_size_tmp = STRIP_SIZE_MAX;
-  #ifdef STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
-  strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;
+  #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;
   #endif
-  // uint16_t strip_size_tmp = STRIP_REPEAT_OUTPUT_MAX;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  // uint16_t strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
   
   //step1:  moving the desired/starting colours into a buffer type, so it is dynamic
   //step2:  to become its own function, so strips can be changed at runtime
@@ -1320,21 +1320,21 @@ void mAnimatorLight::StripUpdate(){
   //   pixel_output_length = STRIP_SIZE_MAX;
   // }
   // // Replicate SetPixel for repeated output
-  // #ifdef STRIP_REPEAT_OUTPUT_MAX
-  // pixel_output_length = STRIP_REPEAT_OUTPUT_MAX;  
-  // #endif // STRIP_REPEAT_OUTPUT_MAX
+  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
+  // pixel_output_length = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;  
+  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
 
 
 
 // AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
   // // Replicate SetPixel for repeated output
-  // #ifdef STRIP_REPEAT_OUTPUT_MAX
+  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
   // int pixels_existing_index = 0;
-  // for(int i=0;i<STRIP_REPEAT_OUTPUT_MAX;i++){
+  // for(int i=0;i<ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;i++){
   //   SetPixelColor(i,GetPixelColor(pixels_existing_index++));
   //   if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
   // }
-  // #endif // STRIP_REPEAT_OUTPUT_MAX
+  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
 
 
 
@@ -1419,6 +1419,12 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
 
+/**
+ * @brief Before showing, duplicate the output by taking the 0-X pixels and replicating it... though this might not work since setpixellength is not long enough anymore? (or should I make a library edit to do this same feature)
+ * 
+ */
+
+
   pCONT_iLight->ShowInterface();
 
   // for (auto copies = 0; copies < 3; copies++) {
@@ -1427,31 +1433,33 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
   
   /**
    * Replicate output if enabled
-   * 
+   * Notice this has been moved the the function above, so needs to be called there
+   * It sould be changed to a runtime variable/flag option for mqtt command
    * */
-  #ifdef STRIP_REPEAT_OUTPUT_MAX
-  uint16_t internal_length = pCONT_iLight->settings.light_size_count;
-  uint16_t external_length = STRIP_OUTPUT_REPEATED_LENGTH;
+  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
+  // uint16_t internal_length = pCONT_iLight->settings.light_size_count;
+  // uint16_t external_length = STRIP_OUTPUT_REPEATED_LENGTH;
 
-  uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
-  if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
-    pixel_output_length = STRIP_SIZE_MAX;
-  }
-  // Replicate SetPixel for repeated output
-  #ifdef STRIP_REPEAT_OUTPUT_MAX
-  pixel_output_length = STRIP_REPEAT_OUTPUT_MAX;  
-  #endif // STRIP_REPEAT_OUTPUT_MAX
+  // uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
+  // if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
+  //   pixel_output_length = STRIP_SIZE_MAX;
+  // }
+  // // Replicate SetPixel for repeated output
+  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
+  // pixel_output_length = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;  
+  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
 
-  // AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
-  // Replicate SetPixel for repeated output
-  #ifdef STRIP_REPEAT_OUTPUT_MAX
-  int pixels_existing_index = 0;
-  for(int i=0;i<STRIP_REPEAT_OUTPUT_MAX;i++){
-    SetPixelColor(i,GetPixelColor(pixels_existing_index++));
-    if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
-  }
-  #endif // STRIP_REPEAT_OUTPUT_MAX
-  #endif // STRIP_REPEAT_OUTPUT_MAX
+  // // AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
+  // // Replicate SetPixel for repeated output
+  // // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
+  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
+  // int pixels_existing_index = 0;
+  // for(int i=0;i<ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;i++){
+  //   SetPixelColor(i,GetPixelColor(pixels_existing_index++));
+  //   if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
+  // }
+  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
+  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
 
 
 }

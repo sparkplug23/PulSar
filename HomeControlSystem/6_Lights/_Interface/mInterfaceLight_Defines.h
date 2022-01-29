@@ -7,7 +7,8 @@
 /**
  * AnimatorLight
  * */
-#define D_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR  "Solid RGBCCT" // "Solid Colour"
+#define D_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR      "Solid RGBCCT" // "Solid Colour"
+#define D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR         "Slow Glow|Blend" /// I need to add that no only does it check the individual ones, but also the entire string so this can be used in templates fully
 #define D_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__NAME_CTR "Sun Elevation RGBCCT Solid Palette 01"
 #define D_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__NAME_CTR "Sun Elevation RGBCCT Solid Palette Augmented 01"
 #define D_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__NAME_CTR "Sun Elevation CCT Temp 01"

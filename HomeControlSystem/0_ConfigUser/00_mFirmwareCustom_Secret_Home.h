@@ -89,8 +89,8 @@ Hallway
  */
 // #define DEVICE_STAIRWAY_MOTION
 // #define DEVICE_RADIATORFAN
-// #define DEVICE_HEATING
 // #define DEVICE_HEATING_ESP32
+
 // #define DEVICE_DOORBELLWALLCHIME
 
 /**
@@ -719,11 +719,49 @@ Bathroom
   #define DEVICENAME_CTR          "rgbshelf"
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
     
+    
+  
+  #define STRIP_SIZE_MAX 33                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+   
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS //add commands
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -731,72 +769,143 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 33
+/**
+ * @brief 
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
+ * 
+ */
 
- #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-  //   "},"
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME_MS "\":10000,"
-  //     "\"" D_JSON_RATE_MS "\":1000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-  //   "},"
-  //   "\"TimeMs\":30000,"
-  //   "\"ColourPalette\":\"Shelf Hearts\","
-  //   "\"BrightnessRGB\":70"
-  // "}";
-  
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     "\"Function\":\"Static Glow\""
-  //   "},"    
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME_MS "\":1000,"
-  //     "\"" D_JSON_RATE_MS "\":2000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-  //   "},"
-  //   "\"ColourPalette\":\"Christmas Warm White\","
-  //   "\"BrightnessRGB\":100"
-  // "}";
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
 
-  #define USE_CUSTOM_USER_PAULA
-  #define STRIP_SIZE_MAX 100
   #define USE_LIGHTING_TEMPLATE
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RgB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Static Glow\""
-    "},"    
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":5000,"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Pink purple 01\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Static Palette\","
+      "\"Intensity\":127,"
+      "\"Speed\":10"
     "},"
-    "\"ColourPalette\":\"Custom User 01\","
-    "\"BrightnessRGB\":70"
+    "\"Transition\":{"
+      "\"TimeMs\":1000,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":100"
   "}";
+  // #endif
+
+
+
+//   #define USE_BUILD_TYPE_LIGHTING
+//   #define USE_MODULE_LIGHTS_INTERFACE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
+//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "}";
+
+//   #define STRIP_SIZE_MAX 33
+
+//  #define USE_LIGHTING_TEMPLATE
+//   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+//   // "{"
+//   //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+//   //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//   //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+//   //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+//   //   "\"" D_JSON_EFFECTS "\":{" 
+//   //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
+//   //   "},"
+//   //   "\"" D_JSON_TRANSITION       "\":{"
+//   //     "\"" D_JSON_TIME_MS "\":10000,"
+//   //     "\"" D_JSON_RATE_MS "\":1000,"
+//   //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+//   //     "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+//   //   "},"
+//   //   "\"TimeMs\":30000,"
+//   //   "\"ColourPalette\":\"Shelf Hearts\","
+//   //   "\"BrightnessRGB\":70"
+//   // "}";
+  
+//   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+//   // "{"
+//   //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+//   //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//   //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
+//   //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+//   //   "\"" D_JSON_EFFECTS "\":{" 
+//   //     "\"Function\":\"Static Glow\""
+//   //   "},"    
+//   //   "\"" D_JSON_TRANSITION       "\":{"
+//   //     "\"" D_JSON_TIME_MS "\":1000,"
+//   //     "\"" D_JSON_RATE_MS "\":2000,"
+//   //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
+//   //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+//   //   "},"
+//   //   "\"ColourPalette\":\"Christmas Warm White\","
+//   //   "\"BrightnessRGB\":100"
+//   // "}";
+
+//   #define USE_CUSTOM_USER_PAULA
+//   #define STRIP_SIZE_MAX 100
+//   #define USE_LIGHTING_TEMPLATE
+//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+//     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RgB\","
+//     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+//     "\"" D_JSON_EFFECTS "\":{" 
+//       "\"Function\":\"Static Glow\""
+//     "},"    
+//     "\"" D_JSON_TRANSITION       "\":{"
+//       "\"" D_JSON_TIME_MS "\":1000,"
+//       "\"" D_JSON_RATE_MS "\":5000,"
+//     "},"
+//     "\"ColourPalette\":\"Custom User 01\","
+//     "\"BrightnessRGB\":70"
+//   "}";
 
 #endif
 
@@ -1206,16 +1315,58 @@ Bathroom
 #endif
 
 
+/**
+ * @brief Changed to segments now 
+ **/
 #ifdef DEVICE_RGBCRYSTAL1
   #define DEVICENAME_CTR            "rgbcrystal1"
   #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder Utility"
   
+
+This might actually be worth changing to esp32, to give year long debug data!!! yes 
+
   
+  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+   
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS //add commands
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+  //#define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 3
 
 
   #define USE_MODULE_TEMPLATE
@@ -1224,53 +1375,290 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 155
+/**
+ * @brief 
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
+ * 
+ */
 
-//   #define STRIP_REPEAT_OUTPUT_MAX 150
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
 
- #define USE_LIGHTING_TEMPLATE
+  #define USE_LIGHTING_TEMPLATE
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Pink purple 01\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Shimmering Palette\","
+      "\"Intensity\":255,"
+      "\"Speed\":10"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":23"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  // #endif
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+  //   "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":\"" D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR "\""
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":5000,"
+  //     "\"RateMs\":20000"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif
+
+  // #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+  //   "\"ColourPalette\":\"Christmas 21\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":30"
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":0,"
+  //     "\"RateMs\":30"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif // LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+  //   "\"ColourPalette\":\"Christmas 06\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":1"
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":0,"
+  //     "\"RateMs\":30"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+
+  // // #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  // // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // // "{"
+  // //   "\"Segment0\":{"
+  // //     "\"PixelRange\":[0,19],"
+  // //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  // //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  // //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  // //     "\"Effects\":{"
+  // //       "\"Function\":\"Static\""
+  // //     "},"
+  // //     "\"ColourPalette\":\"Christmas 09\","
+  // //     "\"Transition\":{"
+  // //       "\"TimeMs\":3000,"
+  // //       "\"RateMs\":10000"
+  // //     "},"    
+  // //     "\"BrightnessRGB\":100"
+  // //   "},"
+  // //   "\"Segment1\":{"
+  // //     "\"PixelRange\":[20,29],"
+  // //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  // //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  // //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+  // //     "\"Effects\":{"
+  // //       "\"Function\":\"Solid RGBCCT\""
+  // //     "},"
+  // //     "\"ColourPalette\":\"Solid Rgbcct 01\","
+  // //     "\"Transition\":{"
+  // //       "\"TimeMs\":500,"
+  // //       "\"RateMs\":1000"
+  // //     "},"    
+  // //     "\"BrightnessRGB\":100"
+  // //   "},"
+  // //   "\"Segment2\":{"
+  // //     "\"PixelRange\":[30,49],"
+  // //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  // //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  // //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  // //     "\"Effects\":{"
+  // //       "\"Function\":\"Slow Glow\""
+  // //     "},"
+  // //     "\"ColourPalette\":\"Christmas 01\","
+  // //     "\"Transition\":{"
+  // //       "\"TimeMs\":500,"
+  // //       "\"RateMs\":1000"
+  // //     "},"    
+  // //     "\"BrightnessRGB\":100"
+  // //   "},"
+  // //   "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+  // //   "\"BrightnessRGB\":100"
+  // // "}";
+  // // #endif
+  
+  // // #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+  // // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // // "{"
+  // //   "\"Segment0\":{"
+  // //     "\"PixelRange\":[0,19],"
+  // //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  // //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  // //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  // //     "\"Effects\":{"
+  // //       "\"Function\":29"
+  // //     "},"
+  // //     "\"ColourPalette\":\"Christmas 09\","
+  // //     "\"Transition\":{"
+  // //       "\"TimeMs\":0,"
+  // //       "\"RateMs\":23"
+  // //     "},"    
+  // //     "\"BrightnessRGB\":100"
+  // //   "},"
+  // //   "\"Segment1\":{"
+  // //     "\"PixelRange\":[20,29],"
+  // //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  // //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  // //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+  // //     "\"Effects\":{"
+  // //       "\"Function\":28"
+  // //     "},"
+  // //     "\"ColourPalette\":11,"
+  // //     "\"Hue\":20,"
+  // //     "\"Sat\":90,"
+  // //     "\"Transition\":{"
+  // //       "\"TimeMs\":0,"
+  // //       "\"RateMs\":25"
+  // //     "},"    
+  // //     "\"BrightnessRGB\":100"
+  // //   "},"
+  // //   "\"Segment2\":{"
+  // //     "\"PixelRange\":[30,49],"
+  // //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  // //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  // //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  // //     "\"Effects\":{"
+  // //       "\"Function\":\"Slow Glow\""
+  // //     "},"
+  // //     "\"ColourPalette\":\"Christmas 01\","
+  // //     "\"Transition\":{"
+  // //       "\"TimeMs\":500,"
+  // //       "\"RateMs\":1000"
+  // //     "},"    
+  // //     "\"BrightnessRGB\":100"
+  // //   "},"
+  // //   "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+  // //   "\"BrightnessRGB\":100"
+  // // "}";
+  // // #endif
+
+
+  
+//   #define USE_BUILD_TYPE_LIGHTING
+//   #define USE_MODULE_LIGHTS_INTERFACE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
+//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  
+
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "}";
+
+//   #define STRIP_SIZE_MAX 155
+
+// //   #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 150
+
+//  #define USE_LIGHTING_TEMPLATE
+// //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+// //   "{"
+// //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+// //     #ifdef STRIP_SIZE_MAX
+// //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+// //     #else
+// //     "\"" D_JSON_STRIP_SIZE       "\":50,"
+// //     #endif //STRIP_SIZE_MAX
+// //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
+// //     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+// //     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+// //     "\"" D_JSON_EFFECTS "\":{" 
+// //       "\"Function\":1" //slow glow
+// //     "},"
+// //     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
+// //     "\"TimeMs\":5000,"
+// //     "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
+// //     "\"BrightnessRGB\":100"
+// //   "}";
+
+  
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
 //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-//     #ifdef STRIP_SIZE_MAX
 //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     #else
-//     "\"" D_JSON_STRIP_SIZE       "\":50,"
-//     #endif //STRIP_SIZE_MAX
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-//     // "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
+//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
 //     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
 //     "\"" D_JSON_EFFECTS "\":{" 
-//       "\"Function\":1" //slow glow
+//       "\"Function\":\"Slow Glow\""
+//     "},"    
+//     "\"" D_JSON_TRANSITION       "\":{"
+//       "\"" D_JSON_TIME_MS "\":1000,"
+//       "\"" D_JSON_RATE_MS "\":10000"
 //     "},"
-//     "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":10000},"
-//     "\"TimeMs\":5000,"
-//     "\"ColourPalette\":\"Shelf Hearts\"," //c12    43 is the colours for this christmas
-//     "\"BrightnessRGB\":100"
+//     "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
+//     "\"BrightnessRGB\":40"
 //   "}";
-
-  
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"Function\":\"Slow Glow\""
-    "},"    
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":10000"
-    "},"
-    "\"ColourPalette\":\"Christmas MultiColoured Warmer\","
-    "\"BrightnessRGB\":40"
-  "}";
 
 
 
@@ -2025,8 +2413,8 @@ Bathroom
  * 
  * */
 
-  #define DEVICENAME_CTR          "heating"
-  #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2"
+  #define DEVICENAME_CTR          "heating"  // to be named "hvac_house_master" with later "hvac_house_slave" for remote controls.
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2" // Gen 3 = Ethernet version
 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
@@ -2047,7 +2435,7 @@ Bathroom
   // #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_DS18X
   
-  #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 8
+  // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 8 // This should not be needed
   // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 5
 
   #define USE_MODULE_DRIVERS_INTERFACE
@@ -2108,7 +2496,7 @@ Bathroom
       // "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
 
 
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin
+      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin  // try all on the same pin? in practice it probably would be better with different pullup values, but long term phasing out so for now, keep it simple
       // // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
 
       // // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
@@ -3327,6 +3715,8 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
  
+
+
 #ifdef DEVICE_BEDROOMSENSOR
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"

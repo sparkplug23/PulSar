@@ -145,6 +145,17 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
   
   // }
 
+  /**
+   * @brief Adding a new status stream, which is basically the default response to user requested commands ie scan for i2c devices, or simply, scan all devices and report addresses
+   * 
+   */
+  // if(jtok = obj["MQTTSend"]){
+
+  // }
+
+
+
+
   //Search for json sending
   //{"MQTT"}
   /**

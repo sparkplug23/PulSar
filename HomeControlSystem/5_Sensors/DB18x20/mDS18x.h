@@ -65,6 +65,8 @@ class mDS18X :
 
     void EveryLoop();
 
+    void Scan_ReportAsJsonBuilder();
+
 
     float tmp_float;
     int ii;
@@ -102,13 +104,14 @@ class mDS18X :
     }sensor[DB18_SENSOR_MAX];
 
 
+    #define SENSOR_GROUP_MAX_COUNT 2
     struct SENSOR_GROUP_INFO{ // from a single pin
       uint8_t fSensorFound = false;
       uint8_t sensor_count = 0;
       uint8_t  pin = 0;
       OneWire* onewire = nullptr;
-      DallasTemperature* dallas = nullptr;
-    }sensor_group[2];
+      DallasTemperature* dallas = nullptr; //later, a class destructor should reset these back to nullptr, though may not be needed?
+    }sensor_group[SENSOR_GROUP_MAX_COUNT];
 
     // these dont make sense
     #define DONE_COMPLETE false

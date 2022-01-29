@@ -2,6 +2,7 @@
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
+//https://haswitchplate.github.io/openHASP-docs/0.6.2/design/objects/#common-properties
 
 // int8_t mNextionPanel::CheckAndExecute_JSONCommands(){
 
@@ -98,7 +99,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
     if(jtok = obj["commands"]){
         JsonParserArray array = jtok;
         for(auto val : array) {
-            // AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+            AddLog(LOG_LEVEL_INFO, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
             nextionSendCmd(val.getStr());
         }
     }
@@ -575,3 +576,46 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
 
 
 #endif// USE_MODULE_DISPLAYS_NEXTION
+
+/****
+ * Example MQTT Commands
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+{
+  "commands": [
+    "p[9].b[1].txt=\"hello\""
+  ]
+}
+
+{
+  "commands": [
+    "page 5"
+  ]
+}
+
+
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * */

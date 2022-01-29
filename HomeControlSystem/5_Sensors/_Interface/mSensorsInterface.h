@@ -56,6 +56,8 @@ class mSensorsInterface :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
 
+    void MQTT_Report_Event_Button();
+
     // sensor_t
 
     

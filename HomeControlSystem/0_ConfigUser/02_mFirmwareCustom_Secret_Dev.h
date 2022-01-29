@@ -62,6 +62,7 @@
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
 // #define DEVICE_HVAC_KITCHEN
+#define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -130,6 +131,36 @@
 **/
 // #define DEVICE_SHELLYDIMMER_GLOBE
 // #define DEVICE_SIDEDOORLIGHT_TEST
+
+
+/**
+ * @brief To be developed totally in my room
+ * 
+ * >>> ESP32 Master <<< Understairs
+ * 3 leds to similate heating
+ * 1 BME (dining room side of wall)
+ * 5 DS18XX
+ * Nextion panel
+ * 
+ * >>> ESP32 Slave <<< Hotpress (rail mount)
+ * 1 led as immersion
+ * DS11XX from immersion (not including backup, keep those as another device, but only use a couple, move most to slave)
+ * Nextion panel in hotpress for heating
+ * BME masterbedroom
+ * BME landing
+ * 
+ * >>> ESP32 Landing <<< Hotpress (rail mount)
+ * Also used as backup immersion sensors (not important 3 sensor places)
+ * Nextion panel? Is this really needed? a PIR in the roof would do the same job
+ * PIR sensor
+ * Masterbedroom sk6812 (rgbW)
+ * Landing sk6812
+ * 
+ * 
+ */
+// #define DEVICE_LANDING
+// #define DEVICE_HVAC_HOUSE_MASTER
+// #define DEVICE_HVAC_HOUSE_SLAVE
 
 
 // Include the home devices, which should ONLY contain final hardware
@@ -2088,6 +2119,36 @@
 #endif
 
 
+#ifdef DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
+  #define DEVICENAME_CTR          "bedroom_controller_buttons_01"
+  #define DEVICENAME_FRIENDLY_CTR "Bedside Controller for Room 01"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"D1\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"D3\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
+      "\"D5\":\"" D_GPIO_FUNCTION_KEY5_INV_CTR  "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_KEY6_INV_CTR  "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+#endif
+
+
+
+
 /**
  * New heating controller, designed to work from single device to multizone system
  * */
@@ -2833,7 +2894,7 @@
   "}";
 
   #define STRIP_SIZE_MAX 300//256//100//256
-  // #define STRIP_REPEAT_OUTPUT_MAX 256
+  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -2905,7 +2966,7 @@
 
   
   #define STRIP_SIZE_MAX 50//100//256
-  // #define STRIP_REPEAT_OUTPUT_MAX 256
+  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -2989,7 +3050,7 @@
 
   
   // #define STRIP_SIZE_MAX 50//100//256
-  // // #define STRIP_REPEAT_OUTPUT_MAX 256
+  // // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
   // #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // "{"
@@ -3469,7 +3530,7 @@ DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
 
   // #define USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
 
-  // #define STRIP_REPEAT_OUTPUT_MAX STRIP_SIZE_MAX
+  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES STRIP_SIZE_MAX
   //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
   //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -7220,7 +7281,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   
 // // //   // #define STRIP_SIZE_MAX 100//256
-// // //   // #define STRIP_REPEAT_OUTPUT_MAX 256
+// // //   // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
 
 // // //   // #define USE_LIGHTING_TEMPLATE
 // // //   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -7288,7 +7349,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   
 // // //   #define STRIP_SIZE_MAX 100//256
-// // //   #define STRIP_REPEAT_OUTPUT_MAX 256
+// // //   #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
 
 // // //   #define USE_LIGHTING_TEMPLATE
 // // //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 

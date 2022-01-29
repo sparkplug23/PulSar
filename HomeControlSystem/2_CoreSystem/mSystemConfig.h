@@ -18,7 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 #define FIRMWARE_VERSION_MINOR    103 // new stopping of changes after christmas
 #define FIRMWARE_VERSION_CORE     114
-#define FIRMWARE_VERSION_MODULE   128
+#define FIRMWARE_VERSION_MODULE   129
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           11//                (random(1,1000))

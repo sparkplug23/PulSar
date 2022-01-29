@@ -97,7 +97,7 @@ class mNextionPanel :
   #endif
 
   #ifndef NEXTION_DEFAULT_PAGE_NUMBER
-    #define NEXTION_DEFAULT_PAGE_NUMBER 2
+    #define NEXTION_DEFAULT_PAGE_NUMBER 9
   #endif
 
   int8_t pin_tx = -1;
@@ -121,6 +121,8 @@ void nextionSendCmd(const char* c_str);
 void Command_SetBrightness(uint8_t brightness_percentage);
 void Command_SetBrightness255(uint8_t brightness);
 void Command_ToggleBrightness();
+
+void Template_Load_Init_Display_Command();
 
 
 

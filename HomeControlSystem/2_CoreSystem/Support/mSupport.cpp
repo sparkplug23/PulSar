@@ -1807,6 +1807,10 @@ bool mSupport::CheckCommand_P(const char* needle, const char* haystack)
 {
   return GetCommandID_P(needle, haystack)>=0;
 }
+/*
+
+ * I also want to check if the entire thing matches, ie "one|two" should allow "one", "two" AND "one|two"
+ */
 int8_t mSupport::GetCommandID_P(const char* needle, const char* haystack, char* destination, size_t destination_size)
 {
   if((needle == nullptr)||(haystack == nullptr)) return false;
@@ -1817,9 +1821,22 @@ int8_t mSupport::GetCommandID_P(const char* needle, const char* haystack, char* 
   char* write = destination;
   //tmp fix, internal buffer to be removed
   if(destination == nullptr){
+    // AddLog(LOG_LEVEL_WARN, PSTR("Should this be removed?? destination == nullptr"));
     char buffer_tmp[50];
     destination = buffer_tmp;
     destination_size = 50;
+  }
+  
+  /**
+   * @brief First check the whole message for a match (ie "A|B" will match when multiple commands are used in template)
+   * check for exact WHOLE match
+   * 
+   * This may cause stability errors
+   **/
+  if(!strcasecmp_P(needle, haystack)) { //works v#.103.#.#
+    // AddLog(LOG_LEVEL_INFO, PSTR("CHECKING WHOLE Should this be removed?? destination == nullptr"));
+    // delay(5000);
+    return 1;
   }
 
   while (true) {

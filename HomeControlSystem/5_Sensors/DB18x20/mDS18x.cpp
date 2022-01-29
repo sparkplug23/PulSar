@@ -134,6 +134,9 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
+    case FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID:
+      Scan_ReportAsJsonBuilder();
+    break;
     /************
      * WEBPAGE SECTION * 
     *******************/
@@ -339,7 +342,88 @@ void mDS18X::Init(void){
 
 }//end init
 
+void mDS18X::Scan_ReportAsJsonBuilder()
+{
+  // For now, just re-init the process, but likely this should instead be subdivided into its own subfunction inside init
+  
+  Pre_Init();
+  Init();
+  AddLog(LOG_LEVEL_WARN, PSTR("Pre_Init|Init without template load, may cause issues. Using anyway for scan. It may require restart to fix"));
+  // I probably need to research the names here? using the template, because I do, stop "init" as this may break it
 
+  
+  // AddLog(LOG_LEVEL_DEBUG,PSTR("DS18: Add(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
+  // index,
+  //   deviceAddress[0],deviceAddress[1],deviceAddress[2],deviceAddress[3],
+  //   deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
+
+  bool flag_found_any = false;
+  bool flag_started_object = false;
+
+
+  // Check all pins  
+  for(uint8_t sensor_group_id=0;
+              sensor_group_id<SENSOR_GROUP_MAX_COUNT;
+              sensor_group_id++
+      ){
+
+  if(sensor_group[sensor_group_id].dallas != nullptr)
+  {
+    uint8_t sensor_count = sensor_group[sensor_group_id].dallas->getDeviceCount();
+
+    if(sensor_count)
+    {
+      flag_found_any = true;
+    }
+
+    if(flag_found_any && !flag_started_object)
+    {
+      flag_started_object = true;
+      JBI->Level_Start(D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR);
+    }
+
+    AddLog(LOG_LEVEL_TEST, PSTR("sensor_count[%d]=%d"),sensor_group_id,sensor_count);
+
+    char buffer[40];
+    DeviceAddress address;
+
+    for(uint8_t sensor_id=0;
+                sensor_id<sensor_count;
+                sensor_id++
+    ){
+
+    AddLog(LOG_LEVEL_TEST, PSTR("sensor_count[%d]=%d \t\t%d"),sensor_group_id,sensor_count,sensor_id);
+
+      if(sensor_group[sensor_group_id].dallas->getAddress(address, sensor_id))
+      {
+
+        snprintf(buffer, sizeof(buffer), "pin%d_id%d", sensor_group[sensor_group_id].pin , sensor_id);
+        
+        JBI->Array_Start(buffer);
+        for(int i=0;i<8;i++)
+        {
+          JBI->Add(address[i]);
+        }
+        JBI->Array_End();
+      
+      }
+
+    }
+        
+
+  }
+    if(flag_found_any)
+    {
+      JBI->Level_End();
+    }
+
+
+
+}
+
+
+
+}
 
 void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_completion){
 
