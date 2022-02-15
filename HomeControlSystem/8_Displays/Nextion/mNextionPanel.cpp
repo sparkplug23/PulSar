@@ -479,4 +479,19 @@ void mNextionPanel::MQTTHandler_Sender(uint8_t id)
   }
 }
 
+/**
+ * @brief 
+ * {
+  "commands": [
+    "page 5",
+    "p[5].b[7].txt=\"Heating is working\"",
+    "p[5].b[7].pco=2047",
+    "p[5].b[7].bco=0",
+    "p[5].b[11].txt=\"12.3\"",
+    "p[5].b[11].pco=65500",
+    "p[5].b[11].bco=0"
+  ]
+}
+ * 
+ */
 #endif

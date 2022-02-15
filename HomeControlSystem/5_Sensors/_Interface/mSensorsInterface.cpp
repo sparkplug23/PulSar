@@ -400,8 +400,6 @@ void mSensorsInterface::MQTT_Report_Event_Button()
 
   // }
 
-
-
     JsonBuilderI->Add("Event", event_ctr);
 
     JsonBuilderI->Add("Device", pCONT_rules->event_triggered.device_id);
