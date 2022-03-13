@@ -78,7 +78,7 @@ void mDoorSensor::Pre_Init(void){
   }
 
 
-  if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID))
+  if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
   {
     pinMode(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID), INPUT_PULLUP);
   }else{
@@ -110,12 +110,12 @@ void mDoorSensor::EveryLoop(){
     if(door_detect.state){ 
       door_detect.isactive = true;
       door_detect.detected_time = pCONT_time->GetTimeShortNow();
-      mqtthandler_sensor_ifchanged.flags.SendNow = true;
     }else{ 
       door_detect.isactive = false;
     }
     door_detect.ischanged = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
     #ifdef USE_MODULE_CORE_RULES
       pCONT_rules->NewEvent(EM_MODULE_SENSORS_DOOR_ID, 0, door_detect.isactive);
