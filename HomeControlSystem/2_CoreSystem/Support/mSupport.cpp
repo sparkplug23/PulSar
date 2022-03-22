@@ -19,7 +19,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 #ifdef ESP8266
   randomSeed(analogRead(0));
 #else
-  randomSeed(analogRead(34)); //esp32
+  // randomSeed(analogRead(34)); //esp32
 #endif
 
 
@@ -1130,49 +1130,49 @@ char* mSupport::subStr(char* dest, char* str, const char *delim, int index)
 
 double mSupport::CharToDouble(const char *str)
 {
-  // // simple ascii to double, because atof or strtod are too large
-  // char strbuf[24];
+  // simple ascii to double, because atof or strtod are too large
+  char strbuf[24];
 
-  // strlcpy(strbuf, str, sizeof(strbuf));
-  // char *pt = strbuf;
-  // while ((*pt != '\0') && isblank(*pt)) { pt++; }  // Trim leading spaces
+  strlcpy(strbuf, str, sizeof(strbuf));
+  char *pt = strbuf;
+  while ((*pt != '\0') && isblank(*pt)) { pt++; }  // Trim leading spaces
 
-  // signed char sign = 1;
-  // if (*pt == '-') { sign = -1; }
-  // if (*pt == '-' || *pt=='+') { pt++; }            // Skip any sign
+  signed char sign = 1;
+  if (*pt == '-') { sign = -1; }
+  if (*pt == '-' || *pt=='+') { pt++; }            // Skip any sign
 
-  // double left = 0;
-  // if (*pt != '.') {
-  //   left = atoi(pt);                               // Get left part
-  //   while (isdigit(*pt)) { pt++; }                 // Skip number
-  // }
+  double left = 0;
+  if (*pt != '.') {
+    left = atoi(pt);                               // Get left part
+    while (isdigit(*pt)) { pt++; }                 // Skip number
+  }
 
-  // double right = 0;
-  // if (*pt == '.') {
-  //   pt++;
-  //   right = atoi(pt);                              // Decimal part
-  //   while (isdigit(*pt)) {
-  //     pt++;
-  //     right /= 10.0;
-  //   }
-  // }
+  double right = 0;
+  if (*pt == '.') {
+    pt++;
+    right = atoi(pt);                              // Decimal part
+    while (isdigit(*pt)) {
+      pt++;
+      right /= 10.0;
+    }
+  }
 
-  // double result = left + right;
-  // if (sign < 0) {
-  //   return -result;                                // Add negative sign
-  // }
-  // return result;
+  double result = left + right;
+  if (sign < 0) {
+    return -result;                                // Add negative sign
+  }
+  return result;
 }
 
 int mSupport::TextToInt(char *str)
 {
-  // char *p;
-  // uint8_t radix = 10;
-  // if ('#' == str[0]) {
-  //   radix = 16;
-  //   str++;
-  // }
-  // return strtol(str, &p, radix);
+  char *p;
+  uint8_t radix = 10;
+  if ('#' == str[0]) { //for conversion of RGB #rrggbb
+    radix = 16;
+    str++;
+  }
+  return strtol(str, &p, radix);
 }
 
 // char* mSupport::ulltoa(unsigned long long value, char *str, int radix)
@@ -1928,8 +1928,14 @@ int8_t mSupport::GetStateNumber(const char *state_text)
   } else
   if (GetCommandCode(command, sizeof(command), state_text, kOptionDecrement) >= 0) {
     state_number = STATE_NUMBER_DECREMENT_ID;
-  }  
-  else{ // c_str to number
+  } else  
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionFollow) >= 0) {
+    state_number = STATE_NUMBER_FOLLOW_ID;
+  } else  
+  if (GetCommandCode(command, sizeof(command), state_text, kOptionFollowInv) >= 0) {
+    state_number = STATE_NUMBER_FOLLOW_INV_ID;
+  } else  
+  { // c_str to number
     state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
 
@@ -1941,6 +1947,31 @@ int8_t mSupport::GetStateNumber(const char *state_text)
 
 }
 
+/**
+ * @brief Since multipe results exist, always return the first as defult
+ * 
+
+  // uint8_t default_index_as_first = 0;
+ * @param state_text 
+ * @return char* 
+ */
+char* mSupport::GetState_Name_by_ID(uint8_t id, char* buffer, uint8_t buflen) 
+{
+  switch(id)
+  {
+    default:
+    case STATE_NUMBER_OFF_ID:         pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionOff); break;
+    case STATE_NUMBER_ON_ID:          pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionOn); break;
+    case STATE_NUMBER_TOGGLE_ID:      pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionToggle); break;
+    case STATE_NUMBER_BLINK_ID:       pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionBlink); break;
+    case STATE_NUMBER_BLINK_OFF_ID:   pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionBlinkOff); break;
+    case STATE_NUMBER_INCREMENT_ID:   pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionIncrement); break;
+    case STATE_NUMBER_DECREMENT_ID:   pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionDecrement); break;
+    case STATE_NUMBER_FOLLOW_ID:      pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionFollow); break;
+    case STATE_NUMBER_FOLLOW_INV_ID:  pCONT_sup->GetTextIndexed_P(buffer, buflen, 0, kOptionFollowInv); break;
+  }
+  return buffer;
+}
 
 
 

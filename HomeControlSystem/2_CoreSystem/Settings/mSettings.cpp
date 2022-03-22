@@ -133,7 +133,7 @@ void mSettings::Function_Template_Load(){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
@@ -181,6 +181,63 @@ int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
 
   return -1;
 }
+
+
+/**
+ * @brief 
+ * 
+ 
+ TOGGLE
+ FOLLOW
+ FOLLOW_INV
+
+  
+ * 
+ * 
+ */
+
+
+
+/**
+ * @brief 
+ * Actually not right for rules, I should probably make "SwitchMode_GetID_by_Name" and "GetStateNumber" together
+ * 
+ * @param c 
+ * @return int16_t 
+ */
+int16_t mSettings::SwitchMode_GetID_by_Name(const char* c)
+// D_DATE_TIME_SEPARATOR
+// RuleCommand? I need to be able to react to trigger, or simply directly set, so needs both switchmode and getstate range, create new LIST
+{
+  if(c=='\0'){    return -1; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_TOGGLE_CTR)==0){ return SWITCHMODE_TOGGLE_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_FOLLOW_CTR)==0){ return SWITCHMODE_FOLLOW_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_FOLLOW_INV_CTR)==0){ return SWITCHMODE_FOLLOW_INV_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTON_CTR)==0){ return SWITCHMODE_PUSHBUTTON_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTON_INV_CTR)==0){ return SWITCHMODE_PUSHBUTTON_INV_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTONHOLD_CTR)==0){ return SWITCHMODE_PUSHBUTTONHOLD_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR)==0){ return SWITCHMODE_PUSHBUTTONHOLD_INV_ID; }
+  if(strcasecmp_P(c,PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR)==0){ return SWITCHMODE_PUSHBUTTON_TOGGLE_ID; }
+  return -1;
+}
+
+
+const char* mSettings::SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_t buflen){
+  switch(id){
+    default:
+    case SWITCHMODE_TOGGLE_ID:                memcpy_P(buffer, PM_SWITCHMODE_TOGGLE_CTR, sizeof(PM_SWITCHMODE_TOGGLE_CTR)); break;
+    case SWITCHMODE_FOLLOW_ID:                memcpy_P(buffer, PM_SWITCHMODE_FOLLOW_CTR, sizeof(PM_SWITCHMODE_FOLLOW_CTR)); break; 
+    case SWITCHMODE_FOLLOW_INV_ID:            memcpy_P(buffer, PM_SWITCHMODE_FOLLOW_INV_CTR, sizeof(PM_SWITCHMODE_FOLLOW_INV_CTR)); break; 
+    case SWITCHMODE_PUSHBUTTON_ID:            memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTON_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTON_CTR)); break; 
+    case SWITCHMODE_PUSHBUTTON_INV_ID:        memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTON_INV_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTON_INV_CTR)); break; 
+    case SWITCHMODE_PUSHBUTTONHOLD_ID:        memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTONHOLD_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTONHOLD_CTR)); break; 
+    case SWITCHMODE_PUSHBUTTONHOLD_INV_ID:    memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR)); break; 
+    case SWITCHMODE_PUSHBUTTON_TOGGLE_ID:     memcpy_P(buffer, PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR, sizeof(PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR)); break; 
+  }
+  return buffer;
+}
+
+
 
 
 

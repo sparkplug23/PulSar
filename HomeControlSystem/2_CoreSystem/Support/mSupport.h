@@ -43,6 +43,8 @@ enum STATE_NUMBER_IDS{
   STATE_NUMBER_BLINK_OFF_ID,
   STATE_NUMBER_INCREMENT_ID, //eg fans, increase
   STATE_NUMBER_DECREMENT_ID,
+  STATE_NUMBER_FOLLOW_ID,
+  STATE_NUMBER_FOLLOW_INV_ID,
   STATE_NUMBER_LENGTH_ID
 };
 
@@ -425,6 +427,7 @@ class mSupport :
     #endif // USE_I2C
 
 
+    char* GetState_Name_by_ID(uint8_t id, char* buffer, uint8_t buflen);
 
 
 

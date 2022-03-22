@@ -68,7 +68,7 @@ Utility
 
 /**
 DSToilet
-  - consumerunit = 8 pzem, bme
+  - consumerunit = 12 pzem, bme
 */
 // #define DEVICE_CONSUMERUNIT
 
@@ -116,6 +116,9 @@ Spareroom
   - CeilingLight
 **/
 // #define DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
+// #define DEVICE_SPAREROOM_H801_WARDROBE_UPLIGHTS
+// #define DEVICE_BLACK_STAND_LIGHT
+// #define DEVICE_AMBILIGHT_SAMSUNG_SPAREROOM
 
 /**
  * 
@@ -128,6 +131,7 @@ Masterbedroom
 // #define DEVICE_SHELLYDIMMER_MASTERBEDROOM_CEILING
 //define DEVICE_MASTERBEDROOMSENSOR
 // #define DEVICE_FLOORFAN2
+// #define DEVICE_MASTERBEDROOM_DRESSER_LIGHTS
 
 /**
  * 
@@ -177,6 +181,7 @@ Bathroom
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_BEDROOMBLINDS
 // #define DEVICE_RGBNOTIFICATION_01
+// #define DEVICE_BEDROOM_WALLCLOCK_01
 
 
 /**************************************************************************************************************************************************
@@ -715,6 +720,103 @@ Bathroom
 #endif
 
 
+/**
+ * This will become the final version of a panel, but requires animation fixing first
+ * */
+#ifdef DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
+  #define DEVICENAME_CTR            "heating_kitchen_display"
+  #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_MOTION
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      // #ifdef USE_MODULE_SENSORS_MOTION
+      // "\"21\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      // #endif
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":40,"
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgbwc\","
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     "\"" D_JSON_TIME_MS "\":1000,"
+  //     "\"" D_JSON_RATE_MS "\":1000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+  //   "},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"" D_JSON_FUNCTION "\":8"
+  //   "},"
+  //   "\"" D_JSON_CCT_TEMP "\":300,"
+  //   "\"" D_JSON_HUE "\":25,"
+  //   "\"" D_JSON_SAT "\":100,"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\"," //ie 10
+  //   "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  // "}";
+  
+  // #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
+  // #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Landing"
+  
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+  //     "],"
+  //     "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+  //     "]"
+  //   "}"
+  // "}";
+
+  // #define USE_FUNCTION_NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+  // DEFINE_PGM_CTR(NEXTION_INIT_PANEL_COMMAND_TEMPLATE)
+  // "{"
+  //   // "\"" D_JSON_DEVICENAME "\":{"
+  //   //   "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+  //   //     "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+  //   //   "],"
+  //   //   "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+  //   //     "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+  //   //   "]"
+  //   // "}"
+  //   "p[0]."
+
+
+  // "}";
+
+#endif
+
+
+
+
+
 #ifdef DEVICE_RGBSHELF
   #define DEVICENAME_CTR          "rgbshelf"
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
@@ -744,8 +846,7 @@ Bathroom
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS //add commands
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
   #define ENABLE_CRGBPALETTES_IN_PROGMEM
   #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
   #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
@@ -1029,9 +1130,6 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
 
   #define USE_MODULE_CORE_RULES
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
        
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
@@ -1090,7 +1188,7 @@ Bathroom
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":2" // Started
+        "\"State\":2" // Started  0=low,1=high,2=toggle,3=follow (change to names)
       "}"
     "}"
   "}";
@@ -1280,34 +1378,54 @@ Bathroom
   "{"
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule0\":{"
-      "\"Trigger\":{"
+      // "\"Trigger\":{"
+      //   "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+      //   "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+      //   "\"DeviceName\":0,"
+      //   "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      // "},"
+      // "\"Command\":{"
+      //   "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+      //   "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+      //   "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+      //   "\"State\":2" // Started
+      // "}"
+      
+    "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":2" // Started
+        "\"DeviceName\":0," 
+        "\"State\":\"FollowInv\""
       "}"
+    "}"
+
+
+
     "},"
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule1\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"DeviceName\":1,"
+        "\"State\":\"On\"" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":2" // Started
+        "\"State\":\"FollowInv\""
       "}"
     "}"
+
+
+
   "}";
 
 
@@ -1349,8 +1467,7 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   /**
    * @brief defines to be tested and incorporated fully
    **/
-  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-  #define ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS //add commands
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
   #define ENABLE_CRGBPALETTES_IN_PROGMEM
   #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
   #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
@@ -1679,14 +1796,53 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
   #define ESP32
     
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
 
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_PZEM004T_V3
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #define STRIP_SIZE_MAX 55                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+
+  // Hard coded to alternate pin until I make this template based
+  #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+  #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":10," 
+    "\"Hue\":25," 
+    "\"Sat\":70," 
+    "\"Effects\":{"
+      "\"Function\":0"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":10"
+  "}";
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1696,38 +1852,71 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
     "\"" D_JSON_GPIOC "\":{"      
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-        #ifdef USE_MODULE_SENSORS_BME
-        "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-        "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-        #endif
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR "\","
+      #endif
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Downstairs Toilet"
+
+
   #define D_DEVICE_SENSOR_CLIMATE "Downstairs Toilet"
-  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
-  #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "17"
-  #define D_DEVICE_SENSOR_PZEM004T_2_ADDRESS "18"
-  #define D_DEVICE_SENSOR_PZEM004T_3_ADDRESS "19"
-  #define D_DEVICE_SENSOR_PZEM004T_4_ADDRESS "20"
-  #define D_DEVICE_SENSOR_PZEM004T_5_ADDRESS "21"
-  #define D_DEVICE_SENSOR_PZEM004T_6_ADDRESS "22"
-  #define D_DEVICE_SENSOR_PZEM004T_7_ADDRESS "23"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "1"
+  #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "2"
+  #define D_DEVICE_SENSOR_PZEM004T_2_ADDRESS "3"
+  #define D_DEVICE_SENSOR_PZEM004T_3_ADDRESS "4"
+  #define D_DEVICE_SENSOR_PZEM004T_4_ADDRESS "5"
+  #define D_DEVICE_SENSOR_PZEM004T_5_ADDRESS "6"
+  #define D_DEVICE_SENSOR_PZEM004T_6_ADDRESS "7"
+  #define D_DEVICE_SENSOR_PZEM004T_7_ADDRESS "8"
+  #define D_DEVICE_SENSOR_PZEM004T_8_ADDRESS "9"
+  #define D_DEVICE_SENSOR_PZEM004T_9_ADDRESS "10"
+  #define D_DEVICE_SENSOR_PZEM004T_10_ADDRESS "11"
+  #define D_DEVICE_SENSOR_PZEM004T_11_ADDRESS "12"
+
+
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Mains"
+  #define D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "Cooker"
+  #define D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "Immersion"
+  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "Washing Machine"
+  #define D_SENSOR_PZEM004T_4_FRIENDLY_NAME_CTR "Dishwasher"
+  #define D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR "Pump Shower"
+  #define D_SENSOR_PZEM004T_6_FRIENDLY_NAME_CTR "Heating"
+  #define D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR "Tumble Dryer"
+  #define D_SENSOR_PZEM004T_8_FRIENDLY_NAME_CTR "Garage"
+  #define D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR "Bathroom Shower"
+  #define D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR "Main Sockets"
+  #define D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "Kitchen Sockets"
   
-  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Mains"
-  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "Cooker"
-  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "Tumble Dryer"
-  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "Washing Machine"
-  #define D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "Dish Washer"
-  #define D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "Shower"
-  #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "Sockets"
-  #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "Kitchen Sockets"
+  
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   "Mains"
+  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   "Cooker"
+  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   "Immersion"
+  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   "Washing Machine"
+  #define D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR   "Dishwasher"
+  #define D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR   "Pump Shower"
+  #define D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR   "Heating"
+  #define D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR   "Tumble Dryer"
+  #define D_DRIVER_ENERGY_8_FRIENDLY_NAME_CTR   "Garage"
+  #define D_DRIVER_ENERGY_9_FRIENDLY_NAME_CTR   "Bathroom Shower"
+  #define D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR  "Main Sockets"
+  #define D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR  "Kitchen Sockets"
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"
       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
@@ -1736,20 +1925,28 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
         "\"" D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\""
+        "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_8_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_9_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR "\","
+        "\"" D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"
       "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
-        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_4_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_5_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_6_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_7_FRIENDLY_NAME_CTR "\""
+        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_4_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_5_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_6_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_7_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_8_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_9_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_10_FRIENDLY_NAME_CTR "\","
+        "\"" D_SENSOR_PZEM004T_11_FRIENDLY_NAME_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -1761,11 +1958,66 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
         D_DEVICE_SENSOR_PZEM004T_4_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_5_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_6_ADDRESS ","
-        D_DEVICE_SENSOR_PZEM004T_7_ADDRESS ""
+        D_DEVICE_SENSOR_PZEM004T_7_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_8_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_9_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_10_ADDRESS ","
+        D_DEVICE_SENSOR_PZEM004T_11_ADDRESS ""
       "]"  
     "},"
     "\"" D_JSON_ENERGY "\":{"
-        "\"DeviceCount\":8"    
+        "\"DeviceCount\":12"    
+    "}"
+  "}";
+
+  /**
+   * In the future, make a way to push this exact rule via single command (append new rule, start using vectors for indexing?)
+   * */
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // PIR detected
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":2" // Started
+      "}"
+    // "},"
+    // "\"Rule1\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":1,"
+    //     "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+    //     "\"State\":2" // Started
+    //   "}"
+    // "},"
+    // "\"Rule2\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":2,"
+    //     "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":2,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+    //     "\"State\":2" // Started
+    //   "}"
     "}"
   "}";
 
@@ -2431,9 +2683,9 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 
   //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on))
   
-  #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_INTERFACE  
   // #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_DS18X
   
   // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 8 // This should not be needed
   // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 5
@@ -2458,8 +2710,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 
       "\"5\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
       "\"19\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
-      "\"18\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
-      "\"21\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
+      "\"21\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
+      "\"18\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
 
       // // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
 
@@ -2704,6 +2956,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "]"
     "}"
   "}";
+
+  
 
 #endif
 
@@ -3107,25 +3361,24 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define DEVICENAME_CTR          "oilfurnace"
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
 
-  #define USE_SSIDS_OUTSIDE_HOUSE
   /**
-   * 2 pipe sensors (boiler_in, boiler_out, maybe on the heat pipe?)
-   * light sensor for lock_out
-   * lockout powered
+   * 4 pipe sensors (boiler_in, boiler_out, exhaust, garage radiator)
+   * light sensor for lock_out (analog and digital)
    * furnace power  
    * bme ambient
    * motion sensor
    */
 
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-
   #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_ANALOG
+  #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_BME //works
+  #define USE_MODULE_SENSORS_BME
   // #define USE_MODULE_SENSORS_MOTION
+  
+  #define USE_MODULE_CORE_RULES
+
+  #define USE_MODULE_CONTROLLER_FURNACE_SENSOR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3138,13 +3391,16 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"D3\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","        // Furnace main power
-      "\"D7\":\"" D_GPIO_FUNCTION_SWT2_CTR  "\","        // Furnace "lockout"
+      "\"D5\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT2_CTR  "\","
       #endif      
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D5\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+      "\"D0\":\"" D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
       #endif
-      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
+      "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
+      #endif
+      "\"D7\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -3152,9 +3408,12 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   
   #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
   #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG  "FurnaceOutflow"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG  "Exhaust"
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG  "GarageRadiator"
   #define D_DEVICE_SENSORS_ANALOG_1_CTR       "LockOut Lamp Luminance"
   #define D_DEVICE_SENSORS_SWITCH_1_CTR       "FurnaceActive"
   #define D_DEVICE_SENSORS_SWITCH_2_CTR       "FurnaceLockOut"
+  #define D_DEVICE_SENSORS_SWITCH_3_CTR       "PIR"
   #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Garage"
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
 
@@ -3167,7 +3426,9 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
@@ -3177,16 +3438,41 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "]"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_SWITCH_1_CTR "\","
-        "\"" D_DEVICE_SENSORS_SWITCH_2_CTR "\""
+        "\"" D_DEVICE_SENSORS_SWITCH_2_CTR "\","
+        "\"" D_DEVICE_SENSORS_SWITCH_3_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                                
-        "[40,170,67,3,30,19,2,25],"                              
-        "[40,255,169,120,53,22,4,240]"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["    
+        "[40,0,37,149,240,1,60,0],"
+        "[40,124,194,149,240,1,60,110],"
+        "[40,199,255,149,240,1,60,249],"
+        "[40,246,153,149,240,1,60,174]"
       "]"  
     "}"
   "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":2,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":2" // Started
+      "}"
+    "}"
+  "}";
+
 
 #endif
 
@@ -3525,6 +3811,260 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 
 
 
+#ifdef DEVICE_SPAREROOM_H801_WARDROBE_UPLIGHTS
+  #define DEVICENAME_CTR          "h801_spareroom_wardrobe"
+  #define DEVICENAME_FRIENDLY_CTR "H801 Spareroom Wardrobe"
+  
+  #define USE_SERIAL_ALTERNATE_TX
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  //#define FORCE_TEMPLATE_LOADING
+  // #define SETTINGS_HOLDER 2 
+
+  #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
+
+  #define DEBUG_TARGET_ANIMATOR_SEGMENTS
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_PWM
+  
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+
+  #define MAX_NUM_SEGMENTS 5
+  
+  
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+
+
+  
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+ 
+
+  #define STRIP_SIZE_MAX 1
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBcw\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":10,"
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+  
+#endif
+
+
+
+#ifdef DEVICE_AMBILIGHT_SAMSUNG_SPAREROOM
+  #define DEVICENAME_CTR          "ambilight_spareroom"
+  #define DEVICENAME_FRIENDLY_CTR "Ambilight Spareroom"
+  #define ESP32
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #define STRIP_SIZE_MAX 226                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+
+  // Hard coded to alternate pin until I make this template based
+  #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+  #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":10," 
+    "\"Hue\":25," 
+    "\"Sat\":70," 
+    "\"Effects\":{"
+      "\"Function\":0"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":10"
+  "}";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  /**
+   * In the future, make a way to push this exact rule via single command (append new rule, start using vectors for indexing?)
+   * */
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // PIR detected
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+        "\"State\":2" // Started
+      "}"
+    "}"
+  "}";
+
+#endif
+
+
+#ifdef DEVICE_BLACK_STAND_LIGHT
+  #define DEVICENAME_CTR          "stand_light"
+  #define DEVICENAME_FRIENDLY_CTR "Stand Light"
+    
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #define STRIP_SIZE_MAX 77                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+
+  // Hard coded to alternate pin until I make this template based
+  // #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+  // #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
+  
+  // #define LIGHTING_TEMPLATE_DEFAULT_STAND_RAINBOW
+  // #define LIGHTING_TEMPLATE_DEFAULT_STAND_WARM_WHITE
+  #define LIGHTING_TEMPLATE_DEFAULT_STAND_ORANGE_WHITE_BLUE
+
+  #ifdef LIGHTING_TEMPLATE_DEFAULT_STAND_WARM_WHITE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":10," 
+    "\"Hue\":25," 
+    "\"Sat\":70," 
+    "\"Effects\":{"
+      "\"Function\":0"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":10"
+  "}";
+  #endif // LIGHTING_TEMPLATE_DEFAULT_STAND_WARM_WHITE
+  #ifdef LIGHTING_TEMPLATE_DEFAULT_STAND_RAINBOW
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Rainbow\"," //rainbow gradient 1
+    "\"Hue\":25," 
+    "\"Sat\":70," 
+    "\"Effects\":{"
+      "\"Function\":\"Static\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":10"
+  "}";
+  #endif // LIGHTING_TEMPLATE_DEFAULT_STAND_RAINBOW
+  #ifdef LIGHTING_TEMPLATE_DEFAULT_STAND_ORANGE_WHITE_BLUE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Orange White Blue\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Static\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_DEFAULT_STAND_ORANGE_WHITE_BLUE
+
+
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+
+#endif
+
+
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
 ****** Masterbedroom ****************************************************************************************************************************************************
@@ -3685,9 +4225,6 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define DEVICENAME_CTR          "floorfan2"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 2"
   
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
   #define USE_MODULE_CORE_RULES
   
   #define USE_MODULE_DRIVERS_INTERFACE
@@ -3706,6 +4243,87 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   "}";
 
 #endif
+
+
+
+#ifdef DEVICE_MASTERBEDROOM_DRESSER_LIGHTS
+  #define DEVICENAME_CTR          "dresser_lights"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Dresser Lights"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 50                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   **/  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Pink purple 02\"," 
+    "\"Effects\":{"
+      "\"Function\":\"" D_EFFECTS_FUNCTION__STATIC__NAME_CTR "\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":2000,"
+      "\"RateMs\":5000"
+    "},"    
+    "\"BrightnessRGB\":0"
+  "}";
+  
+
+#endif
+
 
 
 
@@ -3854,6 +4472,398 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 
 
 #endif
+
+
+
+#ifdef DEVICE_BEDROOM_WALLCLOCK_01
+  #define DEVICENAME_CTR            "bedroom_wallclock_01"
+  #define DEVICENAME_FRIENDLY_CTR   "RGB Clock 0l"
+
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  /**
+   * @brief 
+   * Add list of optional animations on the time
+   *  - on the top of the hour, display animation (idea, flash white (all on), then saturate back into the new time)
+   * 
+   */
+
+
+   
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+
+  #define ENABLE_DEVFEATURE_RGB_CLOCK
+
+
+
+  #define STRIP_SIZE_MAX 93
+  
+  #define DISABLE_WEBSERVER
+
+  // #define USE_MODULE_TEMPLATE
+  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  //   "\"" D_JSON_GPIOC "\":{"
+  //     "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+  //   "},"
+  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  // "}";
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   #ifdef STRIP_SIZE_MAX
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   #else
+  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
+  //   #endif //STRIP_SIZE_MAX
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","
+  //   "\"" D_JSON_TRANSITION       "\":{"
+  //     "\"" D_JSON_TIME_MS "\":0,"
+  //     "\"" D_JSON_RATE_MS "\":1000,"
+  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+  //     "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+  //   "},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+  //   "\"" D_JSON_EFFECTS "\":{" 
+  //     "\"" D_JSON_FUNCTION "\":29"
+  //   "},"
+  //   // "\"CCT_Temp\": 152,"
+  //   // "\"Hue\":25,"
+  //   // "\"Sat\":100,"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":41,"
+  //   "\"BrightnessCCT\":10,"
+  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  // "}";
+  
+  // #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
+  // #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Landing"
+  
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+  //     "],"
+  //     "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+  //     "]"
+  //   "}"
+  // "}";
+
+/**
+ * @brief New format below
+ * 
+ */
+
+
+  
+  // #define STRIP_SIZE_MAX 50                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+   
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+    // #ifdef ESP8266 // default pins for ws28xx
+    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #else
+    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #endif
+    
+      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief 
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
+ * 
+ */
+
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
+
+  #define USE_LIGHTING_TEMPLATE
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    // "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    // "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    // "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
+
+
+    // "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    // "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+    // "\"Effects\":{"
+    //   "\"Function\":\"Slow Glow\""
+    // "},"
+    // "\"Transition\":{"
+    //   "\"TimeMs\":0,"
+    //   "\"RateMs\":1000"
+    // "},"    
+    // "\"BrightnessRGB\":100"
+
+    "\"HardwareType\": \"SK6812\","
+    "\"LightSize\": 93,"
+    "\"ColourOrder\": \"GRBW\","
+    "\"AnimationMode\": \"Effects\","
+    "\"ColourPalette\": 1,"
+    "\"Effects\": {"
+      "\"Function\": 28"
+    "},"
+    "\"Transition\": {"
+      "\"TimeMs\": 500,"
+      "\"RateMs\": 1000"
+    "},"
+    "\"BrightnessRGB\": 100"
+
+  "}";
+
+
+
+
+  // #endif
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+  //   "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":\"" D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR "\""
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":5000,"
+  //     "\"RateMs\":20000"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif
+
+  // #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+  //   "\"ColourPalette\":\"Christmas 21\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":30"
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":0,"
+  //     "\"RateMs\":30"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif // LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+
+  // #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+  //   "\"ColourPalette\":\"Christmas 06\"," 
+  //   "\"Effects\":{"
+  //     "\"Function\":1"
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":0,"
+  //     "\"RateMs\":30"
+  //   "},"    
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+
+  // #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"Segment0\":{"
+  //     "\"PixelRange\":[0,19],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Static\""
+  //     "},"
+  //     "\"ColourPalette\":\"Christmas 09\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":3000,"
+  //       "\"RateMs\":10000"
+  //     "},"    
+  //     "\"BrightnessRGB\":100"
+  //   "},"
+  //   "\"Segment1\":{"
+  //     "\"PixelRange\":[20,29],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Solid RGBCCT\""
+  //     "},"
+  //     "\"ColourPalette\":\"Solid Rgbcct 01\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":500,"
+  //       "\"RateMs\":1000"
+  //     "},"    
+  //     "\"BrightnessRGB\":100"
+  //   "},"
+  //   "\"Segment2\":{"
+  //     "\"PixelRange\":[30,49],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Slow Glow\""
+  //     "},"
+  //     "\"ColourPalette\":\"Christmas 01\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":500,"
+  //       "\"RateMs\":1000"
+  //     "},"    
+  //     "\"BrightnessRGB\":100"
+  //   "},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif
+  
+  // #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"Segment0\":{"
+  //     "\"PixelRange\":[0,19],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //     "\"Effects\":{"
+  //       "\"Function\":29"
+  //     "},"
+  //     "\"ColourPalette\":\"Christmas 09\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":0,"
+  //       "\"RateMs\":23"
+  //     "},"    
+  //     "\"BrightnessRGB\":100"
+  //   "},"
+  //   "\"Segment1\":{"
+  //     "\"PixelRange\":[20,29],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+  //     "\"Effects\":{"
+  //       "\"Function\":28"
+  //     "},"
+  //     "\"ColourPalette\":11,"
+  //     "\"Hue\":20,"
+  //     "\"Sat\":90,"
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":0,"
+  //       "\"RateMs\":25"
+  //     "},"    
+  //     "\"BrightnessRGB\":100"
+  //   "},"
+  //   "\"Segment2\":{"
+  //     "\"PixelRange\":[30,49],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Slow Glow\""
+  //     "},"
+  //     "\"ColourPalette\":\"Christmas 01\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":500,"
+  //       "\"RateMs\":1000"
+  //     "},"    
+  //     "\"BrightnessRGB\":100"
+  //   "},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+  //   "\"BrightnessRGB\":100"
+  // "}";
+  // #endif
+
+
+
+
+#endif
+
 
 
 #ifdef DEVICE_RGBNOTIFICATION_01
@@ -4214,6 +5224,113 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 #endif
 
 
+#ifdef DEVICE_HVAC_HAIRDRYER 
+  #define DEVICENAME_CTR          "hvac_hairdryer"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed HVAC with Energy Sensor"
+
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+   
+  // #define ENABLE_BUG_TRACING
+  //#define ENABLE_MQTT_DEBUG_MESSAGES
+
+  //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
+  // #define ENABLE_HVAC_DEBUG_TIMES
+  // #define DISABLE_WEBSERVER
+
+  // 
+  
+  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+
+  #define USE_MODULE_CONTROLLER_HVAC
+  #define HEATING_DEVICE_MAX 1
+  #define MAX_ZONES 1
+  
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_DHT
+  // // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_REMOTE_DEVICE
+
+  // #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  // #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+  
+  // #define USE_MODULE_ENERGY_INTERFACE
+  // #define USE_MODULE_ENERGY_PZEM004T_V3
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"19\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR     "\","
+      "\"18\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"LBI\":\"" D_GPIO_FUNCTION_BUILTIN_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Room"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Room"
+
+  #define D_DEVICE_SENSOR_BME_0_NAME "Room_BME"
+
+  #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
+      "]"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "}"
+  "}";
+  
+#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -4549,9 +5666,15 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
   
+  #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
   
   
   #define USE_MODULE_SENSORS_INTERFACE

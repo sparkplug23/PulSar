@@ -20,6 +20,11 @@
 
 #include "4_Drivers/GPS_UBX/internal/types/NeoTime.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 class GPSTime
 {
   GPSTime();
@@ -83,3 +88,7 @@ public:
 };
 
 #endif
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

@@ -1,6 +1,8 @@
 #ifndef NEOGPS_CFG
 #define NEOGPS_CFG
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
 //  Copyright (C) 2014-2017, SlashDevin
 //
 //  This file is part of NeoGPS
@@ -105,3 +107,6 @@
 
 
 #endif
+
+
+#endif // USE_MODULE_DRIVERS_GPS

@@ -1,5 +1,5 @@
 
-#include "mEnergy.h"
+#include "mEnergyInterface.h"
 
 #ifdef USE_MODULE_ENERGY_INTERFACE
 

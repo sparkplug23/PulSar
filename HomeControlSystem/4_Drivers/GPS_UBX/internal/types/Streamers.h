@@ -18,6 +18,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #include <Arduino.h>
 
 extern Print & operator <<( Print & outs, const bool b );
@@ -48,3 +52,7 @@ extern void trace_header( Print & outs );
 extern void trace_all( Print & outs, const NMEAGPS &gps, const GPS_FIX &fix );
 
 #endif
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

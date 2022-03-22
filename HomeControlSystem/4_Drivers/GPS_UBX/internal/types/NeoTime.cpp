@@ -17,6 +17,11 @@
 
 #include "NeoTime.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 // For strtoul declaration
 #include <stdlib.h>
 
@@ -206,3 +211,7 @@ uint16_t time_t::day_of_year() const
     pivot_year   ( this_year.year );
   }
 #endif
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

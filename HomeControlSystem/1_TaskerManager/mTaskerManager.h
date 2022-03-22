@@ -190,6 +190,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CORE_UPDATES
     EM_MODULE_CORE_UPDATES_ID,
   #endif 
+  #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
+    EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID,
+  #endif 
   // Additional Internal Subsytems
   #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
     EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID,
@@ -214,7 +217,8 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
     EM_MODULE_DISPLAYS_OLED_SSD1306_ID,
   #endif
-  // Drivers (Range 40-129)
+  // Drivers (Range 40-129) == INTERFACES should be moved to the bottom, so all modules are called first.
+  // Or, new array method should skip all interfaces and call them last? hmm, this does not make sence when interface needs to configure modules first, so prob keep the same
   #ifdef USE_MODULE_DRIVERS_INTERFACE
     // EM_MODULE_DRIVERS_HBRIDGE_ID,
   #endif
@@ -247,6 +251,12 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
     EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
+    EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
+    EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
     EM_MODULE_DRIVERS_STATUS_LEDS_ID,
@@ -332,7 +342,10 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
     EM_MODULE_SENSORS_REMOTE_DEVICE_ID,
   #endif
-  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
+    EM_MODULE_SENSORS_ADC_INTERNAL_ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
     EM_MODULE_SENSORS_ADC_INTERNAL_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
@@ -399,6 +412,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
     EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
+    EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID,
+  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -438,10 +454,14 @@ enum MODULE_IDS{
   #include "2_CoreSystem/Updates/mUpdates.h"
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
 #endif
+#ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
+  #include "2_CoreSystem/DevelopmentDebugging/mDevelopmentDebugging.h"
+  #define   pCONT_mDevelopmentDebugging             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
+#endif 
 
 // Subsystems (x-x)
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  #include "2b_InternalSystems/SolarLunar/mSolarLunar.h"
+  #include "2b_Internal_TaskerSystems/SolarLunar/mSolarLunar.h"
   #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
 #endif
 
@@ -521,6 +541,14 @@ enum MODULE_IDS{
   #include "4_Drivers/CAM_OV2640/mCamera.h"
   #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
 #endif
+#ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
+  #include "4_Drivers/Camera_OV2640/mCameraOV2640.h"
+  #define pCONT_camera                              static_cast<mCameraOV2640*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
+  #include "4_Drivers/WebCam/mWebCam.h"
+  #define pCONT_camera                              static_cast<mWebCam*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID])
+#endif
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/LEDs/mLEDs.h"
   #define pCONT_status_leds                         static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID])
@@ -536,7 +564,7 @@ enum MODULE_IDS{
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
-  #include "7_Energy/_Interface/mEnergy.h"
+  #include "7_Energy/_Interface/mEnergyInterface.h"
   #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
@@ -631,8 +659,12 @@ enum MODULE_IDS{
   #include "5_Sensors/RemoteDevice/mRemoteDevice.h"
   #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
   #include "5_Sensors/ADCInternal/mADCInternal.h"
+  #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+  #include "5_Sensors/ADCInternal_ESP32/mADCInternal.h"
   #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
@@ -722,6 +754,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
   #include "9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
   #define pCONT_bucket_water_level                static_cast<mBucketWaterLevel*>(pCONT->pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
+  #include "9_Controller/FurnaceSensor/mFurnaceSensor.h"
+  #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"

@@ -17,6 +17,10 @@
 
 #include "DMS.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
 #include <Print.h>
 
 //----------------------------------------------------------------
@@ -119,3 +123,7 @@ void DMS_t::printDDDMMmmmm( Print & outs ) const
     outs.print( '0' );
   outs.print( mmmm );
 }
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

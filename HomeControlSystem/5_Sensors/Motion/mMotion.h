@@ -1,7 +1,7 @@
 #ifndef _MODULE_SENSORS_MOTION_H
 #define _MODULE_SENSORS_MOTION_H
 
-#define D_UNIQUE_MODULE_SENSORS_MOTION_ID   132  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_SENSORS_MOTION_ID   133  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 #define D_GROUP_MODULE_SENSORS_MOTION_ID    1    // Numerical accesending order of module within a group
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -56,6 +56,8 @@ class mMotion :
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+
+    void Rules_Add_Rule();
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 

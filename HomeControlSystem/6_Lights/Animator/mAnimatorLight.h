@@ -7,6 +7,8 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+
+
 #include "6_Lights/Palette/mPalette_Progmem.h"
 #include "6_Lights/Palette/mPalette.h"
 
@@ -29,6 +31,7 @@
 #include "math.h"
 #include "fastmath.h"
 
+
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 #include "6_Lights/Palette/mPalette_Progmem.h"
@@ -39,7 +42,6 @@
 #include "6_Lights/FastLED_Modified/FastLED.h"
 
 // #define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-#define ENABLE_PIXEL_SINGLE_ANIMATION_CHANNEL
 
 #if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
   typedef RgbColor RgbTypeColor;
@@ -197,6 +199,8 @@ class mAnimatorLight :
         typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
       #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
         typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; 
+      #elif defined(USE_SK6812_METHOD_DEFAULT)
+        typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; 
       #else          
         typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
       #endif

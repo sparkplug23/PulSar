@@ -34,14 +34,14 @@ Change option to make all palettes gradient mode or node, or how to use it
 #include "2_CoreSystem/Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+// #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD
+// #define FASTLED_INTERNAL // suppress pragma warning messages
+// #include "6_Lights/FastLED_Modified/FastLED.h"
+// #endif // USE_DEVFEATURE_METHOD_WLED_BUILD
+// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/FastLED_Modified/FastLED.h"
-#endif // USE_DEVFEATURE_METHOD_WLED_BUILD
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-#define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/FastLED_Modified/FastLED.h"
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 //Remember to sync with what is in palette_progmem.h
 enum fMapIDs_Type__IDS{
@@ -142,6 +142,8 @@ class mPalette
     void init_ColourPalettes_Flower_SweetPeas_01();
     void init_ColourPalettes_Flower_SweetPeas_02();
     void init_ColourPalettes_Pink_Purple_01();
+    void init_ColourPalettes_Pink_Purple_02();
+    void init_ColourPalettes_Purple_Pink_80_20();
     void init_ColourPalettes_MicroLEDS_Pastel_01();
     void init_ColourPalettes_Single_Fire_01();
     void init_ColourPalettes_Shelf_Hearts();
@@ -171,6 +173,7 @@ class mPalette
     void init_ColourPalettes_Christmas_19();
     void init_ColourPalettes_Christmas_20();
     void init_ColourPalettes_Christmas_21();
+    void init_ColourPalettes_Sky_Glow_01();
     void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
     void init_ColourPalettes_Sunrise_02();
@@ -313,6 +316,7 @@ class mPalette
     PALETTELIST_STATIC_SUNSET_02__ID,
     PALETTELIST_STATIC_CANDLE_FLAME_01__ID,
     PALETTELIST_STATIC_GRADIENT_FIRE_01__ID,
+    PALETTELIST_STATIC_SKY_GLOW_01__ID,
     /**
      * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
      * Effect will go through these to form a rising/falling sun
@@ -351,6 +355,8 @@ class mPalette
     PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID,
     PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID,
     PALETTELIST_STATIC_PINK_PURPLE_01__ID,
+    PALETTELIST_STATIC_PINK_PURPLE_02__ID,
+    PALETTELIST_STATIC_PURPLE_PINK_80_20__ID,
     PALETTELIST_STATIC_MICROLEDS_PASTEL_01__ID,
 
     /**
@@ -520,6 +526,8 @@ class mPalette
       PALETTE flower_sweetpeas_01;
       PALETTE flower_sweetpeas_02;
       PALETTE pink_purple_01;
+      PALETTE pink_purple_02;
+      PALETTE purple_pink_80_20;
       PALETTE microleds_pastel_01;
       PALETTE winter;
       PALETTE autumn;
@@ -539,6 +547,7 @@ class mPalette
       PALETTE sunrise_04;
       PALETTE sunset_01;
       PALETTE sunset_02;
+      PALETTE sky_glow_01;
       PALETTE candle_flame_01;
       PALETTE berry_green;
       PALETTE gradient_sunlevel_group01_01;

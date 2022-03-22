@@ -91,6 +91,11 @@ class mDS18X :
       // uint8_t address_stored[8];
       int8_t sensor_group_id = -1; // which pin it comes from 
 
+      struct FLAGS{
+        bool set_from_known_address = -1; //-1 unset, might be same as below "address_id" == so maybe debug only
+
+      }flag;
+
       /**
        * @brief method is not right, I need to align this with devicename ids, so sensor[id] where id matches devicename should be configured
        * */

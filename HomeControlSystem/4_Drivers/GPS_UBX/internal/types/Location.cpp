@@ -17,6 +17,11 @@
 
 #include "Location.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 using namespace NeoGPS;
 
 //---------------------------------------------------------------------
@@ -135,3 +140,7 @@ void Location_t::OffsetBy( float distR, float bearingR )
   _lon += (dLon   / (RAD_PER_DEG * LOC_SCALE));
 
 } // OffsetBy
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

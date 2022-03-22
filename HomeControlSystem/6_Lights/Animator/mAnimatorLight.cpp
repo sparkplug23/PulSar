@@ -145,8 +145,23 @@ void mAnimatorLight::Init_NeoPixelBus()
   
   //step1:  moving the desired/starting colours into a buffer type, so it is dynamic
   //step2:  to become its own function, so strips can be changed at runtime
+
+
+#ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+
+// future methods will need to parse on esp8266 and only permit certain pins, or if very low pixel count, software versions
+
+  stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, PINSET_TEMP_METHOD_RGB_PIN_RGB);//19); 3 = rx0
+
+
+
+#else //legacy method
+
+
+
   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
   
+  #endif
 
 }
 
@@ -586,6 +601,8 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint32_t color, uint16_t
   col.red =   (color >> 16 & 0xFF);
   col.green = (color >> 8  & 0xFF);
   col.blue =  (color       & 0xFF);
+
+  col.W1 =   (color >> 24 & 0xFF);
 
   // AddLog(LOG_LEVEL_DEBUG, PSTR("color=%d\t%X"),indexPixel,color);
 

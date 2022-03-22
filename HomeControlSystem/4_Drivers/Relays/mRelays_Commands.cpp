@@ -34,6 +34,15 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
     }
 
+    /**
+     * @brief If off, clear any timer decounters for relays
+     * 
+     */
+    if(state == 0)
+    {
+      CommandSet_Timer_Decounter(0, relay_id);
+    }
+
 		//state needs checked for flipped
 		// if(state == 2){
 

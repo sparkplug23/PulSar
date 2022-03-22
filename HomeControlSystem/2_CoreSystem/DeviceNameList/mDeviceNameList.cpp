@@ -93,7 +93,7 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t class_id, 
 
 // }
 
-const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size){
+const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found){
 
   //convert enum number to unqiue
   module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
@@ -104,37 +104,52 @@ const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_
     
     // if((number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
     
-    if((
-      
-      
+    if((    
       number_buffer.unique_group_ids[i]==module_id)&&(number_buffer.index_ids[i]==device_id)){
       found_index = i;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"),i);
-    #endif // ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      // AddLog(LOG_LEVEL_TEST,PSTR("DeviceNameList::GetDeviceNameWithEnumNumber found_index %d"),i);
+      #endif // ENABLE_LOG_LEVEL_INFO
       break;
     }
   }
   //future, if none found, have a list of the prefered defaults, relay%d, sensor%d etc
 
-  if(found_index == -1){
-    memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
-    #endif // ENABLE_LOG_LEVEL_INFO
+  if(found_index == -1)
+  {
+    if(flag_respond_nomatch_if_not_found)
+    {
+      memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+      #endif // ENABLE_LOG_LEVEL_INFO
+    
+
+    }
+    else
+    {  
+      snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName(pCONT->GetVectorIndexbyModuleUniqueID(module_id)), device_id);
+
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+      #endif // ENABLE_LOG_LEVEL_INFO
+    }
     return buffer;
   }
 
   char* name_buffer2 = name_buffer.ptr;
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber len=%d"),strlen(buffer));
-    #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ENABLE_LOG_LEVEL_INFO
+
   // gets first index from the array, where we start at the position the desired name is the next name
   pCONT_sup->GetTextIndexed(buffer, buffer_size, found_index, name_buffer2);
-    #ifdef ENABLE_LOG_LEVEL_INFO
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber=%s"),buffer);
-    #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ENABLE_LOG_LEVEL_INFO
+  
   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("GetDeviceNameWithEnumNumber &name_buffer[index]=%s"),&name_buffer[index]);
 
   if(buffer == nullptr){

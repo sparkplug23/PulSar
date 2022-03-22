@@ -4,7 +4,6 @@
  * Temporary file for copying over functions as I completely redo
  * */
 
-// #ifdef EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
 /**
  * @brief Function reads templates from progmem if available, then calls TemplateParser
@@ -233,7 +232,7 @@ void mHardwarePins::GpioInit(void)
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MODULE "GpioInit"));
   #endif // ENABLE_LOG_LEVEL_INFO
-  
+
   uint16_t mgpio;
 
   /**
@@ -331,6 +330,12 @@ void mHardwarePins::GpioInit(void)
   }
   pCONT_set->my_module_flag = ModuleFlag();
 
+  #ifdef USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
+  AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_MODULE "GpioInit DISABLED with \"USE_DEBUG_DISABLE_GLOBAL_PIN_INIT\""));
+  return;
+  #endif // USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
+  
+  
   AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
 
   /**
@@ -648,7 +653,7 @@ void mHardwarePins::GpioInit(void)
 
   if (PinUsed(GPIO_RGB_DATA_ID)){  // RGB led
     pCONT_set->devices_present++;
-    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE;
+    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;
     // AddLog(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
   }else{
     // AddLog(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
@@ -687,13 +692,3 @@ void mHardwarePins::GpioInit(void)
 
 
 
-
-
-
-
-
-
-
-
-
-// #endif // EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP

@@ -1,6 +1,8 @@
 #ifndef DMS_H
 #define DMS_H
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
 //  Copyright (C) 2014-2017, SlashDevin
 //
 //  This file is part of NeoGPS
@@ -53,3 +55,5 @@ public:
 extern Print & operator << ( Print & outs, const DMS_t & );
 
 #endif
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

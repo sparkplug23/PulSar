@@ -515,6 +515,12 @@ DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
 DEFINE_PGM_CTR(kOptionIncrement)        "Increment|" "Increase|+|plus|" D_CYCLE ;
 DEFINE_PGM_CTR(kOptionDecrement)        "Decrement|" "Decrease|-|minus";
 
+DEFINE_PGM_CTR(kOptionFollow)        "Follow";
+DEFINE_PGM_CTR(kOptionFollowInv)        "FollowInv|Inverted";
+
+
+
+
 // xdrv_02_webserver.ino
 // #ifdef USE_MODULE_NETWORK_WEBSERVER
 // const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>

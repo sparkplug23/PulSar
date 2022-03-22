@@ -109,6 +109,74 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 
 }
 
+/**
+ * @brief For development, print the Rule out and what it means using basic and advanced (with words)
+ * 
+ * show trigger and command (not event)
+ */
+void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
+{
+
+    AddLog(LOG_LEVEL_INFO, PSTR("1"
+      "\n\rIndex:\t %d\n\r"
+      "Trigger>>\n\r"
+      "\tmodule:\t%d\n\r"
+      "\tfunction:\t%d\n\r"
+      "\tdevice_id:\t%d\n\r"
+      "\tvalue:\t\t\t[%d,%d,%d,%d,%d]\n\r"
+      "Command>>\n\r"
+      "\tmodule:\t%d\n\r"
+      "\tfunction:\t%d\n\r"
+      "\tdevice_id:\t%d\n\r"
+      "\tvalue:\t\t\t[%d,%d,%d,%d,%d]\n\r"
+    "2"),
+    pCONT_rules->rules_active_index,
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.module_id, 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.function_id, 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.device_id, 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[0], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[1], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[2], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[3], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].trigger.value.data[4],
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.module_id, 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.function_id, 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id, 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[1], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[2], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[3], 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[4]
+
+    );
+
+    
+}
+
+// Event (not command or trigger)
+void mRuleEngine::ShowRuleEvent_AddLogByIndex(uint8_t show_type)
+{
+
+  AddLog(LOG_LEVEL_INFO, PSTR("1"
+      "\n\rIndex:\t %d\n\r"
+      "Event>>\n\r"
+      "\tmodule:\t%d\n\r"
+      "\tfunction:\t%d\n\r"
+      "\tdevice_id:\t%d\n\r"
+      "\tvalue:\t\t\t[%d,%d,%d,%d,%d]\n\r"
+    "2"),
+    pCONT_rules->rules_active_index,
+    pCONT_rules->event_triggered.module_id, 
+    pCONT_rules->event_triggered.function_id, 
+    pCONT_rules->event_triggered.device_id, 
+    pCONT_rules->event_triggered.value.data[0], 
+    pCONT_rules->event_triggered.value.data[1], 
+    pCONT_rules->event_triggered.value.data[2], 
+    pCONT_rules->event_triggered.value.data[3], 
+    pCONT_rules->event_triggered.value.data[4]
+  );
+    
+}
 
 
 // All events here will only trigger based of function calls, when those occur happen throughout code

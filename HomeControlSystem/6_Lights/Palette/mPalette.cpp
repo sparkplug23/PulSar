@@ -72,7 +72,9 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Single_Fire_01();
   init_ColourPalettes_Flower_SweetPeas_01();
   init_ColourPalettes_Flower_SweetPeas_02();
+  init_ColourPalettes_Purple_Pink_80_20();
   init_ColourPalettes_Pink_Purple_01();
+  init_ColourPalettes_Pink_Purple_02();
   init_ColourPalettes_MicroLEDS_Pastel_01();
   init_ColourPalettes_Shelf_Hearts();
   init_ColourPalettes_Pastel();
@@ -102,6 +104,7 @@ void mPalette::init_PresetColourPalettes(){
   init_ColourPalettes_Christmas_19();
   init_ColourPalettes_Christmas_20();
   init_ColourPalettes_Christmas_21();
+  init_ColourPalettes_Sky_Glow_01();
   init_ColourPalettes_Sunrise_01();
   init_ColourPalettes_Sunrise_02();
   init_ColourPalettes_Sunrise_03();
@@ -186,6 +189,15 @@ void mPalette::init_ColourPalettes_Flower_SweetPeas_02(){
   palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_FLOWER_SWEATPEAS_02_NAME_CTR;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID;
 }
+void mPalette::init_ColourPalettes_Purple_Pink_80_20(){
+  palettelist.ptr     = &palettelist.purple_pink_80_20;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_PURPLE_PINK_80_20__ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_PURPLE_PINK_80_20_COLOUR_MAP__IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_PURPLE_PINK_80_20_COLOUR_MAP__IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_PURPLE_PINK_80_20_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID;
+}
 void mPalette::init_ColourPalettes_Pink_Purple_01(){
   palettelist.ptr     = &palettelist.pink_purple_01;  
   CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
@@ -193,6 +205,15 @@ void mPalette::init_ColourPalettes_Pink_Purple_01(){
   palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP__IDS);
   palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP__IDS;
   palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_PINK_PURPLE_01_NAME_CTR;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID;
+}
+void mPalette::init_ColourPalettes_Pink_Purple_02(){
+  palettelist.ptr     = &palettelist.pink_purple_02;  
+  CLEAR_PALETTELIST_WITH_PTR(palettelist.ptr);
+  palettelist.ptr->id = PALETTELIST_STATIC_PINK_PURPLE_02__ID;
+  palettelist.ptr->colour_map_size    = sizeof(PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__IDS);
+  palettelist.ptr->colour_map_id      = (uint8_t*)PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__IDS;
+  palettelist.ptr->friendly_name_ctr  = (char*)PM_PALETTE_PINK_PURPLE_02_NAME_CTR;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID;
 }
 void mPalette::init_ColourPalettes_MicroLEDS_Pastel_01(){
@@ -488,7 +509,7 @@ void mPalette::init_ColourPalettes_Sunrise_01(){
   palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_SUNRISE_01_COLOUR_MAP__IDS;
   palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_SUNRISE_01_NAME_CTR;
   // palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
-  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID;
 }
 
 void mPalette::init_ColourPalettes_Sunrise_02(){
@@ -537,6 +558,16 @@ void mPalette::init_ColourPalettes_Sunset_02(){
   palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_SUNSET_02_COLOUR_MAP__IDS);
   palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_SUNSET_02_COLOUR_MAP__IDS;
   palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_SUNSET_02_NAME_CTR;
+  // palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
+  palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID;
+}
+
+void mPalette::init_ColourPalettes_Sky_Glow_01(){
+  palettelist.ptr     = &palettelist.sky_glow_01;  
+  palettelist.ptr->id = PALETTELIST_STATIC_SKY_GLOW_01__ID;
+  palettelist.ptr->colour_map_size = sizeof(PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__IDS);
+  palettelist.ptr->colour_map_id = (uint8_t*)PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__IDS;
+  palettelist.ptr->friendly_name_ctr = (char*)PM_PALETTE_SKY_GLOW_01_NAME_CTR;
   // palettelist.ptr->flags.fIndexs_Type = INDEX_TYPE_SCALED_255;
   palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID;
 }
@@ -933,6 +964,8 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID:    return &palettelist.flower_sweetpeas_01;
     case PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID:    return &palettelist.flower_sweetpeas_02;
     case PALETTELIST_STATIC_PINK_PURPLE_01__ID:    return &palettelist.pink_purple_01;
+    case PALETTELIST_STATIC_PINK_PURPLE_02__ID:    return &palettelist.pink_purple_02;
+    case PALETTELIST_STATIC_PURPLE_PINK_80_20__ID:    return &palettelist.purple_pink_80_20;
     case PALETTELIST_STATIC_MICROLEDS_PASTEL_01__ID:    return &palettelist.microleds_pastel_01;
     case PALETTELIST_STATIC_RAINBOW__ID:         return &palettelist.rainbow;
     case PALETTELIST_STATIC_RAINBOW_INVERTED__ID:return &palettelist.rainbow_inverted;
@@ -952,6 +985,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
     case PALETTELIST_STATIC_SUNRISE_04__ID:      return &palettelist.sunrise_04;
     case PALETTELIST_STATIC_SUNSET_01__ID:      return &palettelist.sunset_01;
     case PALETTELIST_STATIC_SUNSET_02__ID:      return &palettelist.sunset_02;
+    case PALETTELIST_STATIC_SKY_GLOW_01__ID:      return &palettelist.sky_glow_01;
     case PALETTELIST_STATIC_CANDLE_FLAME_01__ID:      return &palettelist.candle_flame_01;
     case PALETTELIST_STATIC_CHRISTMAS_01__ID:     return &palettelist.christmas_01;
     case PALETTELIST_STATIC_CHRISTMAS_02__ID:     return &palettelist.christmas_02;

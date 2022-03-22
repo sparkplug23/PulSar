@@ -7,6 +7,12 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
+// New sections of code that should be enabled by default
+#define ENABLE_CRGBPALETTES_IN_PROGMEM
+#define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+#define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
@@ -76,10 +82,12 @@ DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)                      "RBG"
 
 #define D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "RGBCCT_PWM"
 #define D_PIXEL_HARDWARE_TYPE_WS28XX_CTR "WS28XX"
+#define D_PIXEL_HARDWARE_TYPE_SK6812_CTR "SK6812"
 
 
 DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)       D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR;
 DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)       D_PIXEL_HARDWARE_TYPE_WS28XX_CTR;
+DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)       D_PIXEL_HARDWARE_TYPE_SK6812_CTR;
 
 
 // #define CLEAR_PALETTELIST_WITH_PTR(x) memset(x,0,sizeof(PALETTELIST::PALETTE));
@@ -91,7 +99,8 @@ enum LightTypes_IDS{
   LT_NU8,   LT_SERIAL1, LT_SERIAL2,   
   LT_LIGHT_INTERFACE_END,
   // Anything after this will not be handled in lightinterface
-  LT_ADDRESSABLE, 
+  LT_ADDRESSABLE_WS281X,  // this needs split out, into WS2812, SK6812
+  LT_ADDRESSABLE_SK6812,
   LT_RGBW,  LT_RGBWC, // This are not needed, as they are either ADD or PWM
 };
 
@@ -525,6 +534,7 @@ class mInterfaceLight :
 
     
     RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
 
     
     uint8_t ConstructJSON_Scene(uint8_t json_level = 0);

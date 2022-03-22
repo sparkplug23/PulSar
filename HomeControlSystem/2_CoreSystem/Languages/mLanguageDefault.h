@@ -45,6 +45,9 @@
 #define D_MODULE_CORE_TIME_CTR                     "mTime"
 #define D_MODULE_CORE_TIME_FRIENDLY_CTR            "time"
 
+#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR                     "mDevelopmentDebugging"
+#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR            "mDevelopmentDebugging"
+
 #define D_MODULE_CORE_RULES_CTR            "Rules"
 #define D_MODULE_CORE_RULES_FRIENDLY_CTR   "rules"
 
@@ -115,6 +118,9 @@
 
   #define D_MODULE_DRIVERS_CAMERA_OV2640_CTR "Camera"
   #define D_MODULE_DRIVERS_CAMERA_OV2640_FRIENDLY_CTR "camera"
+  
+  #define D_MODULE_DRIVERS_CAMERA_WEBCAM_CTR "Camera"
+  #define D_MODULE_DRIVERS_CAMERA_WEBCAM_FRIENDLY_CTR "camera"
 
   #define D_MODULE_DRIVERS_STATUS_LEDS_CTR              "mSTATUS_LEDS"
   #define D_MODULE_DRIVERS_STATUS_LEDS_FRIENDLY_CTR              "statusleds"
@@ -285,6 +291,8 @@
   #define D_MODULE_CONTROLLER_EXERCISEBIKE_FRIENDLY_CTR              "exercisebike"
 //#endif
 
+
+
 // currently fanpwm
   #define D_MODULE_CONTROLLER_FAN_PWM_CTR              "mFan"
   #define D_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR              "fan"
@@ -321,6 +329,11 @@
 
 #define D_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_CTR "bucket_water_level"
 #define D_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_FRIENDLY_CTR "bucket_water_level"
+
+
+
+#define D_MODULE_CONTROLLER_FURNACE_SENSOR_CTR "furnace_sensor"
+#define D_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR "furnace_sensor"
 
 
 
@@ -918,6 +931,7 @@
 #define D_GPIO_FUNCTION_SWT2_CTR     "SWT2"
 #define D_GPIO_FUNCTION_SWT1_INV_CTR     "SWT1 Inv"
 #define D_GPIO_FUNCTION_SWT2_INV_CTR     "SWT2 Inv"
+#define D_GPIO_FUNCTION_SWT3_INV_CTR     "SWT3 Inv"
 #define D_GPIO_FUNCTION_SWT1_NP_CTR     "SWT1_NP"
 #define D_GPIO_FUNCTION_SWT2_NP_CTR     "SWT2_NP"
 #define D_GPIO_FUNCTION_REL1_CTR          "Relay 1"
@@ -931,6 +945,9 @@
 #define D_GPIO_FUNCTION_FAN_PWM1_CTR      "Fan PWM1"
 #define D_GPIO_FUNCTION_I2C_SCL_CTR       "I2C SCL"
 #define D_GPIO_FUNCTION_I2C_SDA_CTR       "I2C SDA"
+
+
+#define D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "Analog Input0"
 
 #define D_GPIO_FUNCTION_OLED_RESET_CTR "OLED Reset"
 
@@ -991,6 +1008,9 @@
 #define D_GPIO_FUNCTION_GPS_SERIAL1_RX_CTR "GPS Serial1 RX"
 #define D_GPIO_FUNCTION_GPS_SERIAL2_TX_CTR "GPS Serial2 TX"
 #define D_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR "GPS Serial2 RX"
+
+#define D_GPIO_FUNCTION_BUILTIN_LED1_CTR              "Builtin LED 1" // only enabled if available and not being used by another pin
+
 
 #define D_GPIO_FUNCTION_LED1_CTR              D_GPIO_FUNCTION_LED_CTR "1"
 #define D_GPIO_FUNCTION_LED2_CTR              D_GPIO_FUNCTION_LED_CTR "2"

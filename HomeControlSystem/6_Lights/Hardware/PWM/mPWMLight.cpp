@@ -101,7 +101,19 @@ void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
       if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) {
         // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
         cur_col = cur_col_10[i + pCONT_iLight->settings.pwm_offset]; //leak chance
-        if(!pCONT_iLight->rgbcct_controller.isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max
+        // if(!pCONT_iLight->rgbcct_controller.isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max..
+
+
+        
+/**
+ * @brief 
+ * H801 will always assume 1 segment only
+ * 
+ */
+
+if(!pCONT_lAni->_segment_runtimes->rgbcct_controller->isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max
+
+
          //val_1 = cur_col;
           cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0;   // shrink to the range of pwm_min..pwm_max
           //val_2 = cur_col;

@@ -38,7 +38,7 @@
 
 // #include "1_TaskerManager/mTaskerManager.h"
 
-// #ifdef USE_MODULE_DRIVERS_GPS
+#ifdef USE_MODULE_DRIVERS_GPS
 
 
 #define PGM_P const char *
@@ -1068,4 +1068,4 @@ public:
 
 // **/
 
-// #endif 
+#endif 

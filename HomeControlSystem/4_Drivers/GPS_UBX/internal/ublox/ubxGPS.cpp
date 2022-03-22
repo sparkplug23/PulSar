@@ -18,7 +18,15 @@
 // #include "NMEAGPS_cfg.h"
 #include "4_Drivers/GPS_UBX/internal/configs/NMEAGPS_cfg.h"
 // Disable the entire file if derived types are not allowed.
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #ifdef NMEAGPS_DERIVED_TYPES
+
+
+
 
 // #include "ublox/ubxGPS.h"
 #include "4_Drivers/GPS_UBX/internal/ublox/ubxGPS.h"
@@ -1602,3 +1610,6 @@ bool ubloxGPS::parseFix( uint8_t c )
 #endif // UBX messages enabled
 
 #endif // NMEAGPS_DERIVED_TYPES enabled
+
+
+#endif // #ifdef USE_MODULE_DRIVERS_GPS

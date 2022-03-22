@@ -26,6 +26,10 @@
 
 // #include "2_CoreSystem/Logging/mLogging.h"
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #include "4_Drivers/GPS_UBX/internal/ublox/ubxNMEA.h"
 #include "4_Drivers/GPS_UBX/internal/ublox/ubxmsg.h"
 #include "4_Drivers/GPS_UBX/internal/types/GPSTime.h"
@@ -371,3 +375,6 @@ private:
 // #endif // NMEAGPS_DERIVED_TYPES enabled
 
 #endif
+
+
+#endif // #ifdef USE_MODULE_DRIVERS_GPS

@@ -15,6 +15,10 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  Hairdryer will become the premade oil one
+  OilHeater will become the testbed one
+  
 */
 #include "mHVAC.h"
 
@@ -23,11 +27,8 @@
 const char* mHVAC::PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE_CONTROLLER_HVAC_CTR;
 const char* mHVAC::PM_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR = D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR;
 
-int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj){
-
-  //FUTURE ZONE of upstairs climate will be URL/wireless method updated every 10, instead of reading any hardware
-  // REMOVE DHT from upstairs loop. 
-  // immersion relay and sensors will be only wired thing, to be replaced with ethernet POE later back to main controller
+int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   /************
    * INIT SECTION * 
@@ -96,10 +97,17 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj){
 
 void mHVAC::Every_Second()
 {
-  //temp calculate always, later add flags to update it
-  // SubContructCtr_HardwareStatus();
+// Handled 
 
-  //Update zone variables 
+
+}
+
+
+void mHVAC::FunctionHandler_Update_Sensors()
+{
+
+// I need to add checks, for when a sensor is not configured properly!
+
 
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
@@ -109,29 +117,12 @@ void mHVAC::Every_Second()
     zone[zone_id].sensor.humidity    = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
   }
 
-  // Update mqtt faster if active  
-  for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
-  {
-    if(zone[zone_id].program_timer_method->IsRunning())
-    {
-      mqtthandler_program_timers_ifchanged.tRateSecs = 1;
-      break; // Stop if any are true
-    }
-    else
-    {
-      mqtthandler_program_timers_ifchanged.tRateSecs = 10;
-    }
-  }
-    
-
-
 }
-
 
 
 void mHVAC::Pre_Init(void){
 
-  settings.active_zones = 4;
+  settings.active_zones = MAX_ZONES;
 
 }
 
@@ -182,12 +173,10 @@ void mHVAC::init(void){
   #endif
   
   
-  for(uint8_t device_id=0;device_id<4;device_id++){ 
+  for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){ 
     SetHeatingRelay(device_id,RELAY_STATE_OFF); 
   }
 
-  // memset(&status_message, 0, sizeof(status_message));
-// 
   // init_prog/ram_timers();
   // init_program_temps();
   // init_program_scheduling();
@@ -201,6 +190,13 @@ void mHVAC::init(void){
 }//end function
 
 
+
+/**
+ * @brief Needs phased out or simply renamed along the lines of "SetZoneOutput" to handle both hot and cold
+ * 
+ * @param device 
+ * @param state 
+ */
 void mHVAC::SetHeater(uint8_t device, uint8_t state){
 
   //add state check that only runs updates below if new state has been selected, else, return
@@ -234,7 +230,7 @@ void mHVAC::FunctionHandler_Program_Status(){
 return;
   memset(&heating_status,0,sizeof(heating_status));
 
-  // for(uint8_t device_id=0;device_id<4;device_id++){
+  // for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
     
   //   //Timer program active
   //   // if(program_timers[device_id].time_minutes_on){
@@ -278,7 +274,7 @@ uint8_t mHVAC::GetHeatingRelay(uint8_t device_id){
 
 uint8_t mHVAC::GetAnyHeatingRelay(){
   uint8_t oncount = 0;
-  for(uint8_t i = 0;i < 4;i++){
+  for(uint8_t i = 0;i < settings.active_zones;i++){
     oncount += GetHeatingRelay(i);
   }
   return oncount;
@@ -289,7 +285,7 @@ void mHVAC::FunctionHandler_Relay_Status(){ DEBUG_LINE;
 
 //remove, assume part of other functions
 
-  for(uint8_t device_id=0;device_id<4;device_id++){
+  for(uint8_t device_id=0;device_id<settings.active_zones;device_id++){
     if(pCONT_mry->CommandGet_Relay_Power(device_id)){
       // activeprograms[device_id].relays.state = 1;
     }else{
@@ -431,6 +427,17 @@ void mHVAC::FunctionHandler_Init(){
   functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_SECS_ID; 
   functionhandler_ptr->time_val = 1;
   functionhandler_ptr->function = &mHVAC::FunctionHandler_Programs_Temps;
+
+  
+  functionhandler_ptr = &functionhandler_update_sensors;
+  functionhandler_ptr->saved_millis = millis();
+  functionhandler_ptr->flags.periodic_enabled = true;
+  functionhandler_ptr->flags.run_now = true;
+  functionhandler_ptr->flags.run_always = false;
+  functionhandler_ptr->flags.time_unit = FUNCHANDLER_TIME_MS_ID; 
+  functionhandler_ptr->time_val = 100;
+  functionhandler_ptr->function = &mHVAC::FunctionHandler_Update_Sensors;
+  
     
 }
 

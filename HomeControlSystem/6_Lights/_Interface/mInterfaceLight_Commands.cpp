@@ -254,7 +254,8 @@ void mInterfaceLight::CommandSet_PixelHardwareTypeID(uint8_t value){
 int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
   if(c=='\0') return -1;
   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE; }
+  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE_WS281X; }
+  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)==0){       return LT_ADDRESSABLE_SK6812; }
   return -1;
 }
 const char* mInterfaceLight::GetPixelHardwareTypeName(char* buffer){
@@ -263,7 +264,8 @@ const char* mInterfaceLight::GetPixelHardwareTypeName(char* buffer){
 const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer){
   switch(id){
     case LT_PWM5:   memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)); break;
-    case LT_ADDRESSABLE: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR));         break;
+    case LT_ADDRESSABLE_WS281X: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR));         break;
+    case LT_ADDRESSABLE_SK6812: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_SK6812_CTR));         break;
   }
   return buffer;
 }

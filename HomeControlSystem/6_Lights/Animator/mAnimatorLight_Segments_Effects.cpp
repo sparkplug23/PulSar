@@ -21,13 +21,14 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
   
   mPaletteI->SetPaletteListPtrFromID(_segments[segment_active_index].palette.id);
 
-  switch(pCONT_set->Settings.light_settings.type)
-  {
-    default:
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; break;
-    // case LST_RGBW: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
-    // case LST_RGBCCT: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
-  }
+
+  /**
+   * @brief 
+   * Temp fix for rgbcct types, need to consoladate colour types
+   * 
+   */
+  // AddLog(LOG_LEVEL_TEST, PSTR("pCONT_set->Settings.light_settings.type = %d"), pCONT_set->Settings.light_settings.type);
+
   
   uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2; // allocate space for single colour pair
 
@@ -48,7 +49,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
   RgbcctColor desired_colour  = mPaletteI->GetColourFromPalette(_segments[segment_active_index].palette.id);
   #endif // ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("desired_colour=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+  // AddLog(LOG_LEVEL_TEST, PSTR("desired_colour1=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
   if(!_segment_runtimes[segment_active_index].rgbcct_controller->getApplyBrightnessToOutput()){ // If not already applied, do it using global values
     desired_colour = ApplyBrightnesstoRgbcctColour(
@@ -57,6 +58,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
       _segment_runtimes[segment_active_index].rgbcct_controller->getBrightnessCCT255()
     );
   }
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("desired_colour2=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
   
   SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_active_index].data, _segment_runtimes[segment_active_index]._dataLen, 0, _segments[segment_active_index].colour_type, desired_colour); 
   SetTransitionColourBuffer_StartingColour(_segment_runtimes[segment_active_index].data, _segment_runtimes[segment_active_index]._dataLen, 0, _segments[segment_active_index].colour_type, GetPixelColor(0));
@@ -217,12 +220,20 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
    * 
    */
 
-GetTransitionColourBuffer(_segment_runtimes[segment_active_index].data, _segment_runtimes[segment_active_index]._dataLen, 0, _segments[segment_active_index].colour_type, &colour_pairs);
+  GetTransitionColourBuffer(_segment_runtimes[segment_active_index].data, _segment_runtimes[segment_active_index]._dataLen, 0, _segments[segment_active_index].colour_type, &colour_pairs);
+  
     //pixel_within_data_iter++;
 
-    updatedColor = RgbTypeColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
+    updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
     
+// AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
+// AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
 
+      
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("updatedColor=%d,%d,%d,%d,%d"),updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("getSubType=%d"),_segment_runtimes[segment_active_index].rgbcct_controller->getSubType());
 
 
   for (uint16_t pixel =  _segments[segment_active_index].pixel_range.start; 
@@ -1012,7 +1023,7 @@ void mAnimatorLight::LCDDisplay_displayTime(time_t t, byte color, byte colorSpac
     LCDDisplay_showDigit((pCONT_time->second(t) / 10), color + colorSpacing * 6, 1);
     LCDDisplay_showDigit((pCONT_time->second(t) % 10), color + colorSpacing * 7, 0);
   }
-  //if ( second(t) % 2 == 0 ) 
+  // if ( second(t) % 2 == 0 ) 
   LCDDisplay_showDots(2, 5);//pCONT_time->second(t) * 4.25);                                // show : between hours and minutes on even seconds with the color cycling through the palette once per minute
   lastSecond = pCONT_time->second(t);
 }
@@ -1023,8 +1034,33 @@ void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color, byte segDi
   // pos 0 is the most right one (seen from the front) where data in is connected to the arduino
   byte leds_per_segment = 1 + abs( segGroups[segment][1] - segGroups[segment][0] );            // get difference between 2nd and 1st value in array to get led count for this segment
   if ( segDisplay % 2 != 0 ) segment += 7;                                                  // if segDisplay/position is odd add 7 to segment
+
+  uint16_t pixel_index = 0;
+
   for (byte i = 0; i < leds_per_segment; i++) {                                             // fill all leds inside current segment with color
-    animation_colours[( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+    // animation_colours[( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+
+pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
+
+RgbcctColor colour = ColorFromPaletteLCD(_segments[0].palette.id, color);//RgbColor(255,0,0);
+
+// RgbcctColor colour = RgbwColor(1,2,3,4);
+
+uint8_t segment_index = 0;
+
+
+  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_index, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID, colour);
+  
+
+
+
+
+    // animation_colours[( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  
+  
+  
+  
+  
   }
 }
 
@@ -1036,7 +1072,7 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
 }
 
 //tmp method
-RgbcctColor mAnimatorLight::ColorFromPalette(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness){
+RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness){
 
   //tmp fix, colour index not working with mine, I need to modulu it with palette size so it repeats along its length
   // mPaletteI->GetPalettePointerByID(palette_id)
@@ -1077,62 +1113,71 @@ RgbcctColor mAnimatorLight::ColorFromPalette(uint16_t palette_id, uint8_t desire
 
 void mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
 
-  // in 12h mode and while in setup upper dots resemble AM, all dots resemble PM
-  byte startPos = LED_PER_DIGITS_STRIP;
-  if ( LED_BETWEEN_DIGITS_STRIPS % 2 == 0 ) {                                                                 // only SE/TE should have a even amount here (0/2 leds between digits)
-    animation_colours[startPos].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
-    if ( dots == 2 ) animation_colours[startPos + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
-  } else {                                                                                                    // Regular and XL have 5 leds between digits
-    animation_colours[startPos].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
-    animation_colours[startPos + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
-    if ( LED_DIGITS / 3 > 1 ) {
-        animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
-        animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
-      }
-    if ( dots == 2 ) {
-      animation_colours[startPos + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
-      animation_colours[startPos + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
-      if ( LED_DIGITS / 3 > 1 ) {
-        animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
-        animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
-      }
-    }
-  }
+  // // in 12h mode and while in setup upper dots resemble AM, all dots resemble PM
+  // byte startPos = LED_PER_DIGITS_STRIP;
+  // if ( LED_BETWEEN_DIGITS_STRIPS % 2 == 0 ) {                                                                 // only SE/TE should have a even amount here (0/2 leds between digits)
+  //   animation_colours[startPos].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  //   if ( dots == 2 ) animation_colours[startPos + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  // } else {                                                                                                    // Regular and XL have 5 leds between digits
+  //   animation_colours[startPos].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  //   animation_colours[startPos + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  //   if ( LED_DIGITS / 3 > 1 ) {
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
+  //     }
+  //   if ( dots == 2 ) {
+  //     animation_colours[startPos + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  //     animation_colours[startPos + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
+  //     if ( LED_DIGITS / 3 > 1 ) {
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
+  //     }
+  //   }
+  // }
+
+
+
 }
 
 /****
  * Changes pixels randomly to new colour, with slow blending
  * Requires new colour calculation each call
  */
-void mAnimatorLight::SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01(){
-  // So colour region does not need to change each loop to prevent colour crushing
-  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-  // Pick new colours
-  //Display on all pixels
-  UpdateDesiredColourFromPaletteSelected();
+void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
+{
 
-  HsbColor colour_in = HsbColor(RgbColor(0));
-
-  animation_colours[0].DesiredColour = RgbcctColor(0,0,255,255,255);
-
-  for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
-
-  //test method
-  // animation_colours[0].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // animation_colours[1].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // animation_colours[2].DesiredColour = RgbcctColor(0,0,255,0,0);
-
-  // animation_colours[3].DesiredColour = RgbcctColor(0,255,0,0,0);
-  // animation_colours[4].DesiredColour = RgbcctColor(0,255,0,0,0);
-  // animation_colours[5].DesiredColour = RgbcctColor(0,255,0,0,0);
+  // Serial.println("here");
 
 
 
-  animation_colours[0].DesiredColour = RgbcctColor(255,0,0,0,0);
-  animation_colours[22].DesiredColour = RgbcctColor(0,255,0,0,0);
-  animation_colours[44].DesiredColour = RgbcctColor(0,0,255,0,0);
-  animation_colours[49].DesiredColour = RgbcctColor(255,0,0,0,0);
-  animation_colours[71].DesiredColour = RgbcctColor(0,255,0,0,0);
+  // // So colour region does not need to change each loop to prevent colour crushing
+  // pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+  // // Pick new colours
+  // //Display on all pixels
+  // UpdateDesiredColourFromPaletteSelected();
+
+  // HsbColor colour_in = HsbColor(RgbColor(0));
+
+  // animation_colours[0].DesiredColour = RgbcctColor(0,0,255,255,255);
+
+  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
+
+  // //test method
+  // // animation_colours[0].DesiredColour = RgbcctColor(0,0,255,0,0);
+  // // animation_colours[1].DesiredColour = RgbcctColor(0,0,255,0,0);
+  // // animation_colours[2].DesiredColour = RgbcctColor(0,0,255,0,0);
+
+  // // animation_colours[3].DesiredColour = RgbcctColor(0,255,0,0,0);
+  // // animation_colours[4].DesiredColour = RgbcctColor(0,255,0,0,0);
+  // // animation_colours[5].DesiredColour = RgbcctColor(0,255,0,0,0);
+
+
+
+  // animation_colours[0].DesiredColour = RgbcctColor(255,0,0,0,0);
+  // animation_colours[22].DesiredColour = RgbcctColor(0,255,0,0,0);
+  // animation_colours[44].DesiredColour = RgbcctColor(0,0,255,0,0);
+  // animation_colours[49].DesiredColour = RgbcctColor(255,0,0,0,0);
+  // animation_colours[71].DesiredColour = RgbcctColor(0,255,0,0,0);
 
 
 
@@ -1273,34 +1318,34 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01(){
 
 
 
-  for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
+//   for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
 
-      uint16_t tempnumber = testnum;
+//       uint16_t tempnumber = testnum;
 
-      // if(tempnumber%2){
-      //   showDots();
-      // }
-      if ( pCONT_time->second(0) % 2 == 0 ) LCDDisplay_showDots(2, pCONT_time->second(0) * 4.25);  
-
-
-      LCDDisplay_showDigit(
-        (tempnumber/1)%10,
-         64, 0);
-      LCDDisplay_showDigit(
-      (tempnumber/10)%10,
-         64, 1);
-      LCDDisplay_showDigit(
-        (tempnumber/100)%10,
-         64, 2);
-      LCDDisplay_showDigit(
-        (tempnumber/1000)%10,
-         64, 3);
+//       // if(tempnumber%2){
+//       //   showDots();
+//       // }
+//       if ( pCONT_time->second(0) % 2 == 0 ) LCDDisplay_showDots(2, pCONT_time->second(0) * 4.25);  
 
 
-      // showDigit(11, 64, 2);
-      // showDigit(12, 64, 1);
+//       LCDDisplay_showDigit(
+//         (tempnumber/1)%10,
+//          64, 0);
+//       LCDDisplay_showDigit(
+//       (tempnumber/10)%10,
+//          64, 1);
+//       LCDDisplay_showDigit(
+//         (tempnumber/100)%10,
+//          64, 2);
+//       LCDDisplay_showDigit(
+//         (tempnumber/1000)%10,
+//          64, 3);
 
-if(testnum++>9999){testnum=0;}
+
+//       // showDigit(11, 64, 2);
+//       // showDigit(12, 64, 1);
+
+// if(testnum++>9999){testnum=0;}
 
 
 
@@ -1327,16 +1372,16 @@ if(testnum++>9999){testnum=0;}
   
 // #endif 
 
-  // Check if output multiplying has been set, if so, change desiredcolour array
-  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
-  // Get starting positions already on show
-  UpdateStartingColourWithGetPixel();
-  // Call the animator to blend from previous to new
-  this->setAnimFunctionCallback(
-    [this](const AnimationParam& param){
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
-    }
-  );
+  // // Check if output multiplying has been set, if so, change desiredcolour array
+  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // // Get starting positions already on show
+  // UpdateStartingColourWithGetPixel();
+  // // Call the animator to blend from previous to new
+  // this->setAnimFunctionCallback(
+  //   [this](const AnimationParam& param){
+  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
+  //   }
+  // );
 }
 
 
@@ -1344,7 +1389,7 @@ if(testnum++>9999){testnum=0;}
 
 /**************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************
-********* SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02 *************************************************************************************************************************
+********* SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02 *************************************************************************************************************************
 ***************************************************************************************************************************************************************
 ***************************************************************************************************************************************************************/
 
@@ -1353,16 +1398,16 @@ if(testnum++>9999){testnum=0;}
  * Cycles over leds that are on and applies palette
  * */
 void mAnimatorLight::LCDDisplay_colorOverlay() {                                                                                       // This "projects" colors on already drawn leds before showing leds in updateDisplay();
-  for (byte i = 0; i < LED_COUNT; i++) {                                                                    // check each led...
-    if (animation_colours[i].DesiredColour.CalculateBrightness())  {
+  // for (byte i = 0; i < LED_COUNT; i++) {                                                                    // check each led...
+  //   if (animation_colours[i].DesiredColour.CalculateBrightness())  {
       
-      animation_colours[i].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, startColor + (colorOffset * i));
+  //     animation_colours[i].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, startColor + (colorOffset * i));
 
-    }
+  //   }
     
-                                                                                              // ...and if it is lit...
-      // leds[i] = ColorFromPalette(mPaletteI->currentPalette, startColor + (colorOffset * i), brightness, LINEARBLEND);  // ...assign increasing color from current palette
-  }
+  //                                                                                             // ...and if it is lit...
+  //     // leds[i] = ColorFromPalette(mPaletteI->currentPalette, startColor + (colorOffset * i), brightness, LINEARBLEND);  // ...assign increasing color from current palette
+  // }
 }
 
 void mAnimatorLight::LCDDisplay_updateDisplay(byte color, byte colorSpacing) {                                                         // this is what redraws the "screen"
@@ -1390,14 +1435,58 @@ void mAnimatorLight::LCDDisplay_updateDisplay(byte color, byte colorSpacing) {  
  * Requires new colour calculation each call
  * 02 trying lib method with mapping
  */
-void mAnimatorLight::SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02(){
-  // So colour region does not need to change each loop to prevent colour crushing
-  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-  // Pick new colours
-  //Display on all pixels
-  UpdateDesiredColourFromPaletteSelected();
+void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02(){
+//   // So colour region does not need to change each loop to prevent colour crushing
+//   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+//   // Pick new colours
+//   //Display on all pixels
+//   UpdateDesiredColourFromPaletteSelected();
+  pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_SK6812;
+    
+    // THIS IS WRONG
+  // switch(pCONT_set->Settings.light_settings.type)
+  // {
+  //   default:
+  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; break;
+  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID; break;
+  //   // case LST_RGBW: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
+  //   // case LST_RGBCCT: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
+  // }
 
-  for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
+  _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID;
+  
+  AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].colour_type = %d"), _segments[segment_active_index].colour_type);
+
+    
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
+
+  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
+
+  
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
+  
+  
+  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
+  uint8_t segment_index=0;
+
+  for(int i=0;i<93;i++){
+    // animation_colours[i].DesiredColour = RgbcctColor(0);
+    // }
+  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, i, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID, RgbwColor(0,0,0,0));
+  }
+
+  // Pick new colours
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
+
 
   // if(tempcol++>5){
     tempcol=0;
@@ -1406,139 +1495,157 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02(){
   AddLog(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
 
   LCDDisplay_updateDisplay(tempcol, colorOffset);
-    
-
-  // LCDDisplay_displayTime(pCONT_time->Rtc.utc_time,tempcol,0);
-
-//       uint16_t tempnumber = testnum;
-
-//       // if(tempnumber%2){
-//       //   showDots();
-//       // }
-//       if ( second(0) % 2 == 0 ) showDots(2, second(0) * 4.25);  
 
 
-//       showDigit(
-//         (tempnumber/1)%10,
-//          64, 0);
-//       showDigit(
-//       (tempnumber/10)%10,
-//          64, 1);
-//       showDigit(
-//         (tempnumber/100)%10,
-//          64, 2);
-//       showDigit(
-//         (tempnumber/1000)%10,
-//          64, 3);
-
-
-//       // showDigit(11, 64, 2);
-//       // showDigit(12, 64, 1);
-
-// if(testnum++>9999){testnum=0;}
-
+  // LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  // LCDDisplay_showDigit((lcd_display_show_number % 10), 0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
   
-//  #ifndef USE_WS28XX_FEATURE_4_PIXEL_TYPE
-//   //Overwrite random brightness on special range
-//   for(uint16_t index=256;index<300;index++){
 
-//     colour_in = animation_colours[index].DesiredColour;
-
-//     if(colour_in.B==0){ //if colour was off, I need to set the colour to a defined value or it willl turn up brightness to show white
-//       colour_in.H = 0.0f;
-//       colour_in.S = 1.0f;
-//     }
-//     colour_in.B = pCONT_iLight->BrtN2F(random(0,10)*10);
-
-//     // colour_in.H = pCONT_iLight->BrtN2F(random(0,100));
-  
-//     animation_colours[random(256,299)].DesiredColour = colour_in;
-
-//     // animation_colours[random(40,49)].DesiredColour = colour_in;
-
-//   }
-  /*
-  if (  ( lastLoop - lastColorChange >= colorChangeInterval ) && ( overlayMode == 0 )         // if colorChangeInterval has been reached and overlayMode is disabled...
-     || ( lastLoop - lastColorChange >= overlayInterval ) && ( overlayMode == 1 ) ) {         // ...or if overlayInterval has been reached and overlayMode is enabled...
-    startColor++;                                                                             // increase startColor to "move" colors slowly across the digits/leds
-    updateDisplay(startColor, colorOffset);
-    lastColorChange = millis();
-  }
-  if ( lastSecond != second() ) {                                                             // if current second is different from last second drawn...
-    updateDisplay(startColor, colorOffset);                                                   // lastSecond will be set in displayTime() and will be used for
-    lastSecond = second();                                                                    // redrawing regardless the digits count (HH:MM or HH:MM:SS)
-  }
-  if ( lastKeyPressed == 1 ) {                                                                // if buttonA is pressed...
-    switchBrightness();                                                                       // ...switch to next brightness level
-    updateDisplay(startColor, colorOffset);
-    if ( btnRepeatCounter >= 20 ) {                                                           // if buttonA is held for a few seconds change overlayMode 0/1 (using colorOverlay())
-      if ( overlayMode == 0 ) overlayMode = 1; else overlayMode = 0;
-      updateDisplay(startColor, colorOffset);
-      EEPROM.put(3, overlayMode);                                                             // ...and write setting to eeprom
-      #ifdef nodeMCU                                                                          // on nodeMCU we need to commit the changes from ram to flash to make them permanent
-        EEPROM.commit();
-      #endif
-      btnRepeatStart = millis();
-    }
-  }
-  if ( lastKeyPressed == 2 ) {                                                                // if buttonB is pressed...
-    switchPalette();                                                                          // ...switch between color palettes
-    updateDisplay(startColor, colorOffset);
-    if ( btnRepeatCounter >= 20 ) {                                                           // if buttonB is held for a few seconds change displayMode 0/1 (12h/24h)...
-      if ( displayMode == 0 ) displayMode = 1; else displayMode = 0;
-      updateDisplay(startColor, colorOffset);
-      EEPROM.put(2, displayMode);                                                             // ...and write setting to eeprom
-      #ifdef nodeMCU
-        EEPROM.commit();
-      #endif
-      btnRepeatStart = millis();
-    }
-  }
-  if ( ( lastLoop - valueLDRLastRead >= intervalLDR ) && ( brightnessAuto == 1 ) ) {          // if LDR is enabled and sample interval has been reached...
-    readLDR();                                                                                // ...call readLDR();
-    if ( abs(avgLDR - lastAvgLDR) >= 5 ) {                                                    // only adjust current brightness if avgLDR has changed for more than +/- 5.
-      updateDisplay(startColor, colorOffset);
-      lastAvgLDR = avgLDR;
-      if ( dbg ) { Serial.print(F("Updated display with avgLDR of: ")); Serial.println(avgLDR); }
-    }
-    valueLDRLastRead = millis();
-  }
-  if ( lastKeyPressed == 12 ) {                                                               // if buttonA + buttonB are pushed at the same time....
-    #ifdef useWiFi                                                                            // ...and if using WiFi...
-      initWPS();                                                                              // ...start WPS
-    #else                                                                                     // otherwise (arduino + rtc or nodemcu + rtc)...
-      setupClock();                                                                           // ...start manual setup
-    #endif
-  }
-  #ifdef nodeMCU                                                                              // On Arduino SetSyncProvider will be used. So this will sync internal time to rtc/ntp on nodeMCU only
-    if ( ( hour() == 3 || hour() == 9 || hour() == 15 || hour() == 21 ) &&                    // if hour is 3, 9, 15 or 21 and...
-         ( minute() == 3 && second() == 0 ) ) {                                               // minute is 3 and second is 0....
-      if ( dbg ) Serial.print(F("Current time: ")); Serial.println(now());
-      #ifdef useWiFi
-        syncNTP();                                                                            // ...either sync using ntp or...
-      #else
-        setTime(Rtc.GetDateTime());                                                           // ...set internal time to rtc time...
-      #endif
-      if ( dbg ) Serial.print(F("New time: ")); Serial.println(now());
-    }
-    ESP.wdtFeed();                                                                            // feed the watchdog each time loop() is cycled through, just in case...
-  #endif
-  FastLED.show();                                                                             // run FastLED.show() every time to avoid color flickering at low brightness settings
-  lastKeyPressed = readButtons();
-  lastLoop = millis();
-  if ( dbg ) dbgInput();   */
-// #endif 
 
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
-  UpdateStartingColourWithGetPixel();
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
   // Call the animator to blend from previous to new
-  this->setAnimFunctionCallback(
-    [this](const AnimationParam& param){
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
+  setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
   );
+
+
+//   // LCDDisplay_displayTime(pCONT_time->Rtc.utc_time,tempcol,0);
+
+// //       uint16_t tempnumber = testnum;
+
+// //       // if(tempnumber%2){
+// //       //   showDots();
+// //       // }
+// //       if ( second(0) % 2 == 0 ) showDots(2, second(0) * 4.25);  
+
+
+// //       showDigit(
+// //         (tempnumber/1)%10,
+// //          64, 0);
+// //       showDigit(
+// //       (tempnumber/10)%10,
+// //          64, 1);
+// //       showDigit(
+// //         (tempnumber/100)%10,
+// //          64, 2);
+// //       showDigit(
+// //         (tempnumber/1000)%10,
+// //          64, 3);
+
+
+// //       // showDigit(11, 64, 2);
+// //       // showDigit(12, 64, 1);
+
+// // if(testnum++>9999){testnum=0;}
+
+  
+// //  #ifndef USE_WS28XX_FEATURE_4_PIXEL_TYPE
+// //   //Overwrite random brightness on special range
+// //   for(uint16_t index=256;index<300;index++){
+
+// //     colour_in = animation_colours[index].DesiredColour;
+
+// //     if(colour_in.B==0){ //if colour was off, I need to set the colour to a defined value or it willl turn up brightness to show white
+// //       colour_in.H = 0.0f;
+// //       colour_in.S = 1.0f;
+// //     }
+// //     colour_in.B = pCONT_iLight->BrtN2F(random(0,10)*10);
+
+// //     // colour_in.H = pCONT_iLight->BrtN2F(random(0,100));
+  
+// //     animation_colours[random(256,299)].DesiredColour = colour_in;
+
+// //     // animation_colours[random(40,49)].DesiredColour = colour_in;
+
+// //   }
+//   /*
+//   if (  ( lastLoop - lastColorChange >= colorChangeInterval ) && ( overlayMode == 0 )         // if colorChangeInterval has been reached and overlayMode is disabled...
+//      || ( lastLoop - lastColorChange >= overlayInterval ) && ( overlayMode == 1 ) ) {         // ...or if overlayInterval has been reached and overlayMode is enabled...
+//     startColor++;                                                                             // increase startColor to "move" colors slowly across the digits/leds
+//     updateDisplay(startColor, colorOffset);
+//     lastColorChange = millis();
+//   }
+//   if ( lastSecond != second() ) {                                                             // if current second is different from last second drawn...
+//     updateDisplay(startColor, colorOffset);                                                   // lastSecond will be set in displayTime() and will be used for
+//     lastSecond = second();                                                                    // redrawing regardless the digits count (HH:MM or HH:MM:SS)
+//   }
+//   if ( lastKeyPressed == 1 ) {                                                                // if buttonA is pressed...
+//     switchBrightness();                                                                       // ...switch to next brightness level
+//     updateDisplay(startColor, colorOffset);
+//     if ( btnRepeatCounter >= 20 ) {                                                           // if buttonA is held for a few seconds change overlayMode 0/1 (using colorOverlay())
+//       if ( overlayMode == 0 ) overlayMode = 1; else overlayMode = 0;
+//       updateDisplay(startColor, colorOffset);
+//       EEPROM.put(3, overlayMode);                                                             // ...and write setting to eeprom
+//       #ifdef nodeMCU                                                                          // on nodeMCU we need to commit the changes from ram to flash to make them permanent
+//         EEPROM.commit();
+//       #endif
+//       btnRepeatStart = millis();
+//     }
+//   }
+//   if ( lastKeyPressed == 2 ) {                                                                // if buttonB is pressed...
+//     switchPalette();                                                                          // ...switch between color palettes
+//     updateDisplay(startColor, colorOffset);
+//     if ( btnRepeatCounter >= 20 ) {                                                           // if buttonB is held for a few seconds change displayMode 0/1 (12h/24h)...
+//       if ( displayMode == 0 ) displayMode = 1; else displayMode = 0;
+//       updateDisplay(startColor, colorOffset);
+//       EEPROM.put(2, displayMode);                                                             // ...and write setting to eeprom
+//       #ifdef nodeMCU
+//         EEPROM.commit();
+//       #endif
+//       btnRepeatStart = millis();
+//     }
+//   }
+//   if ( ( lastLoop - valueLDRLastRead >= intervalLDR ) && ( brightnessAuto == 1 ) ) {          // if LDR is enabled and sample interval has been reached...
+//     readLDR();                                                                                // ...call readLDR();
+//     if ( abs(avgLDR - lastAvgLDR) >= 5 ) {                                                    // only adjust current brightness if avgLDR has changed for more than +/- 5.
+//       updateDisplay(startColor, colorOffset);
+//       lastAvgLDR = avgLDR;
+//       if ( dbg ) { Serial.print(F("Updated display with avgLDR of: ")); Serial.println(avgLDR); }
+//     }
+//     valueLDRLastRead = millis();
+//   }
+//   if ( lastKeyPressed == 12 ) {                                                               // if buttonA + buttonB are pushed at the same time....
+//     #ifdef useWiFi                                                                            // ...and if using WiFi...
+//       initWPS();                                                                              // ...start WPS
+//     #else                                                                                     // otherwise (arduino + rtc or nodemcu + rtc)...
+//       setupClock();                                                                           // ...start manual setup
+//     #endif
+//   }
+//   #ifdef nodeMCU                                                                              // On Arduino SetSyncProvider will be used. So this will sync internal time to rtc/ntp on nodeMCU only
+//     if ( ( hour() == 3 || hour() == 9 || hour() == 15 || hour() == 21 ) &&                    // if hour is 3, 9, 15 or 21 and...
+//          ( minute() == 3 && second() == 0 ) ) {                                               // minute is 3 and second is 0....
+//       if ( dbg ) Serial.print(F("Current time: ")); Serial.println(now());
+//       #ifdef useWiFi
+//         syncNTP();                                                                            // ...either sync using ntp or...
+//       #else
+//         setTime(Rtc.GetDateTime());                                                           // ...set internal time to rtc time...
+//       #endif
+//       if ( dbg ) Serial.print(F("New time: ")); Serial.println(now());
+//     }
+//     ESP.wdtFeed();                                                                            // feed the watchdog each time loop() is cycled through, just in case...
+//   #endif
+//   FastLED.show();                                                                             // run FastLED.show() every time to avoid color flickering at low brightness settings
+//   lastKeyPressed = readButtons();
+//   lastLoop = millis();
+//   if ( dbg ) dbgInput();   */
+// // #endif 
+
+//   // Check if output multiplying has been set, if so, change desiredcolour array
+//   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+//   // Get starting positions already on show
+//   UpdateStartingColourWithGetPixel();
+//   // Call the animator to blend from previous to new
+//   this->setAnimFunctionCallback(
+//     [this](const AnimationParam& param){
+//       this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
+//     }
+//   );
 }
 
 
@@ -1549,41 +1656,76 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02(){
  * 02 trying lib method with mapping
  */
 void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01(){
-  // So colour region does not need to change each loop to prevent colour crushing
-  pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-  // Pick new colours
-  //Display on all pixels
-  UpdateDesiredColourFromPaletteSelected();
+  // // So colour region does not need to change each loop to prevent colour crushing
+  // pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
+  // // Pick new colours
+  // //Display on all pixels
+  // UpdateDesiredColourFromPaletteSelected();
 
-  for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
+  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
 
-  // if(tempcol++>5){
-    // tempcol=0;
-    // } //startcolour
+  // lcd_display_show_number = 3;
+  
+  // LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  // LCDDisplay_showDigit((lcd_display_show_number % 10), 0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
 
-// lcd_display_show_number ++;
+  // // Check if output multiplying has been set, if so, change desiredcolour array
+  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // // Get starting positions already on show
+  // UpdateStartingColourWithGetPixel();
+  // // Call the animator to blend from previous to new
+  // this->setAnimFunctionCallback(
+  //   [this](const AnimationParam& param){
+  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
+  //   }
+  // );
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
 
-  // LCDDisplay_updateDisplay(tempcol, colorOffset);
 
   
-  // LCDDisplay_displayTime(pCONT_time->Rtc.utc_time, color, colorSpacing);
-  // LCDDisplay_showDigit(23,0,0);
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
+
+  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
+  
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
+  
+  
+  // Pick new colours
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
+
+
+
+
   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
   LCDDisplay_showDigit((lcd_display_show_number % 10), 0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
   
 
+
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
-  UpdateStartingColourWithGetPixel();
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
   // Call the animator to blend from previous to new
-  this->setAnimFunctionCallback(
-    [this](const AnimationParam& param){
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
+  setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
   );
+
+
+
+
 }
 #endif // ENABLE_DEVFEATURE_RGB_CLOCK
 
@@ -8922,14 +9064,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
          * To apply constrain, should I change the "full" colour brightness? this might work (at least temporarily)
          * 
          */
-        #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+        // #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
         colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
-        #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
-
-
-
-
-
+        // #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
 
         colour2 = RgbcctColor(0);
         colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
@@ -8973,9 +9110,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palett
          * To apply constrain, should I change the "full" colour brightness? this might work (at least temporarily)
          * 
          */
-        #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+        // #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
         colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
-        #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+        // #endif // ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
 
 
         colour2 = RgbcctColor(0);

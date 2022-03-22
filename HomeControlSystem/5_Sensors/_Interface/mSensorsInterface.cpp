@@ -66,6 +66,8 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       // Serial.println(pCONT_msdb18->test123());
       // Serial.println(pCONT_dht->test123());
       
+  
+
 
       // for(auto& pmod:pCONT->pModule)
       // {
@@ -80,6 +82,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //   }
       // }
 
+//REMOTE SENSOR NEEDS TO INCLUDE THE UTC TIME IT WAS READ FOR "AGE" TO WORK REMOTELY
       
       //   pModule[switch_index]->Tasker(function, obj);
 
@@ -263,15 +266,14 @@ char buffer[50];
         if(val.Valid())
         {
 
-int8_t device_name_id = sensor_id;
-#ifdef USE_MODULE_SENSORS_DS18X
-//temp fix
-if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
-{
-  device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
-}
-#endif // USE_MODULE_SENSORS_DS18X
-
+          int8_t device_name_id = sensor_id;
+          #ifdef USE_MODULE_SENSORS_DS18X
+          //temp fix
+          if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+          {
+            device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
+          }
+          #endif // USE_MODULE_SENSORS_DS18X
 
           JBI->Add(
             DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
@@ -292,24 +294,59 @@ if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
         if(val.Valid())
         {
 
-int8_t device_name_id = sensor_id;
-#ifdef USE_MODULE_SENSORS_DS18X
-//temp fix
-/**
- * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
- * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
- * This means, on setting name, I should search for the address of X and put it into index X.. swap?
- * */
-if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
-{
-  device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
-}
+          int8_t device_name_id = sensor_id;
+          #ifdef USE_MODULE_SENSORS_DS18X
+          //temp fix
+          /**
+           * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
+           * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
+           * This means, on setting name, I should search for the address of X and put it into index X.. swap?
+           * */
+          if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+          {
+            device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
+          }
+          #endif// USE_MODULE_SENSORS_DS18X
 
-#endif// USE_MODULE_SENSORS_DS18X
           // Convert into colour
           float temperature = val.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
           RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps(temperature,0);
 
+          JBI->Add_FV(
+            DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
+            PSTR("\"%02X%02X%02X\""),
+            colour.R, colour.G, colour.B
+          );
+        }
+      }
+
+      JBI->Level_End();
+      JBI->Level_Start_P(PSTR("HeatMapFullRange"));//,pmod->GetModuleFriendlyName());
+
+      for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
+      {
+        sensors_reading_t val;
+        pmod->GetSensorReading(&val, sensor_id);
+        if(val.Valid())
+        {
+
+          int8_t device_name_id = sensor_id;
+          #ifdef USE_MODULE_SENSORS_DS18X
+          //temp fix
+          /**
+           * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
+           * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
+           * This means, on setting name, I should search for the address of X and put it into index X.. swap?
+           * */
+          if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+          {
+            device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
+          }
+          #endif// USE_MODULE_SENSORS_DS18X
+
+          // Convert into colour
+          float temperature = val.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
+          RgbColor colour  = pCONT_iLight->GetColourValueUsingMapsMaximumBrightness(temperature,0);
 
           JBI->Add_FV(
             DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),

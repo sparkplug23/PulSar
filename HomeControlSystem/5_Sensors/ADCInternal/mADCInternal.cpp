@@ -2,6 +2,9 @@
   mADCInternal.cpp
   Description: Uses the internal ADC for measurements of A0 on ESP8266, and all ESP32 channels
 
+  Due to the significant changes between esp82/32, for develop, the esp32 will be develop and optimised as its own module. 
+  This will allow esp8266 simplier hardware to be optimised, mapping and vectoring to be optimised without the complexity of interrupts and potentially DMA (though esp32 dma will likely be its optimised version for audio sampling)
+
   Copyright (C) 2021  Michael
 
   This program is free software: you can redistribute it and/or modify
@@ -27,102 +30,10 @@
  * */
 #include "mADCInternal.h"
 
-#ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
 
 const char* mADCInternal::PM_MODULE_SENSORS_ADC_INTERNAL_CTR = D_MODULE_SENSORS_ADC_INTERNAL_CTR;
 const char* mADCInternal::PM_MODULE_SENSORS_ADC_INTERNAL_FRIENDLY_CTR = D_MODULE_SENSORS_ADC_INTERNAL_FRIENDLY_CTR;
-
-#ifdef ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
-
-
-#ifdef ESP32
-const byte interruptPin = 25;
-volatile int interruptCounter = 0;
-// volatile double interruptExecuteTime = 0;
-static int taskCore0 = 0;
-static int taskCore1 = 1;
-int numberOfInterrupts = 0;
-uint16_t adc6 = 0;
-uint16_t adc7 = 0;
-
-#include <soc/sens_reg.h>
-#include <soc/sens_struct.h>
-
-  // uint16_t adc_value;
-
-portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
-RTC_DATA_ATTR uint16_t adcValue;
-uint16_t _adcValue;
-// uint16_t adcValue1;
-
-uint16_t IRAM_ATTR adc1_get_raw_ram(adc1_channel_t channel) {
-    SENS.sar_read_ctrl.sar1_dig_force = 0; // switch SARADC into RTC channel 
-    SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PU; // adc_power_on
-    // RTCIO.hall_sens.xpd_hall = false; //disable other peripherals
-    SENS.sar_meas_wait2.force_xpd_amp = SENS_FORCE_XPD_AMP_PD; // channel is set in the convert function
-    
-	// disable FSM, it's only used by the LNA.
-    SENS.sar_meas_ctrl.amp_rst_fb_fsm = 0; 
-    SENS.sar_meas_ctrl.amp_short_ref_fsm = 0;
-    SENS.sar_meas_ctrl.amp_short_ref_gnd_fsm = 0;
-    SENS.sar_meas_wait1.sar_amp_wait1 = 1;
-    SENS.sar_meas_wait1.sar_amp_wait2 = 1;
-    SENS.sar_meas_wait2.sar_amp_wait3 = 1; 
-
-    //set controller
-    SENS.sar_read_ctrl.sar1_dig_force = false;      //RTC controller controls the ADC, not digital controller
-    SENS.sar_meas_start1.meas1_start_force = true;  //RTC controller controls the ADC,not ulp coprocessor
-    SENS.sar_meas_start1.sar1_en_pad_force = true;  //RTC controller controls the data port, not ulp coprocessor
-    SENS.sar_touch_ctrl1.xpd_hall_force = true;     // RTC controller controls the hall sensor power,not ulp coprocessor
-    SENS.sar_touch_ctrl1.hall_phase_force = true;   // RTC controller controls the hall sensor phase,not ulp coprocessor
-    
-    //start conversion
-    SENS.sar_meas_start1.sar1_en_pad = (1 << channel); //only one channel is selected.
-    while (SENS.sar_slave_addr1.meas_status != 0);
-    SENS.sar_meas_start1.meas1_start_sar = 0;
-    SENS.sar_meas_start1.meas1_start_sar = 1;
-    while (SENS.sar_meas_start1.meas1_done_sar == 0);
-    _adcValue = SENS.sar_meas_start1.meas1_data_sar; // set adc value!
-
-    SENS.sar_meas_wait2.force_xpd_sar = SENS_FORCE_XPD_SAR_PD; // adc power off
-
-    return _adcValue;
-}
-
-
-
-
-/************************************************************************************
-******** External Pin Interrupt Triggers For ADC ************************************
- @note Helper functions, that need to be static. The singlton class instance allows setting
-       a flag that is inside the class
-       Hardcoded variables to make this faster for measurements
-*************************************************************************************
-*************************************************************************************/
-void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
-{
-  DEBUG_ADC_ISR_EVENT_SET(LOW);
-  pCONT_adc_internal->external_interrupt.flag_pin_active = true;
-
-  /**
-   * Capture both adc pins for 5 samples (no delay)
-   * */
-  mADCInternal::ISR_DUAL_CAPTURE* adc_p = &pCONT_adc_internal->isr_capture;
-
-  if(adc_p->within_buffer_iter_counter < 40)
-  {
-    adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch6[adc_p->within_buffer_iter_counter] = adc1_get_raw_ram(ADC1_CHANNEL_6);
-    adc_p->adc_readings[adc_p->active_buffer_to_write_to_index].buffer_ch7[adc_p->within_buffer_iter_counter] = adc1_get_raw_ram(ADC1_CHANNEL_7);
-    adc_p->within_buffer_iter_counter++;
-  }
-
-  DEBUG_ADC_ISR_EVENT_SET(HIGH);
-}
-
-#endif // ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
-
-#endif // ESP32
-
 
 int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
 {
@@ -183,41 +94,10 @@ void mADCInternal::Pre_Init(){
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
 
-#ifdef ESP32
-  if(pCONT_pins->PinUsed(GPIO_ADC1_CH6_ID))
-  {
-    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH6_ID);
-    adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
-    adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_6;
-    adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
-    adc_config[settings.fSensorCount].adc_width_bit = ADC_WIDTH_BIT_12;
-    adc_config[settings.fSensorCount].mode = ADC_MODE_EXTERNAL_INTERRUPT_TRIGGERED_ID;
-    pinMode(adc_config[settings.fSensorCount].input_pin, INPUT);
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "adc_config[%d].input_pin=%d"),settings.fSensorCount,adc_config[settings.fSensorCount].input_pin);
-    settings.fSensorCount++;
-  }
 
-  if(pCONT_pins->PinUsed(GPIO_ADC1_CH7_ID))
-  {
-    adc_config[settings.fSensorCount].input_pin = pCONT_pins->GetPin(GPIO_ADC1_CH7_ID);
-    adc_config[settings.fSensorCount].channel_group = ADC_CHANNEL_GROUP_1_ID;
-    adc_config[settings.fSensorCount].channel_id = ADC_CHANNEL_7;
-    adc_config[settings.fSensorCount].attentuation_db_level = ADC_ATTEN_DB_11;
-    adc_config[settings.fSensorCount].adc_width_bit = ADC_WIDTH_BIT_12;
-    adc_config[settings.fSensorCount].mode = ADC_MODE_EXTERNAL_INTERRUPT_TRIGGERED_ID;
-    pinMode(adc_config[settings.fSensorCount].input_pin, INPUT);
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "adc_config[%d].input_pin=%d"),settings.fSensorCount,adc_config[settings.fSensorCount].input_pin);
-    settings.fSensorCount++;
-  }
+  settings.fEnableSensor = 1; // forced for now
 
-  // Special pin set here
-  if(pCONT_pins->PinUsed(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID))
-  {
-    external_interrupt.trigger_pin = pCONT_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
-    external_interrupt.flag_enabled = true;
-  }
-  
-#endif // ESP32
+
 
 
   if(settings.fSensorCount){
@@ -231,57 +111,13 @@ void mADCInternal::Pre_Init(){
 void mADCInternal::Init(void){
 
 
-#ifdef ESP32
-  #ifdef ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
-  if(external_interrupt.flag_enabled)
-  {
-    pinMode(external_interrupt.trigger_pin, INPUT);
-    attachInterrupt(external_interrupt.trigger_pin, ISR_External_Pin_ADC_Config_All_Trigger, FALLING);
-  }
-  #endif // ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
-
-  // Configure all channel atten and width
-  for(int i=0; i<settings.fSensorCount; i++)
-  {
-    switch(adc_config[i].input_pin)
-    {
-      // case 32:
-      //   adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11 );
-      //   adc1_config_width(ADC_WIDTH_BIT_12);
-      //   AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_4 set"));
-      // break;
-      case 34:
-        adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11 );
-        adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_6 set"));
-      break;
-      case 35:
-        adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11 );
-        adc1_config_width(ADC_WIDTH_BIT_12);
-        AddLog(LOG_LEVEL_TEST, PSTR("ADC1_CHANNEL_7 set"));
-      break;
-    }
-
-  }
-#endif // ESP32
-
 }
 
-void mADCInternal::EveryLoop(){
-    
-#ifdef ESP32
-  if(external_interrupt.flag_pin_active)
-  {
-    external_interrupt.flag_pin_active = false;
-    // Serial.println("external_interrupt.flag_pin_active");
-    // Update_Channel1_ADC_Readings();
-    // AddLog(LOG_LEVEL_TEST, PSTR("adc_levels = \t%d\t%d %d"), readings[0].adc_level, readings[1].adc_level, isr_capture.active_buffer_to_write_to_index);
-  } 
+void mADCInternal::EveryLoop()
+{
 
-#endif // ESP32
-  // if(isr_capture.active_buffer_to_write_to_index!=0){
-  // AddLog(LOG_LEVEL_TEST, PSTR("isr_capture.active_buffer_to_write_to_index=%d"),isr_capture.active_buffer_to_write_to_index);
-  // }
+  // Serial.println(analogRead(0));
+    
 
 }
 
@@ -289,40 +125,44 @@ void mADCInternal::EveryLoop(){
 void mADCInternal::Update_Channel1_ADC_Readings()
 {
 
-#ifdef ESP32
-  #ifdef ENABLE_SMOOTHING_ON_ADC_READING
-  for(int i = 0;i<settings.fSensorCount; i++)
-  {
-    samples.clear();
+// #ifdef ESP32
+//   #ifdef ENABLE_SMOOTHING_ON_ADC_READING
+//   for(int i = 0;i<settings.fSensorCount; i++)
+//   {
+//     samples.clear();
 
-    // collect samples from ADC
-    while(samples.size() < readings[i].adcSampleCount_){
-      samples.push_back(adc1_get_raw((adc1_channel_t)adc_config[i].channel_id));
-      ets_delay_us(1); // too long!?
-    }
-    // average the collected samples
-    readings[i].adc_level = (std::accumulate(samples.begin(), samples.end(), 0) / samples.size());
-    // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].adc_level = %d"),i,readings[i].adc_level);
+//     // collect samples from ADC
+//     while(samples.size() < readings[i].adcSampleCount_){
+//       samples.push_back(adc1_get_raw((adc1_channel_t)adc_config[i].channel_id));
+//       ets_delay_us(1); // too long!?
+//     }
+//     // average the collected samples
+//     readings[i].adc_level = (std::accumulate(samples.begin(), samples.end(), 0) / samples.size());
+//     // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].adc_level = %d"),i,readings[i].adc_level);
 
-    readings[i].samples_between_resets++;
+//     readings[i].samples_between_resets++;
 
-    // Add nice function that adds reading into memory
-    if(readings[i].stored_values.index < STORED_VALUE_ADC_MAX){
-      readings[i].stored_values.adc[readings[i].stored_values.index++] = readings[i].adc_level;
-    }else{
-      // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].stored_values.index = %d OVERFLOW"),i,readings[i].stored_values.index);
-      // readings[i].stored_values.index = 0;
-    }
+//     // Add nice function that adds reading into memory
+//     if(readings[i].stored_values.index < STORED_VALUE_ADC_MAX){
+//       readings[i].stored_values.adc[readings[i].stored_values.index++] = readings[i].adc_level;
+//     }else{
+//       // AddLog(LOG_LEVEL_TEST, PSTR("readings[%d].stored_values.index = %d OVERFLOW"),i,readings[i].stored_values.index);
+//       // readings[i].stored_values.index = 0;
+//     }
 
-  }
-  #else
-    readings[0].adc_level = adc1_get_raw(ADC1_CHANNEL_6);
-    ets_delay_us(1);
-    readings[1].adc_level = adc1_get_raw(ADC1_CHANNEL_7);
-    AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
-  #endif
+//   }
+//   #else
+//     readings[0].adc_level = adc1_get_raw(ADC1_CHANNEL_6);
+//     ets_delay_us(1);
+//     readings[1].adc_level = adc1_get_raw(ADC1_CHANNEL_7);
+//     AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
+//   #endif
 
-#endif // ESP32
+// #endif // ESP32
+
+
+
+
 }
 
 
@@ -337,6 +177,9 @@ uint8_t mADCInternal::ConstructJSON_Settings(uint8_t json_method){
 uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
+
+
+    JBI->Add("raw", analogRead(0));
 
   char buffer[50];
 
@@ -364,42 +207,45 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level){
 
     // Update_Channel1_ADC_Readings();
     
-  JBI->Array_Start("chADC1");
-  for(int i=0;i<2;i++){
-    JBI->Add(readings[i].adc_level);
-  }
-  JBI->Array_End();
-
-  // JBI->Array_Start("ADC1");
-  // for(int i=0;i<8;i++){
-  //   JBI->Add(adc1_get_raw((adc1_channel_t)i));
+  // JBI->Array_Start("chADC1");
+  // for(int i=0;i<2;i++){
+  //   JBI->Add(readings[i].adc_level);
   // }
   // JBI->Array_End();
 
-  JBI->Array_Start("stored_values.index");
-  for(int i=0;i<2;i++){
-    JBI->Add(readings[0].stored_values.index);
-  }
-  JBI->Array_End();
-  JBI->Array_Start("samples_between_resets");
-  for(int i=0;i<2;i++){
-    JBI->Add(readings[i].samples_between_resets);
-  }
-  JBI->Array_End();
+  // // JBI->Array_Start("ADC1");
+  // // for(int i=0;i<8;i++){
+  // //   JBI->Add(adc1_get_raw((adc1_channel_t)i));
+  // // }
+  // // JBI->Array_End();
 
-  uint16_t send_size = 0;
-  send_size = 10; //STORED_VALUE_ADC_MAX
+  // JBI->Array_Start("stored_values.index");
+  // for(int i=0;i<2;i++){
+  //   JBI->Add(readings[0].stored_values.index);
+  // }
+  // JBI->Array_End();
+  // JBI->Array_Start("samples_between_resets");
+  // for(int i=0;i<2;i++){
+  //   JBI->Add(readings[i].samples_between_resets);
+  // }
+  // JBI->Array_End();
 
-  JBI->Array_Start("adc0");
-  for(int i=0;i<send_size;i++){
-    JBI->Add(readings[0].stored_values.adc[i]);
-  }
-  JBI->Array_End();
-  JBI->Array_Start("adc1");
-  for(int i=0;i<send_size;i++){
-    JBI->Add(readings[1].stored_values.adc[i]);
-  }
-  JBI->Array_End();
+  // uint16_t send_size = 0;
+  // send_size = 10; //STORED_VALUE_ADC_MAX
+
+  // JBI->Array_Start("adc0");
+  // for(int i=0;i<send_size;i++){
+  //   JBI->Add(readings[0].stored_values.adc[i]);
+  // }
+  // JBI->Array_End();
+
+
+
+  // JBI->Array_Start("adc1");
+  // for(int i=0;i<send_size;i++){
+  //   JBI->Add(readings[1].stored_values.adc[i]);
+  // }
+  // JBI->Array_End();
 
 
   

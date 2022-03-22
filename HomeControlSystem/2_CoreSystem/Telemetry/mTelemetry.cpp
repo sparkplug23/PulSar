@@ -408,8 +408,8 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_MODULENAME,          pCONT_set->Settings.module);
-    JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, sizeof(pCONT_set->Settings.device_name_buffer.device_id)/2);
-    JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  sizeof(pCONT_set->Settings.device_name_buffer.class_id)/2);
+    JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.device_id));
+    JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id));
     JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);
 
     
@@ -419,7 +419,13 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
   // Serial.println(mqtt_data);
   
   //need to escape option to function above
-    JsonBuilderI->Add("I2C_Scan",          mqtt_data);
+    // JsonBuilderI->Add("I2C_Scan",          mqtt_data);
+
+    BufferWriterI->Append(",\"I2C_Scan\":");
+    BufferWriterI->Append(mqtt_data);
+
+
+    // BufferWriterI->Append(",\"I2C_Scan\":");
 
     #ifdef USE_FUNCTION_TEMPLATE
     //JsonBuilderI->Add("Function Template",   FUNCTION_TEMPLATE);

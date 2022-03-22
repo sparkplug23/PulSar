@@ -18,6 +18,10 @@
 // #include "ublox/ubxNMEA.h"
 #include "4_Drivers/GPS_UBX/internal/ublox/ubxNMEA.h"
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 // Disable the entire file if derived types are not allowed,
 //    *or* if no PUBX messages are enabled.
 #if defined( NMEAGPS_DERIVED_TYPES) & \
@@ -208,3 +212,6 @@ bool ubloxNMEA::parseVelocityDown( char chr )
 } // parseVelocityDown
 
 #endif // DERIVED types and at least one PUBX message enabled
+
+
+#endif // ifdef USE_MODULE_DRIVERS_GPS

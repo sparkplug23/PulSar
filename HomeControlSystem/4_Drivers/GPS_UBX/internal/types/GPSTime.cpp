@@ -17,5 +17,12 @@
 
 #include "GPSTime.h"
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
 uint8_t         GPSTime::leap_seconds    = 0;
 NeoGPS::clock_t GPSTime::s_start_of_week = 0;
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

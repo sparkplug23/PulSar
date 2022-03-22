@@ -216,9 +216,9 @@ AddLog(LOG_LEVEL_TEST, PSTR("add=%d %d %d %d %d %d"),
   // delay(5000);
 
 
-  pCONT_iLight->CommandSet_PaletteColour_RGBCCT_Raw_By_ID(mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID, encoded_gradient_temp_array, index);
-  pCONT_iLight->CommandSet_PaletteID(mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID);
-  pCONT_iLight->CommandSet_TransitionOrderID(TRANSITION_ORDER_INORDER_ID);
+  pCONT_iLight->CommandSet_PaletteColour_RGBCCT_Raw_By_ID(mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID, encoded_gradient_temp_array, index);
+  pCONT_lAni->CommandSet_PaletteID(mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID, 0);
+  // pCONT_lAni->CommandSet_TransitionOrderID( pCONT_lAni->TRANSITION_ORDER_INORDER_ID);
 
   // AddLog(LOG_LEVEL_TEST, PSTR("buffer=%s"),buffer);
 

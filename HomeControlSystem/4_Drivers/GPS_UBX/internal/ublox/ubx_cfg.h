@@ -25,6 +25,11 @@
 // However, the message type will still be recognized by /decode/ and 
 // stored in member /rx_msg/.  No valid flags would be available.
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #define UBLOX_PARSE_STATUS
 #define UBLOX_PARSE_TIMEGPS
 #define UBLOX_PARSE_TIMEUTC
@@ -72,3 +77,7 @@
 #endif
 
 #endif
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

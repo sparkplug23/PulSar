@@ -17,6 +17,11 @@
 
 #include "NMEA_Parser.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #include <Stream.h>
 
 // Check configurations
@@ -2153,3 +2158,6 @@ void NMEAGPS::send_P( Stream *device, const __FlashStringHelper *msg )
   }
 
 } // send_P
+
+
+#endif // #ifdef USE_MODULE_DRIVERS_GPS

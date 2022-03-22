@@ -6,8 +6,6 @@
  *  - Devices to be put into home, but not yet ready for install. These are NOT "Devboards" (examples) but meant for actual developing of devices
 \*********************************************************************************************/
 
-
-
 /*********************************************************************************************\
  * This file is one of two user configurable files
  * 
@@ -38,7 +36,7 @@
  * */
 // #define DEVICE_RGBSTRING_DEVBOARD_SEGMENT
 // #define DEVICE_RGBSTRING_DEVBOARD_SEGMENT_ESP32
-// #define DEVICE_BUCKET_WATER_LEVEL
+
 /**
  *  SHORT TERM DEVICES IN BEDROOM -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- 
 **/  
@@ -62,7 +60,8 @@
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
 // #define DEVICE_HVAC_KITCHEN
-#define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
+// #define DEVICE_HVAC_BEDROOM_RAD
+// #define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -78,10 +77,6 @@
 //#define DEVICE_RGBBEDLIGHT_TEST 
 //#define DEVICE_RGBCUSTOM_USER_01
 //#define DEVICE_RGBCUSTOM_USER_02
-// #define DEVICE_TESTER_RGBW
-// #define DEVICE_RGBMICRO1 //
-// #define DEVICE_RGBMICRO2 //              
-// #define DEVICE_RGBMICRO4 //
 // #define DEVICE_RGBESP32_1_TESTER
 // #define DEVICE_RGBGAZEBO_ROOF
 // #define DEVICE_H801_SUNLIGHT
@@ -200,8 +195,7 @@
     // #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     // #define ENABLE_FREERAM_APPENDING_SERIAL
 
-    // #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-    // #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+    // #define  ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 
     // #define ENABLE_CRGBPALETTES_IN_PROGMEM
 
@@ -225,8 +219,7 @@
     #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     #define ENABLE_FREERAM_APPENDING_SERIAL
 
-    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+    #define  ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 
     // to merge h801 rgbcct animation into the new method
     #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
@@ -756,8 +749,7 @@
     #define ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     #define ENABLE_FREERAM_APPENDING_SERIAL
 
-    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
-    #define  ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+    #define  ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 
     // to merge h801 rgbcct animation into the new method
     #define DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
@@ -2398,6 +2390,139 @@
   "}";
   
 #endif
+
+
+
+
+
+/**
+ * New heating controller, designed to work from single device to multizone system
+ * */
+#ifdef DEVICE_HVAC_BEDROOM_RAD
+  #define DEVICENAME_CTR          "hvac_bedroom_rad"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Bedroom Oil Rad"
+
+  #define HEATING_DEVICE_MAX 1
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_CONTROLLER_HVAC
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"   
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      #endif 
+      "\"D7\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Room"
+  // #define D_DEVICE_DRIVER_RELAY_1_NAME "Desk"
+  // #define D_DEVICE_DRIVER_RELAY_2_NAME "Test1"
+  // #define D_DEVICE_DRIVER_RELAY_3_NAME "Test2"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Room"
+  // #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Desk"
+  // #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Test1"
+  // #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Test2"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Room_DHT"
+  // #define D_DEVICE_SENSOR_DHT_1_NAME "Desk_DHT"
+
+  // #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
+  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+  // #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"
+  // #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,135,126,242]"
+  // #define D_DEVICE_SENSOR_DB18S20_3_NAME        "Immersion_Heater"
+  // #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,195,135,215,193]"
+  // #define D_DEVICE_SENSOR_DB18S20_4_NAME        "Tank_Top"
+  // #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,205,202,237,231]"
+  // #define D_DEVICE_SENSOR_DB18S20_5_NAME        "Tank_Middle"
+  // #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,205,206,170,25]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
+      "]"
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\",\"Cooling\"" "]"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":0"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOnSecs\\\":60}}\""
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":1"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"PowerState\\\":0}\""
+      "}"
+    "}"
+  "}";
+  
+#endif
+
+
 
 #ifdef DEVICE_HEATING_ESP32_TESTER
   #define DEVICENAME_CTR          "heating_esp32_tester"
@@ -5509,28 +5634,6 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 #endif // DEVICE_ESP32_DEVKIT_BASIC
 
-
-#ifdef DEVICE_ESP32_WEBCAM1
-  #define DEVICENAME_CTR            "esp32_webcam1"
-  #define DEVICENAME_FRIENDLY_CTR   "esp32_webcam1"
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
-  #define ESP32
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"LBI\":\""  D_GPIO_FUNCTION_PWM1_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_CAM_AITHINKER_CTR "\""
-  "}";
-
-#endif // DEVICE_ESP32_DEVKIT_BASIC
 
 // #ifndef MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_MIC4HAEL2_MEASUREMENT_H
 // #define MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_MIC4HAEL2_MEASUREMENT_H

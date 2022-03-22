@@ -291,10 +291,12 @@ struct RgbcctColor
             };
             union {
                 uint8_t WW;
+                uint8_t W1; // for when the white channel does not matter e.g. rgbw
                 uint8_t warm_white;
             };
             union {
                 uint8_t WC;
+                uint8_t W2;
                 uint8_t white_cold;
             };
         };

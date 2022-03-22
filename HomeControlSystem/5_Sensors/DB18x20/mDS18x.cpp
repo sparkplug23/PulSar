@@ -579,6 +579,7 @@ uint8_t mDS18X::ConstructJSON_Sensor(uint8_t json_level){
 
         // if(json_level <= JSON_LEVEL_DEBUG){
           JsonBuilderI->Add(D_JSON_ADDRESS, sensor[sensor_id].address[7]);
+          JBI->Add("set_from_known_address",sensor[sensor_id].flag.set_from_known_address);
         //   JsonBuilderI->Add("ID", sensor_id);
         //   JsonBuilderI->Add("Corrected_ID", corrected_sensor_id);
         // }
@@ -757,16 +758,29 @@ void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
   uint8_t sensor_count = 0; // reset
   // Address moved into struct, I need to rearrange now with ids
 
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
+  delay(3000);
+
   
-        AddLog(LOG_LEVEL_INFO, "searching start %d",settings.group_count);
+  // AddLog(LOG_LEVEL_INFO, "searching start %d",settings.group_count);
 
 
   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){
-        AddLog(LOG_LEVEL_INFO, "searching iter %d",sensor_group_id);
+    
+    AddLog(LOG_LEVEL_INFO, "\tsearching iter %d",sensor_group_id);
+    
     for(uint8_t sensor_id=0; sensor_id<sensor_group[sensor_group_id].sensor_count; sensor_id++){
       // Check address has been set    
+
+      AddLog(LOG_LEVEL_INFO, "\t\tsensor_id %d",sensor_id);
       
-      if(memcmp(sensor[sensor_count].address,address_to_find,sizeof(sensor[sensor_count].address))==0){ // 0 means equal
+      if(memcmp(
+        sensor[sensor_count].address,
+        address_to_find,
+        sizeof(sensor[sensor_count].address
+        ))==0){ // 0 means equal
 
 
 //temp fix
@@ -777,6 +791,8 @@ void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
  * */
         sensor[sensor_count].address_id = address_id;   
         // sensor[original_device_id].id = sensor_count;    
+
+        sensor[sensor_count].flag.set_from_known_address = sensor_count;
       
       
         AddLog_Array(LOG_LEVEL_INFO, "isconnected", sensor[sensor_count].address, (uint8_t)sizeof(sensor[sensor_count].address));
@@ -793,9 +809,12 @@ void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
 
       }
       else{
-        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed - no find with search %d"),sensor[sensor_count].address[7]);   
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed - no find with search %d @ %d"),sensor[sensor_count].address[7],sensor_id);   
       }
+
       sensor_count++;
+
+
     }
   }
 

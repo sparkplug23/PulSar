@@ -60,6 +60,9 @@ bool loaded_default_for_moduled = false;
 
     }jsonbuffer;
 
+    void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
+    void ShowRuleEvent_AddLogByIndex(uint8_t show_type = 0);
+
 bool AppendRule();
 
     // need a group of functions to "add" and remove from the buffer,

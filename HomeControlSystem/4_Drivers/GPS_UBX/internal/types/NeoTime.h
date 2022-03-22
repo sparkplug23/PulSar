@@ -20,6 +20,10 @@
 
 #include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
   #define PGM_P const char *
 
 typedef PGM_P str_P;
@@ -307,3 +311,7 @@ class Print;
 Print & operator <<( Print & outs, const NeoGPS::time_t &t );
 
 #endif
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

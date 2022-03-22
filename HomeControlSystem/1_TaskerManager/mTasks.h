@@ -80,6 +80,11 @@ enum XsnsFunctions {
   // FUNC_AT_TIME_1_MINUTE,
   // Welcome message to show on boot after X seconds with config
   // FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
+
+  /**
+   * @brief Special FUNC_X that should be used in testing, and will run with delayed start to enable OTA to be possible when boot loop would occur
+   **/
+  FUNC_DELAYED_START_LOOP,
   
   // FUNC_PREP_BEFORE_TELEPERIOD, 
   FUNC_JSON_APPEND, 
@@ -123,6 +128,12 @@ enum XsnsFunctions {
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, 
   FUNC_MQTT_DATA_ID,//
   // 
+
+  /**
+   * @brief Rules
+   **/
+  FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID,
+
 
   // Events (new internal triggers, if something happens trigger another... this will become rules)
   // Ie if this event below happens, then have another ID which is called to run the triggered event

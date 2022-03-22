@@ -46,8 +46,9 @@ class ProgramTemperature; //tmp fix
 
 
 #ifndef HEATING_DEVICE_MAX
-   #define HEATING_DEVICE_MAX 4
-   #endif
+#define HEATING_DEVICE_MAX 4
+#define MAX_ZONES 4
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -195,7 +196,6 @@ enum ZONE_MODES_8BITS_PACKED{
 
 //later another "sensor type" could be MQTT topic, ie if I have remote sensors, also http
 
-#define MAX_ZONES 4
 
 class mHVAC :
   public mTaskerInterface
@@ -659,8 +659,15 @@ void Every_Second();
     void FunctionHandler_Programs_Timers(void);
     struct functionhandler<mHVAC> functionhandler_programs_temps;
     void FunctionHandler_Programs_Temps(void);
+    struct functionhandler<mHVAC> functionhandler_update_sensors;
+    void FunctionHandler_Update_Sensors(void);
 
-    struct functionhandler<mHVAC>* functionhandler_list[5] = {
+    struct functionhandler<mHVAC>* functionhandler_list[
+      6    
+      #ifdef USE_HVAC_PROFILE_ESTIMATION
+      +1
+      #endif // USE_HVAC_PROFILE_ESTIMATION    
+    ] = {
       &functionhandler_failsafe,
       &functionhandler_status_message,
       #ifdef USE_HVAC_PROFILE_ESTIMATION
@@ -668,7 +675,8 @@ void Every_Second();
       #endif //#ifdef USE_HVAC_PROFILE_ESTIMATION
       &functionhandler_relay_status,
       &functionhandler_programs_timers,
-      &functionhandler_programs_temps
+      &functionhandler_programs_temps,
+      &functionhandler_update_sensors
     };
     
 

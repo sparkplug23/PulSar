@@ -75,6 +75,24 @@ void mHVAC::FunctionHandler_Programs_Timers(void){
 
   } 
 
+  
+  // Update mqtt faster if active  
+  for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
+  {
+    if(zone[zone_id].program_timer_method->IsRunning())
+    {
+      mqtthandler_program_timers_ifchanged.tRateSecs = 1;
+      break; // Stop if any are true
+    }
+    else
+    {
+      mqtthandler_program_timers_ifchanged.tRateSecs = 10;
+    }
+  }
+
+
+  
+
 } // end function
 
 #endif

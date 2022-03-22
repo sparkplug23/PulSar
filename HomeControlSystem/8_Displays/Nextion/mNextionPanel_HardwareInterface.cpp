@@ -141,7 +141,7 @@ bool mNextionPanel::nextionHandleInput()
 
   if (serial_available())
   {
-    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION " if (Serial.available())"));
+    // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION " if (Serial.available())"));
     lcdConnected = true;
     byte nextionCommandByte = serial_read();
 
@@ -199,7 +199,7 @@ void mNextionPanel::nextionProcessInput()
   // first instructions byte
   switch(nextionReturnBuffer[0]){
     case NEXTION_COMMAND_INVALID_INSTRUCTION:
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
+      //AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_RX D_NEXTION_COMMAND D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR));   
     break;
 
   }
@@ -451,9 +451,13 @@ void mNextionPanel::nextionSetAttr(const char* hmiAttribute, const char* hmiValu
     swSer->print(utf8ascii2((char*)hmiValue));
     swSer->write(nextionSuffix, sizeof(nextionSuffix));
   #else
+  // DEBUG_LINE_HERE_PAUSE;
     SERIAL_NEXTION_TX.print(hmiAttribute);
     SERIAL_NEXTION_TX.print("=");
-    SERIAL_NEXTION_TX.print(utf8ascii2((char*)hmiValue));
+  // DEBUG_LINE_HERE_PAUSE;
+    // SERIAL_NEXTION_TX.print(utf8ascii((char*)hmiValue));
+    SERIAL_NEXTION_TX.print(utf8ascii((String)hmiValue));
+  // DEBUG_LINE_HERE_PAUSE;
     SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
   #endif
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX "PHASEOUT USING, KEEP LEGACY, SET %s=%s"),hmiAttribute,hmiValue);
@@ -478,7 +482,101 @@ void mNextionPanel::nextionSendCmd(const char* c_str)
 { // Send a raw command to the Nextion panel
   serial_print(utf8ascii(c_str));
   serial_print_suffix();
-  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
+  AddLog(settings.dynamic_log_level,PSTR(D_LOG_NEXTION D_NEXTION_TX " %s"),c_str);
+}
+
+
+void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
+{ // Send a raw command to the Nextion panel
+
+//move format checks here
+  char conversion_buffer[100] = {0};
+
+  snprintf(conversion_buffer, sizeof(conversion_buffer), "%s", c_str);
+
+  // AddLog(LOG_LEVEL_INFO, PSTR("before %s"),conversion_buffer);
+
+  uint8_t command_length = strlen(conversion_buffer);  // use this later to check if "matched index + key + 3 data hue bytes" = "length" for vailidity check
+
+  uint16_t converted_565_number = 0;
+  uint16_t hue_input = 0;
+
+
+  char* pos_start_of_token = nullptr;
+  char* pos_start_of_response_field = nullptr;
+
+  if((pos_start_of_token=strstr(conversion_buffer, "co=h"))!=nullptr) //pco and bco, returns pointer to substring
+  {              
+    // AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),pos_start_of_token);
+    pos_start_of_response_field = pos_start_of_token+3; // Only 3, since "h" is not part of the output command
+
+    hue_input = pCONT_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
+
+    float r,g,b;
+    
+    HueToRgb(hue_input, &r,&g,&b);
+
+    uint8_t red = (int)r;
+    uint8_t green = (int)g;
+    uint8_t blue = (int)b;
+
+    uint16_t Rgb565 = (((red & 0xf8)<<8) + ((green & 0xfc)<<3)+(blue>>3));
+
+
+    // AddLog(LOG_LEVEL_INFO, PSTR("Rgb565 = %d"), Rgb565);
+
+
+    sprintf(pos_start_of_response_field, "%d\0", Rgb565);
+
+  }
+  else
+  if((pos_start_of_token=strstr(conversion_buffer, "co=#"))!=nullptr) //pco and bco, returns pointer to substring, "#" (capital) for byte packed rgb
+  {               
+    // AddLog(LOG_LEVEL_INFO, PSTR("MATCHED %s"),pos_start_of_token);
+    pos_start_of_response_field = pos_start_of_token+3; // Only 3, since "h" is not part of the output command
+
+    // hue_input = pCONT_sup->TextToInt(pos_start_of_response_field+1); //skipping h to numbers only
+
+    
+    // AddLog(LOG_LEVEL_INFO, PSTR("pos_start_of_response_field = %s"), pos_start_of_response_field);
+
+    uint32_t colour32bit = 0;
+    if(pos_start_of_response_field[0]=='#'){ colour32bit = (long) strtol( &pos_start_of_response_field[1], NULL, 16);
+    }else{ colour32bit = (long) strtol( &pos_start_of_response_field[0], NULL, 16); }
+
+    // RgbColor rgb;
+    // rgb.R = colour32bit >> 16; //RGB
+    // rgb.G = colour32bit >> 8 & 0xFF; //RGB
+    // rgb.B = colour32bit & 0xFF; //RGB
+
+
+    // float r,g,b;
+    
+    // HueToRgb(hue_input, &r,&g,&b);
+
+    uint8_t red   = colour32bit >> 16; //RGB
+    uint8_t green = colour32bit >> 8 & 0xFF; //RGB
+    uint8_t blue  = colour32bit & 0xFF; //RGB
+
+    uint16_t Rgb565 = (((red & 0xf8)<<8) + ((green & 0xfc)<<3)+(blue>>3));
+
+// 
+    // AddLog(LOG_LEVEL_INFO, PSTR("Rgb565 = %d"), Rgb565);
+
+
+    sprintf(pos_start_of_response_field, "%d\0", Rgb565);
+
+  }
+  
+  
+  
+  
+  else{
+    // AddLog(LOG_LEVEL_INFO, PSTR("NO match"));
+
+  }
+
+  nextionSendCmd(conversion_buffer);
 }
 
 
@@ -569,30 +667,35 @@ String mNextionPanel::utf8ascii(String s)
   return r;
 }
 
-void mNextionPanel::utf8ascii(char *s)
-{ // In Place conversion UTF8-string to Extended ASCII (ASCII is shorter!)
-  uint16_t k = 0;
-  char c;
-  for (uint16_t i = 0; i < strlen(s); i++)
-  {
-    c = utf8ascii(s[i]);
-    if (c != 0)
-      s[k++] = c;
-  }
-  s[k] = 0;
-}
+// void mNextionPanel::utf8ascii(char *s)
+// { // In Place conversion UTF8-string to Extended ASCII (ASCII is shorter!)
+//   uint16_t k = 0;
+//   char c;
+//   for (uint16_t i = 0; i < strlen(s); i++)
+//   {
+//     c = utf8ascii(s[i]);
+//     if (c != 0)
+//       s[k++] = c;
+//   }
+//   s[k] = 0;
+// }
 
-char* mNextionPanel::utf8ascii2(char *s)
+char* mNextionPanel::utf8ascii_Char(char *s)
 { // In Place conversion UTF8-string to Extended ASCII (ASCII is shorter!)
-  uint16_t k = 0;
-  char c;
-  for (uint16_t i = 0; i < strlen(s); i++)
-  {
-    c = utf8ascii(s[i]);
-    if (c != 0)
-      s[k++] = c;
-  }
-  s[k] = 0;
+
+AddLog(LOG_LEVEL_ERROR, PSTR("mNextionPanel::utf8ascii2(char *s) crashing function"));
+
+  // uint16_t k = 0;
+  // char c;
+  // for (uint16_t i = 0; i < strlen(s); i++)
+  // {
+  //   c = utf8ascii(s[i]);
+  //   if (c != 0)
+  //     s[k++] = c;
+  // }
+  // s[k] = 0;
+  // return s;
+  // return nullptr;
   return s;
 }
 

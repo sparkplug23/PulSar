@@ -421,6 +421,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   else if(strcmp(c,"D5")==0){ pin = 14; }
   else if(strcmp(c,"D8")==0){ pin = 15; }
   else if(strcmp(c,"D0")==0){ pin = 16; }
+  // else if(strcmp(c,"A0")==0){ pin = 17; }
   else if(strcmp(c,"LBI")==0){ 
     #ifdef LED_BUILTIN
     pin = LED_BUILTIN; 
@@ -765,9 +766,9 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE != %d index %s"),index,kModules[index].name);
     // return kModules[index].name;
 
-//Change to use function
+    //Change to use function
 
-return GetModuleNameByID(index, buffer);
+    return GetModuleNameByID(index, buffer);
     // return pCONT_sup->GetTextIndexed_P(buffer, buflen, index, kModules_Name_list_ctr);
 
     
@@ -1398,7 +1399,7 @@ void mHardwarePins::TemplateJson()
 
 //   if (PinUsed(GPIO_RGB_DATA_ID)){  // RGB led
 //     pCONT_set->devices_present++;
-//     pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE;
+//     pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;
 //     // AddLog(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
 //   }else{
 //     // AddLog(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
@@ -1509,6 +1510,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_INV_CTR)==0){  return GPIO_SWT1_INV_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT2_INV_CTR)==0){  return GPIO_SWT2_INV_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT3_INV_CTR)==0){  return GPIO_SWT3_INV_ID; }
 
   
   else if(strcmp_P(c,PM_GPIO_FUNCTION_SWT1_CTR)==0){  return GPIO_SWT1_ID; }

@@ -3,7 +3,7 @@
 
 // #include "1_TaskerManager/mTaskerManager.h"
 
-// #ifdef USE_MODULE_DRIVERS_GPS
+#ifdef USE_MODULE_DRIVERS_GPS
 
 
 //  Copyright (C) 2014-2017, SlashDevin
@@ -60,4 +60,7 @@
 
 #endif
 
+
+
+#endif // USE_MODULE_DRIVERS_GPS
 // #endif

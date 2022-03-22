@@ -116,7 +116,7 @@ bool mInterfaceLight::Pre_Init(void)
   //temp fix
   if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
     // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
-    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE; 
+    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;  // NEEDS METHOD HERE OF SETTING SK6812
   }
 
   if (pCONT_set->Settings.light_settings.type > LT_BASIC) {
@@ -245,7 +245,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 // setApplyBrightnessToOutput(false);
-//   if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
+//   if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ //RGB only
     
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 //       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
@@ -670,7 +670,8 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
 void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index, bool flag_replicate_for_total_pixel_length){
 
   switch(pCONT_set->Settings.light_settings.type){
-    case LT_ADDRESSABLE:
+    case LT_ADDRESSABLE_WS281X:
+    case LT_ADDRESSABLE_SK6812:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       pCONT_ladd->SetPixelColorHardware(index, colour_hardware, flag_replicate_for_total_pixel_length);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
@@ -690,7 +691,8 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardwar
 RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 
   switch(pCONT_set->Settings.light_settings.type){
-    case LT_ADDRESSABLE:  
+    case LT_ADDRESSABLE_WS281X:  
+    case LT_ADDRESSABLE_SK6812:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       return pCONT_ladd->GetPixelColorHardware(index);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
@@ -711,7 +713,8 @@ RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 void mInterfaceLight::ShowInterface(){
 
   switch(pCONT_set->Settings.light_settings.type){
-    case LT_ADDRESSABLE:  
+    case LT_ADDRESSABLE_WS281X:  
+    case LT_ADDRESSABLE_SK6812:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       return pCONT_ladd->ShowHardware();
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
@@ -733,28 +736,42 @@ void mInterfaceLight::ShowInterface(){
 
 void mInterfaceLight::EveryLoop(){
       
-  #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-  AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE HERE %d"),pCONT_set->Settings.light_settings.type);
-  #endif
+  // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE_WS281X HERE %d"),pCONT_set->Settings.light_settings.type);
+  // #endif
 
-  if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
-     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE)){
+  
+
+
+
+  /**
+   * @brief 
+   * If PWM types
+   * 
+   */
+  if(pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END){
      
-    // switch(pCONT_lAni->_segments[0].mode_id)    
-    //   {
-    //   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    //   case ANIMATION_MODE_EFFECTS__ID:
-    //     pCONT_lAni->SubTask_Effects_PhaseOut();
-    //   break;
-    //   #endif
-    //   case ANIMATION_MODE_NONE__ID: default: break; // resting position
-    // }
+    switch(pCONT_lAni->_segments[0].mode_id)    
+      {
+      // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+      
+      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+      case ANIMATION_MODE_EFFECTS_ID:
+        pCONT_lAni->SubTask_Segments_Animation();
+      break;
+      #endif
+      // #endif
+      case ANIMATION_MODE_NONE_ID: default: break; // resting position
+    }
   
   }
   
-  if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ 
+  if((pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X)||
+     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_SK6812)){
+
+  // if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ 
     
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE %d"),animation.mode_id);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE_WS281X %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     
     switch(pCONT_lAni->_segments[0].mode_id)    
@@ -772,7 +789,7 @@ void mInterfaceLight::EveryLoop(){
        * */
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
       case ANIMATION_MODE_NOTIFICATIONS__ID:
-        pCONT_lAni->SubTask_Notifications();
+        pCONT_lAni->SubTask_Notifications();   // Convert this into its own segment effect, effect will need to be set first
       break;
       #endif
       /**
@@ -1130,6 +1147,16 @@ uint32_t mInterfaceLight::RgbColorto32bit(RgbColor rgb){
 *******************************************************************************************************************
 *******************************************************************************************************************/
 
+/**
+ * @brief future global way to map colours using palette
+ * 
+ * @param value 
+ * @param map_style_id 
+ * @param value_min 
+ * @param value_max 
+ * @param map_is_palette_id 
+ * @return RgbColor 
+ */
 RgbColor mInterfaceLight::GetColourValueUsingMaps(float value, 
                                             uint8_t map_style_id,
                                             float value_min, float value_max, //not need for some mappings
@@ -1164,6 +1191,59 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps(float value,
     }
 
     RgbColor colour = HsbColor(HueN2F(hue),1.0f,BrtN2F(brt));
+
+    // colour = RgbColor((int)value, 2, 3);
+
+    return colour;
+
+
+
+}
+
+/**
+ * @brief maximum sat/brt, hue changes
+ * 
+ * @param value 
+ * @param map_style_id 
+ * @param value_min 
+ * @param value_max 
+ * @param map_is_palette_id 
+ * @return RgbColor 
+ */
+RgbColor mInterfaceLight::GetColourValueUsingMapsMaximumBrightness(float value, 
+                                            uint8_t map_style_id,
+                                            float value_min, float value_max, //not need for some mappings
+                                            bool map_is_palette_id
+                                          ){
+
+  // map_style_id can use some internal ones here, or else scale and get from palettes
+
+  // Heating rainbow with brighter red end
+  uint16_t hue = 0;
+  uint8_t  sat = 0;
+  uint8_t  brt = 0;
+
+  // if(map is water temperature in celcius ie have different range styles) then convert into rainbow gradient
+
+    // Generate Hue and Brt values
+    if(value<20){
+      hue = 240;
+      brt = 100;
+    }else
+    if((value>=20)&&(value<50)){
+      hue = mSupport::mapfloat(value, 20,50, 180,0);
+      brt = mSupport::mapfloat(value, 20,50, 10,100);
+    }else
+    if((value>=50)&&(value<60)){      
+      hue = mSupport::mapfloat(value, 50,60, 359,345);
+      brt = 100;
+    }else
+    if(value>=60){
+      hue = 340;
+      brt = 100;
+    }
+
+    RgbColor colour = HsbColor(HueN2F(hue),1.0f,1.0f);
 
     // colour = RgbColor((int)value, 2, 3);
 

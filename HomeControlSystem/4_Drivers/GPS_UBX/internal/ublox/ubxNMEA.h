@@ -20,6 +20,10 @@
 
 #include "4_Drivers/GPS_UBX/internal/configs/NMEAGPS_cfg.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
 // Disable the entire file if derived types are not allowed.
 #ifdef NMEAGPS_DERIVED_TYPES
 
@@ -116,3 +120,6 @@ protected:
 #endif // NMEAGPS_DERIVED_TYPES enabled
 
 #endif
+
+
+#endif // #ifdef USE_MODULE_DRIVERS_GPS

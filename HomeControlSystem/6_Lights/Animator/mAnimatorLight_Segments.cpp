@@ -34,7 +34,7 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
   {
     _segment_runtimes[i].rgbcct_controller->setSubType(RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID);
     _segment_runtimes[i].rgbcct_controller->setApplyBrightnessToOutput(false);
-    if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE){ //RGB only
+    if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ //RGB only
       _segment_runtimes[i].rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_RGB);
     }else{
       _segment_runtimes[i].rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_BOTH);
@@ -159,21 +159,40 @@ void mAnimatorLight::SubTask_Segments_Animation()
     ){
       // if(mTime::TimeReached(&tSaved_Test_Segment_Animation, 2000))
       // {
-        
-      if(_segments[segment_active_index].isActive())
-      {
 
+        /**
+         * @brief 
+         * Temp fix that will override how isActive will not be valid is segment is a single pixel, or at length of 1, is it as 1 |= 0?
+         * 
+         */
+        
+        // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),segment_active_index,_segments[segment_active_index].isActive());
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),segment_active_index,_segments[segment_active_index].pixel_range.start,_segments[segment_active_index].pixel_range.stop);
+        // #endif
+
+
+      if(_segments[segment_active_index].isActive())// || (pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END))
+      {     
 
         if((mTime::TimeReached(&_segments[segment_active_index].tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
         {
+
+        // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
+        //   AddLog(LOG_LEVEL_DEBUG, PSTR("isActive pCONT_lAni->_segments[0].mode_id=%d"),pCONT_lAni->_segments[0].mode_id);
+        // #endif
 
           if(_segments[0].flags.fForceUpdate){ _segments[0].flags.fForceUpdate=false;
             _segments[segment_active_index].tSaved_AnimateRunTime = millis();
           }
           
+          // This maybe cant be global and needs placed inside each effect?
+          Set_Segment_ColourType(segment_active_index, pCONT_set->Settings.light_settings.type);
+
+
         _virtualSegmentLength = _segments[segment_active_index].virtualLength();
           
-        #ifdef ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+        #ifdef ENABLE_FEATURE_INCLUDE_WLED_PALETTES
         /**
          * If effect is from WLED, then Generate new colours
          **/
@@ -183,7 +202,11 @@ void mAnimatorLight::SubTask_Segments_Animation()
         ){          
           mPaletteI->UpdatePalette_FastLED_TargetPalette();
         }
-        #endif // ENABLE_DEVFEATURE_INCLUDE_WLED_PALETTES
+        #endif // ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+
+        // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
+          // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].effect_id=%d"),segment_active_index, _segments[segment_active_index].effect_id);
+        // #endif
         
 
 
@@ -648,15 +671,15 @@ void mAnimatorLight::SubTask_Segments_Animation()
           //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
           //  break;
           #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
-          case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:
-            SubTask_Flasher_Animate_LCD_Clock_Time_Basic_01();
+          case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
+            SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
           break;
-          // case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
-          //   SubTask_Flasher_Animate_LCD_Clock_Time_Basic_02();
-          // break;
-          // case EFFECTS_FUNCTION__LCD_DISPLAY_BASIC_01__ID:
-          //   SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-          // break;
+          case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
+            SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
+          break;
+          case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
+            SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+          break;
           #endif // ENABLE_DEVFEATURE_RGB_CLOCK     
           #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2    
           case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
@@ -687,6 +710,12 @@ void mAnimatorLight::SubTask_Segments_Animation()
       }//end if update reached
 
     } //  if(_segments[segment_active_index].isActive())
+    // else{
+      
+    //     #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
+    //       AddLog(LOG_LEVEL_DEBUG, PSTR("ELSE isActive pCONT_lAni->_segments[0].mode_id=%d"),pCONT_lAni->_segments[0].mode_id);
+    //     #endif
+    // }
 
    _segments[0].flags.animator_first_run = false;
 
@@ -720,6 +749,27 @@ AddLog(LOG_LEVEL_TEST, PSTR("segment_index=%d"),segment_index);
 
 }
 
+
+
+
+void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type)
+{
+
+  switch(light_type)
+  {
+    case LT_PWM5:
+      _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
+    break;
+    case LT_ADDRESSABLE_SK6812:
+      _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID; 
+    break;
+    default:
+    case LT_ADDRESSABLE_WS281X:
+      _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+    break;
+  }
+
+}
 
 
 
@@ -772,6 +822,29 @@ uint16_t pixel_start_i = 0;
         // start_of_pixel_pair[3] = desired_colour.R;
         // start_of_pixel_pair[4] = desired_colour.G;
         // start_of_pixel_pair[5] = desired_colour.B;
+      }
+
+    break;
+    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:
+    
+      pixel_start_i = pixel_index*8;
+
+      if(pixel_start_i + 8 <= buflen)
+      {
+        byte* start_of_pixel_pair = &buffer[pixel_start_i];
+
+        start_of_pixel_pair[0] = starting_colour.R;
+        start_of_pixel_pair[1] = starting_colour.G;
+        start_of_pixel_pair[2] = starting_colour.B;
+        start_of_pixel_pair[3] = starting_colour.W1;
+
+        // start_of_pixel_pair[3] = desired_colour.R;
+        // start_of_pixel_pair[4] = desired_colour.G;
+        // start_of_pixel_pair[5] = desired_colour.B;
+        
+    // AddLog(LOG_LEVEL_TEST, PSTR("SetTransitionColourBuffer_StartingColour"));
+
+
       }
 
     break;
@@ -854,9 +927,10 @@ RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor desired_colour)
 
 // note right now it is storing the full rgbcct value
 uint16_t pixel_start_i = 0;
+        byte* start_of_pixel_pair = nullptr;
 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
+    // AddLog(LOG_LEVEL_TEST, PSTR("[%d] \t pixel_start_i/buflen=%d\t%d"),pixel_index, pixel_start_i,buflen);
   switch(pixel_type)
   {
     case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:
@@ -865,7 +939,7 @@ uint16_t pixel_start_i = 0;
 
       if(pixel_start_i + 6 <= buflen)
       {
-        byte* start_of_pixel_pair = &buffer[pixel_start_i];
+        start_of_pixel_pair = &buffer[pixel_start_i];
 
         // start_of_pixel_pair[0] = starting_colour.R;
         // start_of_pixel_pair[1] = starting_colour.G;
@@ -877,13 +951,32 @@ uint16_t pixel_start_i = 0;
       }
 
     break;
+    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:
+    
+      pixel_start_i = pixel_index*8; // rgbw * 2
+
+      if(pixel_start_i + 8 <= buflen)
+      {
+        start_of_pixel_pair = &buffer[pixel_start_i];
+
+        // start_of_pixel_pair[0] = starting_colour.R;
+        // start_of_pixel_pair[1] = starting_colour.G;
+        // start_of_pixel_pair[2] = starting_colour.B;
+
+        start_of_pixel_pair[4] = desired_colour.R;
+        start_of_pixel_pair[5] = desired_colour.G;
+        start_of_pixel_pair[6] = desired_colour.B;
+        start_of_pixel_pair[7] = desired_colour.W1;
+      }
+
+    break;
     case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
       if(pixel_start_i + 10 <= buflen)
       {
-        byte* start_of_pixel_pair = &buffer[pixel_start_i];
+        start_of_pixel_pair = &buffer[pixel_start_i];
 
         // start_of_pixel_pair[0] = starting_colour.R;
         // start_of_pixel_pair[1] = starting_colour.G;
@@ -907,6 +1000,16 @@ uint16_t pixel_start_i = 0;
   //   AddLog(LOG_LEVEL_TEST, PSTR("NOT enough memory"));
   // }
   
+
+//   if(start_of_pixel_pair != nullptr)
+//   { 
+//     // byte a = &start_of_pixel_pair[0];
+
+//     // Serial.println(a);
+
+// AddLog_Array(LOG_LEVEL_TEST, PSTR("start_of_pixel_pair"), start_of_pixel_pair, 8);
+
+//   }
 
 
 
@@ -969,7 +1072,7 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
   uint16_t pixel_start_i =pixel_index*sizeof(TransitionColourPairs);
 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
+    AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
 
   if(pixel_start_i + 10 <= buflen)
   {
@@ -1039,6 +1142,7 @@ uint16_t pixel_start_i = 0;
 //   uint16_t pixel_pair_index_location_in_buffer = pixel_index*sizeof(TransitionColourPairs);
 
 // // AddLog(LOG_LEVEL_TEST, PSTR("GetTransitionColourBuffer=%d \t%d"),pixel_index, pixel_pair_index_location_in_buffer );
+// AddLog(LOG_LEVEL_TEST, PSTR("pixel_type=%d"),pixel_type );
 
     byte* c = nullptr;
 //   byte* start_of_pair = &buffer[pixel_pair_index_location_in_buffer];
@@ -1054,6 +1158,12 @@ uint16_t pixel_start_i = 0;
       colour->StartingColour = RgbColor(c[0], c[1], c[2]);
       colour->DesiredColour  = RgbColor(c[3], c[4], c[5]);
       break;
+    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:
+      pixel_start_i = pixel_index*8;
+      c = &buffer[pixel_start_i];
+      colour->StartingColour = RgbwColor(c[0], c[1], c[2], c[3]);
+      colour->DesiredColour  = RgbwColor(c[4], c[5], c[6], c[7]);
+      break;
     case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID:
       pixel_start_i = pixel_index*10;
       c = &buffer[pixel_start_i];
@@ -1062,6 +1172,8 @@ uint16_t pixel_start_i = 0;
     break;
   }
 
+// AddLog(LOG_LEVEL_TEST, PSTR("colour->StartingColour=%d,%d,%d,%d,%d"),colour->StartingColour.R,colour->StartingColour.G,colour->StartingColour.B,colour->StartingColour.WC,colour->StartingColour.WW);
+// AddLog(LOG_LEVEL_TEST, PSTR("colour->DesiredColour=%d,%d,%d,%d,%d"),colour->DesiredColour.R,colour->DesiredColour.G,colour->DesiredColour.B,colour->DesiredColour.WC,colour->DesiredColour.WW);
 
       
   // AddLog_Array(LOG_LEVEL_TEST, PSTR("Abuffer"), &start_of_pair[pixel_pair_index_location_in_buffer    ] , 10);
@@ -1418,7 +1530,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
             if(_segments[0].flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
-            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_index, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID, colour);
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_index, _segments[segment_index].colour_type, colour);
   
           }
 
@@ -1468,7 +1580,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
             if(_segments[0].flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
-            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID, colour);
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel, _segments[segment_index].colour_type, colour);
   
             if(++desired_pixel>=mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr)){desired_pixel=0;}
 
@@ -1510,7 +1622,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
             if(_segments[0].flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
-            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, temp, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID, colour);
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, temp,  _segments[segment_index].colour_type, colour);
   
             }            
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
@@ -1524,7 +1636,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
             if(_segments[0].flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
-            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_position, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID, colour);
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_position,  _segments[segment_index].colour_type, colour);
   
             #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
             //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
@@ -1636,7 +1748,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
                if(_segments[0].flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
-            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, index, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID, colour);
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, index,  _segments[segment_index].colour_type, colour);
   
 
 

@@ -18,6 +18,10 @@
 #include "Streamers.h"
 // #include "NMEAGPS.h"
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #include "4_Drivers/GPS_UBX/internal/NMEA_Parser.h"
 
 //#define USE_FLOAT
@@ -496,3 +500,8 @@ void trace_all( Print & outs, const NMEAGPS &gps, const GPS_FIX &fix )
   outs << '\n';
 
 } // trace_all
+
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

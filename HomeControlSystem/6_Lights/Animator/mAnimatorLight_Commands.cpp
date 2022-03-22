@@ -84,7 +84,12 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       _segments[i].pixel_range.stop  = 0;
     }
     _segments[0].pixel_range.start = 0;
+    #ifdef ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
+    _segments[0].pixel_range.stop  = STRIP_SIZE_MAX;
+
+    #else
     _segments[0].pixel_range.stop  = STRIP_SIZE_MAX-1;
+    #endif
   }
 
   /**
@@ -293,7 +298,12 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
-  #ifdef ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+  /**
+   * @brief 
+   * This needs another name, but should be included until after colour wled type is removed
+   * 
+   */
+  // #ifdef E NABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
   /**
    * @brief These are for WLED effects basic 3 colour system, eventually to be merged into mine (likely use the 3 rgbcct options? or add another? or simply more of rgbcct users * 
    */
@@ -316,7 +326,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
       }
     }
   }
-  #endif // ENABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
+  // #endif // NABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
 
 
 
@@ -331,6 +341,19 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
+  
+  #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
+  if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
+    lcd_display_show_number = jtok.getInt();
+    // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  #endif // ENABLE_DEVFEATURE_RGB_CLOCK
+
+
+
   // #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
   // /**
   //  * Pixel output grouping settings
@@ -793,7 +816,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 
 // Flip these so default is 0 to 100%, and the other is range controlled
   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
-    CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, pCONT_iLight->_ct_min_range,pCONT_iLight->_ct_max_range), segment_index);
+    CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, pCONT_iLight->_ct_min_range, pCONT_iLight->_ct_max_range), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
@@ -1731,9 +1754,20 @@ void mAnimatorLight::CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index) {
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mAnimatorLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index) {
+void mAnimatorLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index)
+{
+
+AddLog(LOG_LEVEL_DEBUG, PSTR("ctA=%d"),ct);
+
+// Serial.printf("\n\r\n\r\n\r\n\rcct=%d\n\r",ct);
+
   _segment_runtimes[segment_index].rgbcct_controller->setCCT(ct);
   _segments[segment_index].flags.fForceUpdate = true;
+
+  
+AddLog(LOG_LEVEL_DEBUG, PSTR("w1w2=%d %d"),_segment_runtimes[segment_index].rgbcct_controller->WW,_segment_runtimes[segment_index].rgbcct_controller->WC);
+
+
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), _segment_runtimes[segment_index].rgbcct_controller->getCCT());

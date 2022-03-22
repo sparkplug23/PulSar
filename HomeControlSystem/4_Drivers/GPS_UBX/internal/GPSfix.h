@@ -21,6 +21,11 @@
 #include "4_Drivers/GPS_UBX/internal/configs/NeoGPS_cfg.h"
 #include "4_Drivers/GPS_UBX/internal/configs/GPSfix_cfg.h"
 
+
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 #if defined( GPS_FIX_DATE ) | defined( GPS_FIX_TIME )
   #include "4_Drivers/GPS_UBX/internal/types/NeoTime.h"
 #endif
@@ -590,3 +595,5 @@ public:
 } NEOGPS_PACKED;
 
 #endif
+
+#endif // #ifdef USE_MODULE_DRIVERS_GPS

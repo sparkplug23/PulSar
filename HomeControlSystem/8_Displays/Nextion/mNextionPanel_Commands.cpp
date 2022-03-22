@@ -103,6 +103,15 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
             nextionSendCmd(val.getStr());
         }
     }
+  
+
+    if(jtok = obj["commands_formatted"]){
+        JsonParserArray array = jtok;
+        for(auto val : array) {
+            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+            nextionSendCmd_ContainingFormattedText(val.getStr());
+        }
+    }
 
 
     
@@ -298,6 +307,17 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
 
 
 }
+
+
+
+std::string& replace(std::string& s, const std::string& from, const std::string& to)
+{
+    if(!from.empty())
+        for(size_t pos = 0; (pos = s.find(from, pos)) != std::string::npos; pos += to.size())
+            s.replace(pos, from.size(), to);
+    return s;
+}
+
 
 
 

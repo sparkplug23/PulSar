@@ -138,7 +138,7 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level){
 
   char buffer[50];
   JBI->Start();
-  for(int device_id=0;device_id<4;device_id++){
+  for(int device_id=0;device_id<settings.active_zones;device_id++){
     JBI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
       JBI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->relay_status[device_id].last.ontime.hour,  pCONT_mry->relay_status[device_id].last.ontime.minute,  pCONT_mry->relay_status[device_id].last.ontime.second);
       JBI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->relay_status[device_id].last.offtime.hour,  pCONT_mry->relay_status[device_id].last.offtime.minute,  pCONT_mry->relay_status[device_id].last.offtime.second);
@@ -207,25 +207,25 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
       JBI->Level_Start("Sensor");
 
         JBI->Array_Start("ModuleID");
-        for(int8_t i=0; i<4; i++){
+        for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].sensor.module_id);
         }
         JBI->Array_End();
 
         JBI->Array_Start("Index");
-        for(int8_t i=0; i<4; i++){
+        for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].sensor.index);
         }
         JBI->Array_End();
       
         JBI->Array_Start("Temperature");
-        for(int8_t i=0; i<4; i++){
+        for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].sensor.temperature);
         }
         JBI->Array_End();
       
         JBI->Array_Start("Humidity");
-        for(int8_t i=0; i<4; i++){
+        for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].sensor.humidity);
         }
         JBI->Array_End();

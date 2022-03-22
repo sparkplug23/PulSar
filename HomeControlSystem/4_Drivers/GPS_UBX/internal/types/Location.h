@@ -20,6 +20,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#ifdef USE_MODULE_DRIVERS_GPS
+
+
 class NMEAGPS;
 
 namespace NeoGPS {
@@ -124,3 +128,7 @@ public:
 } // NeoGPS
 
 #endif
+
+
+
+#endif //ifdef USE_MODULE_DRIVERS_GPS

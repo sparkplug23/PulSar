@@ -123,7 +123,44 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       break;
       default:
     // DEBUG_PIN2_SET(0); //blue
+
+  // Serial.printf("Only %d:%d\n\r", switch_index, EM_MODULE_DRIVERS_CAMERA_OV2640_ID);
+
+  // #ifdef USE_DEVFEATURE_DISABLE_FOR_CAMERA
+  // if(switch_index != EM_MODULE_DRIVERS_CAMERA_OV2640_ID)
+  // {
+    
+  // Serial.printf("RETURNING EARLY %d\n\r", switch_index);
+
+  //   return 0;
+  
+  
+  // }
+  
+  // #endif
+
+  // Serial.printf("OV Only %d\n\r", switch_index);
+
+
+// switch(switch_index)
+// {
+//   case EM_MODULE_CORE_HARDWAREPINS_ID:
+//   case EM_MODULE_CORE_SETTINGS_ID:
+//   case EM_MODULE_CORE_SUPPORT_ID:
+//   case EM_MODULE_CORE_LOGGING_ID:
+//   case EM_MODULE_CORE_TELEMETRY_ID:
+//   case EM_MODULE_CORE_TIME_ID:
+//   case EM_MODULE_CORE_RULES_ID:
+//   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
+
         pModule[switch_index]->Tasker(function, obj);
+//   break;
+//   default:
+//   //nothing
+//   break;
+// }
+
+
     // DEBUG_PIN2_SET(1);
       break;
     }
@@ -239,6 +276,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_UPDATES
   pModule[EM_MODULE_CORE_UPDATES_ID] = new mUpdates();
   #endif
+  #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
+  pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID] = new mDevelopmentDebugging();
+  #endif
   // Subsystems
   #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID] = new mSolarLunar();
@@ -296,6 +336,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
     pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new mCameraOV2640();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
+    pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new mCameraOV2640();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
+    pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID] = new mWebCam();
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
     pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new mLEDs();
@@ -381,7 +427,10 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
     pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID] = new mRemoteDevice();
   #endif
-  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
+    pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID] = new mADCInternal();
+  #endif
+  #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
     pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID] = new mADCInternal();
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
@@ -447,6 +496,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
     pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID] = new mBucketWaterLevel();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
+    pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID] = new mFurnaceSensor();
   #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();

@@ -115,7 +115,7 @@ private:
     // );
     // #endif // ENABLE_RGBCCT_DEBUG
     
-    Serial.printf("getSubType %d\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r", _subtype);
+    // Serial.printf("getSubType %d\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r", _subtype);
 
     switch (_subtype) {
       default:
@@ -143,18 +143,46 @@ private:
         set_WC(colour_out.WC);
         set_WW(colour_out.WW);
         break;
-      case LIGHT_TYPE__RGBW__ID:
-      case LIGHT_TYPE__RGBCW__ID:
+      // case LIGHT_TYPE__RGBW__ID:
+      // case LIGHT_TYPE__RGBCW__ID:
       case LIGHT_TYPE__RGBCCT__ID:
-        if (LIGHT_TYPE__RGBCW__ID == _subtype) {
+        // if (LIGHT_TYPE__RGBCW__ID == _subtype) {   // error when combining colours types, if the subtypes are wc/ww then another case should be used here
           set_WC(colour_out.WC);
           set_WW(colour_out.WW);
-        } else {
-          set_WC(briCCT);
-          set_WW(briCCT);
-        }
+        // } else {
+        //   set_WC(briCCT);
+        //   set_WW(briCCT);
+        // }
+        
+        set_R(colour_out.R);
+        set_G(colour_out.G);
+        set_B(colour_out.B);
+
         // continue
+
+      break;
+      case LIGHT_TYPE__RGBW__ID:  //white
+        set_WC(briCCT);
+        set_WW(briCCT);
+        set_R(colour_out.R);
+        set_G(colour_out.G);
+        set_B(colour_out.B);
+
+      break;
+
+
+      case LIGHT_TYPE__RGBCW__ID: //cold white?
+        set_WC(briCCT);
+        set_WW(briCCT);
+        set_R(colour_out.R);
+        set_G(colour_out.G);
+        set_B(colour_out.B);
+      break;
+
+
       case LIGHT_TYPE__RGB__ID:
+        set_WC(0);
+        set_WW(0);
         set_R(colour_out.R);
         set_G(colour_out.G);
         set_B(colour_out.B);
@@ -633,6 +661,8 @@ enum LightColorModes {
 
   void setCCT(uint16_t cct) {
     
+// Serial.printf("cct=%d\n\r",cct);
+
     if (0 == cct) {
       // disable cct mode
       setColorMode(LIGHT_MODE_RGB);  // try deactivating CT mode, setColorMode() will check which is legal

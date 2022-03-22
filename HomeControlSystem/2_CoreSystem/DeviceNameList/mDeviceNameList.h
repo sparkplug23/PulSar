@@ -89,7 +89,7 @@ class DeviceNameList{
 
     int8_t AddDeviceName(const char* name_ctr, int16_t class_id, int8_t device_id);
     int8_t RemoveDeviceName(const char* name_ctr, int16_t class_id, int8_t device_id);
-    const char* GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size);
+    const char* GetDeviceNameWithEnumNumber(int16_t module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found = false);
     int8_t GetDeviceIDbyName(int8_t* class_id, int8_t* device_id, char* name_tofind);
     int16_t GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* class_id = nullptr);
     int16_t GetDeviceIDbyName(const char* name_tofind, int8_t device_id = -1, int8_t class_id = -1);

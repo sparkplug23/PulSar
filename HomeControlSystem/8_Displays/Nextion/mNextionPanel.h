@@ -115,6 +115,7 @@ void serial_print(String s_str);
 
 void nextionGetAttr(const char* c_str);
 void nextionSendCmd(const char* c_str);
+void nextionSendCmd_ContainingFormattedText(const char* c_str);
 
 // void nextionSendCmd_JSON(String s_str);
 
@@ -156,6 +157,17 @@ struct SETTINGS{
   uint8_t brightness_percentage = 0;
   uint8_t page = 0;
   uint8_t page_saved = 0; //used to return to after message is flashed
+    // struct SETTINGS{
+      struct FLAGS{
+          // uint8_t EnableSceneModeWithSliders = true;
+          // uint8_t TemplateProvidedInProgMem = false;
+          uint8_t EnableModule = false;
+      }flags;
+    // }settings;
+
+    uint8_t dynamic_log_level = 8;//LOG_LEVEL_DEBUG_MORE; // used for certain addlog that may only have elevated states (to block large serial prints on recursive array prints)
+
+
 }settings;
 
 // Temporarily show message (eg connected) then return to previous screen from settings
@@ -186,6 +198,8 @@ struct LAST_SCREEN_PRESS{
 
 
 
+void EverySecond_ActivityCheck();
+
 void EverySecond_FlashScreen();
 
 #define PAGE_COUNT_MAX 9
@@ -194,9 +208,10 @@ uint8_t page_count_user_set = PAGE_COUNT_MAX;
 uint32_t tTest = millis();
 
 
+std::string& replace(std::string& s, const std::string& from, const std::string& to);
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void init(void);
+    void Init(void);
 
     // void parse_JSONCommand();
 
@@ -221,6 +236,8 @@ uint32_t tTest = millis();
     void wifiDisconnected();
     void wifiConnected();
 
+void Show_ConnectionWorking();
+void Show_ConnectionNotWorking();
 
     // OPTIONAL: Assign default values here.
     // char wifiSSID[32];// = ""; // Leave unset for wireless autoconfig. Note that these values will be lost
@@ -320,6 +337,8 @@ uint32_t tTest = millis();
 
     uint8_t test_toggle = 0;
 
+  
+
 
     
 void WebCommand_Parse(void);
@@ -339,7 +358,7 @@ void WebCommand_Parse(void);
     void nextionSetAttr(const char* hmiAttribute, const char* hmiValue);
     //void nextionSetAttr(String hmiAttribute, String hmiValue);
     void nextionGetAttr(String hmiAttribute);
-    void nextionSendCmd(String nextionCmd);
+    // void nextionSendCmd(String nextionCmd); //remove
     void nextionParseJson(const char* c_str);//String &strPayload);
     void nextionStartOtaDownload(String otaUrl);
     bool nextionOtaResponse();
@@ -372,9 +391,11 @@ void WebCommand_Parse(void);
     // void debugPrintln(String debugText);
     // void debugPrint(String debugText);
     byte utf8ascii(byte ascii);
-    String utf8ascii(String s);
-    void utf8ascii(char *s);
-    char* utf8ascii2(char *s);
+    String utf8ascii(String s); // to be converted to working char*
+    // void utf8ascii(char *s);
+    char* utf8ascii_Char(char *s);
+
+    void HueToRgb(uint16_t hue, float* r, float* g, float* b);
 
     
   void HandleUpgradeFirmwareStart(void);

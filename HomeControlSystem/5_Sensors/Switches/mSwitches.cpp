@@ -145,11 +145,28 @@ void mSwitches::SwitchInit(void)
   }
 
   if (settings.switches_found) { 
+
+    #ifdef ESP288
     TickerSwitch->attach_ms(SWITCH_PROBE_INTERVAL, 
       [this](void){
         this->SwitchProbe();
       }
     );
+
+    #else // esp32
+    // TickerSwitch->attach_ms(SWITCH_PROBE_INTERVAL, 
+    //   [this](void){
+    //     this->SwitchProbe();
+    //   }
+    // );
+
+    TickerSwitch->attach_ms(
+      SWITCH_PROBE_INTERVAL, 
+
+
+      +[](mSwitches* testInstance){ testInstance->SwitchProbe();}, this); //hacky solution to be fixed
+
+    #endif
   }
 
 }
@@ -208,14 +225,58 @@ void mSwitches::SwitchProbe(void)
     } // if PinUsed
   } // for all switches
 
-  TickerSwitch->attach_ms(SWITCH_PROBE_INTERVAL, 
-    [this](void){
-      this->SwitchProbe();
-    }
-  );
+  // TickerSwitch->attach_ms(SWITCH_PROBE_INTERVAL, 
+  //   [this](void){
+  //     this->SwitchProbe();
+  //   }
+  // );
+    #ifdef ESP288
+    TickerSwitch->attach_ms(SWITCH_PROBE_INTERVAL, 
+      [this](void){
+        this->SwitchProbe();
+      }
+    );
+
+    #else // esp32
+
+    TickerSwitch->attach_ms(
+      SWITCH_PROBE_INTERVAL, 
+
+
+      +[](mSwitches* testInstance){ testInstance->SwitchProbe();}, this); //hacky solution to be fixed
+
+
+    //   +[this](void){
+    //     this->SwitchProbe();
+    //   }
+    // );
+
+    #endif
 
 }
+// Bonus: After thinking about it for a second, you could use a lambda instead of creating the function (note you need to have a + sign before the lambda in order for it to work as a function pointer). This would look like:
 
+// #include <Arduino.h>
+// #include <Test.h>
+// #include <functional>
+
+// // for ESP8266: https://github.com/esp8266/Arduino/blob/master/libraries/Ticker/src/Ticker.h
+// // for ESP32:   https://github.com/espressif/arduino-esp32/blob/master/libraries/Ticker/src/Ticker.h
+// #include <Ticker.h>
+
+// Ticker ticker;
+
+// void Test::start(){
+//   ticker.once(5, +[](Test* testInstance) { testInstance->onTickerCallback(); }, this);
+// }
+
+// void Test::onTickerCallback() {
+//   doSomething();
+// }
+
+// void Test::doSomething() {
+//   Serial.println("Hello");
+// }
 /*********************************************************************************************\
  * Switch handler
 \*********************************************************************************************/
@@ -273,31 +334,31 @@ void mSwitches::SwitchHandler(uint8_t mode)
         
         switchflag = 3;
         switch (pCONT_set->Settings.switchmode[i]) {
-        case TOGGLE:
+        case SWITCHMODE_TOGGLE_ID:
           switchflag = POWER_TOGGLE;    // Toggle
           break;
-        case FOLLOW:
+        case SWITCHMODE_FOLLOW_ID:
           switchflag = state &1;        // Follow wall switch state
           break;
-        case FOLLOW_INV:
+        case SWITCHMODE_FOLLOW_INV_ID:
           switchflag = ~state &1;       // Follow inverted wall switch state
           break;
-        case PUSHBUTTON:
+        case SWITCHMODE_PUSHBUTTON_ID:
           if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
-        case PUSHBUTTON_INV:
+        case SWITCHMODE_PUSHBUTTON_INV_ID:
           if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
             switchflag = 2;              // Toggle with releasing pushbutton from Gnd
           }
           break;
-        case PUSHBUTTON_TOGGLE:
+        case SWITCHMODE_PUSHBUTTON_TOGGLE_ID:
           if (state != switches[i].lastwallswitch) {
             switchflag = 2;              // Toggle with any pushbutton change
           }
           break;
-        case PUSHBUTTONHOLD:
+        case SWITCHMODE_PUSHBUTTONHOLD_ID:
           if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
             switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }
@@ -306,7 +367,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
             switchflag = 2;              // Toggle with pushbutton to Gnd
           }
           break;
-        case PUSHBUTTONHOLD_INV:
+        case SWITCHMODE_PUSHBUTTONHOLD_INV_ID:
           if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
             switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
           }

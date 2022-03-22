@@ -18,14 +18,16 @@
 */
 //https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/gpio.html
 
-#ifndef mADCInternal_H
-#define mADCInternal_H
+#ifndef mADCInternal_esp8266_H
+#define mADCInternal_esp8266_H
 
+#ifndef  D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID
 #define D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID 143
+#endif
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_ADC_INTERNAL
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
 
 #include "1_TaskerManager/mTaskerManager.h"
 

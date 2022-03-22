@@ -7,6 +7,16 @@
  * 
  * auto timeout for setting the display to sleep (off or else dimmer brightness level)
  * 
+ * What is the difference between openHASP and HASPone~
+HASPone uses a d1-mini ESP8266 connected to a Nextion/TJC smart display via the serial port. HASPone is the go-to firmware for using a Nextion/TJC screen in your Home Automation setup.
+
+openHASP does not support Nextion/TJC displays because it needs to be able to drive the display directly. It was created specifically to eliminate the proprietary hardware and take control of the screen.
+
+So openHASP is a hard fork of the original HASwitchPlate project to run on open hardware.
+
+So I will need to create a nextion class (HASPone) and then another for direct drive stuff (openHASP)
+
+ * 
  */
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
@@ -20,16 +30,31 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
   /************
    * INIT SECTION * 
   *******************/
-  if(function == FUNC_PRE_INIT){
-    Pre_Init();
-  }else
-  if(function == FUNC_INIT){
-    init();
+  switch(function){
+    case FUNC_PRE_INIT:
+      Pre_Init();  
+      break;
+    case FUNC_INIT:
+      Init();
+      break;
   }
 
-  //if(!lcdConnected){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
 
   switch(function){
+    /************
+     * SETTINGS SECTION * 
+    *******************/
+    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+    //   Settings_Load();
+    // break;
+    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
+    //   Settings_Save();
+    // break;
+    // case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
+    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
+    //   Settings_Default();
+    // break;
     /************
      * PERIODIC SECTION * 
     *******************/
@@ -38,18 +63,9 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND:
       // EverySecond_SendScreenInfo();
-      //EverySecond_FlashScreen();
+      // EverySecond_FlashScreen();
 
-       if(fOpenHABDataStreamActive_last_secs){ //only if positive
-          if(fOpenHABDataStreamActive_last_secs++>OPENHAB_DATA_STREAM_ACTIVITY_TIMEOUT_SECS){
-            fOpenHABDataStreamActive_last_secs = -1;
-            fOpenHABDataStreamActive = false;
-          }
-        }
-        
-      // EverySecond_SendScreenInfo();
-
-// Serial2.println("TEST");
+      EverySecond_ActivityCheck();
 
     break;
     case FUNC_EVERY_MINUTE:
@@ -61,12 +77,14 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * Network SECTION * 
     *******************/
-    // case FUNC_WIFI_CONNECTED:
-    //   wifiConnected();
-    // break;
-    // case FUNC_WIFI_DISCONNECTED:
-    //   wifiDisconnected();
-    // break;
+    case FUNC_WIFI_CONNECTED:
+      // wifiConnected();
+      // Show_ConnectionWorking();
+    break;
+    case FUNC_WIFI_DISCONNECTED:
+      // wifiDisconnected();
+      // Show_ConnectionNotWorking();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -87,9 +105,11 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_MQTT_CONNECTED:
       mqttConnected();
+      Show_ConnectionWorking();
     break;
     case FUNC_MQTT_DISCONNECTED:
       mqttDisconnected();
+      Show_ConnectionNotWorking();
     break;
     #endif
   }
@@ -104,6 +124,42 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
 }
 
 
+/**
+ * @brief Using a template for "working" and another for "not working"
+ * hardcoding for now
+ **/
+void mNextionPanel::Show_ConnectionWorking()
+{
+
+// char* command = "{}";
+
+#ifdef ENABLE_DEVFEATURE_NEXTION_DISPLAY
+
+  nextionSendCmd("page 2");
+  nextionSetAttr("p[2].b[1].txt", "\"Computer connected!\"");
+  delay(1000);
+  nextionSendCmd("page 1");
+  nextionSetAttr("p[1].b[1].txt", "\"Computer connected!\"");
+
+#endif
+
+}
+
+
+void mNextionPanel::Show_ConnectionNotWorking()
+{
+
+#ifdef ENABLE_DEVFEATURE_NEXTION_DISPLAY
+
+  // nextionSendCmd("page 2");
+  // nextionSetAttr("p[2].b[1].txt", "\"Show_ConnectionNotWorking\"");
+
+#endif
+
+
+
+  
+}
 
 
 
@@ -135,8 +191,7 @@ void mNextionPanel::Pre_Init(void){
     // swSer->begin(NEXTION_BAUD);
   // }
   
-  Serial.println("DONE::Pre_Init");
-  Serial.flush();
+  
 }
 
 
@@ -148,7 +203,7 @@ void mNextionPanel::Pre_Init(void){
 
 
 
-void mNextionPanel::init()
+void mNextionPanel::Init()
 { 
 
 /**
@@ -194,21 +249,116 @@ void mNextionPanel::init()
   char page_default_command[10];
   sprintf(page_default_command,"page %d",NEXTION_DEFAULT_PAGE_NUMBER);
 
+
+  #ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+    Template_Load_Init_Display_Command();
+  #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+
+  /**
+   * @brief 
+   * Boot message
+   * 
+   */
+  #ifdef TEMPLATE_DEFINED_BOOT_MESSAGE
+  // Command_SetPage(settings.page);
+
+
+
+
+  #endif // TEMPLATE_DEFINED_BOOT_MESSAGE
+
+
+
+  /**
+   * @brief 
+   * Runtime page
+   * 
+   */
+
   settings.page = NEXTION_DEFAULT_PAGE_NUMBER;
+
+  settings.flags.EnableModule = true;
 
   //nextionSendCmd(page_default_command); //set page 1 as default 
   //   //nextionSendCmd("page 1"); //set page 1 as default 
 
   Command_SetPage(settings.page);
 
-  #ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
-    Template_Load_Init_Display_Command();
-  #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
 
 }
 
 
+void mNextionPanel::HueToRgb(uint16_t hue, float* r, float* g, float* b)
+{
+    float h = hue/360.0f;
+    float s = 1.0f;
+    float v = 1.0f;
+
+    if (s == 0.0f)
+    {
+        *r = *g = *b = v; // achromatic or black
+    }
+    else
+    {
+        if (h < 0.0f)
+        {
+            h += 1.0f;
+        }
+        else if (h >= 1.0f)
+        {
+            h -= 1.0f;
+        }
+        h *= 6.0f;
+        int i = (int)h;
+        float f = h - i;
+        float q = v * (1.0f - s * f);
+        float p = v * (1.0f - s);
+        float t = v * (1.0f - s * (1.0f - f));
+        switch (i)
+        {
+        case 0:
+            *r = v;
+            *g = t;
+            *b = p;
+            break;
+        case 1:
+            *r = q;
+            *g = v;
+            *b = p;
+            break;
+        case 2:
+            *r = p;
+            *g = v;
+            *b = t;
+            break;
+        case 3:
+            *r = p;
+            *g = q;
+            *b = v;
+            break;
+        case 4:
+            *r = t;
+            *g = p;
+            *b = v;
+            break;
+        default:
+            *r = v;
+            *g = p;
+            *b = q;
+            break;
+        }
+    }
+
+    *r *= 255;
+    *g *= 255;
+    *b *= 255;
+
+}
+
+
+
 #ifdef NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+
 void mNextionPanel::Template_Load_Init_Display_Command(){
 
   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
@@ -242,11 +392,26 @@ void mNextionPanel::Template_Load_Init_Display_Command(){
 
 }
 
+#endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
 
-  #endif // NEXTION_INIT_PANEL_COMMAND_TEMPLATE
+
+void mNextionPanel::EverySecond_ActivityCheck()
+{
+
+  //  if(fOpenHABDataStreamActive_last_secs){ //only if positive
+  //     if(fOpenHABDataStreamActive_last_secs++>OPENHAB_DATA_STREAM_ACTIVITY_TIMEOUT_SECS){
+  //       fOpenHABDataStreamActive_last_secs = -1;
+  //       fOpenHABDataStreamActive = false;
+  //     }
+  //   }
+    
+
+}
 
 
-void mNextionPanel::EveryLoop(){
+
+void mNextionPanel::EveryLoop()
+{
 
   if (nextionHandleInput()){ // Process user input from HMI
     nextionProcessInput();
@@ -277,15 +442,6 @@ void mNextionPanel::EveryLoop(){
 }
 
 
-
-
-/**********************************************************************************************************************************************************
- ******************************************************************************************************************************************************************************* 
- ******************************************************************************************************************************************************************************* 
- *  MQTT ******************************************************************************************************************************************************************************
- ******************************************************************************************************************************************************************************* 
- ******************************************************************************************************************************************************************************* 
- **********************************************************************************************************************************************************************************/
 
 /***
  * Add subscribes for new connection to mqtt
@@ -406,82 +562,12 @@ uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
 }
 
 
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-////////////////////// START OF MQTT /////////////////////////
-
-void mNextionPanel::MQTTHandler_Init(){
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = false;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mNextionPanel::ConstructJSON_Sensor;
-  
-}
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mNextionPanel::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mNextionPanel::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mNextionPanel::MQTTHandler_Sender(uint8_t id)
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DISPLAYS_NEXTION_ID, handle, id);
-  }
-}
-
 /**
  * @brief 
- * {
+ * 
+ * 
+ 
+ {
   "commands": [
     "page 5",
     "p[5].b[7].txt=\"Heating is working\"",
@@ -492,6 +578,66 @@ void mNextionPanel::MQTTHandler_Sender(uint8_t id)
     "p[5].b[11].bco=0"
   ]
 }
+
+{
+  "commands": [
+    "page 1",
+    "p[9].b[1].txt=\"hello\"",
+    "p[9].b[1].bco=200"
+  ]
+}
+
+{
+  "commands": [
+    "page 1",
+    "p0.pic=1",
+    "p[1].b[1].txt=\"Heating is working\"",
+    "p[1].b[1].pco=2047",
+    "p[1].b[1].bco=0",
+    "p[1].b[7].txt=\"12.3\"",
+    "p[1].b[7].pco=65500",
+    "p[1].b[7].bco=0",
+    "p[1].b[8].txt=\"12.3\"",
+    "p[1].b[8].pco=65500",
+    "p[1].b[8].bco=0",
+    "p[1].b[9].txt=\"12.3\"",
+    "p[1].b[9].pco=65500",
+    "p[1].b[9].bco=0",
+    "p[1].b[10].txt=\"12.3\"",
+    "p[1].b[10].pco=65500",
+    "p[1].b[10].bco=0",
+    "p[1].b[11].txt=\"12.3\"",
+    "p[1].b[11].pco=65500",
+    "p[1].b[11].bco=0",
+    "p[1].b[12].txt=\"12.3\"",
+    "p[1].b[12].pco=65500",
+    "p[1].b[12].bco=0",
+    "p[1].b[13].txt=\"12.3\"",
+    "p[1].b[13].pco=65500",
+    "p[1].b[13].bco=0",
+    "p[1].b[14].txt=\"12.3\"",
+    "p[1].b[14].pco=65500",
+    "p[1].b[14].bco=0",
+    "p[1].b[2].txt=\"12.3\"",
+    "p[1].b[13].pco=65500",
+    "p[1].b[13].bco=0"
+  ]
+}
+
+developing conversion of colours
+
+{
+  "commands": [
+    "page 1",
+    "p[1].b[1].txt=\"Heating is working\"",
+    "p[1].b[1].pco=h120",
+    "p[1].b[1].bco=0"
+  ]
+}
+
+
+
+
  * 
  */
 #endif

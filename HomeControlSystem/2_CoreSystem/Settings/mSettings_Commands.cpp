@@ -107,6 +107,17 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   // }
 
 
+// {"ModuleName":255,
+
+// "DeviceID":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8],
+
+// "ClassID":[12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,130,130,130,130,130,130,130,130,130,130,130,130,132,132,132,132,132,132,132,132,132,132,132,132,143,132,0,0,0,0,0,0,0,0],
+
+
+// "Buffer":"User Test 00|User Test 01|User Test 02|User Test 03|User Test 04|User Test 05|User Test 06|User Test 07|User Test 08|User Test 09|Solid Rgbcct 10|Solid Rgbcct 11|Solid Rgbcct 12|Solid Rgbcct 13|Solid Rgbcct 14|Encoded 15|Mains|Cooker|Immersion|Washing Machine|Dishwasher|Pump Shower|Heating|Tumble Dryer|Garage|Bathroom Shower|Main Sockets|Kitchen Sockets|Mains|Cooker|Immersion|Washing Machine|Dishwasher|Pump Shower|Heating|Tumble Dryer|Garage|Bathroom Shower|Main Sockets|Kitchen Sockets|Downstairs Toilet|Downstairs Toilet|","I2C_Scan":{"I2CScan":"not on esp32 yet"}}
+
+
+
 
   
 #ifdef ENABLE_BUFFER_STRUCT

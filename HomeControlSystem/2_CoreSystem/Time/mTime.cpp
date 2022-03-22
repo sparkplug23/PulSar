@@ -56,12 +56,9 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:{
       
       #ifndef DISABLE_SERIAL0_CORE
-      //Serial.println(GetUptime());
+      Serial.println(GetUptime());
       #endif
       
-      #ifndef DISABLE_NETWORK
-        WifiPollNtp();
-      #endif // DISABLE_NETWORK
 
       //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);
         UpdateStoredRTCVariables();
@@ -117,6 +114,18 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       #endif
 
     }break;
+    case FUNC_EVERY_FIVE_SECOND:
+
+
+      #ifndef DISABLE_NETWORK
+        WifiPollNtp();
+      #endif // DISABLE_NETWORK
+
+    break;
+    case FUNC_EVERY_MINUTE:
+
+
+    break;
     case FUNC_EVERY_MIDNIGHT:
     
     break;

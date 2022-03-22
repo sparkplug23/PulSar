@@ -34,6 +34,17 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP: 
       EveryLoop();
     break;  
+    case FUNC_EVERY_SECOND:
+
+
+      // char buffer[80];
+      
+      // AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\r\n\r\n\rtest=\"%s\""), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, 0, buffer, sizeof(buffer), true));
+
+
+
+
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -52,6 +63,9 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
+    case FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID:
+      Rules_Add_Rule();
+    break;
     case FUNC_EVENT_MOTION_STARTED_ID:
     case FUNC_EVENT_MOTION_ENDED_ID:
       RulesEvent_Motion_Change();
@@ -99,6 +113,16 @@ void mMotion::EveryLoop()
 
 }
 
+void mMotion::Rules_Add_Rule()
+{
+
+// Get current rule, increment
+
+
+
+
+}
+
 
 
 /**
@@ -128,13 +152,62 @@ void mMotion::RulesEvent_Motion_Change(){
     uint8_t command_state_in = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
     uint8_t newevent_command_state_in = pCONT_rules->event_triggered.value.data[0];
     uint8_t command_state_out = 0;
-    if(command_state_in==2) /* follow */
-    {
-      command_state_out = newevent_command_state_in; // command will follow trigger state
-    }else{
-      command_state_out = command_state_in;
-    }
 
+// enum SwitchModeOptions_IDS {
+//   TOGGLE, 
+//   FOLLOW, 
+//   FOLLOW_INV, 
+//   PUSHBUTTON, 
+//   PUSHBUTTON_INV, 
+//   PUSHBUTTONHOLD, 
+//   PUSHBUTTONHOLD_INV, 
+//   PUSHBUTTON_TOGGLE, 
+//   MAX_SWITCH_OPTION
+// };
+
+pCONT_rules->ShowRuleAddLogByIndex();
+pCONT_rules->ShowRuleEvent_AddLogByIndex();
+
+//     if(command_state_in == SWITCHMODE_FOLLOW_ID)
+//     {
+//       AddLog(LOG_LEVEL_TEST, PSTR("SWITCHMODE_FOLLOW_ID"));
+//     }
+// else{
+//       AddLog(LOG_LEVEL_TEST, PSTR("ELSE SWITCHMODE_FOLLOW_ID"));
+
+// }
+
+AddLog(LOG_LEVEL_TEST, PSTR("trigger_state=%d"),trigger_state);
+AddLog(LOG_LEVEL_TEST, PSTR("command_state_in=%d"),command_state_in);
+AddLog(LOG_LEVEL_TEST, PSTR("newevent_command_state_in=%d"),newevent_command_state_in);
+AddLog(LOG_LEVEL_TEST, PSTR("command_state_out=%d"), command_state_out);
+
+
+switch(command_state_in)
+{
+  default: //force off
+    command_state_out = 0;
+    break;
+  case STATE_NUMBER_FOLLOW_ID: 
+    command_state_out = newevent_command_state_in;
+    break;
+  case STATE_NUMBER_FOLLOW_INV_ID: 
+AddLog(LOG_LEVEL_TEST, PSTR("Acase STATE_NUMBER_FOLLOW_INV_ID: =%d"), command_state_out);
+    command_state_out = newevent_command_state_in?0:1;
+AddLog(LOG_LEVEL_TEST, PSTR("Bcase STATE_NUMBER_FOLLOW_INV_ID: =%d"), command_state_out);
+    break;
+  case STATE_NUMBER_OFF_ID: 
+    command_state_out = 0;
+    break;
+  case STATE_NUMBER_ON_ID: 
+    command_state_out = 0;
+    break;
+}
+AddLog(LOG_LEVEL_TEST, PSTR("Bommand_state_out=%d"), command_state_out);
+
+char buffer[100];
+
+AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, command_state_out, pCONT_sup->GetState_Name_by_ID(command_state_out, buffer, sizeof(buffer)));
 
 
     // sensor_id<settings.sensors_active;sensor_id++)

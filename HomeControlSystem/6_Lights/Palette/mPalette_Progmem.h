@@ -1463,6 +1463,43 @@
       D_RGB255_PURPLE_RED
     };
 
+    #ifndef D_PALETTE_PINK_PURPLE_02_NAME_CTR
+    #define D_PALETTE_PINK_PURPLE_02_NAME_CTR        "Pink purple 02"     
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID
+    DEF_PGM_CTR  (PM_PALETTE_PINK_PURPLE_02_NAME_CTR)        D_PALETTE_PINK_PURPLE_02_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__IDS)
+    { // 0-255, R,G,B
+      D_RGB255_PINK_HOT
+      D_RGB255_PINK
+      D_RGB255_PINK_HOT2  
+      D_RGB255_PINK_WARM
+      D_RGB255_PURPLE_BLUE
+      D_RGB255_PURPLE_RED
+      D_RGB255_RED_PASTEL
+    };
+
+    #ifndef D_PALETTE_PURPLE_PINK_80_20_NAME_CTR
+    #define D_PALETTE_PURPLE_PINK_80_20_NAME_CTR        "Purple Pink 80/20"     
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID
+    DEF_PGM_CTR  (PM_PALETTE_PURPLE_PINK_80_20_NAME_CTR)        D_PALETTE_PURPLE_PINK_80_20_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_PURPLE_PINK_80_20_COLOUR_MAP__IDS)
+    { // 0-255, R,G,B
+      D_RGB255_PINK_HOT
+      D_RGB255_PURPLE_BLUE
+      D_RGB255_PURPLE_RED
+      D_RGB255_PINK
+      D_RGB255_PURPLE_BLUE
+      D_RGB255_PURPLE_RED
+      D_RGB255_PINK_HOT2  
+      D_RGB255_PURPLE_BLUE
+      D_RGB255_PURPLE_RED
+      D_RGB255_PINK_WARM
+      D_RGB255_PURPLE_BLUE
+      D_RGB255_PURPLE_RED
+    };
+
 
 
 
@@ -1872,6 +1909,41 @@ D_RGB255_WHITE_WARM 0, 0,
       // 25, 2, 0,    0, 0, 
 
 
+    };
+
+    /**
+     * from aliexpress photo
+     * needs changed to indexed
+     * */
+    #ifndef D_PALETTE_SKY_GLOW_01_NAME_CTR
+    #define D_PALETTE_SKY_GLOW_01_NAME_CTR        "Orange White Blue"   
+    #endif
+    //MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID
+    DEF_PGM_CTR  (PM_PALETTE_SKY_GLOW_01_NAME_CTR)        D_PALETTE_SKY_GLOW_01_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__IDS)
+    { //R,G,B,WW,CW
+      // 0,  255, 40, 0, 0, 0,
+      // // 10,  255, 40, 0, 0, 0,
+      // 50, 255, 40, 0, 0, 0,
+      // // 51, 255, 153, 0, 0, 0,
+      // 61, 255, 153, 0, 255, 255,
+
+      0,  255, 100, 0, 0, 0,
+      // 10,  255, 40, 0, 0, 0,
+      50, 255, 130, 0, 0, 0,
+      // 51, 255, 153, 0, 0, 0,
+      90, 255, 153, 0, 255, 255,
+
+      127, 255, 255,  255, 255, 255,
+
+      // 200, 0x06, 0x2B, 0x79, 0, 0, // Dark Blue
+      // 210, 0x16, 0x49, 0x8A, 0, 0,
+      // 211, 0x16, 0x49, 0x8A, 25, 25,
+      // 212, 0x16, 0x49, 0x8A, 50, 50,
+      // 213, 0x59, 0x95, 0xB7, 100, 100,
+      // 214, 0x59, 0x95, 0xB7, 175, 175,
+      170, 0, 0,  255, 0, 0,
+      255, 0, 0,  255, 0, 0,
     };
 
 
