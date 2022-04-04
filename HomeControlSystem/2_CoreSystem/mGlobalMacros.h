@@ -21,6 +21,32 @@
 #define DEBUG_PRINTLN Serial.println
 #define DEBUG_PRINTF Serial.printf
 
+#define DEBUG_TASMOTA_CORE
+
+#ifdef DEBUG_TASMOTA_CORE
+#define DEBUG_LOG_CORE(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+#define DEBUG_LOG_CORE(...)
+#endif
+#ifdef DEBUG_TASMOTA_DRIVER
+#define DEBUG_LOG_DRIVER(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+#define DEBUG_LOG_DRIVER(...)
+#endif
+#ifdef DEBUG_TASMOTA_SENSOR
+#define DEBUG_LOG_SENSOR(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+#define DEBUG_LOG_SENSOR(...)
+#endif
+// #ifdef DEBUG_TASMOTA_TRACE
+// #define DEBUG_TRACE_LOG(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
+// #else
+// #define DEBUG_TRACE_LOG(...)
+// #endif
+
+
+
+
   #define SPF(param_name,string_type,parameter)  Serial.printf("\"" param_name "\"=" string_type "\n\r", parameter)
   
 
