@@ -1,14 +1,14 @@
 # Aurora (Home Automation Control System)
 
-Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity, is intended to allow easy integration of additional sensors or drivers as the project expands. 
+Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity is intended to allow easy integration of additional sensors or drivers as the project grows. 
 
 *The current release of this project into the public domain is to allow easy sharing with early adopters, who are helping to test and debug this project for future public release.*
 
-Note: The documentation on this project is sparse, as there are still significant changes being made to the firmware. I will strive to credit all libraries used and to those I owe my inspiration from, and eventually write a detailed documentation on how to install, use and maintain this project.
+Note: The documentation on this project is sparse, as there are still significant changes being made to the firmware. I will strive to credit all libraries used and to those I owe my inspiration from, and eventually write a detailed documentation on how to install, use and maintain this project. I am still learning as a programmer so improvements are always being made as I improve my knowledge base.
 
 ## Credits
 
-This project started as a bespoke controller for home heating, and slowly expanded with features and devices being added to control lights and add sensors for around the home. A year into the development, I discovered *Tasmota* and all it has to offer and have since started adding features found within Tasmota that are useful in my home automation environment. This has helped jump start the projects scope, and in the near term will probably include many simularities with Tasmota, but over time I aim to diverge this project into its own identity as I have time to develop it further. Nevertheless, Tasmota has been and continues to be a great inspiration and I owe a great deal to their developer team ([Tasmota](https://github.com/arendst/Tasmota/releases/latest)). Furthermore, the project *WLED*, has been extrememly useful learning resource and I equally am extremely grateful for the use of their software ([WLED](https://github.com/Aircoookie/WLED)). 
+This project started as a bespoke controller for home heating, and slowly expanded with features and devices being added to control lights and add sensors for around the home. A year into the development, I discovered *Tasmota* and all it has to offer and have since started adding features found within Tasmota that are useful in my home automation environment. This has helped rapidly expand the scale of my project, but with continued development I aim to make this project unique as my skills as a programmer improves. Nevertheless, Tasmota has been and continues to be a great inspiration and I owe a great deal to their developer team ([Tasmota](https://github.com/arendst/Tasmota/releases/latest)). Additionally, the project *WLED*, has been extrememly useful learning resource and I equally am extremely grateful for the use of their software ([WLED](https://github.com/Aircoookie/WLED)). 
 
 ### Libraries Used (included in project)
 Libraries used with Aurora are:
@@ -157,9 +157,9 @@ upload_port = 192.168.1.79
 ``` -->
 
 
-# How to use the project (Notes in its most recent form)
+# How to use the project (Design methodology)
 
-1) On first compile, it will likely fail, let me know.
+<!-- 1) On first compile, it will likely fail, let me know. -->
 2) The `mFirmwareCustom_Secret.h` and `mUserConfig_Secret.h` files should be generated on second compile.
 3) `mFirmwareCustom_Secret.h` contains the hardware layout. The device/mqtt name, extra GPIO (more than its template) and any JSON commands to be run during startup.
 4) `mUserConfig_Secret.h` contains the code layout. Defining Wifi and MQTT are neccesary right now. Additional changes to default settings found in `mBaseConfig.h` can also be added here.
@@ -178,17 +178,18 @@ The project has a layout with related code being grouped into classes, also reff
 ![image](https://user-images.githubusercontent.com/35019746/118510354-cc5aa700-b728-11eb-8245-7344dad1cb4a.png)
 
 These folders can be summarised as follows:
-  * `0_ConfigUser` - Allows configuring what sections of the project should be included, configurable by the user.
+  * `0_ConfigUser` - Allows configuration of the desired functioanility of the project, configurable by the user.
   * `1_TaskerManager` - This is the primary entry point for all modules, together with the `loop()` and `setup()` from `HomeControlSystem.cpp`, the tasks, also known as "Functions" will be executed when needed. This is effectively a multitasking thread controller, as it allows each active module to share resources by limiting how long each function takes up in CPU time, including splitting functions into multiple split tasks where they would otherwise be "blocking" or waiting code. An example of this is requesting a sensor reading, then returning to the module to check for its result instead of waiting for the result. 
   * `2_CoreSystem` - This contains modules which are shared resources by all hardware, and are often all required for each project. 
+  * `2b_Internal_TaskerSystems` - Shared resources, but are not need for most builds (e.g. SolarLunar positions)
+  * `2c_Internal_IsolatedNoTaskerSystems` - Shared resources that can be used by other classes, but contains no "Tasker" calls.
   * `3_Network` - Includes all networking modules required for communicating with a host, this does not include any remote devices that would fall into a hardware addon (ie 433mhz radios).
   * `4_Drivers` - All modules which directly control an external device, connected via GPIO pins.
   * `5_Sensors` - All modules that receive data from external devices, connected via GPIO pins.
   * `6_Lights` - Control any connected devices that control lights, including addressable leds or pwm controlled hardware. 
-  * `7_Energy` - All modules that receive power data from connected hardware, connceted via GPIO pins.
+  * `7_Energy` - All modules that receive energy data from connected hardware, connected via GPIO pins.
   * `8_Displays` - Special drivers for controlling connected displays.
-  * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output.
-
+  * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output. (Note: For simple reactive controls, rules may be used instead.)
 
 # Module Details
 
