@@ -55,7 +55,9 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
   
   if(jtok = obj[PM_JSON_NAME]){
     const char* name_ctr = jtok.getStr();
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "system_name %s"),name_ctr);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
     // snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr); 
     snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s",name_ctr);  
   }
@@ -65,7 +67,9 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
   // Name means friendly name (max 20 chars)
   if(jtok = obj[PM_JSON_FRIENDLYNAME]){
     const char* name_ctr = jtok.getStr();
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template NAME %s"),name_ctr);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
     snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
     //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
@@ -93,10 +97,14 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
       const char* key = jtok.getStr();
       
       real_pin = GetRealPinNumberFromName(key);
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
+      #endif // ENABLE_LOG_LEVEL_COMMANDS
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+      #endif // ENABLE_LOG_LEVEL_COMMANDS
       
       if(index_pin>=0){
       
@@ -120,7 +128,9 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
           #endif
           // AddLog(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_number=%d"), pin_number, pin_number_array_index, gpio_number);
         }else{
+    #ifdef ENABLE_LOG_LEVEL_ERROR
           AddLog(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\" %d"),value, gpio_number);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
         }
 
       }// end UsuableGPIOPin
@@ -133,10 +143,14 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
   if(jtok = obj[PM_JSON_BASE]){
     
     const char* base_ctr = jtok.getStr();
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
     pCONT_set->Settings.module = GetModuleIDbyName(base_ctr);
     char buffer[40];
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("Settings.module=%s"),GetModuleNameByID(pCONT_set->Settings.module, buffer));
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
     //snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
   }else{
     pCONT_set->Settings.module = USER_MODULE;
@@ -162,8 +176,10 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   uint16_t src[ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io)];
   
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_DEBUG, PSTR("src size =%d"),ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
   AddLog(LOG_LEVEL_DEBUG, PSTR("pCONT_set->Settings.module =%d"),pCONT_set->Settings.module);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   // Check if active module is simply a user_module, requiring no template reads
@@ -178,7 +194,9 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
   } 
   // Read templates from progmem, these will differ by esp8266, esp8285 and esp32
   else {
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_DEBUG, PSTR("TemplateGPIOs Loading from kModules progmem"));
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
     // debug_debug_delay(3000);
     #ifdef ESP8266
       // GetInternalTemplate(&src, Settings.module, 1);
@@ -195,8 +213,10 @@ void mHardwarePins::TemplateGPIOs(myio *gp)
 
   // For extensive debugging, print the source and destination before copying
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog_Array(LOG_LEVEL_TEST, PSTR("TemplateGPIO:src"), src,  ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
   AddLog_Array(LOG_LEVEL_TEST, PSTR("TemplateGPIO:dst"), dest, ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io));
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   uint8_t j = 0;
@@ -236,14 +256,28 @@ void mHardwarePins::GpioInit(void)
   uint16_t mgpio;
 
   /**
-   * Correcting for invalid module
+   * Part A: Checking module or setting to default based on chipset
    * */
   if (!ValidModule(pCONT_set->Settings.module)) {
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_MODULE "!ValidModule"));
     #endif // ENABLE_LOG_LEVEL_INFO
     uint8_t module = MODULE;
-    if (!ValidModule(MODULE)) { module = MODULE_WEMOS_ID; }
+    if (!ValidModule(MODULE))
+    { 
+      module = MODULE_WEMOS_ID; 
+
+      //esp32 ad esp8266 have different defaults
+
+      // #ifdef ESP8266
+      // module = SONOFF_BASIC;
+      // #endif  // ESP8266
+      // #ifdef ESP32
+      //       module = WEMOS;
+      // #endif  // ESP32
+
+
+    }
     pCONT_set->Settings.module = module;
     pCONT_set->Settings.last_module = module;
   }else{
@@ -254,14 +288,14 @@ void mHardwarePins::GpioInit(void)
   SetModuleType();
 
   /**
-   * Module changes
+   * Part B: Fallback to base baudrate if module has changed
    * */
   if (pCONT_set->Settings.module != pCONT_set->Settings.last_module) {
     //pCONT_set->baudrate = APP_BAUDRATE;
   }
 
   /**
-   * Correcting for invalid gpio functions
+   * Part C: Correcting for invalid gpio functions
    * */
   for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io); i++) {
     if(!ValidUserGPIOFunction(pCONT_set->Settings.user_template2.hardware.gp.io,i)){
@@ -272,16 +306,32 @@ void mHardwarePins::GpioInit(void)
     }
   }
 
+  DEBUG_LINE_HERE;
+
+  /**
+   * @brief Part D: Read any template GPIO values. Function name needs changed!
+   * 
+   */
   myio def_gp;
   TemplateGPIOs(&def_gp); // Get template values
 
+  DEBUG_LINE_HERE;
+
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
-  AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
+  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
+  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     
-  for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.module_pins.io); i++) { //all pins
+  DEBUG_LINE_HERE;
+
+  /**
+   * @brief For all possible GPIO physical pins, populate gpio function if desired from TEMPLATE
+   * 
+   */
+  for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.module_pins.io); i++) 
+  { //all pins
     
+  DEBUG_LINE_HERE;
     // #ifdef ENABLE_LOG_LEVEL_INFO
     //   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),pCONT_set->Settings.module_pins.io[i],i);
     // #endif // ENABLE_LOG_LEVEL_INFO
@@ -324,11 +374,17 @@ void mHardwarePins::GpioInit(void)
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     }
     else{
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
+      DEBUG_LOG_CORE(PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
+    // #ifdef ENABLE_LOG_LEVEL_ERROR
+    //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
+    // #endif // ENABLE_LOG_LEVEL_COMMANDS
     }
 
   }
+  
+  DEBUG_LINE_HERE;
   pCONT_set->my_module_flag = ModuleFlag();
+  DEBUG_LINE_HERE;
 
   #ifdef USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
   AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_MODULE "GpioInit DISABLED with \"USE_DEBUG_DISABLE_GLOBAL_PIN_INIT\""));
@@ -336,13 +392,18 @@ void mHardwarePins::GpioInit(void)
   #endif // USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
   
   
+  DEBUG_LINE_HERE;
   AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
 
+  DEBUG_LINE_HERE;
   /**
    *  Take module io and configure pins
+   * Unlike Tas, each pin function has its unique name maintained (ie SWT_INV for switch inverted maintained its ID, and it not saved simply as INV then shifted back to standard SWT. Internal classes must handle this)
    * */
-  for (uint8_t index = 0; index < ARRAY_SIZE(pCONT_set->my_module.io); index++) {
+  for (uint8_t index = 0; index < ARRAY_SIZE(pCONT_set->my_module.io); index++) 
+  {
 
+  DEBUG_LINE_HERE;
   // uint8_t real_pin = UsablePinToTemplateArrayIndex(pCONT_set->my_module.io[i]);
 
 //problems starts here
@@ -372,8 +433,10 @@ void mHardwarePins::GpioInit(void)
   //   // SetPinFunction(gpio_pin_number, pin_function);  
   // #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
 
+    #endif //  ENABLE_LOG_LEVEL_INFO
   //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
   //   // if(mgpio){
   //   // AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: io %02d, mgpio %d"), i, mgpio);
@@ -395,19 +458,37 @@ void mHardwarePins::GpioInit(void)
     
   }//end fof
 
+  DEBUG_LINE_HERE;
+
   #ifdef ESP8266
+  /**
+   * @brief The check for H801 should be phased out here, as its hardware specific, really the template should force this to happen anyway as TX==2
+   * 
+   */
     if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { 
+  DEBUG_LINE_HERE;
       Serial.set_tx(2); 
       flag_serial_set_tx_set = true;
       
       }
   #endif
 
+  DEBUG_LINE_HERE;
+
+
+/**
+ * @brief Configure PWM if needed
+ * 
+ */
 // leave as default for testing
   analogWriteRange(pCONT_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
   analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
   // #endif
 
+/**
+ * @brief Configure SPI if needed
+ * 
+ */
 // #ifdef USE_SPI
 
 //   spi_flg = ((((GetPin(GPIO_SPI_CS] < 99) && (GetPin(GPIO_SPI_CS] > 14)) || (GetPin(GPIO_SPI_CS] < 12)) || (((GetPin(GPIO_SPI_DC] < 99) && (GetPin(GPIO_SPI_DC] > 14)) || (GetPin(GPIO_SPI_DC] < 12)));
@@ -489,6 +570,11 @@ void mHardwarePins::GpioInit(void)
 // #endif  // USE_SPI
 // #endif  // ESP8266 - ESP32
 
+
+/**
+ * @brief Configure digital pin
+ * 
+ */
 //new
 // Set any non-used GPIO to INPUT - Related to resetPins() in support_legacy_cores.ino
   // Doing it here solves relay toggles at restart.
@@ -519,6 +605,10 @@ void mHardwarePins::GpioInit(void)
     }
   }
 
+/**
+ * @brief Configure I2C
+ * 
+ */
 #ifdef USE_I2C
   pCONT_set->i2c_enabled = (PinUsed(GPIO_I2C_SCL_ID) && PinUsed(GPIO_I2C_SDA_ID));
   if (pCONT_set->i2c_enabled)
@@ -620,33 +710,12 @@ void mHardwarePins::GpioInit(void)
 
   // }
 
-  // for (uint8_t i = 0; i < MAX_LEDS; i++) {
-  //   if (PinUsed(GPIO_LED1_ID,i)) {
-  //     pinMode(Pin(GPIO_LED1_ID,i), OUTPUT);
-  //     digitalWrite(Pin(GPIO_LED1_ID,i), bitRead(pCONT_set->led_inverted, i));
-  //   }
-  // }
-  
-  for (uint32_t i = 0; i < MAX_LEDS; i++) {
-    if (PinUsed(GPIO_LED1_ID, i)) {
-// #ifdef USE_ARILUX_RF
-//       if ((3 == i) && (leds_present < 2) && !PinUsed(GPIO_ARIRFSEL)) {
-//         SetPin(Pin(GPIO_LED1, i), AGPIO(GPIO_ARIRFSEL));  // Legacy support where LED4 was Arilux RF enable
-//       } else {
-// #endif
-        pinMode(Pin(GPIO_LED1_ID, i), OUTPUT);
-        pCONT_set->leds_present++;
-        digitalWrite(Pin(GPIO_LED1_ID, i), bitRead(pCONT_set->led_inverted, i));
-// #ifdef USE_ARILUX_RF
-//       }
-// #endif
-    }
-  }
-  // if (PinUsed(GPIO_LEDLNK_ID)) {
-  //   pinMode(Pin(GPIO_LEDLNK_ID), OUTPUT);
-  //   digitalWrite(Pin(GPIO_LEDLNK_ID), pCONT_set->ledlnk_inverted);
-  // }
 
+
+/**
+ * @brief Configure addressable light (phase out? handled in init of light)
+ * 
+ */
 #ifdef USE_WS2812
 
 //bring back, part of light types
@@ -661,7 +730,15 @@ void mHardwarePins::GpioInit(void)
 #endif  // USE_WS2812
 
 
+/**
+ * @brief Configure Serial
+ * 
+ */
 
+/**
+ * @brief Configure and set pwm levels
+ * 
+ */
   // Basic PWM controls (PWM1-6)
   if (!pCONT_set->Settings.light_settings.type) {
     for (uint8_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
@@ -682,13 +759,11 @@ void mHardwarePins::GpioInit(void)
   //DEBUG_PRINTF("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
   #endif
 
-  pCONT_sup->SetLedPower(pCONT_set->Settings.ledstate &8);
-  pCONT_sup->SetLedLink(pCONT_set->Settings.ledstate &8);
+  #ifdef USE_MODULE_DRIVERS_LEDS
+  pCONT_led->SetLedPower(pCONT_set->Settings.ledstate &8);
+  pCONT_led->SetLedLink(pCONT_set->Settings.ledstate &8);
+  #endif // USE_MODULE_DRIVERS_LEDS
 
-  // pCONT->Tasker_Interface(FUNC_PRE_INIT); //called outside of this for better transparency
+
+  DEBUG_LINE_HERE;
 }
-
-
-
-
-
