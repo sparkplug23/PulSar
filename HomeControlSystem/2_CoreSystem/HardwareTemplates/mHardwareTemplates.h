@@ -1,6 +1,12 @@
 #ifndef _mHardwareTemplates2_H_
 #define _mHardwareTemplates2_H_
 
+/**
+ * This should become an entire new file for working towards new esp82xx methods until working
+ * 
+ * */
+
+
 // "HardwareTemplates" to be its own folder, with this main headers, plus 3 sub headers
 // Split templates themselves into 3 files, for each esp8266, 8285 and 32 later
 
@@ -688,11 +694,14 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_CC1110_SYNC_PULSE_SIGNAL_CTR)   D_GPIO_FUNCTION_
 #define USE_MODULE_TEMPLATE_MAGICHOME
 #define USE_MODULE_TEMPLATE_SHELLY1
 #define USE_MODULE_TEMPLATE_SHELLY_2P5
-#define USE_MODULE_TEMPLATE_SONOFF_IFAN03
 #define USE_MODULE_TEMPLATE_SHELLY_DIMMER2
 
+#define USE_MODULE_TEMPLATE_DEFAULT_WEMOS
+#define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+#define USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+
 // Supported hardware modules. Leave completed list
-enum SupportedModules_StaticCompleteList {
+enum SupportedModules_8266_StaticCompleteList {
   MODULE_WEMOS_ID,
   MODULE_SONOFF_BASIC_ID,
   MODULE_SONOFF_BASIC_EXTERNAL_ID, // tmp solution until both fixed modules can also have extra gpio added on top of default templates eg adding key2 to basic
@@ -702,9 +711,23 @@ enum SupportedModules_StaticCompleteList {
   MODULE_SHELLY2P5_ID,
   MODULE_SHELLY_DIMMER2_ID,
   MODULE_SONOFF_IFAN03_ID,
+  MODULE_SONOFF_4CHPRO_ID,
   // Last module
-  MODULE_MAXMODULE 
+  MODULE_MAXMODULE_8266 
 };
+
+
+// enum SupportedTemplates8285 {
+//   MODULE_WEMOS = MODULE_MAXMODULE_8266, 
+//   MODULE_SONOFF_4CH, 
+//   // TMP_SONOFF_T12, 
+//   // TMP_SONOFF_T13, 
+//   // TMP_SONOFF_DUAL_R2, 
+//   // TMP_SONOFF_IFAN03,   // needs moved to here?
+//   MODULE_MAXMODULE_8285 };
+
+
+
 
 
 // define list
@@ -741,6 +764,11 @@ enum SupportedModules_StaticCompleteList {
 #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
   #define            D_MODULE_NAME_SHELLY_DIMMER2_CTR       "Shelly Dimmer 2"
   DEFINE_PGM_CTR(PM_MODULE_NAME_SHELLY_DIMMER2_CTR)     D_MODULE_NAME_SHELLY_DIMMER2_CTR;
+#endif
+
+#ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+  #define            D_MODULE_NAME_SONOFF_4CHPRO_CTR       "Sonoff 4CHPRO"
+  DEFINE_PGM_CTR(PM_MODULE_NAME_SONOFF_4CHPRO_CTR)     D_MODULE_NAME_SONOFF_4CHPRO_CTR;
 #endif
 #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   #define            D_MODULE_NAME_SONOFF_IFAN03_CTR       "Sonoff IFAN03"
@@ -894,9 +922,13 @@ typedef struct MYTMPLT {
 } mytmplt;
 
 
-// ID list
+// ID list kModuleTemplateList 
+/**
+ * @brief This contains indexing for esp8266 THEN esp8285, the index (value) is important for retrieving template from either esp8266 or esp8285 arrays
+ * 
+ */
 const uint8_t kModuleNiceList_IDS[] PROGMEM = {
-  MODULE_WEMOS_ID, //esp8266
+  MODULE_WEMOS_ID,  //esp8285
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
     MODULE_SONOFF_BASIC_ID,
   #endif
@@ -919,8 +951,13 @@ const uint8_t kModuleNiceList_IDS[] PROGMEM = {
     MODULE_SHELLY_DIMMER2_ID,
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
-    MODULE_SONOFF_IFAN03_ID
+    MODULE_SONOFF_IFAN03_ID,   //esp8285
   #endif
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+    MODULE_SONOFF_4CHPRO_ID   //esp8285
+  #endif
+
+  
 };
 
 DEFINE_PGM_CTR(kModules_Name_list_ctr)
@@ -933,7 +970,8 @@ DEFINE_PGM_CTR(kModules_Name_list_ctr)
   D_MODULE_NAME_SHELLY1_CTR       "|"
   D_MODULE_NAME_SHELLY2P5_CTR     "|"
   D_MODULE_NAME_SHELLY_DIMMER2_CTR "|"
-  D_MODULE_NAME_SONOFF_IFAN03_CTR 
+  D_MODULE_NAME_SONOFF_IFAN03_CTR  "|"
+  D_MODULE_NAME_SONOFF_4CHPRO_CTR 
 };
 
 #ifdef ESP8266
@@ -942,9 +980,13 @@ DEFINE_PGM_CTR(kModules_Name_list_ctr)
  * Templates with 12 usable pins (ESP8266)
 \*********************************************************************************************/
 
-const mytmplt8266 kModules[MODULE_MAXMODULE] PROGMEM = {
+const mytmplt8266 kModules[MODULE_MAXMODULE_8266] PROGMEM = {
   // Generic option always first
-  { //MODULE_WEMOS_ID,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
+  { 
+    
+    //phase into split esp82xx arrays, but MUST be done with ifdef's to enable long term conversion and testing
+    
+    //MODULE_WEMOS_ID,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
     GPIO_USER_ID,        // GPIO00 D3 Wemos Button Shield
     GPIO_USER_ID,        // GPIO01 TX Serial RXD
     GPIO_USER_ID,        // GPIO02 D4 Wemos DHT Shield
@@ -975,8 +1017,8 @@ const mytmplt8266 kModules[MODULE_MAXMODULE] PROGMEM = {
                       // GPIO06 (SD_CLK   Flash)
                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    0,                // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
-    0,                // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
+    0,                // GPIO09 (SD_DATA2 Flash QIO or ESP8285)                             PHASE OUT !!!! ON 8266
+    0,                // GPIO10 (SD_DATA3 Flash QIO or ESP8285)                             PHASE OUT !!!! ON 8266
                       // GPIO11 (SD_CMD   Flash)
     GPIO_REL1_ID,     // GPIO12 Red Led and Relay (0 = Off_ID, 1 = On)
     GPIO_LED1_INV_ID, // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
@@ -1113,6 +1155,11 @@ const mytmplt8266 kModules[MODULE_MAXMODULE] PROGMEM = {
     GPIO_FLAG_ADC0_TEMP        // ADC Temperature
   },
   #endif
+
+  /**
+   * @brief ESP8285 below this point, and will be moved into its own array
+   * 
+   */
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   {          //MODULE_SONOFF_IFAN03_ID                  // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
     GPIO_KEY1_ID,              // GPIO00 WIFI_KEY0 Button 1
@@ -1133,8 +1180,32 @@ const mytmplt8266 kModules[MODULE_MAXMODULE] PROGMEM = {
     GPIO_REL4_ID,              // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
     0,                         // GPIO16 None 
     0                          // A0
-  }
+  },
   #endif
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO  
+  {                           // SONOFF_4CH - Sonoff 4CH (ESP8285)
+    GPIO_KEY1_ID,          // GPIO00 Button 1
+    GPIO_USER_ID,          // GPIO01 Serial RXD and Optional sensor
+    GPIO_RF_433MHZ_RX_ID,          // GPIO02 Optional sensor
+    GPIO_USER_ID,          // GPIO03 Serial TXD and Optional sensor
+    GPIO_REL3_ID,          // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
+    GPIO_REL2_ID,          // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
+                        // GPIO06 (SD_CLK   Flash)
+                        // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+                        // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+    GPIO_KEY2_ID,          // GPIO09 Button 2
+    GPIO_KEY3_ID,          // GPIO10 Button 3
+                        // GPIO11 (SD_CMD   Flash)
+    GPIO_REL1_ID,          // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
+    GPIO_LED1_INV_ID,      // GPIO13 Blue Led (0 = On, 1 = Off)
+    GPIO_KEY4_ID,          // GPIO14 Button 4
+    GPIO_REL4_ID,          // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
+    0, 0
+  }
+  #endif //  USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+
+
+
 };
 
 
@@ -1142,66 +1213,109 @@ const mytmplt8266 kModules[MODULE_MAXMODULE] PROGMEM = {
  * Templates with 14 usable pins (ESP8285)
 \*********************************************************************************************/
 
-// const mytmplt8285 kModules8285[TMP_MAXMODULE_8266 - TMP_WEMOS] PROGMEM = {
-//   {                     // WEMOS - Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
-//     GPI8_USER,          // GPIO00 D3 Wemos Button Shield
-//     GPI8_USER,          // GPIO01 TX Serial RXD
-//     GPI8_USER,          // GPIO02 D4 Wemos DHT Shield
-//     GPI8_USER,          // GPIO03 RX Serial TXD and Optional sensor
-//     GPI8_USER,          // GPIO04 D2 Wemos I2C SDA
-//     GPI8_USER,          // GPIO05 D1 Wemos I2C SCL / Wemos Relay Shield (0 = Off, 1 = On) / Wemos WS2812B RGB led Shield
-//                         // GPIO06 (SD_CLK   Flash)
-//                         // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-//                         // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-//     GPI8_USER,          // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
-//     GPI8_USER,          // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
-//                         // GPIO11 (SD_CMD   Flash)
-//     GPI8_USER,          // GPIO12 D6
-//     GPI8_USER,          // GPIO13 D7
-//     GPI8_USER,          // GPIO14 D5
-//     GPI8_USER,          // GPIO15 D8
-//     GPI8_USER,          // GPIO16 D0 Wemos Wake
-//     GPI8_USER           // ADC0 A0 Analog input
+// const mytmplt8285 kModules8285[MODULE_MAXMODULE_8285 - MODULE_WEMOS] PROGMEM = {
+//    { //MODULE_WEMOS_ID,         // Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
+//     GPIO_USER_ID,        // GPIO00 D3 Wemos Button Shield
+//     GPIO_USER_ID,        // GPIO01 TX Serial RXD
+//     GPIO_USER_ID,        // GPIO02 D4 Wemos DHT Shield
+//     GPIO_USER_ID,        // GPIO03 RX Serial TXD and Optional sensor
+//     GPIO_USER_ID,        // GPIO04 D2 Wemos I2C SDA
+//     GPIO_USER_ID,        // GPIO05 D1 Wemos I2C SCL / Wemos Relay Shield (0 = Off, 1 = On) / Wemos WS2812B RGB led Shield
+//                       // GPIO06 (SD_CLK   Flash)
+//                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+//                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+//     GPIO_USER_ID,        // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
+//     GPIO_USER_ID,        // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
+//                       // GPIO11 (SD_CMD   Flash)
+//     GPIO_USER_ID,        // GPIO12 D6
+//     GPIO_USER_ID,        // GPIO13 D7
+//     GPIO_USER_ID,        // GPIO14 D5
+//     GPIO_USER_ID,        // GPIO15 D8
+//     GPIO_USER_ID,        // GPIO16 D0 Wemos Wake
+//     GPIO_FLAG_ADC0_ID    // ADC0 A0 Analog input
 //   },
-//   {                     // SONOFF_4CH - Sonoff 4CH (ESP8285)
-//     GPI8_KEY1,          // GPIO00 Button 1
-//     GPI8_USER,          // GPIO01 Serial RXD and Optional sensor
-//     GPI8_USER,          // GPIO02 Optional sensor
-//     GPI8_USER,          // GPIO03 Serial TXD and Optional sensor
-//     GPI8_REL3,          // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
-//     GPI8_REL2,          // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
-//                         // GPIO06 (SD_CLK   Flash)
-//                         // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-//                         // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-//     GPI8_KEY2,          // GPIO09 Button 2
-//     GPI8_KEY3,          // GPIO10 Button 3
-//                         // GPIO11 (SD_CMD   Flash)
-//     GPI8_REL1,          // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
-//     GPI8_LED1_INV,      // GPIO13 Blue Led (0 = On, 1 = Off)
-//     GPI8_KEY4,          // GPIO14 Button 4
-//     GPI8_REL4,          // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
-//     0, 0
+
+
+//   {                      // SONOFF_4CH - Sonoff 4CH (ESP8285)
+//     GPIO_USER_ID,        // GPIO00 D3 Wemos Button Shield
+//     GPIO_USER_ID,        // GPIO01 TX Serial RXD
+//     GPIO_USER_ID,        // GPIO02 D4 Wemos DHT Shield
+//     GPIO_USER_ID,        // GPIO03 RX Serial TXD and Optional sensor
+//     GPIO_USER_ID,        // GPIO04 D2 Wemos I2C SDA
+//     GPIO_USER_ID,        // GPIO05 D1 Wemos I2C SCL / Wemos Relay Shield (0 = Off, 1 = On) / Wemos WS2812B RGB led Shield
+//                       // GPIO06 (SD_CLK   Flash)
+//                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+//                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+//     GPIO_USER_ID,        // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
+//     GPIO_USER_ID,        // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
+//                       // GPIO11 (SD_CMD   Flash)
+//     GPIO_USER_ID,        // GPIO12 D6
+//     GPIO_USER_ID,        // GPIO13 D7
+//     GPIO_USER_ID,        // GPIO14 D5
+//     GPIO_USER_ID,        // GPIO15 D8
+//     GPIO_USER_ID,        // GPIO16 D0 Wemos Wake
+//     GPIO_FLAG_ADC0_ID    // ADC0 A0 Analog input
 //   },
-//   {                     // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
-//     GPI8_KEY1,          // GPIO00 WIFI_KEY0 Button 1
-//     GPI8_TXD,           // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
-//     0,                  // GPIO02 ESP_LOG
-//     GPI8_RXD,           // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
-//     0,                  // GPIO04 DEBUG_RX
-//     0,                  // GPIO05 DEBUG_TX
-//                         // GPIO06 (SD_CLK   Flash)
-//                         // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-//                         // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-//     GPI8_REL1_INV,      // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
-//     GPI8_BUZZER_INV,    // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
-//                         // GPIO11 (SD_CMD   Flash)
-//     GPI8_REL3,          // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
-//     GPI8_LED1_INV,      // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
-//     GPI8_REL2,          // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
-//     GPI8_REL4,          // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
-//     0, 0
-//   }
-// };
+
+//   // {                     // WEMOS - Any ESP8266/ESP8285 device like WeMos and NodeMCU hardware (ESP8266)
+//   //   GPI8_USER,          // GPIO00 D3 Wemos Button Shield
+//   //   GPI8_USER,          // GPIO01 TX Serial RXD
+//   //   GPI8_USER,          // GPIO02 D4 Wemos DHT Shield
+//   //   GPI8_USER,          // GPIO03 RX Serial TXD and Optional sensor
+//   //   GPI8_USER,          // GPIO04 D2 Wemos I2C SDA
+//   //   GPI8_USER,          // GPIO05 D1 Wemos I2C SCL / Wemos Relay Shield (0 = Off, 1 = On) / Wemos WS2812B RGB led Shield
+//   //                       // GPIO06 (SD_CLK   Flash)
+//   //                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+//   //                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+//   //   GPI8_USER,          // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
+//   //   GPI8_USER,          // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
+//   //                       // GPIO11 (SD_CMD   Flash)
+//   //   GPI8_USER,          // GPIO12 D6
+//   //   GPI8_USER,          // GPIO13 D7
+//   //   GPI8_USER,          // GPIO14 D5
+//   //   GPI8_USER,          // GPIO15 D8
+//   //   GPI8_USER,          // GPIO16 D0 Wemos Wake
+//   //   GPI8_USER           // ADC0 A0 Analog input
+//   // },
+//   // {                     // SONOFF_4CH - Sonoff 4CH (ESP8285)
+//   //   GPI8_KEY1,          // GPIO00 Button 1
+//   //   GPI8_USER,          // GPIO01 Serial RXD and Optional sensor
+//   //   GPI8_USER,          // GPIO02 Optional sensor
+//   //   GPI8_USER,          // GPIO03 Serial TXD and Optional sensor
+//   //   GPI8_REL3,          // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
+//   //   GPI8_REL2,          // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
+//   //                       // GPIO06 (SD_CLK   Flash)
+//   //                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+//   //                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+//   //   GPI8_KEY2,          // GPIO09 Button 2
+//   //   GPI8_KEY3,          // GPIO10 Button 3
+//   //                       // GPIO11 (SD_CMD   Flash)
+//   //   GPI8_REL1,          // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
+//   //   GPI8_LED1_INV,      // GPIO13 Blue Led (0 = On, 1 = Off)
+//   //   GPI8_KEY4,          // GPIO14 Button 4
+//   //   GPI8_REL4,          // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
+//   //   0, 0
+//   // },
+// //   {                     // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
+// //     GPI8_KEY1,          // GPIO00 WIFI_KEY0 Button 1
+// //     GPI8_TXD,           // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
+// //     0,                  // GPIO02 ESP_LOG
+// //     GPI8_RXD,           // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
+// //     0,                  // GPIO04 DEBUG_RX
+// //     0,                  // GPIO05 DEBUG_TX
+// //                         // GPIO06 (SD_CLK   Flash)
+// //                         // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+// //                         // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+// //     GPI8_REL1_INV,      // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
+// //     GPI8_BUZZER_INV,    // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
+// //                         // GPIO11 (SD_CMD   Flash)
+// //     GPI8_REL3,          // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
+// //     GPI8_LED1_INV,      // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
+// //     GPI8_REL2,          // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
+// //     GPI8_REL4,          // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
+// //     0, 0
+// //   }
+// // };
 
 #endif // ESP8266
 
