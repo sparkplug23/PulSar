@@ -45,16 +45,6 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                   };
 // Put around ALL addlog_p
 
-// // To reduce ram usage
-// #define ENABLE_LOG_LEVEL_NONE 
-// #define ENABLE_LOG_LEVEL_ERROR 
-// #define ENABLE_LOG_LEVEL_WARN 
-// #define ENABLE_LOG_LEVEL_TEST
-// #define ENABLE_LOG_LEVEL_INFO 
-// //#define ENABLE_LOG_LEVEL_DEBUG 
-// //#define ENABLE_LOG_LEVEL_DEBUG_MORE 
-// //#define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL 
-// //#define ENABLE_LOG_LEVEL_ALL
   
 //  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
@@ -202,7 +192,7 @@ extern "C" {
   #define D_LOG_LEVEL_WARN_SHORT_CTR            "WRN"
   #define D_LOG_LEVEL_TEST_SHORT_CTR            "TST"
   #define D_LOG_LEVEL_INFO_SHORT_CTR            "INF"
-  #define D_LOG_LEVEL_COMMANDS_SHORT_CTR    "INP"
+  #define D_LOG_LEVEL_COMMANDS_SHORT_CTR        "INP"
   #define D_LOG_LEVEL_DEBUG_SHORT_CTR           "DBG"
   #define D_LOG_LEVEL_DEBUG_MORE_SHORT_CTR      "DBM"
   #define D_LOG_LEVEL_DEBUG_LOWLEVEL_SHORT_CTR  "DBL"
@@ -225,7 +215,7 @@ extern "C" {
   #define D_LOG_LEVEL_WARN_LONG_CTR            "WRN"
   #define D_LOG_LEVEL_TEST_LONG_CTR            "TST"
   #define D_LOG_LEVEL_INFO_LONG_CTR            "INF"
-  #define D_LOG_LEVEL_COMMANDS_LONG_CTR    "INP"
+  #define D_LOG_LEVEL_COMMANDS_LONG_CTR        "INP"
   #define D_LOG_LEVEL_DEBUG_LONG_CTR           "DBG"
   #define D_LOG_LEVEL_DEBUG_MORE_LONG_CTR      "DBM"
   #define D_LOG_LEVEL_DEBUG_LOWLEVEL_LONG_CTR  "DBL"
@@ -248,8 +238,10 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...);
 
 
 void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);
+
+
 // void AddLog(PGM_P formatP, ...);
-void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...);
+// void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...);
 int Response_mP(const char* format, ...);
 int ResponseAppend_mP(const char* format, ...);
 void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
