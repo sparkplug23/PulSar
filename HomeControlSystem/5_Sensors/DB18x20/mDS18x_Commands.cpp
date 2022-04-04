@@ -15,7 +15,8 @@ void mDS18X::parse_JSONCommand(JsonParserObject obj)
   int8_t tmp_id = 0;
 
   // Using a desired address, the sensor is searched for, then index (id) is updated
-  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR]){
+  if(jtok = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR])
+  {
      
     JsonParserArray array_group = obj[PM_JSON_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR];
       
@@ -45,6 +46,8 @@ void mDS18X::parse_JSONCommand(JsonParserObject obj)
       AddLog_Array(LOG_LEVEL_COMMANDS, "address", address_temp, (uint8_t)8);
       SetIDWithAddress(original_device_id++, address_temp);
       Serial.println();
+
+      DEBUG_LINE_HERE_PAUSE;
 
     }
     

@@ -2,16 +2,9 @@
 
 mTaskerManager* mTaskerManager::instance = nullptr;
 
-/**
- * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
- If !0, a specific tasker will be called and this function will exit after completion
- * */
 
-// Add later what the source is, with none passed, then assume its generic
-// USe SRC when rule are called etc
-
-
-int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker, bool flags_is_executing_rule){
+int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
+{
 
   int8_t result = 0;
 
@@ -21,24 +14,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
-  #ifdef USE_MODULE_CORE_RULES
-  if(flags_is_executing_rule != true){
-    pCONT_rules->Tasker_Rules_Interface(function);
-  }
-  #endif
-
   JsonParserObject obj = 0;
-  // JsonParser parser(parsing_buffer);
-  // char parsing_buffer[data_buffer.payload.len+1];
-  // memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-
-
-
-  // JsonParser parser(nullptr);//data_buffer.payload.ctr);
-
-  // JsonParser parser(data_buffer.payload.ctr);
-
-  // Method is jdson, so one off parse it (maybe this should be done before calling? passing globally)
   
   switch(function)
   {
@@ -53,41 +29,39 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       
       // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
       obj = parser.getRootObject();   
-      if (!obj) { 
+      if (!obj)
+      {
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
         AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
         #endif //ENABLE_LOG_LEVEL_COMMANDS
         break;
-      } 
+      }
 
       for(uint8_t i=0;i<GetClassCount();i++)
       { 
         switch_index = target_tasker ? target_tasker : i;
         pModule[switch_index]->Tasker(function, obj);
-        if(target_tasker) { 
-
-           AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
-  
-          
-          break; }
+        if(target_tasker)
+        {
+          #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+          AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));  
+          #endif // ENABLE_LOG_LEVEL_COMMANDS          
+          break; 
+        }
       }
-      return 0;
-      // else{
-      //   AddLog(LOG_LEVEL_ERROR, PSTR("D_JSON_DESERIALIZATION_ERROR"));
-      //   AddLog(LOG_LEVEL_TEST, PSTR("D_JSON_DESERIALIZATION_ERROR=%d"),obj["test2"].getInt());   
-      // }
+      return 0; // needs to return via "Tasker"
     } 
     break;
   } //END switch
 
-#ifdef  ENABLE_DEBUG_FUNCTION_NAMES
+  #ifdef  ENABLE_DEBUG_FUNCTION_NAMES
     char buffer_taskname[50];
   #endif
   #ifdef DEBUG_PIN3_GPIO
-  for(int i=0;i<1;i++){
+    for(int i=0;i<1;i++){
     DEBUG_PIN3_SET(0); //green
     DEBUG_PIN3_SET(1);
-  }
+    }
   #endif // DEBUG_PIN3_GPIO
 
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
@@ -95,7 +69,7 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     switch_index = target_tasker ? target_tasker : i;
     // #ifdef ENABLE_ADVANCED_DEBUGGING
     // Serial.printf("switch_index=%d\n\r",switch_index);
-#ifdef  ENABLE_DEBUG_FUNCTION_NAMES
+    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
     #ifdef ENABLE_ADVANCED_DEBUGGING
@@ -105,13 +79,9 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t start_millis = millis();
     #endif
-
-// DEBUG_PIN2_SET(0);
-
-// if(i==0){
-//   DEBUG_PIN3_SET(1);
-// }
-    switch(function){
+    
+    switch(function)
+    {
       // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
       case FUNC_JSON_COMMAND_ID: 
         // AddLog(LOG_LEVEL_TEST, PSTR("FUNC_JSON_COMMAND_ID=%d"),obj["test2"].getInt());   
@@ -122,50 +92,26 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       //   }
       break;
       default:
-    // DEBUG_PIN2_SET(0); //blue
-
-  // Serial.printf("Only %d:%d\n\r", switch_index, EM_MODULE_DRIVERS_CAMERA_OV2640_ID);
-
-  // #ifdef USE_DEVFEATURE_DISABLE_FOR_CAMERA
-  // if(switch_index != EM_MODULE_DRIVERS_CAMERA_OV2640_ID)
-  // {
-    
-  // Serial.printf("RETURNING EARLY %d\n\r", switch_index);
-
-  //   return 0;
-  
-  
-  // }
-  
-  // #endif
-
-  // Serial.printf("OV Only %d\n\r", switch_index);
-
-
-// switch(switch_index)
-// {
-//   case EM_MODULE_CORE_HARDWAREPINS_ID:
-//   case EM_MODULE_CORE_SETTINGS_ID:
-//   case EM_MODULE_CORE_SUPPORT_ID:
-//   case EM_MODULE_CORE_LOGGING_ID:
-//   case EM_MODULE_CORE_TELEMETRY_ID:
-//   case EM_MODULE_CORE_TIME_ID:
-//   case EM_MODULE_CORE_RULES_ID:
-//   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
-
+      
+        // switch(switch_index)
+        // {
+        //   case EM_MODULE_CORE_HARDWAREPINS_ID:
+        //   case EM_MODULE_CORE_SETTINGS_ID:
+        //   case EM_MODULE_CORE_SUPPORT_ID:
+        //   case EM_MODULE_CORE_LOGGING_ID:
+        //   case EM_MODULE_CORE_TELEMETRY_ID:
+        //   case EM_MODULE_CORE_TIME_ID:
+        //   case EM_MODULE_CORE_RULES_ID:
+        //   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
         pModule[switch_index]->Tasker(function, obj);
-//   break;
-//   default:
-//   //nothing
-//   break;
-// }
+        //   break;
+        //   default:
+        //   //nothing
+        //   break;
+        // }
 
-
-    // DEBUG_PIN2_SET(1);
       break;
     }
-
-// DEBUG_PIN2_SET(1);
 
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t end_millis = millis(); // Remember start millis
@@ -207,9 +153,8 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
     }
   
   } //end for
-  // DEBUG_PIN3_SET(0);
 
-  DEBUG_LINE;
+  #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
   if(!pCONT_set->flag_boot_complete){
     char buffer_taskname[50];
     if(function != last_function){
@@ -230,20 +175,16 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker,
       //}
       last_function = function;
     }
-    if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
   }//flag_boot_complete
+  #endif // ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
+
+  if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
   
   DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
 
-// #ifdef DEBUG_PIN1_GPIO
-  // for(int i=0;i<2;i++){
-  //   DEBUG_PIN1_SET(0); //pur
-  //   DEBUG_PIN1_SET(1);
-  // }
-  // #endif // DEBUG_PIN3_GPIO
   return result;
 
 }
@@ -319,9 +260,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_PWM
     pModule[EM_MODULE_DRIVERS_PWM_ID] = new mPWM();
   #endif
-  #ifdef USE_MODULE_DRIVERS_RF433MHZ
-    pModule[EM_MSAW_MODULE_ID] = new X();
-  #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
     pModule[EM_MODULE_DRIVERS_SDCARD_ID] = new mSDCard();
   #endif
@@ -344,13 +282,16 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID] = new mWebCam();
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
-    pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID] = new mLEDs();
+    pModule[EM_MODULE_DRIVERS_LEDS_ID] = new mLEDs();
   #endif
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
   #endif
   #ifdef USE_MODULE_DRIVERS_BUZZER
     pModule[EM_MODULE_DRIVERS_BUZZER_ID] = new mBuzzer();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+    pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID] = new mRCSwitch();
   #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -505,61 +446,16 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
 
 };
-/**
- * Default is Tasker_Interface(uint8_t function) with target_tasker = 0. If 0, all classes are called. 
- If !0, a specific tasker will be called and this function will exit after completion
- * */
-// int8_t mTaskerManager::Tasker_ParseCommands(uint8_t function, char* buffer, uint16_t buflen){//}, uint8_t target_tasker, bool flags_is_executing_rule){
-
-//   int8_t result = 0;
-
-//   // if(mSupport::SetTopicMatch(data_buffer.topic.ctr,D_MODULE_SENSORS_MOTION_FRIENDLY_CTR)>=0){
-//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
-//   //   pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-//   //   parse_JSONCommand();
-//   //   return FUNCTION_RESULT_HANDLED_ID;
-//   // }else{
-//   //   return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
-//   // }
-
-//   // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
-//   char parsing_buffer[data_buffer.payload.len+1];
-//   memcpy(parsing_buffer,data_buffer.payload.ctr,sizeof(char)*data_buffer.payload.len+1);
-//   JsonParser parser(parsing_buffer);
-//   JsonParserObject obj = parser.getRootObject();   
-//   if (!obj) { 
-//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//     AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-//     #endif //ENABLE_LOG_LEVEL_COMMANDS
-//     return 0;
-//   }  
-//   // JsonParserToken jtok = 0;
 
 
-
-//   for(uint8_t i=0;i<GetClassCount();i++){
-
-
-//     // result = 
-//     pModule[i]->parse_JSONCommand(obj);
-    
-//     // Tasker(function);
-  
-//   } //end for
-
-
-//   return result;
-
-// }
-
-
-
-uint16_t mTaskerManager::GetClassCount(){
+uint16_t mTaskerManager::GetClassCount()
+{
   return EM_MODULE_LENGTH_ID;
 }
 
 
-uint16_t mTaskerManager::GetClassSizeByID(uint8_t class_id){
+uint16_t mTaskerManager::GetClassSizeByID(uint8_t class_id)
+{
   #ifdef USE_DEBUG_CLASS_SIZE
   return pModule[class_id]->GetClassSize(); // can I maybe get the class size via its pointer, thus, removing the need for function callbacks
   //return sizeof(&pModule[class_id]);// size of what it points to?
@@ -569,7 +465,8 @@ uint16_t mTaskerManager::GetClassSizeByID(uint8_t class_id){
 }
 
 
-int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c){
+int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
+{
   if(c=='\0'){ return -1; }
   for(int ii=0;ii<GetClassCount();ii++){
     if(strcasecmp_P(c, pModule[ii]->GetModuleFriendlyName())==0){
@@ -579,32 +476,6 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c){
   }
   return -1;
 }
-
-// Get module unique id as intended for command
-// int16_t mTaskerManager::GetModule
-
-
-// GetModuleUniqueIDbyCommandToFriendlyName(char* set_topic_path){
-
-// int16_t result = -1;
-// // char name[100]
-
-//   char buffer[60];
-//   snprintf(buffer, sizeof(buffer), "set/%s", set_topic_path);
-
-//   char *p = strstr(toSearch,buffer);
-
-//   if(p != NULL){
-//     // return abs(toSearch - p); // get the position
-//     return true;
-//   }else{
-//     // return -1; //if null, it doesnt exist
-//     return false;
-//   }
-
-// return result;
-
-// }
 
 
 int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)

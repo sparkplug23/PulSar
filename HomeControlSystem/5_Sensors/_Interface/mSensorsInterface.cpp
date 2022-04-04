@@ -194,7 +194,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
     //Get any sensors in module
     uint8_t sensors_available = pmod->GetSensorCount();
 
-    AddLog(LOG_LEVEL_TEST, PSTR("GetSensorCount =%d\t%s"),sensors_available,pmod->GetModuleFriendlyName());
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetSensorCount =%d\t%s"),sensors_available,pmod->GetModuleFriendlyName());
 
     if(sensors_available)
     {

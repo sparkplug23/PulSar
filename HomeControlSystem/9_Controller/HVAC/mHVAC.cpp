@@ -122,7 +122,7 @@ void mHVAC::FunctionHandler_Update_Sensors()
 
 void mHVAC::Pre_Init(void){
 
-  settings.active_zones = MAX_ZONES;
+  settings.active_zones = HEATING_DEVICE_MAX;
 
 }
 
@@ -680,7 +680,7 @@ void mHVAC::MQTTHandler_Set_TelePeriod()
  * */
 void mHVAC::MQTTHandler_Sender(uint8_t id)
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:mqtthandler_list){  
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_HVAC_ID, handle, id);
   }
 }

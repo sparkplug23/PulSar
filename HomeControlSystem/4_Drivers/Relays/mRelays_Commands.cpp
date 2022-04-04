@@ -8,7 +8,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 {
 
 
-  AddLog(LOG_LEVEL_INFO, PSTR("mRelays::parse_JSONCommand"));
+  // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::parse_JSONCommand"));
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -52,6 +52,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 
   // PHASE OUT by version 0.87
   if(jtok = obj[PM_JSON_ONOFF]){
+    AddLog(LOG_LEVEL_ERROR, PSTR("PHASE OUT -- Invalid Command"));
     if(jtok.isStr()){
       state = pCONT_sup->GetStateNumber(jtok.getStr());
     }else 

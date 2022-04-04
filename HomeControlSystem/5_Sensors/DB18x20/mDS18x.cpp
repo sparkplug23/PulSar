@@ -296,6 +296,7 @@ void mDS18X::Init(void){
                   sensor_id<group_sensor_found;
                   sensor_id++
           ){
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "FOR sensor_id=%d, group_sensor_found=%d"),sensor_id,group_sensor_found);
         // get sensor and add to list 
         
         if(sensor_group[sensor_group_id].dallas->getAddress(sensor[sensor_count].address,sensor_id))
@@ -447,10 +448,11 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
                 sensor_id<db18_sensors_active;
                 sensor_id++){
 
-          if(sensor[sensor_id].sensor_group_id == sensor_group_id){
+          if(sensor[sensor_id].sensor_group_id == sensor_group_id)
+          {
 
-
-            if((tmp_float = sensor_group[sensor_group_id].dallas->getTempC(sensor[sensor_id].address))!=DEVICE_DISCONNECTED_C){
+            if((tmp_float = sensor_group[sensor_group_id].dallas->getTempC(sensor[sensor_id].address))!=DEVICE_DISCONNECTED_C)
+            {
               if(sensor[sensor_id].reading.val != tmp_float){ 
                 sensor[sensor_id].reading.ischanged = true; 
                 anychanged=true;// check if updated
@@ -461,8 +463,10 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
-            }else{
+              AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+            }
+            else
+            {
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
@@ -602,23 +606,23 @@ uint8_t mDS18X::ConstructJSON_Settings(uint8_t json_level){
 
   JsonBuilderI->Level_Start("Address");
 
-    for(int id=0;id<settings.nSensorsFound;id++){
-      snprintf(buffer, sizeof(buffer), "sens%d_%d_%d", id, sensor[id].address[6], sensor[id].address[7]);
-      JsonBuilderI->Array_AddArray(buffer, &sensor[id].address[0], 8);
-    }
+  for(int id=0;id<settings.nSensorsFound;id++){
+    snprintf(buffer, sizeof(buffer), "sens%d_%d_%d", id, sensor[id].address[6], sensor[id].address[7]);
+    JsonBuilderI->Array_AddArray(buffer, &sensor[id].address[0], 8);
+  }
 
 
-JBI->Add("pin0", sensor_group[0].pin);
-JBI->Add("pin1", sensor_group[1].pin);
+  JBI->Add("pin0", sensor_group[0].pin);
+  JBI->Add("pin1", sensor_group[1].pin);
 
-JBI->Add("pindb0", pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
-JBI->Add("pindb1", pCONT_pins->GetPin(GPIO_DSB_2OF2_ID));
+  JBI->Add("pindb0", pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
+  JBI->Add("pindb1", pCONT_pins->GetPin(GPIO_DSB_2OF2_ID));
 
-JBI->Add("pindb0PinUsed", pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID));
-JBI->Add("pindb1PinUsed", pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID));
+  JBI->Add("pindb0PinUsed", pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)?"true":"false");
+  JBI->Add("pindb1PinUsed", pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)?"true":"false");
 
-// JBI->Add("count1", sensor_group[0].dallas->getDeviceCount());
-// JBI->Add("count2", sensor_group[1].dallas->getDeviceCount());
+  // JBI->Add("count1", sensor_group[0].dallas->getDeviceCount());
+  // JBI->Add("count2", sensor_group[1].dallas->getDeviceCount());
 
 
 
@@ -677,7 +681,7 @@ void mDS18X::printAddress(DeviceAddress deviceAddress, int8_t index){
   //   deviceAddress[0],deviceAddress[1],deviceAddress[2],deviceAddress[3],
   //   deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
 
-  AddLog(LOG_LEVEL_DEBUG,PSTR("DS18: Add(%d) %d,%d,%d,%d,%d,%d,%d,%d"),
+  AddLog(LOG_LEVEL_DEBUG,PSTR("DS18: [%d]=> %d,%d,%d,%d,%d,%d,%d,%d"),
   index,
     deviceAddress[0],deviceAddress[1],deviceAddress[2],deviceAddress[3],
     deviceAddress[4],deviceAddress[5],deviceAddress[6],deviceAddress[7]);
@@ -758,13 +762,17 @@ void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
   uint8_t sensor_count = 0; // reset
   // Address moved into struct, I need to rearrange now with ids
 
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-  delay(3000);
+  // DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
+  // delay(3000);
 
   
-  // AddLog(LOG_LEVEL_INFO, "searching start %d",settings.group_count);
+  AddLog(LOG_LEVEL_INFO, "searching start address_id=%d", address_id);
+
+  
+      AddLog_Array(LOG_LEVEL_COMMANDS, "address_to_find",address_to_find, (uint8_t)8);
+      AddLog_Array(LOG_LEVEL_COMMANDS, "address_saved",  sensor[0].address, (uint8_t)8);
 
 
   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){
@@ -823,16 +831,22 @@ void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
 
 void mDS18X::EveryLoop(){
   if(mTime::TimeReachedNonReset(&tSavedMeasureSensor,settings.rate_measure_ms)){
+
+    // AddLog(LOG_LEVEL_TEST, PSTR("db18_sensors_activ\t\te=%d"), db18_sensors_active);
     
     // AddLog(LOG_LEVEL_DEBUG,PSTR("mDS18X::here2 %d %d %d"),db18_sensors_active, settings.rate_measure_ms, settings.group_count);
 
-    if(!db18_sensors_active){ // Retry init if failed
+    if(db18_sensors_active==0) // Retry init if failed
+    {
       Init(); //search again
       // set a cooldown period if sensor was not found of X seconds
-      if(db18_sensors_active==0){ //still no sensor found, wait
+      if(db18_sensors_active==0)
+      { //still no sensor found, wait
         tSavedMeasureSensor = millis()+10000; //30 seocnds backoff
       }
-    }else{
+    }
+    else
+    {
       // AddLog(LOG_LEVEL_DEBUG,PSTR("SplitTask_UpdateSensors"));
         for(uint8_t sensor_group_id=0;
                   sensor_group_id<settings.group_count;

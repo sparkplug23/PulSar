@@ -16,6 +16,13 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
       SwitchLoop();
     break;
     case FUNC_EVERY_SECOND:
+
+      AddLog(LOG_LEVEL_INFO,PSTR("swt=%s"),IsSwitchActive(0)?"On":"Off");
+      
+      
+      
+
+
    
         // Serial.printf("PinUsed[29]\t\tpin=%d\n\r",pCONT_pins->GetPin(29));
         // Serial.printf("PinUsed[30]\t\tpin=%d\n\r",pCONT_pins->GetPin(30));
@@ -129,6 +136,7 @@ void mSwitches::SwitchInit(void)
 
       // Set global now so doesn't change the saved power state on first switch check
       switches[settings.switches_found].lastwallswitch = digitalRead(switches[settings.switches_found].pin);  
+      switches[settings.switches_found].switch_virtual = digitalRead(switches[settings.switches_found].pin);  
       
       #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_TEST, PSTR("Switch %d %d %d"), pin_id, settings.switches_found, switches[settings.switches_found].pin);
@@ -324,7 +332,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
       {
         switches[i].ischanged = true;
 
-        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
+        AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
                               i, 
                               state,
                               state==active_state?"ACTIVE":"Not Active"
@@ -383,14 +391,31 @@ void mSwitches::SwitchHandler(uint8_t mode)
 
         if (switchflag < 3) 
         {
+          #ifndef ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
           #ifdef USE_MODULE_CORE_RULES
             // Active high means start of motion always, so check for inversion
             uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
             
-            // AddLog(LOG_LEVEL_INFO, PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
-            pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID, i, new_state);
+            AddLog(LOG_LEVEL_INFO, PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
+
+            // #ifdef ENABLE_RULES_TRIGGER_METHOD_V2
+              pCONT_rules->NewEventRun(EM_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
+            // #else // OLD METHOD, to delete
+            //   pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID, i, new_state); // Event has occured, save and check it
+            //   pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID); // This should maybe be rolled into "NewEvent" so NewEvent of switch would automtically call this        
+            // #endif
+
           #endif
-          pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
+          
+          // This is the manual way of starting rules, but probably should be phased out?
+
+          /**
+           * @brief 
+           * The "NewEvent" if rules are enabled should automatically fire checking of rules
+           * 
+           */
+
+          #endif // ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
         }
 
         switches[i].lastwallswitch = state;
@@ -415,11 +440,25 @@ void mSwitches::SwitchLoop(void)
 
 
 bool mSwitches::IsSwitchActive(uint8_t id){
-// Needs to know what type the button is, low, high, no pullup etc
-  if(switches[id].lastwallswitch){
-    return switches[id].active_state_value ? false : true;
+
+  // #ifdef ENABLE_DEVFEATURE_ISSWITCHACTIVE_CHANGE
+
+  if( // Is Active?
+    switches[id].switch_virtual ==     // internal switch state
+    switches[id].active_state_value    // logical value when the switch is considered on, ie, active low 0==0, active high 1==1 
+  ){
+    return true;
   }
-  return switches[id].active_state_value ? true : false;  
+  return false;
+
+  // #else // ENABLE_DEVFEATURE_ISSWITCHACTIVE_CHANGE // PHASE OUT IF NOT NEEDED
+  // // Needs to know what type the button is, low, high, no pullup etc
+  // if(switches[id].lastwallswitch){
+  //   return switches[id].active_state_value ? false : true;
+  // }
+  // return switches[id].active_state_value ? true : false;  
+  // #endif // ENABLE_DEVFEATURE_ISSWITCHACTIVE_CHANGE
+
 }
 
 
@@ -480,6 +519,13 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
       JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_SWITCHES_ID, sensor_id, buffer, sizeof(buffer)));
         JsonBuilderI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
         JsonBuilderI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
+
+
+        JsonBuilderI->Add("digitalRead", digitalRead(switches[sensor_id].pin));
+
+        
+
+
         JsonBuilderI->Add("ischanged", switches[sensor_id].ischanged);
         JsonBuilderI->Add("lastwallswitch", switches[sensor_id].lastwallswitch);
         JsonBuilderI->Add("holdwallswitch", switches[sensor_id].holdwallswitch);

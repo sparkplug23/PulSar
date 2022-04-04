@@ -16,11 +16,11 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
       // fSendTemplatesOnce = true;
 
       
-#ifdef ESP8266
-  randomSeed(analogRead(0));
-#else
-  // randomSeed(analogRead(34)); //esp32
-#endif
+      #ifdef ESP8266
+        randomSeed(analogRead(0));
+      #else
+        // randomSeed(analogRead(34)); //esp32
+      #endif
 
 
     break;
@@ -63,7 +63,9 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
 //move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
   // if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     pCONT_set->RtcReboot.fast_reboot_count = 0;
     pCONT_set->RtcRebootSave();
     // pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
@@ -153,9 +155,9 @@ void mSupport::ArduinoOTAInit(void)
           // /}
       // #endif  // USE_MODULE_NETWORK_WEBSERVER
       //if (pCONT_set->Settings.flag_system.mqtt_enabled) { MqttDisconnect(); }
-    // #ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
-    // #endif// ENABLE_LOG_LEVEL_INFO
+    #endif// ENABLE_LOG_LEVEL_INFO
     // #endif
     arduino_ota_triggered = true;
     arduino_ota_progress_dot_count = 0;
@@ -205,10 +207,11 @@ void mSupport::ArduinoOTAInit(void)
       default:
         snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
     }
-    //#ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
-    //#endif
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
+    #endif // ENABLE_LOG_LEVEL_INFO
+  
     if(error != OTA_BEGIN_ERROR)
       ESP.restart(); //should only reach if the first failed
 
@@ -216,18 +219,18 @@ void mSupport::ArduinoOTAInit(void)
 
   ArduinoOTA.onEnd([this]()
   {
-    //#ifdef ENABLE_LOG_LEVEL_INFO
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "OTA " D_SUCCESSFUL ". " D_RESTARTING));
-    //#endif
+    #endif
     ESP.restart();
 	});
 
   ArduinoOTA.begin();
   ota_init_success = true;
   
-   // #ifdef ENABLE_LOG_LEVEL_INFO
+   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA mSUPPORT METHOD " D_ENABLED " " D_PORT " 8266"));
-  //#endif
+  #endif
 }
 
 void mSupport::ArduinoOtaLoop(void)
@@ -487,12 +490,6 @@ bool mSupport::SetTopicMatch_P(const char* toSearch, const char* set_topic_path)
 }
 
 
-
-// bool mSupport::BufferContainsSubString(const char* toSearch, const char* toFind){
-
-
-
-// }
 
 
 // mSearchCtrIndexOf(const char* toSearch, const char* toFind){
@@ -2184,17 +2181,11 @@ void mSupport::PerformEverySecond(void)
 
 
 
-
-
-
-
-
-
-
 }
 
-  void mSupport::Handle_Check_Power_Saving()
-  {
+
+void mSupport::Handle_Check_Power_Saving()
+{
 
     /*if (save_data_counter && (backlog_pointer == backlog_index)) {
       save_data_counter--;
@@ -2399,87 +2390,24 @@ void mSupport::CheckResetConditions()
       }
       // pCONT_set->SettingsSaveAll();
       pCONT_set->restart_flag--;
-      if (pCONT_set->restart_flag <= 0) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
+      if (pCONT_set->restart_flag <= 0) 
+      {
+
+        #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "pCONT_set->restart_flag <= 0 " D_RESTARTING));
-    #endif// ENABLE_LOG_LEVEL_INFO
+        #endif// ENABLE_LOG_LEVEL_INFO
     
-#ifdef USE_MODULE_NETWORK_WIFI
-   
-   // THIS should be moved into this class
-        pCONT_wif->EspRestart();
-        
-#endif USE_MODULE_NETWORK_WIFI
+        #ifdef USE_MODULE_NETWORK_WIFI   
+        // THIS should be moved into this class
+        pCONT_wif->EspRestart();        
+        #endif USE_MODULE_NETWORK_WIFI
+
       }
     }
 
 
     }
 
-void mSupport::UpdateStatusBlink(){
-  
-  DEBUG_LINE;
-  uint8_t blinkinterval = 1;
-  // pCONT_set->global_state.network_down = (pCONT_set->global_state.wifi_down && pCONT_set->global_state.eth_down);
-
-  if (!pCONT_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
-    if (pCONT_set->global_state.data) {                              // Any problem
-      if (pCONT_set->global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
-      if (pCONT_set->global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
-      pCONT_set->blinks = 201;                                       // Allow only a single blink in case the problem is solved
-    }
-  }
-
-//DEBUG_LINE_HERE;
-  DEBUG_LINE;
-  if (pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag) {
-
-    // Work out the led state based on time
-    if (pCONT_set->restart_flag || pCONT_set->ota_state_flag) {                 // Overrule blinks and keep led lit
-      AddLog(LOG_LEVEL_WARN, PSTR("blinkstate phasing out for new method"));
-      pCONT_set->blinkstate = true;                                  // Stay lit
-    } else {
-      pCONT_set->blinkspeed--; // based of multiples of 200ms
-      if (!pCONT_set->blinkspeed) {
-        pCONT_set->blinkspeed = blinkinterval;                       // Set interval to 0.2 (default), 1 or 2 seconds
-        pCONT_set->blinkstate ^= 1;                                  // Blink
-      }
-    }
-
-//DEBUG_LINE_HERE;
-  DEBUG_LINE;
-    // Update Link LED
-    if ((!(pCONT_set->Settings.ledstate &0x08)) && ((pCONT_set->Settings.ledstate &0x06) || (pCONT_set->blinks > 200) || (pCONT_set->blinkstate))) {
-     SetLedLink(pCONT_set->blinkstate);                            // Set led on or off
-    }
-
-    // If blink has completed
-    if (!pCONT_set->blinkstate) {
-      pCONT_set->blinks--;
-      if (200 == pCONT_set->blinks) pCONT_set->blinks = 0;                      // Disable blink
-    }
-
-  }
-
-
-//DEBUG_LINE_HERE;
-  // if (pCONT_set->Settings.ledstate &1 && (pCONT_pins->PinUsed(GPIO_LEDLNK_ID) || !(pCONT_set->blinks || pCONT_set->restart_flag || pCONT_set->ota_state_flag)) ) {
-  //   bool tstate = pCONT_set->power & pCONT_set->Settings.ledmask;
-  //   // if ((MODULE_SONOFF_TOUCH == pCONT_set->my_module_type) || 
-  //   //(MODULE_SONOFF_T11 == pCONT_set->my_module_type) || 
-  //   //(MODULE_SONOFF_T12 == pCONT_set->my_module_type) || 
-  //   //(MODULE_SONOFF_T13 == pCONT_set->my_module_type)) {
-  //   //   tstate = (!pCONT_set->power) ? 1 : 0;                          // As requested invert signal for Touch devices to find them in the dark
-  //   // }
-  //  SetLedPower(tstate);
-  // }
-
-  DEBUG_LINE;
-  //   #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("{blinkstate:%d,blinks:%d}"),pCONT_set->blinkstate,pCONT_set->blinks);
-  //   #endif// ENABLE_LOG_LEVEL_INFO
-
-}
 
 
 // Force a float value between two ranges, and adds or substract the range until we fit
@@ -2838,98 +2766,6 @@ uint16_t mSupport::changeUIntScale(uint16_t inum,
   return (uint32_t) (result > to_max ? to_max : (result < to_min ? to_min : result));
 }
 
-
-
-
-
-void mSupport::UpdateLedPowerAll()
-{
-	for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {
-		SetLedPowerIdx(i, bitRead(pCONT_set->led_power, i));
-	}
-}
-
-void mSupport::SetLedPowerIdx(uint32_t led, uint32_t state)
-{
-  // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID) && (0 == led)) {  // Legacy - LED1 is link led only if LED2 is present
-  //   if (pCONT_pins->PinUsed(GPIO_LED1_ID, 1)) {
-  //     led = 1;
-  //   }
-  // }
-  if (pCONT_pins->PinUsed(GPIO_LED1_ID, led)) {
-    uint32_t mask = 1 << led;
-    if (state) {
-      state = 1;
-      pCONT_set->led_power |= mask;
-    } else {
-      pCONT_set->led_power &= (0xFF ^ mask);
-    }
-    uint16_t pwm = 0;
-    if (bitRead(pCONT_set->Settings.ledpwm_mask, led)) {
-// #ifdef USE_LIGHT
-//       pwm = mapvalue(ledGamma10(state ? Settings.ledpwm_on : Settings.ledpwm_off), 0, 1023, 0, Settings.pwm_range); // gamma corrected
-// #else //USE_LIGHT
-      pwm = mapvalue((uint16_t)(state ? pCONT_set->Settings.ledpwm_on : pCONT_set->Settings.ledpwm_off), 0, 255, 0, pCONT_set->Settings.pwm_range); // linear
-// #endif //USE_LIGHT
-
-#ifdef ESP8266
-      analogWrite(pCONT_pins->Pin(GPIO_LED1_ID, led), bitRead(pCONT_set->led_inverted, led) ? pCONT_set->Settings.pwm_range - pwm : pwm);
-      
-#endif // ESP8266
-    } else {
-      pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
-    }
-  }
-// #ifdef USE_MODULE_DRIVERS_BUZZER
-//   if (led == 0) {
-//     BuzzerSetStateToLed(state);
-//   }
-// #endif // USE_MODULE_DRIVERS_BUZZER
-}
-
-void mSupport::SetLedPower(uint32_t state)
-{
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedPower(%d)"),state);
-    #endif// ENABLE_LOG_LEVEL_INFO
-  // if (!pCONT_pins->PinUsed(GPIO_LEDLNK_ID)) {           // Legacy - Only use LED1 and/or LED2
-  //   SetLedPowerIdx(0, state);
-  // } else {
-    power_t mask = 1;
-    for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {  // Map leds to power
-      bool tstate = (pCONT_set->power & mask);
-      SetLedPowerIdx(i, tstate);
-      mask <<= 1;
-    }
-  // }
-}
-
-void mSupport::SetLedPowerAll(uint32_t state)
-{
-  for (uint32_t i = 0; i < pCONT_set->leds_present; i++) {
-    SetLedPowerIdx(i, state);
-  }
-}
-
-void mSupport::SetLedLink(uint32_t state)
-{
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("SetLedLink(%d)"),state);
-    #endif// ENABLE_LOG_LEVEL_INFO
-
-  uint32_t led_pin = pCONT_pins->GetPin(GPIO_LED1_ID);
-  uint32_t led_inv = pCONT_set->ledlnk_inverted;
-  if (99 == led_pin) {                    // Legacy - LED1 is status
-    SetLedPowerIdx(0, state);
-  }
-  else if (led_pin < 99) {
-    if (state) { state = 1; }
-    digitalWrite(led_pin, (led_inv) ? !state : state);
-  }
-// #ifdef USE_MODULE_DRIVERS_BUZZER
-//   BuzzerSetStateToLed(state);
-// #endif // USE_MODULE_DRIVERS_BUZZER
-}
 
 
 

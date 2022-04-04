@@ -123,6 +123,9 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
  
   if(jtok = obj[PM_JSON_PALETTE_EDIT].getObject()[PM_JSON_COLOUR_PALETTE]){
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(LOG_LEVEL_TEST, PSTR("Palette: PM_JSON_PALETTE_EDIT "));
+    #endif // ENABLE_LOG_LEVEL_INFO
     JsonParserToken jtok_data = obj[PM_JSON_PALETTE_EDIT].getObject()[PM_JSON_DATA];
     if(!jtok_data.isNull()){ 
 
@@ -419,7 +422,7 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 // }
 // const char* mInterfaceLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen){
-//   sprintf(buffer, D_NO_MATCH_CTR);
+//   sprintf(buffer, PM_SEARCH_NOMATCH);
 //   // switch(id){
 //   //   default:
 //   //   case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
@@ -1331,7 +1334,10 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   // Check if palette can be edited
   if(!mPaletteI->CheckPaletteByIDIsEditable(palette_id)){ 
+    
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST, PSTR("Palette can not be edited"));
+    #endif // ENABLE_LOG_LEVEL_INFO
       return; 
   }
 
@@ -1373,7 +1379,9 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)){
     // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID;    
     palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;

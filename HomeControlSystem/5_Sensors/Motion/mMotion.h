@@ -69,7 +69,6 @@ class mMotion :
     struct handler<mMotion> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mMotion> mqtthandler_sensor_ifchanged;
-    struct handler<mMotion> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers example
@@ -77,10 +76,9 @@ class mMotion :
     //with extra handlers example
     #endif // USE_MODULE_NETWORK_MQTT
     
-    struct handler<mMotion>* mqtthandler_list[3] = {
+    struct handler<mMotion>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
+      &mqtthandler_sensor_ifchanged
     };
 
 };

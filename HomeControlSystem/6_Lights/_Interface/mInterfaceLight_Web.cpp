@@ -197,7 +197,8 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_LIGHTPOWER, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Light Power "),
-                              rgbcct_controller.getBrightness255() ? D_JSON_ON : D_JSON_OFF //make this a state function
+                              "BROKEN"
+                              // rgbcct_controller.getBrightness255() ? D_JSON_ON : D_JSON_OFF //make this a state function
                               //mSupport::GetStateCtr_P()
                             );    
     BufferWriterI->Append_P(HTTP_DEVICE_CONTROL_BUTTON_JSON_VARIABLE_INSERTS_HANDLE_IHR2,
@@ -207,7 +208,8 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
                               D_JSON_ANIMATIONENABLE, 
                               D_DEVICE_CONTROL_BUTTON_TOGGLE_CTR,
                               PSTR("Animation "),
-                              animation.flags.fEnable_Animation ? D_JSON_ON : D_JSON_OFF
+                              "BROKEN"
+                              // animation.flags.fEnable_Animation ? D_JSON_ON : D_JSON_OFF
                             );                  
   BufferWriterI->Append_P(PSTR("</tr>{t2}"));
   
@@ -225,7 +227,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 void mInterfaceLight::WebAppend_Root_RGBPalette()
 {
 
-  mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
+  // mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 
   uint8_t length = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
   uint8_t pal_length = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
@@ -233,7 +235,7 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
   JsonBuilderI->Array_Start("rgb_pal_title");// Class name
     JsonBuilderI->Level_Start();
     char title_ctr[30];
-    if(mPaletteI->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT_ID){
+    if(mPaletteI->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID){
       JsonBuilderI->Add_FV("ih",PSTR("\"%s (Gradient)\""), mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
     }else{
       JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
@@ -293,7 +295,7 @@ void mInterfaceLight::WebAppend_Root_Sliders(){
     // JsonBuilderI->Level_End();
 
 
-    HsbColor hsb = RgbColor(active_rgbcct_colour_p->R,active_rgbcct_colour_p->G,active_rgbcct_colour_p->B);
+    HsbColor hsb = RgbColor(255);//active_rgbcct_colour_p->R,active_rgbcct_colour_p->G,active_rgbcct_colour_p->B);
 
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add("id",1);
@@ -395,7 +397,7 @@ void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
       
       char buffer[20];
       
-      for (uint8_t row_id = mPaletteI->PALETTELIST_VARIABLE_HSBID_01_ID; row_id < mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+      for (uint8_t row_id = mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID; row_id < mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
         BufferWriterI->Append_P(
           PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
           row_id, 
@@ -404,7 +406,7 @@ void mInterfaceLight::WebAppend_Root_Draw_PaletteSelect(){
       }
       BufferWriterI->Append_P(PSTR("</optgroup>"));
       BufferWriterI->Append_P(PSTR("<optgroup label='Preset'>"));
-      for (uint8_t row_id = mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID; row_id < mPaletteI->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+      for (uint8_t row_id = mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID; row_id < mPaletteI->PALETTELIST_STATIC_LENGTH__ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
         BufferWriterI->Append_P(
           PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR, 
           row_id, 

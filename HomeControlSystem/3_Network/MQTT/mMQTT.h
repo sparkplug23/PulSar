@@ -273,6 +273,8 @@ const char* state_ctr(void);
     //   }
     // }
 
+// Easy way to add to the counter
+#define D_MQTT_COMMAND_HANDLED_COUNT_INC data_buffer.isserviced++
 
 
 
@@ -296,6 +298,7 @@ const char* state_ctr(void);
     template<typename T>
     void MQTTHandler_Command(T& class_ptr, uint8_t class_id, handler<T>* handler_ptr, int8_t optional_desired_id = -1)
     {
+      
       // Sanity check
       if(handler_ptr == nullptr){
         return;

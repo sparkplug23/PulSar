@@ -6,7 +6,7 @@
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
-#define DISABLE_WEBSERVER
+// #define DISABLE_WEBSERVER
 // //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"

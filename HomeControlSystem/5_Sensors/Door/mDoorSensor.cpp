@@ -7,7 +7,7 @@ const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR = D_MODULE_SENSORS_
 
 int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
 {
-
+  
   /************
    * INIT SECTION * 
   *******************/
@@ -105,6 +105,9 @@ void mDoorSensor::init(void){
 void mDoorSensor::EveryLoop(){
 
   if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
+
+AddLog(LOG_LEVEL_TEST, PSTR("IsDoorOpen()"));
+
     door_detect.state = IsDoorOpen();
     door_detect.tDetectTimeforDebounce = millis();
     if(door_detect.state){ 
@@ -117,11 +120,8 @@ void mDoorSensor::EveryLoop(){
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
     mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-    #ifdef USE_MODULE_CORE_RULES
-      pCONT_rules->NewEvent(EM_MODULE_SENSORS_DOOR_ID, 0, door_detect.isactive);
-    #endif
-    pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
-  
+    pCONT_rules->NewEventRun(EM_MODULE_SENSORS_DOOR_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, 0, door_detect.isactive);
+   
   }
 
 }
@@ -225,8 +225,12 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   }
 
   JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
-  JBI->Add("DoorLockPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
 
+
+  if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+  {
+  JBI->Add("DoorLockPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+  }
   return JsonBuilderI->End();
 
 }

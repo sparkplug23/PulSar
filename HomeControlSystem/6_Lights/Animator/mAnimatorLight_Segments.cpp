@@ -732,7 +732,9 @@ void mAnimatorLight::SubTask_Segments_Animation()
 RgbcctColor mAnimatorLight::GetSegmentColour(uint8_t colour_index, uint8_t segment_index)
 {
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
 AddLog(LOG_LEVEL_TEST, PSTR("segment_index=%d"),segment_index);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
   RgbcctColor colour = RgbcctColor(0);
 
@@ -792,7 +794,9 @@ RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour)
 
   if(buffer == nullptr)
   {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("buffer == nullptr"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     return false;
   } 
 
@@ -921,7 +925,9 @@ RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor desired_colour)
 
   if(buffer == nullptr)
   {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("buffer == nullptr"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     return false;
   } 
 
@@ -1063,7 +1069,9 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
 
   if(buffer == nullptr)
   {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("buffer == nullptr"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     return false;
   } 
 
@@ -1072,7 +1080,7 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
   uint16_t pixel_start_i =pixel_index*sizeof(TransitionColourPairs);
 
 
-    AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
+    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
 
   if(pixel_start_i + 10 <= buflen)
   {
@@ -1090,7 +1098,10 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
     start_of_pixel_pair[8] = desired_colour.WW;
     start_of_pixel_pair[9] = desired_colour.WC;
   }else{
+    
+    #ifdef ENABLE_LOG_LEVEL_WARN
     AddLog(LOG_LEVEL_TEST, PSTR("NOT enough memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
   }
   
   // AddLog_Array(LOG_LEVEL_TEST, PSTR("buffer"), &buffer[pixel_start_i    ] , 10);
@@ -1261,9 +1272,9 @@ void mAnimatorLight::EveryLoop(){
        * */
       if(!_segments[0].flags.fRunning)
       {   
-        //#ifdef ENABLE_LOG_LEVEL_DEBUG
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Animation Started"));
-        //#endif
+        #endif
       }
       _segments[0].flags.fRunning = true; 
       fPixelsUpdated = true;

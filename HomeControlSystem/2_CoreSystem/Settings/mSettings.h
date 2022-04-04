@@ -25,7 +25,7 @@ return potato;
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  3000
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
-#define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
+// #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
 
 
 enum DATA_BUFFER_FLAG_SOURCE_IDS{
@@ -269,10 +269,9 @@ const uint32_t POWER_MASK = 0xffffffffUL;   // Power (Relay) full mask
 \*********************************************************************************************/
 
 // Changes to the following MAX_ defines will impact settings layout
-#define MAX_RELAYS 4
+// #define MAX_RELAYS 4
 // const uint8_t MAX_RELAYS = 8;               // Max number of relays
 const uint8_t MAX_INTERLOCKS = 4;           // Max number of interlock groups (MAX_RELAYS / 2)
-const uint8_t MAX_LEDS = 4;                 // Max number of leds
 
 const uint8_t MAX_PWMS = 5;                 // Max number of PWM channels
 const uint8_t MAX_COUNTERS = 4;             // Max number of counter sensors
@@ -362,8 +361,6 @@ const uint32_t APP_BAUDRATE = 115200;       // Default serial baudrate
 
 
 const uint32_t START_VALID_TIME = 1451602800;  // Time is synced and after 2016-01-01
-
-const char D_NO_MATCH_CTR[] = "NoMatch";
 
 //const uint32_t DRIVER_BOOT_DELAY = 1;       // Number of milliseconds to retard driver cycles during boot-up time to reduce overall CPU load whilst Wifi is connecting
 //const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to go through the main loop using delay when needed
@@ -513,15 +510,15 @@ extern uint8_t rotary_changed; // Rotary switch changed
 
 
 
-const char kWebColors[] PROGMEM =
-  COLOR_TEXT "|" COLOR_BACKGROUND "|" 
-  COLOR_FORM "|" COLOR_INPUT_TEXT "|" 
-  COLOR_INPUT "|" COLOR_CONSOLE_TEXT "|" COLOR_CONSOLE "|"
-  COLOR_TEXT_WARNING "|" COLOR_TEXT_SUCCESS "|"
-  COLOR_BUTTON_TEXT "|" COLOR_BUTTON "|" COLOR_BUTTON_HOVER "|" COLOR_BUTTON2 "|" COLOR_BUTTON2_HOVER "|" 
-  COLOR_BUTTON_RESET "|" COLOR_BUTTON_RESET_HOVER "|" COLOR_BUTTON_SAVE "|" 
-  COLOR_BUTTON_SAVE_HOVER "|"
-  COLOR_TIMER_TAB_TEXT "|" COLOR_TIMER_TAB_BACKGROUND "|" D_COL_TEXT_MODULE_TITLE_CTR;
+// const char kWebColors[] PROGMEM =
+//   COLOR_TEXT "|" COLOR_BACKGROUND "|" 
+//   COLOR_FORM "|" COLOR_INPUT_TEXT "|" 
+//   COLOR_INPUT "|" COLOR_CONSOLE_TEXT "|" COLOR_CONSOLE "|"
+//   COLOR_TEXT_WARNING "|" COLOR_TEXT_SUCCESS "|"
+//   COLOR_BUTTON_TEXT "|" COLOR_BUTTON "|" COLOR_BUTTON_HOVER "|" COLOR_BUTTON2 "|" COLOR_BUTTON2_HOVER "|" 
+//   COLOR_BUTTON_RESET "|" COLOR_BUTTON_RESET_HOVER "|" COLOR_BUTTON_SAVE "|" 
+//   COLOR_BUTTON_SAVE_HOVER "|"
+//   COLOR_TIMER_TAB_TEXT "|" COLOR_TIMER_TAB_BACKGROUND "|" D_COL_TEXT_MODULE_TITLE_CTR;
 
 
 /*********************************************************************************************\
@@ -1483,6 +1480,7 @@ struct SYSCFG {
   uint16_t      pwm_frequency;             // 2E6
   uint16_t      pwm_value[MAX_PWMS];       // 2EC
   // uint8_t       rf_code[17][9];            // 5D4
+  uint16_t      rf_duplicate_time;         // 522
 
   // Power
   unsigned long power; //power_t       power;                     // 2E8
@@ -1504,6 +1502,7 @@ struct SYSCFG {
   // SysBitfield4  flag4;                     // TEMP FIX
 // TO SORT
 
+  uint64_t      rf_protocol_mask;          // FA8
  
 
 
@@ -1730,10 +1729,6 @@ struct RUNTIME_VALUES{
 
 
 uint8_t active_device = 1;                  // Active device in ExecuteCommandPower
-uint8_t leds_present = 0;                   // Max number of LED supported
-uint8_t led_inverted = 0;                   // LED inverted flag (1 = (0 = On, 1 = Off))
-uint8_t led_power = 0;                      // LED power state
-uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = On, 1 = Off))
 
 
 uint8_t pwm_inverted = 0;                   // PWM inverted flag (1 = inverted)
@@ -1792,24 +1787,6 @@ void CommandSet_SystemRestartID(uint8_t value);
 
 int16_t     SwitchMode_GetID_by_Name(const char* c);
 const char* SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_t buflen);
-
-
-// #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
-// #define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
-// struct DATA_BUFFER{
-//   struct TOPIC{
-//     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
-//     uint8_t len = 0;
-//   }topic;
-//   struct PAYLOAD{
-//     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
-//     uint16_t len = 0;
-//     uint8_t encoded_type_id; //json,raw
-//   }payload;
-//   uint8_t fWaiting = false;
-//   uint8_t method = false; // For detailed, ifchanged, all
-//   uint8_t isserviced = 0; // Set to 0 on new mqtt, incremented with handled CORRECTLY payloads
-// }data_buffer_old;
 
 #ifndef WEB_LOG_SIZE
 #define WEB_LOG_SIZE 200       // Max number of characters in weblog

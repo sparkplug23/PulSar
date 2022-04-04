@@ -322,11 +322,17 @@ class mAnimatorLight :
       void StartAnimationAsBlendFromStartingColorToDesiredColor(void);
       void StartAnimationAsSwitchingFromStartingColorToDesiredColor();
 
-      void WebPage_Root_AddHandlers();
-      void WebPage_Root_SendInformationModule();
-      void WebAppend_JSON_RootPage_LiveviewPixels();
     
      #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+
+     
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+      void WebPage_Root_AddHandlers();
+      void WebAppend_JSON_RootPage_LiveviewPixels();
+      void WebPage_Root_SendInformationModule();
+
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
     /**
      * @brief 

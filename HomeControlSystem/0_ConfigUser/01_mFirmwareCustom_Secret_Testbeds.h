@@ -8,7 +8,7 @@
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
-#define DISABLE_WEBSERVER
+// #define DISABLE_WEBSERVER
 // //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -25,6 +25,7 @@
 // #define DEVICE_TESTBED_SHELLY1_01
 // #define DEVICE_TESTBED_SHELLY2P5_01
 // #define DEVICE_TESTBED_SHELLY2_DIMMER 
+// #define DEVICE_TESTBED_SONOFF_4CHPRO 
 
 /**
  * Generic hardware eg nodemcu
@@ -32,23 +33,26 @@
 // #define DEVICE_TESTBED_MOTION
 // #define DEVICE_TESTBED_DS18XX
 // #define DEVICE_TESTBED_RGBCLOCK
-// #define DEVICE_RGBSTRING_ANIMATOR_01
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
 // #define DEVICE_TESTBED_ULTRASONIC
 // #define DEVICE_TESTBED_9AXIS_GRYO
 // #define DEVICE_TESTBED_9AXIS_GRYO_MPU9250
 // #define DEVICE_TESTBED_9AXIS_GRYO_GY89
-// #define DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
 // #define DEVICE_TESTBED_6DOF_ECOMPASS_LSM303D
 // #define DEVICE_TESTBED_ANIMATION_SEGMENTS_3PIXELS
 // #define DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS
-// #define DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS_ENABLING_WEBUI
 // #define DEVICE_TESTBED_ANIMATION_SEGMENTS_DUAL_MQTT
 // #define DEVICE_TESTBED_NEXTION_HEATING
 // #define DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC
 // #define DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC_WITH_WEBUI
 // #define DEVICE_TESTBED_MOTION_CLIMATE_SENSOR
-#define DEVICE_TESTBED_HVAC_HEAT_ONLY_WITH_ENERGY_SENSOR
+// #define DEVICE_TESTBED_HVAC_HEAT_ONLY_WITH_ENERGY_SENSOR
+// #define DEVICE_TESTBED_WEBUI_BASIC_GUI
+// #define DEVICE_TESTBED_WEBUI_FIRMWARE_UPDATE
+// #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
+// #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS
+// #define DEVICE_TESTBED_3PIXELS_MATRIX_E131_PROTOCOL
+#define DEVICE_TESTBED_STATUS_LEDS
 
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
@@ -81,6 +85,104 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#ifdef DEVICE_TESTBED_SONOFF_4CHPRO
+  #define DEVICENAME_CTR          "testbed_4chpro"
+  #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
+  
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_DRIVERS_BUZZER
+  #define USE_MODULE_DRIVERS_RELAY
+
+  // #define USE_MODULE_CONTROLLER_SONOFF_4CHPRO
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+
+  // default key# = relay#
+  // RF Key433 using rules to match patterns then need limit to how often RF matches 
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\""
+  "}";
+
+  /**
+   * @brief Remote 433 Number 1
+   ***
+    1L:  Data 0xA37348 (10711880), Bits 24, Protocol 1, Delay 238
+    1R:  Data 0xA3734C (10711884), Bits 24, Protocol 1, Delay 239
+    2L:  Data 0xA37344 (10711876), Bits 24, Protocol 1, Delay 239
+    2R:  Data 0xA37349 (10711881), Bits 24, Protocol 1, Delay 239
+    3L:  Data 0xA37342 (10711874), Bits 24, Protocol 1, Delay 244
+    3R:  Data 0xA37345 (10711877), Bits 24, Protocol 1, Delay 240
+    4L:  Data 0xA37341 (10711873), Bits 24, Protocol 1, Delay 238
+    4R:  Data 0xA37343 (10711875), Bits 24, Protocol 1, Delay 239
+
+    rules packing
+
+    function: tasker_func for "received rf"
+    deviceid: int list
+    values: [
+      protocol int value
+      delay number (2 bits)
+      bits size eg 24 or 32 bits (and hence next bits)
+      data1
+      data2
+      data3]
+
+    For now, instead of handling via rules, lets do this via openhab (ie RF code triggers a press and "expire" resets it after X seconds)
+
+   */
+
+  /**
+   * @brief Remote 433 Number 2
+   ***
+    1L:  Data 0x3194B8 (3249336), Bits 24, Protocol 1, Delay 243
+    1R:  Data 0x3194BC (3249340), Bits 24, Protocol 1, Delay 242     
+    2L:  Data 0x3194B4 (3249332), Bits 24, Protocol 1, Delay 241  
+    2R:  Data 0x3194B9 (3249337), Bits 24, Protocol 1, Delay 241    
+    3L:  Data 0x3194B2 (3249330), Bits 24, Protocol 1, Delay 241
+    3R:  Data 0x3194B5 (3249333), Bits 24, Protocol 1, Delay 242
+    4L:  Data 0x3194B1 (3249329), Bits 24, Protocol 1, Delay 241
+    4R:  Data 0x3194B3 (3249331), Bits 24, Protocol 1, Delay 241                           
+   */
+
+  /**
+   * @brief Remote 433 Number 2
+   ***
+    1L:  Data 0x6730C8 (6762696), Bits 24, Protocol 1, Delay 240
+    1R:  Data 0x6730CC (6762700), Bits 24, Protocol 1, Delay 240
+    2L:  Data 0x6730C4 (6762692), Bits 24, Protocol 1, Delay 241
+    2R:  Data 0x6730C9 (6762697), Bits 24, Protocol 1, Delay 241
+    3L:  Data 0x6730C2 (6762690), Bits 24, Protocol 1, Delay 240
+    3R:  Data 0x6730C5 (6762693), Bits 24, Protocol 1, Delay 240
+    4L:  Data 0x6730C1 (6762689), Bits 24, Protocol 1, Delay 242
+    4R:  Data 0x6730C3 (6762691), Bits 24, Protocol 1, Delay 241 
+   */
+
+  /**
+   * @brief Remote 433 Number 2
+   ***
+    1L:  Data 0xE632B8 (15086264), Bits 24, Protocol 1, Delay 237 
+    1R:  Data 0xE632BC (15086268), Bits 24, Protocol 1, Delay 236 
+    2L:  Data 0xE632B4 (15086260), Bits 24, Protocol 1, Delay 234 
+    2R:  Data 0xE632B9 (15086265), Bits 24, Protocol 1, Delay 236 
+    3L:  Data 0xE632B2 (15086258), Bits 24, Protocol 1, Delay 235 
+    3R:  Data 0xE632B5 (15086261), Bits 24, Protocol 1, Delay 235 
+    4L:  Data 0xE632B1 (15086257), Bits 24, Protocol 1, Delay 235 
+    4R:  Data 0xE632B3 (15086259), Bits 24, Protocol 1, Delay 236 
+   */
+
+#endif
+
+
 
 /**
  * This will become the final version of a panel, but requires animation fixing first
@@ -197,6 +299,8 @@
   
   #define ENABLE_DEVFEATURE_NEXTION_WEBUI
 
+  #define USE_MODULE_NETWORK_WEBSERVER
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -312,7 +416,7 @@
   #define DEVICENAME_CTR          "testbed_animation_segment_01"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
   #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
   
-  #define STRIP_SIZE_MAX 50                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
   #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
   #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
 
@@ -863,6 +967,7 @@
    * @brief Uncomment one line to use testing template configs for lighting_template
    **/
   #define LIGHTING_TEMPLATE_DEFAULT_DOWNSTAIRS_TOILET
+
    
   /**
    * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
@@ -1125,6 +1230,34 @@
   
 #endif
 
+/**
+ * @brief Used to test status leds on both hardware, needing analog (pwm) and digital drivers (the PWM vs IO needs to be lower level controls)
+ * 
+ */
+#ifdef DEVICE_TESTBED_STATUS_LEDS
+  #define DEVICENAME_CTR          "testbed_status_leds"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Status LEDs"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define USE_MODULE_DRIVERS_LEDS
+
+   
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+    #ifdef ESP8266 
+      "\"" "2" "\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
+      "\"" "16" "\":\"" D_GPIO_FUNCTION_LED2_CTR  "\""
+    #else
+      "\"" "LBI" "\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+    
+#endif
 
 #ifdef DEVICE_TESTBED_ANIMATION_SEGMENTS_DUAL_MQTT
   #define DEVICENAME_CTR          "testbed_animation_segment_01_dual"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
@@ -1668,54 +1801,82 @@
 #endif
 
 
+
 /**
- * @brief Used to test SK6812 rgbW (ie addressable 4 pixel)
+ * @brief Used to develop the core webui again, no extra functions/buttons, minimal page with console etc
  * 
  */
-#ifdef DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS_ENABLING_WEBUI
-  #define DEVICENAME_CTR          "testbed_webui_4pixels_01"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI
+  #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
   #define DEVICENAME_FRIENDLY_CTR "Secondary Testbed for Segments 01"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
   
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  #define STRIP_SIZE_MAX 55                                                                           // Change: Set *total* length of string, segment0 will default to this length
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    // "\"" D_JSON_GPIOC "\":{"
+    // #ifdef ESP8266 
+    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #else
+    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #endif
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+
+  
+#endif
+
+
+#ifdef DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
+  #define DEVICENAME_CTR          "testbed_webui_3pixels"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
   #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
   #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
 
-  // /**
-  //  * @brief Uncomment one line to use testing template configs for lighting_template
-  //  **/
-  // #define LIGHTING_TEMPLATE_DEFAULT_DOWNSTAIRS_TOILET
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
    
-  // /**
-  //  * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
-  //  **/
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // cant be removed or does not compile, phase out, should always be included
-
-  // // I need to make a define difference between "h801" effects, and addressable effects, since there is overlapping effects
-
-  // /**
-  //  * @brief defines to be tested and incorporated fully
-  //  **/
-  // #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
-  // // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-  // // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
-  // // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  // #define USE_SK6812_METHOD_DEFAULT
-
-  // /**
-  //  * @brief Debug flags, used mostly be me
-  //  * */  
-  // // #define ENABLE_FREERAM_APPENDING_SERIAL
-  // // #define DEBUG_WLED_EFFECT_FUNCTIONS
-  // // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
 
 
   #define USE_MODULE_TEMPLATE
@@ -1724,7 +1885,7 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-    #ifdef ESP8266 
+    #ifdef ESP8266 // default pins for ws28xx
       "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     #else
       "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
@@ -1732,18 +1893,38 @@
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
-  
 
-  /**
-   * @brief The following templates are tested examples
-   * */
+/**
+ * @brief 
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
+ * 
+ */
+
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
 
   #define USE_LIGHTING_TEMPLATE
 
   #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
@@ -1759,43 +1940,20 @@
   "}";
   #endif
 
-  #ifdef LIGHTING_TEMPLATE_DEFAULT_DOWNSTAIRS_TOILET
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    "\"Effects\":{"
-      "\"Function\":\"Solid RGBCCT\""
-    "},"
-    "\"ColourPalette\":\"RGBCCTColour 00\"," 
-    "\"Hue\":20,"
-    "\"Sat\":100,"
-    "\"CCT_TempPercentage\":100,"
-    "\"Transition\":{"
-      "\"TimeMs\":1000,"
-      "\"RateMs\":2000"
-    "},"    
-    "\"BrightnessCCT\":100,"
-    "\"BrightnessRGB\":100"
-  "}";
-  #endif
-
   #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
-    "\"ColourPalette\":\"Christmas 01\"," 
+    "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
     "\"Effects\":{"
-      "\"Function\":\"" "Slow Glow" "\""
+      "\"Function\":\"" D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR "\""
     "},"
     "\"Transition\":{"
-      "\"TimeMs\":1000,"
-      "\"RateMs\":2000"
+      "\"TimeMs\":5000,"
+      "\"RateMs\":20000"
     "},"    
     "\"BrightnessRGB\":100"
   "}";
@@ -1804,7 +1962,7 @@
   #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
@@ -1947,6 +2105,1364 @@
   "}";
   #endif
   
+  /**
+   * @brief For easy copy and pasting (as backup for mqtt explorer commands)
+   * These are simply copies of commands, that may or may not be translated into future templates
+   * 
+   */
+
+
+  /** Copy from mqtt broker
+   * 
+   * {
+  "Segment0": {
+    "PixelRange": [
+      31,
+      40
+    ],
+    "Effects": {
+      "Function":1
+    },
+    "ColourPalette": "Christmas 06",
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 1500,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment1": {
+    "PixelRange": [
+      21,
+      30
+    ],
+    "Effects": {
+      "Function": 28
+    },
+    "ColourPalette": 11,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      0,
+      20
+    ],
+    "Effects": {
+      "Function": 29
+    },
+    "ColourPalette": "Christmas 06",
+    "Hue": 120,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  }
+}
+
+
+  {
+  "Segment0": {
+    "PixelRange": [
+      40,
+      49
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    }
+  },
+  "Segment1": {
+    "PixelRange": [
+      0,
+      39
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 10,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB":100
+  },
+    "Hue": 120,
+    "Sat": 90,
+  "Segment1": {
+    "PixelRange": [
+      11,
+      49
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 25,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 20
+    },
+    "BrightnessRGB": 10
+  },
+  "Segment1": {
+    "PixelRange": [
+      11,
+      20
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 11,
+    "Hue": 240,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      25,
+      40
+    ],
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 14,
+    "Hue": 120,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  }
+}
+{
+  "PixelRange": [
+    0,
+    1300
+  ],
+  "Effects": {
+    "Function":21,
+    "Speed": 10,
+    "Intensity": 255
+  },
+  "ColourPalette": 95,
+  "WLED": {
+    "Colour0": [
+      255,
+      0,
+      0,
+      0
+    ],
+    "Colour1": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "Colour2": [
+      0,0,
+      255,
+      0
+    ]
+  },
+  "Hue": 10,
+  "Sat": 100,
+  "ColourOrder": "grbwc",
+  "Transition": {
+    "TimeMs": 0,
+    "RateMs": 23
+  },
+  "BrightnessRGB": 0,
+  "BrightnessCCT": 100
+}
+
+*/
+
+#endif
+
+
+#ifdef DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS
+  #define DEVICENAME_CTR          "testbed_webui_4pixels"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 3                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_COMPILE_TIME_DEFINES_OF_MODULE_LIST
+
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+
+  // #define ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
+   
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief 
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
+ * 
+ */
+
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
+
+  #define USE_LIGHTING_TEMPLATE
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Shimmering Palette\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":23"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+    "\"Effects\":{"
+      "\"Function\":\"" D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR "\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":5000,"
+      "\"RateMs\":20000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 21\"," 
+    "\"Effects\":{"
+      "\"Function\":30"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Static\""
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":3000,"
+        "\"RateMs\":10000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":\"Solid RGBCCT\""
+      "},"
+      "\"ColourPalette\":\"Solid Rgbcct 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":29"
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":23"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":28"
+      "},"
+      "\"ColourPalette\":11,"
+      "\"Hue\":20,"
+      "\"Sat\":90,"
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":25"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  /**
+   * @brief For easy copy and pasting (as backup for mqtt explorer commands)
+   * These are simply copies of commands, that may or may not be translated into future templates
+   * 
+   */
+
+
+  /** Copy from mqtt broker
+   * 
+   * {
+  "Segment0": {
+    "PixelRange": [
+      31,
+      40
+    ],
+    "Effects": {
+      "Function":1
+    },
+    "ColourPalette": "Christmas 06",
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 1500,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment1": {
+    "PixelRange": [
+      21,
+      30
+    ],
+    "Effects": {
+      "Function": 28
+    },
+    "ColourPalette": 11,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      0,
+      20
+    ],
+    "Effects": {
+      "Function": 29
+    },
+    "ColourPalette": "Christmas 06",
+    "Hue": 120,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  }
+}
+
+
+  {
+  "Segment0": {
+    "PixelRange": [
+      40,
+      49
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    }
+  },
+  "Segment1": {
+    "PixelRange": [
+      0,
+      39
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 10,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB":100
+  },
+    "Hue": 120,
+    "Sat": 90,
+  "Segment1": {
+    "PixelRange": [
+      11,
+      49
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 25,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 20
+    },
+    "BrightnessRGB": 10
+  },
+  "Segment1": {
+    "PixelRange": [
+      11,
+      20
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 11,
+    "Hue": 240,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      25,
+      40
+    ],
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 14,
+    "Hue": 120,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  }
+}
+{
+  "PixelRange": [
+    0,
+    1300
+  ],
+  "Effects": {
+    "Function":21,
+    "Speed": 10,
+    "Intensity": 255
+  },
+  "ColourPalette": 95,
+  "WLED": {
+    "Colour0": [
+      255,
+      0,
+      0,
+      0
+    ],
+    "Colour1": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "Colour2": [
+      0,0,
+      255,
+      0
+    ]
+  },
+  "Hue": 10,
+  "Sat": 100,
+  "ColourOrder": "grbwc",
+  "Transition": {
+    "TimeMs": 0,
+    "RateMs": 23
+  },
+  "BrightnessRGB": 0,
+  "BrightnessCCT": 100
+}
+
+*/
+
+#endif
+
+/**
+ * @brief For the development and inclusion of the E131 protocol for xLight stream data
+ * 
+ */
+#ifdef DEVICE_TESTBED_3PIXELS_MATRIX_E131_PROTOCOL
+  #define DEVICENAME_CTR          "testbed_matrix_3p_e131"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Primary Testbed for Segments 01"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+   
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+/**
+ * @brief 
+ * LIGHTING_TEMPLATE
+ * 1) Without "Segment#:{}" used, it is assumed the command should be applied to the entire strip, defaulting entire strip as segment number 0
+ * 2) Multiple segments can be set, be using the same commands but under multiple json keys called segment with its number (currently maximum of 5 segments)
+ *    eg
+ *        {
+ *        "Segment0":{
+ *                      "ColourPalette":"Christmas 01" 
+ *                   },
+ *        "Segment1":{
+ *                      "ColourPalette":"Christmas 02" 
+ *                   },
+ *        "Segment2":{
+ *                      "ColourPalette":"Christmas 03" 
+ *                   }
+ *         }
+ * 
+ */
+
+/**
+ * @brief The following templates are tested examples
+ * 
+ */
+
+  #define USE_LIGHTING_TEMPLATE
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Shimmering Palette\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":23"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+    "\"Effects\":{"
+      "\"Function\":\"" D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR "\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":5000,"
+      "\"RateMs\":20000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+
+  #ifdef LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 21\"," 
+    "\"Effects\":{"
+      "\"Function\":30"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_ADDING_WLED_FIREWORKS
+
+  #ifdef LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Christmas 06\"," 
+    "\"Effects\":{"
+      "\"Function\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":30"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // LIGHTING_TEMPLATE_SINGLE_SEGMENT_CANDLE_CHRISTMAS
+
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Static\""
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":3000,"
+        "\"RateMs\":10000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":\"Solid RGBCCT\""
+      "},"
+      "\"ColourPalette\":\"Solid Rgbcct 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  #ifdef LIGHTING_TEMPLATE_MULTIPLE_SEGMENTS_FOR_UTILITY
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,19],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":29"
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":23"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[20,29],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":28"
+      "},"
+      "\"ColourPalette\":11,"
+      "\"Hue\":20,"
+      "\"Sat\":90,"
+      "\"Transition\":{"
+        "\"TimeMs\":0,"
+        "\"RateMs\":25"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[30,49],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":100"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif
+  
+  /**
+   * @brief For easy copy and pasting (as backup for mqtt explorer commands)
+   * These are simply copies of commands, that may or may not be translated into future templates
+   * 
+   */
+
+
+  /** Copy from mqtt broker
+   * 
+   * {
+  "Segment0": {
+    "PixelRange": [
+      31,
+      40
+    ],
+    "Effects": {
+      "Function":1
+    },
+    "ColourPalette": "Christmas 06",
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 1500,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment1": {
+    "PixelRange": [
+      21,
+      30
+    ],
+    "Effects": {
+      "Function": 28
+    },
+    "ColourPalette": 11,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      0,
+      20
+    ],
+    "Effects": {
+      "Function": 29
+    },
+    "ColourPalette": "Christmas 06",
+    "Hue": 120,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  }
+}
+
+
+  {
+  "Segment0": {
+    "PixelRange": [
+      40,
+      49
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 20,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    }
+  },
+  "Segment1": {
+    "PixelRange": [
+      0,
+      39
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 10,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB":100
+  },
+    "Hue": 120,
+    "Sat": 90,
+  "Segment1": {
+    "PixelRange": [
+      11,
+      49
+    ],
+    "ColourOrder":"grb",
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    }
+  },
+  "BrightnessRGB": 100
+}
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      10
+    ],
+    "Effects": {
+      "Function": 28,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 10,
+    "Hue": 25,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 20
+    },
+    "BrightnessRGB": 10
+  },
+  "Segment1": {
+    "PixelRange": [
+      11,
+      20
+    ],
+    "Effects": {
+      "Function": 27,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 11,
+    "Hue": 240,
+    "Sat": 90,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  },
+  "Segment2": {
+    "PixelRange": [
+      25,
+      40
+    ],
+    "Effects": {
+      "Function": 1,
+      "Speed": 100,
+      "Current": 127,
+      "Palette": 0,
+      "Intensity": 127,
+      "Mode": 80
+    },
+    "ColourPalette": 14,
+    "Hue": 120,
+    "Sat": 100,
+    "ColourOrder": "grbwc",
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  }
+}
+{
+  "PixelRange": [
+    0,
+    1300
+  ],
+  "Effects": {
+    "Function":21,
+    "Speed": 10,
+    "Intensity": 255
+  },
+  "ColourPalette": 95,
+  "WLED": {
+    "Colour0": [
+      255,
+      0,
+      0,
+      0
+    ],
+    "Colour1": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "Colour2": [
+      0,0,
+      255,
+      0
+    ]
+  },
+  "Hue": 10,
+  "Sat": 100,
+  "ColourOrder": "grbwc",
+  "Transition": {
+    "TimeMs": 0,
+    "RateMs": 23
+  },
+  "BrightnessRGB": 0,
+  "BrightnessCCT": 100
+}
+
+*/
+
 #endif
 
 
@@ -2453,9 +3969,9 @@
   #define USE_MODULE_CORE_RULES
        
   #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_DOOR
 
   #define USE_MODULE_TEMPLATE
@@ -2469,10 +3985,10 @@
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_OPEN_CTR)
+      "\"D7\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -2513,31 +4029,24 @@
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
-        "\"State\":\"FollowInv\""
+        "\"State\":\"Follow\""
       "}"
-    // "}"
-
-    
-
-    "},"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":\"FollowInv\""
-      "}"
+    // "},"
+    // // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    // "\"Rule1\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":1,"
+    //     "\"State\":\"On\""
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":1,"
+    //     "\"State\":\"Follow\""
+    //   "}"
     "}"
-
-
-
   "}";
   
 
@@ -3069,89 +4578,6 @@
 
 #endif
 
-
-
-
-
-#ifdef DEVICE_RGBSTRING_ANIMATOR_01
-  #define DEVICENAME_CTR          "testbed_string_animator_01"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
-  
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // WLED
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define ENABLE_DEVFEATURE_WLED_EFFECTS_INSIDE_ANIMATOR_ONLY
-  // #define ENABLE_PIXEL_FUNCTION_WLED_EFFECTS // long term, these will be absorbed into normal effects
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE // future devices will move to creating 3/4 types via "new" and are dynamic (aka wled)
-
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // new method for 2022
-        // current method for xmas 2021
-
-  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  
-  #define ENABLE_BOOT_OVERRIDE_INIT
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
- #define STRIP_SIZE_MAX 50
- #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"rgb\","
-    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_NOTIFICATIONS  "\","
-    // "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_ANIMATIONMODE    "\":"  "5"  "," //5
-    "\"" D_JSON_EFFECTS "\":{" 
-      // "\"Function\":\"FirePlace01\"" //slow glow
-      "\"Function\":\"Static Glow\"" //slow glow
-    "},"
-    // "\"Transition\":{\"Order\":\"InOrder\",\"PixelUpdatePerc\":2,\"RateMs\":1000},"
-    // "\"TimeMs\":500,"
-    
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":5000,"
-      "\"" D_JSON_RATE_MS "\":5001,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"ColourPalette\":\"Christmas 06\"," //c12    43 is the colours for this christmas
-    // "\"ColourPalette\":\"Single Fire 01\"," //c12    43 is the colours for this christmas
-    // "\"PaletteGeneration\":{\"RandomiseBrightnessMode\":1},"
-    "\"BrightnessRGB\":100"
-  "}";
-  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS   
-  #define STRIP_SIZE_MAX                      50   
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" "bedroom" "\""
-      "]"
-    "}"
-  "}";
-
-#endif
 
 
 /**
@@ -3711,177 +5137,6 @@
 #endif
 
 
-/**
- * Need to add cc1110 input, simple low/high into json output so I can show sync messages in recording
- * need 12v power source
- * 
- * */
-#ifdef DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
-  #define DEVICENAME_CTR            "radpattern"
-  #define DEVICENAME_FRIENDLY_CTR   "radpattern"  //white wire, blue tape, to be uav 
-  #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "RP0"
-  #define DEVICENUM_NUM   0
-
-  // #define ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
-  // #define ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
-  #define ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
-
-  /**
-   * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
-   * */
-  #define USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
-  #define USE_SYSTEM_OLED_LOGGER_FEEDBACK
-  #define USE_SYSTEM_SDCARD_LOGGING
-  #define USE_SYSTEM_IMU_RADIATIONPATTERN
-
-  /**
-   * Debug methods
-   * */
-  /**
-   * @note SD Card will still be enabled, but data will be pushed out of serial2(17) 
-   * */
-  // #define USE_SYSTEM_ENABLE_DEBUG_OUTPUT_ON_SERIAL2
-  // #define USE_SYSTEM_OUTPUT_SDCARD_STREAM_TO_SERIAL0_FOR_FAST_TESTING
-    // #define USE_MODULE_SENSORS_LSM303D
-
-  /**
-   * ADC written directly into controller, not as a module
-   * */
-  #define USE_DEVFEATURE_ADC_IN_CONTROLLER
-
-  /**
-   *  IMU recording
-   * */
-  #ifdef USE_SYSTEM_IMU_RADIATIONPATTERN
-    #define USE_MODULE_SENSORS_LSM303D
-    #define USE_MODULE_SENSORS_L3G
-    #define USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
-  #endif
-
-  /**
-   * General defines to disable systems not needed
-   * */
-  #define DISABLE_NETWORK
-  #define DISABLE_SLEEP
-
-  /**
-   * SDCard
-   * */
-  #ifdef USE_SYSTEM_SDCARD_LOGGING
-    #define USE_MODULE_DRIVERS_SDCARD
-    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
-    #define ENABLE_DEVFEATURE_DUALCORE_SDCARD_WRITER
-  #endif // USE_SYSTEM_SDCARD_LOGGING
-
-  /**
-   * Button input
-   * */
-  #ifdef USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
-    #define USE_MODULE_CORE_RULES
-    #define USE_MODULE_SENSORS_BUTTONS
-  #endif // USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
-
-  /**
-   * OLED display
-   * */
-  #ifdef USE_SYSTEM_OLED_LOGGER_FEEDBACK
-    #define USE_MODULE_DISPLAYS_INTERFACE
-    #define USE_MODULE_DISPLAYS_OLED_SSD1306
-    #define SHOW_SPLASH
-  #endif // USE_SYSTEM_OLED_LOGGER_FEEDBACK
-
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      /** 4P large JST - ADC
-       * Yellow     32(I), ADC2G, ADC1_CH6
-       * White      35(I), ADC5G, ADC1_CH7
-       * Red        32(I), ADC Record Trigger
-       * Black      GND
-       * */
-      // "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_ADC1_CH4_CTR   "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
-      // "\"32\":\"" D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR   "\","
-      /** 5P small - UART2 RSS Stream
-       * Orange      17, UART2_TX
-       * Yellow      16, UART2_RX
-       * White       25, ie superframe event over, rising edge interrupt
-       * Red         5V
-       * Black       GND
-       * */
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
-      /** 5P small - UART1 GPS Stream
-       * Orange      19, UART1_TX
-       * Yellow      18, UART1_RX
-       * White        
-       * Red         VCC, 3V3
-       * Black       GND
-       * */
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
-      /** 6P small - SD Card
-       * Green       15, CS
-       * Orange      14, SCK
-       * Yellow      13, MOSI
-       * White       12, MISO
-       * Red         3V3
-       * Black       GND
-       * */
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MISO_CTR  "\","
-      /** Built in - OLED
-       * 
-       * */
-      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-      /**
-       * Optional added switches for controls eg radiation pattern enabling
-       * GPIO21 - manual digitalread/set in radpat
-       * GPIO22 - manual digitalread/set in radpat
-       * */
-      // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      // "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      /** 2P small
-       * Red        Button Logging Toggle
-       * Black      GND
-       * */
-      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define GPIO_FUNCTION_MANUAL_ENABLE_SAMPLING_NUMBER 22
-  #define GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER 27
-
-  
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "ARM"
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "LEG"
-  
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_LSM303D_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-
-
-#endif // DEVICE_GPSPARSER_TESTER
-
-
 #ifdef DEVICE_ESP32_WEBCAM1 //based on tasmota
   #define DEVICENAME_CTR            "esp32_webcam1"
   #define DEVICENAME_FRIENDLY_CTR   "esp32_webcam1"
@@ -3992,33 +5247,45 @@
   #define DEVICENAME_CTR          "testbed_hvac_energy_sens"
   #define DEVICENAME_FRIENDLY_CTR "Testbed HVAC with Energy Sensor"
 
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
-   
   // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
-  //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
-  // #define ENABLE_HVAC_DEBUG_TIMES
-  // #define DISABLE_WEBSERVER
+  #define ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
 
-  // 
+  #define ENABLE_HVAC_DEBUG_TIMES
+  #define DISABLE_WEBSERVER
+
   
+    /**
+     * @brief 
+     * Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
+     * 
+     */
   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+  
+
+  #define ENABLE_DEVFEATURE_HVACTESTBED_CODE // for the testbed, so it does not ruin the heating code until functional
 
   // #define USE_MODULE_CONTROLLER_HVAC
-  // #define HEATING_DEVICE_MAX 1
-  // #define MAX_ZONES 1
+    #ifdef ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+      #define HEATING_DEVICE_MAX 4
+      #define HEATING_DEVICE_MAX 4
+    #else  
+      #define HEATING_DEVICE_MAX 1
+      #define HEATING_DEVICE_MAX 1
+    #endif // ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+
+    #define ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS   
+
   
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_DS18X
-  // #define USE_MODULE_SENSORS_REMOTE_DEVICE
+  // #define USE_MODULE_SENSORS_DS18X  // not working well on esp32, unreliable
+  #define USE_MODULE_SENSORS_REMOTE_DEVICE
 
-  // #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
-  // #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+  #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  #define REMOTE_SENSOR_JSON_NAME "Bedroom"
   
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_PZEM004T_V3
@@ -4043,28 +5310,49 @@
       #ifdef USE_MODULE_SENSORS_DS18X
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
       #endif // USE_MODULE_SENSORS_DS18X
+      #ifdef USE_MODULE_DRIVERS_RELAY
       "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-
-      "\"LBI\":\"" D_GPIO_FUNCTION_BUILTIN_LED1_CTR  "\""
-      // only enabled if available and not being used by another pin
-
-      
+      #ifdef ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+      "\"25\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      #endif // ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+      #endif // USE_MODULE_DRIVERS_RELAY
+      "\"LBI\":\"" D_GPIO_FUNCTION_BUILTIN_LED1_CTR  "\""      
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
-  #define D_DEVICE_DRIVER_RELAY_0_NAME "Room"
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "DriverZone0"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "DriverZone1"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "DriverZone2"
+  #define D_DEVICE_DRIVER_RELAY_3_NAME "DriverZone3"
 
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Room"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Zone0"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Zone1"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Zone2"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Zone3"
 
-  #define D_DEVICE_SENSOR_BME_0_NAME "Room_BME"
+  #define D_DEVICE_SENSOR_ZONE_0_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_1_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_2_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_3_NAME REMOTE_SENSOR_JSON_NAME // tESTING REMOTE SENSOR VIA MQTT (LATER OPTIONS SHOULD INCLUDE DIRECT udp) "BME0"
+
+  #define D_DEVICE_SENSOR_BME_0_NAME "BME0"
+  #define D_DEVICE_SENSOR_BME_1_NAME "BME1"
+  #define D_DEVICE_SENSOR_BME_2_NAME "BME2"
+  #define D_DEVICE_SENSOR_BME_3_NAME "BME3"
 
   #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
 
-  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
-  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
-  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
-  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+  // // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,170,67,3,30,19,2,25]"
+  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,68,132,149,240,1,60,87]"
+
+
+
+  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
 
   #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Cooker"
   #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
@@ -4074,12 +5362,15 @@
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
-      "],"
+      // "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+      //   "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\"" //","
+      //   // "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+      // "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
       "],"
@@ -4087,30 +5378,51 @@
         "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
       "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
       "],"
       "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
-        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
-      "],"  
+      // "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+      //   D_DEVICE_SENSOR_DB18S20_0_ADDRESS //","
+      //   // D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
+      // "],"  
       "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS 
       "]"  
     "},"
     "\"" "HVACZone" "\":{"
       "\"" "SetSensor" "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+        "\"" D_DEVICE_SENSOR_ZONE_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_ZONE_1_NAME "\"," // All use the same
+        "\"" D_DEVICE_SENSOR_ZONE_2_NAME "\","
+        "\"" D_DEVICE_SENSOR_ZONE_3_NAME "\""
       "],"
       "\"" "SetOutput" "\":["
         "{"
           "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_3_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Cooling\"" "]"
         "}"
       "]"
     "},"

@@ -915,7 +915,10 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id){
 
   switch(id){
     default:
+    
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_WARN, PSTR("GetPalettePointerByID=%d DEFAULT"),id);
+    #endif // ENABLE_LOG_LEVEL_INFO
     /**
      * Variable User HSBID
      * */
@@ -1494,7 +1497,9 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 
         if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr)){ 
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
+    #endif // ENABLE_LOG_LEVEL_INFO
           return ii;            
            
           }
@@ -1524,7 +1529,9 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
     sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
     // Default names
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Searching \"%s\""),name_ctr);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     if(strcmp(c,name_ctr)==0){
       return PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID+ii;
@@ -1618,7 +1625,10 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
   switch(ptr->flags.fMapIDs_Type){
     default:
     
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_ERROR, PSTR("ERROR pixel_length=%d"),pixel_length);
+
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     break;
     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID: pixel_width = 1; break;

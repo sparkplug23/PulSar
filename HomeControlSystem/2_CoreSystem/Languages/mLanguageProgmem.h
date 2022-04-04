@@ -146,16 +146,16 @@ DEFINE_PGM_CTR(PM_JSON_SAVEDATA)          D_JSON_SAVEDATA;
 DEFINE_PGM_CTR(PM_JSON_SAVESTATE)         D_JSON_SAVESTATE;
 DEFINE_PGM_CTR(PM_JSON_SAVECOUNT)         D_JSON_SAVECOUNT;
 DEFINE_PGM_CTR(PM_JSON_SENTCOUNT)         D_JSON_SENTCOUNT;
-DEFINE_PGM_CTR(PM_JSON_SENTPERMINUTE)     D_JSON_SENTPERMINUTE;
+// DEFINE_PGM_CTR(PM_JSON_SENTPERMINUTE)     D_JSON_SENTPERMINUTE;
 DEFINE_PGM_CTR(PM_JSON_SENSORRETAIN)      D_JSON_SENSORRETAIN;
 DEFINE_PGM_CTR(PM_JSON_SENSORADDRESS)     D_JSON_SENSORADDRESS;
 DEFINE_PGM_CTR(PM_JSON_SDKVERSION)        D_JSON_SDKVERSION;
-DEFINE_PGM_CTR(PM_JSON_SENSORS)           D_JSON_SENSORS;
-DEFINE_PGM_CTR(PM_JSON_SENSORCOUNT)       D_JSON_SENSORCOUNT;
+// DEFINE_PGM_CTR(PM_JSON_SENSORS)           D_JSON_SENSORS;
+// DEFINE_PGM_CTR(PM_JSON_SENSORCOUNT)       D_JSON_SENSORCOUNT;
 DEFINE_PGM_CTR(PM_JSON_SETTINGS_HOLDER)   D_JSON_SETTINGS_HOLDER;
 DEFINE_PGM_CTR(PM_JSON_SIZE)              D_JSON_SIZE;
 DEFINE_PGM_CTR(PM_JSON_SLEEP)             D_JSON_SLEEP;
-DEFINE_PGM_CTR(PM_JSON_SPEED)             D_JSON_SPEED;
+// DEFINE_PGM_CTR(PM_JSON_SPEED)             D_JSON_SPEED;
 DEFINE_PGM_CTR(PM_JSON_SLEEPMODE)         D_JSON_SLEEPMODE;
 DEFINE_PGM_CTR(PM_JSON_SUNRISE)           D_JSON_SUNRISE;
 DEFINE_PGM_CTR(PM_JSON_SUNSET)            D_JSON_SUNSET;
@@ -163,7 +163,7 @@ DEFINE_PGM_CTR(PM_JSON_SSID)              D_JSON_SSID;
 DEFINE_PGM_CTR(PM_JSON_SSID_NUMBERED)     D_JSON_SSID_NUMBERED;
 DEFINE_PGM_CTR(PM_JSON_STARTDST)          D_JSON_STARTDST;
 DEFINE_PGM_CTR(PM_JSON_STARTUPUTC)        D_JSON_STARTUPUTC;
-DEFINE_PGM_CTR(PM_JSON_STATUS)            D_JSON_STATUS;
+// DEFINE_PGM_CTR(PM_JSON_STATUS)            D_JSON_STATUS;
 DEFINE_PGM_CTR(PM_JSON_STATIC_IPADDRESS)  D_JSON_STATIC_IPADDRESS;
 DEFINE_PGM_CTR(PM_JSON_SUBNETMASK)        D_JSON_SUBNETMASK;
 DEFINE_PGM_CTR(PM_JSON_SERIAL)            D_JSON_SERIAL;
@@ -263,7 +263,7 @@ DEFINE_PGM_CTR(PM_JSON_PALETTE_GENERATION)               D_JSON_PALETTE_GENERATI
 //R
 DEFINE_PGM_CTR(PM_JSON_RGB)                 D_JSON_RGB;
 DEFINE_PGM_CTR(PM_JSON_RGB_COLOUR_ORDER)                    D_JSON_RGB_COLOUR_ORDER;
-DEFINE_PGM_CTR(PM_JSON_RGB_COLOUR_ORDER2)                    D_JSON_RGB_COLOUR_ORDER "2";
+// DEFINE_PGM_CTR(PM_JSON_RGB_COLOUR_ORDER2)                    D_JSON_RGB_COLOUR_ORDER "2";
 DEFINE_PGM_CTR(PM_JSON_RGB_CLOCK)                             D_JSON_RGB_CLOCK;
 DEFINE_PGM_CTR(PM_JSON_RANDOMISE_BRIGHTNESS_MODE)               D_JSON_RANDOMISE_BRIGHTNESS_MODE;
 
@@ -351,71 +351,71 @@ DEFINE_PGM_CTR(PM_JSON_DISPLAY_MODE)        D_JSON_DISPLAY_MODE;
 #endif // USE_MODULE_DISPLAYS_INTERFACE
 
 // Common
-enum UnitNames {
-  UNIT_AMPERE,
-  UNIT_HOUR,
-  UNIT_KILOOHM,
-  UNIT_KILOWATTHOUR,
-  UNIT_LUX,
-  UNIT_MICROSECOND,
-  UNIT_MILLIAMPERE,
-  UNIT_MILLIMETER_MERCURY,
-  UNIT_MILLISECOND,
-  UNIT_MINUTE,
-  UNIT_PPB,
-  UNIT_PPD,
-  UNIT_PPM,
-  UNIT_PERCENTAGE,
-  UNIT_PRESSURE,
-  UNIT_SECOND,
-  UNIT_SECTORS,
-  UNIT_VOLT,
-  UNIT_WATT,
-  UNIT_WATTHOUR,
-  UNIT_HERTZ };
-const char kUnitNames[] PROGMEM =
-  D_UNIT_AMPERE "|"
-  D_UNIT_HOUR "|"
-  D_UNIT_KILOOHM "|"
-  D_UNIT_KILOWATTHOUR "|"
-  D_UNIT_LUX "|"
-  D_UNIT_MICROSECOND "|"
-  D_UNIT_MILLIAMPERE "|"
-  D_UNIT_MILLIMETER_MERCURY "|"
-  D_UNIT_MILLISECOND "|"
-  D_UNIT_MINUTE "|"
-  D_UNIT_PARTS_PER_BILLION "|"
-  D_UNIT_PARTS_PER_DECILITER "|"
-  D_UNIT_PARTS_PER_MILLION "|"
-  "%|"
-  D_UNIT_PRESSURE "|"
-  D_UNIT_SECOND "|"
-  D_UNIT_SECTORS "|"
-  D_UNIT_VOLT "|"
-  D_UNIT_WATT "|"
-  D_UNIT_WATTHOUR "|"
-  D_UNIT_HERTZ ;
+// enum UnitNames {
+//   UNIT_AMPERE,
+//   UNIT_HOUR,
+//   UNIT_KILOOHM,
+//   UNIT_KILOWATTHOUR,
+//   UNIT_LUX,
+//   UNIT_MICROSECOND,
+//   UNIT_MILLIAMPERE,
+//   UNIT_MILLIMETER_MERCURY,
+//   UNIT_MILLISECOND,
+//   UNIT_MINUTE,
+//   UNIT_PPB,
+//   UNIT_PPD,
+//   UNIT_PPM,
+//   UNIT_PERCENTAGE,
+//   UNIT_PRESSURE,
+//   UNIT_SECOND,
+//   UNIT_SECTORS,
+//   UNIT_VOLT,
+//   UNIT_WATT,
+//   UNIT_WATTHOUR,
+//   UNIT_HERTZ };
+// const char kUnitNames[] PROGMEM =
+//   D_UNIT_AMPERE "|"
+//   D_UNIT_HOUR "|"
+//   D_UNIT_KILOOHM "|"
+//   D_UNIT_KILOWATTHOUR "|"
+//   D_UNIT_LUX "|"
+//   D_UNIT_MICROSECOND "|"
+//   D_UNIT_MILLIAMPERE "|"
+//   D_UNIT_MILLIMETER_MERCURY "|"
+//   D_UNIT_MILLISECOND "|"
+//   D_UNIT_MINUTE "|"
+//   D_UNIT_PARTS_PER_BILLION "|"
+//   D_UNIT_PARTS_PER_DECILITER "|"
+//   D_UNIT_PARTS_PER_MILLION "|"
+//   "%|"
+//   D_UNIT_PRESSURE "|"
+//   D_UNIT_SECOND "|"
+//   D_UNIT_SECTORS "|"
+//   D_UNIT_VOLT "|"
+//   D_UNIT_WATT "|"
+//   D_UNIT_WATTHOUR "|"
+//   D_UNIT_HERTZ ;
 
-const char S_JSON_COMMAND_NVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%d %s\"}";
-const char S_JSON_COMMAND_LVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%lu %s\"}";
-const char S_JSON_COMMAND_SVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%s %s\"}";
-const char S_JSON_COMMAND_NVALUE_UNIT[] PROGMEM =             "{\"%s\":\"%d%s\"}";
-const char S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT[] PROGMEM = "{\"%s\":\"%d%s (%d%s)\"}";
+// const char S_JSON_COMMAND_NVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%d %s\"}";
+// const char S_JSON_COMMAND_LVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%lu %s\"}";
+// const char S_JSON_COMMAND_SVALUE_SPACE_UNIT[] PROGMEM =       "{\"%s\":\"%s %s\"}";
+// const char S_JSON_COMMAND_NVALUE_UNIT[] PROGMEM =             "{\"%s\":\"%d%s\"}";
+// const char S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT[] PROGMEM = "{\"%s\":\"%d%s (%d%s)\"}";
 
-const char S_JSON_COMMAND_NVALUE_SVALUE[] PROGMEM =           "{\"%s\":\"%d (%s)\"}";
-const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D_JSON_ACTIVE " %d)\"}";
+// const char S_JSON_COMMAND_NVALUE_SVALUE[] PROGMEM =           "{\"%s\":\"%d (%s)\"}";
+// const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D_JSON_ACTIVE " %d)\"}";
 
-const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
+// const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
 #define    D_JSON_COMMAND_NVALUE                              "{\"%s\":%d}"
-#define    D_JSON_COMMAND_NVALUE_P                            "{\"%S\":%d}"
+// #define    D_JSON_COMMAND_NVALUE_P                            "{\"%S\":%d}"
 #define    D_JSON_COMMAND_NVALUE_K(KEY)                       "{\"" KEY "\":%d}"
 
-#define    D_JSON_COMMAND_FVALUE                              "{\"%s\":%.1f}"
-const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
-const char S_JSON_COMMAND_FVALUE[] PROGMEM =                  "{\"%s\":%.1f}";
-const char S_JSON_COMMAND_SVALUE[] PROGMEM =                  "{\"%s\":\"%s\"}";
-#define    D_JSON_COMMAND_SVALUE                              "{\"%s\":\"%s\"}"
-#define    D_JSON_COMMAND_SVALUE_P                            "{\"%S\":\"%s\"}"
+// #define    D_JSON_COMMAND_FVALUE                              "{\"%s\":%.1f}"
+// const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
+// const char S_JSON_COMMAND_FVALUE[] PROGMEM =                  "{\"%s\":%.1f}";
+// const char S_JSON_COMMAND_SVALUE[] PROGMEM =                  "{\"%s\":\"%s\"}";
+// #define    D_JSON_COMMAND_SVALUE                              "{\"%s\":\"%s\"}"
+// #define    D_JSON_COMMAND_SVALUE_P                            "{\"%S\":\"%s\"}"
 
 
 #define    D_JSON_COMMAND_SVALUE_K(KEY)                       "{\"" KEY ":\"%s\"}"
@@ -438,45 +438,45 @@ const char S_JSON_COMMAND_ASTERIX[] PROGMEM =                 "{\"%s\":\"" D_AST
 const char S_JSON_COMMAND_XVALUE[] PROGMEM =                  "{\"%s\":%s}";  // %s must provide quotes on non-number
 
 
-#define    D_JSON_KEYVALUE_NVALUE                             "\"%s\":%d"
-DEFINE_PGM_CTR(PM_JSON_KEYVALUE_NVALUE)                   D_JSON_KEYVALUE_NVALUE;
-#define    D_JSON_KEYVALUE_SVALUE                             "\"%s\":\"%s\""
-DEFINE_PGM_CTR(PM_JSON_KEYVALUE_SVALUE)                   D_JSON_KEYVALUE_SVALUE;
-#define    D_JSON_KEYVALUE_FVALUE                             "\"%s\":%s"
-DEFINE_PGM_CTR(PM_JSON_KEYVALUE_FVALUE)                   D_JSON_KEYVALUE_FVALUE;
+// #define    D_JSON_KEYVALUE_NVALUE                             "\"%s\":%d"
+// DEFINE_PGM_CTR(PM_JSON_KEYVALUE_NVALUE)                   D_JSON_KEYVALUE_NVALUE;
+// #define    D_JSON_KEYVALUE_SVALUE                             "\"%s\":\"%s\""
+// DEFINE_PGM_CTR(PM_JSON_KEYVALUE_SVALUE)                   D_JSON_KEYVALUE_SVALUE;
+// #define    D_JSON_KEYVALUE_FVALUE                             "\"%s\":%s"
+// DEFINE_PGM_CTR(PM_JSON_KEYVALUE_FVALUE)                   D_JSON_KEYVALUE_FVALUE;
 
 
 
 #define    D_FUNCTION_NAME_SVALUE                              "f::\"%s\""
 
-const char S_JSON_COMMAND_INDEX_NVALUE[] PROGMEM =            "{\"%s%d\":%d}";
-const char S_JSON_COMMAND_INDEX_LVALUE[] PROGMEM =            "{\"%s%d\":%lu}";
-const char S_JSON_COMMAND_INDEX_SVALUE[] PROGMEM =            "{\"%s%d\":\"%s\"}";
-const char S_JSON_COMMAND_INDEX_ASTERIX[] PROGMEM =           "{\"%s%d\":\"" D_ASTERIX "\"}";
-const char S_JSON_COMMAND_INDEX_SVALUE_SVALUE[] PROGMEM =     "{\"%s%d\":\"%s%s\"}";
-const char S_JSON_COMMAND_INDEX_NVALUE_ACTIVE_NVALUE[] PROGMEM = "{\"%s%d\":\"%d (" D_JSON_ACTIVE " %d)\"}";
+// const char S_JSON_COMMAND_INDEX_NVALUE[] PROGMEM =            "{\"%s%d\":%d}";
+// const char S_JSON_COMMAND_INDEX_LVALUE[] PROGMEM =            "{\"%s%d\":%lu}";
+// const char S_JSON_COMMAND_INDEX_SVALUE[] PROGMEM =            "{\"%s%d\":\"%s\"}";
+// const char S_JSON_COMMAND_INDEX_ASTERIX[] PROGMEM =           "{\"%s%d\":\"" D_ASTERIX "\"}";
+// const char S_JSON_COMMAND_INDEX_SVALUE_SVALUE[] PROGMEM =     "{\"%s%d\":\"%s%s\"}";
+// const char S_JSON_COMMAND_INDEX_NVALUE_ACTIVE_NVALUE[] PROGMEM = "{\"%s%d\":\"%d (" D_JSON_ACTIVE " %d)\"}";
 
-const char S_JSON_SENSOR_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":%d}";
-const char S_JSON_SENSOR_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":\"%s\"}";
+// const char S_JSON_SENSOR_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":%d}";
+// const char S_JSON_SENSOR_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_SENSOR "%d\":\"%s\"}";
 
-const char S_JSON_DRIVER_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":%d}";
-const char S_JSON_DRIVER_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":\"%s\"}";
+// const char S_JSON_DRIVER_INDEX_NVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":%d}";
+// const char S_JSON_DRIVER_INDEX_SVALUE[] PROGMEM =             "{\"" D_JSON_DRIVER "%d\":\"%s\"}";
 
-const char JSON_SNS_TEMP[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s}";
-const char JSON_SNS_TEMPHUM[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s,\"" D_JSON_HUMIDITY "\":%s}";
+// const char JSON_SNS_TEMP[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s}";
+// const char JSON_SNS_TEMPHUM[] PROGMEM = ",\"%s\":{\"" D_JSON_TEMPERATURE "\":%s,\"" D_JSON_HUMIDITY "\":%s}";
 
-const char JSON_SNS_GNGPM[] PROGMEM = ",\"%s\":{\"" D_JSON_TOTAL_USAGE "\":%s,\"" D_JSON_FLOWRATE "\":%s}";
+// const char JSON_SNS_GNGPM[] PROGMEM = ",\"%s\":{\"" D_JSON_TOTAL_USAGE "\":%s,\"" D_JSON_FLOWRATE "\":%s}";
 
 const char S_LOG_I2C_FOUND_AT[] PROGMEM = D_LOG_I2C "%s " D_FOUND_AT " 0x%x";
 
-const char S_LOG_HTTP[] PROGMEM = D_LOG_HTTP;
+// const char S_LOG_HTTP[] PROGMEM = D_LOG_HTTP;
 const char S_LOG_WIFI[] PROGMEM = D_LOG_WIFI;
-const char S_LOG_MQTT[] PROGMEM = D_LOG_MQTT;
-const char S_RSLT_POWER[] PROGMEM = D_RSLT_POWER;
-const char S_RSLT_RESULT[] PROGMEM = D_RSLT_RESULT;
-const char S_RSLT_WARNING[] PROGMEM = D_RSLT_WARNING;
-const char S_LWT[] PROGMEM = D_LWT;
-const char S_OFFLINE[] PROGMEM = D_OFFLINE;
+// const char S_LOG_MQTT[] PROGMEM = D_LOG_MQTT;
+// const char S_RSLT_POWER[] PROGMEM = D_RSLT_POWER;
+// const char S_RSLT_RESULT[] PROGMEM = D_RSLT_RESULT;
+// const char S_RSLT_WARNING[] PROGMEM = D_RSLT_WARNING;
+// const char S_LWT[] PROGMEM = D_LWT;
+// const char S_OFFLINE[] PROGMEM = D_OFFLINE;
 
 // sonoff.ino
 // #define MAX_BUTTON_COMMANDS  5  // Max number of button commands supported
@@ -548,24 +548,24 @@ DEFINE_PGM_CTR(kOptionFollowInv)        "FollowInv|Inverted";
 // const char HTTP_SNS_ENERGY_TOTAL[] PROGMEM = "{s}" D_ENERGY_TOTAL "{m}%s " D_UNIT_KILOWATTHOUR "{e}";
 
 
-const char S_MAIN_MENU[] PROGMEM = D_MAIN_MENU;
-const char S_CONFIGURATION[] PROGMEM = D_CONFIGURATION;
-const char S_SYSTEM_SETTINGS[] PROGMEM = D_SYSTEM_SETTINGS;
-const char S_CONFIGURE_TEMPLATE[] PROGMEM = D_CONFIGURE_TEMPLATE;
-const char S_CONFIGURE_MODULE[] PROGMEM = D_CONFIGURE_MODULE;
-const char S_COLOUR_PALETTE_EDITOR[] PROGMEM = D_COLOUR_PALETTE_EDITOR;
-const char S_COLOUR_MIXER_EDITOR[] PROGMEM = D_COLOUR_MIXER_EDITOR;
-const char S_CONFIGURE_WIFI[] PROGMEM = D_CONFIGURE_WIFI;
-const char S_NO_NETWORKS_FOUND[] PROGMEM = D_NO_NETWORKS_FOUND;
-const char S_CONFIGURE_LOGGING[] PROGMEM = D_CONFIGURE_LOGGING;
-const char S_CONFIGURE_OTHER[] PROGMEM = D_CONFIGURE_OTHER;
-const char S_SAVE_CONFIGURATION[] PROGMEM = D_SAVE_CONFIGURATION;
-const char S_RESET_CONFIGURATION[] PROGMEM = D_RESET_CONFIGURATION;
-const char S_RESTORE_CONFIGURATION[] PROGMEM = D_RESTORE_CONFIGURATION;
-const char S_FIRMWARE_UPGRADE[] PROGMEM = D_FIRMWARE_UPGRADE;
-const char S_CONSOLE[] PROGMEM = D_CONSOLE;
-const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
-const char S_RESTART[] PROGMEM = D_RESTART;
+// const char S_MAIN_MENU[] PROGMEM = D_MAIN_MENU;
+// const char S_CONFIGURATION[] PROGMEM = D_CONFIGURATION;
+// const char S_SYSTEM_SETTINGS[] PROGMEM = D_SYSTEM_SETTINGS;
+// const char S_CONFIGURE_TEMPLATE[] PROGMEM = D_CONFIGURE_TEMPLATE;
+// const char S_CONFIGURE_MODULE[] PROGMEM = D_CONFIGURE_MODULE;
+// const char S_COLOUR_PALETTE_EDITOR[] PROGMEM = D_COLOUR_PALETTE_EDITOR;
+// const char S_COLOUR_MIXER_EDITOR[] PROGMEM = D_COLOUR_MIXER_EDITOR;
+// const char S_CONFIGURE_WIFI[] PROGMEM = D_CONFIGURE_WIFI;
+// const char S_NO_NETWORKS_FOUND[] PROGMEM = D_NO_NETWORKS_FOUND;
+// const char S_CONFIGURE_LOGGING[] PROGMEM = D_CONFIGURE_LOGGING;
+// const char S_CONFIGURE_OTHER[] PROGMEM = D_CONFIGURE_OTHER;
+// const char S_SAVE_CONFIGURATION[] PROGMEM = D_SAVE_CONFIGURATION;
+// const char S_RESET_CONFIGURATION[] PROGMEM = D_RESET_CONFIGURATION;
+// const char S_RESTORE_CONFIGURATION[] PROGMEM = D_RESTORE_CONFIGURATION;
+// const char S_FIRMWARE_UPGRADE[] PROGMEM = D_FIRMWARE_UPGRADE;
+// const char S_CONSOLE[] PROGMEM = D_CONSOLE;
+// const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
+// const char S_RESTART[] PROGMEM = D_RESTART;
 // #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 

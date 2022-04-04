@@ -4,7 +4,7 @@
 #define D_USER_MICHAEL
 
 #ifdef D_USER_MICHAEL
-#warning "------------------------------------------------------------------------------- Development by Author, will not compile for others"
+#warning "------------------------------------------------------------------------------- Development by Author, may not compile for others"
 #endif
 
 #include <Arduino.h>
@@ -41,13 +41,11 @@
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
-
 #include "2_CoreSystem/Events/mEvents.h"
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
 #endif
-
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 #include "2_CoreSystem/Languages/mLanguageDefault.h"                           // Language support configured by .h
@@ -99,7 +97,6 @@ enum FUNCTION_RESULT_IDS{
   #include <ArduinoOTA.h>                   // Arduino OTA
 #endif  // USE_ARDUINO_OTA
 
-
 //#ifdef USE_I2C
   #include <Wire.h>                         // I2C support library
 //#endif  // USE_I2C
@@ -122,15 +119,10 @@ enum FUNCTION_RESULT_IDS{
 #endif
 #ifdef ESP8266
   #include <ESP8266HTTPClient.h>
-  #include <ESP8266httpUpdate.h>
-  // #ifdef USE_NETWORK_MDNS
-  // // #include <ESP8266mDNS.h>
-  // #endif // #ifdef USE_NETWORK_MDNS
-  
+  #include <ESP8266httpUpdate.h>  
   #ifdef USE_DISCOVERY
     #include <ESP8266mDNS.h>                  // MQTT, Webserver, Arduino OTA
   #endif  // USE_DISCOVERY
-
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
   #define WDT_RESET() ESP.wdtFeed()
@@ -142,9 +134,7 @@ enum FUNCTION_RESULT_IDS{
 #endif
 
 #include "2_CoreSystem/JSON/mJSON.h"
-
 #include "2_CoreSystem/Support/mSupport.h"
-
 
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
@@ -160,10 +150,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 
 #define D_TARGET_TASKER_NONE 0
 
-//Consider moving unique number inside the class, then further references to it must be called via array index (with reverse lookup)
-//This would remove the need to have GetVectorIndex below, and IDs can be used directly
-// D_MODULE_x_ID would need to be an enum list above this line
-//Notice, vector.push_back order would need to align with this, making the use of arrays a better idea
 enum MODULE_IDS{
   // Core
   #ifdef USE_MODULE_CORE_HARDWAREPINS
@@ -234,9 +220,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_PWM
     EM_MODULE_DRIVERS_PWM_ID,
   #endif
-  #ifdef USE_MODULE_DRIVERS_RF433MHZ
-    EM_MSAW_MODULE_ID,
-  #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
     EM_MODULE_DRIVERS_SDCARD_ID,
   #endif
@@ -259,13 +242,16 @@ enum MODULE_IDS{
     EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
-    EM_MODULE_DRIVERS_STATUS_LEDS_ID,
+    EM_MODULE_DRIVERS_LEDS_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     EM_MODULE_DRIVERS_FILESYSTEM_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_BUZZER
     EM_MODULE_DRIVERS_BUZZER_ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+    EM_MODULE_DRIVERS_RF433_RCSWITCH_ID,
   #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -293,9 +279,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_LIGHTS_PWM
     EM_MODULE_LIGHTS_PWM_ID,
   #endif
-  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  //   EM_MODULE_LIGHTS_WLED_EFFECTS_ID,
-  // #endif
   // Sensors
   #ifdef USE_MODULE_SENSORS_INTERFACE
     EM_MODULE_SENSORS_INTERFACE_ID,
@@ -421,6 +404,7 @@ enum MODULE_IDS{
   EM_MODULE_LENGTH_ID
 };
 
+
 // CoreSystem (Range 0-29)
 #ifdef USE_MODULE_CORE_HARDWAREPINS
   #include "2_CoreSystem/HardwarePins/mHardwarePins.h"
@@ -517,10 +501,6 @@ enum MODULE_IDS{
   #include "4_Drivers/PWM/mPWM.h"
   #define pCONT_pwm                                 static_cast<mPWM*>(pCONT->pModule[EM_MODULE_DRIVERS_PWM_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_RF433MHZ
-  #include "4_Drivers/SAWRadios/mSAWRadios.h"
-  #define pCONT_433                                 static_cast<mSAWMain*>(pCONT->pModule[EM_MODULE_DRIVERS_SAWRADIOS_ID])
-#endif
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
   #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
@@ -551,7 +531,7 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/LEDs/mLEDs.h"
-  #define pCONT_status_leds                         static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_STATUS_LEDS_ID])
+  #define pCONT_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   #include "4_Drivers/FileSystem/mFileSystem.h"
@@ -559,7 +539,11 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_DRIVERS_BUZZER
   #include "4_Drivers/Buzzer/mBuzzer.h"
-  #define pCONT_buzzer                               static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
+  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+  #include "4_Drivers/RCSwitch/mRCSwitch.h"
+  #define pCONT_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
 #endif
 
 // Energy (Range 130-139)
@@ -793,13 +777,8 @@ class mTaskerManager{
 
     // mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
 
-
-
-
     int16_t GetModuleIndexbyFriendlyName(const char* c);
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
-
-
     uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
 
     #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
@@ -809,10 +788,7 @@ class mTaskerManager{
     uint8_t Instance_Init();
     uint8_t CheckPointersPass();
     
-    int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0, bool flags_is_executing_rule = false);
-
-    // int8_t Tasker_ParseCommands(uint8_t function, char* buffer = nullptr, uint16_t buflen = 0);
-    
+    int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0);    
     
     uint16_t GetClassSizeByID(uint8_t class_id);
 
@@ -826,8 +802,7 @@ class mTaskerManager{
     
     int16_t GetVectorIndexbyModuleUniqueID(int16_t);
 
-    // enum 
-
+    #ifdef ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
     // #define CLASS_ID_MAX 255
     // struct CLASS_ID{
     //   uint8_t list[CLASS_ID_MAX];
@@ -838,6 +813,7 @@ class mTaskerManager{
     //   // #endif
     //   uint8_t count = 0;
     // }module_settings; 
+    #endif // ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
     uint16_t last_function = 255; // 0 will be first
 

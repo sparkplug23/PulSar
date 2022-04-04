@@ -8,7 +8,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
   DEBUG_LINE_HERE;
 
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
+  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
   char buffer[50];
@@ -25,7 +25,11 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
 
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
+
+      #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST, PSTR("Seg: \"%s\""),buffer);
+      #endif// ENABLE_LOG_LEVEL_INFO
+
       segments_found++;
 
       // If segment commands updated, some effects may need reset
@@ -71,7 +75,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    */
   if(segment_index == 255)
   {
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("segment_index was unset/default, setting segment_index to 0 for backwards compatability!!"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     segment_index = 0;
 
     /**
@@ -129,13 +135,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         }
 
         array[arrlen++] = v.getInt();
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange Segment[%d] = %d -> %d"),
           segment_index,
           _segments[segment_index].pixel_range.start,
           _segments[segment_index].pixel_range.stop
         );
+        #endif
         
 
 
@@ -146,7 +153,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
       if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
       {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
         AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
+    #endif // ENABLE_LOG_LEVEL_INFO
         _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX;
       }
 
@@ -227,14 +236,14 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
         }
 
         array[arrlen++] = v.getInt();
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange Segment[%d] = %d -> %d"),
           segment_index,
           _segments[segment_index].pixel_range.start,
           _segments[segment_index].pixel_range.stop
         );
-        
+        #endif
 
 
 
@@ -244,7 +253,9 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 
       if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
       {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
         AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
+    #endif //ef ENABLE_LOG_LEVEL_INFO
         _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX;
       }
 
@@ -1144,9 +1155,9 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
 
   if(!c){ return; }
   if(strlen(c)<=5){
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
+    // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
   }else{
-    AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
+    // AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
     return;
   }
 
@@ -1196,7 +1207,7 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
 //   return GetHardwareColourTypeNameByID(_segments[segment_index].mode_id, buffer, buflen, segment_index);
 // }
 // const char* mAnimatorLight::GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index){
-//   sprintf(buffer, D_NO_MATCH_CTR);
+//   sprintf(buffer, PM_SEARCH_NOMATCH);
 //   // switch(id){
 //   //   default:
 //   //   case PIXEL_HARDWARE_COLOR_ORDER_GRB_ID: memcpy_P(buffer, PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR, sizeof(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)); break;
@@ -1648,7 +1659,9 @@ void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t p
 
 _segment_runtimes[segment_index].active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
   
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
+    #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 
@@ -1667,7 +1680,10 @@ void mAnimatorLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uin
   #endif // ENABLE_LOG_LEVEL_COMMANDS
   
   RgbcctColor c = _segment_runtimes[segment_index].rgbcct_controller->GetColourFullRange();
+  
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("desired_colour=%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WC,c.WW);
+    #endif //  ENABLE_LOG_LEVEL_INFO
   
   #ifdef USE_MODULE_NETWORK_MQTT
   pCONT_lAni->mqtthandler_flasher_teleperiod.flags.SendNow = true;
@@ -1757,7 +1773,7 @@ void mAnimatorLight::CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index) {
 void mAnimatorLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index)
 {
 
-AddLog(LOG_LEVEL_DEBUG, PSTR("ctA=%d"),ct);
+// AddLog(LOG_LEVEL_DEBUG, PSTR("ctA=%d"),ct);
 
 // Serial.printf("\n\r\n\r\n\r\n\rcct=%d\n\r",ct);
 
@@ -1765,8 +1781,9 @@ AddLog(LOG_LEVEL_DEBUG, PSTR("ctA=%d"),ct);
   _segments[segment_index].flags.fForceUpdate = true;
 
   
-AddLog(LOG_LEVEL_DEBUG, PSTR("w1w2=%d %d"),_segment_runtimes[segment_index].rgbcct_controller->WW,_segment_runtimes[segment_index].rgbcct_controller->WC);
-
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+// AddLog(LOG_LEVEL_DEBUG, PSTR("w1w2=%d %d"),_segment_runtimes[segment_index].rgbcct_controller->WW,_segment_runtimes[segment_index].rgbcct_controller->WC);
+//     #endif //  ENABLE_LOG_LEVEL_INFO
 
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS

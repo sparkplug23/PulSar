@@ -112,7 +112,9 @@ void setup(void)
   // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before1"));
   // delay(1000);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR("Loading minimal defaults"));
+    #endif // ENABLE_LOG_LEVEL_INFO
   pCONT_set->SettingsDefault(); //preload minimal required
 
   // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after"));
@@ -124,7 +126,9 @@ void setup(void)
 
  // #endif // DEBUG_NUM1
   // #ifdef ENABLE_SETTINGS_STORAGE
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR("Loading settings from saved memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
   // Check Load was successful

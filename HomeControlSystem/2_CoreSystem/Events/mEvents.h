@@ -1,6 +1,7 @@
 
 /**
  * Basic class that holds event type only
+ * The event size will be changed to dynamic later, allowing more complex rules to be save as data
  * */
 
 
@@ -41,6 +42,9 @@ class mEvent
      * 
      * 
      * */
+
+    #define D_RULE_DATA_VALUE_MAX_LENGTH 10
+
     struct EVENT_PART{
       /**
        * Buttons, Relays
@@ -59,7 +63,8 @@ class mEvent
        * */
       struct VALUES{
         uint8_t encoding = 0;
-        uint8_t data[5];
+        // dynamic way of handling this in the future, ie the instance of this class creates the size?
+        uint8_t data[D_RULE_DATA_VALUE_MAX_LENGTH]; // should this change to a vector? where would the vector save, and expand to?
         uint8_t length = 0;
       }value;
       /**

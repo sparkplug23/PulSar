@@ -125,6 +125,16 @@ void Command_ToggleBrightness();
 
 void Template_Load_Init_Display_Command();
 
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+int8_t Tasker_Web(uint8_t function);
+
+void WebPage_Root_AddHandlers();
+
+void Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request);
+
+#endif // USE_MODULE_NETWORK_WEBSERVER
+
 
 
 #define WEB_HANDLE_NEXTION_PAGE_SET             "nextion_page_set"

@@ -207,7 +207,7 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
         stats.start_time = millis();
         modbus->Send(pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);      
         
-        AddLog(LOG_LEVEL_DEBUG,PSTR("modbus->Send(address=%d, func=%d, s_add=%d, 10)"), pCONT_iEnergy->GetAddressWithID(device_id), 0x04, 0, 10);
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_PZEM "modbus->Send(address=%d)"), pCONT_iEnergy->GetAddressWithID(device_id));
 
         transceive_mode = TRANSCEIVE_AWAITING_RESPONSE_ID;
       }

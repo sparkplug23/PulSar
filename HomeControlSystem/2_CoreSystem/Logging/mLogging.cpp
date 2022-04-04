@@ -5,15 +5,11 @@ const char* mLogging::PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
 const char* mLogging::PM_MODULE_CORE_LOGGING_FRIENDLY_CTR = D_MODULE_CORE_LOGGING_FRIENDLY_CTR;
 
 
-void mLogging::init(void){
-  // StartTelnetServer();
-}
+
+int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
+{ // KEEP TASKER ON TOP
 
 
-int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj){ // KEEP TASKER ON TOP
-
-// Serial.println("logging");
-//   DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
       // init();
@@ -63,6 +59,10 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj){ // KEEP TASKER 
 }//end
 
 
+void mLogging::init(void){
+  // StartTelnetServer();
+}
+ 
 void mLogging::parse_JSONCommand(JsonParserObject obj){};
 
 // for quick prototyping, set to test level
@@ -95,6 +95,12 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 // }
     //   Serial.println("Telnet else");
     // }
+
+    /**
+     * @brief 
+     * Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
+     * 
+     */
 
 
   #ifdef DEBUG_FOR_FAULT
@@ -189,9 +195,20 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         pCONT_set->log_data
       );
     #else
+
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT START<<\n\r\n\r"); }
+      #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+      if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
+      #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+
+
       SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
+
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT END<<\n\r\n\r"); }
+      #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+      if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
+      #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+
     #endif
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // Only flush if we all doing all for debugging
@@ -291,80 +308,80 @@ void mLogging::handleTelnet(){
 }
 
 
-// For sending without network during uploads
-void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...)
-{
+// // For sending without network during uploads
+// void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...)
+// {
 
-  // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
-  if(
-    (loglevel>pCONT_set->Settings.seriallog_level)
-    ){
-    return;
-  }
+//   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
+//   if(
+//     (loglevel>pCONT_set->Settings.seriallog_level)
+//     ){
+//     return;
+//   }
   
-  // Filtering
-  if(pCONT_set->enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
-    if(loglevel == pCONT_set->Settings.seriallog_level){
-      //permit messages
-    }else{
-      return;
-    }
-  }
+//   // Filtering
+//   if(pCONT_set->enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
+//     if(loglevel == pCONT_set->Settings.seriallog_level){
+//       //permit messages
+//     }else{
+//       return;
+//     }
+//   }
 
-  va_list arg;
-  va_start(arg, formatP);
-  vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
-  va_end(arg);
+//   va_list arg;
+//   va_start(arg, formatP);
+//   vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
+//   va_end(arg);
 
-  //AddLogAddLog(loglevel);
+//   //AddLogAddLog(loglevel);
 
-  char mxtime[25];  // "13:45:21 " //9
-  char level_buffer[10];
+//   char mxtime[25];  // "13:45:21 " //9
+//   char level_buffer[10];
 
-  uint8_t hour = 0;
-  uint8_t minute = 0;
-  uint8_t second = 0;
-  uint8_t uday = 0;
-  uint8_t uhour = 0;
-  uint8_t uminute = 0;
-  uint8_t usecond = 0;
-  if(pCONT_time!=NULL){ 
-    hour = pCONT_time->RtcTime.hour; 
-    minute = pCONT_time->RtcTime.minute; 
-    second = pCONT_time->RtcTime.second; 
-    uday = pCONT_time->uptime.Mday; 
-    uhour = pCONT_time->uptime.hour;   
-    uminute = pCONT_time->uptime.minute; 
-    usecond = pCONT_time->uptime.second; 
-  }
+//   uint8_t hour = 0;
+//   uint8_t minute = 0;
+//   uint8_t second = 0;
+//   uint8_t uday = 0;
+//   uint8_t uhour = 0;
+//   uint8_t uminute = 0;
+//   uint8_t usecond = 0;
+//   if(pCONT_time!=NULL){ 
+//     hour = pCONT_time->RtcTime.hour; 
+//     minute = pCONT_time->RtcTime.minute; 
+//     second = pCONT_time->RtcTime.second; 
+//     uday = pCONT_time->uptime.Mday; 
+//     uhour = pCONT_time->uptime.hour;   
+//     uminute = pCONT_time->uptime.minute; 
+//     usecond = pCONT_time->uptime.second; 
+//   }
 
-  memset(mxtime,0,sizeof(mxtime));
-  if(pCONT_set->Settings.log_time_isshort){
+//   memset(mxtime,0,sizeof(mxtime));
+//   if(pCONT_set->Settings.log_time_isshort){
     
-    if(uhour<1){
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "),minute,second,uminute,usecond);
-    }
+//     if(uhour<1){
+//       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "),minute,second,uminute,usecond);
+//     }
 
-  }else{
-    // Show all information
-    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),hour,minute,second,uday,uhour,uminute,usecond);
-  }
+//   }else{
+//     // Show all information
+//     snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),hour,minute,second,uday,uhour,uminute,usecond);
+//   }
 
 
-  // Overrides
-  //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //pCONT_sto->seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //pCONT_set->Settings.seriallog_level = LOG_LEVEL_DEBUG;
-  //pCONT_set->Settings.weblog_level = LOG_LEVEL_INFO;
+//   // Overrides
+//   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
+//   //pCONT_sto->seriallog_level = LOG_LEVEL_DEBUG_MORE;
+//   //pCONT_set->Settings.seriallog_level = LOG_LEVEL_DEBUG;
+//   //pCONT_set->Settings.weblog_level = LOG_LEVEL_INFO;
 
-  // LOG : SERIAL
-  if (loglevel <= pCONT_set->Settings.seriallog_level) {
-    SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
-    //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
-    // SERIAL_DEBUG.flush();
-  }
+//   // LOG : SERIAL
+//   if (loglevel <= pCONT_set->Settings.seriallog_level) {
+//     SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
+//     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
+//     // SERIAL_DEBUG.flush();
+//   }
 
-}
+// }
 
 
 
@@ -690,7 +707,7 @@ void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 
 
 /*********************************************************************************************\
- * Response data handling
+ * Response data handling -- "AddLog" that are pushed to mqtt channel "status/response"
 \*********************************************************************************************/
 
 // return if response was sent, else use leds?
@@ -752,7 +769,7 @@ void mLogging::StartTelnetServer(){
 
 
 const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer){
-  if(buffer == nullptr){ return D_NO_MATCH_CTR;}
+  if(buffer == nullptr){ return PM_SEARCH_NOMATCH;}
   switch(id){
     default: 
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;

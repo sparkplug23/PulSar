@@ -55,9 +55,9 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_SECOND:{
       
-      #ifndef DISABLE_SERIAL0_CORE
-      Serial.println(GetUptime());
-      #endif
+      // #ifndef DISABLE_SERIAL0_CORE
+      // Serial.println(GetUptime());
+      // #endif
       
 
       //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);
@@ -641,7 +641,10 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
       (strlen(time_ctr)!=11) && 
       (time_ctr[2]!='D')
     ){
+      
+    #ifdef ENABLE_LOG_LEVEL_ERROR
       AddLog(LOG_LEVEL_TEST, PSTR("Invalid time"));
+    #endif // ENABLE_LOG_LEVEL_INFO
       return time_s;
     }
   }else{
@@ -652,7 +655,9 @@ time_short_t mTime::Parse_Time_TimeShortCtr_To_TimeShort(const char* time_ctr){
       return time_s;
     }
     includes_week = false;
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("Parse_Time_TimeShortCtr_To_TimeShort NOT D found"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
   }
 
   if(includes_week){
@@ -1013,18 +1018,21 @@ void mTime::DateTimeWeek2HHMMSS(datetime_t* dt, uint8_t* hour, uint8_t* minute, 
 
 void mTime::PrintDateTime(datetime_t dt){
 
+  #ifdef ENABLE_LOG_LEVEL_INFO
   //[Yxx-Mxx-Dxx-Wxx:H:M:S]
   char ctr[80];memset(ctr,0,sizeof(ctr));
   sprintf_P(ctr, PSTR("%02d-%02d-%04d W%02d T%02d:%02d:%02d"), dt.Wday, dt.month, dt.year, dt.Wday, dt.hour, dt.minute, dt.second);
-  // pCONT.mso.MessagePrintln(ctr);
+  #endif // ENABLE_LOG_LEVEL_INFO
 
 }
 
 void mTime::PrintDateTime(time_short_t dt){
 
+  #ifdef ENABLE_LOG_LEVEL_INFO
   char buffer[40];memset(buffer,0,sizeof(buffer));
   sprintf_P(buffer, PSTR("W%02d T%02d:%02d:%02d"), dt.Wday, dt.hour, dt.minute, dt.second);
   AddLog(LOG_LEVEL_TEST,PSTR("PrintDateTime>\"%s\""),buffer);
+  #endif // ENABLE_LOG_LEVEL_INFO
   
 }
 
@@ -2053,7 +2061,9 @@ void mTime::RtcSecond(void)
 void mTime::RtcSync(void) {
   // Rtc.time_synced = true;
   RtcSecond();
+    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
  AddLog(LOG_LEVEL_TEST, PSTR("RTC: Synced"));
+    #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 void mTime::RtcSetTime(uint32_t epoch)
@@ -2099,7 +2109,9 @@ void mTime::WifiPollNtp() {
   if(pCONT_set->global_state.wifi_down){ 
     
     
+    #ifdef ENABLE_LOG_LEVEL_WARN
     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     
     return ; }
     
@@ -2158,11 +2170,20 @@ uint32_t mTime::WifiGetNtp(void) {
     if (ntp_server_id > 2) { ntp_server_id = 0; }
   }
   if (!resolved_ip) {
+    
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("NTP: No server found"));
+    
+    #endif // ENABLE_LOG_LEVEL_INFO
+
+
     return 0;
   }
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("NTP: Server \"%s\", IP %s"), ntp_server, time_server_ip.toString().c_str());
+
+    #endif // ENABLE_LOG_LEVEL_INFO
 
   WiFiUDP udp;
 
@@ -2214,7 +2235,13 @@ uint32_t mTime::WifiGetNtp(void) {
       if ((packet_buffer[0] & 0b11000000) == 0b11000000) {
         // Leap-Indicator: unknown (clock unsynchronized)
         // See: https://github.com/letscontrolit/ESPEasy/issues/2886#issuecomment-586656384
+        
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_TEST, PSTR("NTP: IP %s unsynched"), time_server_ip.toString().c_str());
+        
+    #endif // ENABLE_LOG_LEVEL_INFO
+
+
         return 0;
       }
 
@@ -2232,7 +2259,9 @@ uint32_t mTime::WifiGetNtp(void) {
     delay(10);
   }
   // Timeout.
+    #ifdef ENABLE_LOG_LEVEL_ERROR
   AddLog(LOG_LEVEL_DEBUG, PSTR("NTP: No reply"));
+    #endif // ENABLE_LOG_LEVEL_INFO
   udp.stop();
   return 0;
 }

@@ -103,14 +103,6 @@ enum XsnsFunctions {
   // System/Status message
   FUNC_BOOT_MESSAGE, //at 10 seconds, show how the function is configured
 
-  //Light commands
-  // Commands
-  // FUNC_COMMAND, 
-  // FUNC_COMMAND_SENSOR, 
-  // FUNC_COMMAND_DRIVER, 
-  // FUNC_JSON_COMMAND, 
-  // FUNC_JSON_COMMAND_OBJECT, 
-  // FUNC_JSON_COMMAND_OBJECT_WITH_TOPIC,  //ie check for the topic (in the future use module name are set/<moduclename>)
   FUNC_JSON_COMMAND_CHECK_TOPIC_ID,
   FUNC_JSON_COMMAND_ID,  //ie check for the topic (in the future use module name are set/<moduclename>)
   /**
@@ -126,8 +118,8 @@ enum XsnsFunctions {
   FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,
   FUNC_MQTT_HANDLERS_RESET, FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD,
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, 
-  FUNC_MQTT_DATA_ID,//
-  // 
+  FUNC_MQTT_DATA_ID,
+  
 
   /**
    * @brief Rules
@@ -147,49 +139,41 @@ enum XsnsFunctions {
   //
   FUNC_STATUS_MESSAGE_APPEND, FUNC_JSON_HARDWARE_APPEND, // Messages
   FUNC_SET_CHANNELS, 
-  // Webpage
+  /**
+   * @brief Webpage
+   * 
+   */
   FUNC_WEB_ADD_MAIN_BUTTON, 
   FUNC_WEB_ADD_BUTTON, 
   FUNC_WEB_ADD_BUTTON_SYSTEM_SETTINGS, //system settings 
   FUNC_WEB_ADD_HANDLER, //root page
-
   FUNC_WEB_ROOT_SEND_STYLE, // Send any style for root page
   FUNC_WEB_ROOT_SEND_SCRIPT,  
   FUNC_WEB_ROOT_SCRIPT_JSON_FETCH_MODULEPARSING, 
   FUNC_WEB_ROOT_SEND_BODY,   // send once on load 
   FUNC_WEB_ROOT_SEND_STATUS,     //the tas way
   FUNC_WEB_ADD_ROOT_SHOWS,
-
   FUNC_WEB_ADD_JSON_FETCH_RESULT, // As part of fetch
   FUNC_WEB_ADD_JSON_DATA_FETCH_URL, // Adding urls that will be requested for as part of jsonparse
   FUNC_WEB_ADD_ROOT_TABLE_ROWS,
   FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER,
-
   FUNC_WEB_ADD_ROOT_SCRIPT,
   FUNC_WEB_ADD_ROOT_STYLE,  
-
-  // FUNC_WEB_APPEND_LOADTIME_ROOT_URLS,
-  // FUNC_WEB_APPEND_LOADTIME_ROOT_RATES,
-  FUNC_WEB_APPEND_RUNTIME_ROOT_URLS,
-  // FUNC_WEB_APPEND_RUNTIME_ROOT_RATES,
-  
+  FUNC_WEB_APPEND_RUNTIME_ROOT_URLS,  
   FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED, //send table data
   FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED,
   FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS,
   FUNC_WEB_APPEND_ROOT_BUTTONS,
-
   FUNC_WEB_PAGEINFORMATION_SEND_MODULE, //send parts of page info
-
   // parital sub functions that need to be address later by special "interface tasker"
   FUNC_WEB_RESPOND_LIGHT_LIVEVIEW_JSON, //reply with liveview json data "WEB_RESPOND"=func group, "LIGHT"=interface, LIVEVIEW_JSON=type
-
-
-  FUNC_WEB_COMMAND,    
-  // FUNC_WEB_SHOW_PARAMETERS,   PHASED OUT
-  // FUNC_WEB_SHOW_PARAMETERS2, 
+  FUNC_WEB_COMMAND,   
   FUNC_WEB_SYSTEM_INFO,  //WEBSERVER
 
-  // Debuging functions
+  /**
+   * @brief Debugging
+   * 
+   */
   FUNC_DEBUG_CONFIGURE,
 
 /**

@@ -54,6 +54,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 // #define USE_MODULE_CORE_RULES
 #define USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
 
+// #define USE_MODULE_DRIVERS_LEDS // for status LEDs
+
 #ifndef DISABLE_NETWORK
 #define USE_MODULE_NETWORK_WIFI
 #define USE_MODULE_NETWORK_MQTT

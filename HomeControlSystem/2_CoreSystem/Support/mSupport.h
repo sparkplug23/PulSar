@@ -596,12 +596,6 @@ static int8_t GetCommandID_P(const char* needle, const char* haystack, char* des
     bool CrashFlag(void);
     void CrashDump(void);
 
-    void UpdateLedPowerAll();
-    void SetLedPowerIdx(uint32_t led, uint32_t state);
-    void SetLedPower(uint32_t state);
-    void SetLedPowerAll(uint32_t state);
-    void SetLedLink(uint32_t state);
-
 
 
 

@@ -46,7 +46,7 @@
 #define D_MODULE_CORE_TIME_FRIENDLY_CTR            "time"
 
 #define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR                     "mDevelopmentDebugging"
-#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR            "mDevelopmentDebugging"
+#define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR            "debug_development"
 
 #define D_MODULE_CORE_RULES_CTR            "Rules"
 #define D_MODULE_CORE_RULES_FRIENDLY_CTR   "rules"
@@ -131,6 +131,12 @@
   #define D_MODULE_DRIVERS_BUZZER_CTR "mBuzzer"
   #define D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR "buzzer"
   
+  #define D_MODULE_DRIVERS_RF433_RCSWITCH_CTR "rcswitch"
+  #define D_MODULE_DRIVERS_RF433_RCSWITCH_FRIENDLY_CTR "rcswitch"
+
+  #define D_MODULE_DRIVERS_LEDS_CTR "leds"
+  #define D_MODULE_DRIVERS_LEDS_FRIENDLY_CTR "leds"
+
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
@@ -1266,6 +1272,7 @@
 #define D_LOG_UPTIME "UPT: "         // Uptime
 #define D_LOG_DHT "DHT: "         // Uptime
 #define D_LOG_BME "BME: "         // Uptime
+#define D_LOG_PZEM "PZM: "         // Uptime
 #define D_LOG_SETTINGS "SET: "         // Uptime
 #define D_LOG_ULTRASONIC "ULT: "         // Uptime
 #define D_LOG_DB18 "DB8: "         // Uptime
@@ -1403,6 +1410,7 @@
 #define D_JSON_MODEL "Model"
 #define D_JSON_MQTT "MQTT"
 #define D_JSON_MQTT_COUNT "MqttCount"
+#define D_JSON_MILLIS "millis"
 #define D_JSON_NO "No"
 #define D_JSON_NOISE "Noise"
 #define D_JSON_NONE "None"

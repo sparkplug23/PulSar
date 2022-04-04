@@ -24,7 +24,11 @@ void mSettings::SettingsDefault(void)
 
   // DEBUG_LINE_HERE;
    //Serial.println("SettingsDefault");
-   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
+
   // DEBUG_LINE_HERE;
    SystemSettings_DefaultHeader();
   // DEBUG_LINE_HERE;

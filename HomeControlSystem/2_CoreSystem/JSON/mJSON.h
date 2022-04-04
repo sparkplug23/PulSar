@@ -148,8 +148,16 @@ char* GetPtr();
       }else
       if(is_float_type<T>::value){ 
         // float f = static_cast<float>(value);
-        float f = 0;     memcpy(&f,&value,sizeof(f));
-        char fvalue[20]; dtostrfd2(f,3,fvalue);
+        float f = 0;//12.35;    
+        
+       memcpy(&f,&value,sizeof(f)); // causing crashing
+        char fvalue[40] = {0}; 
+        
+        // dtostrfd2(f,3,fvalue);
+        
+        dtostrf(f, 5, 2, fvalue);
+
+
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);
       }
 

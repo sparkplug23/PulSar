@@ -5,7 +5,9 @@
 
 void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* event){
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("parsesub_Rule_Part"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
   JsonParserToken jtok;
   // JsonParserObject jobj2 = &jobj;
@@ -30,10 +32,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         event->module_id = matched_id;
         data_buffer.isserviced++;
       }
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
 
@@ -49,10 +51,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         event->function_id = jtok.getInt();
         data_buffer.isserviced++;
       }
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
 
@@ -69,10 +71,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         event->device_id = jtok.getInt();
         data_buffer.isserviced++;
       }
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
 
@@ -95,10 +97,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
     if(jtok = jobj["Value"]){
@@ -119,16 +121,18 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
 
     if(jtok = jobj["JsonCommands"]){
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
 
       // if(jsonbuffer.data != nullptr){
@@ -154,8 +158,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
           // I need to create the ability to move to add/edit buffer (like tas)
           // Rules can therefore only be created once at starttime for now          
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
           AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
           // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
         }
@@ -183,7 +189,9 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj){
     sprintf(rule_name, "Rule%d", rule_index);
     if(jtok = obj[rule_name]){
       
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_INFO, PSTR("MATCHED Rule%d"),rule_index);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
       mEvent::EVENT_PART* p_event = nullptr;
 

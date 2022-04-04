@@ -47,7 +47,6 @@ class ProgramTemperature; //tmp fix
 
 #ifndef HEATING_DEVICE_MAX
 #define HEATING_DEVICE_MAX 4
-#define MAX_ZONES 4
 #endif
 
 #include <stdio.h>
@@ -263,7 +262,7 @@ class mHVAC :
          * */
         std::vector<uint8_t> driver_type;
       }output;
-    }zone[MAX_ZONES];
+    }zone[HEATING_DEVICE_MAX];
 
 
     void Pre_Init(void);

@@ -117,6 +117,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 {
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR("1"
       "\n\rIndex:\t %d\n\r"
       "Trigger>>\n\r"
@@ -150,6 +151,7 @@ void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 
     );
 
+    #endif //  ENABLE_LOG_LEVEL_INFO
     
 }
 
@@ -157,6 +159,7 @@ void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 void mRuleEngine::ShowRuleEvent_AddLogByIndex(uint8_t show_type)
 {
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR("1"
       "\n\rIndex:\t %d\n\r"
       "Event>>\n\r"
@@ -176,14 +179,45 @@ void mRuleEngine::ShowRuleEvent_AddLogByIndex(uint8_t show_type)
     pCONT_rules->event_triggered.value.data[4]
   );
     
+    #endif //  ENABLE_LOG_LEVEL_INFO
 }
+
+
+/**
+ * @brief Version 2 of triggering rules, adding the event but also include the type of function. Thie function can choose to pass that on, ignore or change the function type 
+ * 
+ * @param _module_id 
+ * @param function_event 
+ * @param _index 
+ * @param _state 
+ */
+void mRuleEngine::NewEventRun(uint16_t _module_id, uint16_t function_event, uint8_t _index, uint8_t _state)
+{
+  Reset();
+  event_triggered.module_id = _module_id;
+  event_triggered.device_id = _index;
+  event_triggered.value.data[0] = _state;
+
+  /**
+   * @brief Mess version for now, added to here
+   *  */
+
+  // Legacy option, pass to all tasker_interfaces. This allows hard coded things to happen. ie Time runs out, turn relay off
+  pCONT->Tasker_Interface(function_event);
+  // New method to check the rules
+  Tasker_Rules_Interface(function_event);
+
+}
+
 
 
 // All events here will only trigger based of function calls, when those occur happen throughout code
 void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Tasker_Rules_Interface function_input%d"),function_input);
+    #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
+    #endif // ENABLE_LOG_LEVEL_INFO
 //maybe need to return rule(s) handled then leave taasker_interface
 
 
@@ -192,7 +226,10 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
     // Check this rule must act of the function
     if(rules[rule_index].trigger.function_id == function_input){
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED function_input[%d] to rule[%d]"),function_input,rule_index);
+
+    #endif // ENABLE_LOG_LEVEL_INFO
 
       rules_active_index = rule_index;
 
@@ -200,8 +237,10 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
       if(rules[rule_index].trigger.device_id == event_triggered.device_id)
       {
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
 
+    #endif// ENABLE_LOG_LEVEL_INFO
         // char message[50];
         // memset(message,0,sizeof(message));
         // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);
@@ -213,11 +252,12 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
         if(rules[rule_index].trigger.module_id == event_triggered.module_id)
         {
         
-          AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.module_id[%d] to rule[%d]"),rules[rule_index].trigger.module_id,rule_index);
-         
+    #ifdef ENABLE_LOG_LEVEL_INFO
+          AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.module_id[%d] to rule[%d]"),rules[rule_index].trigger.module_id,rule_index);         
           AddLog(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
           AddLog(LOG_LEVEL_TEST, PSTR("Trying to target module %d \"%s\""),rules[rule_index].command.module_id, pCONT->GetModuleFriendlyName(rules[rule_index].command.module_id));
         
+    #endif// ENABLE_LOG_LEVEL_INFO
 
           // Populate any jsoncommands to be executed, this takes precident over "State" controls
           if(rules[rule_index].command.json_commands_dlist_id>=0)
@@ -232,8 +272,10 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
             ); 
             data_buffer.payload.len += strlen(data_buffer.payload.ctr);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
             AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
 
+    #endif // ENABLE_LOG_LEVEL_INFO
             pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
           }
           else // Execute normal state/value method if no jsoncommand was used
@@ -247,19 +289,28 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
             // }
             
-            pCONT->Tasker_Interface(
-              rules[rule_index].command.function_id, // function the previous trigger is linked to
-              rules[rule_index].command.module_id, //target module
-              true  // runnig a rule, so don't call this loop back into this function
-            );
+            // #ifdef ENABLE_RULES_TRIGGER_METHOD_V2
+              pCONT->Tasker_Interface(
+                rules[rule_index].command.function_id, // function the previous trigger is linked to
+                rules[rule_index].command.module_id //target module
+              );
+            // #else // should not be calling itself again, so basic call only needed
+            // pCONT->Tasker_Interface(
+            //   rules[rule_index].command.function_id, // function the previous trigger is linked to
+            //   rules[rule_index].command.module_id, //target module
+            //   true  // runnig a rule, so don't call this loop back into this function
+            // );
+            // #endif // ENABLE_RULES_TRIGGER_METHOD_V2
 
 
+    #ifdef ENABLE_LOG_LEVEL_ERROR
             AddLog(LOG_LEVEL_TEST, PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
               rules[rule_index].command.function_id, // function the previous trigger is linked to
               rules[rule_index].command.module_id, //target module
               true  // runnig a rule, so don't call this loop back into this function
             );
 
+    #endif // ENABLE_LOG_LEVEL_INFO
           }
 
         } // trigger.module_id
@@ -268,8 +319,10 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
       else
       {
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES ".............NOMATCH trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
 
+    #endif // ENABLE_LOG_LEVEL_INFO
       }
 
     }
@@ -307,6 +360,8 @@ rules_active_index = 0;
 
 /**
  * @brief: Function that will append a rule to the current list
+ * 
+ * Perhaps this needs added into each module, ie the way the rule is encoded/decoded is contained within the module eg RF433 
  * */
 bool mRuleEngine::AppendRule()
 {

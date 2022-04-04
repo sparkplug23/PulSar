@@ -74,7 +74,9 @@ int8_t DeviceNameList::AddDeviceName(const char* name_ctr, int16_t class_id, int
   number_buffer.unique_group_ids[index] = class_id;
   number_buffer.index_ids[index] = device_id;
 
+    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("name_bufferE=%s"), buffer);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
 
     #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog_Array(LOG_LEVEL_DEBUG_MORE,PSTR("class_id"),number_buffer.unique_group_ids,(int16_t)DEVICENAMEBUFFER_NAME_INDEX_LENGTH);
@@ -128,10 +130,13 @@ const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_
     }
     else
     {  
+
+// I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
+
       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName(pCONT->GetVectorIndexbyModuleUniqueID(module_id)), device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,buffer);
       #endif // ENABLE_LOG_LEVEL_INFO
     }
     return buffer;

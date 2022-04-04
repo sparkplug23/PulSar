@@ -18,16 +18,6 @@ void mMotion::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mMotion::ConstructJSON_Settings;
 
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mMotion::ConstructJSON_Sensor;
-
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = false;

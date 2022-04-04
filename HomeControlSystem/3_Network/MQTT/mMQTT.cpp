@@ -99,13 +99,16 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
     // if(jtok.isNum()){
     //   relay_id  = jtok.getInt();
     // }
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend"));
+    #endif //
     JsonParserToken jtok_topic = jtok.getObject()["Topic"];
     JsonParserToken jtok_payload = jtok.getObject()["Payload"];
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
     AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
-    
+    #endif // 
 
     char topic_ctr[100] = {0};
     char payload_ctr[300] = {0};
@@ -131,9 +134,11 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
 
     // jtok_topic.size()
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST,PSTR("Topic=%s"),topic_ctr);
     AddLog(LOG_LEVEL_TEST,PSTR("Payload=%s"),payload_ctr);
     AddLog(LOG_LEVEL_TEST,PSTR("buffer_escaped=%s"),buffer_escaped);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
     // ppublish(jtok_topic.getStr(),jtok_payload.getStr(),false);
     pubsub->publish(topic_ctr,buffer_escaped,false);
@@ -211,7 +216,9 @@ void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST, PSTR("!MqttIsConnected"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
       pCONT_set->global_state.mqtt_down = 1;
       if (!Mqtt.retry_counter) {        
     // #ifdef ENABLE_LOG_LEVEL_INFO
@@ -259,53 +266,57 @@ void mMQTT::MqttConnected(void)
     Mqtt.retry_counter = 0;
 
 
-  DEBUG_LINE;
-  DEBUG_PRINT_FUNCTION_NAME;
-    DEBUG_LINE;
+  // DEBUG_LINE;
+  // DEBUG_PRINT_FUNCTION_NAME;
+    // DEBUG_LINE;
   char lwt_message_ondisconnect_ctr[200];
   sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
-  DEBUG_LINE;
+  // DEBUG_LINE;
   
     #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
-      DEBUG_LINE;
+      // DEBUG_LINE;
       pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic,lwt_message_ondisconnect_ctr,true); // onconnect message
-        DEBUG_LINE;
+        // DEBUG_LINE;
       delay(100);
     #endif
-      DEBUG_LINE;
+      // DEBUG_LINE;
     pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic,WILLMESSAGE_ONCONNECT_CTR,true); // onconnect message
-  DEBUG_LINE;
+  // DEBUG_LINE;
     #ifdef USE_MQTT_RETAINED_VERSION_HISTORY_CHECK // for checking version history
       pubsub->subscribe(("TBD_firmware/set/settings/firmware")); //PSTR failure
     #endif
-DEBUG_LINE;
+// DEBUG_LINE;
     // Group name for setting all devices
     pubsub->subscribe(("group_all/#"));//(PSTR("group_all/#"));
-DEBUG_LINE;
+// DEBUG_LINE;
     //pubsub->subscribe("<devicename>/sync"); //namesake sync name
     psubscribe(PSTR(D_MQTT_SYNC "/#"));
-DEBUG_LINE;
+// DEBUG_LINE;
     // //pubsub->subscribe("<devicename>/set/#");
     psubscribe(PSTR(D_MQTT_COMMAND "/#"));
-DEBUG_LINE;
+// DEBUG_LINE;
     connection_maintainer.cConnectionAttempts = 0; // reset
 
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connection SUCCESS!\""));
     #endif// ENABLE_LOG_LEVEL_INFO
-DEBUG_LINE;
+// DEBUG_LINE;
     // if succesful, clear flag
     connection_maintainer.flag_require_reconnection = false;
 
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connected? %d!\""),pubsub->connected());
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
-    DEBUG_LINE;
+    // DEBUG_LINE;
     pCONT->Tasker_Interface(FUNC_MQTT_CONNECTED);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connected? %d!\""),pubsub->connected());
+    #endif //  ENABLE_LOG_LEVEL_INFO
     
-    DEBUG_LINE;
+    // DEBUG_LINE;
 
 
   // char stopic[TOPSZ];
@@ -533,10 +544,17 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
   if(pubsub->connect(pCONT_set->Settings.mqtt.client_name,pCONT_set->Settings.mqtt.lwt_topic,WILLQOS_CTR,WILLRETAIN_CTR,lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Connected"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     MqttConnected();
-  } else {
+
+  }
+  else
+  {
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Failed %d"),pubsub->state());
+    #endif // 
     MqttDisconnected(pubsub->state());  // status codes are documented here http://pubsubclient.knolleary.net/api.html#state
   }
 

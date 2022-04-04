@@ -420,6 +420,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:
     case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Tasker\n\r\n\r\n\r\n\r"
         //Test data
         "%d:%d:%d:%d"
@@ -430,6 +431,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
         ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
         ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
     );
+    #endif // ENABLE_LOG_LEVEL_INFO
 
 
 

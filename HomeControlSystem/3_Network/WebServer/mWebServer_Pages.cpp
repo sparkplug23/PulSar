@@ -175,7 +175,9 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
 
 void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("mWebServer::HandlePage_Root"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_ASYNC WEB_HANDLER_SCRIPT_WEB_DATA_FETCHER_RUNTIME_URLS_RATES_VAR "Sf::%s"),"HandlePage_Root");
 

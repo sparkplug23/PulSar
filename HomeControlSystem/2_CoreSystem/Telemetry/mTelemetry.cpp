@@ -611,6 +611,21 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level){ //B
   //   // }
   // }
 
+  /**
+   * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
+   * I could also run a "append" id but check its not in it already (easier with vector?)
+   * 
+   */
+  char buffer[100];
+
+  JBI->Array_Start("ModuleIDs");
+  for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  {
+    snprintf_P(buffer, sizeof(buffer), PSTR("%d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
+
+    JBI->Add(buffer);
+  }
+  JBI->Array_End();
 
   JBI->Level_End();
 

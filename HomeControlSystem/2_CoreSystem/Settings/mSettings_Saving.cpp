@@ -93,6 +93,7 @@ uint32_t i = 0;
 
     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings_Temporary, sizeof(Settings_Temporary));
     
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("\n\r"
         "cfg_holder\t\t\t%d\n\r"
         "cfg_size\t\t\t%d\n\r"
@@ -115,6 +116,7 @@ uint32_t i = 0;
         ,Settings.animation_settings.xmas_controller_params[2]
         ,Settings.animation_settings.xmas_controller_params[3]
     );
+    #endif// ENABLE_LOG_LEVEL_INFO
 
 // DEBUG_LINE_HERE;
 
@@ -221,6 +223,7 @@ uint32_t i = 0;
 
   SettingsMerge(&Settings, &Settings_Temporary);
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("AFTER SettingsMerge\n\r"
         "cfg_holder\t\t\t%d\n\r"
         "cfg_size\t\t\t%d\n\r"
@@ -244,6 +247,8 @@ uint32_t i = 0;
         ,Settings.animation_settings.xmas_controller_params[3]
     );
 
+    #endif // ENABLE_LOG_LEVEL_INFO
+    
 #ifndef FIRMWARE_MINIMAL
 
 /***
@@ -436,9 +441,12 @@ void mSettings::SettingsSave(uint8_t rotate)
 
     if (!stop_flash_rotate && rotate) {
       // DEBUG_LINE_HERE;
-      for (uint32_t i = 1; i < CFG_ROTATES; i++) {
+      for (uint32_t i = 1; i < CFG_ROTATES; i++) 
+      {
         // DEBUG_LINE_HERE;
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ESP.flashEraseSector(settings_location -i);"));
+    #endif // ENABLE_LOG_LEVEL_INFO
         ESP.flashEraseSector(settings_location -i);  // Delete previous configurations by resetting to 0xFF
         delay(1);
       }
@@ -475,6 +483,7 @@ void mSettings::TestSettingsLoad()
   
   ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&settings_tmp, sizeof(settings_tmp));
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("TestSettingsLoad \t\t\t\t TestSettingsLoad\n\r"
       "cfg_holder\t\t\t%d\n\r"
       "cfg_size\t\t\t%d\n\r"
@@ -492,12 +501,14 @@ void mSettings::TestSettingsLoad()
   );
     #endif // ESP8266
   
+    #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 
 void mSettings::TestSettings_ShowLocal_Header()
 {
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("TestSettings_ShowLocal_Header\n\r"
       "cfg_holder\t\t\t%d\n\r"
       "cfg_size\t\t\t%d\n\r"
@@ -513,6 +524,7 @@ void mSettings::TestSettings_ShowLocal_Header()
       Settings.bootcount,
       Settings.cfg_crc
   );
+    #endif// ENABLE_LOG_LEVEL_INFO
   
 }
 

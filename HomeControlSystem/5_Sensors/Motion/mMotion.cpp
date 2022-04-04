@@ -29,36 +29,11 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     /************
-     * PERIODIC SECTION * 
-    *******************/
-    case FUNC_LOOP: 
-      EveryLoop();
-    break;  
-    case FUNC_EVERY_SECOND:
-
-
-      // char buffer[80];
-      
-      // AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\r\n\r\n\rtest=\"%s\""), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, 0, buffer, sizeof(buffer), true));
-
-
-
-
-    break;
-    /************
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    // case FUNC_EVENT_MOTION_STARTED_ID:
-    // case FUNC_EVENT_MOTION_ENDED_ID:
-    //   // CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
-
-    //   mqtthandler_sensor_ifchanged.flags.SendNow = true;
-
-    // break; 
-    // case FUNC_
     /************
      * RULES SECTION * 
     *******************/
@@ -105,13 +80,15 @@ void mMotion::Init(void)
 
   settings.sensors_active = MAXIMUM_SENSORS;
 
+  // #ifdef USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH
+  AddLog(LOG_LEVEL_WARN, PSTR("USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH"));
+  // default is toggle, follow must be used here for motion 
+  for (uint8_t i = 0; i < MAX_SWITCHES; i++) { pCONT_set->Settings.switchmode[i] = SWITCHMODE_FOLLOW_ID; }
+  // #endif // USE_DEVFEATURE_FORCE_SWITCH_TO_FOLLOW_FOR_SWITCH
+
+
 }
 
-
-void mMotion::EveryLoop()
-{
-
-}
 
 void mMotion::Rules_Add_Rule()
 {
@@ -192,17 +169,17 @@ switch(command_state_in)
     command_state_out = newevent_command_state_in;
     break;
   case STATE_NUMBER_FOLLOW_INV_ID: 
-AddLog(LOG_LEVEL_TEST, PSTR("Acase STATE_NUMBER_FOLLOW_INV_ID: =%d"), command_state_out);
     command_state_out = newevent_command_state_in?0:1;
-AddLog(LOG_LEVEL_TEST, PSTR("Bcase STATE_NUMBER_FOLLOW_INV_ID: =%d"), command_state_out);
     break;
   case STATE_NUMBER_OFF_ID: 
     command_state_out = 0;
     break;
   case STATE_NUMBER_ON_ID: 
-    command_state_out = 0;
+    command_state_out = 1;
     break;
 }
+
+
 AddLog(LOG_LEVEL_TEST, PSTR("Bommand_state_out=%d"), command_state_out);
 
 char buffer[100];

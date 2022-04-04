@@ -244,7 +244,9 @@ void mSupport::I2cResetActive(uint32_t addr, uint32_t count)
     i2c_active[addr / 32] &= ~(1 << (addr % 32));
     addr++;
   }
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3]);
+    #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 void mSupport::I2cSetActive(uint32_t addr, uint32_t count)
@@ -255,13 +257,17 @@ void mSupport::I2cSetActive(uint32_t addr, uint32_t count)
     i2c_active[addr / 32] |= (1 << (addr % 32));
     addr++;
   }
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3]);
+    #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 void mSupport::I2cSetActiveFound(uint32_t addr, const char *types)
 {
   I2cSetActive(addr);
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, S_LOG_I2C_FOUND_AT, types, addr);
+    #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 bool mSupport::I2cActive(uint32_t addr)
@@ -277,10 +283,14 @@ bool mSupport::I2cSetDevice(uint32_t addr)
 {
   addr &= 0x7F;         // Max I2C address is 127
   if (I2cActive(addr)) {
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_DEBUG, PSTR("I2cSetDevice already active"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     return false;       // If already active report as not present;
   }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
 AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("I2cSetDevice beginning"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
   wire->beginTransmission((uint8_t)addr);
   return (0 == wire->endTransmission());
 }
@@ -288,11 +298,11 @@ AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("I2cSetDevice beginning"));
 bool mSupport::I2cEnabled(uint32_t i2c_index)
 {
 
-Serial.println("I2cEnabled"); Serial.flush();
+// Serial.println("I2cEnabled"); Serial.flush();
 // delay(3000);
 bool val = (pCONT_set->i2c_enabled && bitRead(pCONT_set->Settings.i2c_drivers[i2c_index / 32], i2c_index % 32));
 
-Serial.println(val); Serial.flush();
+// Serial.println(val); Serial.flush();
   return val;
 
 // Serial.println("val"); Serial.flush();

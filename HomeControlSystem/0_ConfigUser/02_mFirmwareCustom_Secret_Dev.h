@@ -21,7 +21,7 @@
 \*********************************************************************************************/
 
 // #define DEVICE_FORCED_TO_BE_TESTER
-#define DISABLE_WEBSERVER
+// #define DISABLE_WEBSERVER
 // //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -1830,6 +1830,8 @@
 
 /**
  * Original screen, to be renamed
+ * Move 5V PSU into spare room, therefore it will remained powered going forward
+ * Same for under desk
  * */
 #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
   #define DEVICENAME_CTR            "rgb_computer_display_u25"//"rgbdell"
@@ -1891,6 +1893,10 @@
 
 #endif
 
+/*
+ * Move 5V PSU into spare room, therefore it will remained powered going forward
+ * Same for under desk
+*/
 
 #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   #define DEVICENAME_CTR            "rgb_computer_display_p32"
@@ -9960,6 +9966,177 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 // #endif // MSYSTEMCONFIG_HARDWAREDEFAULTS_H
 
+
+
+/**
+ * Need to add cc1110 input, simple low/high into json output so I can show sync messages in recording
+ * need 12v power source
+ * 
+ * */
+#ifdef DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV
+  #define DEVICENAME_CTR            "radpattern"
+  #define DEVICENAME_FRIENDLY_CTR   "radpattern"  //white wire, blue tape, to be uav 
+  #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "RP0"
+  #define DEVICENUM_NUM   0
+
+  // #define ENABLE_DEVFEATURE_SAMPLER_FIX_CYAN
+  // #define ENABLE_DEVFEATURE_UART2RXBUFFER_INTO_MULTIPLE_BUFFERS_INSTEAD_OF_RINGBUFFER
+  #define ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
+
+  /**
+   * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
+   * */
+  #define USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+  #define USE_SYSTEM_OLED_LOGGER_FEEDBACK
+  #define USE_SYSTEM_SDCARD_LOGGING
+  #define USE_SYSTEM_IMU_RADIATIONPATTERN
+
+  /**
+   * Debug methods
+   * */
+  /**
+   * @note SD Card will still be enabled, but data will be pushed out of serial2(17) 
+   * */
+  // #define USE_SYSTEM_ENABLE_DEBUG_OUTPUT_ON_SERIAL2
+  // #define USE_SYSTEM_OUTPUT_SDCARD_STREAM_TO_SERIAL0_FOR_FAST_TESTING
+    // #define USE_MODULE_SENSORS_LSM303D
+
+  /**
+   * ADC written directly into controller, not as a module
+   * */
+  #define USE_DEVFEATURE_ADC_IN_CONTROLLER
+
+  /**
+   *  IMU recording
+   * */
+  #ifdef USE_SYSTEM_IMU_RADIATIONPATTERN
+    #define USE_MODULE_SENSORS_LSM303D
+    #define USE_MODULE_SENSORS_L3G
+    #define USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
+  #endif
+
+  /**
+   * General defines to disable systems not needed
+   * */
+  #define DISABLE_NETWORK
+  #define DISABLE_SLEEP
+
+  /**
+   * SDCard
+   * */
+  #ifdef USE_SYSTEM_SDCARD_LOGGING
+    #define USE_MODULE_DRIVERS_SDCARD
+    #define USE_SDCARD_RINGBUFFER_STREAM_OUT
+    #define ENABLE_DEVFEATURE_DUALCORE_SDCARD_WRITER
+  #endif // USE_SYSTEM_SDCARD_LOGGING
+
+  /**
+   * Button input
+   * */
+  #ifdef USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+    #define USE_MODULE_CORE_RULES
+    #define USE_MODULE_SENSORS_BUTTONS
+  #endif // USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+
+  /**
+   * OLED display
+   * */
+  #ifdef USE_SYSTEM_OLED_LOGGER_FEEDBACK
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_OLED_SSD1306
+    #define SHOW_SPLASH
+  #endif // USE_SYSTEM_OLED_LOGGER_FEEDBACK
+
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      /** 4P large JST - ADC
+       * Yellow     32(I), ADC2G, ADC1_CH6
+       * White      35(I), ADC5G, ADC1_CH7
+       * Red        32(I), ADC Record Trigger
+       * Black      GND
+       * */
+      // "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_ADC1_CH4_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
+      // "\"32\":\"" D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR   "\","
+      /** 5P small - UART2 RSS Stream
+       * Orange      17, UART2_TX
+       * Yellow      16, UART2_RX
+       * White       25, ie superframe event over, rising edge interrupt
+       * Red         5V
+       * Black       GND
+       * */
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+      /** 5P small - UART1 GPS Stream
+       * Orange      19, UART1_TX
+       * Yellow      18, UART1_RX
+       * White        
+       * Red         VCC, 3V3
+       * Black       GND
+       * */
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      /** 6P small - SD Card
+       * Green       15, CS
+       * Orange      14, SCK
+       * Yellow      13, MOSI
+       * White       12, MISO
+       * Red         3V3
+       * Black       GND
+       * */
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MISO_CTR  "\","
+      /** Built in - OLED
+       * 
+       * */
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      /**
+       * Optional added switches for controls eg radiation pattern enabling
+       * GPIO21 - manual digitalread/set in radpat
+       * GPIO22 - manual digitalread/set in radpat
+       * */
+      // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      // "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      /** 2P small
+       * Red        Button Logging Toggle
+       * Black      GND
+       * */
+      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define GPIO_FUNCTION_MANUAL_ENABLE_SAMPLING_NUMBER 22
+  #define GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER 27
+
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "ARM"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "LEG"
+  
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_LSM303D_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+
+
+#endif // DEVICE_GPSPARSER_TESTER
 
 
 

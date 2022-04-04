@@ -362,8 +362,10 @@ void mWiFi::ScanBestAndBeginWifi()
 
   
 if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){  
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR("WiFi.scanComplete() RUNNING"));
   AddLog(LOG_LEVEL_INFO, PSTR("WiFi.IP() %s"),WiFi.localIP().toString().c_str());
+    #endif //  ENABLE_LOG_LEVEL_INFO
 }
 
 
@@ -387,7 +389,9 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
 
 
   int8_t scan_result = WiFi.scanComplete();
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "scan_result=%d"),scan_result);
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
   // Check scan done
   if (4 == connection.scan_state) {
@@ -1037,8 +1041,10 @@ void mWiFi::WifiConnect(void)
   
   // if (!Settings.flag4.network_wifi) { return; } //probably for when ethernet is used instead
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
 
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),__FUNCTION__);
+    #endif // ENABLE_LOG_LEVEL_INFO
   WifiSetState(0);
   // WifiSetOutputPower(); //new
   WiFi.persistent(false);     // Solve possible wifi init errors
@@ -1405,7 +1411,14 @@ void mWiFi::StartMdns(void) {
     MDNS.end(); 
     // Begin with devicename
     Mdns.begun = (uint8_t)MDNS.begin(pCONT_set->Settings.system_name.device);
+    
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s" "with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),pCONT_set->Settings.system_name.device);
+  
+  
+    #endif // ENABLE_LOG_LEVEL_INFO
+
+
   }
 }
 
@@ -1417,7 +1430,9 @@ void mWiFi::MqttDiscoverServer(void)
 
   int n = MDNS.queryService("mqtt", "tcp");  // Search for mqtt service
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
+    #endif // ENABLE_LOG_LEVEL_INFO
 
   if (n > 0) {
     uint32_t i = 0;            // If the hostname isn't set, use the first record found.
@@ -1472,7 +1487,10 @@ uint8_t mWiFi::GetRSSPercentage(){
 
 
 
-const char* mWiFi::GetWiFiStatusCtr(void){
+const char* mWiFi::GetWiFiStatusCtr(void){                          // UNSTABLE CODE, RETURNING NULL!!
+
+//NULL
+
   switch(WiFi.status()){
     case WL_IDLE_STATUS      : return PSTR("WL_IDLE_STATUS");
     case WL_NO_SSID_AVAIL    : return PSTR("WL_NO_SSID_AVAIL");
@@ -1486,6 +1504,9 @@ const char* mWiFi::GetWiFiStatusCtr(void){
 }
 
 const char* mWiFi::GetWiFiConfigTypeCtr(void){
+
+  //NULL 
+
   switch(connection.config_type){
     case WIFI_RESTART      : return PSTR("WIFI_RESTART");
     case WIFI_SMARTCONFIG    : return PSTR("WIFI_SMARTCONFIG");

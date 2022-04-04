@@ -2,12 +2,264 @@
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+int8_t mNextionPanel::Tasker_Web(uint8_t function){
+
+
+
+  switch(function){  
+    
+    case FUNC_WEB_ADD_HANDLER:
+      WebPage_Root_AddHandlers();
+    break;
+
+    // case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
+    //   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    //   // pCONT_ladd->
+    //   WebAppend_Root_Draw_Table();
+    
+    // //  WebAppend_Root_Draw_RGBLive();
+    //   // #endif
+      
+    // break; 
+    // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+    //   JsonBuilderI->Add(WEB_HANDLE_LIVEPIXELS_SHARED_JSON,liveview.refresh_rate);
+    //   JsonBuilderI->Add("/draw/palette_selector.json",-500);
+    // break;
+    
+    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+
+    //   //if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_EFFECTS_ID){
+    //     WebAppend_Root_RGBPalette();
+    //   //}
+    //   WebAppend_Root_Sliders();  //move webui stuff into here, as "scenes" will soon be replaced by colour[5].. make it a struct, but read/write using bytes when need by pointer of struct
+
+    // break;
+    // case FUNC_WEB_APPEND_ROOT_BUTTONS:
+    //   WebAppend_Root_ControlUI();
+    // break;
+    // case FUNC_WEB_COMMAND:
+    //   WebCommand_Parse();
+    // break;  
+  }
+
+  return 0;
+
+}
+
+
+
+void mNextionPanel::WebPage_Root_AddHandlers(){
+  
+  // if ((configPassword[0] != '\0') && (configUser[0] != '\0'))
+  // { // Start the webserver with our assigned password if it's been configured...
+  //   httpOTAUpdate.setup(&webServer, "/update", configUser, configPassword);
+  // }
+  // else
+  // { // or without a password if not
+  //   httpOTAUpdate.setup(&webServer, "/update");
+  // }
+
+  // webServer.on("/", webHandleRoot);
+  // webServer.on("/saveConfig", webHandleSaveConfig);
+  // webServer.on("/resetConfig", webHandleResetConfig);
+  // webServer.on("/resetBacklight", webHandleResetBacklight);
+  // webServer.on("/firmware", webHandleFirmware);
+  // webServer.on("/espfirmware", webHandleEspFirmware);
+  // webServer.on(
+  //     "/lcdupload", HTTP_POST, []()
+  //     { webServer.send(200); },
+  //     webHandleLcdUpload);
+  // webServer.on("/tftFileSize", webHandleTftFileSize);
+  // webServer.on("/lcddownload", webHandleLcdDownload);
+  // webServer.on("/lcdOtaSuccess", webHandleLcdUpdateSuccess);
+  // webServer.on("/lcdOtaFailure", webHandleLcdUpdateFailure);
+  // webServer.on("/reboot", webHandleReboot);
+  // webServer.onNotFound(webHandleNotFound);
+  // webServer.begin();
+  // debugPrintln(String(F("HTTP: Server started @ http://")) + WiFi.localIP().toString());
+
+  // espSetupOta(); // Start OTA firmware update
+
+  // motionSetup(); // Setup motion sensor if configured
+
+  // mqttConnect(); // Connect to MQTT
+
+  // if (mdnsEnabled)
+  // { // Setup mDNS service discovery if enabled
+  //   hMDNSService = MDNS.addService(haspNode, "http", "tcp", 80);
+  //   if (debugTelnetEnabled)
+  //   {
+  //     MDNS.addService(haspNode, "telnet", "tcp", 23);
+  //   }
+  //   MDNS.addServiceTxt(hMDNSService, "app_name", "HASwitchPlate");
+  //   MDNS.addServiceTxt(hMDNSService, "app_version", String(haspVersion).c_str());
+  //   MDNS.update();
+  // }
+
+  /**
+   * Root Page 
+   * */
+  // pCONT_web->pWebServer->on(WEB_HANDLE_JSON_LIVEPIXELS, [this](AsyncWebServerRequest *request){
+  //   WebSend_JSON_RootPage_LiveviewPixels(request); 
+  // });
+  
+  
+  #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
+  /**
+   * RGB LIGHT SETTINGS
+   * */
+  // pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS_PAGE, [this](AsyncWebServerRequest *request){ //"/page"
+  //   HandlePage_RGBLightSettings(request); 
+  // });
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls", [this](AsyncWebServerRequest *request){ //"/page"
+//     // HandlePage_RGBLightSettings(request); 
+
+//     Serial.printf("GET\n\r\n\r\n\r\n\r\n\r\n\r");
+
+//     // request->client->
+
+// //  char* buffertemp = request->_tempObject;
+
+// // WebSave_RGBControls(request);
+// // int params = request->params();
+// // for(int i=0;i<params;i++){
+// //   AsyncWebParameter* p = request->getParam(i);
+// //   if(p->isFile()){ //p->isPost() is also true
+// //     Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+// //   } else if(p->isPost()){
+// //     Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+// //   } else {
+// //     Serial.printf("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+// //   }
+// // }
+
+
+//   request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,"PAGE_ROOT");//PAGE_rgb_colour_palette_editor);
+
+
+//   });
+
+  //D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls"
+  // pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls", HTTP_POST, [this](AsyncWebServerRequest *request){
+
+
+  //   int params = request->params();
+  //   for(int i=0;i<params;i++){
+  //     AsyncWebParameter* p = request->getParam(i);
+  //     if(p->isFile()){
+  //       Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+  //     } else 
+  //     if(p->isPost()){
+  //       Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+  //     }
+  //      else {
+  //       Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+  //     }
+  //   }
+
+  //   request->send(200, CONTENT_TYPE_TEXT_HTML_ID, "end");
+
+  //   //  if (request->method() == HTTP_POST && request->url() == "/michael") {
+  //   //    Serial.println("HTTP_POST && request->url()");
+  //   //   // Shoudl be already handled by handleBody(..) at this point.
+  //   //   return;
+  //   // }
+  //   // Web_Base_Page_Draw(request);
+  // });
+  #endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
+
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls", HTTP_POST, [](AsyncWebServerRequest *request){
+//     //nothing and dont remove it
+//   }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+//     Serial.println("onRequestBody " D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls" );
+//     if ((request->url() == D_WEB_HANDLE_RGB_CONTROLS "/save_animation_controls") && //"/rest/api/v2/test") &&
+//         (request->method() == HTTP_POST))
+//     {
+      
+// #ifdef ENABLE_DEVFEATURE_ARDUINOJSON
+//         const size_t        JSON_DOC_SIZE   = 512U;
+//         DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
+        
+//         if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+//         {
+//             JsonObject obj = jsonDoc.as<JsonObject>();
+
+//             pCONT_ladd->parse_JSONCommand(jsonDoc.as<JsonObjectConst>());
+
+//             for (JsonPair keyValue : obj) {
+//               // AddLog(LOG_LEVEL_INFO, PSTR("key[\"%s\"]=%s"),keyValue.key().c_str(),keyValue.value().as<char*>());
+//               if(keyValue.value().as<char*>()){
+//                 Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<char*>());
+//               }else{
+//                 Serial.print(keyValue.key().c_str()); Serial.print("\t"); Serial.println(keyValue.value().as<int>());
+//               }
+//             }
+
+//         }
+        
+//         request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{ \"status\": 0 }");
+        
+// #endif // ENABLE_DEVFEATURE_ARDUINOJSON
+//     }
+//   });
+
+//   #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+//     Web_RGBLightSettings_Draw(request);
+//   });
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_RGB_CONTROLS "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//     Web_RGBLightSettings_UpdateURLs(request);
+//   }); 
+//   pCONT_web->pWebServer->on("/fetch/animation_control_list_options.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//     Web_RGBLightSettings_ListOptions(request);
+//   }); 
+
+
+//   /**
+//    * PALETTE EDTIOR
+//    * */
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_PALETTE_EDITOR_PAGE_CTR, [this](AsyncWebServerRequest *request){ //"/page"
+//     HandlePage_PaletteEditor(request); 
+//   });
+//   pCONT_web->pWebServer->on("/fetch/colour_palette_list_options.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//     Web_PaletteEditor_ListOptions(request);
+//   }); 
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_PALETTE_EDITOR_CTR "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//     Web_PaletteEditor_UpdateURLs(request);
+//   }); 
+//   pCONT_web->pWebServer->on(D_WEB_HANDLE_PALETTE_EDITOR_CTR "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+//     Web_PaletteEditor_Draw(request);
+//   });
+//   #endif // USE_WEBSERVER_ADVANCED_MULTIPAGES
+
+
+} //add handlers
+
+
+  // #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
+void mNextionPanel::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request){
+  
+  // JsonBuilderI->Start();
+  //   JsonBuilderI->Level_Start("function");
+  //     JsonBuilderI->Level_Start("Parse_Urls");        
+  //       JsonBuilderI->Add("/fetch/animation_control_list_options.json",-1);
+  //     JsonBuilderI->Level_End();
+  //   JsonBuilderI->Level_End();
+  // JsonBuilderI->End();
+
+  // request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
+  
+}
+
 /**********************************************************************************************************************************************************
  ******************************************************************************************************************************************************************************* 
  * Webpage Functions ******************************************************************************************************************************************************************************
  ******************************************************************************************************************************************************************************* 
  **********************************************************************************************************************************************************************************/
  
+
 
 /*
  case FUNC_WEB_ROOT_SEND_STATUS:{
@@ -1702,5 +1954,8 @@ void mNextionPanel::HandlePreflightRequest(void)
   // mcl->mwif->pWebServer->sendHeader(F("Access-Control-Allow-Headers"), F("authorization"));
   // mcl->mwif->WSSend(200, CT_HTML, "");
 }
+
+#endif // USE_MODULE_NETWORK_WEBSERVER
+
 
 #endif //#ifdef USE_MODULE_DISPLAYS_NEXTION

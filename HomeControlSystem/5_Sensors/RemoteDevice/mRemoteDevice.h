@@ -63,7 +63,7 @@ class mRemoteDevice :
     
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      Serial.printf("OVERRIDE ACCESSED REMOTE DEVICE %d\n\r",index);//Serial.println(sensor[index].instant.temperature);
+      // Serial.printf("OVERRIDE ACCESSED REMOTE DEVICE %d\n\r",index);//Serial.println(sensor[index].instant.temperature);
       
       // Need to copy each part
       value->type = sensor_data.type;

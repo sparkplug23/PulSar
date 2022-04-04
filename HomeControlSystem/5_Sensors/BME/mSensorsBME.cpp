@@ -127,7 +127,7 @@ void mSensorsBME::Init(void){
     sensor[sensor_id].temperature_threshold_value = 0.1; 
   }
 
-  settings.measure_rate_ms = 1000;
+  settings.measure_rate_ms = 5000;
   
 }
 

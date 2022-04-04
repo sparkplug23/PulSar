@@ -83,24 +83,24 @@ void mAnimatorLight::WebAppend_Root_Status_Table(){
             );
           }
         break;
-        case 2:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
-            pCONT_iLight->animation.transition.rate_ms/1000, 
-            pCONT_iLight->animation.transition.time_ms/1000
-          );
-        break;
-        case 3: 
-          JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
-            pCONT_iLight->animation.transition.pixels_to_update_as_number, 
-            pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_number)
-          );
-        break;
-        case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
-        case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
-        // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOU T
-        // case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer, sizeof(buffer))); break;
-        // #endif
-        case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
+        // case 2:
+        //   JsonBuilderI->Add_FV("ih",PSTR("\"%d/%d (secs)\""), 
+        //     pCONT_iLight->animation.transition.rate_ms/1000, 
+        //     pCONT_iLight->animation.transition.time_ms/1000
+        //   );
+        // break;
+        // case 3: 
+        //   JsonBuilderI->Add_FV("ih",PSTR("\"%d%% [#%d]\""),
+        //     pCONT_iLight->animation.transition.pixels_to_update_as_number, 
+        //     pCONT_iLight->GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_number)
+        //   );
+        // break;
+        // case 4: JsonBuilderI->Add("ih",pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer))); break;
+        // case 5: JsonBuilderI->Add("ih",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));   break;
+        // // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOU T
+        // // case 6: JsonBuilderI->Add("ih",GetFlasherFunctionName(buffer, sizeof(buffer))); break;
+        // // #endif
+        // case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
       } //switch
     
     JsonBuilderI->Level_End();

@@ -116,7 +116,8 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
     // #endif
   }
 
-  if(jtok = obj["HVACZone"].getObject()["SetSensor"]){ 
+  if(jtok = obj["HVACZone"].getObject()["SetSensor"])
+  { 
   
     JsonParserArray array = jtok;
     uint8_t index = 0;
@@ -135,7 +136,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
         AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "device_id_found>pCONT_set->Settings.device_name_buffer.class_id = %d,%d"),device_id_found,ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id) );
         }
 
-        if(index < MAX_ZONES)
+        if(index < HEATING_DEVICE_MAX)
         {
           AddLog(LOG_LEVEL_ERROR, PSTR("pCONT_set->Settings.device_name_buffer.class_id[device_id_found] = %d,%d"),device_id_found,pCONT_set->Settings.device_name_buffer.class_id[device_id_found]);
         
@@ -148,6 +149,11 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
       }
 
     }
+
+    // #ifdef ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+    // DEBUG_LINE_HERE;
+    // delay(5000); // to view if this is working
+    // #endif // ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
 
   }
   

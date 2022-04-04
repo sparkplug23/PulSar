@@ -36,7 +36,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Static_Single_Colou
 
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
 
@@ -94,7 +96,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
 
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
   
@@ -138,7 +142,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
     AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
     _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
   }
   
@@ -174,7 +180,9 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
 
   if(_segment_runtimes[segment_active_index].data == nullptr)
   { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("_segment_runtimes[%d].data == nullptr = %d"),segment_active_index);
+    #endif // ENABLE_LOG_LEVEL_INFO
     return;
   }
 
@@ -207,7 +215,9 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
 
   if(_segment_runtimes[segment_active_index].data == nullptr)
   { 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("_segment_runtimes[%d].data == nullptr = %d"),segment_active_index);
+    #endif // ENABLE_LOG_LEVEL_INFO
     return;
   }
 
@@ -374,7 +384,8 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
 
   switch(*region_p){
     case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_COLOUR_SELECT_ID"));
+
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_COLOUR_SELECT_ID"));
      
       uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
 
@@ -382,7 +393,10 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
 
         if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
         {
+          
+    #ifdef ENABLE_LOG_LEVEL_ERROR
           AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+          #endif
           _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
         }
 
@@ -393,7 +407,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
       int16_t pixel_position = -2;
       uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
     
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
       
       desired_pixel = *indexes_active_p;
       uint8_t pixels_map_upper_limit = *indexes_active_p+1;
@@ -457,7 +471,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
   
     }break;
     case EFFECTS_REGION_ANIMATE_ID: //shift along
+    #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_ANIMATE_ID"));
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
       // Check if output multiplying has been set, if so, change desiredcolour array
       // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();  // THIS SHOULD PROBABLY JUST BE MOVED INTO THE SETPIXEL AND RAN BEFORE STRIPUPDATE

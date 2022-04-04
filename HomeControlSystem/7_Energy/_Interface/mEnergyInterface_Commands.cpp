@@ -93,7 +93,7 @@
 void mEnergyInterface::parse_JSONCommand_BootSafe(JsonParserObject obj)
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand_BootSafe"));
+//   AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand_BootSafe"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
@@ -108,7 +108,7 @@ void mEnergyInterface::parse_JSONCommand_BootSafe(JsonParserObject obj)
 
 void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
 
-    AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand"));
+    // AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 

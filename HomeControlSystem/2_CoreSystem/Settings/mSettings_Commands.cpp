@@ -340,19 +340,27 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
   }else
 
   if(value == 2){
+    
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("REBOOT TEST" DEBUG_INSERT_PAGE_BREAK));
+    #endif 
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Current bootcount is %d"), Settings.bootcount);
+    #endif //  ENABLE_LOG_LEVEL_INFO
 
     pCONT_set->TestSettings_ShowLocal_Header();
     pCONT_set->TestSettingsLoad();
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Modying bootcount to %d"), Settings.bootcount++);
+#endif 
 
     pCONT_set->SettingsSaveAll();
 
+    #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Settings should be saved now to %d"), Settings.bootcount);
-
+#endif
 
     pCONT_set->TestSettings_ShowLocal_Header();
     pCONT_set->TestSettingsLoad();

@@ -91,16 +91,15 @@ Hallway
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_HEATING_ESP32
 
-// #define DEVICE_DOORBELLWALLCHIME
-
 /**
 Outside
   - CeilingLight
 **/
 // #define DEVICE_SIDEDOORLIGHT
-// #define DEVICE_GAZEBO_CONTROLLER
+// #define DEVICE_GAZEBO_SONOFF_4CHPRO
 // #define DEVICE_GAZEBO_SENSOR
 // #define DEVICE_H801_RGBGAZEBO
+// #define DEVICE_STRING_ROSEBUD
 
 /**
 Garage
@@ -182,6 +181,7 @@ Bathroom
 // #define DEVICE_BEDROOMBLINDS
 // #define DEVICE_RGBNOTIFICATION_01
 // #define DEVICE_BEDROOM_WALLCLOCK_01
+// #define DEVICE_HVAC_HAIRDRYER
 
 
 /**************************************************************************************************************************************************
@@ -1147,7 +1147,7 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR   "\""
+      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1175,20 +1175,20 @@ Bathroom
   
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+  "{"    
+    // for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":2" // Started  0=low,1=high,2=toggle,3=follow (change to names)
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
       "}"
     "}"
   "}";
@@ -1341,12 +1341,12 @@ Bathroom
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR    "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_SWT1_INV_CTR)
+      DEFINE_APP_SVALUE("D6",D_GPIO_FUNCTION_SWT1_CTR)
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      DEFINE_APP_SVALUE("D7",D_GPIO_FUNCTION_DOOR_OPEN_CTR)
+      DEFINE_END_SVALUE("D7",D_GPIO_FUNCTION_DOOR_OPEN_CTR)
       #endif
-      DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LED1_CTR)
+      // DEFINE_END_SVALUE("D4",D_GPIO_FUNCTION_LED1_CTR)
     "},"
     DEFINE_END_SVALUE("BASE",D_MODULE_NAME_USERMODULE_CTR)
   "}";
@@ -1376,22 +1376,10 @@ Bathroom
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule0\":{"
-      // "\"Trigger\":{"
-      //   "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-      //   "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-      //   "\"DeviceName\":0,"
-      //   "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
-      // "},"
-      // "\"Command\":{"
-      //   "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-      //   "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-      //   "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-      //   "\"State\":2" // Started
-      // "}"
-      
-    "\"Trigger\":{"
+
+  // for PIR to follow
+   "\"Rule0\":{"
+      "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
@@ -1401,27 +1389,56 @@ Bathroom
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
-        "\"State\":\"FollowInv\""
+        "\"State\":\"Follow\""
       "}"
-    "}"
+
+
+    // // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    // "\"Rule0\":{"
+    //   // "\"Trigger\":{"
+    //   //   "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+    //   //   "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //   //   "\"DeviceName\":0,"
+    //   //   "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+    //   // "},"
+    //   // "\"Command\":{"
+    //   //   "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //   //   "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //   //   "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+    //   //   "\"State\":2" // Started
+    //   // "}"
+      
+    // "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":0,"
+    //     "\"State\":\"On\""
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":0," 
+    //     "\"State\":\"FollowInv\""
+    //   "}"
+    // "}"
 
 
 
-    "},"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":\"On\"" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":\"FollowInv\""
-      "}"
+    // "},"
+    // // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+    // "\"Rule1\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":1,"
+    //     "\"State\":\"On\"" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+    //     "\"State\":\"FollowInv\""
+    //   "}"
     "}"
 
 
@@ -1798,6 +1815,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
     
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
 
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1 // temporary force the value, should be handled by command
+
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
@@ -1857,7 +1876,7 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
@@ -1976,19 +1995,19 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
-    // PIR detected
+      // for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":2" // Started
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
       "}"
     // "},"
     // "\"Rule1\":{"
@@ -2053,6 +2072,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
  * eg power, G, I2C, I2C
  * eg power, G, Lux I2C needs 2, Motion
  * 
+ * 
+ * livingroom sensor will be divided into "drivewaysensor", where driveway will be esp32_cam + PIR and maybe ultrasonic
  * 
  * */
 #ifdef DEVICE_LIVINGROOMSENSOR
@@ -2384,7 +2405,7 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "\"D5\":\"" D_GPIO_FUNCTION_REL1_INV_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D7\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR     "\","
+      "\"D7\":\"" D_GPIO_FUNCTION_SWT1_CTR     "\","
       #endif 
       "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
@@ -2435,18 +2456,18 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule0\":{"
+     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
       "}"
     "}"
   "}";
@@ -3125,67 +3146,51 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 #endif
 
 
-
-
-
-
-
-
-
-
-#ifdef DEVICE_GAZEBO_CONTROLLER
-  #define DEVICENAME_CTR          "gazebo_controller"
-  #define DEVICENAME_FRIENDLY_CTR "Gazebo Controller"
-
-  //to become a sonoff 4ch (non pro)
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 4
+#ifdef DEVICE_GAZEBO_SONOFF_4CHPRO
+  #define DEVICENAME_CTR          "gazebo_sonoff_4chpro"
+  #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
   
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  // #define USE_MODULE_DRIVERS_BUZZER
+  #define USE_MODULE_DRIVERS_RELAY
+
+  // #define USE_MODULE_CONTROLLER_SONOFF_4CHPRO
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+
+  // default key# = relay#
+  // RF Key433 using rules to match patterns then need limit to how often RF matches 
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"D5\":\"" D_GPIO_FUNCTION_REL1_INV_CTR "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_REL2_INV_CTR "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_REL3_INV_CTR "\","
-      "\"D0\":\"" D_GPIO_FUNCTION_REL4_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Red"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Yellow"
-  #define D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "Blue"
-  #define D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "White"
-
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Gazebo"
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_2_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_3_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
 
 #endif
 
 
 // gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
+
+/**
+ * @brief Presence detector
+ * - PIR 
+ * - BME280
+ * - BH1750
+ * 
+ * Ethernet Interface Layout A [gnd, 5v, pir, -, -, 3v3, i2c_data, i2c_clock] where [w/o, o/w, w/g, bl/w, w/bl, g/w, w/br, br/w] == kitchen/utility are the same, probably make the same for livingroom, same room? 3d print a box
+ */
+
 #ifdef DEVICE_GAZEBO_SENSOR
   #define DEVICENAME_CTR          "gazebosensor"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
   
-  #define USE_SSIDS_OUTSIDE_HOUSE
-
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
@@ -3203,7 +3208,7 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
       "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D5\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR "\""
+      "\"D5\":\"" D_GPIO_FUNCTION_SWT1_CTR "\""
       #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -3224,20 +3229,20 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+  "{"    
+    // for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
       "}"
     "}"
   "}";
@@ -3288,6 +3293,93 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   "}";
 
 #endif
+
+
+
+
+#ifdef DEVICE_STRING_ROSEBUD
+  #define DEVICENAME_CTR          "string_rosebud"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "String Rosebud"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+   #define ESP32
+    
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+  #define ENABLE_CRGBPALETTES_IN_PROGMEM
+  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  // #define USE_SK6812_METHOD_DEFAULT
+
+  // Hard coded to alternate pin until I make this template based
+  #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+  #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS2812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":15," 
+
+    "\"PaletteEdit\": {"
+    "\"ColourPalette\": 15,"
+    "\"Data\": ["
+      "4,6,0,0,0,"
+      "252, 3, 45,"
+      "252, 40, 3,"
+      "252, 3, 177,"
+      "128, 1, 122"
+    "]"
+  "},"
+    
+
+    "\"Effects\":{"
+      "\"Function\":\"Static\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      #endif
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+
+#endif
+
+
+
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -4150,6 +4242,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
  * Potentionally to be merged with landingpanel controller
  * BME, RGB
  * DHT in place, not part of sensor (wired to heating) 
+ * 
+ * 
  * */
 #ifdef DEVICE_MASTERBEDROOMSENSOR
   #define DEVICENAME_CTR          "masterbedroomsensor"
@@ -4333,7 +4427,34 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
  
-
+/**
+ * @brief 
+ * * Ethernet Interface Layout A 
+ * [w/o, o/w, w/g, bl/w, w/bl, g/w, w/br, br/w]
+ * [gnd,  5v, pir,    RGB,    -, 3v3, i2c_data, i2c_clock] where  == kitchen/utility are the same, probably make the same for livingroom, same room? 3d print a box
+ *
+ * LAYOUT_B_2022Q1 - GPIO_ABC_NO_UART
+ * 
+ * This will be used to properly incorporate motion AND doorsensor opening, thus, making the utiltiysensor work properly
+ * 
+ * 
+ * New PCB
+ * 
+ * - PIR GPIO_A
+ * - BME
+ * - BH1
+ * 
+ * - DOOR reed
+ * - DOOR lock
+ * - RGB_Data
+ * 
+ * [GND, 5V, PIR, ICD2, I2CC, 3V3, Reed, Lock]
+ * 
+ * 22 = RGB
+ * 21 = PIR
+ * 
+ * 
+ */
 
 #ifdef DEVICE_BEDROOMSENSOR
   #define DEVICENAME_CTR          "bedroomsensor"
@@ -4866,6 +4987,60 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 
 
 
+#ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE
+  #define DEVICENAME_CTR          "h801_bedroom_wardrobe"
+  #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 2"
+  
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1   
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_PWM
+
+  // need to add motion here
+
+  // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
+
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+  
+  #define STRIP_SIZE_MAX 1 // PWM type, set size to 1
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBwc\","
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
+      "\"" D_JSON_FUNCTION "\":8"//\"Sun Elevation RGBCCT Solid Palette 01\""
+    "},"
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME "\":1,"
+      "\"" D_JSON_RATE "\":5,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
+    "},"
+    "\"" D_JSON_CCT_TEMP "\":300,"
+    "\"" D_JSON_HUE "\":25,"
+    "\"" D_JSON_SAT "\":100,"
+    "\"" D_JSON_COLOUR_PALETTE "\":67,"
+    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+  "}";
+    
+#endif
+
 #ifdef DEVICE_RGBNOTIFICATION_01
   #define DEVICENAME_CTR          "rgbnotification_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
@@ -5224,29 +5399,138 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 #endif
 
 
-#ifdef DEVICE_HVAC_HAIRDRYER 
-  #define DEVICENAME_CTR          "hvac_hairdryer"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed HVAC with Energy Sensor"
+// #ifdef DEVICE_HVAC_HAIRDRYER 
+//   #define DEVICENAME_CTR          "hvac_hairdryer"
+//   #define DEVICENAME_FRIENDLY_CTR "Testbed HVAC with Energy Sensor"
+
+//   //#define FORCE_TEMPLATE_LOADING
+//   #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+   
+//   // #define ENABLE_BUG_TRACING
+//   //#define ENABLE_MQTT_DEBUG_MESSAGES
+
+//   //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
+//   // #define ENABLE_HVAC_DEBUG_TIMES
+//   // #define DISABLE_WEBSERVER
+
+//   // 
+  
+//   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+//   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+//   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+
+//   #define USE_MODULE_CONTROLLER_HVAC
+//   #define HEATING_DEVICE_MAX 1
+//   #define HEATING_DEVICE_MAX 1
+  
+//   // #define USE_MODULE_SENSORS_INTERFACE  
+//   // #define USE_MODULE_SENSORS_DHT
+//   // // #define USE_MODULE_SENSORS_BME
+//   // #define USE_MODULE_SENSORS_DS18X
+//   // #define USE_MODULE_SENSORS_REMOTE_DEVICE
+
+//   // #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+//   // #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+  
+//   // #define USE_MODULE_ENERGY_INTERFACE
+//   // #define USE_MODULE_ENERGY_PZEM004T_V3
+
+//   #define USE_MODULE_DRIVERS_INTERFACE
+//   #define USE_MODULE_DRIVERS_RELAY
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       "\"19\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR     "\","
+//       "\"18\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+//       "\"LBI\":\"" D_GPIO_FUNCTION_BUILTIN_LED1_CTR  "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "}";
+  
+//   #define D_DEVICE_DRIVER_RELAY_0_NAME "Room"
+
+//   #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Room"
+
+//   #define D_DEVICE_SENSOR_BME_0_NAME "Room_BME"
+
+//   #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
+//   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+//   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+//   #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+//   #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+
+//   #define USE_FUNCTION_TEMPLATE
+//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//   "{"
+//     "\"" D_JSON_DEVICENAME "\":{"
+//       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+//       "],"
+//       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+//         "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+//       "],"
+//       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
+//       "],"
+//       "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
+//       "],"
+//       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
+//       "]"
+//     "},"
+//     "\"" D_JSON_SENSORADDRESS "\":{"
+//       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+//         D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+//         D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
+//       "]"  
+//     "},"
+//     "\"" "HVACZone" "\":{"
+//       "\"" "SetSensor" "\":["
+//         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+//       "],"
+//       "\"" "SetOutput" "\":["
+//         "{"
+//           "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+//           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+//           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+//         "}"
+//       "]"
+//     "}"
+//   "}";
+  
+// #endif
+
+
+/**
+ * New heating controller, designed to work from single device to multizone system
+ * */
+#ifdef DEVICE_HVAC_HAIRDRYER
+  #define DEVICENAME_CTR          "hvac_bedroom_dryer"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Bedroom Hairdryer"
 
   //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
+  // #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
    
   // #define ENABLE_BUG_TRACING
   //#define ENABLE_MQTT_DEBUG_MESSAGES
 
   //#define FORCE_DEVICENAME_CLEAR_ON_BOOT
   // #define ENABLE_HVAC_DEBUG_TIMES
-  // #define DISABLE_WEBSERVER
-
-  // 
+  #define DISABLE_WEBSERVER
   
   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
   #define USE_MODULE_CONTROLLER_HVAC
-  #define HEATING_DEVICE_MAX 1
-  #define MAX_ZONES 1
+  #define HEATING_DEVICE_MAX 4
   
   // #define USE_MODULE_SENSORS_INTERFACE  
   // #define USE_MODULE_SENSORS_DHT
@@ -5254,11 +5538,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   // #define USE_MODULE_SENSORS_DS18X
   // #define USE_MODULE_SENSORS_REMOTE_DEVICE
 
-  // #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
-  // #define REMOTE_SENSOR_JSON_NAME "Bedroom"
-  
-  // #define USE_MODULE_ENERGY_INTERFACE
-  // #define USE_MODULE_ENERGY_PZEM004T_V3
+  #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  #define REMOTE_SENSOR_JSON_NAME "Bedroom"
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
@@ -5269,18 +5550,37 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      "\"19\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR     "\","
-      "\"18\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"LBI\":\"" D_GPIO_FUNCTION_BUILTIN_LED1_CTR  "\""
+      "\"D5\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"D1\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
+      // "\"D6\":\"" D_GPIO_FUNCTION_REL3_CTR      "\","
+      "\"D6\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\""
+      // "\"D0\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      // "\"D7\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\","
+
+      // "\"D5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+      
+      // "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR   "\""    // LBI causing failed boot here
+      
+      // "\"D5\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      // "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
   #define D_DEVICE_DRIVER_RELAY_0_NAME "Room"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Desk"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "Test1"
+  #define D_DEVICE_DRIVER_RELAY_3_NAME "Test2"
 
   #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Room"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Desk"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Test1"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Test2"
 
-  #define D_DEVICE_SENSOR_BME_0_NAME "Room_BME"
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Room_DHT"
+  #define D_DEVICE_SENSOR_DHT_1_NAME "Desk_DHT"
 
   #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
 
@@ -5288,49 +5588,87 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
   #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
   #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+  #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"
+  #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,135,126,242]"
+  #define D_DEVICE_SENSOR_DB18S20_3_NAME        "Immersion_Heater"
+  #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,195,135,215,193]"
+  #define D_DEVICE_SENSOR_DB18S20_4_NAME        "Tank_Top"
+  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,205,202,237,231]"
+  #define D_DEVICE_SENSOR_DB18S20_5_NAME        "Tank_Middle"
+  #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,205,206,170,25]"
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
       "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
         D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
+        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
       "]"  
     "},"
     "\"" "HVACZone" "\":{"
       "\"" "SetSensor" "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
       "],"
       "\"" "SetOutput" "\":["
         "{"
           "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\",\"Cooling\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Cooling\"" "]"
         "}"
       "]"
     "}"
   "}";
   
 #endif
+
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************

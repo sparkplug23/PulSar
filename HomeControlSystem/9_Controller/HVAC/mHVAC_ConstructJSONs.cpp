@@ -25,6 +25,7 @@
 
 uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level){
 
+  // DEBUG_LINE_HERE;
   char buffer[50];
 
   JBI->Start();
@@ -47,6 +48,7 @@ uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level){
   
+  // DEBUG_LINE_HERE;
   char buffer[50];
   
   JBI->Start();
@@ -99,6 +101,7 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_ProgramActive(uint8_t json_level){
   JBI->Start();
+  // DEBUG_LINE_HERE;
     JBI->Level_Start_P(D_JSON_RELAY);   
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_US, GetHeatingRelay(DEVICE_US_ID));
       // JBI->Add(D_HVAC_SENSOR_NAME_SHORT_DS, GetHeatingRelay(DEVICE_DS_ID));
@@ -136,6 +139,7 @@ uint8_t mHVAC::ConstructJSON_ProgramActive(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level){
 
+  // DEBUG_LINE_HERE;
   char buffer[50];
   JBI->Start();
   for(int device_id=0;device_id<settings.active_zones;device_id++){
@@ -153,6 +157,7 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level){
 
+  // DEBUG_LINE_HERE;
   char buffer[25];
 
   JBI->Start();
@@ -171,6 +176,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level){
 
+  // DEBUG_LINE_HERE;
   return 0;
 
 }
@@ -178,6 +184,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level){
 
+  // DEBUG_LINE_HERE;
   return 0;
 
 }
@@ -185,6 +192,10 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level){
 
 uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
 
+  // DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   JBI->Start();
     JBI->Add("active_zones", settings.active_zones);
 

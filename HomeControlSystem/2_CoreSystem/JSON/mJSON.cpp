@@ -3,12 +3,16 @@
 
 char* dtostrfd2(double number, unsigned char prec, char *s)
 {
-  if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
-    strcpy(s, "null");
-    return s;
-  } else {
+
+  // Already included in "dtostrf"
+  // if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
+  //   // strcpy(s, "null"); // error fix? turn off
+  //   return s;
+  // } else {
     return dtostrf(number, 1, prec, s);
-  }
+  // }
+
+  // return s;
 }
 
 
