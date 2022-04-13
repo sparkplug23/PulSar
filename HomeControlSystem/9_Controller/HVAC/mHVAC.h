@@ -236,8 +236,8 @@ class mHVAC :
       struct SENSOR_STATE
       {
         //Add ROC here?
-        float temperature;
-        float humidity;
+        float temperature = 0;
+        float humidity = 0;
         /**
          * @brief This is the sensor module id (ie dht, db18s20, bme) so it knows which class to ask for temp readings 
          * */

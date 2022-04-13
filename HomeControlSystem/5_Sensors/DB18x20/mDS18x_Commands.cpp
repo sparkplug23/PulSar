@@ -47,7 +47,7 @@ void mDS18X::parse_JSONCommand(JsonParserObject obj)
       SetIDWithAddress(original_device_id++, address_temp);
       Serial.println();
 
-      DEBUG_LINE_HERE_PAUSE;
+      // DEBUG_LINE_HERE_PAUSE;
 
     }
     

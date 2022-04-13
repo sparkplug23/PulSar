@@ -62,6 +62,7 @@
 // #define DEVICE_HVAC_KITCHEN
 // #define DEVICE_HVAC_BEDROOM_RAD
 // #define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
+// #define DEVICE_HVAC_OIL_RADIATOR
 
 /**
  *  DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- DEV -- -- 
@@ -163,6 +164,216 @@
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
+
+
+/**
+ * New heating controller, designed to work from single device to multizone system
+ * For development of hvac with pzem to monitor power
+ * 
+ * Taken from testbeds for insitu development and openhab integration, this will remain the primary hvac dev code (unless I use a 4 LED tester)
+ * Long USB will be used for always debugging
+ * 
+ * To include:
+ *  - BME? If I could place this on the plug into the wall, it would be elevated heat sensing? with 1m cable
+ *  - Optional Ds18 that can be added to oil heater
+ *  - Relay output (requiring level shifter)
+ *  - PZEM at 5v, via level shifter
+ *  - Power with mains internal? (possible danger with sensors?) -- 
+ *  - Since pzem, this needs to esp32, but good practive for house hvac
+ * 
+ * */
+#ifdef DEVICE_HVAC_OIL_RADIATOR 
+  #define DEVICENAME_CTR          "hvac_oil_radiator"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Oil Radiator with Energy Sensor"
+
+  // #define ENABLE_BUG_TRACING
+  //#define ENABLE_MQTT_DEBUG_MESSAGES
+
+  #define ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+
+  #define ENABLE_HVAC_DEBUG_TIMES
+  #define DISABLE_WEBSERVER
+
+  #define USE_MODULE_CONTROLLER_HVAC
+
+  #define USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
+
+  
+    /**
+     * @brief 
+     * Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
+     * 
+     */
+  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  
+
+  #define ENABLE_DEVFEATURE_HVACTESTBED_CODE // for the testbed, so it does not ruin the heating code until functional
+
+    #ifdef ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+      #define HEATING_DEVICE_MAX 4
+      #define HEATING_DEVICE_MAX 4
+    #else  
+      #define HEATING_DEVICE_MAX 1
+      #define HEATING_DEVICE_MAX 1
+    #endif // ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+
+    #define ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS   
+
+  
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_DS18X  // not working well on esp32, unreliable
+  #define USE_MODULE_SENSORS_REMOTE_DEVICE
+
+  #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+  
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_PZEM004T_V3
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      #endif // USE_MODULE_ENERGY_PZEM004T_V3
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif // USE_MODULE_SENSORS_BME
+      #ifdef USE_MODULE_SENSORS_DS18X
+      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
+      #endif // USE_MODULE_SENSORS_DS18X
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      #ifdef ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+      "\"25\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\","
+      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\","
+      #endif // ENABLE_HVAC_DEBUG_PINS_FOR_TESTING
+      #endif // USE_MODULE_DRIVERS_RELAY
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""      
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "DriverZone0"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "DriverZone1"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "DriverZone2"
+  #define D_DEVICE_DRIVER_RELAY_3_NAME "DriverZone3"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Zone0"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Zone1"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Zone2"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Zone3"
+
+  #define D_DEVICE_SENSOR_ZONE_0_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_1_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_2_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_3_NAME REMOTE_SENSOR_JSON_NAME // tESTING REMOTE SENSOR VIA MQTT (LATER OPTIONS SHOULD INCLUDE DIRECT udp) "BME0"
+
+  #define D_DEVICE_SENSOR_BME_0_NAME "BME0"
+  #define D_DEVICE_SENSOR_BME_1_NAME "BME1"
+  #define D_DEVICE_SENSOR_BME_2_NAME "BME2"
+  #define D_DEVICE_SENSOR_BME_3_NAME "BME3"
+
+  #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
+  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Room_DB18S20"
+  // // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,170,67,3,30,19,2,25]"
+  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,68,132,149,240,1,60,87]"
+
+
+
+  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Desk_DB18S20"
+  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,194,102,202,187]"
+
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Cooker"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
+      "],"
+      // "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+      //   "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\"" //","
+      //   // "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+      // "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      // "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+      //   D_DEVICE_SENSOR_DB18S20_0_ADDRESS //","
+      //   // D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
+      // "],"  
+      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS 
+      "]"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_ZONE_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_ZONE_1_NAME "\"," // All use the same
+        "\"" D_DEVICE_SENSOR_ZONE_2_NAME "\","
+        "\"" D_DEVICE_SENSOR_ZONE_3_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_3_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Cooling\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"" D_JSON_ENERGY "\":{"
+        "\"DeviceCount\":1"    
+    "}"
+  "}";
+  
+#endif
 
 
 
@@ -4815,7 +5026,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
   
   // Test ultrasonic oilfurnace code
-  // #define USE_MODULE_CONTROLLER_OILFURNACE
+  // #define USE_MODULE_CONTROLLER_TANKVOLUME
   // #define USE_MODULE_SENSORS_ULTRASONICS  
   // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
   

@@ -126,9 +126,9 @@ char* GetPtr();
         (*writer.length>1)&&
         (writer.buffer[*writer.length-1]!='{')&&
         (writer.buffer[*writer.length-1]!='[')      
-      ){ 
-        
-        *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,","); }
+      ){   
+        *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,","); 
+      }
 
       #ifdef DEBUG_JSON_BUILDER
       char buffer_id[50];
@@ -145,23 +145,42 @@ char* GetPtr();
       }else
       if(is_char_type<T>::value){   
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value);
-      }else
-      if(is_float_type<T>::value){ 
+      }
+      // #ifndef USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
+      else
+      if(is_float_type<T>::value){ // Maybe phase out?
         // float f = static_cast<float>(value);
-        float f = 0;//12.35;    
-        
-       memcpy(&f,&value,sizeof(f)); // causing crashing
-        char fvalue[40] = {0}; 
-        
+        float f = 0;//12.35;            
+       memcpy(&f,&value,sizeof(f)); // causing crashing "stack smashing"
+        char fvalue[40] = {0};         
         // dtostrfd2(f,3,fvalue);
-        
         dtostrf(f, 5, 2, fvalue);
-
-
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);
       }
+      // #endif // USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
 
     }
+
+    #ifdef USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
+    void Addf(float value){
+      if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+        return;
+      
+      if(
+        (*writer.length>1)&&
+        (writer.buffer[*writer.length-1]!='{')&&
+        (writer.buffer[*writer.length-1]!='[')      
+      ){         
+        *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,","); 
+      }
+
+      char fvalue[40] = {0}; 
+      dtostrf(value, 5, 2, fvalue);
+      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);
+    
+
+    }
+    #endif // USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
 
 
     template <typename T>

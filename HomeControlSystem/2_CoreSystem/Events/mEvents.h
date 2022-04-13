@@ -70,7 +70,7 @@ class mEvent
       /**
        * jsoncommands stored in a dlist
        * */
-      int8_t json_commands_dlist_id = -1;
+      uint8_t json_commands_dlist_id = 0; // 0 = none, 1+ is the count
     };
 
 };

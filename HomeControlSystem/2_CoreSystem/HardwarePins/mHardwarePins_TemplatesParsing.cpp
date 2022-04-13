@@ -331,7 +331,7 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t i = 0; i < ARRAY_SIZE(pCONT_set->Settings.module_pins.io); i++) 
   { //all pins
     
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
     // #ifdef ENABLE_LOG_LEVEL_INFO
     //   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),pCONT_set->Settings.module_pins.io[i],i);
     // #endif // ENABLE_LOG_LEVEL_INFO
@@ -382,9 +382,9 @@ void mHardwarePins::GpioInit(void)
 
   }
   
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   pCONT_set->my_module_flag = ModuleFlag();
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
   #ifdef USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
   AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_MODULE "GpioInit DISABLED with \"USE_DEBUG_DISABLE_GLOBAL_PIN_INIT\""));
@@ -392,10 +392,10 @@ void mHardwarePins::GpioInit(void)
   #endif // USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
   
   
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   /**
    *  Take module io and configure pins
    * Unlike Tas, each pin function has its unique name maintained (ie SWT_INV for switch inverted maintained its ID, and it not saved simply as INV then shifted back to standard SWT. Internal classes must handle this)
@@ -403,7 +403,7 @@ void mHardwarePins::GpioInit(void)
   for (uint8_t index = 0; index < ARRAY_SIZE(pCONT_set->my_module.io); index++) 
   {
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   // uint8_t real_pin = UsablePinToTemplateArrayIndex(pCONT_set->my_module.io[i]);
 
 //problems starts here
@@ -458,7 +458,7 @@ void mHardwarePins::GpioInit(void)
     
   }//end fof
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
   #ifdef ESP8266
   /**
@@ -473,7 +473,7 @@ void mHardwarePins::GpioInit(void)
       }
   #endif
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
 
 /**
@@ -578,19 +578,20 @@ void mHardwarePins::GpioInit(void)
 //new
 // Set any non-used GPIO to INPUT - Related to resetPins() in support_legacy_cores.ino
   // Doing it here solves relay toggles at restart.
-  for (uint32_t i = 0; i < ARRAY_SIZE(pCONT_set->my_module.io);
-  
-  
-  // sizeof(pCONT_set->my_module.io); 
-  i++){//ARRAY_SIZE(my_module.io); i++) {
-  DEBUG_LINE;
+  for (uint32_t i = 0; 
+                i < ARRAY_SIZE(pCONT_set->my_module.io);
+                i++
+  ){
+    
     uint32_t mgpio = ValidPin_AdjustGPIO(i, pCONT_set->my_module.io[i]);
     
-  DEBUG_LINE;
+    DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
+    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
     #endif // ENABLE_LOG_LEVEL_INFO
-    if (((i < 6) || (i > 11)) && (0 == mgpio)) {  // Skip SPI flash interface
+    
+    if (((i < 6) || (i > 11)) && (0 == mgpio))
+    {  // Skip SPI flash interface
 
       // if((i == 2)&&(pCONT_set->))
 
@@ -619,9 +620,19 @@ void mHardwarePins::GpioInit(void)
       pCONT_sup->wire = new TwoWire();
       #else
       pCONT_sup->wire = new TwoWire(0);
+      // pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Trying to start i2c 2-wire"));
       #endif
     }
-    pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
+    // if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))
+    // {
+    //   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire"));
+    // }
+    // else
+    // {
+    //   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
+
+    // }
   } // i2c_enabled
 #endif  // USE_I2C
 
@@ -683,51 +694,34 @@ void mHardwarePins::GpioInit(void)
   // else {
     if (!pCONT_set->Settings.light_settings.type) { pCONT_set->devices_present = 0; }
 
-// Set PWM immediately to limit unknown states
-#ifdef USE_PWM
- for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
+  /**
+   *  Set PWM immediately to limit unknown states
+   * **/
+  #ifdef USE_PWM
+  for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
     if (PinUsed(GPIO_PWM1_ID, i)) {
       pinMode(Pin(GPIO_PWM1_ID, i), OUTPUT);
-      
-#ifdef ESP32
+
+      #ifdef ESP32
       analogAttach(Pin(GPIO_PWM1_ID, i),i);
       // analogWriteFreqRange(i,pCONT_set->Settings.pwm_frequency,pCONT_set->Settings.pwm_range);
-#endif
+      #endif
 
-#ifdef ESP8266
+      #ifdef ESP8266
       if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
         analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
       } else {
         pCONT_set->pwm_present = true;
         analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
       }
-   
-#endif // ESP8266
+      #endif // ESP8266
+    
     }
     
   }
-  #endif
+  #endif // USE_PWM
 
   // }
-
-
-
-/**
- * @brief Configure addressable light (phase out? handled in init of light)
- * 
- */
-#ifdef USE_WS2812
-
-//bring back, part of light types
-
-  if (PinUsed(GPIO_RGB_DATA_ID)){  // RGB led
-    pCONT_set->devices_present++;
-    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;
-    // AddLog(LOG_LEVEL_TEST, PSTR("Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
-  }else{
-    // AddLog(LOG_LEVEL_TEST, PSTR("NOT Settings.light_settings.type && (PinUsed(GPIO_RGB_DATA_ID))"));
-  }
-#endif  // USE_WS2812
 
 
 /**
@@ -745,12 +739,10 @@ void mHardwarePins::GpioInit(void)
       if (PinUsed(GPIO_PWM1_ID,i)) {
         pCONT_set->pwm_present = true;
         pinMode(GetPin(GPIO_PWM1_ID,i), OUTPUT);
-        
-#ifdef ESP8266
+        #ifdef ESP8266
         analogWrite(GetPin(GPIO_PWM1_ID,i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
         Serial.println(F("Setting analogWrite with basic light type"));
-        
-#endif // ESP8266
+        #endif // ESP8266
       }
     }
   }
@@ -759,10 +751,10 @@ void mHardwarePins::GpioInit(void)
   //DEBUG_PRINTF("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
   #endif
 
-  #ifdef USE_MODULE_DRIVERS_LEDS
-  pCONT_led->SetLedPower(pCONT_set->Settings.ledstate &8);
-  pCONT_led->SetLedLink(pCONT_set->Settings.ledstate &8);
-  #endif // USE_MODULE_DRIVERS_LEDS
+  // #ifdef USE_MODULE_DRIVERS_LEDS
+  // pCONT_led->SetLedPower(pCONT_set->Settings.ledstate &8);
+  // pCONT_led->SetLedLink(pCONT_set->Settings.ledstate &8);
+  // #endif // USE_MODULE_DRIVERS_LEDS
 
 
   DEBUG_LINE_HERE;

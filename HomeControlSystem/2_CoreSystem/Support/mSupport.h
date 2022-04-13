@@ -41,7 +41,7 @@ enum STATE_NUMBER_IDS{
   STATE_NUMBER_TOGGLE_ID,
   STATE_NUMBER_BLINK_ID,
   STATE_NUMBER_BLINK_OFF_ID,
-  STATE_NUMBER_INCREMENT_ID, //eg fans, increase
+  STATE_NUMBER_INCREMENT_ID, //eg fans, increase /// Also add a "STATE_NUMBER_INCREMENT_NO_WRAP_ID"
   STATE_NUMBER_DECREMENT_ID,
   STATE_NUMBER_FOLLOW_ID,
   STATE_NUMBER_FOLLOW_INV_ID,
@@ -418,6 +418,7 @@ class mSupport :
     int8_t I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len);
     void I2cScan(char *devs, unsigned int devs_len);
     bool I2cDevice(uint8_t addr);
+    bool I2cDevice_IsConnected(uint8_t addr) ;
     void I2cResetActive(uint32_t addr, uint32_t count = 1);
     void I2cSetActive(uint32_t addr, uint32_t count = 1);
     void I2cSetActiveFound(uint32_t addr, const char *types);

@@ -5,6 +5,11 @@
 const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_CTR = D_MODULE_SENSORS_DOOR_CTR;
 const char* mDoorSensor::PM_MODULE_SENSORS_DOOR_FRIENDLY_CTR = D_MODULE_SENSORS_DOOR_FRIENDLY_CTR;
 
+// Should this be a controller? Since the underlying input is from switches sensor. This would also mean motion should be controller.
+// But then how does motion + others become an "event"
+// Event should be anything really, not just switch ie power level threshold crossed
+
+
 int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
 {
   
@@ -28,6 +33,14 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_LOOP: 
       EveryLoop();
+    break;
+    case FUNC_EVERY_SECOND:
+
+      if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+      {
+        AddLog(LOG_LEVEL_TEST, PSTR("DoorLockPin=%d"), digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+      }
+
     break;
     /************
      * MQTT SECTION * 
@@ -106,7 +119,7 @@ void mDoorSensor::EveryLoop(){
 
   if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
 
-AddLog(LOG_LEVEL_TEST, PSTR("IsDoorOpen()"));
+    AddLog(LOG_LEVEL_TEST, PSTR("IsDoorOpen()"));
 
     door_detect.state = IsDoorOpen();
     door_detect.tDetectTimeforDebounce = millis();

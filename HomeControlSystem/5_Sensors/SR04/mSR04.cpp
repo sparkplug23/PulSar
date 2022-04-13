@@ -1,22 +1,4 @@
 
-/*
-  xsns_22_sr04.ino - SR04 ultrasonic sensor support for Tasmota
-
-  Copyright (C) 2021  Nuno Ferreira and Theo Arends
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "mSR04.h"
 
 #ifdef USE_MODULE_SENSORS_SR04
@@ -28,13 +10,12 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
     *******************/
     case FUNC_PRE_INIT:
-      Pre_Init();
+      Pre_Init();  // should "pre_init" ne chanegd to pin/gpio/hardware pin ??
     break;
     case FUNC_INIT:
       Init();
@@ -47,11 +28,11 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
-      EveryLoop();
-    break;  
     case FUNC_EVERY_SECOND:
-      Sr04TReading();
+      EverySecond();
+    break;
+    case FUNC_EVERY_MINUTE:
+      EveryMinute();
     break;
     /************
      * COMMANDS SECTION * 
@@ -81,19 +62,31 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-void mSR04::parse_JSONCommand(JsonParserObject obj)
-{
-
-}
-
-
 
 void mSR04::Pre_Init(void)
 {
-  if (pCONT_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS_ID) && pCONT_pins->PinUsed(GPIO_PZEM0XX_TX_ID))
+  if (pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID))
   {
     settings.fEnableSensor = true;
   }
+}
+
+
+void mSR04::Config_Filters()
+{
+
+  #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+  /*  As we said in the previous post, in the exponential type filter the amount of smoothing is controlled through the alpha factor. It is not easy to find a simple relationship with the cut-off frequency, among other things, because the sampling frequency is unknown and variable.
+      What we do know is that the lower the alpha factor, the greater the smoothing of the signal, and therefore, the lower the cut-off frequency. Remember that, as a negative point, the delay between the filtered signal and the original signal will also be greater.
+      In a bandpass and stop band filter we will have two alpha factors that we will call Low and High that correspond, respectively, with the lower and upper cut frequency.
+      Below we will see the effect of these factors with the results of the bandpass filter for different combinations of alpha Low and High applied to the same signal.
+      These are the results for an alpha Low of 0.025 and alpha High of 0.5. Note that the lower filter has removed the bias after a few oscillations, while the upper filter has softened some of the high-frequency noise
+  */
+  readings.average_EMA.filter  = new SingleEMAFilter<float>(readings.average_EMA.alpha);  // alpha = 2/(N-1) so for N=60 ie 1/sec for 1 minute
+  #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+  #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+  readings.average_DEMA.filter = new DoubleEMAFilter<float>(readings.average_DEMA.alpha1, readings.average_DEMA.alpha2);
+  #endif // ENABLE_DEVFEATURE_SR04_SINGLE_EMA_FILTERING
 
 }
 
@@ -101,31 +94,55 @@ void mSR04::Pre_Init(void)
 void mSR04::Init(void)
 {
 
+  if (sonar_serial==nullptr && sonar==nullptr) {
+    ModeDetect();
+  }
+
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_SR04 "ModeDetect Complete"));
+
+  #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+  // Default weight values
+  readings.average_EMA.alpha = 2.0f / (100.0f-1.0f);
+  #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+  #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+  readings.average_DEMA.alpha1 = 2.0f / (100.0f-1.0f);
+  readings.average_DEMA.alpha2 = 1-(2.0f / (100.0f-1.0f));
+  #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+
+  Config_Filters();
+
+  #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+  readings.conversion_settings.flag_distance_conversion_method = EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_TEMPERATURE_COMPENSATED__ID;
+  readings.temp_adj.flag_enabled = true;
+  #endif
 
 }
 
 
-void mSR04::EveryLoop()
+uint8_t mSR04::ModeDetect(void)
 {
-
-
-}
-
-
-uint8_t mSR04::Sr04TModeDetect(void)
-{
-  sr04_type = 0;
-  if (!pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID)) { return sr04_type; }
+  sr04_type = 1; // default
+  if (!pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID))
+  {
+    AddLog(LOG_LEVEL_TEST, PSTR("Sr04: TModeDetect::Error"));
+    return sr04_type; 
+  }
 
   int sr04_echo_pin = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);
   int sr04_trig_pin = (pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID)) ? pCONT_pins->GetPin(GPIO_SR04_TRIG_ID) : pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);   // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
   sonar_serial = new TasmotaSerial(sr04_echo_pin, sr04_trig_pin, 1);
 
-  if (sonar_serial->begin(9600,1)) {
+  if (sonar_serial->begin(9600,1))
+  {
     AddLog(LOG_LEVEL_TEST,PSTR("SR04: Detect mode"));
-
-    if (sr04_trig_pin != -1) {
-      sr04_type = (Sr04TMiddleValue(Sr04TMode3Distance(), Sr04TMode3Distance(), Sr04TMode3Distance()) != NO_ECHO) ? 3 : 1;
+    if (sr04_trig_pin != -1) 
+    {      
+      // sr04_type = (
+      //   MiddleValue(
+      //     Mode3Distance(), 
+      //     Mode3Distance(), 
+      //     Mode3Distance()
+      //   ) != NO_ECHO) ? 3 : 1;
     } else {
       sr04_type = 2;
     }
@@ -136,21 +153,28 @@ uint8_t mSR04::Sr04TModeDetect(void)
   if (sr04_type < 2) {
     delete sonar_serial;
     sonar_serial = nullptr;
+    AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_SR04 "Release TasmotaSerial"));
     if (-1 == sr04_trig_pin) {
       sr04_trig_pin = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
     }
     sonar = new NewPing(sr04_trig_pin, sr04_echo_pin, 300);
+    
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SR04 "NewPing %d %d"), sr04_trig_pin, sr04_echo_pin);
+
   } else {
     if (sonar_serial->hardwareSerial()) {
       // ClaimSerial();
+      AddLog(LOG_LEVEL_INFO,PSTR("ClaimSerial NotEnabled %d %d"), sr04_trig_pin, sr04_echo_pin);
     }
   }
 
   AddLog(LOG_LEVEL_INFO,PSTR("SR04: Mode %d"), sr04_type);
   return sr04_type;
+
 }
 
-uint16_t mSR04::Sr04TMiddleValue(uint16_t first, uint16_t second, uint16_t third)
+
+uint16_t mSR04::MiddleValue(uint16_t first, uint16_t second, uint16_t third)
 {
   uint16_t ret = first;
   if (first > second) {
@@ -167,22 +191,23 @@ uint16_t mSR04::Sr04TMiddleValue(uint16_t first, uint16_t second, uint16_t third
   }
 }
 
-uint16_t mSR04::Sr04TMode3Distance() {
 
-    sonar_serial->write(0x55);
-    sonar_serial->flush();
-
-    return Sr04TMode2Distance();
+uint16_t mSR04::Mode3Distance() 
+{
+  sonar_serial->write(0x55);
+  sonar_serial->flush();
+  return Mode2Distance();
 }
 
-uint16_t mSR04::Sr04TMode2Distance(void)
+
+uint16_t mSR04::Mode2Distance(void)
 {
   sonar_serial->setTimeout(300);
   const char startByte = 0xff;
 
   if (!sonar_serial->find(startByte)) {
-      AddLog(LOG_LEVEL_TEST,PSTR("SR04: No start byte"));
-      return NO_ECHO;
+    AddLog(LOG_LEVEL_TEST,PSTR("SR04: No start byte"));
+    return NO_ECHO;
   }
 
   delay(5);
@@ -202,138 +227,187 @@ uint16_t mSR04::Sr04TMode2Distance(void)
     return NO_ECHO;
   }
   AddLog(LOG_LEVEL_TEST,PSTR("SR04: Distance: %d"), distance);
+  
   return distance;
 }
 
-void mSR04::Sr04TReading(void) {
 
-  if (sonar_serial==nullptr && sonar==nullptr) {
-    Sr04TModeDetect();
-  }
+void mSR04::EverySecond(void)
+{
 
-  switch (sr04_type) {
+  MeasureSensor();
+
+}
+
+
+void mSR04::EveryMinute(void)
+{
+  #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+  SubTask_UpdateAmbientTemperature();
+  #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+}
+
+void mSR04::MeasureSensor()
+{
+  
+  switch (sr04_type)
+  {
     case 3:
-      distance = (real64_t)(Sr04TMiddleValue(Sr04TMode3Distance(),Sr04TMode3Distance(),Sr04TMode3Distance()))/ 10; //convert to cm
+      // readings.distance_cm = (float)(MiddleValue(Mode3Distance(),Mode3Distance(),Mode3Distance()))/ 10; //convert to cm
       break;
     case 2:
-      //empty input buffer first
-      while(sonar_serial->available()) sonar_serial->read();
-      distance = (real64_t)(Sr04TMiddleValue(Sr04TMode2Distance(),Sr04TMode2Distance(),Sr04TMode2Distance()))/10;
+      while(sonar_serial->available()) sonar_serial->read(); // empty input buffer first
+      // readings.distance_cm = (float)(MiddleValue(Mode2Distance(),Mode2Distance(),Mode2Distance()))/10;
       break;
     case 1:
-      distance = (real64_t)(sonar->ping_median(5))/ US_ROUNDTRIP_CM;
+      readings.raw.ping_value = sonar->ping_median(5);
+      readings.raw.distance_cm = GetDistanceFromPing(readings.raw.ping_value);
       break;
     default:
-      distance = NO_ECHO;
+      readings.raw.ping_value = NO_ECHO;
   }
-
-  return;
-}
-
-
-
-
-
-uint8_t mSR04::ConstructJSON_Settings(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
-  return JsonBuilderI->End();
-
-}
-
-
-uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-    
-//       ResponseAppend_P(PSTR(",\"SR04\":{\"" D_JSON_DISTANCE "\":%s}"), distance_chr);
-
-  return JsonBuilderI->End();
-    
-}
-
-
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-void mSR04::MQTTHandler_Init(){
-
-  struct handler<mSR04>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSR04::ConstructJSON_Settings;
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSR04::ConstructJSON_Sensor;
-
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSR04::ConstructJSON_Sensor;
   
-} //end "MQTTHandler_Init"
+  #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+  readings.average_EMA.distance_cm  = readings.average_EMA.filter->AddValue(readings.raw.distance_cm);
+  #endif
+  #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+  readings.average_DEMA.distance_cm = readings.average_DEMA.filter->AddValue(readings.raw.distance_cm);
+  #endif
 
+  AddLog(LOG_LEVEL_TEST, PSTR("GetDistanceFromPing %d (cm)"), (int)readings.raw.distance_cm);
 
-void mSR04::MQTTHandler_Set_RefreshAll(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mSR04::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mSR04::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mSR04>* list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_SENSORS_SR04_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
 
 }
 
-////////////////////// END OF MQTT /////////////////////////
+float mSR04::GetDistanceFromPing(uint32_t ping_value)
+{
+  if(ping_value==0){ return 0; }
+  float distance_cm = 0;
+
+// // this should be last to always return it
+//   if(settings.flag_distance_conversion_method == EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID)
+//   {
+//     return distance_cm = (float)(ping_value)/ US_ROUNDTRIP_CM;
+//   }
+//   if
+  
+  switch(readings.conversion_settings.flag_distance_conversion_method)
+  {
+    default:
+    case EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID:
+      distance_cm = (float)(ping_value)/ US_ROUNDTRIP_CM;
+    break;
+    case EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_DEFAULT__ID:
+    {
+      readings.conversion_settings.speed_of_sound = 343.0f;
+      float speed_of_sound_cm_per_us = readings.conversion_settings.speed_of_sound/10000.0f;
+      distance_cm = (float)(ping_value)*(speed_of_sound_cm_per_us/2.0f);
+    }
+    break;
+    #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+    case EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_TEMPERATURE_COMPENSATED__ID:
+    {
+      // readings.temp_adj.ambient_temperature = 23.0f;
+      // need to check flag here
+      readings.conversion_settings.speed_of_sound = 331.3 + (0.606 * readings.temp_adj.ambient_temperature); 
+      float speed_of_sound_cmps = readings.conversion_settings.speed_of_sound/100.0f;
+      distance_cm = (float)(ping_value)*(speed_of_sound_cmps/2.0f/100.0f);
+    }
+    break;
+    #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+  }
+  
+  return distance_cm;
+
+}
+
+
+
+/**
+ * @brief Check if any sensor reports temperature and has friendly name "AmbientTemperature"
+ * 
+ **/
+#ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+void mSR04::SubTask_UpdateAmbientTemperature()
+{
+
+  AddLog(LOG_LEVEL_INFO, PSTR("SubTask_UpdateAmbientTemperature"));
+
+  /**
+   * @brief I need a way to make this runtime safe
+   **/
+
+  float temperature = 0;
+
+  uint16_t module_id = 127;//D_UNIQUE_MODULE_SENSORS_DB18_ID;
+  uint8_t  device_id = 0;
+
+  sensors_reading_t reading;
+  pCONT->GetModuleObjectbyUniqueID(module_id)->GetSensorReading(&reading, device_id);
+  temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
+
+  Serial.printf("temperature=%f\n\r", temperature);
+
+  readings.temp_adj.ambient_temperature = temperature;
+
+}
+#endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+
+
+
+
+uint8_t mSR04::ConstructJSON_Settings(uint8_t json_method)
+{
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_JSON_TYPE, sr04_type);
+    
+    #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    JBI->Level_Start("Filtered_EMA");
+      JBI->Add("alpha", readings.average_EMA.alpha);
+    JBI->Level_End();
+    #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    JBI->Level_Start("Filtered_DEMA");
+      JBI->Add("alpha1", readings.average_DEMA.alpha1);
+      JBI->Add("alpha2", readings.average_DEMA.alpha1);
+    #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+
+  return JsonBuilderI->End();
+}
+
+
+uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_method)
+{
+  JsonBuilderI->Start();
+    JsonBuilderI->Add("Ping", readings.raw.ping_value);
+    JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.raw.distance_cm);
+    #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    JBI->Level_Start("Filtered_EMA");
+      JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.average_EMA.distance_cm);
+      JsonBuilderI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
+      JsonBuilderI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
+    JBI->Level_End();
+    #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    JBI->Level_Start("Filtered_DEMA");
+      JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.average_DEMA.distance_cm);
+      JsonBuilderI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
+      JsonBuilderI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
+    #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    JBI->Level_End();
+    #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+    JBI->Level_Start("Temperature");
+      JBI->Add("Enabled", readings.temp_adj.flag_enabled);
+      JBI->Add("Ambient", readings.temp_adj.ambient_temperature);
+    JBI->Level_End();
+    JBI->Level_Start("Conversion");
+      JBI->Add("speed_of_sound", readings.conversion_settings.speed_of_sound);
+      JBI->Add("flag_distance_conversion_method", readings.conversion_settings.flag_distance_conversion_method);
+    JBI->Level_End();
+    #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+  return JsonBuilderI->End();    
+}
+
 
 #endif

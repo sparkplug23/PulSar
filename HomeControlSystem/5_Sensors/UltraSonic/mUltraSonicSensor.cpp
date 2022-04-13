@@ -78,6 +78,8 @@ int mUltraSonicSensor::GetDurationReading(void)
   // Reads the echoPin, returns the sound wave travel time in microseconds
   duration = pulseIn(pin_echo, HIGH, 10000);//, 4500);//, ultrasonic.settings.duration_limit_max); //10000us 10ms //default 1 second timeout
 
+  Serial.println(duration);
+
   //duration is microseconds
   // Reads the echoPin, returns the sound wave travel time in microseconds
   // duration = pulseIn(echoPin, HIGH);

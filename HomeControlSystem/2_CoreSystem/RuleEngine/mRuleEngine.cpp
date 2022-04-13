@@ -69,7 +69,8 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     // break;  
     case FUNC_EVERY_SECOND:
       // AddLog(LOG_LEVEL_TEST, PSTR("DefaultRuleForModule"));   
-      // DefaultRuleForModule();
+      // // DefaultRuleForModule();
+      // MQTTHandler_Set_RefreshAll();
     break;
     /************
      * COMMANDS SECTION * 
@@ -209,6 +210,26 @@ void mRuleEngine::NewEventRun(uint16_t _module_id, uint16_t function_event, uint
 
 }
 
+uint8_t mRuleEngine::GetConfiguredCount()
+{
+  uint8_t count = 0;
+  for(uint8_t i=0;i<D_MAX_RULES;i++)
+  {
+    if(rules[i].flag_configured){ count++; }
+  }
+  return count;
+}
+
+
+uint8_t mRuleEngine::GetEnabledCount()
+{
+  uint8_t count = 0;
+  for(uint8_t i=0;i<D_MAX_RULES;i++)
+  {
+    if(rules[i].flag_enabled){ count++; }
+  }
+  return count;
+}
 
 
 // All events here will only trigger based of function calls, when those occur happen throughout code
@@ -221,7 +242,12 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 //maybe need to return rule(s) handled then leave taasker_interface
 
 
-  for (int rule_index=0;rule_index<D_MAX_RULES;rule_index++){
+  for (int rule_index=0;rule_index<D_MAX_RULES;rule_index++)
+  {
+
+    // Only run if configured and enabled
+    if(rules[rule_index].flag_configured && rules[rule_index].flag_enabled)
+    {
 
     // Check this rule must act of the function
     if(rules[rule_index].trigger.function_id == function_input){
@@ -232,6 +258,11 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
     #endif // ENABLE_LOG_LEVEL_INFO
 
       rules_active_index = rule_index;
+
+      /**
+       * @brief Checking if all 3 criteria match can be one if statement. Or, 3 consequentive (not nested) for debugging and only running when matches == 3. easier to read
+       * 
+       */
 
       // Also check switch_index against rule index
       if(rules[rule_index].trigger.device_id == event_triggered.device_id)
@@ -260,7 +291,7 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
     #endif// ENABLE_LOG_LEVEL_INFO
 
           // Populate any jsoncommands to be executed, this takes precident over "State" controls
-          if(rules[rule_index].command.json_commands_dlist_id>=0)
+          if(rules[rule_index].command.json_commands_dlist_id>0)
           {
 
             D_DATA_BUFFER_CLEAR();
@@ -327,8 +358,9 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
     }
 
+    } // configured and enabled
 
-  }
+  } // for loop
  
 }
 
@@ -338,6 +370,11 @@ void mRuleEngine::DefaultRuleForModule(){
 // #ifndef USE_RULES_TEMPLATE // if no rules defined, then check for preset defaults by hardware type
 rules_active_index = 0;
 
+#ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+  if(pCONT_set->Settings.module == MODULE_SONOFF_4CHPRO_ID){
+    DefaultRule_Sonoff_4CHPRO();
+  }else
+#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
 #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   if(pCONT_set->Settings.module == MODULE_SONOFF_IFAN03_ID){
     DefaultRule_Sonoff_iFan03();
@@ -363,230 +400,34 @@ rules_active_index = 0;
  * 
  * Perhaps this needs added into each module, ie the way the rule is encoded/decoded is contained within the module eg RF433 
  * */
-bool mRuleEngine::AppendRule()
+bool mRuleEngine::AppendEventToRules(mEvent::EVENT_PART* trigger_new, mEvent::EVENT_PART* command_new) // CHANGE TO ADD RULE
 {
 
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Shelly_2p5"));
+  uint8_t rule_count = GetConfiguredCount();
+  uint8_t new_index = rule_count;
 
-    // mEvent::EVENT_PART* p_event = nullptr;
+  if(rule_count>D_MAX_RULES){ return false; } //block new rules
 
-    // if(pCONT_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
+  // #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
 
-    // #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
-    
-    // // Trigger0
-    // pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true;   
-    // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
-    // p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
-    // p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
-    // p_event->device_id = 0;
-    // p_event->value.length = 0;
-    // p_event->value.data[p_event->value.length++] = 2;  // Toggled 
-    // // Command0
-    // p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].command;   
-    // p_event->module_id = EM_MODULE_DRIVERS_RELAY_ID;
-    // p_event->function_id = FUNC_EVENT_SET_POWER_ID;
-    // p_event->device_id = 0;
-    // p_event->value.length = 0;
-    // p_event->value.data[p_event->value.length++] = 2;  // Toggle
-    // pCONT_rules->rules_active_index++;
+  // TBD: Add check for unique rule
+
+  // Clear rule
+  memset(&rules[rule_count].trigger, 0, sizeof(mEvent::EVENT_PART));
+  memset(&rules[rule_count].command, 0, sizeof(mEvent::EVENT_PART));
+
+  // Copy rule
+  memcpy(&rules[rule_count].trigger, trigger_new, sizeof(mEvent::EVENT_PART));
+  memcpy(&rules[rule_count].command, command_new, sizeof(mEvent::EVENT_PART));
+  // Activate rule
+  rules[rule_count].flag_configured = true;
+  rules[rule_count].flag_enabled = true;
+  // If succesfully added
+  return true;
+  // pCONT_rules->rules_active_index++;
 
 }
 
 
-uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    // JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
-
-    char buffer[200];
-
-    char name[10]={0};
-
-    for(uint8_t id=0;id<MAX_RULE_VARS;id++){
-
-        sprintf(name, "Rule%d", id);
-
-      JBI->Level_Start("Settings");
-        JBI->Add("Default",settings.loaded_default_for_moduled);
-      JBI->Level_End();
-
-      JsonBuilderI->Level_Start_P(name);//DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
-
-        JsonBuilderI->Level_Start_P("Source");
-            JsonBuilderI->Add("module_id", rules[id].trigger.module_id);
-            JsonBuilderI->Add("function_id", rules[id].trigger.function_id);
-            JsonBuilderI->Add("device_id", rules[id].trigger.device_id);
-            JsonBuilderI->Add("json_commands_dlist_id", rules[id].trigger.json_commands_dlist_id);
-            JBI->Array_AddArray("params", rules[id].trigger.value.data, 5);
-
-            
-            // if(rules[id].trigger.p_json_commands!=nullptr){
-            //     JBI->Add("json", rules[id].trigger.p_json_commands);
-            // }
-        JsonBuilderI->Level_End(); 
-
-        JsonBuilderI->Level_Start_P("Destination");
-            JsonBuilderI->Add("module_id", rules[id].command.module_id);
-            JsonBuilderI->Add("function_id", rules[id].command.function_id);
-            JsonBuilderI->Add("device_id", rules[id].command.device_id);
-            JsonBuilderI->Add("json_commands_dlist_id", rules[id].command.json_commands_dlist_id);
-            JBI->Array_AddArray("params", rules[id].command.value.data, 5);
-            // if(rules[id].command.p_json_commands!=nullptr){
-
-            if(rules[id].command.json_commands_dlist_id>=0){
-            //     JBI->Add("json", rules[id].command.p_json_commands);
-
-
-                // pCONT_sup->GetTextIndexed(buffer, sizeof(buffer), rules[id].command.json_commands_dlist_id, jsonbuffer.data);  // should this be _P?
-                //     JBI->Add("json", buffer); 
-
-                    
-                char buffer_unescaped[200] = {0};
-                char buffer_escaped[200] = {0};
-                uint8_t len  = 0;
-                
-                pCONT_sup->GetTextIndexed(
-                    buffer_unescaped, 
-                    sizeof(buffer_unescaped), 
-                    pCONT_rules->rules[id].command.json_commands_dlist_id, 
-                    pCONT_rules->jsonbuffer.data
-                ); 
-
-                for(int i=0;i<strlen(buffer_unescaped);i++){
-                    if(buffer_unescaped[i] == '\"'){
-                    len+=sprintf(buffer_escaped+len,"\\\"");
-                    }else{    
-                    buffer_escaped[len++] = buffer_unescaped[i];
-                    }
-                }
-                JBI->Add("json_es", buffer_escaped); 
-
-            }
-        JsonBuilderI->Level_End(); 
-
-
-      JsonBuilderI->Level_End(); 
-    }
-
-    // JBI->Add("data", jsonbuffer.data); 
-    JBI->Add("size",sizeof(rules));
-  
-  JsonBuilderI->End();
-
-}
-
-uint8_t mRuleEngine::ConstructJSON_Sensor(uint8_t json_level){
-
-  char buffer[100];
-  JBI->Start();
-
-    JBI->Level_Start("EventTriggered");
-
-      JBI->Add("DeviceID", event_triggered.device_id);
-      JBI->Add("FunctionID", event_triggered.function_id);    
-      JBI->Add("ModuleID", event_triggered.module_id);    
-
-    JBI->Level_End();
-
-
-
-  JBI->End();
-
-}
-
-
-/*********************************************************************************************************************************************
-******** MQTT **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-  #ifdef USE_MODULE_NETWORK_MQTT
-void mRuleEngine::MQTTHandler_Init(){
-
-  struct handler<mRuleEngine>* mqtthandler_ptr;
-
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Settings;
-
-  #ifdef ENABLE_DEVFEATURE_RULES_MQTT_FASTER_SECS
-  //mqtthandler_ptr->tRateSecs = 1;
-  #endif
-
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Sensor;
-
-//   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Sensor;
-
-  
-//   mqtthandler_ptr = &mqtthandler_scheduled_teleperiod;
-//   mqtthandler_ptr->handler_id = MQTT_HANDLER_SCHEDULED_TELEPERIOD_ID;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Scheduled;
-
-
-  
-} //end "MQTTHandler_Init"
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mRuleEngine::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mRuleEngine::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
-}
-
-void mRuleEngine::MQTTHandler_Sender(uint8_t id){
-    
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_RULES_ID, handle, id);
-  }
-
-}
-
-#endif // USE_MODULE_NETWORK_MQTT
 
 #endif // USE_MODULE_CORE_RULES

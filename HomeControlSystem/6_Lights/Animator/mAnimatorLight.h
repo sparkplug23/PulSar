@@ -206,8 +206,15 @@ class mAnimatorLight :
       #endif
     #endif   
 
-    void Init_NeoPixelBus();
-    NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;
+    #ifndef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    void Init_NeoPixelBus(int8_t pin);
+    NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;  // needs moved to segments array so a pin can also be in there
+    #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    // // void Init_NeoPixelBus(int8_t pin);
+    NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;  // needs moved to segments array so a pin can also be in there
+    #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
 
     #ifndef STRIP_OUTPUT_REPEATED_LENGTH
       #define STRIP_OUTPUT_REPEATED_LENGTH 20

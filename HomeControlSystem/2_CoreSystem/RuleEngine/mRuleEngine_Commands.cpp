@@ -32,10 +32,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
         event->module_id = matched_id;
         data_buffer.isserviced++;
       }
-      #ifdef ENABLE_LOG_LEVEL_DEBUG
+      // #ifdef ENABLE_LOG_LEVEL_DEBUG
       AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-      #endif // ENABLE_LOG_LEVEL_DEBUG
+      // #endif // ENABLE_LOG_LEVEL_DEBUG
     
     }//end trigger
 
@@ -198,11 +198,20 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj){
       jobj = obj[rule_name].getObject()["Trigger"];
       if(!jobj.isNull()){
         parsesub_Rule_Part(jobj, &pCONT_rules->rules[rule_index].trigger);
+
+        // tmp fix, just set but later needs made dynamic
+
+        // Activate rule
+        rules[rule_index].flag_configured = true;
+        rules[rule_index].flag_enabled = true;
+
+
       }
 
       jobj = obj[rule_name].getObject()["Command"];
       if(!jobj.isNull()){
         parsesub_Rule_Part(jobj, &pCONT_rules->rules[rule_index].command);
+        
       }
 
     }

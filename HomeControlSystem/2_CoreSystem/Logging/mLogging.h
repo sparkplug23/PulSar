@@ -96,7 +96,13 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #endif
 
 
+/** Easy copy and paste for insitu header debug
 
+  Serial.printf("DEBUG HERE: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();
+**/
 
 
 //For single test use, no ifdefs

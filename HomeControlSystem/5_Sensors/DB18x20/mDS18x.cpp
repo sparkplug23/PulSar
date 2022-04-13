@@ -189,8 +189,7 @@ void mDS18X::Pre_Init(){
 
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
 
-    // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "pCONT_pins->GetPin(GPIO_DSB_1OF2_ID) 1 Valid %d"),
-    // pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "pCONT_pins->GetPin(GPIO_DSB_1OF2_ID) 1 Valid %d"), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
     // sensor_group[sensor_group_count].pin);
     
     //sensor_group[0].onewire = new OneWire(15); 
@@ -200,7 +199,7 @@ void mDS18X::Pre_Init(){
     //sensor_group[0].dallas  = new DallasTemperature(sensor_group[0].onewire);   
 
      
-    sensor_group[sensor_group_count].dallas->begin();
+    // sensor_group[sensor_group_count].dallas->begin();
 
     // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas->begin();
@@ -329,6 +328,7 @@ void mDS18X::Init(void){
 
   if(!sensor_count){    
     AddLog(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
+    db18_sensors_active = 0; // reset to none found so backoff will correctly happen
     return;
   }
 
@@ -463,14 +463,14 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = [%d]"), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+              AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = [%d]"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }
             else
             {
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE " \"%s\" = " D_FAILED), DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+              AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
             }
           
           } // end if

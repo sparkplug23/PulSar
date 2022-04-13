@@ -26,7 +26,9 @@
 #ifdef USE_MODULE_SENSORS_BME
 
 #include <Wire.h>
-#include "5_Sensors/BME/internal/Adafruit_BME280.h"
+// #include "5_Sensors/BME/internal/Adafruit_BME280.h"
+
+#include "Adafruit_BME280.h"
 
 class Adafruit_BME280;
 

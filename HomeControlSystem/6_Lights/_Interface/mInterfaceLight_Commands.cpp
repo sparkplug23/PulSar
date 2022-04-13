@@ -623,6 +623,45 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT DEBUG_INSERT_PAGE_BREAK "f::CommandSet_LightPowerState %d"), state);
   #endif
+
+
+
+  /**
+   * @brief 
+   * Temporary fix 
+   * 
+   * Force light on as default solid colour for now
+   * 
+   * **** proper fix: should enable temporary blend, so the animation can be returned to later (or, simply blend output off and suppress furrther animations so they can easily be turned on again)
+   */
+
+  if(state == 0) // turn off
+  {
+
+    pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
+    pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
+    pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    CommandSet_Brt_255(0);
+
+  }
+  else
+  if(state == 1) // turn on
+  {
+
+    pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
+    pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
+    pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    CommandSet_Brt_255(255);
+
+    pCONT_lAni->CommandSet_PaletteID(10, 0);
+    pCONT_lAni->CommandSet_Flasher_FunctionID(pCONT_lAni->EFFECTS_FUNCTION__SOLID_COLOUR__ID);
+
+
+
+  }
+
+
+
           
   // switch(state){
   //   case LIGHT_POWER_STATE_ON_ID:
@@ -730,6 +769,16 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
   //   break;
   // } // END switch
 }
+
+
+bool mInterfaceLight::CommandGet_LightPowerState()
+{
+  return 
+  light_power_state
+  // getBri_Global() 
+  ? true : false;
+}
+
 
   
 

@@ -326,11 +326,14 @@ void mButtons::ButtonHandler(void)
             // AddLog(LOG_LEVEL_INFO,PSTR("tsaved_button_debounce=%d"),tsaved_button_debounce);
 
 
-        #ifdef USE_MODULE_CORE_RULES
-        pCONT_rules->NewEvent(EM_MODULE_SENSORS_BUTTONS_ID,button_index,state);
-        #endif
-        pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
+        // #ifdef USE_MODULE_CORE_RULES
+        // pCONT_rules->NewEvent(EM_MODULE_SENSORS_BUTTONS_ID,button_index,state);
+        // #endif
+        // pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID);
 
+
+   pCONT_rules->NewEventRun(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, button_index, state); // Event has occured, save and check it            
+          
           //}
         // } else {
         //   buttons[button_index].multipress = (multiwindow[button_index]) ? buttons[button_index].multipress +1 : 1;

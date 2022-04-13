@@ -1843,8 +1843,6 @@ const char* mPalette::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buf
 
 
 
-#ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
-
 /*
  * FastLED palette modes helper function. Limitation: Due to memory reasons, multiple active segments with FastLED will disable the Palette transitions
 
@@ -2006,7 +2004,6 @@ void mPalette::load_gradient_palette(uint8_t index)
 }
 #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
-#endif // ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
 
 
 

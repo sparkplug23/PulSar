@@ -44,7 +44,7 @@ class mDS18X :
     #endif
 
     struct SETTINGS{
-      uint8_t  fEnableSensor = true;
+      uint8_t  fEnableSensor = false;
       uint8_t  nSensorsFound = 0; // count of sensors found    n:number found, c:case number for switches
       uint16_t rate_measure_ms = 1000;
       uint8_t  group_count = 0;
@@ -114,7 +114,7 @@ class mDS18X :
       uint8_t fSensorFound = false;
       uint8_t sensor_count = 0;
       uint8_t  pin = 0;
-      OneWire* onewire = nullptr;
+      OneWire* onewire = nullptr; // Onewire can be created here, as (currently) no other sensor supports it so wont be sharing a pin
       DallasTemperature* dallas = nullptr; //later, a class destructor should reset these back to nullptr, though may not be needed?
     }sensor_group[SENSOR_GROUP_MAX_COUNT];
 

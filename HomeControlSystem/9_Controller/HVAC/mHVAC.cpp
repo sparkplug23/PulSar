@@ -134,6 +134,19 @@ void mHVAC::init(void){
     zone[id].program_temp_method = new ProgramTemperature();
     zone[id].program_timer_method = new ProgramTimer();
   }
+/**
+ * @brief Set the zone struct properly to default
+ * 
+ */
+
+  for(uint8_t id=0; id<settings.active_zones; id++)
+  {
+    zone[id].sensor.temperature = 0;
+    zone[id].sensor.humidity = 0;
+  }
+
+
+
 
   for(uint8_t id=0; id<settings.active_zones; id++)
   {

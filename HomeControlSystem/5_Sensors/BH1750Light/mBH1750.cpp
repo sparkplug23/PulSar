@@ -216,6 +216,8 @@ bool mBH1750::Bh1750Read(uint32_t sensor_index) {
   Bh1750_sensors[sensor_index].level = level;
   Bh1750_sensors[sensor_index].illuminance = illuminance;
 
+  AddLog(LOG_LEVEL_INFO, PSTR("BH1:" "level=%d"),(int)level);
+
   Bh1750_sensors[sensor_index].valid = SENSOR_MAX_MISS;
   return true;
 }

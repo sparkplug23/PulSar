@@ -2,6 +2,11 @@
 #define _MODULE_SENSORS_BH1750_H
 
 #define D_UNIQUE_MODULE_SENSORS_BH1750_ID   139  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+
+#include "1_TaskerManager/mTaskerManager.h"
+
+#ifdef USE_MODULE_SENSORS_BH1750
+
 #define D_GROUP_MODULE_SENSORS_BH1750_ID    1    // Numerical accesending order of module within a group
 
 // #define USE_MODULE_EXAMPLE_CLASS
@@ -24,8 +29,8 @@
 #define D_CMND_MTREG "MTime"
 
 #include "1_TaskerManager/mTaskerManager.h"
+#include "1_TaskerManager/mTaskerInterface.h"
 
-#ifdef USE_MODULE_SENSORS_BH1750
 
 class mBH1750 :
   public mTaskerInterface

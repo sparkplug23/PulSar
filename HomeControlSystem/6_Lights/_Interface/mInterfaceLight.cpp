@@ -632,9 +632,16 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    // case FUNC_SET_POWER:
-    //   LightSetPower();
-    // break;
+    // None json commands
+    case LIGHT_POWER_STATE_OFF_ID: //probably phase out for "SetPower" is generic event type
+      CommandSet_LightPowerState(0);
+    break;
+    
+    #ifdef USE_MODULE_CORE_RULES
+    case FUNC_EVENT_SET_POWER_ID:
+      RulesEvent_Set_Power();
+    break;
+    #endif// USE_MODULE_CORE_RULES
     /************
      * MQTT SECTION * 
     *******************/
@@ -663,6 +670,41 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END function
+
+
+#ifdef USE_MODULE_CORE_RULES
+
+void mInterfaceLight::RulesEvent_Set_Power()
+{
+
+  // struct RELAY_EVENT_PARAMETERS{
+  //   uint8_t index;
+  //   uint8_t state;
+  //   uint8_t state;
+  // }rule_event_layout;
+
+
+  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+
+  uint8_t index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
+
+  uint8_t state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+
+  bool get_state = CommandGet_LightPowerState();
+
+  AddLog(LOG_LEVEL_TEST, PSTR("CommandGet_LightPowerState() = %d"), get_state);
+
+  
+
+  // get state
+  ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());
+
+  // apply invert if needed
+  CommandSet_LightPowerState(state);
+
+}
+#endif // USE_MODULE_CORE_RULES
+
 
 
 /**

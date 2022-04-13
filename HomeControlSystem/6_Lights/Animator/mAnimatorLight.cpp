@@ -130,10 +130,46 @@ void mAnimatorLight::Pre_Init(void){
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX; 
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
 
+  /**
+   * @brief Get pins here
+   **/
+  #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
+    int8_t pin_data = -1, pin_clock = -1;
+
+    // for(
+      uint8_t ii=0; 
+      // ii<1; ii++)
+    // {
+      if(pCONT_pins->PinUsed(GPIO_RGB_DATA_ID, ii))
+      {
+        pin_data = pCONT_pins->GetPin(GPIO_RGB_DATA_ID, ii);
+      }
+
+      // if(pCONT_pins->PinUsed(GPIO_RGB_CLOCK1_ID, ii))
+      // {
+      //   pin_clock = pCONT_pins->GetPin(GPIO_RGB_DATA1_ID, ii);
+      // }
+
+      // Stripbus
+      if(pin_data != -1)
+      {
+        AddLog(LOG_LEVEL_INFO, PSTR("NeoPixelBus: Segment[%d] Pin[%d]"), 0, pin_data);
+        stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, pin_data);
+      }
+
+    // }
+
+  #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
+
+
+
 }
 
 
-void mAnimatorLight::Init_NeoPixelBus()
+#ifndef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT 
+void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
 {
 
   // if pixel size changes, free and init again
@@ -164,6 +200,44 @@ void mAnimatorLight::Init_NeoPixelBus()
   #endif
 
 }
+#endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
+
+// #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+// void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
+// {
+
+
+//   // if pixel size changes, free and init again
+//   uint16_t strip_size_tmp = STRIP_SIZE_MAX;
+//   #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+//   strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;
+//   #endif
+//   // uint16_t strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
+  
+//   /**
+//    * @brief 
+//    * Populate RGB pin#1 across all pins if only 1 pin is set
+//    * Create number of stripbuses based on how many pins are configured
+//    **/ 
+//   int8_t pin = pCONT_pins->GetPin(GPIO_RGB_DATA1_ID);
+//   if(pin != -1)
+//   {
+
+//   }
+
+
+//   #ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+//   // future methods will need to parse on esp8266 and only permit certain pins, or if very low pixel count, software versions
+//   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, PINSET_TEMP_METHOD_RGB_PIN_RGB);//19); 3 = rx0
+//   #else //legacy method
+//   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
+//   #endif
+
+
+// }
+// #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+     
 
 
 
@@ -181,8 +255,10 @@ void mAnimatorLight::Init(void){
   //step2:  to become its own function, so strips can be changed at runtime
   // stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
 
+  #ifndef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT 
   Init_NeoPixelBus();
-  
+  #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT 
+
 
   // #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   // mqtthandler_debug_animations_progress.tRateSecs = 1;
@@ -237,6 +313,29 @@ void mAnimatorLight::Init(void){
 
 
   // Start display
+
+  if(stripbus == nullptr)
+  {
+    // not configured, no pin? disable lighting
+    AddLog(LOG_LEVEL_ERROR, PSTR("stripbus == nullptr, no pin or stripbus set, setting default as temporary fix"));
+    settings.flags.EnableModule = false;
+
+    /**
+     * @brief 
+     * Temp fix to resolve crashing errors due to stripbus being called from interface_light without setting
+     * Default values
+     */
+    #ifdef ESP8266
+    stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, 3);
+    #else
+    stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, 23);
+    #endif
+
+
+  }
+
+
+
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
     stripbus->ClearTo(0);

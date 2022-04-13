@@ -206,7 +206,7 @@ snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"not on esp32 yet\"}" 
 }
 
 //old function that seems to be changed
-bool mSupport::I2cDevice(uint8_t addr)
+bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
 {
 
   
@@ -215,7 +215,7 @@ bool mSupport::I2cDevice(uint8_t addr)
     #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint8_t address = 1; address <= 127; address++) {
-      // AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
+      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x|%x)=for"),address,addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) {
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -229,6 +229,37 @@ bool mSupport::I2cDevice(uint8_t addr)
     #endif// ENABLE_LOG_LEVEL_INFO
     }
   }
+    #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=FALSE"),addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
+  return false;
+}
+
+bool mSupport::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
+{
+
+  
+    #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
+
+  // for (
+    uint8_t address = addr;
+  //  address <= 127; address++) {
+      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
+    wire->beginTransmission(address);
+    if (!wire->endTransmission() && (address == addr)) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=true"),addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
+      return true;
+    }else
+    if (!wire->endTransmission() && (address != addr)){
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x) also found %x"),address,addr);
+    #endif// ENABLE_LOG_LEVEL_INFO
+    }
+  // }
     #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=FALSE"),addr);
     #endif// ENABLE_LOG_LEVEL_INFO

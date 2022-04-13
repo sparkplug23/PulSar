@@ -735,7 +735,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     case POWER_ON:
       pCONT_set->power |= mask;
       break;
-    case POWER_TOGGLE:
+    case POWER_TOGGLE: // STATE_NUMBER_TOGGLE_ID
       pCONT_set->power ^= mask;
     }
     SetDevicePower(pCONT_set->power, source);

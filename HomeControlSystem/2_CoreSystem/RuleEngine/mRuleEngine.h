@@ -46,8 +46,8 @@ class mRuleEngine :
 
     struct SETTINGS{
 
-bool loaded_default_for_moduled = false;
-}settings;  
+      bool loaded_default_for_moduled = false;
+    }settings;  
 
     uint8_t* data = nullptr;
     uint16_t _dataLen = 0;
@@ -63,7 +63,7 @@ bool loaded_default_for_moduled = false;
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
     void ShowRuleEvent_AddLogByIndex(uint8_t show_type = 0);
 
-bool AppendRule();
+    bool AppendEventToRules(mEvent::EVENT_PART* trigger, mEvent::EVENT_PART* command);
 
     // need a group of functions to "add" and remove from the buffer,
     // what about buffers? they can includes ids
@@ -80,6 +80,8 @@ bool AppendRule();
     // ~mRuleEngine(){
     //   deallocateData();
     // };
+uint8_t GetConfiguredCount();
+uint8_t GetEnabledCount();
 
     // bool allocateData(uint16_t len){
     //   // Serial.println("allocateData");
@@ -140,6 +142,7 @@ bool AppendRule();
 //                      SRC_TIMER, SRC_RULE, SRC_MAXPOWER, SRC_MAXENERGY, SRC_LIGHT, SRC_KNX, SRC_DISPLAY, SRC_WEMO, SRC_HUE, SRC_RETRY, SRC_MAX };
 // const char kCommandSource[] PROGMEM = "I|MQTT|Restart|Button|Switch|Backlog|Serial|WebGui|WebCommand|WebConsole|PulseTimer|Timer|Rule|MaxPower|MaxEnergy|Light|Knx|Display|Wemo|Hue|Retry";
 
+uint8_t rule_count2 = 0;
     
     // /***
     //  * 
@@ -177,7 +180,8 @@ bool AppendRule();
     // };
 
     struct RULES{
-      bool enabled = false;
+      bool flag_enabled = false;
+      bool flag_configured = false;
       mEvent::EVENT_PART trigger;
       mEvent::EVENT_PART command; //introduce multiple commands? Create a vector of rules?
     }rules[D_MAX_RULES];
@@ -255,6 +259,9 @@ bool AppendRule();
 
     void DefaultRuleForModule();
 
+    #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
+    void DefaultRule_Sonoff_4CHPRO();
+    #endif // USE_MODULE_TEMPLATE_SONOFF_4CHPRO
     #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
     void DefaultRule_Sonoff_iFan03();
     #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
@@ -273,7 +280,7 @@ bool AppendRule();
     // void Tasker_Rules_Init();
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_State(uint8_t json_method = 0);
 
 
   #ifdef USE_MODULE_NETWORK_MQTT
@@ -285,7 +292,7 @@ bool AppendRule();
 
     struct handler<mRuleEngine> mqtthandler_settings_teleperiod;
     // struct handler<mRuleEngine> mqtthandler_sensor_ifchanged;
-    struct handler<mRuleEngine> mqtthandler_sensor_teleperiod;
+    struct handler<mRuleEngine> mqtthandler_state_ifchanged;
     // struct handler<mRuleEngine> mqtthandler_scheduled_teleperiod;
 
     // Extra module only handlers
@@ -297,7 +304,7 @@ bool AppendRule();
     
     struct handler<mRuleEngine>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_teleperiod
+      &mqtthandler_state_ifchanged
     };
   #endif //  USE_MODULE_NETWORK_MQTT
 

@@ -44,6 +44,14 @@ int8_t mSensorsBME::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP: 
       EveryLoop();
     break;   
+    case FUNC_EVERY_SECOND:
+
+
+      // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("wire A/C %d/%d"), pCONT_sup->wire->getPin_Data(), pCONT_sup->wire->getPin_Clock());
+
+
+
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -92,10 +100,13 @@ void mSensorsBME::Pre_Init(){
   // if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
   if(pCONT_sup->I2cDevice(0x76) || pCONT_sup->I2cDevice(0x77)){
+  // if(pCONT_sup->I2cDevice_IsConnected(0x76) || pCONT_sup->I2cDevice_IsConnected(0x77)){
+
 
     // Wire = new TwoWire();//pCONT_pins->GetPin(GPIO_I2C_SCL_ID),pCONT_pins->GetPin(GPIO_I2C_SDA_ID));
   
     sensor[settings.fSensorCount].bme = new Adafruit_BME280();
+
     if (sensor[settings.fSensorCount].bme->begin(0x76, pCONT_sup->wire)) {
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_BME "BME280 sensor detected"));// Serial.flush();
       sensor[settings.fSensorCount].i2c_address = 0x76;
@@ -110,6 +121,7 @@ void mSensorsBME::Pre_Init(){
     }
   }
 
+AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_sup->wire->getErrorText(pCONT_sup->wire->lastError()));
   
   if(settings.fSensorCount){
     settings.fEnableSensor = true;
@@ -189,7 +201,7 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
         sensor[sensor_id].temperature = sensor[sensor_id].bme->readTemperature();
         sensor[sensor_id].humidity =    sensor[sensor_id].bme->readHumidity();
         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
-        sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
+        // sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
 
         AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);

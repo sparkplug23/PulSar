@@ -112,6 +112,8 @@ void DallasTemperature::begin(void) {
 
 	while (_wire->search(deviceAddress)) {
 
+		// Serial.println("while (_wire->search(deviceAddress)");
+
 		if (validAddress(deviceAddress)) {
 			devices++;
 

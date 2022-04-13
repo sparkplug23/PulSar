@@ -310,6 +310,7 @@ const char* state_ctr(void);
       //     return;
       // }
 
+
       #ifdef ENABLE_ADVANCED_DEBUGGING
         #ifndef DISABLE_SERIAL_LOGGING
         // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
@@ -339,16 +340,24 @@ const char* state_ctr(void);
         // Generate the JSON payload, to the level of detail needed.
         //CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->function_sender)(handler_ptr->json_level);
         //CALL_MEMBER_FUNCTION_WITH_ARG(class_ptr,handler_ptr->function_sender,handler_ptr->topic_type,handler_ptr->json_level);
-
+// Serial.printf("fSendPayload A=%s %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush();
+          
         // use return flag for if mqtt needs sent, useful with ifchanged
         uint8_t fSendPayload = (class_ptr.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level); //fSendPayload as uint8_t is what I return, cant be length > 255
+// Serial.printf("fSendPayload B=%s %d fSendPayload %d\n\r",handler_ptr->postfix_topic, class_id, fSendPayload); Serial.flush();
+          
+        if(fSendPayload > 1){ 
+          // Serial.printf("fSendPayload %d: Not set!\n\r", fSendPayload); Serial.flush();
+          fSendPayload= 0; 
+        } // to fix when return was not used
 
         // Serial.printf("payload_length=%d\n\r",payload_length);
 
         // Send MQTT payload with structured output
         if(fSendPayload){ 
-          // Serial.printf("fSendPayload SendNow postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id);
+          // Serial.printf("fSendPayload SendNow postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush();
           MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); 
+          // Serial.printf("ENDfSendPayload SendNow postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush();
         }
       }
       // Check if this needs reducing

@@ -399,8 +399,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
     pModule[EM_MODULE_CONTROLLER_IRTRANSMITTER_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CONTROLLER_OILFURNACE
-    pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID] = new mOilFurnace();
+  #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
+    pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID] = new mTankVolume();
   #endif
   #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
     pModule[EM_MODULE_CONTROLLER_EXERCISEBIKE_ID] = new X();
@@ -512,6 +512,20 @@ mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
 {
   return pModule[GetVectorIndexbyModuleUniqueID(id)];
 }
+
+/**
+ * @brief Must check for validity, if not, returns nullptr
+ * 
+ * @param id 
+ * @return mTaskerInterface* 
+ */
+// mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID_Protected(uint16_t id)
+// {
+
+// safe way by returning a default class
+
+//   return pModule[GetVectorIndexbyModuleUniqueID(id)];
+// }
 
 
 bool mTaskerManager::ValidTaskID(uint8_t id)

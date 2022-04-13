@@ -767,10 +767,12 @@
         union{
           uint16_t white_warm : 3; // bit 9-11
           uint16_t w : 3; // bit 9-11
+          uint16_t w1 : 3; // bit 9-11
         };
         union{
           uint16_t white_cold : 3; // bit 12-14
           uint16_t c : 3; // bit 12-14
+          uint16_t w2 : 3; // bit 12-14
         };
         uint16_t reserved : 1;   // bit 15
       };
@@ -821,6 +823,14 @@
     // };
     uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
 
+/**
+ * How to handle multiple neopixelbus, since each segment can share them
+ * 
+ * */
+
+
+
+
     /**
      * previous animation settings will be moved into here
      * */
@@ -843,6 +853,15 @@
       HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
       RgbcctColor_Controller::LightSubType colour_type = 
       RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
+
+      /**
+       * @brief Moving neopixelbus and pin here, so each segment can also be on different pins
+       **/
+      // #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+      //   NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;  // needs moved to segments array so a pin can also be in there
+      //   int8_t bus_pin = -1;
+      //   // void Init_NeoPixelBus(int8_t pin);
+      // #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   
     //   uint8_t opacity = 255; //??
 

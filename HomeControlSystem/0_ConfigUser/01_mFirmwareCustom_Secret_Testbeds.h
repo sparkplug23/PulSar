@@ -52,7 +52,8 @@
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS
 // #define DEVICE_TESTBED_3PIXELS_MATRIX_E131_PROTOCOL
-#define DEVICE_TESTBED_STATUS_LEDS
+// #define DEVICE_TESTBED_STATUS_LEDS
+// #define DEVICE_TESTBED_CLIMATE_SENSOR_BREADBOARD
 
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
@@ -95,7 +96,6 @@
   
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
-  // #define USE_MODULE_DRIVERS_BUZZER
   #define USE_MODULE_DRIVERS_RELAY
 
   // #define USE_MODULE_CONTROLLER_SONOFF_4CHPRO
@@ -111,6 +111,69 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\""
+  "}";
+ 
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"Buttons\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0,"
+        "\"State\":\"Toggle\""
+      "}"
+    "},"
+    "\"Rule1\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"Buttons\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1,"
+        "\"State\":\"Toggle\""
+      "}"
+    "}"
+    "},"
+    "\"Rule2\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"Buttons\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":2,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":2,"
+        "\"State\":\"Toggle\""
+      "}"
+    "}"
+    "},"
+    "\"Rule3\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"Buttons\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":3,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"Relays\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":3,"
+        "\"State\":\"Toggle\""
+      "}"
+    "}"
   "}";
 
   /**
@@ -179,6 +242,7 @@
     4L:  Data 0xE632B1 (15086257), Bits 24, Protocol 1, Delay 235 
     4R:  Data 0xE632B3 (15086259), Bits 24, Protocol 1, Delay 236 
    */
+
 
 #endif
 
@@ -4401,9 +4465,84 @@
 
 
 
+/**
+ * Testbed for multiple types of climate sensors
+ * - DHT
+ * - BME280
+ * - DS18B20
+ * 
+ * Add 4 LEDs to this, it can also be a hvac tester with 4 different temp inputs to control "relays" at different climate ranges for zone control
+ * */
+#ifdef DEVICE_TESTBED_CLIMATE_SENSOR_BREADBOARD
+  #define DEVICENAME_CTR          "testbed_climate_sensor" APPEND_ESP_TYPE_MQTT_STRING  
+  #define DEVICENAME_FRIENDLY_CTR "Testbed DS18XX" APPEND_ESP_TYPE_NAME_STRING
+  
+  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_DHT
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"   
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
+      "\"19\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","
+      #endif
+      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "DB_02"
+  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,205,206,170,25]"
+  #define D_DEVICE_SENSOR_DB18S20_2_NAME        "DB_03"
+  #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,134,175,63]"
+  #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
+  #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,205,202,237,231]"
+  #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
+  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,195,135,126,242]"
+  
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ""
+      "]"  
+    "}"
+  "}";
+  
+#endif
+
 
 /**
  * New heating controller, designed to work from single device to multizone system
+ * 
+ * 
  * */
 #ifdef DEVICE_TESTBED_DS18XX
   #define DEVICENAME_CTR          "testbed_ds18xx" APPEND_ESP_TYPE_MQTT_STRING  
@@ -4828,7 +4967,7 @@
   #define DEVICENAME_CTR          "testbed_ultrasonic"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
 
-  #define USE_MODULE_CONTROLLER_OILFURNACE
+  #define USE_MODULE_CONTROLLER_TANKVOLUME
     
   // #define USE_MODULE_SENSORS_DS18X
   
@@ -4888,7 +5027,7 @@
   #define DEVICENAME_CTR          "testbed_9axis_gyro"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
 
-  //#define USE_MODULE_CONTROLLER_OILFURNACE
+  //#define USE_MODULE_CONTROLLER_TANKVOLUME
     
   // #define USE_MODULE_SENSORS_DS18X
 
@@ -5076,7 +5215,7 @@
   #define DEVICENAME_CTR          "testbed_9axis_gyro"
   #define DEVICENAME_FRIENDLY_CTR "Testbed MPU9260"
 
-  //#define USE_MODULE_CONTROLLER_OILFURNACE
+  //#define USE_MODULE_CONTROLLER_TANKVOLUME
     
   // #define USE_MODULE_SENSORS_DS18X
 

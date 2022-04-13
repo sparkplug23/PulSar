@@ -364,7 +364,7 @@ bool mHardwarePins::UsuableGPIOPin(uint8_t pin)
 int8_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
   return Pin(gpio, index);
 }
-uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {
+uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think this should be returning uint32_t here? #D10APR22
   return Pin(gpio, index);
 }
 
@@ -801,7 +801,11 @@ int16_t mHardwarePins::GetModuleIDbyName(const char* c){
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY1_CTR)==0){         return MODULE_SHELLY1_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY2P5_CTR)==0){         return MODULE_SHELLY2P5_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_SHELLY_DIMMER2_CTR)==0){         return MODULE_SHELLY_DIMMER2_ID; }
+  
+#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_IFAN03_CTR)==0){         return MODULE_SONOFF_IFAN03_ID; }
+#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
+
   else if(strcmp_P(c,PM_MODULE_NAME_SONOFF_4CHPRO_CTR)==0){         return MODULE_SONOFF_4CHPRO_ID; }
 
   #ifdef ESP32
@@ -821,7 +825,10 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
     #ifdef ESP8266
     case MODULE_SONOFF_BASIC_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_CTR)); break;
     case MODULE_SONOFF_BASIC_EXTERNAL_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR, sizeof(PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)); break;
+    
+#ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
     case MODULE_SONOFF_IFAN03_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_IFAN03_CTR, sizeof(PM_MODULE_NAME_SONOFF_IFAN03_CTR)); break;
+#endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
     case MODULE_SONOFF_4CHPRO_ID:   memcpy_P(buffer, PM_MODULE_NAME_SONOFF_4CHPRO_CTR, sizeof(PM_MODULE_NAME_SONOFF_4CHPRO_CTR)); break;
     case MODULE_H801_ID:   memcpy_P(buffer, PM_MODULE_NAME_H801_CTR, sizeof(PM_MODULE_NAME_H801_CTR)); break;
     case MODULE_MAGICHOME_ID:   memcpy_P(buffer, PM_MODULE_NAME_MAGICHOME_CTR, sizeof(PM_MODULE_NAME_MAGICHOME_CTR)); break;
@@ -848,6 +855,7 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
 int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   if(c=='\0'){ return -1; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_NONE_CTR)==0){       return GPIO_NONE_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA1_CTR)==0){   return GPIO_RGB_DATA1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA_CTR)==0){   return GPIO_RGB_DATA_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_CLOCK_CTR)==0){  return GPIO_RGB_CLOCK_ID; }
 

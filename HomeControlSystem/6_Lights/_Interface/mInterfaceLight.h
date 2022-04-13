@@ -374,7 +374,10 @@ class mInterfaceLight :
     ******************************************************************************************************************************/
 
     void CommandSet_PixelHardwareTypeID(uint8_t value);
+
     void CommandSet_LightPowerState(uint8_t value);
+    bool CommandGet_LightPowerState();
+
     void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri);
@@ -418,6 +421,10 @@ class mInterfaceLight :
     ******************************************************************************************************************************/
 
 
+
+#ifdef USE_MODULE_CORE_RULES
+void RulesEvent_Set_Power();
+#endif // rules
 
     
     void Settings_Default();  

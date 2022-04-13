@@ -169,33 +169,40 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level){
       JBI->Add("Index",zone[zone_id].sensor.index);
     JBI->Level_End();
   }
-  JBI->End();
+  return JBI->End();
 
+  // DEBUG_LINE_HERE;
 }
 
 
 uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level){
 
+  JBI->Start();
   // DEBUG_LINE_HERE;
-  return 0;
+  return JBI->End();
 
 }
 
 
 uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level){
 
+  JBI->Start();
   // DEBUG_LINE_HERE;
-  return 0;
-
+  return JBI->End();
 }
 
 
 uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
 
+  // return 0;
+  DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
-  // DEBUG_LINE_HERE;
-  // DEBUG_LINE_HERE;
+  // 
+
+Serial.printf("settings.active_zones=%d", settings.active_zones); Serial.flush();
+
+
   JBI->Start();
     JBI->Add("active_zones", settings.active_zones);
 
@@ -215,6 +222,17 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
 
 
 
+      JBI->Level_Start("Driver");
+
+        JBI->Array_Start("ModuleID");
+        for(int8_t i=0; i<settings.active_zones; i++){
+          JBI->Add(zone[i].output.module_ids[0]);
+        }
+        JBI->Array_End();
+      
+      JBI->Level_End();
+      
+      
       JBI->Level_Start("Sensor");
 
         JBI->Array_Start("ModuleID");
@@ -228,13 +246,13 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
           JBI->Add(zone[i].sensor.index);
         }
         JBI->Array_End();
-      
+        
         JBI->Array_Start("Temperature");
         for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].sensor.temperature);
         }
         JBI->Array_End();
-      
+        
         JBI->Array_Start("Humidity");
         for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].sensor.humidity);
@@ -245,7 +263,8 @@ uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
 
     JBI->Level_End();
 
-  JBI->End();
+      DEBUG_LINE_HERE;
+  return JBI->End();
 
 
 }

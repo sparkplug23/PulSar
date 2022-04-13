@@ -356,7 +356,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
     EM_MODULE_CONTROLLER_IRTRANSMITTER_ID,
   #endif
-  #ifdef USE_MODULE_CONTROLLER_OILFURNACE
+  #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
     EM_MODULE_CONTROLLER_TANKVOLUME_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
@@ -686,9 +686,9 @@ enum MODULE_IDS{
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
   #define pCONT_ir                              static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-#ifdef USE_MODULE_CONTROLLER_OILFURNACE
-  #include "9_Controller/OilFurnace/mOilFurnace.h"
-  #define pCONT_tankvolume                      static_cast<mOilFurnace*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
+#ifdef USE_MODULE_CONTROLLER_TANKVOLUME
+  #include "9_Controller/TankVolume/mTankVolume.h"
+  #define pCONT_tankvolume                      static_cast<mTankVolume*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
   #include "9_Controller/ExerciseBike/mExerciseBike.h"

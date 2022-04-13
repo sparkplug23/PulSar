@@ -288,7 +288,7 @@
   #define D_MODULE_CONTROLLER_IRTRANSMITTER_CTR              "infrared"
   #define D_MODULE_CONTROLLER_IRTRANSMITTER_FRIENDLY_CTR              "infrared"
 //#endif
-//#ifdef USE_MODULE_CONTROLLER_OILFURNACE
+//#ifdef USE_MODULE_CONTROLLER_TANKVOLUME
   #define D_MODULE_CONTROLLER_TANKVOLUME_CTR              "mTankVolume"
   #define D_MODULE_CONTROLLER_TANKVOLUME_FRIENDLY_CTR              "tankvolume"
 //#endif
@@ -931,6 +931,7 @@
 #define D_GPIO_FUNCTION_NONE_CTR          "None"
 #define D_GPIO_FUNCTION_USER_CTR          "User"
 #define D_GPIO_FUNCTION_DOOR_POSITION_CTR "Door Position"
+#define D_GPIO_FUNCTION_RGB_DATA1_CTR      "RGBData1"
 #define D_GPIO_FUNCTION_RGB_DATA_CTR      "WS281x Data"
 #define D_GPIO_FUNCTION_RGB_CLOCK_CTR     "WS281x Clock"
 #define D_GPIO_FUNCTION_SWT1_CTR     "SWT1"
@@ -1291,6 +1292,7 @@
 #define D_LOG_SDCARD "SDC: "
 #define D_LOG_SWITCHES "SWH: "
 #define D_LOG_RULES "RUL: "
+#define D_LOG_SR04 "SR4: "
 
 //SDM220
 #define D_PHASE_ANGLE     "Phase Angle"

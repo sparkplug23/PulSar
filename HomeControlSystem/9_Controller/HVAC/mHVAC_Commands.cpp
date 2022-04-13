@@ -33,6 +33,8 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
     if(jtok.isStr()){
       if((device_id = DLI->GetDeviceIDbyName(jtok.getStr()))>=0){ // D_JSON_DEVICE
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
+      }else{
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
       }
     }else
     if(jtok.isNum()){
@@ -189,6 +191,9 @@ void mHVAC::CommandSet_ProgramTemperature_Mode(uint8_t zone_id, uint8_t value)
 
 void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value)
 {
+
+  // check if zone id is valid
+  if(zone_id == -1){ return; }
 
   zone[zone_id].program_timer_method->StartTimer_Minutes(value);
   

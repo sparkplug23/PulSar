@@ -178,6 +178,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["MQTTUpdateSeconds"].getObject()["IfChanged"])
   {
     Settings.sensors.ifchanged_secs = jtok.getInt();
+    AddLog(LOG_LEVEL_TEST, PSTR("MQTTUpdateSeconds IfChanged %d"),Settings.sensors.ifchanged_secs);
     pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
   }
 

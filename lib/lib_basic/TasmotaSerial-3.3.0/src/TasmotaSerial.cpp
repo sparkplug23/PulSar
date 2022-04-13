@@ -158,7 +158,7 @@ bool TasmotaSerial::begin(uint32_t speed, uint32_t config) {
     } else {
       m_valid = false;
     }
-//    Serial.printf("TSR: Using UART%d\n", m_uart);
+  //  Serial.printf("TSR: Using UART%d\n", m_uart);
 #endif  // ESP32
   } else {
     // Use getCycleCount() loop to get as exact timing as possible

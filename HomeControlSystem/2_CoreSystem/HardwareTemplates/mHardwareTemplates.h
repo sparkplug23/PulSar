@@ -49,6 +49,8 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_I2C_SCL_ID, GPIO_I2C_SDA_ID,
   // Addressable RGB(w) leds
   GPIO_RGB_DATA_ID, GPIO_RGB_CLOCK_ID,
+  GPIO_RGB_DATA1_ID, GPIO_RGB_DATA2_ID, GPIO_RGB_DATA3_ID, GPIO_RGB_DATA4_ID,  // needs to be done in this order
+  GPIO_RGB_CLOCK1_ID, GPIO_RGB_CLOCK2_ID, GPIO_RGB_CLOCK3_ID, GPIO_RGB_CLOCK4_ID,
   // IR Transceiver
   GPIO_IRSEND_ID, GPIO_IRRECV_ID,
   // Switches = 8. User connected external switches (No longer using offset, making discrete options)
@@ -482,6 +484,7 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_I2C_SDA_CTR)           D_GPIO_FUNCTION_I2C_SDA_C
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_OLED_RESET_CTR)           D_GPIO_FUNCTION_OLED_RESET_CTR;
 
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_RGB_DATA_CTR)          D_GPIO_FUNCTION_RGB_DATA_CTR;
+DEFINE_PGM_CTR(PM_GPIO_FUNCTION_RGB_DATA1_CTR)          D_GPIO_FUNCTION_RGB_DATA1_CTR;
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_RGB_CLOCK_CTR)         D_GPIO_FUNCTION_RGB_CLOCK_CTR;
 
 // #ifdef USE_MODULE_SENSORS_MOTION
@@ -697,7 +700,7 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_CC1110_SYNC_PULSE_SIGNAL_CTR)   D_GPIO_FUNCTION_
 #define USE_MODULE_TEMPLATE_SHELLY_DIMMER2
 
 #define USE_MODULE_TEMPLATE_DEFAULT_WEMOS
-#define USE_MODULE_TEMPLATE_SONOFF_IFAN03
+// #define USE_MODULE_TEMPLATE_SONOFF_IFAN03
 #define USE_MODULE_TEMPLATE_SONOFF_4CHPRO
 
 // Supported hardware modules. Leave completed list
@@ -710,10 +713,12 @@ enum SupportedModules_8266_StaticCompleteList {
   MODULE_SHELLY1_ID,
   MODULE_SHELLY2P5_ID,
   MODULE_SHELLY_DIMMER2_ID,
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03 // I probably dont want these here, to keep this list the same, but array method below is wrong with it
   MODULE_SONOFF_IFAN03_ID,
+  #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
   MODULE_SONOFF_4CHPRO_ID,
   // Last module
-  MODULE_MAXMODULE_8266 
+  MODULE_MAXMODULE_8266 // moved to dynamic ID list so it allows changing array size
 };
 
 
@@ -956,6 +961,7 @@ const uint8_t kModuleNiceList_IDS[] PROGMEM = {
   #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO
     MODULE_SONOFF_4CHPRO_ID   //esp8285
   #endif
+  // MODULE_MAXMODULE_8266 // To allow dynamic array size
 
   
 };
@@ -970,7 +976,9 @@ DEFINE_PGM_CTR(kModules_Name_list_ctr)
   D_MODULE_NAME_SHELLY1_CTR       "|"
   D_MODULE_NAME_SHELLY2P5_CTR     "|"
   D_MODULE_NAME_SHELLY_DIMMER2_CTR "|"
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   D_MODULE_NAME_SONOFF_IFAN03_CTR  "|"
+  #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
   D_MODULE_NAME_SONOFF_4CHPRO_CTR 
 };
 
@@ -1052,7 +1060,7 @@ const mytmplt8266 kModules[MODULE_MAXMODULE_8266] PROGMEM = {
   #endif
   #ifdef USE_MODULE_TEMPLATE_H801
   { // MODULE_H801_ID,            // Lixada H801 Wifi (ESP8266)
-    GPIO_USER_ID,        // GPIO00 E-FW Button
+    GPIO_KEY1_ID,        // GPIO00 E-FW Button   // TEMPORARILY FORCING AS A KEY1 HERE, REMOVE WHEN GPIOC IS PROPERLY ADDED INTO CODE
     GPIO_LED1_ID,        // GPIO01 Green LED - Link and Power status
     GPIO_USER_ID,        // GPIO02 TX and Optional sensor - Pin next to TX on the PCB
     GPIO_USER_ID,        // GPIO03 RX and Optional sensor - Pin next to GND on the PCB
@@ -1201,7 +1209,7 @@ const mytmplt8266 kModules[MODULE_MAXMODULE_8266] PROGMEM = {
     GPIO_KEY4_ID,          // GPIO14 Button 4
     GPIO_REL4_ID,          // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
     0, 0
-  }
+  },
   #endif //  USE_MODULE_TEMPLATE_SONOFF_4CHPRO
 
 
