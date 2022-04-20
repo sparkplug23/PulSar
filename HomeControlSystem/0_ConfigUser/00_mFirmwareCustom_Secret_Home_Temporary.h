@@ -279,33 +279,19 @@
  * - This will be the test device, full of as many sensors as possible, and also use 4 LEDs to emulate relay outputs
  * - This will be used as a rapid/testbed device for improving as many sensors as possible (at minimum, the "...sensor" devices)
  * 
- * * Ethernet Interface Layout A 
- * [w/o, o/w, w/g, bl/w, w/bl, g/w, w/br, br/w]
- * [gnd,  5v, pir,    RGB,    -, 3v3, i2c_data, i2c_clock] where  == kitchen/utility are the same, probably make the same for livingroom, same room? 3d print a box
- *
- * LAYOUT_B_2022Q1 - GPIO_ABC_NO_UART
- * 
- * This will be used to properly incorporate motion AND doorsensor opening, thus, making the utiltiysensor work properly
- * 
- * PRIMARY DEVELOPMENT DEVICE
- * 
- * New PCB
- * 
- * - PIR GPIO_A
- * - BME
- * - BH1
- * 
- * - DOOR reed
- * - DOOR lock
- * - RGB_Data
- * 
- * [GND, 5V, PIR, ICD2, I2CC, 3V3, Reed, Lock]
- * 
- * 22 = RGB
- * 21 = PIR
- * 
- * 
- * 
+ * Modules to be tested
+ * - DS18B20
+ * - DHT22
+ * - BME280
+ * - BH1750
+ * - Status LEDs (mqtt/wifi down)
+ * - Nextion = OTA updating
+ * - rgbW lights = Notification lights as a mode
+ * - Motion sensor = including nicely having interface showing "event" of motion
+ * - ESP32 Touch inputs
+ * - DAC Output - Mono Speaker Audio
+ * - ADC Input (probably with LDR)
+ * - Audio Input? MCP3208
  * 
  * 
  **/
@@ -317,36 +303,40 @@
   // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
-
   #define USE_MODULE_DRIVERS_LEDS
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2
+  // #define USE_MODULE_DRIVERS_IRREMOTE
+  // #define USE_IR_RECEIVE
 
+  #define USE_MODULE_DISPLAYS_NEXTION
+  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
-  // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define USE_MODULE_SENSORS_DOOR
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_LDR_BASIC
+
+  #ifdef USE_MODULE_SENSORS_LDR_BASIC
+    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+  #endif // USE_MODULE_SENSORS_LDR_BASIC
   
-  #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
   #define STRIP_SIZE_MAX 12                                                                           // Change: Set *total* length of string, segment0 will default to this length
   #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
   #define ENABLE_CRGBPALETTES_IN_PROGMEM
   #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
-
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -363,7 +353,9 @@
       #endif // USE_MODULE_SENSORS_DS18X
       // TX0 - Debug Serial TX
       // RX0 - Debug Serial RX
-      // 21   
+      #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+      "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
+      #endif
       #ifdef USE_MODULE_SENSORS_DHT
       "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
       "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","
@@ -372,27 +364,31 @@
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // Serial2
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","  // Serial2
-      #endif // USE_MODULE_DISPLAYS_NEXTION
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","   // Use the 12LED RGBW ring to permit led testing, and eventually, notification mode
-      #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+      #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      #endif // USE_MODULE_DRIVERS_LEDS
-      // 15
+      #endif
+      #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
+      "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
+      #endif
       /**
        * @brief Left side
        **/
       // EN
       // VP
       // VN
-      // 34 - adc1_6
+      #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6
+      #endif
       // 35 - adc1_7
       // 32 - Touch9
       // 33 - Touch8
-      // 25 - DAC1
+      // 25 - DAC1 = LM386 Amplifier Module
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
@@ -406,8 +402,10 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Bedroom"
-  #define D_DEVICE_SENSOR_CLIMATE "Bedroom"
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
+  #define D_DEVICE_SENSOR_CLIMATE_BME "BedroomDesk-BME"
+  #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDesk-DHT1"
+  #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2"
   
   
 
@@ -436,7 +434,17 @@
         "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
-      "]"
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_BME "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
+        "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"  
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
@@ -447,15 +455,8 @@
         D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
         D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
       "]"  
-    "},"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE "\""
-      "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-      "]"  
-    "}"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
   
@@ -485,27 +486,43 @@
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
-    "\"ColourPalette\":15," 
-    "\"PaletteEdit\": {"
-      "\"ColourPalette\": 15,"
-      "\"Data\": ["
-        "4,6,0,0,0,"
-        "252, 3, 45,"
-        "252, 40, 3,"
-        "252, 3, 177,"
-        "128, 1, 122"
-      "]"
+    // "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
+    // "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
+    // "\"ColourPalette\":15," 
+    // "\"PaletteEdit\": {"
+    //   "\"ColourPalette\": 15,"
+    //   "\"Data\": ["
+    //     "4,6,0,0,0,"
+    //     "252, 3, 45,"
+    //     "252, 40, 3,"
+    //     "252, 3, 177,"
+    //     "128, 1, 122"
+    //   "]"
+    // "},"
+    // "\"Effects\":{"
+    //   "\"Function\":\"Static\""
+    // "},"
+    // "\"Transition\":{"
+    //   "\"TimeMs\":900,"
+    //   "\"RateMs\":1000"
+    // "},"    
+    // "\"BrightnessRGB\":1"
+
+    "\"AnimationMode\": \"Effects\","
+    "\"ColourOrder\": \"rgbw\","
+    "\"ColourPalette\": 10,"
+    "\"Effects\": {"
+      "\"Function\": \"Solid RGBCCT\""
     "},"
-    "\"Effects\":{"
-      "\"Function\":\"Static\""
-    "},"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":0"
+    "\"Hue\": 0,"
+    "\"Sat\": 100,"
+    "\"BrightnessRGB\": 2,"
+    "\"BrightnessCCT\": 10,"
+    "\"CCT_TempPercentage\": 100,"
+    "\"Transition\": {"
+      "\"Time\": 1"
+    "}"
+
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
