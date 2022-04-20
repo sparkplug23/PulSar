@@ -293,6 +293,7 @@
  * - ADC Input (probably with LDR)
  * - Audio Input? MCP3208
  * 
+ * development branch only
  * 
  **/
 #ifdef DEVICE_DESKSENSOR_AS_LONGTERM_TEST_DEVICE
