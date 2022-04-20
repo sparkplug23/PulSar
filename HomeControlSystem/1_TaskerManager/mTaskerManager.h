@@ -253,6 +253,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     EM_MODULE_DRIVERS_RF433_RCSWITCH_ID,
   #endif
+  #ifdef USE_MODULE_DRIVERS_IRREMOTE
+    EM_MODULE_DRIVERS_IRREMOTE_ID,
+  #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
     EM_MODULE_ENERGY_INTERFACE_ID,
@@ -288,6 +291,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
     EM_MODULE_SENSORS_SWITCHES_ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_LDR_BASIC
+    EM_MODULE_SENSORS_LDR_BASIC_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_ANALOG
     EM_MODULE_SENSORS_ANALOG_ID,
@@ -545,6 +551,10 @@ enum MODULE_IDS{
   #include "4_Drivers/RCSwitch/mRCSwitch.h"
   #define pCONT_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
 #endif
+#ifdef USE_MODULE_DRIVERS_IRREMOTE
+#include "4_Drivers/IRRemote/mIRRemote.h"
+  #define pCONT_ir_remote                           static_cast<mIRRemote*>(pCONT->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
+#endif
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -594,6 +604,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_SWITCHES
   #include "5_Sensors/Switches/mSwitches.h"
   #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_LDR_BASIC
+  #include "5_Sensors/LDRBasic/mLDRBasic.h"
+  #define pCONT_ldr_basic                      static_cast<mLDRBasic*>(pCONT->pModule[EM_MODULE_SENSORS_LDR_BASIC_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ANALOG
   #include "5_Sensors/Analog_PhasedIntoADCInternal/mSensorsAnalog.h"
