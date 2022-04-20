@@ -850,6 +850,22 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 //   } 
 
 
+  /**
+   * @brief "RgbcctController" as level one to target everything inside the controllers
+   * 
+   */
+  if(jtok = obj["RgbcctController"].getObject()[D_JSON_SUBTYPE]){ // Assume range 0-100
+
+    CommandSet_RgbcctController_SubType(jtok.getInt(), segment_index);
+    // _segment_runtimes[i].rgbcct_controller->setSubType(RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID);
+
+    // CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt(), segment_index);
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
 
 // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
@@ -1186,6 +1202,22 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
       _segments[segment_index].hardware_element_colour_order.w = index;
     }
   }
+
+  /**
+   * @brief A DEVFEATURE where is only C or W is set, then the white channel colour temperature should be disabled (or temp set to give the right priority)
+   * This should be handled later internal of rgbcct_controller as a rgb(single channel white) type
+   **/
+  // if(_segments[segment_index].hardware_element_colour_order.c == D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE)
+  // {
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR("Temporary Fix: Disable \"C\" channel"));
+  //   CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(100, 0,100, pCONT_iLight->_ct_min_range, pCONT_iLight->_ct_max_range), segment_index);
+  // }else
+  // if(_segments[segment_index].hardware_element_colour_order.w == D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE)
+  // {
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR("Temporary Fix: Disable \"W\" channel"));
+  //   CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(0, 0,100, pCONT_iLight->_ct_min_range, pCONT_iLight->_ct_max_range), segment_index);
+  // }
+
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR("segment_index%d == red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
@@ -1836,6 +1868,24 @@ void mAnimatorLight::CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8
 // }
 
 
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** setSubType *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mAnimatorLight::CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index)
+{
+  _segment_runtimes[segment_index].rgbcct_controller->setSubType(subtype);       // does NOT currrently work for always enabled white (without temperature)
+  // _segment_runtimes[segment_index].rgbcct_controller->setColorMode(subtype);
+  // pCONT_iLight->_briCT_Global = bri;
+  pCONT_lAni->_segments[segment_index].flags.fForceUpdate = true;
+  
+  // pCONT_iLight->setBriCT_Global(bri);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SUBTYPE)), _segment_runtimes[segment_index].rgbcct_controller->getSubType());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
 
 
 
