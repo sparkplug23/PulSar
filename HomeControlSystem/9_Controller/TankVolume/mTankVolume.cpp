@@ -73,6 +73,9 @@ int8_t mTankVolume::Tasker(uint8_t function, JsonParserObject obj){
 
 void mTankVolume::Init(void)
 {
+  tank.volume_litres_notusable = TANK_LITRES_BELOW_PIPE;
+
+  tank.height_of_tank_cm = 120.0f;
 
 
 }
@@ -183,7 +186,10 @@ void mTankVolume::SubTask_CopyAveragedSensorValues(){
 void mTankVolume::SubTask_UpdateTankVolume()
 {
 
-  float height_cm = pCONT_sr04->readings.average_EMA.distance_cm;
+  float distance_from_sensor_cm = pCONT_sr04->readings.average_EMA.distance_cm;
+  float height_cm = tank.height_of_tank_cm - distance_from_sensor_cm;
+
+
   // float height_mm = pCONT_sr04->readings.average_EMA.distance_cm/1000.0f;
   float volume_cm3 = GetHeightToVolume_Custom_MyTank(height_cm);
 
@@ -201,22 +207,30 @@ float mTankVolume::GetHeightToVolume_Custom_MyTank(float height_cm)
   // float height_mm = pCONT_sr04->readings.average_EMA.distance_cm/10.0f;
 
   // // Above tank radius split
-  // if(height_mm>=TANK_MAINBOTTOM_THRESHOLD_HEIGHT_MM){
-  //   // Need to account for smaller tank diameter on bottom AND nozzle height
-  //   volume_cm3 = TANK_MAIN_RADIUSSQUARED_TIMES_PI_CM * ((height_mm-TANK_MAINBOTTOM_THRESHOLD_HEIGHT_MM)/10);
-  //   // Bottom section ADD on
-  //   volume_cm3 += TANK_BOTTOM_RADIUSSQUARED_TIMES_PI_CM * (TANK_MAINBOTTOM_THRESHOLD_HEIGHT_MM/10);
-  // }else{
+  if(height_cm == TANK_MAINBOTTOM_THRESHOLD_HEIGHT_CM)
+  {
+    // Need to account for smaller tank diameter on bottom AND nozzle height
+    volume_cm3 = TANK_MAIN_RADIUSSQUARED_TIMES_PI_CM * (height_cm-TANK_MAINBOTTOM_THRESHOLD_HEIGHT_CM);
+    // Bottom section ADD on
+    volume_cm3 += TANK_BOTTOM_RADIUSSQUARED_TIMES_PI_CM * TANK_MAINBOTTOM_THRESHOLD_HEIGHT_CM;
+  }
+  else
+  {
     // Can just use height, since its below 170 anyway
     volume_cm3 = TANK_BOTTOM_RADIUSSQUARED_TIMES_PI_CM * height_cm;
     // oiltank.ptr->final.volume_of_oil_mm3 = TANK_BOTTOM_RADIUSSQUARED_TIMES_PI_MM * (height_mm);
-  // }
+  }
 
   // 1000 cm3 or cc, is 1 Litre
   float litres_in_tank = volume_cm3/1000;
   // oiltank.ptr->final.millilitres_in_tank = oiltank.ptr->final.volume_of_oil_mm3/1000;
 
-  // float litres_of_usable_oil = litres_in_tank - TANK_LITRES_BELOW_PIPE;
+  if(tank.volume_litres_notusable>0)
+  {
+    // tank.volume_litres_usable = litres_in_tank - TANK_LITRES_BELOW_PIPE;
+    tank.volume_litres_usable = litres_in_tank - tank.volume_litres_notusable;
+
+  }
 
 
   return litres_in_tank;

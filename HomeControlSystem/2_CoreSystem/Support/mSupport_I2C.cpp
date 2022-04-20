@@ -169,13 +169,14 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
   // I2C_SDA_HELD_LOW_AFTER_INIT 4 = line busy. SDA again held low by another device. 2nd master?
 
 
-#ifdef ESP8266
+// #ifdef ESP8266
 
   uint8_t error = 0;
   uint8_t address = 0;
   uint8_t any = 0;
 
   snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_DEVICES_FOUND_AT));
+
   for (address = 1; address <= 127; address++) {
     wire->beginTransmission(address);
     error = wire->endTransmission();
@@ -185,7 +186,7 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
     }
     else if (error != 2) {  // Seems to happen anyway using this scan
       any = 2;
-      // snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
+      snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"Error %d at 0x%02x"), error, address);
       break;
     }
   }
@@ -196,12 +197,12 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
     snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"" D_JSON_I2CSCAN_NO_DEVICES_FOUND "\"}"));
   }
 
-#else
+// #else
 
-snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"not on esp32 yet\"}" ));
+// snprintf_P(devs, devs_len, PSTR("{\"" D_JSON_I2CSCAN "\":\"not on esp32 yet\"}" ));
   
 
-#endif
+// #endif
 
 }
 
@@ -215,7 +216,7 @@ bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired 
     #endif// ENABLE_LOG_LEVEL_INFO
 
   for (uint8_t address = 1; address <= 127; address++) {
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x|%x)=for"),address,addr);
+      // AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x|%x)=for"),address,addr);
     wire->beginTransmission(address);
     if (!wire->endTransmission() && (address == addr)) {
     #ifdef ENABLE_LOG_LEVEL_INFO

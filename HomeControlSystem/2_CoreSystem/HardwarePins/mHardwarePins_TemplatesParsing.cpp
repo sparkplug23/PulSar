@@ -156,6 +156,24 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
     pCONT_set->Settings.module = USER_MODULE;
   }
 
+  
+  // Name means friendly name (max 20 chars)
+  if(jtok = obj["RoomHint"]){
+    const char* name_ctr = jtok.getStr();
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template RoomHint %s"),name_ctr);
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+    snprintf(pCONT_set->Settings.room_hint,sizeof(pCONT_set->Settings.room_hint),"%s",name_ctr);
+
+
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
+    //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
+  }
+
+
+
+
   // ModuleSettings_FlashSerial();
 
 // ParseModuleTemplate();
@@ -620,19 +638,22 @@ void mHardwarePins::GpioInit(void)
       pCONT_sup->wire = new TwoWire();
       #else
       pCONT_sup->wire = new TwoWire(0);
-      // pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
+      pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
       AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Trying to start i2c 2-wire"));
       #endif
     }
-    // if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))
-    // {
-    //   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire"));
-    // }
-    // else
-    // {
-    //   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
 
-    // }
+// crap, deleted the begin?
+
+    if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))
+    {
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire"));
+    }
+    else
+    {
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
+
+    }
   } // i2c_enabled
 #endif  // USE_I2C
 

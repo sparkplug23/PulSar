@@ -59,6 +59,34 @@ class mLEDs :
 
 // const uint8_t MAX_LEDS = 8;                 // Max number of leds
 
+/**
+ * @brief 
+ * Definitely need to move to "mpin" since LED1-8 is a hard limit of 8, hence I can turn 1-8 as status type
+ * Or else LED1 will always be "status" for combined mqtt/wifi connected
+ * 
+ * 
+ * StatusLED
+ * - Single blinks = wifi
+ * - Double blinks = mqtt
+ * - Solid LED = Power state
+ * 
+ */
+
+
+void SubTask_Status_LEDs();
+struct STATUS_LEDs{
+  uint32_t tSaved_Update = millis();
+  bool flag_enabled = false;
+
+  // I need a way to enable much slow (than 1 second)
+  uint16_t freq = 0; // flashes per 1 second
+
+
+}status_leds;
+
+
+
+
 #define MAX_LEDS 8
 
 /**

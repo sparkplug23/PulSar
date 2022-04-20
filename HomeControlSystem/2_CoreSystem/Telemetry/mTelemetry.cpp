@@ -188,13 +188,18 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_MODULENAME,     pCONT_set->Settings.system_name.friendly);
     JsonBuilderI->Add(PM_JSON_FRIENDLYNAME,   pCONT_pins->ModuleName(buffer, sizeof(buffer))); 
+
+
+    JBI->Add(PM_JSON_ROOMHINT, pCONT_set->Settings.room_hint);
+
+
     JsonBuilderI->Add(PM_JSON_POWER,          pCONT_set->power); 
     JsonBuilderI->Add(PM_JSON_POWERONSTATE,   pCONT_set->Settings.poweronstate); 
     JsonBuilderI->Add(PM_JSON_LEDSTATE,       pCONT_set->Settings.ledstate);
     JsonBuilderI->Add_FV(PM_JSON_LEDMASK,     PSTR("\"%04X\""), 0); 
     JsonBuilderI->Add(PM_JSON_SAVEDATA,       0); 
     JsonBuilderI->Add(PM_JSON_SAVESTATE,      0); 
-    JsonBuilderI->Add(PM_JSON_SWITCHMODE,     0); 
+    // JsonBuilderI->Add(PM_JSON_SWITCHMODE,     0);  // Turning this off as an easy way to search for older devices not running most recent mqtt, will eventually be turned on again
     JsonBuilderI->Add(PM_JSON_BUTTONRETAIN,   pCONT_set->Settings.flag_system.mqtt_button_retain); 
     JsonBuilderI->Add(PM_JSON_SWITCHRETAIN,   pCONT_set->Settings.flag_system.mqtt_switch_retain); 
     JsonBuilderI->Add(PM_JSON_SENSORRETAIN,   pCONT_set->Settings.flag_system.mqtt_sensor_retain); 
@@ -205,6 +210,8 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
     JsonBuilderI->Add_FV(PM_JSON_SAVEADDRESS, PSTR("\"%X\""), pCONT_set->GetSettingsAddress());
     JsonBuilderI->Add(PM_JSON_SAVECOUNT,      pCONT_set->Settings.save_flag);
     JsonBuilderI->Add(PM_JSON_STARTUPUTC,     "2019-12-10T21:35:44");
+
+
   return JsonBuilderI->End();
 }
 
@@ -299,11 +306,11 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
     JsonBuilderI->Add(PM_JSON_WEBSERVER_ENABLED, pCONT_set->Settings.webserver);
     JsonBuilderI->Add(PM_JSON_WIFICONFIG_STATE, pCONT_set->Settings.sta_config);
 
-  JBI->Array_Start("AP_List");
-    JBI->Add(pCONT_set->Settings.sta_ssid[0]);
-    JBI->Add(pCONT_set->Settings.sta_ssid[1]);
-    JBI->Add(pCONT_set->Settings.sta_ssid[2]);
-  JBI->Array_End();
+    JBI->Array_Start("AP_List");
+      JBI->Add(pCONT_set->Settings.sta_ssid[0]);
+      JBI->Add(pCONT_set->Settings.sta_ssid[1]);
+      JBI->Add(pCONT_set->Settings.sta_ssid[2]);
+    JBI->Array_End();
 
   return JsonBuilderI->End();
 

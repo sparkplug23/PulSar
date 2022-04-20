@@ -134,11 +134,11 @@ bool Adafruit_BME280::init()
         // I2C
         if(_wire -> begin()){
             
-            Serial.println("Adafruit_BME280::init() y");
+            // Serial.println("Adafruit_BME280::init() y");
             
             }else{
                 
-            Serial.println("Adafruit_BME280::init() n");
+            // Serial.println("Adafruit_BME280::init() n");
             }
     } else {
         digitalWrite(_cs, HIGH);

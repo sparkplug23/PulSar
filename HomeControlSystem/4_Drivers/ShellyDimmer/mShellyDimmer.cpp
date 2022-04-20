@@ -34,7 +34,6 @@ void mShellyDimmer::init(void)
   #ifdef ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
     leading_edge = 1;
     CmndShdLeadingEdge(0);
-
   #endif
 
 }
@@ -289,7 +288,7 @@ void mShellyDimmer::SetBrightnessFade()
   if (req_brightness > dimmer.brightness)
     delta = (req_brightness - dimmer.brightness) * 0.8;
   else
-      delta = (dimmer.brightness - req_brightness) * 0.8;
+    delta = (dimmer.brightness - req_brightness) * 0.8;
 
   // Payload format:
   // [0-1] Brightness (%) * 10

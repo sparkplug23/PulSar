@@ -684,6 +684,10 @@ int16_t GetFunctionIDbyFriendlyName(const char* c);
 
 void SettingsLoad_CheckSuccessful();
 
+#ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
+bool RtcSettingsLoad(uint32_t update);
+
   void RtcRebootReset(void);
   uint32_t GetRtcSettingsCrc(void);
   void RtcSettingsSave(void);
@@ -693,6 +697,20 @@ void SettingsLoad_CheckSuccessful();
   void RtcRebootSave(void);
   void RtcRebootLoad(void);
   bool RtcRebootValid(void);
+
+#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+#ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2 // old
+  void RtcRebootReset(void);
+  uint32_t GetRtcSettingsCrc(void);
+  void RtcSettingsSave(void);
+  void RtcSettingsLoad(void);
+  bool RtcSettingsValid(void);
+  uint32_t GetRtcRebootCrc(void);
+  void RtcRebootSave(void);
+  void RtcRebootLoad(void);
+  bool RtcRebootValid(void);
+#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
 
   void SetFlashModeDout(void);
   void SettingsBufferFree(void);
@@ -1376,6 +1394,8 @@ struct SYSCFG {
   Template_Config user_template2;
   SystemName      system_name;
 
+  char room_hint[50];
+
   SysBitfield_System   flag_system;                      // 010
   int16_t       save_data;                 // 014
   myio          module_pins;                     // 484     
@@ -1535,6 +1555,7 @@ void SettingsMerge(SYSCFG* saved, SYSCFG* new_settings);
 // NEW flag that allows anything to run on reboot
 uint8_t fSystemRestarted = true; // will be restart at the end of the first loop
 
+#ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 struct RTCRBT {
   uint16_t      valid;                     // 280 (RTC memory offset 100 - sizeof(RTCRBT))
   uint8_t       fast_reboot_count;         // 282
@@ -1560,11 +1581,61 @@ struct RTCMEM {
   uint8_t       free_022[22];              // 2D6
                                            // 2EC - 2FF free locations
 } RtcSettings;
+#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
 
 
+#ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
+typedef struct {
+  uint32_t usage1_kWhtotal;
+  uint32_t usage2_kWhtotal;
+  uint32_t return1_kWhtotal;
+  uint32_t return2_kWhtotal;
+  uint32_t last_return_kWhtotal;
+  uint32_t last_usage_kWhtotal;
+} EnergyUsage;
 
 
+typedef struct {
+  uint16_t      valid;                     // 280  (RTC memory offset 100 - sizeof(RTCRBT))
+  uint8_t       fast_reboot_count;         // 282
+  uint8_t       free_003[1];               // 283
+} TRtcReboot;
+TRtcReboot RtcReboot;
+#ifdef ESP32
+RTC_NOINIT_ATTR TRtcReboot RtcDataReboot;
+#endif  // ESP32
+
+typedef struct {
+  uint16_t      valid;                     // 290  (RTC memory offset 100)
+  uint8_t       oswatch_blocked_loop;      // 292
+  uint8_t       ota_loader;                // 293
+  uint32_t      energy_kWhtoday;           // 294
+  uint32_t      energy_kWhtotal;           // 298
+  volatile uint32_t pulse_counter[MAX_COUNTERS];  // 29C - See #9521 why volatile
+  power_t       power;                     // 2AC
+  EnergyUsage   energy_usage;              // 2B0
+  uint32_t      nextwakeup;                // 2C8
+  uint32_t      baudrate;                  // 2CC
+  uint32_t      ultradeepsleep;            // 2D0
+  uint16_t      deepsleep_slip;            // 2D4
+  uint8_t       improv_state;              // 2D6
+
+  uint8_t       free_2d7[1];               // 2D7
+
+  int32_t       energy_kWhtoday_ph[3];     // 2D8
+  int32_t       energy_kWhtotal_ph[3];     // 2E4
+
+                                           // 2F0 - 2FF free locations
+} TRtcSettings;
+TRtcSettings RtcSettings;
+#ifdef ESP32
+RTC_NOINIT_ATTR TRtcSettings RtcDataSettings;
+#endif  // ESP32
+
+
+#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
 
 uint8_t flag_boot_complete = false;

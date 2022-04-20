@@ -50,7 +50,14 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_method){
 
   JsonBuilderI->Start();
 
-    JBI->Add("LitresRemaining", tank.volume_litres);
+    JBI->Level_Start("Litres");
+
+    JBI->Add("Total", tank.volume_litres);
+    JBI->Add("Usuable", tank.volume_litres_usable);
+    JBI->Add("NotUsuable", tank.volume_litres_notusable);
+    JBI->Add("OilHeight_cm", tank.height_of_tank_cm - pCONT_sr04->readings.average_EMA.distance_cm);
+
+    JBI->Level_End();
 
   if(json_method >= JSON_LEVEL_SHORT){
 

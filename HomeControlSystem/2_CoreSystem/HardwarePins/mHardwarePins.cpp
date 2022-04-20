@@ -595,10 +595,10 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
  // if(buffer != nullptr){ pointer = buffer;// = pCONT_sup->global_buffer; }
 
  
-  if (USER_MODULE == index) {
-  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE == index"));
-    return PM_SEARCH_NOMATCH;//pCONT_set->Settings.user_template2.hardware.name; //returns pointer
-  } else {
+  // if (USER_MODULE == index) {
+  // // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE == index"));
+  //   return PM_SEARCH_NOMATCH;//pCONT_set->Settings.user_template2.hardware.name; //returns pointer
+  // } else {
     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_HTTP "USER_MODULE != %d index %s"),index,kModules[index].name);
     // return kModules[index].name;
 
@@ -610,7 +610,7 @@ const char* mHardwarePins::AnyModuleName(uint8_t index, char* buffer, uint8_t bu
     
 
 
-  }
+  // }
 }
 
 

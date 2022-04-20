@@ -89,11 +89,74 @@ void setup(void)
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
   
   RESET_BOOT_STATUS();
-    
+
+  #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
+  // fastboot is currently contained within settings class, but this requires a stable class config.
+  // I should consider not using cpp classes for the RTC, perhaps just header code, so truly basic and simple/safe code will always work
+  // For now, get working as tas did (for v2) and use the header only method as version 3
+  
+  pCONT_set->RtcPreInit();
+  #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
+  #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
   pCONT_set->RtcRebootLoad();
-  if(!pCONT_set->RtcRebootValid()) { pCONT_set->RtcReboot.fast_reboot_count = 0; }
+  if (!pCONT_set->RtcRebootValid()) {
+    pCONT_set->RtcReboot.fast_reboot_count = 0;
+  }
+#ifdef FIRMWARE_MINIMAL
+  pCONT_set->RtcReboot.fast_reboot_count = 0;    // Disable fast reboot and quick power cycle detection
+#else
+  if (ResetReason() == REASON_DEEP_SLEEP_AWAKE) {
+    pCONT_set->RtcReboot.fast_reboot_count = 0;  // Disable fast reboot and quick power cycle detection
+  } else {
+    pCONT_set->RtcReboot.fast_reboot_count++;
+  }
+#endif
+  RtcRebootSave();
+
+  if (RtcSettingsLoad(0)) {
+    uint32_t baudrate = (RtcSettings.baudrate / 300) * 300;  // Make it a valid baudrate
+    if (baudrate) { TasmotaGlobal.baudrate = baudrate; }
+  }
+  Serial.begin(TasmotaGlobal.baudrate);
+  Serial.println();
+#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
+
+
+  #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+  pCONT_set->RtcRebootLoad();
+  if(!pCONT_set->RtcRebootValid()) { 
+    pCONT_set->RtcReboot.fast_reboot_count = 0; 
+  }
   pCONT_set->RtcReboot.fast_reboot_count++;
   pCONT_set->RtcRebootSave();
+  #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+
+
+
+
+
+// //  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
+// #ifdef ESP32
+//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
+//             FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+//   AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
+//   #if !defined(HAS_PSRAM_FIX)
+//   if (FoundPSRAM() && !CanUsePSRAM()) {
+//     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+//   }
+//   #endif
+// #else // ESP32
+//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+// #endif // ESP32
+
+// #ifdef USE_UFILESYS
+//   UfsInit();  // xdrv_50_filesystem.ino
+// #endif
+
+
 
   pCONT_sup->init_FirmwareVersion();
 

@@ -31,7 +31,9 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND: 
 
+      
 
+// digitalWrite(pCONT_pins->GetPin(GPIO_LED1_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_INV_ID))); 
       // EveryLoop();
       // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID),!digitalRead(pCONT_pins->GetPin(GPIO_LED1_ID)));
       // digitalWrite(pCONT_pins->GetPin(GPIO_LED2_ID),!digitalRead(pCONT_pins->GetPin(GPIO_LED2_ID)));
@@ -109,7 +111,10 @@ void mLEDs::Init(void)
 }
 
 
-void mLEDs::EveryLoop(){
+void mLEDs::EveryLoop()
+{
+
+  SubTask_Status_LEDs();
 
 
 // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_ID))); delay(200);
@@ -127,6 +132,18 @@ void mLEDs::EveryLoop(){
   //   door_detect.ischanged = true;
   //   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   // }
+
+}
+
+/**
+ * @brief Any LEDs configured as status leds will be handled here
+ * 
+ */
+void mLEDs::SubTask_Status_LEDs()
+{
+
+  
+
 
 }
 

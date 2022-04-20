@@ -115,6 +115,18 @@ void mSettings::SystemSettings_DefaultBody_System(void)
   Settings.sbaudrate = SOFT_BAUDRATE / 1200;
   Settings.sleep = DEFAULT_LOOP_SLEEP;
 
+  /**
+   * @brief Set everything from normal template to something generic to stop crashes/lost devices when template/gpio error parsing occurs
+   * 
+   */
+
+
+  snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s","fallback");
+  snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s","fallback");
+  snprintf(pCONT_set->Settings.room_hint,sizeof(pCONT_set->Settings.room_hint),"%s","none_set");
+
+
+
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
   
   Settings.mqtt_retry = MQTT_RETRY_SECS;

@@ -40,6 +40,7 @@ const char* mBH1750::PM_MODULE_SENSORS_BH1750_FRIENDLY_CTR = D_MODULE_SENSORS_BH
 int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
+
   
   // some functions must run regardless
   switch(function){
@@ -137,7 +138,17 @@ void mBH1750::Pre_Init(void)
   
   if (pCONT_sup->I2cEnabled(XI2C_11)) { 
     settings.fEnableSensor = true;
+  }else{
+    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("mBH1750::Pre_Init NOT FOUND"));
+    // delay(4000);
+
   }
+
+  // if(pCONT_sup->I2cDevice(Bh1750.addresses[0]) || pCONT_sup->I2cDevice(Bh1750.addresses[1]))
+  // {
+  //   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("mBH1750::Pre_Init THIS IS .......... FOUND"));
+
+  // }
 
 }
 
@@ -148,7 +159,7 @@ void mBH1750::Init(void)
     if (pCONT_sup->I2cActive(Bh1750.addresses[i])) { continue; }
 
     Bh1750_sensors[Bh1750.count].address = Bh1750.addresses[i];
-    // AddLog(LOG_LEVEL_INFO, PSTR("Bh1750.count=%d"),Bh1750.count);
+    AddLog(LOG_LEVEL_INFO, PSTR("Bh1750.count=%d"),Bh1750.count);
 
     if (Bh1750SetMTreg(Bh1750.count)) {
       pCONT_sup->I2cSetActiveFound(Bh1750_sensors[Bh1750.count].address, Bh1750.types);

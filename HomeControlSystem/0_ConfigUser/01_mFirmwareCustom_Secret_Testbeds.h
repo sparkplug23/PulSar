@@ -54,6 +54,7 @@
 // #define DEVICE_TESTBED_3PIXELS_MATRIX_E131_PROTOCOL
 // #define DEVICE_TESTBED_STATUS_LEDS
 // #define DEVICE_TESTBED_CLIMATE_SENSOR_BREADBOARD
+// #define DEVICE_TESTBED_RTC_FASTBOOT
 
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
@@ -65,7 +66,7 @@
  */ 
 
 // Include the home devices, which should ONLY contain final hardware
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -5573,6 +5574,37 @@
 #endif
 
 
+
+/**
+ * @brief DEVICE_TESTBED_RTC_FASTBOOT
+ * 
+ */
+#ifdef DEVICE_TESTBED_RTC_FASTBOOT
+  #define DEVICENAME_CTR          "testbed_rtc_fastboot"   APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Testbed RTC Fastboot"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 55                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    // "\"" D_JSON_GPIOC "\":{"
+    // #ifdef ESP8266 
+    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #else
+    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #endif
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+    
+#endif
 
 
 #ifdef DEVICE_FORCED_TO_BE_TESTER

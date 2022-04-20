@@ -734,14 +734,15 @@ enum SupportedModules_8266_StaticCompleteList {
 
 
 
+  // #define            D_MODULE_NAME_GENERIC_CTR            "Generic"
+  // DEFINE_PGM_CTR(PM_MODULE_NAME_GENERIC_CTR)          D_MODULE_NAME_GENERIC_CTR;
 
-// define list
-  #define            D_MODULE_NAME_GENERIC_CTR            "Generic"
-  DEFINE_PGM_CTR(PM_MODULE_NAME_GENERIC_CTR)          D_MODULE_NAME_GENERIC_CTR;
   #define            D_MODULE_NAME_NODEMCU_CTR            "NodeMCU"
   DEFINE_PGM_CTR(PM_MODULE_NAME_NODEMCU_CTR)          D_MODULE_NAME_NODEMCU_CTR;
-  #define            D_MODULE_NAME_USERMODULE_CTR            "USERMODULE-Temp" //to enable tas code to work, but I need to move to another flag instead
+
+  #define            D_MODULE_NAME_USERMODULE_CTR            "User Module" // The new "Generic"
   DEFINE_PGM_CTR(PM_MODULE_NAME_USERMODULE_CTR)          D_MODULE_NAME_USERMODULE_CTR;
+
 #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
   #define            D_MODULE_NAME_SONOFF_BASIC_CTR       "Sonoff Basic"
   DEFINE_PGM_CTR(PM_MODULE_NAME_SONOFF_BASIC_CTR)     D_MODULE_NAME_SONOFF_BASIC_CTR;
@@ -968,7 +969,7 @@ const uint8_t kModuleNiceList_IDS[] PROGMEM = {
 
 DEFINE_PGM_CTR(kModules_Name_list_ctr)
 {
-  D_MODULE_NAME_GENERIC_CTR "|"
+  D_MODULE_NAME_USERMODULE_CTR "|"
   D_MODULE_NAME_SONOFF_BASIC_CTR  "|"
   D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR  "|"
   D_MODULE_NAME_H801_CTR          "|"
@@ -990,7 +991,7 @@ DEFINE_PGM_CTR(kModules_Name_list_ctr)
 
 const mytmplt8266 kModules[MODULE_MAXMODULE_8266] PROGMEM = {
   // Generic option always first
-  { 
+  { // D_MODULE_NAME_USERMODULE_CTR
     
     //phase into split esp82xx arrays, but MUST be done with ifdef's to enable long term conversion and testing
     

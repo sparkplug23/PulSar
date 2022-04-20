@@ -161,7 +161,7 @@ private:
         // continue
 
       break;
-      case LIGHT_TYPE__RGBW__ID:  //white
+      case LIGHT_TYPE__RGBW__ID:  //white   "WHITE" as rgbW should be generic to any white
         set_WC(briCCT);
         set_WW(briCCT);
         set_R(colour_out.R);
@@ -170,7 +170,11 @@ private:
 
       break;
 
-
+/**
+ * @brief 
+ * CW and WW, ie signel channel white should be handled here?
+ * 
+ */
       case LIGHT_TYPE__RGBCW__ID: //cold white?
         set_WC(briCCT);
         set_WW(briCCT);
@@ -413,9 +417,9 @@ enum LightColorModes {
       _briRGB = 0;
       if (0 == _briCCT) { _briCCT = maxbri; }
     }
-    #ifdef ENABLE_RGBCCT_DEBUG
+    // #ifdef ENABLE_RGBCCT_DEBUG
     Serial.printf("prev_cm (%d) req_cm (%d) new_cm (%d)\n\r", prev_cm, cm, _color_mode);
-    #endif // ENABLE_RGBCCT_DEBUG
+    // #endif // ENABLE_RGBCCT_DEBUG
 
     return prev_cm;
   

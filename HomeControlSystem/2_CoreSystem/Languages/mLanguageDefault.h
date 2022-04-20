@@ -76,7 +76,7 @@
 //#endif
 //#ifdef USE_MODULE_DISPLAYS_NEXTION
   #define D_MODULE_DISPLAYS_NEXTION_CTR              "mNextionPanel"
-  #define D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR              "nextionpanel"
+  #define D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR              "nextion"
 //#endif
 
   #define D_MODULE_DISPLAYS_OLED_SSD1306_CTR      "display_1306"
@@ -176,7 +176,7 @@
 
 
   #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
-  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "light"
+  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lights_interface"
 //#endif
 // Sensors (Range 120-169
 
@@ -1670,6 +1670,9 @@
 #define D_JSON_RATIO "Ratio"
 
 #define D_JSON_RELAY_NAME "Relay Name"
+
+#define D_JSON_ROOMHINT "RoomHint"
+
 #define D_JSON_MOTION_NAME "Motion Name"
 
 #define D_JSON_SAT "Sat"
@@ -1713,6 +1716,8 @@
 #define D_JSON_TRANSITION "Transition"
 #define D_JSON_TYPE "Type"
 #define D_JSON_RELAY "Relay"
+
+#define D_JSON_SUBTYPE "SubType"
 
 #define D_JSON_MANUAL_SETPIXEL_TO_SCENE "ManualSetPixelToScene"
 
@@ -1834,6 +1839,8 @@
 #define D_JSON_WIFIPOWER "WifiPower"
 
 #define D_JSON_WIFI_AP "WifiAP"
+
+#define D_JSON_ROOMHINT "RoomHint"
 
 #define D_JSON_FRIENDLYNAME "FriendlyName"
 #define D_JSON_SWITCHMODE "SwitchMode"

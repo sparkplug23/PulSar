@@ -160,7 +160,7 @@
 
 
 // Include the home devices, which should ONLY contain final hardware
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
+// #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
@@ -2893,101 +2893,6 @@
     "}"
   "}";
   
-#endif
-
-#ifdef DEVICE_RGBDESK
-  #define DEVICENAME_CTR            "rgbdesk"
-  #define DEVICENAME_FRIENDLY_CTR   "RGB Under Desk"
-
-  // //#define FORCE_TEMPLATE_LOADING
-   
-  // #define USE_MODULE_SENSORS_MOTION
-  
-  // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define DISABLE_WEBSERVER
-
-  // #define USE_MODULE_DRIVERS_FILESYSTEM
-  //#define USE_MODULE_DRIVERS_FILESYSTEM
-
-  // #define USE_MODULE_CORE_UPDATES
-
-  // #define USE_MODULE_SENSORS_BUTTONS
-  // #define ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
-
-  // #define ENABLE_SETTINGS_STORAGE
-  // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
-  
-  // #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
-
-  // #define ENABLE_DEVFEATURE_RTC_TIME_V2_MQTT_DEBUG
-
-  // #define USE_MODULE_DRIVERS_LEDS
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"D0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\"," // Test, nodemcu might allow this button after boot, I will use this to toggle on/off leds
-      #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D7\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      #endif
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"D4\":\"" D_GPIO_FUNCTION_LED1_INV_CTR  "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define STRIP_SIZE_MAX 60
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
-    "},"
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"" D_JSON_CCT_TEMP "\":300,"
-    "\"" D_JSON_HUE "\":25,"
-    "\"" D_JSON_SAT "\":100,"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-  "}";
-  
-  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Radar"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
 #endif
 
 

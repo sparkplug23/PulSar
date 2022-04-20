@@ -495,47 +495,6 @@ uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
 }
 
 
-uint32_t mSettings::GetRtcRebootCrc(void)
-{
-  uint32_t crc = 0;
-  uint8_t *bytes = (uint8_t*)&RtcReboot;
-
-  for (uint16_t i = 0; i < sizeof(RTCRBT); i++) {
-    crc += bytes[i]*(i+1);
-  }
-  return crc;
-}
-
-void mSettings::RtcRebootSave(void)
-{
-  #ifdef ESP8266
-  if (GetRtcRebootCrc() != rtc_reboot_crc) {
-    RtcReboot.valid = RTC_MEM_VALID;
-    ESP.rtcUserMemoryWrite(100 - sizeof(RTCRBT), (uint32_t*)&RtcReboot, sizeof(RTCRBT));
-    rtc_reboot_crc = GetRtcRebootCrc();
-  }
-  #endif
-}
-
-void mSettings::RtcRebootLoad(void)
-{
-  #ifdef ESP8266
-
-  ESP.rtcUserMemoryRead(100 - sizeof(RTCRBT), (uint32_t*)&RtcReboot, sizeof(RTCRBT));  // 0x280
-  if (RtcReboot.valid != RTC_MEM_VALID) {
-    memset(&RtcReboot, 0, sizeof(RTCRBT));
-    RtcReboot.valid = RTC_MEM_VALID;
-//    RtcReboot.fast_reboot_count = 0;  // Explicit by memset
-    RtcRebootSave();
-  }
-  rtc_reboot_crc = GetRtcRebootCrc();
-  DEBUG_PRINTF("fast_reboot=%d\n\r",RtcReboot.fast_reboot_count);
-  #endif
-}
-
-
-
-
 const char* mSettings::GetTelePeriodJsonLevelCtr(char* buffer){
   return GetTelePeriodJsonLevelCtr(pCONT_set->Settings.sensors.teleperiod_json_level, buffer);
 }
@@ -655,77 +614,6 @@ void mSettings::SettingsLoad_CheckSuccessful(){
 
 
 
-
-
-/*********************************************************************************************\
- * RTC memory
-\*********************************************************************************************/
-
-uint32_t mSettings::GetRtcSettingsCrc(void)
-{
-  uint32_t crc = 0;
-  uint8_t *bytes = (uint8_t*)&RtcSettings;
-
-  for (uint32_t i = 0; i < sizeof(RTCMEM); i++) {
-    crc += bytes[i]*(i+1);
-  }
-  return crc;
-}
-
-void mSettings::RtcSettingsSave(void)
-{
-  
-  #ifdef ESP8266
-  if (GetRtcSettingsCrc() != rtc_settings_crc) {
-    RtcSettings.valid = RTC_MEM_VALID;
-    ESP.rtcUserMemoryWrite(100, (uint32_t*)&RtcSettings, sizeof(RTCMEM));
-    rtc_settings_crc = GetRtcSettingsCrc();
-  }
-  #endif// ESP8266
-}
-
-void mSettings::RtcSettingsLoad(void)
-{
-    #ifdef ESP8266
-  ESP.rtcUserMemoryRead(100, (uint32_t*)&RtcSettings, sizeof(RTCMEM));  // 0x290
-  if (RtcSettings.valid != RTC_MEM_VALID) {
-    memset(&RtcSettings, 0, sizeof(RTCMEM));
-    RtcSettings.valid = RTC_MEM_VALID;
-    
-  #ifdef USE_ENERGY
-    RtcSettings.energy_kWhtoday = Settings.energy_usage.energy_kWhtoday;
-    RtcSettings.energy_kWhtotal = Settings.energy_usage.energy_kWhtotal;
-    RtcSettings.energy_usage = Settings.energy_usage;
-    // for (uint32_t i = 0; i < MAX_COUNTERS; i++) {
-    //   RtcSettings.pulse_counter[i] = Settings.pulse_counter[i];
-    //}
-    #endif
-    RtcSettings.power = Settings.power;
-    RtcSettingsSave();
-  }
-  rtc_settings_crc = GetRtcSettingsCrc();
-    #endif // ESP8266
-}
-
-bool mSettings::RtcSettingsValid(void)
-{
-  return (RTC_MEM_VALID == RtcSettings.valid);
-}
-
-/********************************************************************************************/
-
-
-void mSettings::RtcRebootReset(void)
-{
-  RtcReboot.fast_reboot_count = 0;
-  RtcRebootSave();
-}
-
-
-bool mSettings::RtcRebootValid(void)
-{
-  return (RTC_MEM_VALID == RtcReboot.valid);
-}
 
 
 // /********************************************************************************************/

@@ -180,6 +180,7 @@ class mTankVolume :
     #define TANK_BOTTOM_RADIUS_CM 63.662*0.96
 
     #define TANK_MAINBOTTOM_THRESHOLD_HEIGHT_MM 170
+    #define TANK_MAINBOTTOM_THRESHOLD_HEIGHT_CM 17
     #define TANK_PIPEOUT_HEIGHT_MM 90
 
     #define TANK_MAIN_RADIUSSQUARED_TIMES_PI_CM (3.14*TANK_MAIN_RADIUS_CM*TANK_MAIN_RADIUS_CM)
@@ -270,7 +271,20 @@ class mTankVolume :
 
     struct TANK{
 
+      // struct DISTANCE_SETTINGS{
+      //   bool flag_distance_is_relative_to_far_object = true; // ie, not distance from sensor, but relative to distant object eg tank bottom
+
+      // }distance;
+
+      float height_of_tank_cm = 0;
+
       float volume_litres = 0;
+      /**
+       * @brief Outlet pipe from tank is above the bottom, where that liquid is not usable
+       * 
+       */
+      float volume_litres_notusable = 0;
+      float volume_litres_usable = 0;
 
     }tank;
 

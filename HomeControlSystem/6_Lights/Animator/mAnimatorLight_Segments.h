@@ -1506,6 +1506,8 @@ void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
     void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);
     void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index = 0);
 
+    void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
+
     // void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
     // void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
     // void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);

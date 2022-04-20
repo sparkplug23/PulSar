@@ -20,7 +20,7 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_method){
 
     JBI->Level_Start(D_JSON_RFRECEIVED);
   
-      // JBI->Add(D_JSON_DATA, rx_pkt.data);
+      JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
       // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
       // JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
       // JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   

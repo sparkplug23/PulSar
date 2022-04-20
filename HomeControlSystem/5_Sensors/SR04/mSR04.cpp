@@ -34,6 +34,10 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_MINUTE:
       EveryMinute();
     break;
+    case FUNC_UPTIME_1_MINUTES:
+      readings.average_EMA.alpha = 2.0f / (200.0f-1.0f); // 60 samples, slower
+      Config_Filters();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -88,6 +92,8 @@ void mSR04::Config_Filters()
   readings.average_DEMA.filter = new DoubleEMAFilter<float>(readings.average_DEMA.alpha1, readings.average_DEMA.alpha2);
   #endif // ENABLE_DEVFEATURE_SR04_SINGLE_EMA_FILTERING
 
+  mqtthandler_settings_teleperiod.flags.SendNow = true;
+
 }
 
 
@@ -102,7 +108,8 @@ void mSR04::Init(void)
 
   #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
   // Default weight values
-  readings.average_EMA.alpha = 2.0f / (100.0f-1.0f);
+  readings.average_EMA.alpha = 2.0f / (5.0f-1.0f); // faster
+  // readings.average_EMA.alpha = 2.0f / (60.0f-1.0f); // 60 samples, slower
   #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
   #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
   readings.average_DEMA.alpha1 = 2.0f / (100.0f-1.0f);

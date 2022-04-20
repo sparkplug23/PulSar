@@ -96,10 +96,12 @@ void mSensorsBME::Pre_Init(){
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
 
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_BME "BME280  mSensorsBME::Pre_Init"));
   // in futre use array to store bme type found (BME_280_ID, BME_180_ID) etc
   // if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID) && pCONT_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
-  if(pCONT_sup->I2cDevice(0x76) || pCONT_sup->I2cDevice(0x77)){
+  if(pCONT_sup->I2cDevice(0x76) || pCONT_sup->I2cDevice(0x77))
+  {
   // if(pCONT_sup->I2cDevice_IsConnected(0x76) || pCONT_sup->I2cDevice_IsConnected(0x77)){
 
 
@@ -128,6 +130,7 @@ AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_sup->wire->getEr
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
   }
 
+      // delay(4000);
 }
 
 

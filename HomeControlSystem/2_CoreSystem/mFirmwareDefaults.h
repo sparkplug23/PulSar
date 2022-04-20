@@ -30,7 +30,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #include "2_CoreSystem/mBaseConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 #ifdef D_USER_MICHAEL
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
 #include "0_ConfigUser/03_mFirmwareCustom_Secret_Christmas_Devices.h"
