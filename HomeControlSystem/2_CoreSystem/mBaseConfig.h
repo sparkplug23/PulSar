@@ -311,6 +311,48 @@
   #define WEB_PORT             80                // Web server Port for User and Admin mode
 
 
+// -- IR Remote features - all protocols from IRremoteESP8266 --------------------------
+// IR Full Protocols mode is now activated through USE_IR_REMOTE_FULL
+//
+// Code impact of IR full protocols is +90k code, 3k mem
+
+// -- IR Remote features - subset of IR protocols --------------------------
+#define USE_IR_REMOTE                            // Send IR remote commands using library IRremoteESP8266 (+4k3 code, 0k3 mem, 48 iram)
+  #define IR_SEND_INVERTED          false        // Invert the output. (default = false) e.g. LED is illuminated when GPIO is LOW rather than HIGH.
+                                                 // Setting inverted to something other than the default could easily destroy your IR LED if you are overdriving it.
+                                                 // Unless you REALLY know what you are doing, don't change this.
+  #define IR_SEND_USE_MODULATION    true         // Do we do frequency modulation during transmission? i.e. If not, assume a 100% duty cycle.
+
+  // ====> IR Full protocols are enabled with the line below
+  // #define USE_IR_REMOTE_FULL                     // Support all IR protocols from IRremoteESP8266
+  //
+  // WARNING: if you change any IR configuration, you need to clear Platform.io cache
+  //          currently the include change detection does not work for these parameters
+  //          This is not an issue if you compile with gitpod or pre-compiled binaries
+  //          since there is no cache of previously compiled libraries
+  // ====>
+  //
+  // You can also disable specific protocols in user_config_override
+  // Example: disable some HVAC protocols to reduce flash size
+  // #define DECODE_WHIRLPOOL_AC  false
+  // #define SEND_WHIRLPOOL_AC    false
+  // #define DECODE_SAMSUNG_AC    false
+  // #define SEND_SAMSUNG_AC      false
+  // ...
+
+  // When using 'USE_IR_REMOTE_FULL', parameters below
+  // (USE_IR_REMOTE, USE_IR_RECEIVE, USE_IR_HVAC...) are IGNORED.
+  #define USE_IR_SEND_NEC                        // Support IRsend NEC protocol
+  #define USE_IR_SEND_RC5                        // Support IRsend Philips RC5 protocol
+  #define USE_IR_SEND_RC6                        // Support IRsend Philips RC6 protocol
+
+  // Enable IR devoder via GPIO `IR Recv` - always enabled if `USE_IR_REMOTE_FULL`
+  #define USE_IR_RECEIVE                         // Support for IR receiver (+7k2 code, 264 iram)
+    #define IR_RCV_BUFFER_SIZE      100          // Max number of packets allowed in capture buffer (default 100 (*2 bytes ram))
+    #define IR_RCV_TIMEOUT          15           // Number of milli-Seconds of no-more-data before we consider a message ended (default 15)
+    #define IR_RCV_MIN_UNKNOWN_SIZE 6            // Set the smallest sized "UNKNOWN" message packets we actually care about (default 6, max 255)
+    #define IR_RCV_WHILE_SENDING    0            // Turns on receiver while sending messages, i.e. receive your own. This is unreliable and can cause IR timing issues
+    #define IR_RCV_TOLERANCE        25           // Base tolerance percentage for matching incoming IR messages (default 25, max 100)
 
 
 // Anything added by this file must "undef" then "ifdef" to replace it

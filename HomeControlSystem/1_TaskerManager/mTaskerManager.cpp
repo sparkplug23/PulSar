@@ -293,6 +293,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID] = new mRCSwitch();
   #endif
+  #ifdef USE_MODULE_DRIVERS_IRREMOTE
+    pModule[EM_MODULE_DRIVERS_IRREMOTE_ID] = new mIRRemote();
+  #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
     pModule[EM_MODULE_ENERGY_INTERFACE_ID] = new mEnergyInterface();
@@ -331,6 +334,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS_SWITCHES
     pModule[EM_MODULE_SENSORS_SWITCHES_ID] = new mSwitches();
+  #endif
+  #ifdef USE_MODULE_SENSORS_LDR_BASIC
+    pModule[EM_MODULE_SENSORS_LDR_BASIC_ID] = new mLDRBasic();
   #endif
   #ifdef USE_MODULE_SENSORS_ANALOG
     pModule[EM_MODULE_SENSORS_ANALOG_ID] = new mSensorsAnalog();
