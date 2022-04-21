@@ -85,7 +85,7 @@ function writeHtmlGzipped(sourceFile, resultFile) {
       console.info("Compressed " + result.length + " bytes");
       const array = hexdump(result);
       const src = `/*
- * Binary array for the Web UI.
+ * Binary array for the Web UI 2022.
  * gzip is used for smaller size and improved speeds.
  * 
  * Please see https://github.com/Aircoookie/WLED/wiki/Add-own-functionality#web-ui
@@ -125,7 +125,7 @@ function writeHtmlGzippedExtern(sourceFile, resultFile, resultFileName) {
       const array = hexdump(result);
 
 const header_data = `/*
-* Binary array for the Web UI.
+* Binary array for the Web UI 2022.
 * gzip is used for smaller size and improved speeds.
 * Header with extern definition to reduce file size with multiple inclusions of array in multiple files
 */
@@ -138,7 +138,7 @@ extern const uint8_t PAGE_ROOT[];
 `;
 
 const cpp_data = `/*
-* Binary array for the Web UI.
+* Binary array for the Web UI 2022.
 * gzip is used for smaller size and improved speeds.
 * cpp file which contains the one and only initialization of data
 */

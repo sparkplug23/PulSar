@@ -6,7 +6,7 @@
 
 void mButtons::WebAppend_Root_Draw_Table(){
 
-  pCONT_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(buttons_found,"button_table", "Button");
+  pCONT_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(settings.buttons_found,"button_table", "Button");
 
 
 }
@@ -17,7 +17,7 @@ void mButtons::WebAppend_Root_Status_Table(){
   char buffer[20];
 
   JsonBuilderI->Array_Start_P(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR);// Class name
-  for(int row=0;row<buttons_found;row++){
+  for(int row=0;row<settings.buttons_found;row++){
     JsonBuilderI->Level_Start();
       JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,row);
       JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,IsButtonActiveCtr(row, buffer, sizeof(buffer)));//"\"%s\"", IsButtonActiveCtr(row, buffer, sizeof(buffer)));

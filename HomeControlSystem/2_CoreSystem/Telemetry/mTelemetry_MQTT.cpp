@@ -1,9 +1,32 @@
-#include "2_CoreSystem/Telemetry/mTelemetry.h"
+/**
+ * @file    mTelemetry_MQTT.cpp
+ * @author  Michael Doone (michaeldoonehub@gmail.com)
+ * @brief   MQTT Configuration
+ * @version 1.0
+ * @date    2022-04-20
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
+#include "2_CoreSystem/Telemetry/mTelemetry.h"
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mTelemetry::MQTTHandler_Init(){
+void mTelemetry::MQTTHandler_Init()
+{
 
   handler<mTelemetry>* p;
 
@@ -96,11 +119,7 @@ void mTelemetry::MQTTHandler_Init(){
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
-  #ifdef DEBUG_MODULE_TIME_STD
-  p->tRateSecs = 1;//SEC_IN_HOUR; 
-  #else //ifdef DEBUG_MODULE_TIME_STD
   p->tRateSecs = SEC_IN_HOUR; 
-  #endif
   p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   p->json_level = JSON_LEVEL_DETAILED;
@@ -185,17 +204,13 @@ void mTelemetry::MQTTHandler_Init(){
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
-  #ifdef USE_DEVFEATURE_DEBUG_SETTINGS_VIA_MQTT_FASTER_UPDATES
-  p->tRateSecs = 1;//SEC_IN_HOUR; 
-  #else
   p->tRateSecs = SEC_IN_HOUR; 
-  #endif
   p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   p->json_level = JSON_LEVEL_DETAILED;
   p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_SYSTEM_STORED_SETTINGS_CTR;
   p->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_System_Stored_Settings;
-  #endif
+  #endif // ENABLE_MQTT_DEBUG_TELEMETRY
   
   p = &mqtthandler_debug_minimal;
   p->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID;
@@ -203,7 +218,7 @@ void mTelemetry::MQTTHandler_Init(){
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
   p->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
-  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;// MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   p->json_level = JSON_LEVEL_DETAILED;
   p->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;

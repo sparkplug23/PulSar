@@ -52,8 +52,7 @@ class AsyncStaticWebHandler;
 class AsyncCallbackWebHandler;
 class AsyncResponseStream;
 
-// #ifndef ESP32
-// #ifndef WEBSERVER_H
+#ifndef WEBSERVER_H
 typedef enum {
   HTTP_GET     = 0b00000001,
   HTTP_POST    = 0b00000010,
@@ -64,8 +63,7 @@ typedef enum {
   HTTP_OPTIONS = 0b01000000,
   HTTP_ANY     = 0b01111111,
 } WebRequestMethod;
-// #endif
-// #endif
+#endif
 
 
 //if this value is returned when asked for data, packet will not be sent and you will be asked for data again

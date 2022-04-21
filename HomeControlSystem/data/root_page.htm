@@ -1212,11 +1212,18 @@ function populateInfo(i)
 {
 	var cn="";
     cn += "<table class=\"infot\">";
-        cn += "<span class=\"info_row\"></span>";
-        cn += "<span class=\"info_row\"></span>";
-        cn += "<span class=\"info_row\"></span>";
-        cn += "<span class=\"info_row\"></span>";
+
+        for (i = 0; i < 15; i++){ // extra rows during debugging, this can be reduced on release version to essential info for "normal" people
+            cn += "<span class=\"info_row\"></span>";
+        // cn += "<span class=\"info_row\"></span>";
+        // cn += "<span class=\"info_row\"></span>";
+        // cn += "<span class=\"info_row\"></span>";
+        // cn += "<span class=\"info_row\"></span>"; // line count needs to be sent somehow. Perhaps "if length change, redraw?"
         // use json list to write? or send it as innerhtml?
+
+        }
+
+
         // cn += inforow()
     cn += "</table>";
 

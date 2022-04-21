@@ -540,7 +540,7 @@
   };
   
   #ifndef D_PALETTE_PASTEL_NAME_CTR
-  #define D_PALETTE_PASTEL_NAME_CTR        "Pastel Easter"   
+  #define D_PALETTE_PASTEL_NAME_CTR        "Pastel Easter|Pastel|Easter"   
   #endif
   const char PM_PALETTE_PASTEL_NAME_CTR[] PROGMEM = D_PALETTE_PASTEL_NAME_CTR;
   const uint8_t COLOUR_PALETTE_PASTEL_MAP__IDS[] PROGMEM = {

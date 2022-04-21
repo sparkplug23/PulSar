@@ -15,48 +15,29 @@ typedef struct  FREEMEM_HANDLER{
 }freemem_usage_t;
 #endif
 
-
-
 #include <Arduino.h>
 #include "2_CoreSystem/Logging/mLogging.h"
 
-// #include "3_Network/WebServer/WebPages_Progmem.h"
 #include "html_ui.h"
-// #include "html_ui.cpp"
-
 #include "1_TaskerManager/mTaskerManager.h"
 
-
-//#include "//2_CoreSystem/Languages/mLanguage.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
 #ifdef ESP32
   #include <WiFi.h>
   #include <WiFiClient.h>
   #include <WebServer.h>
-  // #include <ESPmDNS.h>
   #include <HTTPClient.h>
+  #include <AsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
 #endif
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
-  // #include <ESP8266mDNS.h>
   #include <ESP8266HTTPClient.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>
 #endif
 
-
-#ifdef ESP32
-#include <WiFi.h>
-#ifndef DISABLE_NETWORK
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#endif // DISABLE_NETWORK
-#elif defined(ESP8266)
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#endif
 
 #include <DNSServer.h>
 #include "2_CoreSystem/Time/mTime.h"
@@ -1344,7 +1325,8 @@ public mTaskerInterface{
       AsyncWebServer *pWebServer;
     #endif
     #ifdef ESP32
-    WebServer *pWebServer;
+    // WebServer *pWebServer;
+      AsyncWebServer *pWebServer;
     #endif
     
     #ifdef DEBUG_WEBSERVER_MEMORY

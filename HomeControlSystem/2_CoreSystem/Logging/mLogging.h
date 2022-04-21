@@ -104,6 +104,36 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                         SERIAL_DEBUG.flush();
 **/
 
+/**
+ * @brief Compact ways of adding a log and compile disabling it
+ * 
+ * #ifdef ENABLE_LOG_LEVEL_INFO
+ *   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+ * #endif// ENABLE_LOG_LEVEL_INFO
+ */
+#ifdef ENABLE_LOG_LEVEL_ERROR
+#define ALOG_ERR(...) AddLog(LOG_LEVEL_ERROR, __VA_ARGS__)
+#else
+#define ALOG_ERR(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_WARNING
+#define ALOG_WRN(...) AddLog(LOG_LEVEL_WARNING, __VA_ARGS__)
+#else
+#define ALOG_WRN(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_INFO
+#define ALOG_INF(...) AddLog(LOG_LEVEL_INFO, __VA_ARGS__)
+#else
+#define ALOG_INF(...)
+#endif
+
+#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+#define ALOG_DBM(...) AddLog(LOG_LEVEL_DEBUG_MORE, __VA_ARGS__)
+#else
+#define ALOG_DBM(...)
+#endif
 
 //For single test use, no ifdefs
 // #ifdef USE_DEBUG_LINE

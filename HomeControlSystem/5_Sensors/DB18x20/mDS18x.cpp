@@ -695,7 +695,7 @@ void mDS18X::WebAppend_Root_Status_Table_Draw(){
 
   for(int sensor_id=0;sensor_id<db18_sensors_active;sensor_id++){ //add number in name? List needed? also hold user defined name?
     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      JsonBuilderI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
       JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_db18","?");   
     JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }

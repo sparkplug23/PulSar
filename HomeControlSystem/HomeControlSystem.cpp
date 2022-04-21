@@ -1,5 +1,5 @@
 
-#define D_USER_MICHAEL // maybe undef later?
+// #define D_USER_MICHAEL // maybe undef later?
 
 // #define USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
 
@@ -175,9 +175,8 @@ void setup(void)
   // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before1"));
   // delay(1000);
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR("Loading minimal defaults"));
-    #endif // ENABLE_LOG_LEVEL_INFO
+  ALOG_INF(PSTR("Loading minimal defaults"));
+
   pCONT_set->SettingsDefault(); //preload minimal required
 
   // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after"));
@@ -189,9 +188,9 @@ void setup(void)
 
  // #endif // DEBUG_NUM1
   // #ifdef ENABLE_SETTINGS_STORAGE
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR("Loading settings from saved memory"));
-    #endif // ENABLE_LOG_LEVEL_INFO
+
+  ALOG_INF(PSTR("Loading settings from saved memory"));
+  
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
   // Check Load was successful
@@ -222,9 +221,9 @@ void setup(void)
   // This will overwrite the settings, temporary, will use a second flag to force template loads "TEMPLATE_HOLDER"
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_WARN,PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-  #endif
+  
+  ALOG_WRN(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
+  
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
   // load
   // pCONT->Tasker_Interface(FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM);  //load/overwrite names AFTER init (FUNC_TEMPLATE_DEVICE_CONFIG_BEFORE_INIT)
@@ -280,7 +279,6 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
   #endif // USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_
-  // pinMode(21, OUTPUT);++
 
   #ifndef USE_MODULE_NETWORK_WIFI
   WiFi.mode(WIFI_OFF);
@@ -308,69 +306,20 @@ void LoopTasker()
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);      }  DEBUG_LINE;
 
-
-  /**
-   * @brief For debugging
-   *  */
-
-  // ifdef delayed start enabled
-  // FUNC_DELAYED_START_LOOP/ wait until uptime is 60 seconds
-
-// check pinused here to see if they are set properly
-
-// if(pCONT_pins->PinUsed(GPIO_RGB_DATA_ID))
-// {
-//   Serial.println("PinUsed RGB");
-//   Serial.println(pCONT_pins->GetPin(GPIO_RGB_DATA_ID));
-// }
-
 }
 
 /********************************************************************************************/
 /*********************loop*******************************************************************/
 /********************************************************************************************/
 
-void loop(void)
+
+void SmartLoopDelay()
 {
-  pCONT_sup->activity.loop_counter++;
-  pCONT_sup->loop_start_millis = millis();
-  WDT_RESET();
-  
-//  vTaskDelay(pdMS_TO_TICKS(100)); 
-        // AddLog(LOG_LEVEL_INFO, PSTR("loop"));
-
-//  vTaskDelay(pdMS_TO_TICKS(10)); 
-
-  LoopTasker();
-  
-    // Serial.printf("LoopTasker=%d\r\n", millis());
-
-    
-  pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
-
-  if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
-    pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
-    #endif // ENABLE_LOG_LEVEL_INFO
-    pCONT_sup->activity.loop_counter=0;
-  }
-
-  if(pCONT_sup->loop_runtime_millis > 40){
-    DEBUG_PRINTF("loop_runtime_millis=%d\n\r", pCONT_sup->loop_runtime_millis);
-  }
-
-  //  pCONT_mqtt->flag_uptime_reached_reduce_frequency = true;
-
-  // Change this to my own way
-  // DO THIS NEXT
-  //SmartLoopDelay()
   #ifndef DISABLE_SLEEP
   if(pCONT_set->Settings.enable_sleep){
     if (pCONT_set->Settings.flag_network.sleep_normal) {
       pCONT_sup->SleepDelay(pCONT_set->runtime_var.sleep);
     } else {
-
       // Loop time < sleep length of time
       if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_var.sleep) {
         //delay by loop time
@@ -384,11 +333,27 @@ void loop(void)
       }
     }
   }
-  // #else
-  // delay(0);
   #endif
+}
 
-  // delay(100);
+
+void loop(void)
+{
+  pCONT_sup->activity.loop_counter++;
+  pCONT_sup->loop_start_millis = millis();
+  WDT_RESET();
+  
+  LoopTasker();
+      
+  pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
+
+  if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
+    pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
+    ALOG_DBM(PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
+    pCONT_sup->activity.loop_counter=0;
+  }
+
+  SmartLoopDelay();
 
   DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
@@ -397,20 +362,6 @@ void loop(void)
   pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)
   pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay_temp;
   pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
-
-  DEBUG_LINE;
-  // Create a debug mqtt packet for timings, of main loop and interface loops
-  // DEBUG_PRINTF("%s=%d\r\n","tick",pCONT_sup->loop_runtime_millis);
-  // DEBUG_PRINTF("%s=%d\r\n","tick",pCONT_sup->activity.cycles_per_sec);
-  // uint32_t start_millis = millis();
-  // AddLog(LOG_LEVEL_TEST,PSTR("LOOPSEC = %d \t %d"),loops_per_second,mtel.activity.cycles_per_sec);
-  // DEBUG_PRINTF("ADD TIME = %d\n\r",millis()-start_millis);
-
-  pCONT_set->fSystemRestarted = false; //phase out and use module flag instead
-
-  DEBUG_LINE;
-
-  // #endif // USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
 
 }
 

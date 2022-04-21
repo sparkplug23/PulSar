@@ -5,6 +5,7 @@
  * 1) Install Node 11+ and npm
  * 2) npm install
  * 3) npm run build
+ * https://github.com/nullivex/nodist to install npm on windows (as admin!), then reload vscode for updated PATH
  *
  * If you change data folder often, you can run it in monitoring mode (it will recompile and update *.h on every file change)
  *
@@ -85,7 +86,7 @@ function writeHtmlGzipped(sourceFile, resultFile) {
       console.info("Compressed " + result.length + " bytes");
       const array = hexdump(result);
       const src = `/*
- * Binary array for the Web UI.
+ * Binary array for the Web UI 2022.
  * gzip is used for smaller size and improved speeds.
  */
 
@@ -126,7 +127,7 @@ function writeHtmlGzippedExtern(sourceFile, resultFile, resultFileName) {
       const array = hexdump(result);
 
 const header_data = `/*
-* Binary array for the Web UI.
+* Binary array for the Web UI 2022.
 * gzip is used for smaller size and improved speeds.
 * Header with extern definition to reduce file size with multiple inclusions of array in multiple files
 */
@@ -144,7 +145,7 @@ extern const uint8_t PAGE_ROOT[];
 `;
 
 const cpp_data = `/*
-* Binary array for the Web UI.
+* Binary array for the Web UI 2022.
 * gzip is used for smaller size and improved speeds.
 * cpp file which contains the one and only initialization of data
 */

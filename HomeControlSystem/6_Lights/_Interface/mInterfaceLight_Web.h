@@ -10,12 +10,12 @@
 #include <WiFi.h>
 #ifndef DISABLE_NETWORK
 #include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+//?#include <ESPAsyncWebServer.h>
 #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+//?#include <ESPAsyncWebServer.h>
 #endif
 
 

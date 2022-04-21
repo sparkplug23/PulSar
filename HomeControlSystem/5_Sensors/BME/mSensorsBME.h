@@ -28,7 +28,24 @@
 #include <Wire.h>
 // #include "5_Sensors/BME/internal/Adafruit_BME280.h"
 
+/*********************************************************************************************\
+ * BMP085, BMP180, BMP280, BME280, BME680 - Pressure, Temperature, Humidity (BME280/BME680) and gas (BME680)
+ *
+ * Source: Heiko Krupp and Adafruit Industries
+ *
+ * I2C Address: 0x76 or 0x77
+\*********************************************************************************************/
+
+#define BMP180_CHIPID        0x55
+#define BMP280_CHIPID        0x58
+#define BME280_CHIPID        0x60
+#define BME680_CHIPID        0x61 // gas
+
 #include "Adafruit_BME280.h"
+
+#define BMP_MAX_SENSORS      2
+
+// const char kBmpTypes[] PROGMEM = "BMP180|BMP280|BME280|BME680";
 
 class Adafruit_BME280;
 
@@ -79,8 +96,8 @@ class mSensorsBME :
     #define MAX_SENSORS 1
     void EveryLoop();
 
-    void WebAppend_Root_Status_Table_Draw();
-    void WebAppend_Root_Status_Table_Data();
+    // void WebAppend_Root_Status_Table_Draw();
+    // void WebAppend_Root_Status_Table_Data();
     struct SENSORDATA{
       float temperature;
       float humidity;

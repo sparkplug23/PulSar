@@ -17,11 +17,6 @@
 // Void Arg Functions
 #define CALL_MEMBER_FUNCTION(object,ptrToMember)  ((object).*(ptrToMember))
 // (uint8_t,uint8_t) Arg Function calls
-//#define CALL_MEMBER_FUNCTION_WITH_ARG(object,ptrToMember,X,Y)  ((object).*(ptrToMember)(X,Y))
-
-// From before removing isserviced
-// RAM:   [=====     ]  47.5% (used 38916 bytes from 81920 bytes)
-// Flash: [=====     ]  47.8% (used 489856 bytes from 1023984 bytes)
 
 #define DEFAULT_MQTT_SYSTEM_BOOT_RATE_SECS 1
 #define DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS 120
@@ -103,13 +98,13 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_CTR) "motion";
 //   MQTT_FREQUENCY_REDUNCTION_LEVEL_HIGH_ID     //60 minutes
 // };
 
+
 typedef union {
   uint8_t data;
   struct {
     uint8_t PeriodicEnabled : 1; 
     uint8_t SendNow         : 1;
-    uint8_t FrequencyRedunctionLevel  : 2;     // 0= no redunction, maintain level, 1 = reduce after 1 minute, 1= 10 minutes, 2= 60 minutes
-    
+    uint8_t FrequencyRedunctionLevel  : 2;     // 0= no redunction, maintain level, 1 = reduce after 1 minute, 1= 10 minutes, 2= 60 minutes    
     uint8_t reserved : 4; 
   };
 }Handler_Flags;
@@ -121,7 +116,6 @@ struct handler {
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
   const char*   postfix_topic;
-  // uint8_t       module_id = 0;
   uint8_t       handler_id = 0;
   Handler_Flags flags;
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level); // member-function to sender with one args
@@ -340,12 +334,10 @@ const char* state_ctr(void);
         // Generate the JSON payload, to the level of detail needed.
         //CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->function_sender)(handler_ptr->json_level);
         //CALL_MEMBER_FUNCTION_WITH_ARG(class_ptr,handler_ptr->function_sender,handler_ptr->topic_type,handler_ptr->json_level);
-// Serial.printf("fSendPayload A=%s %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush();
           
         // use return flag for if mqtt needs sent, useful with ifchanged
         uint8_t fSendPayload = (class_ptr.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level); //fSendPayload as uint8_t is what I return, cant be length > 255
-// Serial.printf("fSendPayload B=%s %d fSendPayload %d\n\r",handler_ptr->postfix_topic, class_id, fSendPayload); Serial.flush();
-          
+         
         if(fSendPayload > 1){ 
           // Serial.printf("fSendPayload %d: Not set!\n\r", fSendPayload); Serial.flush();
           fSendPayload= 0; 

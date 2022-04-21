@@ -189,8 +189,8 @@ void mDoorSensor::WebAppend_Root_Status_Table_Data(){
         sprintf(colour_ctr,"#ffffff");
       }
 
-      sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
-        mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
+      // sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
+      //   mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
     
       JsonBuilderI->Add("ih",inner_html);
       JsonBuilderI->Add("fc",colour_ctr);

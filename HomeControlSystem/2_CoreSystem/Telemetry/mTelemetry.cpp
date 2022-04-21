@@ -1,21 +1,40 @@
+/**
+ * @file    mTelemetry.cpp
+ * @author  Michael Doone (michaeldoonehub@gmail.com)
+ * @brief   Generate JSON of coresystem values
+ * @version 1.0
+ * @date    2022-04-20
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 #include "2_CoreSystem/Telemetry/mTelemetry.h"
 
 const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
 const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
 
-int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
+{
 
-  // DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
       Init();
     break;
-    
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_HANDLER:
-      WebPage_Root_AddHandlers();
-    break;
-    #endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  }
+
+  switch(function){
     /************
      * MQTT SECTION * 
     *******************/
@@ -31,9 +50,17 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Sender();
       break;
     case FUNC_MQTT_CONNECTED:
-      MQTTHandler_Set_RefreshAll(); // This needs later to not do it if first connect
+      MQTTHandler_Set_RefreshAll();
       break;
     #endif //USE_MODULE_NETWORK_MQTT
+    /************
+     * WEGPAGE SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case FUNC_WEB_ADD_HANDLER:
+      WebPage_Root_AddHandlers();
+    break;
+    #endif // USE_MODULE_NETWORK_WEBSERVER
   }
 
 }
@@ -487,7 +514,8 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level){ //
  * 
  * ****/
 
-uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHealth
+uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level)
+{
 
   IPAddress localip = WiFi.localIP();
   
@@ -509,7 +537,8 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level){ //BuildHeal
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level){ //BuildHealth
+uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level)
+{
 
   char buffer[30];
   JsonBuilderI->Start();

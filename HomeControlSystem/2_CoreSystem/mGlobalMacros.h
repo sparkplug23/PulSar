@@ -44,27 +44,9 @@
 // #define DEBUG_TRACE_LOG(...)
 // #endif
 
-/**
- * @brief Compact ways of adding a log and compile disabling it
- * 
- * #ifdef ENABLE_LOG_LEVEL_INFO
- *   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
- * #endif// ENABLE_LOG_LEVEL_INFO
- */
-#ifdef ENABLE_LOG_LEVEL_ERROR
-#define ALOG_LEVEL_ERROR(...) AddLog(LOG_LEVEL_ERROR, __VA_ARGS__)
-#else
-#define ALOG_LEVEL_ERROR(...)
-#endif
-#ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-#define ALOG_LEVEL_DEBUG_MORE(...) AddLog(LOG_LEVEL_DEBUG_MORE, __VA_ARGS__)
-#else
-#define ALOG_LEVEL_DEBUG_MORE(...)
-#endif
 
 
-
-  #define SPF(param_name,string_type,parameter)  Serial.printf("\"" param_name "\"=" string_type "\n\r", parameter)
+#define SPF(param_name,string_type,parameter)  Serial.printf("\"" param_name "\"=" string_type "\n\r", parameter)
   
 
 #define DEBUGGING_PROCEED_ONLY_AFTER_MILLIS_SHOWS_STABLE(X) \
