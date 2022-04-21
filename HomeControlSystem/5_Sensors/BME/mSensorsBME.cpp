@@ -1,28 +1,32 @@
-/*
-  mHVAC.cpp - mSensorsBME
+/**
+ * @file mSensorsBME.cpp
+ * @author Michael Doone (michaeldoonehub@gmail.com)
+ * @brief BME280 Temperature, Humidity and Pressure sensor 
+ * @version 1.0
+ * @date 2022-04-20
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
 
-  Copyright (C) 2021  Michael
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "mSensorsBME.h"
 
 #ifdef USE_MODULE_SENSORS_BME
 
 const char* mSensorsBME::PM_MODULE_SENSORS_BME_CTR = D_MODULE_SENSORS_BME_CTR;
 const char* mSensorsBME::PM_MODULE_SENSORS_BME_FRIENDLY_CTR = D_MODULE_SENSORS_BME_FRIENDLY_CTR;
-
 
 int8_t mSensorsBME::Tasker(uint8_t function, JsonParserObject obj){
   
@@ -62,12 +66,12 @@ int8_t mSensorsBME::Tasker(uint8_t function, JsonParserObject obj){
      * WEBPAGE SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Status_Table_Draw();
-      break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table_Data();
-      break;
+    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    //   WebAppend_Root_Status_Table_Draw();
+    //   break;
+    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    //   WebAppend_Root_Status_Table_Data();
+    //   break;
     #endif //USE_MODULE_NETWORK_WEBSERVER
     /************
      * MQTT SECTION * 
@@ -123,8 +127,11 @@ void mSensorsBME::Pre_Init(){
     }
   }
 
+  #ifdef ESP32
 AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_sup->wire->getErrorText(pCONT_sup->wire->lastError()));
-  
+  #endif 
+
+
   if(settings.fSensorCount){
     settings.fEnableSensor = true;
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
@@ -206,7 +213,7 @@ void mSensorsBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comple
         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
         // sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
 
-        AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
+        ALOG_INF( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);

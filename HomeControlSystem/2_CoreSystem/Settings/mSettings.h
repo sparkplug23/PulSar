@@ -1553,7 +1553,7 @@ void SettingsMerge(SYSCFG* saved, SYSCFG* new_settings);
 
 
 // NEW flag that allows anything to run on reboot
-uint8_t fSystemRestarted = true; // will be restart at the end of the first loop
+// uint8_t fSystemRestarted = true; // will be restart at the end of the first loop
 
 #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 struct RTCRBT {

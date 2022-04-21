@@ -1,3 +1,25 @@
+/**
+ * @file mSensorsBME.cpp
+ * @author Michael Doone (michaeldoonehub@gmail.com)
+ * @brief BME280 Temperature, Humidity and Pressure sensor 
+ * @version 1.0
+ * @date 2022-04-20
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 
 #include "mSensorsBME.h"
 
@@ -5,13 +27,14 @@
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mSensorsBME::MQTTHandler_Init(){
+void mSensorsBME::MQTTHandler_Init()
+{
 
   struct handler<mSensorsBME>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = SEC_IN_MIN; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
@@ -74,6 +97,6 @@ void mSensorsBME::MQTTHandler_Sender(uint8_t id)
   }
 }
   
-#endif// USE_MODULE_NETWORK_MQTT
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

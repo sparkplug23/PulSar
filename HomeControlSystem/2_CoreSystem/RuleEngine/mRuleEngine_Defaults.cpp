@@ -11,12 +11,12 @@
 void mRuleEngine::DefaultRule_Sonoff_4CHPRO()
 {
 
-    ALOG_LEVEL_DEBUG_MORE(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Sonoff_4CHPRO"));
+    ALOG_DBM(LOG_LEVEL_DEBUG, PSTR("DefaultRule_Sonoff_4CHPRO"));
     
     mEvent::EVENT_PART* p_event = nullptr;
 
     if(GetConfiguredCount()>D_MAX_RULES){
-        ALOG_LEVEL_ERROR(PSTR("Unable to add rules: Out of memory"));
+        ALOG_ERR(PSTR("Unable to add rules: Out of memory"));
         return; 
     } 
 

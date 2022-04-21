@@ -26,9 +26,9 @@ void mWebServer::WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request){
 
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
-  JsonBuilderI->Start();
+  JBI->Start();
     pCONT->Tasker_Interface(FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
-  JsonBuilderI->End();
+  JBI->End();
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
@@ -39,9 +39,9 @@ void mWebServer::Web_Base_Page_Draw(AsyncWebServerRequest *request){
         
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
-  JsonBuilderI->Start();
+  JBI->Start();
     WebAppend_Root_Draw_PageTitleFields();
-  JsonBuilderI->End();
+  JBI->End();
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
@@ -54,15 +54,15 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
 
   char buffer[30];
 
-  JsonBuilderI->Start();
-  JsonBuilderI->Array_Start("info_row");// Class name
+  JBI->Start();
+  JBI->Array_Start("info_row");// Class name
     for(int row=0;row<4;row++){
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",row);
+    JBI->Level_Start();
+      JBI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
-          JsonBuilderI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+          JBI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
+          JBI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
@@ -70,30 +70,36 @@ void mWebServer::WebSend_JSON_WebServer_TopBar(AsyncWebServerRequest *request){
           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
-          JsonBuilderI->Add("fc", colour_ctr);    
+          JBI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
+          JBI->Add("fc", colour_ctr);    
         }break;
         case 2:
-          JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
-          JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+          JBI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+          JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
 
         break;
         case 3:
-            JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
-    
+            JBI->Add_FV("ih",PSTR("\"ROW3%dc %d %s|%s PT(%s) LPS(%d)\""), 
+                pCONT_set->Settings.bootcount, 
+                ESP.getFreeHeap(), 
+                F(__DATE__), 
+                F(__TIME__), 
+                pCONT_set->boot_status.module_template_used ? "Y" : "N", 
+                pCONT_sup->activity.cycles_per_sec
+            );
         break;
       } //end switch 
-   JsonBuilderI->Level_End();
+   JBI->Level_End();
    } // end for
 
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
   
-  // JsonBuilderI->Array_Start("debug_line");// Class name
-  //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->Array_End();
-  JsonBuilderI->End();
+  // JBI->Array_Start("debug_line");// Class name
+  //   JBI->Level_Start();
+  //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+  //   JBI->Level_End();
+  // JBI->Array_End();
+  JBI->End();
 
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
@@ -109,15 +115,15 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
 
   char buffer[30];
 
-  JsonBuilderI->Start();
-  JsonBuilderI->Array_Start("info_row");// Class name
-    for(int row=0;row<4;row++){
-    JsonBuilderI->Level_Start();
-          JsonBuilderI->Add("id",row);
+  JBI->Start();
+  JBI->Array_Start("info_row");// Class name
+    for(int row=0;row<6;row++){
+    JBI->Level_Start();
+      JBI->Add("id",row);
       switch(row){
         case 0:
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
-          JsonBuilderI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
+          JBI->Add_FV("ih",PSTR("\"%s U%s\""), pCONT_time->RtcTime.hhmmss_ctr, pCONT_time->uptime.hhmmss_ctr);
+          JBI->Add("fc", pCONT_time->uptime.seconds_nonreset<SEC_IN_HOUR?PSTR("#ff0000"):PSTR("#ffffff"));    
         break;
         case 1:{        
           int8_t wifi_perc = pCONT_wif->GetRSSPercentage();
@@ -125,29 +131,38 @@ void mWebServer::WebSend_JSON_WebServer_StatusPopoutData(AsyncWebServerRequest *
           if(wifi_perc<20){      sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ff0000")); }
           else if(wifi_perc<30){ sprintf_P(colour_ctr,PSTR("%s"),PSTR("#fcba03")); }
           else{                  sprintf_P(colour_ctr,PSTR("%s"),PSTR("#ffffff")); }
-          JsonBuilderI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
-          JsonBuilderI->Add("fc", colour_ctr);   
-          // JsonBuilderI->Add("fc", "red");    
+          JBI->Add_FV("ih",PSTR("\"%s %d%% (%d&nbsp;dBm)\""), WiFi.SSID().c_str(),wifi_perc,pCONT_wif->GetRSSdBm());
+          JBI->Add("fc", colour_ctr);   
         }break;
         case 2:
-          JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
-          JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+          JBI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+          JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
         break;
         case 3:
-            JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+          JBI->Add_FV("ih",PSTR("\"Boot: %dc PT(%s)\""), pCONT_set->Settings.bootcount, pCONT_set->boot_status.module_template_used ? "Y" : "N");
+        break;
+        case 4:
+          JBI->Add_FV("ih",PSTR("\"Firmware: %s %s|%s\""), pCONT_set->firmware_version.current.name_ctr, F(__DATE__), F(__TIME__));
+          JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
+        break;
+        case 5:
+          JBI->Add_FV("ih",PSTR("\"Runtime: LPS(%d Hz | %d ms) FreeHeap:%d\""), pCONT_sup->activity.cycles_per_sec, 1000/pCONT_sup->activity.cycles_per_sec, ESP.getFreeHeap());
+        break;
+        case 6:
+          JBI->Add_FV("ih",PSTR("\"Templates: M%d R%d L%d D%d\""), 0, 0, 0, 0);
         break;
       } //end switch 
-    JsonBuilderI->Level_End();
+    JBI->Level_End();
     } // end for
 
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
   
-  // JsonBuilderI->Array_Start("debug_line");// Class name
-  //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->Array_End();
-  JsonBuilderI->End();
+  // JBI->Array_Start("debug_line");// Class name
+  //   JBI->Level_Start();
+  //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+  //   JBI->Level_End();
+  // JBI->Array_End();
+  JBI->End();
 
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
@@ -206,13 +221,13 @@ void mWebServer::HandlePage_Root(AsyncWebServerRequest *request){
   // delay(1000);
 
 
-  // JsonBuilderI->Start();
-  //   JsonBuilderI->Level_Start("function");
-  //     JsonBuilderI->Level_Start("Parse_Urls");
+  // JBI->Start();
+  //   JBI->Level_Start("function");
+  //     JBI->Level_Start("Parse_Urls");
   //       // pCONT->Tasker_Interface(FUNC_WEB_APPEND_RUNTIME_ROOT_URLS);
-  //     JsonBuilderI->Level_End();
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->End();
+  //     JBI->Level_End();
+  //   JBI->Level_End();
+  // JBI->End();
 
   // request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
 
@@ -227,11 +242,11 @@ void mWebServer::Web_Root_Draw(AsyncWebServerRequest *request){
         
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
-  JsonBuilderI->Start();
+  JBI->Start();
     WebAppend_Root_Draw_PageTitleFields();
     WebAppend_Root_Draw_PageTable();
     WebAppend_Root_Draw_PageButtons();
-  JsonBuilderI->End();
+  JBI->End();
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
@@ -242,10 +257,10 @@ void mWebServer::Web_Root_Draw_Modules(AsyncWebServerRequest *request){
         
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
-  JsonBuilderI->Start();
+  JBI->Start();
     WebAppend_Root_Draw_ModuleTable();
     WebAppend_Root_Draw_ModuleButtons();
-  JsonBuilderI->End();
+  JBI->End();
   
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
   
@@ -255,41 +270,41 @@ void mWebServer::Web_Root_Draw_Modules(AsyncWebServerRequest *request){
 //append to internal buffer if any root messages table
 void mWebServer::WebAppend_Root_Draw_ModuleButtons(){
 
-  JsonBuilderI->Array_Start("container_4");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("ihr");           // function
-        JsonBuilderI->AppendBuffer("\"");
+  JBI->Array_Start("container_4");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("ihr");           // function
+        JBI->AppendBuffer("\"");
         pCONT->Tasker_Interface(FUNC_WEB_APPEND_ROOT_BUTTONS);
-      JsonBuilderI->AppendBuffer("\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+      JBI->AppendBuffer("\"");
+    JBI->Level_End();
+  JBI->Array_End();
 
 }
 
 void mWebServer::WebAppend_Root_Draw_PageButtons(){
   
-  // JsonBuilderI->Array_Start("container_5");// Class name
-  //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->AddKey("ihr");           // function
-  //       JsonBuilderI->AppendBuffer("\"");
+  // JBI->Array_Start("container_5");// Class name
+  //   JBI->Level_Start();
+  //     JBI->AddKey("ihr");           // function
+  //       JBI->AppendBuffer("\"");
   //       WebAppend_Button_Spaced(BUTTON_CONSOLE);
   //       WebAppend_Button(BUTTON_SYSTEM_SETTINGS);
-  //     JsonBuilderI->AppendBuffer("\"");
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->Array_End();
+  //     JBI->AppendBuffer("\"");
+  //   JBI->Level_End();
+  // JBI->Array_End();
 
 }
 
 
 void mWebServer::Web_Root_UpdateURLs(AsyncWebServerRequest *request){
   
-  JsonBuilderI->Start();
-    JsonBuilderI->Level_Start("function");
-      JsonBuilderI->Level_Start("Parse_Urls");
+  JBI->Start();
+    JBI->Level_Start("function");
+      JBI->Level_Start("Parse_Urls");
         pCONT->Tasker_Interface(FUNC_WEB_APPEND_RUNTIME_ROOT_URLS);
-      JsonBuilderI->Level_End();
-    JsonBuilderI->Level_End();
-  JsonBuilderI->End();
+      JBI->Level_End();
+    JBI->Level_End();
+  JBI->End();
 
   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
   
@@ -299,59 +314,59 @@ void mWebServer::Web_Root_UpdateURLs(AsyncWebServerRequest *request){
 
 void mWebServer::WebAppend_Root_Draw_PageTitleFields(){
 
-  JsonBuilderI->Array_Start("page_title");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("ihr",pCONT_set->Settings.system_name.friendly);
-      JsonBuilderI->Add("fc", D_COLOUR_PAGE_TITLE);           
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+  JBI->Array_Start("page_title");// Class name
+    JBI->Level_Start();
+      JBI->Add("ihr",pCONT_set->Settings.system_name.friendly);
+      JBI->Add("fc", D_COLOUR_PAGE_TITLE);           
+    JBI->Level_End();
+  JBI->Array_End();
 
   // char buffer[10];
-  // JsonBuilderI->Array_Start("row_version_data");// Class name
-  //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
-  //     JsonBuilderI->Add("fc", pCONT_sup->GetVersionColour(buffer));           
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->Array_End();
+  // JBI->Array_Start("row_version_data");// Class name
+  //   JBI->Level_Start();
+  //     JBI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+  //     JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));           
+  //   JBI->Level_End();
+  // JBI->Array_End();
 
-  // JsonBuilderI->Level_Start("function");
-  //     JsonBuilderI->Add("SetTitle",pCONT_set->Settings.system_name.friendly);
-  // JsonBuilderI->Level_End();  
+  // JBI->Level_Start("function");
+  //     JBI->Add("SetTitle",pCONT_set->Settings.system_name.friendly);
+  // JBI->Level_End();  
 
   
-  // JsonBuilderI->Array_Start("function");// Class name
-  //   JsonBuilderI->Level_Start();
-  //     JsonBuilderI->Add("SetTitle","Heelo");//pCONT_set->Settings.system_name.friendly);
-  //   JsonBuilderI->Level_End();
-  // JsonBuilderI->Array_End();
+  // JBI->Array_Start("function");// Class name
+  //   JBI->Level_Start();
+  //     JBI->Add("SetTitle","Heelo");//pCONT_set->Settings.system_name.friendly);
+  //   JBI->Level_End();
+  // JBI->Array_End();
 
 
 }
 
 void mWebServer::WebAppend_Root_Draw_PageTable(){
 
-  JsonBuilderI->Array_Start("container_2");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("ihr");           // function
-        JsonBuilderI->AppendBuffer("\"{t}");
+  JBI->Array_Start("container_2");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("ihr");           // function
+        JBI->AppendBuffer("\"{t}");
         pCONT->Tasker_Interface(FUNC_WEB_ADD_ROOT_TABLE_ROWS);
-      JsonBuilderI->AppendBuffer("{t2}\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+      JBI->AppendBuffer("{t2}\"");
+    JBI->Level_End();
+  JBI->Array_End();
 
 }
 
 
 void mWebServer::WebAppend_Root_Draw_ModuleTable(){
 
-  JsonBuilderI->Array_Start("container_3");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("ihr");           // function
-        JsonBuilderI->AppendBuffer("\"");
+  JBI->Array_Start("container_3");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("ihr");           // function
+        JBI->AppendBuffer("\"");
         pCONT->Tasker_Interface(FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER);
-      JsonBuilderI->AppendBuffer("\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+      JBI->AppendBuffer("\"");
+    JBI->Level_End();
+  JBI->Array_End();
 
 }
 
@@ -387,12 +402,6 @@ void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
   // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
   // return;
 
-  // Serial.println(PAGE_ROOT[0]);
-  // Serial.println(PAGE_ROOT[1]);
-  // Serial.println(PAGE_ROOT[2]);
-  // Serial.flush();
-  // delay(1000);
-  
   AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
 
   response->addHeader("Content-Encoding","gzip");
@@ -406,70 +415,70 @@ void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
         
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
-  JsonBuilderI->Start();
+  JBI->Start();
     
-  JsonBuilderI->Array_Start("container_1");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("ihr");           // function
-        JsonBuilderI->AppendBuffer("\"");
-        JsonBuilderI->AppendBuffer(PSTR("<fieldset><legend><b>&nbsp;Web Commands&nbsp;</b></legend>"));
-        JsonBuilderI->AppendBuffer(PSTR("<textarea readonly='' id='console_textbox' cols='340' wrap='off' name='console_textbox'></textarea>"
+  JBI->Array_Start("container_1");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("ihr");           // function
+        JBI->AppendBuffer("\"");
+        JBI->AppendBuffer(PSTR("<fieldset><legend><b>&nbsp;Web Commands&nbsp;</b></legend>"));
+        JBI->AppendBuffer(PSTR("<textarea readonly='' id='console_textbox' cols='340' wrap='off' name='console_textbox'></textarea>"
           "<br><br>"
           "<form method='get' onsubmit='return l(1);'>"
               "<input id='c1'  style='background:#1d1d1d' placeholder='Enter Module Name eg pixels' autofocus='' name='c1'>"
               "<br>"
           "</form>")
         );
-        JsonBuilderI->AppendBuffer(PSTR(
+        JBI->AppendBuffer(PSTR(
           "<form method='get' onsubmit='return l(1);'>"
           "<input id='com_web' name='com_web' style='background:#1d1d1d' placeholder='" "Enter command eg {name:value} or name value'" "' autofocus><br/>"
             "<button  class='buttonh bform1' type='submit'>Execute command</button>"
           "</form>"
         ));            
-      JsonBuilderI->AppendBuffer(PSTR("</fieldset>"));
+      JBI->AppendBuffer(PSTR("</fieldset>"));
       // topic = module name only, in code, add "set/modulename"
       //payload = json message for multple inputs, OR, single input where {"a":"b"} can simply be "a b"
 
-      JsonBuilderI->AppendBuffer(PSTR("<fieldset>"));
-        JsonBuilderI->AppendBuffer(PSTR("<legend><b>&nbsp;MQTT Commands&nbsp;</b></legend>"));
-        JsonBuilderI->AppendBuffer(PSTR(
+      JBI->AppendBuffer(PSTR("<fieldset>"));
+        JBI->AppendBuffer(PSTR("<legend><b>&nbsp;MQTT Commands&nbsp;</b></legend>"));
+        JBI->AppendBuffer(PSTR(
         "<form method='get' onsubmit='return l(1);'>"
         "<input id='com_top' name='com_top' style='background:#1d1d1d' placeholder='" "Enter topic" "' autofocus><br/>"
         "</form>" ));
-        JsonBuilderI->AppendBuffer(PSTR(
+        JBI->AppendBuffer(PSTR(
         "<form method='get' onsubmit='return l(1);'>"
         "<input id='com_pay' name='com_pay' style='background:#1d1d1d' placeholder='" "Enter payload" "' autofocus><br/>"
         "<button class='buttonh bform1' type='submit'>Execute Command</button>"
         "</form>"  ));
-      JsonBuilderI->AppendBuffer(PSTR("</fieldset>"));
+      JBI->AppendBuffer(PSTR("</fieldset>"));
 
-      JsonBuilderI->AppendBuffer("\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+      JBI->AppendBuffer("\"");
+    JBI->Level_End();
+  JBI->Array_End();
 
-  JsonBuilderI->Array_Start("container_5");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("ihr");           // function
-        JsonBuilderI->AppendBuffer("\"");
+  JBI->Array_Start("container_5");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("ihr");           // function
+        JBI->AppendBuffer("\"");
         WebAppend_Button_Spaced(BUTTON_MAIN);
-      JsonBuilderI->AppendBuffer("\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+      JBI->AppendBuffer("\"");
+    JBI->Level_End();
+  JBI->Array_End();
     
-  JsonBuilderI->Array_Start("function");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("Parse_AddScript");
-        JsonBuilderI->AppendBuffer("\"");
-        JsonBuilderI->AppendBuffer(PSTR(
+  JBI->Array_Start("function");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("Parse_AddScript");
+        JBI->AppendBuffer("\"");
+        JBI->AppendBuffer(PSTR(
           "set_console_as_page();"
           "enable_get_console_data();"
         )
       );
-      JsonBuilderI->AppendBuffer("\"");
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+      JBI->AppendBuffer("\"");
+    JBI->Level_End();
+  JBI->Array_End();
     
-  JsonBuilderI->End();
+  JBI->End();
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
@@ -541,11 +550,11 @@ void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
 
   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
-  JsonBuilderI->Start();
+  JBI->Start();
     
-  JsonBuilderI->Array_Start("function");// Class name
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->AddKey("Append_Console");
+  JBI->Array_Start("function");// Class name
+    JBI->Level_Start();
+      JBI->AddKey("Append_Console");
 
         char buffer[500];
         // sprintf(buffer, "{'link':1,'text':'hello','reset':0}");
@@ -555,14 +564,14 @@ void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
 
 
         // sprintf(buffer, "{}");
-        JsonBuilderI->AppendBuffer("\"");
-        JsonBuilderI->AppendBuffer(buffer);
-        JsonBuilderI->AppendBuffer("\"");
+        JBI->AppendBuffer("\"");
+        JBI->AppendBuffer(buffer);
+        JBI->AppendBuffer("\"");
 
-    JsonBuilderI->Level_End();
-  JsonBuilderI->Array_End();
+    JBI->Level_End();
+  JBI->Array_End();
         
-  JsonBuilderI->End();
+  JBI->End();
 
   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 
@@ -2264,13 +2273,13 @@ void mWebServer::WebAppend_Button2(const char* button_title_ctr, const char* act
 
 //   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return true;} 
 
-//   JsonBuilderI->Start();
-//     JsonBuilderI->AppendBuffer(PSTR("t}")); //temp fix
+//   JBI->Start();
+//     JBI->AppendBuffer(PSTR("t}")); //temp fix
 //     // all but phased out 
 //     // REMOVE html part
 //     // pCONT->Tasker_Interface(FUNC_WEB_SHOW_PARAMETERS);
-//     JsonBuilderI->AppendBuffer(PSTR("{t2")); //temp fix
-//   JsonBuilderI->End();
+//     JBI->AppendBuffer(PSTR("{t2")); //temp fix
+//   JBI->End();
 
 //   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
 

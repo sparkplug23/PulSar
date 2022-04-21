@@ -47,7 +47,8 @@
 // #define DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC_WITH_WEBUI
 // #define DEVICE_TESTBED_MOTION_CLIMATE_SENSOR
 // #define DEVICE_TESTBED_HVAC_HEAT_ONLY_WITH_ENERGY_SENSOR
-// #define DEVICE_TESTBED_WEBUI_BASIC_GUI
+#define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
+// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
 // #define DEVICE_TESTBED_WEBUI_FIRMWARE_UPDATE
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS
@@ -1871,13 +1872,27 @@
  * @brief Used to develop the core webui again, no extra functions/buttons, minimal page with console etc
  * 
  */
-#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
   #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
-  #define DEVICENAME_FRIENDLY_CTR "Secondary Testbed for Segments 01"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  
+  #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
+  // #define USE_DEFAULT_FIRMWARE_SENSORS
+
+  // Step 1: Gaining ability to HTTP flash
+
+  // Step 2: Debug screen, really just print json messages from all templates out onto the window so I can view them
+             // LAter, introduce parsing of json for web html, so each key/valye pair becomes a line, and each json level becomes another indent ie "JsonPretty"
+
+  // Step 3: view module template configured, as if I am going to change it (this requires settings saving first)
+
+  // #define DISABLE_SLEEP
+
+  #undef ESP32
+  #define ESP8266
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1891,11 +1906,42 @@
     //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
     // #endif
     // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
+#endif
 
-  
+
+
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+  #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  #define DISABLE_SLEEP
+
+  #define ESP32
+  #undef ESP8266
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    // "\"" D_JSON_GPIOC "\":{"
+    // #ifdef ESP8266 
+    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #else
+    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #endif
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
 #endif
 
 
@@ -2987,6 +3033,10 @@
 */
 
 #endif
+
+
+
+
 
 /**
  * @brief For the development and inclusion of the E131 protocol for xLight stream data

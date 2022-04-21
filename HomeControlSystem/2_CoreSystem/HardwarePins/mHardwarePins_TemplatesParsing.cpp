@@ -636,24 +636,26 @@ void mHardwarePins::GpioInit(void)
     {
       #ifdef ESP8266
       pCONT_sup->wire = new TwoWire();
+      pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)); // no return to check status
       #else
       pCONT_sup->wire = new TwoWire(0);
       pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
       AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Trying to start i2c 2-wire"));
+      if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))
+      {
+        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire"));
+      }
+      else
+      {
+        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
+      }
       #endif
     }
 
 // crap, deleted the begin?
 
-    if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))
-    {
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire"));
-    }
-    else
-    {
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
+    
 
-    }
   } // i2c_enabled
 #endif  // USE_I2C
 

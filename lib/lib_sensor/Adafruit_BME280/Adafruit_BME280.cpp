@@ -132,14 +132,16 @@ bool Adafruit_BME280::init()
     // init I2C or SPI sensor interface
     if (_cs == -1) {
         // I2C
-        if(_wire -> begin()){
+        // if(
+            _wire -> begin();
+            // ){
             
-            // Serial.println("Adafruit_BME280::init() y");
+            // // Serial.println("Adafruit_BME280::init() y");
             
-            }else{
+            // }else{
                 
-            // Serial.println("Adafruit_BME280::init() n");
-            }
+            // // Serial.println("Adafruit_BME280::init() n");
+            // }
     } else {
         digitalWrite(_cs, HIGH);
         pinMode(_cs, OUTPUT);
