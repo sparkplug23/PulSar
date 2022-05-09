@@ -162,8 +162,8 @@ void mPWM::Init(void)
     }
   }
 
-  var_blend_f  = new LinearBlendVariable<float>(1, BLEND_DATA_MILLISECONDS);
-  var_blend_u8 = new LinearBlendVariable<uint8_t>(1, BLEND_DATA_MILLISECONDS);
+  // var_blend_f  = new LinearBlendVariable<float>(1, BLEND_DATA_MILLISECONDS);
+  // var_blend_u8 = new LinearBlendVariable<uint8_t>(1, BLEND_DATA_MILLISECONDS);
 
 }
 
@@ -172,8 +172,8 @@ void mPWM::Init(void)
 void mPWM::EveryLoop(void)
 {
 
-  var_blend_f ->UpdateBlend();
-  var_blend_u8->UpdateBlend();
+  // var_blend_f ->UpdateBlend();
+  // var_blend_u8->UpdateBlend();
 
   
   for(uint8_t i=0;i<MAX_PWM_PINS;i++)
@@ -209,10 +209,10 @@ void mPWM::EverySecond(void)
   // AddLog(LOG_LEVEL_TEST, PSTR("ldr[0].analog_reading =%d %d"), ldr[0].analog_reading, pCONT_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
   // AddLog(LOG_LEVEL_TEST, PSTR("ldr[0].digital_reading =%d %d"), ldr[0].digital_reading, pCONT_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
 
-  for(uint8_t i=0;i<MAX_PWM_PINS;i++)
-  {
-    AddLog(LOG_LEVEL_INFO, PSTR("pwm[%d].blended_value->UpdateBlend() = %d"), i, pwm[i].blended_value->GetValue());
-  }
+  // for(uint8_t i=0;i<MAX_PWM_PINS;i++)
+  // {
+  //   AddLog(LOG_LEVEL_INFO, PSTR("pwm[%d].blended_value->UpdateBlend() = %d"), i, pwm[i].blended_value->GetValue());
+  // }
 
 }
 

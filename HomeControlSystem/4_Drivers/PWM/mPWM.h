@@ -53,8 +53,8 @@ class mPWM :
     // LinearBlendVariable<uint16_t>* variable_blend = nullptr;
     // LinearBlendVariable<uint16_t>*  var_blend = nullptr;
 
-    LinearBlendVariable<float>*  var_blend_f = nullptr;
-    LinearBlendVariable<uint8_t>*  var_blend_u8 = nullptr;
+    // LinearBlendVariable<float>*  var_blend_f = nullptr;
+    // LinearBlendVariable<uint8_t>*  var_blend_u8 = nullptr;
 
     struct SETTINGS{
       bool fEnableSensor = false;
@@ -68,6 +68,9 @@ class mPWM :
       
       LinearBlendVariable<uint16_t>*  blended_value = nullptr;
 
+      uint16_t range_min = 0;
+      uint16_t range_max = 1024;
+      
     }pwm[MAX_PWM_PINS];
 
     uint8_t dir = 0;

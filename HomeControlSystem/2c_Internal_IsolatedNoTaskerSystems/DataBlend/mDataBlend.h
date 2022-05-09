@@ -87,7 +87,7 @@ public:
 
     uint16_t BlendDuration()
     {
-        return _blends._duration;
+        return _blends->_duration;
     }
 
     void ChangeBlendDuration(uint16_t newDuration)
