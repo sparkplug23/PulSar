@@ -1,7 +1,7 @@
 /**
- * @file mBME.cpp
+ * @file mBH1750.cpp
  * @author Michael Doone (michaeldoonehub@gmail.com)
- * @brief BME280 Temperature, Humidity and Pressure sensor 
+ * @brief BH1750280 Temperature, Humidity and Pressure sensor 
  * @version 1.0
  * @date 2022-04-20
  * 
@@ -21,16 +21,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include "mBME.h"
+#include "mBH1750.h"
 
-#ifdef USE_MODULE_SENSORS_BME
+#ifdef USE_MODULE_SENSORS_BH1750
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mBME::MQTTHandler_Init()
+void mBH1750::MQTTHandler_Init()
 {
 
-  struct handler<mBME>* ptr;
+  struct handler<mBH1750>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -40,7 +40,7 @@ void mBME::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mBME::ConstructJSON_Settings;
+  ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Settings;
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -50,7 +50,7 @@ void mBME::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mBME::ConstructJSON_Sensor;
+  ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -60,14 +60,14 @@ void mBME::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mBME::ConstructJSON_Sensor;
+  ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
   
 } //end "MQTTHandler_Init"
 
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mBME::MQTTHandler_Set_RefreshAll()
+void mBH1750::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -77,7 +77,7 @@ void mBME::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mBME::MQTTHandler_Set_TelePeriod()
+void mBH1750::MQTTHandler_Set_TelePeriod()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
@@ -90,10 +90,10 @@ void mBME::MQTTHandler_Set_TelePeriod()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mBME::MQTTHandler_Sender(uint8_t id)
+void mBH1750::MQTTHandler_Sender(uint8_t id)
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BME_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BH1750_ID, handle, id);
   }
 }
   

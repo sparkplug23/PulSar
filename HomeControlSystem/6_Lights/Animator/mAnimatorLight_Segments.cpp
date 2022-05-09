@@ -2,8 +2,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
 uint16_t mAnimatorLight::_usedSegmentData = 0;
 
 
@@ -145,9 +143,6 @@ void mAnimatorLight::SubTask_Segments_Animation()
    * 
    * Test1: Apply slow glow on segment 0-50%, apply random solid to 50-100%
    * */
-  #ifdef ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
-  return;
-  #endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
   
     /**
      * Subtask to handle by each segment ie "flasher" function for each segment
@@ -157,19 +152,17 @@ void mAnimatorLight::SubTask_Segments_Animation()
       segment_active_index<MAX_NUM_SEGMENTS; 
       segment_active_index++
     ){
-      // if(mTime::TimeReached(&tSaved_Test_Segment_Animation, 2000))
-      // {
 
-        /**
-         * @brief 
-         * Temp fix that will override how isActive will not be valid is segment is a single pixel, or at length of 1, is it as 1 |= 0?
-         * 
-         */
-        
-        // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-        //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),segment_active_index,_segments[segment_active_index].isActive());
-        //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),segment_active_index,_segments[segment_active_index].pixel_range.start,_segments[segment_active_index].pixel_range.stop);
-        // #endif
+      /**
+       * @brief 
+       * Temp fix that will override how isActive will not be valid is segment is a single pixel, or at length of 1, is it as 1 |= 0?
+       * 
+       */
+      
+      // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
+      //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),segment_active_index,_segments[segment_active_index].isActive());
+      //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),segment_active_index,_segments[segment_active_index].pixel_range.start,_segments[segment_active_index].pixel_range.stop);
+      // #endif
 
 
       if(_segments[segment_active_index].isActive())// || (pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END))
@@ -192,7 +185,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
         _virtualSegmentLength = _segments[segment_active_index].virtualLength();
           
-        #ifdef ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+        // #ifdef ENABLE_FEATURE_INCLUDE_WLED_PALETTES
         /**
          * If effect is from WLED, then Generate new colours
          **/
@@ -202,10 +195,10 @@ void mAnimatorLight::SubTask_Segments_Animation()
         ){          
           mPaletteI->UpdatePalette_FastLED_TargetPalette();
         }
-        #endif // ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+        // #endif // ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 
         // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-          // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].effect_id=%d"),segment_active_index, _segments[segment_active_index].effect_id);
+          AddLog(LOG_LEVEL_TEST, PSTR("_segments[%d].effect_id=%d"),segment_active_index, _segments[segment_active_index].effect_id);
         // #endif
         
 
@@ -233,7 +226,6 @@ void mAnimatorLight::SubTask_Segments_Animation()
           // case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
           //   SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
           // break;        
-          #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
           /**
            * Static
            **/
@@ -606,7 +598,6 @@ void mAnimatorLight::SubTask_Segments_Animation()
             SubTask_Segment_Flasher_Animate_Function__Drip();
           break;
           #endif // ENABLE_EXTRA_WLED_EFFECTS
-          #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
           /**
            * Development effects without full code 
            * 
@@ -686,6 +677,26 @@ void mAnimatorLight::SubTask_Segments_Animation()
             SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
           break; 
           #endif // ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
+          #ifdef ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS 
+          case EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID:
+            SubTask_Segment_Animate_Function__Notification_Static_On();
+          break;
+          case EFFECTS_FUNCTION__NOTIFICATION_STATIC_OFF__ID:
+            SubTask_Segment_Animate_Function__Notification_Static_Off();
+          break;
+          case EFFECTS_FUNCTION__NOTIFICATION_FADE_ON__ID:
+            SubTask_Segment_Animate_Function__Notification_Fade_On();
+          break;
+          case EFFECTS_FUNCTION__NOTIFICATION_FADE_OFF__ID:
+            SubTask_Segment_Animate_Function__Notification_Fade_Off();
+          break;
+          case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
+            SubTask_Segment_Animate_Function__Notification_Blinking();
+          break;
+          case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
+            SubTask_Segment_Animate_Function__Notification_Pulsing();
+          break;
+          #endif // ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
           case EFFECTS_FUNCTION__TESTER__ID:
             SubTask_Flasher_Animate_Function_Tester();
           break; 
@@ -1809,10 +1820,6 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
 uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level)
 {
 
-// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-// return 0;
-// #endif
-
   char buffer[100];
 
   JsonBuilderI->Start();
@@ -2155,11 +2162,28 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 
 
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR)){ return EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID; }
+
+
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SEVEN_SEGMENT_DISPLAY_MANUAL_NUMBER__NAME_CTR)){ return EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID; }
   
   // if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
   // if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
   // if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR)){ return EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_ID; }
   
+
+
+    #ifdef ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
+    if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__NAME_CTR)){ return EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID; }
+    // EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_STATIC_OFF__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_FADE_ON__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_FADE_OFF__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
+    // EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,
+    #endif // ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+ 
+
+
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__TESTER__NAME_CTR)){ return EFFECTS_FUNCTION__TESTER__ID; }
 
   return -1;
@@ -2185,7 +2209,15 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     // case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01_NAME_CTR);  break;
   
   
+    case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SEVEN_SEGMENT_DISPLAY_MANUAL_NUMBER__NAME_CTR);  break;
+
+
     case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);  break;
+
+    #ifdef ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
+    case EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__NAME_CTR);  break;
+    #endif // ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS 
+
 
     case EFFECTS_FUNCTION__TESTER__ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__TESTER__NAME_CTR);  break;
 
@@ -2206,11 +2238,6 @@ void mAnimatorLight::CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t v
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings_segments.update_colour_region.refresh_secs);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
-
-
-
-
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

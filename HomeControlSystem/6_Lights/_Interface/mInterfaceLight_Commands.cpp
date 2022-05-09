@@ -831,12 +831,8 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
  
   // Serial.println("HER"); Serial.flush();
   
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-setRGB(colour.R, colour.G, colour.B);
+  
+      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRGB(colour.R, colour.G, colour.B);
 
   
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;

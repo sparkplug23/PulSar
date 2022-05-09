@@ -2,8 +2,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Solid Colour
@@ -1056,16 +1054,16 @@ void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color, byte segDi
   for (byte i = 0; i < leds_per_segment; i++) {                                             // fill all leds inside current segment with color
     // animation_colours[( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
 
-pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
+    pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
 
-RgbcctColor colour = ColorFromPaletteLCD(_segments[0].palette.id, color);//RgbColor(255,0,0);
+    RgbcctColor colour = ColorFromPaletteLCD(_segments[0].palette.id, color);//RgbColor(255,0,0);
 
-// RgbcctColor colour = RgbwColor(1,2,3,4);
+    // RgbcctColor colour = RgbwColor(1,2,3,4);
 
-uint8_t segment_index = 0;
+    uint8_t segment_index = 0;
 
 
-  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_index, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID, colour);
+    SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, pixel_index, _segments[segment_active_index].colour_type, colour);
   
 
 
@@ -1497,7 +1495,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   for(int i=0;i<93;i++){
     // animation_colours[i].DesiredColour = RgbcctColor(0);
     // }
-  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, i, RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID, RgbwColor(0,0,0,0));
+  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, i, _segments[segment_active_index].colour_type, RgbwColor(0,0,0,0));
   }
 
   // Pick new colours
@@ -1702,7 +1700,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
   
   uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
 
-  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
 
   if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
   {
@@ -1719,11 +1717,21 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
   // Pick new colours
   //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
 
+/**
+ * @brief Temporary force until handled in code
+ * 
+ */
+  // pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;
+  _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
 
 
+  // LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  // LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
+  // lcd_display_show_number = 67;
 
   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
-  LCDDisplay_showDigit((lcd_display_show_number % 10), 0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
   
 
 
@@ -11528,7 +11536,102 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
 
 
 
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+#ifdef ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Slow Glow
+ * @note : Randomly changes colours of pixels, and blends to the new one
+ *  
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static_On()
+{
+
+  uint16_t dataSize = sizeof(notification_data);
+
+  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
+    return;
+  }
+
+  uint8_t  segment_index  = segment_active_index;
+  uint16_t segment_length = _segments[segment_active_index].length();
+  uint16_t start_pixel    = _segments[segment_active_index].pixel_range.start;
+  uint16_t stop_pixel     = _segments[segment_active_index].pixel_range.stop;
+  _virtualSegmentLength = segment_length;
+
+  NOTIFICATIONS_DATA* notif_data = reinterpret_cast<NOTIFICATIONS_DATA*>(_segment_runtimes[segment_active_index].data);
+
+  RgbcctColor target_colour = notif_data->colour;
+  RgbcctColor set_colour = notif_data->colour;
+
+  float progress = mSupport::mapfloat(notif_data->progress, 0,255, 0.0f,1.0f);
+
+
+  target_colour = RgbcctColor(0,0,notif_data->progress,0,0);
+
+
+  set_colour = RgbcctColor::LinearBlend(RgbcctColor(255,0,0,0,0), target_colour, progress);
+
+
+
+  uint8_t j = notif_data->progress++;
+  
+  AddLog(LOG_LEVEL_TEST, PSTR("notif_data->progress = %d"), notif_data->progress);
+
+  for(uint16_t index = start_pixel; index<stop_pixel; index++)
+  {  
+    SetPixelColor(index, set_colour);
+  }  
+
+//   // // this should probably force order as random, then introduce static "inorder" option
+//   // _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+//   // // So colour region does not need to change each loop to prevent colour crushing
+//   // _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
+  
+//   // // Pick new colours
+//   // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
+//   // // Check if output multiplying has been set, if so, change desiredcolour array
+//   // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+//   // // Get starting positions already on show
+//   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+//   // // Call the animator to blend from previous to new
+//   // setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+//   //   [this](const AnimationParam& param){ 
+//   //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+//   //   }
+//   // );
+
+  StripUpdate();
+
+}
+
+
+void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static_Off(){};
+void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Fade_On(){};
+void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Fade_Off(){};
+void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Blinking(){};
+void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Pulsing(){};
+
+
+
+
+
+
+
+#endif // ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
+
+
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

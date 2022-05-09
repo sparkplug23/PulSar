@@ -355,9 +355,7 @@ void mAnimatorLight::Init(void){
 
   settings.flags.EnableModule = true;
 
-  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   Init_Segments();
-  #endif
 
   #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
   user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
@@ -538,13 +536,13 @@ DEBUG_LINE;
       // pCONT_iLight->animation.brightness = 1; //default ot 50% normally for power reasons
     #endif
 
-    #ifndef DISABLE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     #ifdef DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ
       liveview.refresh_rate = DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ;
     #else
       pCONT_iLight->liveview.refresh_rate = 1000;
     #endif
-    #endif // DISABLE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
     
     
     // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -1587,13 +1585,6 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
 
 uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_method){
 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-
-
-
-return 0;
-#endif
 
   // D_DATA_BUFFER_CLEAR();
   // pCONT_sup->WriteBuffer_P(data_buffer.payload.ctr,
@@ -1631,9 +1622,6 @@ uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_method){
   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Animation"));
   #endif
 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-return 0;
-#endif
 
   // StaticJsonDocument<600> doc;
   // JsonObject root = doc.to<JsonObject>();
@@ -1706,11 +1694,8 @@ uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level){
 
 
 
-uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level){
-
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-return 0;
-#endif
+uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level)
+{
 
   uint8_t numpixels = pCONT_iLight->settings.light_size_count<100?pCONT_iLight->settings.light_size_count:100;
   RgbTypeColor c;

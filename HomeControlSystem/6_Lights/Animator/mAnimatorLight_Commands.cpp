@@ -2,8 +2,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
 void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
 
   DEBUG_LINE_HERE;
@@ -1011,7 +1009,6 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 
 // void mAnimatorLight::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment)
 // {
-//   #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   
 // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 //   char buffer[50];
@@ -1021,7 +1018,6 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
-//   #endif
 // } 
 
 
@@ -1684,10 +1680,10 @@ void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t p
  * 
  */
 
-#ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-                   pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+// #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
 
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 _segment_runtimes[segment_index].active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
   
@@ -1922,10 +1918,6 @@ void mAnimatorLight::CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_
 //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
 //   #endif // ENABLE_LOG_LEVEL_DEBUG
 // }
-
-
-#endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

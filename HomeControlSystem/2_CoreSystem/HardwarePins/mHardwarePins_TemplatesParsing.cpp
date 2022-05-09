@@ -639,11 +639,11 @@ void mHardwarePins::GpioInit(void)
       pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)); // no return to check status
       #else
       pCONT_sup->wire = new TwoWire(0);
-      pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
+      // pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
       AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Trying to start i2c 2-wire"));
       if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))
       {
-        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire"));
+        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire sda%d scl%d"),GetPin(GPIO_I2C_SDA_ID),GetPin(GPIO_I2C_SCL_ID));
       }
       else
       {

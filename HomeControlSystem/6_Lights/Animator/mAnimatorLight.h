@@ -19,8 +19,10 @@
 #ifdef ESP32
   #include <WiFi.h>
   #ifndef DISABLE_NETWORK
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
     #include <AsyncTCP.h>
-    //?#include <ESPAsyncWebServer.h>
+    #include <ESPAsyncWebServer.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
   #include <ESP8266WiFi.h>
@@ -369,7 +371,7 @@ class mAnimatorLight :
 
     void DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(uint16_t palette_id, uint8_t runtime_segment_index);
 
-    #ifndef DISABLE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
     void Web_RGBLightSettings_Draw(AsyncWebServerRequest *request);
     void Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request);
@@ -394,7 +396,7 @@ class mAnimatorLight :
     void HandlePage_RGBLightSettings(AsyncWebServerRequest *request);
     void WebAppend_Root_Status_Table();
     void WebSave_RGBColourSelector(void);
-    #endif //DISABLE_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
 
@@ -496,18 +498,14 @@ class mAnimatorLight :
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
         +1
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-        +1
-      #endif
+      +1
       ] = {
       &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
       &mqtthandler_state_teleperiod,
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
         &mqtthandler_notifications_teleperiod,
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-        &mqtthandler_flasher_teleperiod, 
-      #endif
+      &mqtthandler_flasher_teleperiod, 
       #ifdef ENABLE_PIXEL_FUNCTION_MIXER
         &mqtthandler_mixer_teleperiod,
       #endif
@@ -555,6 +553,11 @@ class mAnimatorLight :
 *** Animation Effect:   Notifications   ***************************************************************************************************************************************************************************
 **  @note:     This is highly specialised effect, and will unlikely ever run next to "animated segment effect"
                It makes sense to keep this as its own effect type
+
+To be phased into normal segment effects
+
+
+
 **************************************************************************************************************************************************************************
 **************************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
@@ -564,10 +567,14 @@ class mAnimatorLight :
 ******************************************************************************************************************************************************************************/
 
 #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+
+// create subsub_json_parse_command that is triggered and passes to special commands with "Notifications" as json level 1 that then passes the json object level 2
+   
+  
   #ifndef STRIP_NOTIFICATION_SIZE
     #define STRIP_NOTIFICATION_SIZE (STRIP_SIZE_MAX>12?12:STRIP_SIZE_MAX) // Set max if not defined as 20
   #endif
-    RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colour_end, float progress, uint8_t effect_type);
+  RgbcctColor ApplySimpleEffectOnColour(RgbcctColor colour_start, RgbcctColor colour_end, float progress, uint8_t effect_type);
 
   void init_Notifications();
   void SubTask_Notifications();
@@ -575,6 +582,11 @@ class mAnimatorLight :
   
   const char* GetNotificationModeNamebyID(uint8_t id, char* buffer);
   int8_t      GetNotificationModeIDbyName(const char* c);
+
+  /**
+   * @brief These need to be turned into a list of segment style animations
+   * 
+   */
   enum NOTIF_MODE{
     NOTIF_MODE_STATIC_OFF_ID=0,
     NOTIF_MODE_STATIC_ON_ID,
@@ -608,17 +620,20 @@ class mAnimatorLight :
       uint8_t reserved : 4;
     };
   } NOTIFICATION_FLAGS;
+
+
+
   struct NOTIF{
     NOTIFICATION_FLAGS flags;
-    struct TSAVED{
-      uint32_t ForceUpdate = millis();
+    struct TSAVED{ // this all needs phased out and included directly into the pixel struct so it can be added as a segment animation
+      uint32_t ForceUpdate = millis(); 
       uint32_t TimeoutCounter = millis();
       uint32_t Timeout = millis();
       uint32_t AutoOff = millis();
       uint32_t tSavedForceUpdate=millis();
       uint32_t tNotifPanelTimeout;
     }tSaved;
-    struct PIXELN{
+    struct PIXELN{ // changed to one struct, then each notification is a segment of length one, or else, segment==length to be all
       /**
        * Using full Rgbcct, with possible Rgbw only to save 1 byte per notif pixel
        * */        

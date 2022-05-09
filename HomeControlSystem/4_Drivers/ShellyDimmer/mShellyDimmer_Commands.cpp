@@ -12,7 +12,7 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj[PM_JSON_BRIGHTNESS]){
 
     req_brightness = map(jtok.getInt(),0,100,0,1000);
-    SetBrightness();
+    SetBrightnessReq();
 
   }
 
@@ -29,11 +29,46 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
 
   }
   
+  if(jtok = obj["ShellyDimmer"].getObject()[PM_JSON_TIME_ON]){
+    CommandSet_Timer_Decounter(jtok.getInt());
+  }else
+  if(jtok = obj["ShellyDimmer"].getObject()[PM_JSON_TIME_ON_SECS]){
+    CommandSet_Timer_Decounter(jtok.getInt());
+  }else
+  if(jtok = obj["ShellyDimmer"].getObject()[PM_JSON_TIME_ON_MINUTES]){
+    CommandSet_Timer_Decounter(jtok.getInt()*60);
+  }
   
   mqtthandler_state_teleperiod.flags.SendNow = true;
 
 }
 
+
+/**********************************************************************************************
+ *********************************************************************************************
+  Parameter: TimerDecounter
+ *********************************************************************************************
+ ********************************************************************************************/
+
+void mShellyDimmer::CommandSet_Timer_Decounter(uint16_t time_secs)
+{
+  timer_decounter.seconds = time_secs;
+  timer_decounter.active = time_secs > 0 ? true : false;
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "%d" D_UNIT_SECOND), timer_decounter.seconds);  
+  #endif
+}
+
+uint16_t mShellyDimmer::CommandGet_SecondsToRemainOn()
+{
+  // relay_status[relay_id].timer_decounter.seconds = time_secs;
+  // relay_status[relay_id].timer_decounter.active = time_secs > 0 ? true : false;
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_RELAYS "Set" D_JSON_TIME "Relay%d " "%d" D_UNIT_SECOND), relay_id, relay_status[relay_id].timer_decounter.seconds);  
+  // #endif
+
+  return timer_decounter.seconds;
+}
 
 
 

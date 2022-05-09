@@ -193,7 +193,7 @@ class mTime :
 
     uint32_t tSavedUptime;
 
-    uint8_t fTimeSet = false;
+    // uint8_t fTimeSet = false;
 
 //     const char* GetUTCTimeCtr(char* buffer = nullptr);
 //     const char* GetLocalTimeCtr(char* buffer = nullptr);

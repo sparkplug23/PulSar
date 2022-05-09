@@ -6,6 +6,7 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
 
 
 
+
 int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
@@ -17,11 +18,20 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
       
       #ifdef ESP8266
-        randomSeed(analogRead(0));
+        randomSeed(analogRead(0));  // also check adc module is not active AND pin not in use
       #else
         // randomSeed(analogRead(34)); //esp32
       #endif
 
+      // pinMode(18, OUTPUT);
+      // pinMode(19, OUTPUT);
+
+  #ifndef USE_MODULE_NETWORK_WIFI
+  WiFi.mode(WIFI_OFF);
+  #ifdef ESP32
+  btStop();
+  #endif // esp32
+  #endif // USE_MODULE_NETWORK_WIFI
 
     break;
     case FUNC_LOOP: {
@@ -42,6 +52,9 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
     }break;
     case FUNC_EVERY_SECOND:{
+
+      // DIGITAL_INVERT_PIN(18);
+      // DIGITAL_INVERT_PIN(19);
 
 
   // char mqtt_data[300];

@@ -171,6 +171,9 @@ void mSupport::I2cScan(char *devs, unsigned int devs_len)
 
 // #ifdef ESP8266
 
+// DEBUG_LINE_HERE;
+// delay(5000);
+
   uint8_t error = 0;
   uint8_t address = 0;
   uint8_t any = 0;

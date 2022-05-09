@@ -447,7 +447,12 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
     JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);
 
     
+    if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+    {
 
+#ifdef ESP32
+      JBI->Add("I2C_BusSpeed", pCONT_sup->wire->getClock());
+#endif
   char mqtt_data[300];
   pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
   // Serial.println(mqtt_data);
@@ -457,7 +462,7 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
 
     BufferWriterI->Append(",\"I2C_Scan\":");
     BufferWriterI->Append(mqtt_data);
-
+    }
 
     // BufferWriterI->Append(",\"I2C_Scan\":");
 

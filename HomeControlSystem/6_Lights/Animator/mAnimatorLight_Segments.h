@@ -14,7 +14,7 @@
 
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
-  #ifndef MAX_NUM_SEGMENTS
+#ifndef MAX_NUM_SEGMENTS
 #define MAX_NUM_SEGMENTS 5 // cant be made smaller than 5 until the init process (ie rgbcctcontroller) is properly tested for all sizes
 #endif // MAX_NUM_SEGMENTS
 
@@ -157,7 +157,6 @@
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     // Static
     EFFECTS_FUNCTION__WLED_STATIC__ID,
     EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
@@ -290,8 +289,16 @@
     EFFECTS_FUNCTION__WLED_DRIP__ID,     
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
     EFFECTS_FUNCTION__WLED_LENGTH__ID, // to show end of declared animation, this will have no actual effect     
-    #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
+    #ifdef ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+    EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID,
+    EFFECTS_FUNCTION__NOTIFICATION_STATIC_OFF__ID,
+    EFFECTS_FUNCTION__NOTIFICATION_FADE_ON__ID,
+    EFFECTS_FUNCTION__NOTIFICATION_FADE_OFF__ID,
+    EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
+    EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,
+    #endif // ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+ 
     /**
      * Development effects
      * @note These need to be last since without proper defines of effect names they can only be addressed by their numeric ID
@@ -967,7 +974,11 @@
       }
       uint16_t length()
       {
-        return pixel_range.stop - pixel_range.start + 1;
+        return pixel_range.stop - pixel_range.start + 1; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
+      }
+      uint16_t length_m() //temporary using my version until the above function indexing is fixed
+      {
+        return pixel_range.stop - pixel_range.start; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
       }
       uint16_t groupLength()
       {
@@ -1206,7 +1217,6 @@
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
 
   
-  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   // Static
   void SubTask_Segment_Flasher_Animate_Function__Static();
   void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
@@ -1365,16 +1375,95 @@
   uint16_t triwave16(uint16_t in);
   uint16_t mode_palette();
 
-  #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-
-
-void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
+  void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
 
   // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
   // void load_gradient_palette(uint8_t index);
   // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
+
+#ifdef ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+
+
+  /**
+   * @brief These need to be turned into a list of segment style animations
+   * 
+   */
+  enum NOTIF_MODE{
+    NOTIF_MODE_STATIC_OFF_ID=0,
+    NOTIF_MODE_STATIC_ON_ID,
+    NOTIF_MODE_FADE_OFF_ID,
+    NOTIF_MODE_FADE_ON_ID,
+    NOTIF_MODE_BLINKING_ID,
+    NOTIF_MODE_PULSING_ID,
+    NOTIF_MODE_LENGTH_ID
+  };
+
+  enum SIMPLE_EFFECT_ON_COLOUR_IDS{
+    SIMPLE_EFFECT_ON_COLOUR_LINEAR_BLEND_ID=0,
+    SIMPLE_EFFECT_ON_COLOUR_LINEAR_BLEND_AND_BACK_ID,
+    SIMPLE_EFFECT_ON_COLOUR_BLINK5050_ID,
+    SIMPLE_EFFECT_ON_COLOUR_BLINK1090_ID,
+    SIMPLE_EFFECT_ON_COLOUR_STATIC_ON_ID,
+    SIMPLE_EFFECT_ON_COLOUR_FADE_ON_ID,
+    SIMPLE_EFFECT_ON_COLOUR_LENGTH_IDS
+  };
+
+
+  typedef union {
+    uint8_t data; // allows full manipulating
+    struct { 
+      uint8_t fForcePanelUpdate : 1;
+      uint8_t fShowPanelUpdate  : 1;
+      uint8_t fEnableTimeoutAll : 1;    
+      // Reserved
+      uint8_t reserved : 4;
+    };
+  } NOTIFICATION_FLAGS;
+  struct NOTIFICATIONS_DATA{
+    NOTIFICATION_FLAGS flags;
+    /**
+     * Using full Rgbcct, with possible Rgbw only to save 1 byte per notif pixel
+     * */        
+    RgbcctColor colour;
+    /**
+     * Using full 255 range
+     * */
+    // uint8_t brightness = 0;  
+    /**
+     * Using full 255 range
+     * */
+    uint8_t progress = 0;
+    /**
+     * Mode
+     * */
+    uint8_t  mode = 0;//NOTIF_MODE_STATIC_OFF_ID;
+    /**
+     * Mode
+     * */    
+    // uint16_t period_ms = 1000; 
+    /**
+     * Speed 0-255, relative to period
+     * */       
+    // uint8_t speed = 0;  // speed should control period for timing, or Rate? 
+    /**
+     * Trigger times
+     * */   
+    uint32_t tSavedUpdate = 0;
+    uint16_t tRateUpdate = 10;
+    uint32_t tSavedDuration = 0;
+    /**
+     * Seconds until auto turn off
+     * */   
+    uint16_t auto_time_off_secs = 0; // reset pixel to off
+  }notification_data;
+  void SubTask_Segment_Animate_Function__Notification_Static_On();
+  void SubTask_Segment_Animate_Function__Notification_Static_Off();
+  void SubTask_Segment_Animate_Function__Notification_Fade_On();
+  void SubTask_Segment_Animate_Function__Notification_Fade_Off();
+  void SubTask_Segment_Animate_Function__Notification_Blinking();
+  void SubTask_Segment_Animate_Function__Notification_Pulsing();
+#endif // ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
 
 
 
@@ -1551,8 +1640,8 @@ void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
     float minf2(float v, float w);
     float maxf2(float v, float w);
 
-    #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
 #endif // USE_MODULE_LIGHTS_ANIMATOR
+
+#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 #endif // Guard

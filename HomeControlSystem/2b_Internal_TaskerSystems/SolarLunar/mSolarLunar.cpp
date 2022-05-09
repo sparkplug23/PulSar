@@ -5,7 +5,10 @@
 const char* mSolarLunar::PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR = D_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR;
 const char* mSolarLunar::PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR = D_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR;
 
-int8_t mSolarLunar::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mSolarLunar::Tasker(uint8_t function, JsonParserObject obj)
+{
+
+	// +- 6% of elevation is dust/dawn
 
   int8_t function_result = 0;
   
@@ -21,7 +24,6 @@ int8_t mSolarLunar::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
   
-  // Only continue to remaining functions if sensor has been detected and enabled
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
@@ -61,7 +63,6 @@ int8_t mSolarLunar::Tasker(uint8_t function, JsonParserObject obj){
   }
   
   return function_result;
-
 
 }
 
@@ -116,7 +117,32 @@ void mSolarLunar::Update_Solar_Tracking_Data()
 	solar_position.elevation = elevation_tmp+elevation_adjusted_for_debugging;
 
 
-	solar_position.isvalid = true;
+	/**
+	 * @brief Can only be set when the time has been set first
+	 **/
+	if(pCONT_time->RtcTime.isvalid)
+	{
+		solar_position.isvalid = true;
+	}else{
+		solar_position.isvalid = false;
+	}
+
+	/**
+	 * @brief Update period of day based on sun elevation
+	 **/
+	if((solar_position.elevation>5)&&(solar_position.direction.is_ascending == false)) // 
+	{
+		// time of day is "Daytime-Increasing"
+		// Daytime-Decreasing
+
+
+	}
+
+	if((solar_position.elevation>5)&&(solar_position.direction.is_ascending == false)) // 
+	{
+
+	}
+
 	solar_position.tUpdated_millis = millis();
 
 }
@@ -313,6 +339,21 @@ uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_level){
 		JBI->Add("El",(float)solar_position.elevation);
 		JBI->Add("age",millis()-solar_position.tUpdated_millis);
 		JBI->Add("elevation_adjusted_for_debugging", elevation_adjusted_for_debugging);
+
+
+		// time until/from
+		/**
+		 * @brief 
+		 * 
+		 * sunrise
+		 * sunset
+		 * dust
+		 * dawn
+		 * culmination
+		 * daylight duration
+		 * 
+		 * 
+		 */
 	}
 
   return JsonBuilderI->End();

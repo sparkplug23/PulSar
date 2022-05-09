@@ -44,6 +44,8 @@
 // #define DEBUG_TRACE_LOG(...)
 // #endif
 
+#define DIGITAL_INVERT_PIN(pin) digitalWrite(pin,!digitalRead(pin))
+
 
 
 #define SPF(param_name,string_type,parameter)  Serial.printf("\"" param_name "\"=" string_type "\n\r", parameter)

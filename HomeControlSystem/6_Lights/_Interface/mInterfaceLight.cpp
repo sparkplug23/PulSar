@@ -407,12 +407,9 @@ void mInterfaceLight::init_Animations(){
 // Another func will push those values to the output, which each hardware class will handle
 
 // // Used for timed on or off events
-int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
+{
   
-//       #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-// DEBUG_LINE_HERE;
-//       #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
   int8_t function_result = 0;
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
@@ -500,19 +497,12 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND:{
 
-      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//Serial.println("every second");
-      #endif// ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
       //Temp fix until proper monitoring of on/off states
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
       // replace with GetLightPower() so its updated internally
       
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
       light_power_state = pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightness255()?1:0;
-#else
-      light_power_state = rgbcct_controller.getBrightness255()?1:0;
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
       //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
@@ -797,14 +787,9 @@ void mInterfaceLight::EveryLoop(){
      
     switch(pCONT_lAni->_segments[0].mode_id)    
       {
-      // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-      
-      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
       case ANIMATION_MODE_EFFECTS_ID:
         pCONT_lAni->SubTask_Segments_Animation();
       break;
-      #endif
-      // #endif
       case ANIMATION_MODE_NONE_ID: default: break; // resting position
     }
   
@@ -832,7 +817,7 @@ void mInterfaceLight::EveryLoop(){
        * Notifications: Single pixel basic animations (pulse, flash, on/off)
        * */
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-      case ANIMATION_MODE_NOTIFICATIONS__ID:
+      case ANIMATION_MODE_NOTIFICATIONS_ID:
         pCONT_lAni->SubTask_Notifications();   // Convert this into its own segment effect, effect will need to be set first
       break;
       #endif
@@ -896,40 +881,15 @@ void mInterfaceLight::EverySecond_AutoOff(){
 
 void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
 
-  colour->R  = mapvalue(colour->R,  0, 255, 0, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  colour->R  = mapvalue(colour->R,  0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessRGB255());
-  colour->G  = mapvalue(colour->G,  0, 255, 0, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  colour->G  = mapvalue(colour->G,  0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessRGB255());
-  colour->B  = mapvalue(colour->B,  0, 255, 0, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  colour->B  = mapvalue(colour->B,  0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessRGB255());
-  colour->WW = mapvalue(colour->WW, 0, 255, 0, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  colour->WW = mapvalue(colour->WW, 0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessCCT255());
-  colour->WC = mapvalue(colour->WC, 0, 255, 0, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  colour->WC = mapvalue(colour->WC, 0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessCCT255());
 
 }
@@ -977,27 +937,12 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
   JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
   
 
-  JsonBuilderI->Add_P(PM_JSON_HUE, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getHue360());
-  JsonBuilderI->Add_P(PM_JSON_SAT, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getSat255());
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessRGB255());
 
   
@@ -1005,12 +950,7 @@ getBrightnessRGB255());
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_c12olour_order);
 
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT, 
-#ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-#else
-      rgbcct_controller.
-#endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
 getBrightnessCCT255());
 
 

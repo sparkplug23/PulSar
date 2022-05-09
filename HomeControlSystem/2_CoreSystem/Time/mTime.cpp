@@ -278,7 +278,7 @@ bool mTime::CheckOrStartNTPService(){
   #endif // USE_MODULE_NETWORK_WIFI
 
   if(!settings.timeclient_is_started){
-    fTimeSet = false;
+    // fTimeSet = false;
     RtcTime.isvalid = false;
     return false; // failed to start
   }
@@ -295,17 +295,19 @@ bool mTime::CheckOrStartNTPService(){
   //     )
   //   ){
 
-  if(RtcTime.valid){
-    fTimeSet = true;
-    RtcTime.isvalid = true;
-    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = true"));
-  }else{
-    fTimeSet = false;
-    RtcTime.isvalid = false;
-    //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = false"));
-  }
+    // RtcTime.isvalid = fTimeSet;
 
-  RtcTime.isvalid = true;
+  // if(RtcTime.valid){
+  //   fTimeSet = true;
+  //   RtcTime.isvalid = true;
+  //   //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = true"));
+  // }else{
+  //   fTimeSet = false;
+  //   RtcTime.isvalid = false;
+  //   //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_TIME "fTimeSet = false"));
+  // }
+
+  // RtcTime.isvalid = true;
 
   return true;
 
@@ -1907,6 +1909,9 @@ void mTime::RtcSecond(void)
     #ifdef DEBUG_MODULE_TIME_STD
     AddLog(LOG_LEVEL_INFO, PSTR("Rtc local_time Valid"));
     #endif
+
+    RtcTime.isvalid = true; // other parts of code rely on this being accurate
+
 
     int16_t timezone_minutes = pCONT_set->Settings.timezone_minutes;
     if (pCONT_set->Settings.timezone < 0) { timezone_minutes *= -1; }

@@ -58,6 +58,21 @@ public:
     void parse_JSONCommand(JsonParserObject obj);
 
     void Update_Solar_Tracking_Data();
+    
+		/**
+		 * @brief 
+		 * 
+		 */
+		enum SOLAR_POSITION_DESCRIPTION{
+			SOLAR_POSITION_DAYTIME_RISING_ID, // before noon
+			SOLAR_POSITION_DAYTIME_FALLING_ID, //after noon but still daylight
+			SOLAR_POSITION_DAYTIME_SUNSET_ID,
+			SOLAR_POSITION_DAYTIME_DUSK_ID, // sun below horizon, but still brightness (E< -5), ie, no orange left, deepening blue
+			SOLAR_POSITION_DAYTIME_NIGHT_ID,
+			SOLAR_POSITION_DAYTIME_DAWN_ID, // E>-10 and E<-5, ie, no "orange" in the sky but its a lighter blue
+			SOLAR_POSITION_DAYTIME_SUNRISE_ID, // E>-5 and E<5
+			SOLAR_POSITION_DAYTIME_LENGTH_ID
+		};
 
     struct solar_position_t
     {

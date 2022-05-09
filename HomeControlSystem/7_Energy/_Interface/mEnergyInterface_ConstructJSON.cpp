@@ -60,6 +60,10 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_method){
   JsonBuilderI->Array_AddArray_F(D_JSON_VOLTAGE,              Energy.voltage,       Energy.phase_count);
   JsonBuilderI->Array_AddArray_F(D_JSON_CURRENT,              Energy.current,       Energy.phase_count);
   JsonBuilderI->Array_AddArray_F(D_JSON_ACTIVE_POWERUSAGE,    Energy.active_power,  Energy.phase_count);
+
+  JBI->Add("tRateSecs", mqtthandler_sensor_ifchanged.tRateSecs);
+
+
   // JsonBuilderI->Array_AddArray_F(D_JSON_APPARENT_POWERUSAGE,  Energy.apparent_power,Energy.phase_count);
   // JsonBuilderI->Array_AddArray_F(D_JSON_REACTIVE_POWERUSAGE,  Energy.reactive_power,Energy.phase_count);
   // JsonBuilderI->Array_AddArray_F(D_JSON_POWERFACTOR,          Energy.power_factor,  Energy.phase_count);

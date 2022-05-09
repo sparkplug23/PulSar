@@ -601,14 +601,18 @@ void mRelays::SetAllPower(uint32_t state, uint32_t source)
 
 void mRelays::SetPowerOnState(void)
 {
-  // if (MODULE_MOTOR == pCONT_set->my_module_type) {
-  //   pCONT_set->Settings.poweronstate = POWER_ALL_ON;   // Needs always on else in limbo!
-  // }
-  // if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {
-  //   SetDevicePower(1, SRC_RESTART);
-  // } else {
-  //   if ((pCONT_sup->ResetReason() == REASON_DEFAULT_RST) || (pCONT_sup->ResetReason() == REASON_EXT_SYS_RST)) {
-      switch (pCONT_set->Settings.poweronstate) {
+  
+  if (POWER_ALL_ALWAYS_ON == pCONT_set->Settings.poweronstate) {
+    SetDevicePower(1, SRC_RESTART);
+  } else {
+    
+    if (
+      (pCONT_sup->ResetReason() == REASON_DEFAULT_RST) || 
+      (pCONT_sup->ResetReason() == REASON_EXT_SYS_RST)
+    ){
+
+      switch (pCONT_set->Settings.poweronstate)
+      {
       case POWER_ALL_OFF:
       case POWER_ALL_OFF_PULSETIME_ON:
         pCONT_set->power = 0;
@@ -631,13 +635,15 @@ void mRelays::SetPowerOnState(void)
         }
         break;
       }
-    // } else {
-    //   power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
-    //   if (pCONT_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
-    //     SetDevicePower(pCONT_set->power, SRC_RESTART);
-    //   }
-    // }
-  //}
+
+    } else {
+      pCONT_set->power = pCONT_set->Settings.power & ((1 << pCONT_set->devices_present) );
+      if (pCONT_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
+        SetDevicePower(pCONT_set->power, SRC_RESTART);
+      }
+    }
+    
+  }
 
   blink_powersave = pCONT_set->power;
 }

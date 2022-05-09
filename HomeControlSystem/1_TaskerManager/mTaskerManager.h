@@ -127,7 +127,7 @@ enum FUNCTION_RESULT_IDS{
   #define WDT_RESET() ESP.wdtFeed()
   #include <ESP8266WiFi.h>
   #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #include <ESPAsyncTCP.h>
+    // #include <ESPAsyncTCP.h>
     //?#include <ESPAsyncWebServer.h>
   #endif //USE_MODULE_NETWORK_WEBSERVER
 #endif
@@ -617,8 +617,8 @@ enum MODULE_IDS{
   #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_BME
-  #include "5_Sensors/BME/mSensorsBME.h"
-  #define pCONT_bme                             static_cast<mSensorsBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
+  #include "5_Sensors/BME/mBME.h"
+  #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_DS18X
   #include "5_Sensors/DB18x20/mDS18X.h"

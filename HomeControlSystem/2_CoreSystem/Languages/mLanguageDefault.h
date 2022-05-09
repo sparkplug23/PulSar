@@ -214,7 +214,7 @@
   #define D_MODULE_SENSORS_DHT_FRIENDLY_CTR      "dht"
 //#endif
 //#ifdef USE_MODULE_SENSORS_BME
-  #define D_MODULE_SENSORS_BME_CTR              "mSensorsBME"
+  #define D_MODULE_SENSORS_BME_CTR              "mBME"
   #define D_MODULE_SENSORS_BME_FRIENDLY_CTR     "bme"
 //#endif
 //#ifdef USE_MODULE_SENSORS_DS18X

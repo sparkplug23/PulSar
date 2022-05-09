@@ -1975,9 +1975,9 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(void)
   {
     uint16_t gradient_id = paletteIndex - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
     // AddLog(LOG_LEVEL_TEST, PSTR("gradient_id=%d"),gradient_id);
-    #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+    // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
     load_gradient_palette(gradient_id);
-    #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+    // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
   }
   
   if (singleSegmentMode && pCONT_lAni->paletteFade) // Only blend if just one segment uses FastLED mode
@@ -1994,7 +1994,7 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(void)
 }
 
 
-#ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
 void mPalette::load_gradient_palette(uint8_t index)
 {
   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
@@ -2002,7 +2002,7 @@ void mPalette::load_gradient_palette(uint8_t index)
   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
   targetPalette.loadDynamicGradientPalette(tcp);
 }
-#endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
 
 

@@ -8,8 +8,8 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 // New sections of code that should be enabled by default
-#define ENABLE_CRGBPALETTES_IN_PROGMEM
-#define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+// #define ENABLE_CRGBPALETTES_IN_PROGMEM
+// #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
 #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 
@@ -450,14 +450,11 @@ void RulesEvent_Set_Power();
     void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
     void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
 
-// #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
 //     // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
 //     RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
 
 //     RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
     
-// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
     void Template_Load();
 
@@ -470,7 +467,7 @@ void RulesEvent_Set_Power();
     void Init(void);
     
 
-    #ifndef DISABLE_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     void WebAppend_Root_Buttons();
     void WebAppend_Root_Draw_Table();
     void WebCommand_Parse();
@@ -490,7 +487,7 @@ void RulesEvent_Set_Power();
     }palette_view;
     uint32_t WebColorFromColourMap(uint8_t i);
     uint32_t WebColorFromColourType(RgbColor rgb);
-    #endif // DISABLE_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
  
     uint8_t light_power_state = 0;

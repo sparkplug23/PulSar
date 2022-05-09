@@ -71,6 +71,7 @@ LivingRoom
 **/
 // #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_RGBFIREPLACE
+// #define DEVICE_SHELLYDIMMER_LIVING_LAMP
 
 /**
  * 
@@ -80,16 +81,15 @@ Hallway
   - hallway table
  */
 // #define DEVICE_RADIATORFAN
-// #define DEVICE_SHELLYDIMMER_HALLWAY_LAMP 
 // #define DEVICE_CANDLE_ELECTRIC_HALLWAY  // Socket_SocketNumber16_Power
+// #define DEVICE_SHELLYDIMMER_HALLWAY_LAMP
 
 /**
  * 
 Understairs
   - heating
  */
-// #define DEVICE_HEATING_ESP32
-
+// #define DEVICE_HEATING
 
 
 /**
@@ -1129,6 +1129,21 @@ Bathroom
 #endif
 
 
+/**
+ * @brief 
+ * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
+ * 
+ * Ethernet      Function       ESP32         6P/2P Connector        
+ * 
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           PIR            5             Yellow
+ * bl/w          I2D            18            Green      //check i2c 
+ * w/bl          I2C            19            Orange
+ * g/w           3V3            3V3           White
+ * w/br           -                           Black     // Button? Led?
+ * br/w           -                           Red
+ **/
 #ifdef DEVICE_KITCHENSENSOR
   #define DEVICENAME_CTR          "kitchensensor"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
@@ -1139,6 +1154,7 @@ Bathroom
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BH1750
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1147,11 +1163,12 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_BME
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"18\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
+      "\"27\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1173,14 +1190,13 @@ Bathroom
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-    "}"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
-
   
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"    
-    // for PIR to follow
+  "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
@@ -1325,6 +1341,21 @@ Bathroom
 
 #endif
 
+/**
+ * @brief 
+ * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
+ * 
+ * Ethernet      Function       ESP32         6P/2P Connector        
+ * 
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           PIR            5             Yellow
+ * bl/w          I2D            18            Green      //check i2c 
+ * w/bl          I2C            19            Orange
+ * g/w           3V3            3V3           White
+ * w/br           -                           Black     // Button? Led?
+ * br/w           -                           Red
+ **/
 #ifdef DEVICE_UTILITYSENSOR
   #define DEVICENAME_CTR          "utilitysensor"
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
@@ -1379,12 +1410,9 @@ Bathroom
     "}"
   "}";
 
-
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-
-  // for PIR to follow
+  "{" // for PIR to follow
    "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
@@ -1398,61 +1426,8 @@ Bathroom
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
-
-
-    // // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    // "\"Rule0\":{"
-    //   // "\"Trigger\":{"
-    //   //   "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-    //   //   "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-    //   //   "\"DeviceName\":0,"
-    //   //   "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
-    //   // "},"
-    //   // "\"Command\":{"
-    //   //   "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //   //   "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-    //   //   "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-    //   //   "\"State\":2" // Started
-    //   // "}"
-      
-    // "\"Trigger\":{"
-    //     "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-    //     "\"DeviceName\":0,"
-    //     "\"State\":\"On\""
-    //   "},"
-    //   "\"Command\":{"
-    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-    //     "\"DeviceName\":0," 
-    //     "\"State\":\"FollowInv\""
-    //   "}"
-    // "}"
-
-
-
-    // "},"
-    // // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    // "\"Rule1\":{"
-    //   "\"Trigger\":{"
-    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-    //     "\"DeviceName\":1,"
-    //     "\"State\":\"On\"" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
-    //   "},"
-    //   "\"Command\":{"
-    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-    //     "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-    //     "\"State\":\"FollowInv\""
-    //   "}"
     "}"
-
-
-
   "}";
-
-
 
 #endif
 
@@ -1847,6 +1822,7 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
   // Hard coded to alternate pin until I make this template based
   #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
@@ -1995,7 +1971,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
     "},"
     "\"" D_JSON_ENERGY "\":{"
         "\"DeviceCount\":12"    
-    "}"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
   /**
@@ -2301,6 +2278,55 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 
 #endif
 
+#ifdef DEVICE_SHELLYDIMMER_HALLWAY_LAMP
+  #define DEVICENAME_CTR          "dimmer_hallway_lamp"
+  #define DEVICENAME_FRIENDLY_CTR "Dimmer Hallway Lamp"
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 2
+
+  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
+  
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_CORE_RULES
+  #define USE_HARDWARE_DEFAULT_RULES_1
+
+  #define DISABLE_SERIAL_LOGGING //temp measure
+  // #define DISABLE_SERIAL0_CORE //dont think its needed
+
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
+  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 
 
 /**************************************************************************************************************************************************
@@ -2462,67 +2488,101 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-/***
- * Gen 2 will stickw ith current wiring
- *  - I will add an ethernet wire down the house, if just temporary for new internet
- * 
- * 
- * Gen 3
- * New Split Heating controller
- * "heating" as primary
- * "heating_remote_1" as device in hotpress
- *    - remote tank sensors
- *    - remote upstairs temperatures
- *    - relay control for immersion
- * (initally connected via mqtt in json format, eventually socket directly but also by json format)
- * (this allows both to be connected via ethernet indirectly with switches, future esp32-poe)
- * 
- * */
-
-
-#ifdef DEVICE_HEATING_ESP32
-
 /**
- * 1)
- * Transition hardware, will use esp32_A for control of relays 
- * Nodemcu will continue to measure db18 sensors
+ * @brief 
+ * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
+ * "*" pin = confirmed soldering
+ * Ethernet      Function       ESP32         Note        
  * 
- * 2) Esp32_b will be introduced, to measure just the downstairs db sensors. At this point
- * there will be 3 active esp's (1 esp8266 and 2 esp32)
+ * ** Blue (Upstairs Link) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           R_IH           21*           Immersion relay (5v IO)
+ * bl/w          I2D            12*           Reserving, likely not possible      
+ * w/bl          I2C            13*              
+ * g/w           3V3            3V3           
+ * w/br          1wire          14*            ds18b20 water, 4k7 pulled high        (comes from blue by connector)
+ * br/w           -                           
+ * ** Green (Downstairs Sensors) **************************************************************************
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           1Wire          4*            DS18B20 water pipe sensors
+ * bl/w          I2D            22*           BME in Dinning Room (Alternatively, DHT22 data pin)
+ * w/bl          I2C            23*           BME in Dinning Room
+ * g/w           3V3            3V3           White
+ * w/br                                       NC
+ * br/w          DHT22          25*           DHT22 (until BME is working)
+ * ** Red (Relay Board) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g                          5*             
+ * bl/w          R_DS           18*                   
+ * w/bl                         19*            
+ * g/w           R_WB           3V3           
+ * w/br           -                           
+ * br/w          R_US                         
+ * ** Orange (Nextion Display) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           NEO            27*             SK6812 4 pixels of rgbW
+ * bl/w                                      
+ * w/bl                                      
+ * g/w           3V3            3V3           
+ * w/br          RX2            17*              Nextion TX
+ * br/w          TX2            16*              Nextion RX   -- "SERIAL TX" of Serial will always be dominant colour (brown) as its important to know the output pin
+ * Twin          Switch
+ * Twin          Switch
+ * ** Power Screw Jacks **************************************************************************
+ * 4 (Top)       12V
+ * 3             5V
+ * 2
+ * 1 (Bottom)    GND
+ * ** ADC Input **************************************************************************
+ * 4 (Top)       LDR_US         33
+ *               LDR_DS         32 
+ *               LDR_WB         35
+ * Extra Ethernet for LDRs hot glued onto the red led of the servos?
  * 
- * 3) Adding the new downstairs sensors, into the primary esp32 heating
- * 
- * 4) Adding all sensors into primary esp32
- * 
- * */
-
-  #define DEVICENAME_CTR          "heating"  // to be named "hvac_house_master" with later "hvac_house_slave" for remote controls.
-  #define DEVICENAME_FRIENDLY_CTR "HVAC Heating Gen 2" // Gen 3 = Ethernet version
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1 //maintain other settings (bootcount)
-   
-  // #define ENABLE_BUG_TRACING
-  //#define ENABLE_MQTT_DEBUG_MESSAGES
-  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
+ **/
+#ifdef DEVICE_HEATING
+  #define DEVICENAME_CTR          "heating"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating"
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  
+  /**
+   * @brief Increasing buffers for the larger controller than default minimums
+   * 
+   */
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
+  #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
+  #define DB18_SENSOR_MAX 15
 
   #define DISABLE_WEBSERVER
-  #define ESP32
 
   #define USE_MODULE_CONTROLLER_HVAC
 
-  //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on))
-  
-  // #define USE_MODULE_SENSORS_INTERFACE  
-  // #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_DS18X
-  
-  // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT 8 // This should not be needed
-  // #define ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO2_SENSOR_COUNT 5
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_DHT
 
+  //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on)) 30+ pins == use this to know what has been turned on manually.
+  //Also need to add a mains detector for the furnace trigger (orange wire from servos)
+  
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  #define STRIP_SIZE_MAX 5 //tmp +1 fix for length issue in segment code
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
+  
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
 
   #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_INV_CTR
   #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_INV_CTR
@@ -2535,69 +2595,35 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-
-    // Phase 1 - Just relays, no sensors
-
-
-      "\"5\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"5\":\""  GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
       "\"19\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
       "\"21\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
       "\"18\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
-
-      // // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
-
+      #endif
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DS_DHT 
       // "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
-
-      // /**
-      //  * Upstairs
-      //  * */
-      // "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
-
-
-      // "\"22\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin
-      // // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
-
-      // // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      // // Understairs control panel with basic controls, would be great if the GUI can output a json command when pressed? would simplify design. Though need output, so needs its own control stuff
-      // "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // TBA
-      // "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," // TBA
-      // // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
-
-
-      // "\"25\":\"" GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
-      // "\"26\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
-      // "\"27\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
-      // "\"14\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
-
-      // // "\"12\":\"" D_GPIO_FUNCTION_REL5_INV_CTR  "\"," //spare relay inside DS device
-
-      // "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
-
-      // /**
-      //  * Upstairs
-      //  * */
-      // "\"5\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT- 3 pin connector
-
-
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // US_DB - 3 pin  // try all on the same pin? in practice it probably would be better with different pullup values, but long term phasing out so for now, keep it simple
-      // // "\"23\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // DS_DB - 3 pin
-
-      // // "\"23\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      // // Understairs control panel with basic controls, would be great if the GUI can output a json command when pressed? would simplify design. Though need output, so needs its own control stuff
-      // "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\"," // TBA
-      // "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," // TBA
-      // // "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //future bme
-      // // "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-
-/**
- * 
- * LDRs onto input only 30 gpios
- * */
-
-
+      #endif
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DS18X
+      "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","  // DS_DB - 3 pin
+      "\"14\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","  // US_DB - 3 pin
+      #endif    
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" //builti n led
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   
@@ -2614,12 +2640,53 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
   #define D_DEVICE_SENSOR_DHT_1_NAME "Downstairs_DHT"
 //flip these
-  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Downstairs_Pipe"
-  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,152,171,193,23,4,231]"
-  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Upstairs_Pipe"
-  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,131,6,194,23,4,59]"
-  #define D_DEVICE_SENSOR_DB18S20_2_NAME        "Boiler_Pipe"
-  #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,204,226,193,23,4,30]"
+
+// {"found":9,"Address":
+
+// "sens0_60_127":[40,208,174,149,240,1,60,127], //x7F
+// "sens1_60_157":[40,168,253,149,240,1,60,157], //9D
+// "sens2_0_72":[40,12,164,2,0,0,0,72], //x48
+// "sens3_0_131":[40,9,77,4,0,0,0,131], //x83
+// "sens4_0_138":[40,121,172,3,0,0,0,138], //8A
+// "sens5_60_148":[40,205,241,149,240,1,60,148], //x94
+// "sens6_0_178":[40,195,112,2,0,0,0,178], //xB2
+// "sens7_0_153":[40,103,49,3,0,0,0,153], //x99
+// "sens8_60_24":[40,183,162,149,240,1,60,24] //x18
+
+
+  /** 
+   * Pin_DS
+   * */
+  #define D_DEVICE_SENSOR_DB18S20_21_NAME        "Water21-Upstairs"
+  #define D_DEVICE_SENSOR_DB18S20_21_ADDRESS     "[40,208,174,149,240,1,60,127]"
+
+  #define D_DEVICE_SENSOR_DB18S20_22_NAME        "Water22-HotCross"
+  #define D_DEVICE_SENSOR_DB18S20_22_ADDRESS     "[40,168,253,149,240,1,60,157]"
+
+  #define D_DEVICE_SENSOR_DB18S20_23_NAME        "Water23-R/C"
+  #define D_DEVICE_SENSOR_DB18S20_23_ADDRESS     "[40,12,164,2,0,0,0,72]"
+
+  #define D_DEVICE_SENSOR_DB18S20_24_NAME        "Mains"
+  #define D_DEVICE_SENSOR_DB18S20_24_ADDRESS     "[40,9,77,4,0,0,0,131]"
+
+  #define D_DEVICE_SENSOR_DB18S20_25_NAME        "Water25-HotFromBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_25_ADDRESS     "[40,121,172,3,0,0,0,138]"
+
+  #define D_DEVICE_SENSOR_DB18S20_26_NAME        "Water26-Downstairs"
+  #define D_DEVICE_SENSOR_DB18S20_26_ADDRESS     "[40,205,241,149,240,1,60,148]"
+
+  #define D_DEVICE_SENSOR_DB18S20_27_NAME        "Water27-R/H"
+  #define D_DEVICE_SENSOR_DB18S20_27_ADDRESS     "[40,195,112,2,0,0,0,178]"
+
+  #define D_DEVICE_SENSOR_DB18S20_28_NAME        "Water28-HotFromFurnace"
+  #define D_DEVICE_SENSOR_DB18S20_28_ADDRESS     "[40,103,49,3,0,0,0,153]"
+
+  #define D_DEVICE_SENSOR_DB18S20_29_NAME        "Water29-WaterBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_29_ADDRESS     "[40,183,162,149,240,1,60,24]"
+
+  /**
+   * @brief Pin_US 
+   */
   #define D_DEVICE_SENSOR_DB18S20_3_NAME        "Immersion_Heater"
   #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,136,105,53,22,4,114]"
   #define D_DEVICE_SENSOR_DB18S20_4_NAME        "Tank_Top"
@@ -2642,14 +2709,25 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
         "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_6_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_7_NAME "\""
+        // "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_6_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DB18S20_7_NAME "\","
+
+        "\"" D_DEVICE_SENSOR_DB18S20_21_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_22_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_23_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_24_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_25_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_26_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_27_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_28_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_29_NAME "\""
+
       "],"
       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
@@ -2664,14 +2742,24 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
-        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_5_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_6_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_7_ADDRESS ""
+        // D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_5_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_6_ADDRESS ","
+        // D_DEVICE_SENSOR_DB18S20_7_ADDRESS ","
+        //test devices
+        D_DEVICE_SENSOR_DB18S20_21_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_22_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_23_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_24_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_25_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_26_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_27_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_28_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_29_ADDRESS ""
       "]"  
     "},"
     "\"" "HVACZone" "\":{"
@@ -2698,8 +2786,76 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
           "\"" "HVAC_Type" "\":[" "\"Cooling\"" "]"
         "}"
       "]"
-    "}"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
+
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    // "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
+    // "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
+    // "\"ColourPalette\":15," 
+    // "\"PaletteEdit\": {"
+    //   "\"ColourPalette\": 15,"
+    //   "\"Data\": ["
+    //     "4,6,0,0,0,"
+    //     "252, 3, 45,"
+    //     "252, 40, 3,"
+    //     "252, 3, 177,"
+    //     "128, 1, 122"
+    //   "]"
+    // "},"
+    // "\"Effects\":{"
+    //   "\"Function\":\"Static\""
+    // "},"
+    // "\"Transition\":{"
+    //   "\"TimeMs\":900,"
+    //   "\"RateMs\":1000"
+    // "},"    
+    // "\"BrightnessRGB\":1"
+
+    "\"AnimationMode\": \"Effects\","
+    "\"ColourOrder\": \"rgbw\","
+    "\"ColourPalette\": 10,"
+    "\"Effects\": {"
+      "\"Function\": \"Solid RGBCCT\""
+    "},"
+    "\"Hue\": 0,"
+    "\"Sat\": 100,"
+    "\"BrightnessRGB\": 2,"
+    "\"BrightnessCCT\": 10,"
+    "\"CCT_TempPercentage\": 100,"
+    "\"Transition\": {"
+      "\"Time\": 1"
+    "}"
+
+  "}";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+  
+/**
+ * 
+ * LDRs onto input only 30 gpios
+ * */
+
+// {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function":1
+//   },
+//   "ColourPalette":77,
+//   "ColourOrder":"grb",
+//   "BrightnessRGB": 10,
+//   "Transition": {
+//     "Time": 1
+//   },
+//   "RGBClock":{"ManualNumber":74}
+// }
+
   
 #endif
 
@@ -4529,6 +4685,8 @@ This might actually be worth changing to esp32, to give year long debug data!!! 
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_DOOR
+  
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE

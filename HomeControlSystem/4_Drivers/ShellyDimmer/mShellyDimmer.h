@@ -199,7 +199,7 @@ class mShellyDimmer :
     int check_byte();
     bool SerialSend(const uint8_t data[] = nullptr, uint16_t len = 0);
     bool SendCmd(uint8_t cmd, uint8_t *payload, uint8_t len);
-    void SetBrightness();
+    void SetBrightnessReq();
     void SetBrightnessFade();
     
     void CmndShdLeadingEdge(uint8_t edge_type);
@@ -220,6 +220,21 @@ class mShellyDimmer :
 
     bool ModuleSelected(void) ;
     bool SetChannels();
+
+    /**
+     * 0 = not running
+     * 1 = turn off then set to 0 to be off
+     * 2+ count down
+     * */
+    struct TIME_ON_DECOUNTERS{
+      uint16_t seconds = 0;
+      uint8_t active = false;
+    }timer_decounter;     
+    void SubTask_Power_Time_To_Remain_On_Seconds();
+    void SetBrightness(uint8_t brightness = 255);
+    void CommandSet_Timer_Decounter(uint16_t time_secs);
+    uint16_t CommandGet_SecondsToRemainOn();
+
 
     int8_t Tasker_Web(uint8_t function);
 

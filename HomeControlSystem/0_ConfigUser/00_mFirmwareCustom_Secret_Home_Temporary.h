@@ -34,7 +34,7 @@
  */
 // #define DEVICE_RGBDESK
 // #define DEVICE_DESKSENSOR_AS_LONGTERM_TEST_DEVICE
-
+// #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 
 
 /**************************************************************************************************************************************************
@@ -306,7 +306,10 @@
   // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
-  #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
+  // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
+  #define DISABLE_WEBSERVER  // phase out to only USE_MODULE_NETWORK_WEBSERVER
+
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
   #define USE_MODULE_DRIVERS_LEDS
 
@@ -333,15 +336,15 @@
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  #define STRIP_SIZE_MAX 12                                                                           // Change: Set *total* length of string, segment0 will default to this length
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
-  #define ENABLE_CRGBPALETTES_IN_PROGMEM
-  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  #define STRIP_SIZE_MAX 12
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 
+  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
+
+  #define ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -468,6 +471,7 @@
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"
+    // "\"AddRuleDefault\":\"Motion0=0\","
     // MOTION
     "\"Rule0\":{"
       "\"Trigger\":{"

@@ -1,24 +1,37 @@
-#ifndef _USE_MODULE_DRIVERS_PWM_H
-#define _USE_MODULE_DRIVERS_PWM_H 0.3
+#ifndef _DRIVERS_PWM_H_
+#define _DRIVERS_PWM_H_
 
-#define D_UNIQUE_MODULE_DRIVERS_PWM_ID 45
+#define D_UNIQUE_MODULE_DRIVERS_PWM_ID 122
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS_PWM
 
+#include <Ticker.h>
 
-#include <string.h>
-#include <strings.h>
+#include "2_CoreSystem/mBaseConfig.h"
+#include "2_CoreSystem/Time/mTime.h"
+#include "2_CoreSystem/Logging/mLogging.h"
+#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "3_Network/MQTT/mMQTT.h"
+#include "2_CoreSystem/Time/mTime.h"
+
+#include <Ticker.h>
+
+#include "1_TaskerManager/mTaskerInterface.h"
+
+#include "2c_Internal_IsolatedNoTaskerSystems/DataBlend/mDataBlend.h"
 
 class mPWM :
   public mTaskerInterface
 {
-
-  private:
   public:
     mPWM(){};
-
+    
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    
+    void Pre_Init(void);
+    void Init(void);
 
     static const char* PM_MODULE_DRIVERS_PWM_CTR;
     static const char* PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
@@ -26,50 +39,43 @@ class mPWM :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR; }
     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_PWM_ID; }
 
-    
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
       return sizeof(mPWM);
     };
     #endif
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
+    void parse_JSONCommand(JsonParserObject obj);
 
-    int8_t Tasker_Web(uint8_t function);
+    void EveryLoop();
+    void EverySecond();
 
-    #define WEB_HANDLE_PWM_SLIDER "fan_speed"
-    
-// int8_t CheckAndExecute_JSONCommands(JsonObjectConst obj);
-// void parse_JSONCommand(JsonObjectConst obj);
+    // LinearBlendVariable<uint16_t>* variable_blend = nullptr;
+    // LinearBlendVariable<uint16_t>*  var_blend = nullptr;
 
-uint16_t test_val = 0;
-uint8_t dir = 0;
+    LinearBlendVariable<float>*  var_blend_f = nullptr;
+    LinearBlendVariable<uint8_t>*  var_blend_u8 = nullptr;
 
-void init();
-void Pre_Init();
-int8_t pin = -1;
+    struct SETTINGS{
+      bool fEnableSensor = false;
+    }settings;
 
-struct SETTINGS{
-  uint8_t fEnableModule = false;
-  uint8_t fShowManualSlider = false;
-}settings;
+    #define MAX_PWM_PINS 5
+    struct PWM_VALUES{
 
+      uint16_t value = 0;
+      int8_t pin = -1;
+      
+      LinearBlendVariable<uint16_t>*  blended_value = nullptr;
 
-    
-void WebCommand_Parse(void);
+    }pwm[MAX_PWM_PINS];
 
-
-void WebAppend_Root_Draw_PageTable();
-void WebAppend_Root_Status_Table();
-
+    uint8_t dir = 0;
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
-
+    uint8_t ConstructJSON_State(uint8_t json_method = 0);
   
-  //#ifdef USE_CORE_MQTT 
-
+    #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
@@ -77,18 +83,25 @@ void WebAppend_Root_Status_Table();
     struct handler<mPWM>* mqtthandler_ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPWM> mqtthandler_settings_teleperiod;
-    
-    // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
-    struct handler<mPWM> mqtthandler_sensor_ifchanged;
-    struct handler<mPWM> mqtthandler_sensor_teleperiod;
+    struct handler<mPWM> mqtthandler_state_ifchanged;
+    struct handler<mPWM> mqtthandler_state_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    
+    struct handler<mPWM>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_state_ifchanged,
+      &mqtthandler_state_teleperiod
+    };
+    #endif // USE_MODULE_NETWORK_MQTT 
 
 
 };
 
-#endif
+
 
 #endif
+
+#endif  // _SONOFF_H_
+//#endif

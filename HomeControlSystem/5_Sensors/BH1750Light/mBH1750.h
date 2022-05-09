@@ -64,7 +64,7 @@ class mBH1750 :
       uint8_t addresses[2] = { BH1750_ADDR1, BH1750_ADDR2 };
       uint8_t resolution[3] = { BH1750_CONTINUOUS_HIGH_RES_MODE, BH1750_CONTINUOUS_HIGH_RES_MODE2, BH1750_CONTINUOUS_LOW_RES_MODE };
       uint8_t count = 0;
-      char types[7] = "BH1750";
+      // char types[7] = "BH1750"; // remove this
     } Bh1750;
 
     struct {
@@ -73,7 +73,7 @@ class mBH1750 :
       uint8_t mtreg = 69;                          // Default Measurement Time
       uint16_t illuminance = 0;
       uint16_t level = 0;
-    } Bh1750_sensors[2];
+    } device_data[2];
         
     uint8_t Bh1750Resolution(uint32_t sensor_index);
     bool Bh1750SetResolution(uint32_t sensor_index);
@@ -99,6 +99,13 @@ class mBH1750 :
     //No extra handlers example
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     //with extra handlers example
+    
+    struct handler<mBH1750>* mqtthandler_list[3] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged,
+      &mqtthandler_sensor_teleperiod
+    };
+
     #endif // USE_MODULE_NETWORK_MQTT
 
 

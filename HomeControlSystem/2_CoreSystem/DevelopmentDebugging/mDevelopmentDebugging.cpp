@@ -67,6 +67,24 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #endif 
 
 
+  /**
+   * @brief When a define has been stripped from code, but not templates, this will alert user to ensure new commands
+   * are properly integrated into the newer code format.    * 
+   */
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    // #error "ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS -- Can be removed"
+  #endif 
+  #ifdef ENABLE_FEATURE_INCLUDE_WLED_PALETTES
+    #error "ENABLE_FEATURE_INCLUDE_WLED_PALETTES -- Can be removed"
+  #endif 
+  #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+    #error "ENABLE_CRGBPALETTES_IN_PROGMEM -- Can be removed"
+  #endif 
+  #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
+    #error "ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT -- Can be removed"
+  #endif 
+
+
 
 
 }

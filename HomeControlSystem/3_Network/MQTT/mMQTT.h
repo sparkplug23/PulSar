@@ -53,7 +53,7 @@ enum TOPIC_TYPE_IDS{
 };
 
 enum MQTT_FREQUENCY_REDUCTION_LEVEL_IDS{
-  MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID = 0,
+  MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID = 0, // leave it as original set
   MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_1_MINUTES_ID = 1,
   MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID = 2,
   MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_60_MINUTES_ID = 3,
@@ -319,7 +319,7 @@ const char* state_ctr(void);
           handler_ptr->tSavedLastSent=millis();
           handler_ptr->flags.SendNow = true;
           //handler_ptr->flags.FrequencyRedunctionLevel = 1;
-          if(flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel){
+          if(flag_uptime_reached_reduce_frequency && (handler_ptr->flags.FrequencyRedunctionLevel > MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID)){
             // handler_ptr->flags.FrequencyRedunctionLevel = 0; // reset to don't change            
             //Serial.println("flag_uptime_reached_reduce_frequency");            
             handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs; //only reduce if new rate is longer

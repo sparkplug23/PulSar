@@ -101,6 +101,7 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     case FUNC_EVERY_SECOND:  
       Poll();    
+      SubTask_Power_Time_To_Remain_On_Seconds();
     break;
     /************
      * COMMANDS SECTION * 
@@ -147,6 +148,46 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
   #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
+
+
+/**
+ * @note: Time a relay will remain ON
+ * */
+void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
+{
+
+  // Auto time off decounters
+  if(timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "timer_decounter.seconds==1 and disable"));
+    #endif       
+
+    uint8_t brightness100 = 0;
+    req_brightness = map(brightness100, 0,100, 0,1000);
+    SetBrightnessReq();
+
+    timer_decounter.seconds=0;
+
+  }else
+  if(timer_decounter.seconds>1){ // if =1 then turn off and clear to 0
+    timer_decounter.seconds--;   // decrease
+
+    // uint8_t brightness100 = 100;
+    // req_brightness = map(brightness100, 0,100, 0,1000);
+    // SetBrightnessReq();
+    
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
+    #endif
+
+    mqtthandler_state_ifchanged.flags.SendNow = true;
+
+  }else{
+    //assumed off ie == 0
+  }
+
+}
+
 
 
 #ifdef USE_MODULE_CORE_RULES
@@ -196,6 +237,8 @@ uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_method){
   JsonBuilderI->Start();  
 
     JBI->Add_P(PM_JSON_BRIGHTNESS, map(dimmer.brightness,0,1000,0,100));
+    JBI->Add("CommandGet_SecondsToRemainOn", CommandGet_SecondsToRemainOn());
+    JBI->Add("CommandGet_SecondsToRemainOn_Active", timer_decounter.active);
 
   return JsonBuilderI->End();
 
@@ -210,11 +253,8 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
 {
   int retries = 3;
 
-#ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "Tx Packet:"));
-  // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t*)data, len);
-#endif  // SHELLY_DIMMER_DEBUG
-
+  ALOG_DBM(PSTR(SHD_LOGNAME "Tx Packet:"));
+  
   while (retries--)
   {
     ShdSerial->write(data, len);
@@ -232,7 +272,7 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
     }
 
     // timeout
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "ShdSerial send timeout"));
+    ALOG_ERR(PSTR(SHD_LOGNAME "ShdSerial send timeout"));
   }
   return false;
 
@@ -268,7 +308,7 @@ bool mShellyDimmer::SendCmd(uint8_t cmd, uint8_t *payload, uint8_t len)
 }
 
 
-void mShellyDimmer::SetBrightness()
+void mShellyDimmer::SetBrightnessReq()
 {
   // Payload format:
   // [0-1] Brightness (%) * 10
@@ -277,6 +317,19 @@ void mShellyDimmer::SetBrightness()
 
   payload[0] = req_brightness & 0xff;
   payload[1] = req_brightness >> 8;
+
+  SendCmd(SHD_SWITCH_CMD, payload, SHD_SWITCH_SIZE);
+}
+
+void mShellyDimmer::SetBrightness(uint8_t brightness)
+{
+  // Payload format:
+  // [0-1] Brightness (%) * 10
+
+  uint8_t payload[SHD_SWITCH_SIZE];
+
+  payload[0] = brightness & 0xff;
+  payload[1] = brightness >> 8;
 
   SendCmd(SHD_SWITCH_CMD, payload, SHD_SWITCH_SIZE);
 }
@@ -497,21 +550,20 @@ bool mShellyDimmer::PacketProcess(void)
 //                 last_power_check = Rtc.utc_time;
 // #endif  // USE_ENERGY_SENSOR
 
-#ifdef SHELLY_DIMMER_DEBUG
-          AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdPacketProcess: Brightness:%d Power:%lu Voltage:%lu Current:%lu Fade:%d"), brightness, wattage_raw, voltage_raw, current_raw, fade_rate);
-#endif  // SHELLY_DIMMER_DEBUG
-          dimmer.brightness = brightness;
-          dimmer.power = wattage_raw;
-          dimmer.fade_rate = fade_rate;
+        ALOG_DBM( PSTR(SHD_LOGNAME "ShdPacketProcess: Brightness:%d Power:%lu Voltage:%lu Current:%lu Fade:%d"), brightness, wattage_raw, voltage_raw, current_raw, fade_rate);
+
+        dimmer.brightness = brightness;
+        dimmer.power = wattage_raw;
+        dimmer.fade_rate = fade_rate;
       }
       break;
   case SHD_VERSION_CMD:
       {
-#ifdef SHELLY_DIMMER_DEBUG
-          AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "ShdPacketProcess: Version: %u.%u"), buffer[pos + 1], buffer[pos]);
-#endif  // SHELLY_DIMMER_DEBUG
-          dimmer.version_minor = buffer[pos];
-          dimmer.version_major = buffer[pos + 1];
+
+        ALOG_DBM( PSTR(SHD_LOGNAME "ShdPacketProcess: Version: %u.%u"), buffer[pos + 1], buffer[pos]);
+        
+        dimmer.version_minor = buffer[pos];
+        dimmer.version_major = buffer[pos + 1];
       }
       break;
   case SHD_SWITCH_CMD:
@@ -552,10 +604,9 @@ void mShellyDimmer::ResetToAppMode()
 
 void mShellyDimmer::Poll(void)
 {
-  #ifdef SHELLY_DIMMER_DEBUG
-  AddLog(LOG_LEVEL_DEBUG, PSTR(SHD_LOGNAME "Poll"));
-  #endif  // SHELLY_DIMMER_DEBUG
 
+  ALOG_DBM( PSTR(SHD_LOGNAME "Poll"));
+  
   if(!ShdSerial)
     return;
 

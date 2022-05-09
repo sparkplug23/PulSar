@@ -345,7 +345,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_SENSORS_DHT_ID] = new mSensorsDHT();
   #endif
   #ifdef USE_MODULE_SENSORS_BME
-    pModule[EM_MODULE_SENSORS_BME_ID] = new mSensorsBME();
+    pModule[EM_MODULE_SENSORS_BME_ID] = new mBME();
   #endif
   #ifdef USE_MODULE_SENSORS_DS18X
     pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mDS18X();

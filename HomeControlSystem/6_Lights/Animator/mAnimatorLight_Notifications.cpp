@@ -2,6 +2,52 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+/**
+ * @brief 
+ * 
+ * 
+ *  Create segment effects:
+ * 
+ *    SubTask_Segment_Animate_Function__Notification_Static_Off
+ *    SubTask_Segment_Animate_Function__Notification_Static_On
+ *    SubTask_Segment_Animate_Function__Notification_Fade_Off
+ *    SubTask_Segment_Animate_Function__Notification_Fade_On
+ *    SubTask_Segment_Animate_Function__Notification_Blinking
+ *    SubTask_Segment_Animate_Function__Notification_Pulsing
+ * 
+ * 
+ * 
+ 
+ {
+  "AnimationMode": "Notifications",
+  "Effects": {
+    "Function": "Solid RGBCCT"
+  },
+  "ColourOrder":"grbw",
+  "ColourPalette": "RGBCCTColour 00",
+  "BrightnessRGB": 100,
+  "Hue": 20,
+  "Sat": 100,
+  "CCT_TempPercentage": 100,
+  "BrightnessCCT": 100,
+  "Transition": {
+    "Time": 2
+  },
+  "Notifications": {
+    "pixelnum": [
+      0,1,2,3
+    ],
+    "Hue": [
+      0,120,240,330
+    ],
+    "Mode":[1,2,3]
+  }
+}
+
+ * 
+ * 
+ * 
+ */
 // Can this become its own segment??
 // The data regarding the pixel effect can be saved as a typedeffed struct, commands will have to know its started.
 
@@ -11,7 +57,7 @@
 void mAnimatorLight::init_Notifications(){
 
   notif.flags.fForcePanelUpdate = true;
-  notif.flags.fEnableTimeoutAll = false;
+  notif.flags.fEnableTimeoutAll = true;
 
   for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
     notif.pixel[i].mode = NOTIF_MODE_STATIC_OFF_ID;
@@ -69,6 +115,7 @@ void mAnimatorLight::SubTask_Notifications(){
     notif.flags.fForcePanelUpdate = true;
   }
 
+
   //Enable a flag to auto turn everything off if inactive for 2 minutes
   // This could probably be replaced by simply sending the colour again anyway
   // 
@@ -79,23 +126,30 @@ void mAnimatorLight::SubTask_Notifications(){
       #endif
     }
     if(mTime::TimeReached(&notif.tSaved.Timeout,120000)){
-        #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO "tNotifPanelTimeout"));
       #endif
-      TurnLEDsOff();
+      // TurnLEDsOff();
+      for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ SetPixelColor(i,RgbwColor(0)); }
     }
   }
 
   char buffer[50];
 
-  for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){
+  for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++)
+  {
+
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "NotifA mode %d|%d"), i, notif.pixel[i].mode );
+
+
     if(
         mTime::TimeReached(&notif.pixel[i].tSavedUpdate,notif.pixel[i].tRateUpdate)
         ||(notif.flags.fForcePanelUpdate)
       ){ notif.flags.fForcePanelUpdate = false;
       
       #ifdef ENABLE_LOG_LEVEL_INFO
-      //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "Notif mode %d:%s"),i,GetNotificationModeNamebyID(notif.pixel[i].mode, buffer));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "Notif mode %d:%s"),i,GetNotificationModeNamebyID(notif.pixel[i].mode, buffer));
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "Notif mode %d|%d"), i, notif.pixel[i].mode );
       #endif
       
       RgbcctColor colour = RgbcctColor(0);
@@ -776,6 +830,11 @@ uint8_t mAnimatorLight::ConstructJSON_Notifications(uint8_t json_level){
     JsonBuilderI->Array_End();
 
 
+    JsonBuilderI->Array_Start("tRateUpdate");
+    for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ JsonBuilderI->Add(notif.pixel[i].tRateUpdate); }
+    JsonBuilderI->Array_End();
+
+
     
 //   // root["fForcePanelUpdate"] = notif.flags.fForcePanelUpdate;
 //   // root["fShowPanelUpdate"] = notif.flags.fShowPanelUpdate;
@@ -808,7 +867,7 @@ uint8_t mAnimatorLight::ConstructJSON_Notifications(uint8_t json_level){
 //   // //   hsb_arr.add(tmpctr);
 //   // // }
 //   // //     pixelobj["tSavedUpdate"] = notif.pixel[i].tSavedUpdate;
-//   // //     pixelobj["tRateUpdate"] = notif.pixel[i].tRateUpdate;
+//   // //     pixelobj["tRateUpdate"] = ;
 
   return JsonBuilderI->End();
 
