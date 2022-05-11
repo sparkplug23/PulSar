@@ -141,7 +141,7 @@ void mButtons::Pre_Init(void)
       buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;  //if pulls up normally, then grounded is on ie low
       
       
-      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // so its not "not pressed" on first call
+      buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // so its not "not pressed" on first call
       // BUTTON_NOT_PRESSED_ID;
       
       // (digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
@@ -161,7 +161,7 @@ void mButtons::Pre_Init(void)
       pinMode(buttons[settings.buttons_found].pin, GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin));
       SetInvertFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = GetHardwareSpecificPullMethod(buttons[settings.buttons_found].pin)==INPUT_PULLUP ? LOW : HIGH;
-      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
+      buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID; 
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_KEY1_NP_ID, sensor_index))
@@ -170,7 +170,7 @@ void mButtons::Pre_Init(void)
       pinMode(buttons[settings.buttons_found].pin, INPUT);
       SetPullupFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = HIGH; 
-      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;  
+      buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==HIGH)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;  
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }else
     if(pCONT_pins->PinUsed(GPIO_KEY1_INV_NP_ID, sensor_index))
@@ -180,7 +180,7 @@ void mButtons::Pre_Init(void)
       SetPullupFlag(sensor_index); 
       SetInvertFlag(sensor_index); 
       buttons[settings.buttons_found].active_state_value = LOW; 
-      buttons[settings.buttons_found].lastbutton_active_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;          
+      buttons[settings.buttons_found].last_state = BUTTON_PRESSED_ID; // = BUTTON_NOT_PRESSED_ID;//(digitalRead(buttons[settings.buttons_found].pin)==LOW)?BUTTON_PRESSED_ID:BUTTON_NOT_PRESSED_ID;;          
       if(settings.buttons_found++ >= MAX_KEYS){ break; }
     }
   }
@@ -230,6 +230,8 @@ void mButtons::Pre_Init(void)
  * Button handler with single press only or multi-press and hold on all buttons
 \*********************************************************************************************/
 
+#ifndef ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
 void mButtons::ButtonHandler(void)
 {
   
@@ -255,7 +257,8 @@ void mButtons::ButtonHandler(void)
 //delay(1000);
 
 
- for (uint8_t button_index = 0; button_index < maxdev; button_index++) {
+ for (uint8_t button_index = 0; button_index < maxdev; button_index++)
+ {
    
     state = BUTTON_NOT_PRESSED_ID;
     button_present = 0;
@@ -269,14 +272,14 @@ void mButtons::ButtonHandler(void)
       state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,button_index)) != bitRead(key_inverted, button_index));
     }
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].lastbutton_active_state);
+    // AddLog(LOG_LEVEL_TEST, PSTR("state=%s[%d]%d:%d"),state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",button_index,state,buttons[button_index].last_state);
 
           // AddLog(LOG_LEVEL_TEST, PSTR("state=%d:%d"),
           // // state==BUTTON_PRESSED_ID?"pressed":"NOTpressed",
           // // button_index,
           
           // state,
-          // buttons[button_index].lastbutton_active_state
+          // buttons[button_index].last_state
           
           // );
 
@@ -292,7 +295,7 @@ void mButtons::ButtonHandler(void)
       // {
 
       // new PRESS, was not previously pressed
-      if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].lastbutton_active_state)) {
+      if ((BUTTON_PRESSED_ID == state) && (BUTTON_NOT_PRESSED_ID == buttons[button_index].last_state)) {
         // if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
         
           // AddLog(LOG_LEVEL_TEST, PSTR("state=%d:%d"),
@@ -300,7 +303,7 @@ void mButtons::ButtonHandler(void)
           // // button_index,
           
           // state,
-          // buttons[button_index].lastbutton_active_state
+          // buttons[button_index].last_state
           
           // );
 
@@ -414,9 +417,228 @@ void mButtons::ButtonHandler(void)
       // }//if serviced, single button, 4chan
     } // if (button_present)
     
-    buttons[button_index].lastbutton_active_state = state;
+    buttons[button_index].last_state = state;
   }
 }
+
+#endif // ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
+#ifdef ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
+/*********************************************************************************************\
+ * Button handler with single press only or multi-press and hold on all buttons
+ *
+ * ButtonDebounce (50) - Debounce time in mSec
+ * SetOption1  (0)     - If set do not execute commands WifiConfig and Reset
+ * SetOption11 (0)     - If set perform single press action on double press and reverse (on two relay devices only)
+ * SetOption13 (0)     - If set act on single press only
+ * SetOption73 (0)     - Decouple button from relay and send just mqtt topic
+\*********************************************************************************************/
+
+/**
+ * @brief 
+ * Button data event with structure
+ * <length of data>,<state>,<type ie single/multi/hold><count>
+ * 
+ */
+
+void mButtons::ButtonHandler(void) {
+
+
+  if (pCONT_time->uptime.seconds_nonreset < 4) { return; }                     // Block GPIO for 4 seconds after poweron to workaround Wemos D1 / Obi RTS circuit
+
+  uint8_t hold_time_extent = IMMINENT_RESET_FACTOR;             // Extent hold time factor in case of iminnent Reset command
+  uint16_t loops_per_second = 1000 / pCONT_set->Settings.button_debounce;  // ButtonDebounce (50) - How often is the button polled? = 20 per second
+  char scmnd[20];
+
+  for (uint8_t id = 0; id < MAX_KEYS; id++) 
+  {
+    uint8_t state = BUTTON_NOT_PRESSED_ID;
+    uint8_t button_present = 0;
+
+//     if (pCONT_pins->PinUsed(GPIO_KEY1_ID, id)) {
+//       button_present = 1;
+// // #ifdef ESP32
+// // #ifndef CONFIG_IDF_TARGET_ESP32C3
+// //       if (bitRead(Button.touch_mask, id)) {          // Touch
+// //         uint32_t _value = touchRead(Pin(GPIO_KEY1_ID, id));
+// //         state = NOT_PRESSED;
+// //         if (_value != 0) {                                     // Probably read-error
+// //           if (_value < TOUCH_BUTTON.pin_threshold) {
+// //             if (++Button.touch_hits[id] > TOUCH_BUTTON.hit_threshold) {
+// //               if (!bitRead(TOUCH_BUTTON.calibration, id+1)) {
+// //                 state = PRESSED;
+// //               }
+// //             }
+// //           } else {
+// //             Button.touch_hits[id] = 0;
+// //           }
+// //         } else {
+// //           Button.touch_hits[id] = 0;
+// //         }
+// //         if (bitRead(TOUCH_BUTTON.calibration, id+1)) {
+// //           AddLog(LOG_LEVEL_INFO, PSTR("PLOT: %u, %u, %u,"), id+1, _value, Button.touch_hits[id]);  // Button number (1..4), value, continuous hits under threshold
+// //         }
+// //       } else
+// // #endif  // not ESP32C3
+// // #endif  // ESP32
+//       {                                                 // Normal button
+//         state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID, id)) != bitRead(Button.inverted_mask, id));
+//       }
+//     }
+    
+    if (pCONT_pins->PinUsed(GPIO_KEY1_ID, id)) {
+      button_present = 1;
+      state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_ID,id)) != bitRead(key_inverted, id));
+    }else
+    if (pCONT_pins->PinUsed(GPIO_KEY1_INV_ID, id)) {
+      button_present = 1;
+      state = (digitalRead(pCONT_pins->GetPin(GPIO_KEY1_INV_ID,id)) != bitRead(key_inverted, id));
+    }
+
+    
+    // ALOG_INF(PSTR("state =%d"), state);
+
+
+// #ifdef USE_ADC
+//     else if (PinUsed(GPIO_ADC_BUTTON, id)) {
+//       button_present = 1;
+//       state = AdcGetButton(Pin(GPIO_ADC_BUTTON, id));
+//     }
+//     else if (PinUsed(GPIO_ADC_BUTTON_INV, id)) {
+//       button_present = 1;
+//       state = AdcGetButton(Pin(GPIO_ADC_BUTTON_INV, id));
+//     }
+// #endif  // USE_ADC
+
+
+    if (button_present) 
+    {
+
+      /**
+       * @brief If button state has changed
+       **/
+      if (
+        (BUTTON_PRESSED_ID == state) && 
+        (BUTTON_NOT_PRESSED_ID == buttons[id].last_state)
+      ){
+
+        if(pCONT_set->Settings.flag_system.button_single) // SetOption13 (0) - Allow only single button press for immediate action
+        {           
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " D_IMMEDIATE), id, state, state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active" );          
+          // <length of data>,<state>,<type ie single/multi/hold><count>  
+          pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_PRESS_ID); // 1 press event
+        }
+        else
+        {
+          buttons[id].press_counter = (buttons[id].window_timer) ? buttons[id].press_counter +1 : 1;
+          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BUTTON "%d " D_MULTI_PRESS " %d"), id +1, buttons[id].press_counter);
+          buttons[id].window_timer = loops_per_second / 2;  // 0.5 second multi press window
+          // No immediate action here -- awaiting for multiple presses            
+        }
+              
+        #ifdef USE_MODULE_NETWORK_MQTT
+        mqtthandler_sensor_ifchanged.flags.SendNow = true;
+        #endif // USE_MODULE_NETWORK_MQTT     
+
+      } // if button state changed
+
+
+      /**
+       * @brief If the button is not pressed, keep the hold_timer count reset 
+       **/
+      if (BUTTON_NOT_PRESSED_ID == state) {
+        buttons[id].hold_timer = 0;
+      }
+      /**
+       * @brief If button is still held, then increment the hold timer and check if the timeout has been reached
+       * This will be called every buttonloop
+       **/
+      else 
+      {
+        buttons[id].hold_timer++;
+
+        if (pCONT_set->Settings.flag_system.button_single)
+        {           // SetOption13 (0) - Allow only single button press for immediate action
+        
+          if (buttons[id].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button held for factor times longer
+            // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_SETOPTION "13 0"));  // Disable single press only             // ExecuteCommand(scmnd, SRC_BUTTON); 
+          // <length of data>,<state>,<type ie single/multi/hold><count>  
+            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);
+          }
+        } 
+        else 
+        /**
+         * @brief Checking for a long press
+         **/
+        {
+
+          if (buttons[id].hold_timer == loops_per_second * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button hold
+            buttons[id].press_counter = 0;
+          
+            AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Changed : Level %d | %s " "LongPress of (%d) seconds"), id, state, state==BUTTON_PRESSED_ID?"ACTIVE":"Not Active", pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10 );            
+          
+            // 3 = button pressed state, presses of button, type is long press?
+            // <length of data>,<state>,<type ie single/multi/hold><count>  
+            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
+
+          }
+          // Long pressed not yet reached 
+          else {
+            if (pCONT_set->Settings.flag_system.button_restrict) {     // SetOption1 (0) - Control button multipress
+              if (buttons[id].hold_timer > loops_per_second * pCONT_set->Settings.setoption_255[P_HOLD_IGNORE] / 10) {
+                buttons[id].hold_timer = 0;     // Reset button hold counter to stay below hold trigger
+                buttons[id].press_counter = 0;  // Discard button press to disable functionality
+              }
+            } else {
+              if ((buttons[id].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10)) {  // SetOption32 (40) - Button held for factor times longer
+                buttons[id].press_counter = 0;
+                // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_RESET " 1"));
+                // ExecuteCommand(scmnd, SRC_BUTTON);                
+                ALOG_INF(PSTR(D_LOG_BUTTONS D_CMND_RESET " 1"));                
+                pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
+              }
+            }
+          }
+        } // if (pCONT_set->Settings.flag_system.button_single)
+      }
+
+    #ifdef ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
+      if (!pCONT_set->Settings.flag_system.button_single) {            // SetOption13 (0) - Allow multi-press
+        if (buttons[id].window_timer) {
+          buttons[id].window_timer--;
+        } else {
+
+          /**
+           * @brief Hold timer is counting (pressed) and press count is within range
+           * */
+          if (
+            !pCONT_set->restart_flag && 
+            !buttons[id].hold_timer && 
+            (buttons[id].press_counter > 0) && (buttons[id].press_counter < 7)
+          ){
+            /**
+             * @brief What to do with multiple key presses
+             **/
+            // <length of data>,<state>,<type ie single/multi/hold><count>  
+            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
+
+            buttons[id].press_counter = 0;
+          }
+        }
+      }
+      #endif // ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
+
+    }
+    buttons[id].last_state = state;
+  }
+}
+
+#endif // ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
+
+
+
 
 void mButtons::ButtonLoop(void)
 {
@@ -451,40 +673,5 @@ char* mButtons::IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen){
 
 
 
-
-/*********************************************************************************************************************************************
-******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-uint8_t mButtons::ConstructJSON_Settings(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
-  return JsonBuilderI->End();
-
-}
-
-uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
-
-  JsonBuilderI->Start();
-    // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
-
-    JBI->Level_Start("ButtonPressed");
-      JBI->Add("IsButtonActiveCtr", buttons[0].isactive);
-    JBI->Level_End();
-
-    JBI->Add("pin",    buttons[0].pin);
-    JBI->Add("dpin",   digitalRead(buttons[0].pin));
-    JBI->Array_Start("bit_set_invert");
-      for(int i=0;i<MAX_KEYS;i++){ JBI->Add(bitRead(key_inverted, i)); }
-    JBI->Array_End();
-    JBI->Array_Start("state");
-      for(int i=0;i<MAX_KEYS;i++){ JBI->Add(buttons[i].state); }
-    JBI->Array_End();
-
-  return JsonBuilderI->End();
-
-}
 
 #endif
