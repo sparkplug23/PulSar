@@ -107,6 +107,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     #ifdef ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES    
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
       MQTT_Report_Event_Button();
+      break;
     #endif
     /************
      * RULES SECTION * 
@@ -194,7 +195,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
     //Get any sensors in module
     uint8_t sensors_available = pmod->GetSensorCount();
 
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetSensorCount =%d\t%s"),sensors_available,pmod->GetModuleFriendlyName());
+    ALOG_DBM( PSTR("GetSensorCount =%d\t%s"),sensors_available,pmod->GetModuleFriendlyName());
 
     if(sensors_available)
     {
@@ -459,7 +460,9 @@ void mSensorsInterface::MQTT_Report_Event_Button()
   /**
    * If event was serviced, then clear it
    * */
-  pCONT_rules->Reset(&pCONT_rules->event_triggered);
+  #ifndef ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
+  pCONT_rules->Reset(&pCONT_rules->event_triggered);  // I need to remember the last event, so simply use another flag outside of the struct as waiting and clear that if needed
+  #endif 
 
 }
 

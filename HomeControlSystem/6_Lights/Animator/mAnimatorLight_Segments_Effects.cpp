@@ -268,7 +268,7 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
  * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rotating_Palette()
+void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 {
 
   _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
@@ -366,7 +366,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rotating_Palette(
  * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palette()
+void mAnimatorLight::SubTask_Segment_Animation__Sequential_Palette()
 {
 
   uint8_t segment_index = segment_active_index;
@@ -494,19 +494,113 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sequential_Palett
 }
 
 
+#ifdef ENABLE_EXTRA_EFFECTS_SUNPOSITIONS 
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : Sequential
+ * @name : SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend
  * @note : Randomly changes colours of pixels, and blends to the new one
+ *  
+ * Best to develop this with 12 pixel ring, esp32
+ * Start with RGPBO palette
  * 
- * @param : "rate_ms" : How often it changes
- * @param : "time_ms" : How often it changes
- * @param : "pixels to update" : How often it changes
- * @param : "rate_ms" : How often it changes 
+ * Add test command cpp file, that lets me set anything in struct for development with mqtt. Only include in development build
+ * 
+ * Step 1: Scale palette progress with elevation (manual) 
+ * Step 2: Use user defined max/min elevations, or, enable suns max/min of the day (is this directly in the math, or does it need to be calculated? perhaps at midnight for the next day)
+ *         Save as uint16_t as it uses less memory than float, ie 12.34 will be 1234, what about minus, signed int16_t gives 32k +-, for only 2 decimel places, this is enough is +/-32768 can store 327.68 
+ * 
  * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step()
+{
+
+// for sun thing
+// I will still use this function to get the raw colour, I just need another intermediate function that does the conversion with sun elevation
+// also add sun elevation and azimuth into settings struct, that way I can update it locally or via command 
+
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
+
+  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
+  
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
+  
+  // Pick new colours
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
+  // Check if output multiplying has been set, if so, change desiredcolour array
+  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend
+ * @note : Randomly changes colours of pixels, and blends to the new one
+ *  
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend()
+{
+
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
+
+  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
+  
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
+  
+  // Pick new colours
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
+  // Check if output multiplying has been set, if so, change desiredcolour array
+  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+
+
 
 // /**************************************************************************************************************************************************************
 //  * @brief  Solid_Colour_Based_On_Sun_Elevation_02
@@ -839,6 +933,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 }
 
 
+#endif // ENABLE_EXTRA_EFFECTS_SUNPOSITIONS 
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -1009,14 +1104,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
  ********************************************************************************************************************************************************************************************************************/
 
 
-
 #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
-
-// #define hour(t) pCONT_time->RtcTime.hour
-// // #define minute(t) pCONT_time->minute(t) // pCONT_time->RtcTime.minute
-// #define second(t) pCONT_time->RtcTime.second
-// #define hourFormat12(t) (1)
-
 
 //add "LCDDisplay_" to relevant functions
 void mAnimatorLight::LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing) {
@@ -1085,35 +1173,27 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
   }
 }
 
-//tmp method
-RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness){
-
-  //tmp fix, colour index not working with mine, I need to modulu it with palette size so it repeats along its length
-  // mPaletteI->GetPalettePointerByID(palette_id)
-
-  // AddLog(LOG_LEVEL_TEST, PSTR("desired_index=%d"), desired_index);
-
+/**
+ * @brief Temporary method: Normal getcolour should work, but needs to include wrap functionality ie when index exceeds size then repeat pattern
+ * 
+ * @param palette_id 
+ * @param desired_index 
+ * @param apply_global_brightness 
+ * @return RgbcctColor 
+ */
+RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness)
+{
   
   mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
 
   uint8_t pixels_max = mPaletteI->GetPixelsInMap(ptr);
 
-  if(desired_index > pixels_max){
+  if(desired_index >= pixels_max){
     desired_index %= pixels_max;
+    // ALOG_INF(PSTR("desired_index2 = %d"), desired_index);
   }
   
-
   RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(palette_id), desired_index);
-
-  // switch(desired_index){
-  //   case 0: colour = RgbcctColor(255,0,0,0,0); break;
-  //   case 1: colour = RgbcctColor(0,255,0,0,0); break;
-  //   case 2: colour = RgbcctColor(0,0,255,0,0); break;
-  //   case 3: colour = RgbcctColor(255,0,255,0,0); break;
-  //   case 4: colour = RgbcctColor(0,255,255,0,0); break;
-  //   default:
-  //   case 5: colour = RgbcctColor(255,255,255,255,255); break;
-  // }
 
   if(apply_global_brightness){
     pCONT_iLight->ApplyGlobalBrightnesstoColour(&colour);
@@ -1154,248 +1234,67 @@ void mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
 }
 
 /****
- * Changes pixels randomly to new colour, with slow blending
- * Requires new colour calculation each call
+ * @brief Basic clock with no animations
  */
 void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
 {
 
-  // Serial.println("here");
+  AddLog(LOG_LEVEL_TEST, PSTR("_segments[%d].colour_type = %d"), segment_active_index, _segments[segment_active_index].colour_type);
 
+    
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
 
+  ALOG_DBM(PSTR("dataSize = %d"), dataSize);
 
-  // // So colour region does not need to change each loop to prevent colour crushing
-  // pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-  // // Pick new colours
-  // //Display on all pixels
-  // UpdateDesiredColourFromPaletteSelected();
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    ALOG_ERR(PSTR("Not Enough Memory"));
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
 
-  // HsbColor colour_in = HsbColor(RgbColor(0));
-
-  // animation_colours[0].DesiredColour = RgbcctColor(0,0,255,255,255);
-
-  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
-
-  // //test method
-  // // animation_colours[0].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // // animation_colours[1].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // // animation_colours[2].DesiredColour = RgbcctColor(0,0,255,0,0);
-
-  // // animation_colours[3].DesiredColour = RgbcctColor(0,255,0,0,0);
-  // // animation_colours[4].DesiredColour = RgbcctColor(0,255,0,0,0);
-  // // animation_colours[5].DesiredColour = RgbcctColor(0,255,0,0,0);
-
-
-
-  // animation_colours[0].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[22].DesiredColour = RgbcctColor(0,255,0,0,0);
-  // animation_colours[44].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // animation_colours[49].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[71].DesiredColour = RgbcctColor(0,255,0,0,0);
-
-
-
-  // /**
-  //  *     A
-  //  *  F     B
-  //  *     G
-  //  *  E     C
-  //  *     D
-  //  * */
-
-  // // 7-segment, 1/4, A
-  // animation_colours[13].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[14].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[15].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 1/4, B
-  // animation_colours[16].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[17].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[18].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 1/4, C
-  // animation_colours[0].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[1].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[2].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 1/4, D
-  // animation_colours[3].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[4].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[5].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 1/4, E
-  // animation_colours[6].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[7].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[8].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 1/4, F
-  // animation_colours[10].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[11].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[12].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 1/4, G
-  // animation_colours[19].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[20].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[21].DesiredColour = RgbcctColor(255,0,0,0,0);
-
-
-  // // 7-segment, 2/4, A
-  // animation_colours[35].DesiredColour = RgbcctColor(255,255,0,0,0);
-  // animation_colours[36].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[37].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 2/4, B
-  // animation_colours[32].DesiredColour = RgbcctColor(255,255,0,0,0);
-  // animation_colours[33].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[34].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 2/4, C
-  // animation_colours[28].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[29].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[30].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 2/4, D
-  // animation_colours[25].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[26].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[27].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 2/4, E
-  // animation_colours[22].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[23].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[24].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 2/4, F
-  // animation_colours[38].DesiredColour = RgbcctColor(255,255,0,0,0);
-  // animation_colours[39].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[40].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 2/4, G
-  // animation_colours[41].DesiredColour = RgbcctColor(255,255,0,0,0);
-  // animation_colours[42].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[43].DesiredColour = RgbcctColor(255,0,0,0,0);
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
   
-  // // Colon, 1/1, top
-  // animation_colours[44].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // animation_colours[45].DesiredColour = RgbcctColor(0,0,255,0,0);
-  // // Colon, 1/1, bottom
-  // animation_colours[47].DesiredColour = RgbcctColor(255,0,255,0,0);
-  // animation_colours[48].DesiredColour = RgbcctColor(255,0,255,0,0);
+  // Will only work with first segment
+  uint8_t segment_index=0;
+
+  for(int i=0;i<93;i++){
+    SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].data, _segment_runtimes[segment_index]._dataLen, i, _segments[segment_active_index].colour_type, RgbwColor(0,0,0,0));
+  }
+
+  // if(tempcol++>5){
+    tempcol=0;
+    // } //startcolour
+
+  AddLog(LOG_LEVEL_TEST, PSTR("tempcol=%d"), tempcol);
+
+  LCDDisplay_updateDisplay(tempcol, colorOffset);
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+  this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
+    [this](void){
+      this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
+    }
+  );
+
+}
+
+void mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01()
+{   
   
-
-  // // 7-segment, 3/4, A
-  // animation_colours[84].DesiredColour = RgbcctColor(255,100,0,0,0);
-  // animation_colours[85].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[86].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 3/4, B
-  // animation_colours[87].DesiredColour = RgbcctColor(255,100,100,0,0);
-  // animation_colours[88].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[89].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 3/4, C
-  // animation_colours[71].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[72].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[73].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 3/4, D
-  // animation_colours[74].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[75].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[76].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 3/4, E
-  // animation_colours[77].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[78].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[79].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 3/4, F
-  // animation_colours[81].DesiredColour = RgbcctColor(255,100,0,0,0);
-  // animation_colours[82].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[83].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 3/4, G
-  // animation_colours[90].DesiredColour = RgbcctColor(255,100,100,0,0);
-  // animation_colours[91].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[92].DesiredColour = RgbcctColor(255,0,0,0,0);
-
-
-  // // 7-segment, 4/4, A
-  // animation_colours[62].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[63].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[64].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 4/4, B
-  // animation_colours[59].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[60].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[61].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 4/4, C
-  // animation_colours[55].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[56].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[57].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 4/4, D
-  // animation_colours[52].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[53].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[54].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 4/4, E
-  // animation_colours[49].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[50].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[51].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 4/4, F
-  // animation_colours[65].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[66].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[67].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // // 7-segment, 4/4, G
-  // animation_colours[68].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[69].DesiredColour = RgbcctColor(255,0,0,0,0);
-  // animation_colours[70].DesiredColour = RgbcctColor(255,0,0,0,0);
-
-
-
-
-//   for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
-
-//       uint16_t tempnumber = testnum;
-
-//       // if(tempnumber%2){
-//       //   showDots();
-//       // }
-//       if ( pCONT_time->second(0) % 2 == 0 ) LCDDisplay_showDots(2, pCONT_time->second(0) * 4.25);  
-
-
-//       LCDDisplay_showDigit(
-//         (tempnumber/1)%10,
-//          64, 0);
-//       LCDDisplay_showDigit(
-//       (tempnumber/10)%10,
-//          64, 1);
-//       LCDDisplay_showDigit(
-//         (tempnumber/100)%10,
-//          64, 2);
-//       LCDDisplay_showDigit(
-//         (tempnumber/1000)%10,
-//          64, 3);
-
-
-//       // showDigit(11, 64, 2);
-//       // showDigit(12, 64, 1);
-
-// if(testnum++>9999){testnum=0;}
-
-
-
+  JBI->Add("lcd_display_show_number", lcd_display_show_number);
   
-//  #ifndef USE_WS28XX_FEATURE_4_PIXEL_TYPE
-//   //Overwrite random brightness on special range
-//   for(uint16_t index=256;index<300;index++){
-
-//     colour_in = animation_colours[index].DesiredColour;
-
-//     if(colour_in.B==0){ //if colour was off, I need to set the colour to a defined value or it willl turn up brightness to show white
-//       colour_in.H = 0.0f;
-//       colour_in.S = 1.0f;
-//     }
-//     colour_in.B = pCONT_iLight->BrtN2F(random(0,10)*10);
-
-//     // colour_in.H = pCONT_iLight->BrtN2F(random(0,100));
-  
-//     animation_colours[random(256,299)].DesiredColour = colour_in;
-
-//     // animation_colours[random(40,49)].DesiredColour = colour_in;
-
-//   }
-  
-// #endif 
-
-  // // Check if output multiplying has been set, if so, change desiredcolour array
-  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
-  // // Get starting positions already on show
-  // UpdateStartingColourWithGetPixel();
-  // // Call the animator to blend from previous to new
-  // this->setAnimFunctionCallback(
-  //   [this](const AnimationParam& param){
-  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
-  //   }
-  // );
 }
 
 
@@ -1457,19 +1356,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
 //   UpdateDesiredColourFromPaletteSelected();
   pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_SK6812;
     
-    // THIS IS WRONG
-  // switch(pCONT_set->Settings.light_settings.type)
-  // {
-  //   default:
-  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; break;
-  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID: _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID; break;
-  //   // case LST_RGBW: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
-  //   // case LST_RGBCCT: _segments[segment_active_index].colour_type = COLOUR_TYPE_RGBW_ID; break;
-  // }
-
   _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID;
   
-  AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].colour_type = %d"), _segments[segment_active_index].colour_type);
+  AddLog(LOG_LEVEL_TEST, PSTR("02    _segments[segment_active_index].colour_type = %d"), _segments[segment_active_index].colour_type);
 
     
   uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
@@ -1525,6 +1414,12 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+  this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
+    [this](void){
+      this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
     }
   );
 
@@ -1662,6 +1557,12 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
 //   );
 }
 
+void mAnimatorLight::ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02()
+{   
+  
+  JBI->Add("lcd_display_show_number", lcd_display_show_number);
+  
+}
 
 
 /****
@@ -1669,32 +1570,17 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
  * Requires new colour calculation each call
  * 02 trying lib method with mapping
  */
-void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01(){
-  // // So colour region does not need to change each loop to prevent colour crushing
-  // pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
-  // // Pick new colours
-  // //Display on all pixels
-  // UpdateDesiredColourFromPaletteSelected();
-
-  // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
-
-  // lcd_display_show_number = 3;
+void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
+{
   
-  // LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
-  // LCDDisplay_showDigit((lcd_display_show_number % 10), 0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  AddLog(LOG_LEVEL_TEST, PSTR("Numbers_Basic    _segments[].colour_type = %d"), _segments[segment_active_index].colour_type);
+  AddLog(LOG_LEVEL_TEST, PSTR("lcd_display_show_number = %d"), lcd_display_show_number);
+
+
   
 
-  // // Check if output multiplying has been set, if so, change desiredcolour array
-  // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
-  // // Get starting positions already on show
-  // UpdateStartingColourWithGetPixel();
-  // // Call the animator to blend from previous to new
-  // this->setAnimFunctionCallback(
-  //   [this](const AnimationParam& param){
-  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend(param);
-  //   }
-  // );
-
+  _segments[segment_active_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+    
 
 
   
@@ -1747,10 +1633,12 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
     }
   );
 
-
-
-
 }
+
+
+
+
+
 #endif // ENABLE_DEVFEATURE_RGB_CLOCK
 
 
@@ -1946,7 +1834,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //         );
 
 //         if(flashersettings.flags.force_finish_flasher_pair_once){
-//           AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           ALOG_DBM( PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
 //           flashersettings.flags.force_finish_flasher_pair_once = false;
 //         }
         
@@ -2159,7 +2047,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //         );
 
 //         if(flashersettings.flags.force_finish_flasher_pair_once){
-//           AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           ALOG_DBM( PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
 //           flashersettings.flags.force_finish_flasher_pair_once = false;
 //         }
         
@@ -2312,7 +2200,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //         }
 
 //         if(flashersettings.flags.force_finish_flasher_pair_once){
-//           AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
+//           ALOG_DBM( PSTR("flashersettings.flags.force_finish_flasher_pair_once WAS SET"));
 //           flashersettings.flags.force_finish_flasher_pair_once = false;
 //         }
 //       break;
@@ -4995,7 +4883,7 @@ typedef struct Spark {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-// void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static()
+// void mAnimatorLight::SubTask_Segment_Animation__Static()
 // {
 //   uint8_t segment_index  = segment_active_index;
 //   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5034,7 +4922,7 @@ typedef struct Spark {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern()
+void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5085,7 +4973,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Tri_Static_Patter
 *******************************************************************************************************************************************************************************************************************
 ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(bool rev, bool useRandomColors)
+void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, bool useRandomColors)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5159,9 +5047,9 @@ void mAnimatorLight::BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_W
 // void mAnimatorLight::mode_color_wipe(void) { // the default calls directly
 //   return color_wipe(false, false);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Wipe()
+void mAnimatorLight::SubTask_Segment_Animation__Colour_Wipe()
 {
-  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(false, false);
+  BaseSubTask_Segment_Animation__Base_Colour_Wipe(false, false);
 }
 
 // /*
@@ -5172,9 +5060,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Wipe()
 //   return color_wipe(false, true);
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random()
+void mAnimatorLight::SubTask_Segment_Animation__Colour_Wipe_Random()
 {
-  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(false, true);
+  BaseSubTask_Segment_Animation__Base_Colour_Wipe(false, true);
 }
 
 
@@ -5184,9 +5072,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Rando
 // void mAnimatorLight::mode_color_sweep(void) {
 //   return color_wipe(true, false);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Sweep()
+void mAnimatorLight::SubTask_Segment_Animation__Colour_Sweep()
 {
-  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(true, false);
+  BaseSubTask_Segment_Animation__Base_Colour_Wipe(true, false);
 }
 
 
@@ -5196,9 +5084,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Sweep()
 // void mAnimatorLight::mode_color_sweep_random(void) {
 //   return color_wipe(true, true);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random()
+void mAnimatorLight::SubTask_Segment_Animation__Colour_Sweep_Random()
 {
-  BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(true, true);
+  BaseSubTask_Segment_Animation__Base_Colour_Wipe(true, true);
 }
 
 
@@ -5367,7 +5255,7 @@ void mAnimatorLight::seg_fill_ranged(uint32_t c)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5453,9 +5341,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32
 //   return chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Colour()
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Colour()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
+  SubTask_Segment_Animation__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), true);
 }
 
 
@@ -5467,9 +5355,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Colour()
 //   return chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), false);
 // }
 
-// void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Random()
+// void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
 // {
-//   SubTask_Segment_Flasher_Animate_Function__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), false);
+//   SubTask_Segment_Animation__Base_Chase(SEGCOLOR(1), (SEGCOLOR(2)) ? SEGCOLOR(2) : SEGCOLOR(0), SEGCOLOR(0), false);
 // }
 
 /*
@@ -5478,7 +5366,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Colour()
 // void mAnimatorLight::mode_chase_rainbow(void) {
 //   return chase();
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow()
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5489,7 +5377,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow()
   uint8_t color_index = _segment_runtimes[segment_active_index].call & 0xFF;
   uint32_t color = color_wheel(((_segment_runtimes[segment_active_index].step * color_sep) + color_index) & 0xFF);
 
-  SubTask_Segment_Flasher_Animate_Function__Base_Chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
+  SubTask_Segment_Animation__Base_Chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
 }
 
 
@@ -5514,7 +5402,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Flash()
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash()
 // Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
 {
   uint8_t segment_index  = segment_active_index;
@@ -5565,7 +5453,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Flash()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Random()
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5618,7 +5506,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Rando
 
 //   return chase(SEGCOLOR(0), color2, color3, false);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_White()
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow_White()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5631,7 +5519,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_Whi
   uint32_t color2 = color_wheel(((n * 256 / segment_length) + (_segment_runtimes[segment_active_index].call & 0xFF)) & 0xFF);
   uint32_t color3 = color_wheel(((m * 256 / segment_length) + (_segment_runtimes[segment_active_index].call & 0xFF)) & 0xFF);
 
-  SubTask_Segment_Flasher_Animate_Function__Base_Chase(SEGCOLOR(0), color2, color3, false);
+  SubTask_Segment_Animation__Base_Chase(SEGCOLOR(0), color2, color3, false);
 }
 
 
@@ -5647,7 +5535,7 @@ void mAnimatorLight::theater_chase(uint32_t color1, uint32_t color2, bool do_pal
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette)
 {
 
   uint8_t segment_index  = segment_active_index;
@@ -5687,8 +5575,8 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theate
  * Theatre-style crawling lights.
  * Inspired by the Adafruit examples.
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Theater(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(SEGCOLOR(0), SEGCOLOR(1), true);
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Theater(void) {
+  return SubTask_Segment_Animation__Base_Chase_Theater(SEGCOLOR(0), SEGCOLOR(1), true);
 }
 
 
@@ -5696,7 +5584,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Theater(voi
  * Theatre-style crawling lights with rainbow effect.
  * Inspired by the Adafruit examples.
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rainbow(void) {
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Theatre_Rainbow(void) {
   
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5705,7 +5593,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rai
   _virtualSegmentLength = segment_length;
 
 
-  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(color_wheel(_segment_runtimes[segment_active_index].step), SEGCOLOR(1), false);
+  return SubTask_Segment_Animation__Base_Chase_Theater(color_wheel(_segment_runtimes[segment_active_index].step), SEGCOLOR(1), false);
 }
 
 
@@ -5723,7 +5611,7 @@ void mAnimatorLight::tricolor_chase(uint32_t color1, uint32_t color2) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(uint32_t color1, uint32_t color2)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t color1, uint32_t color2)
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -5757,9 +5645,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriCol
 /*
  * Tricolor chase mode
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_TriColour(void) {
+void mAnimatorLight::SubTask_Segment_Animation__Chase_TriColour(void) {
 
-  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(SEGCOLOR(2), SEGCOLOR(0));
+  return SubTask_Segment_Animation__Base_Chase_TriColour(SEGCOLOR(2), SEGCOLOR(0));
 }
 
 
@@ -5777,7 +5665,7 @@ void mAnimatorLight::mode_random_chase(void)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Random()
+void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -5810,8 +5698,8 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chase_Random()
 /*
  * Alternating white/red/black pixels running. PLACEHOLDER
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Circus_Combustus(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(RED, WHITE);
+void mAnimatorLight::SubTask_Segment_Animation__Circus_Combustus(void) {
+  return SubTask_Segment_Animation__Base_Chase_TriColour(RED, WHITE);
 }
 
 
@@ -5837,7 +5725,7 @@ void mAnimatorLight::mode_breath(void) {
  ********************************************************************************************************************************************************************************************************************/
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Breath()
+void mAnimatorLight::SubTask_Segment_Animation__Breath()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -5879,7 +5767,7 @@ void mAnimatorLight::mode_fade(void) {
  ********************************************************************************************************************************************************************************************************************/
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade()
+void mAnimatorLight::SubTask_Segment_Animation__Fade()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6038,7 +5926,7 @@ void mAnimatorLight::fade_out(uint8_t rate)
  @param aux1 Previous location of center index of firework
  @param aux2 Iter to wrap palette
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks()
+void mAnimatorLight::SubTask_Segment_Animation__Fireworks()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6122,7 +6010,7 @@ typedef struct particle {
   float    fragment[STARBURST_MAX_FRAG];
 } star;
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst()
+void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6262,7 +6150,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fireworks_Starbur
  ********************************************************************************************************************************************************************************************************************/
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks()
+void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6410,7 +6298,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Exploding_Firewor
 
 
 //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rain() // Firework_Rain
+void mAnimatorLight::SubTask_Segment_Animation__Rain() // Firework_Rain
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -6440,7 +6328,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rain() // Firewor
   
   _segment_runtimes[segment_active_index].animation_has_anim_callback = false; // When no animation callback is needed
 
-  SubTask_Segment_Flasher_Animate_Function__Fireworks();
+  SubTask_Segment_Animation__Fireworks();
 
 
   // StripUpdate();
@@ -6474,7 +6362,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rain() // Firewor
 
 
 //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle() // Firework_Rain
+void mAnimatorLight::SubTask_Segment_Animation__Sparkle() // Firework_Rain
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -6520,7 +6408,7 @@ void mAnimatorLight::mode_flash_sparkle(void) {
  ********************************************************************************************************************************************************************************************************************/
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash() // Firework_Rain
+void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Flash() // Firework_Rain
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -6551,12 +6439,12 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash() /
  * Like flash sparkle. With more flash.
  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
  *
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper(void) {
+void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Hyper(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
 //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper() // Firework_Rain
+void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Hyper() // Firework_Rain
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -6604,7 +6492,7 @@ void mAnimatorLight::mode_twinkleup(void) {                 // A very short twin
  ********************************************************************************************************************************************************************************************************************/
 
 //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Up() // Firework_Rain
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Up() // Firework_Rain
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -6642,7 +6530,7 @@ random16_set_seed(535);                                 // The randomizer needs 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Random_Colour()
+void mAnimatorLight::SubTask_Segment_Animation__Random_Colour()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6695,7 +6583,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Random_Colour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dynamic()
+void mAnimatorLight::SubTask_Segment_Animation__Dynamic()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6745,7 +6633,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dynamic()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle()
+void mAnimatorLight::SubTask_Segment_Animation__Rainbow_Cycle()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6784,7 +6672,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Running(bool saw)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6825,9 +6713,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Running(bool
 //   return running_base(false);
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Lights()
+void mAnimatorLight::SubTask_Segment_Animation__Running_Lights()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Running(false);
+  SubTask_Segment_Animation__Base_Running(false);
 }
 
 // /*
@@ -6837,9 +6725,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Lights()
 //   return running_base(true);
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Saw()
+void mAnimatorLight::SubTask_Segment_Animation__Saw()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Running(true);
+  SubTask_Segment_Animation__Base_Running(true);
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -6851,7 +6739,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Saw()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle()
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6905,7 +6793,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(uint32_t color)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Dissolve(uint32_t color)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -6963,9 +6851,9 @@ uint8_t _brightness = 255;
 //   return dissolve(SEGCOLOR(0));
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dissolve()
+void mAnimatorLight::SubTask_Segment_Animation__Dissolve()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(SEGCOLOR(0));
+  SubTask_Segment_Animation__Base_Dissolve(SEGCOLOR(0));
 }
 
 
@@ -6976,9 +6864,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dissolve()
 //   return dissolve(color_wheel(random8()));
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dissolve_Random()
+void mAnimatorLight::SubTask_Segment_Animation__Dissolve_Random()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(color_wheel(random8()));
+  SubTask_Segment_Animation__Base_Dissolve(color_wheel(random8()));
 }
 
 
@@ -6998,7 +6886,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Dissolve_Random()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Android()
+void mAnimatorLight::SubTask_Segment_Animation__Android()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7072,7 +6960,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Android()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ColourFul()
+void mAnimatorLight::SubTask_Segment_Animation__ColourFul()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7142,7 +7030,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ColourFul()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Traffic_Light()
+void mAnimatorLight::SubTask_Segment_Animation__Traffic_Light()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7194,7 +7082,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Traffic_Light()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Running(uint32_t color1, uint32_t color2)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7234,30 +7122,30 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Running(uint
 /*
  * Alternating red/blue pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Running(RED, BLUE);
+void mAnimatorLight::SubTask_Segment_Animation__Running_Red_Blue(void) {
+  return SubTask_Segment_Animation__Base_Running(RED, BLUE);
 }
 
 /*
  * Alternating color/sec pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Colour(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Running(SEGCOLOR(0), SEGCOLOR(1));
+void mAnimatorLight::SubTask_Segment_Animation__Running_Colour(void) {
+  return SubTask_Segment_Animation__Base_Running(SEGCOLOR(0), SEGCOLOR(1));
 }
 
 /*
  * Alternating red/green pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Merry_Christmas(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Running(RED, GREEN);
+void mAnimatorLight::SubTask_Segment_Animation__Merry_Christmas(void) {
+  return SubTask_Segment_Animation__Base_Running(RED, GREEN);
 }
 
 
 /*
  * Alternating orange/purple pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Halloween(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Running(PURPLE, ORANGE);
+void mAnimatorLight::SubTask_Segment_Animation__Halloween(void) {
+  return SubTask_Segment_Animation__Base_Running(PURPLE, ORANGE);
 }
 
 
@@ -7275,7 +7163,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Halloween(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Random()
+void mAnimatorLight::SubTask_Segment_Animation__Running_Random()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7327,7 +7215,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Running_Random()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Gradient(bool loading)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7365,16 +7253,16 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Gradient(boo
 /*
  * Gradient run
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Gradient(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Gradient(false);
+void mAnimatorLight::SubTask_Segment_Animation__Gradient(void) {
+  return SubTask_Segment_Animation__Base_Gradient(false);
 }
 
 
 /*
  * Gradient run with hard transition
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Loading(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Gradient(true);
+void mAnimatorLight::SubTask_Segment_Animation__Loading(void) {
+  return SubTask_Segment_Animation__Base_Gradient(true);
 }
 
 
@@ -7391,7 +7279,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Loading(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Police(uint32_t color1, uint32_t color2, bool all)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Police(uint32_t color1, uint32_t color2, bool all)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7442,35 +7330,35 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Police(uint3
 
 
 //American Police Light with all LEDs Red and Blue 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Polce_All()
+void mAnimatorLight::SubTask_Segment_Animation__Polce_All()
 {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Police(RED, BLUE, true);
+  return SubTask_Segment_Animation__Base_Police(RED, BLUE, true);
 }
 
 
 //Police Lights Red and Blue 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Police()
+void mAnimatorLight::SubTask_Segment_Animation__Police()
 {
   fill(SEGCOLOR(1));
 
-  return SubTask_Segment_Flasher_Animate_Function__Base_Police(RED, BLUE, false);
+  return SubTask_Segment_Animation__Base_Police(RED, BLUE, false);
 }
 
 
 //Police All with custom colors
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Two_Areas()
+void mAnimatorLight::SubTask_Segment_Animation__Two_Areas()
 {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Police(SEGCOLOR(0), SEGCOLOR(1), true);
+  return SubTask_Segment_Animation__Base_Police(SEGCOLOR(0), SEGCOLOR(1), true);
 }
 
 
 //Police Lights with custom colors 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Two_Dots()
+void mAnimatorLight::SubTask_Segment_Animation__Two_Dots()
 {
   fill(SEGCOLOR(2));
   uint32_t color2 = (SEGCOLOR(1) == SEGCOLOR(2)) ? SEGCOLOR(0) : SEGCOLOR(1);
 
-  return SubTask_Segment_Flasher_Animate_Function__Base_Police(SEGCOLOR(0), color2, false);
+  return SubTask_Segment_Animation__Base_Police(SEGCOLOR(0), color2, false);
 }
 
 #endif // ENABLE_EXTRA_WLED_EFFECTS
@@ -7492,7 +7380,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Two_Dots()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__TriColour()
+void mAnimatorLight::SubTask_Segment_Animation__TriColour()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7555,7 +7443,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__TriColour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade_TriColour()
+void mAnimatorLight::SubTask_Segment_Animation__Fade_TriColour()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7616,7 +7504,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade_TriColour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Multi_Comet()
+void mAnimatorLight::SubTask_Segment_Animation__Multi_Comet()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7691,7 +7579,7 @@ typedef struct Oscillator {
   int8_t  speed;
 } oscillator;
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Oscillate()
+void mAnimatorLight::SubTask_Segment_Animation__Oscillate()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7781,7 +7669,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Oscillate()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Pride_2015()
+void mAnimatorLight::SubTask_Segment_Animation__Pride_2015()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7845,7 +7733,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Pride_2015()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Juggle()
+void mAnimatorLight::SubTask_Segment_Animation__Juggle()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7881,7 +7769,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Juggle()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Palette()
+void mAnimatorLight::SubTask_Segment_Animation__Palette()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -7956,7 +7844,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ColourWaves()
+void mAnimatorLight::SubTask_Segment_Animation__ColourWaves()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8026,7 +7914,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ColourWaves()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__BPM()
+void mAnimatorLight::SubTask_Segment_Animation__BPM()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8062,7 +7950,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__BPM()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour()
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Colour()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8138,7 +8026,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Lake()
+void mAnimatorLight::SubTask_Segment_Animation__Lake()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8179,7 +8067,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Lake()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Meteor()
+void mAnimatorLight::SubTask_Segment_Animation__Meteor()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8236,7 +8124,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Meteor()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth()
+void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8305,7 +8193,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth()
 #define COOL_LIKE_INCANDESCENT 1
 
 
-CRGB mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
+CRGB mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8385,7 +8273,7 @@ CRGB mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(bool cat)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8430,7 +8318,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(
     // We now have the adjusted 'clock' for this pixel, now we call
     // the function that computes what color the pixel should be based
     // on the "brightness = f( time )" idea.
-    CRGB c = SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(myclock30, myunique8, cat);
+    CRGB c = SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(myclock30, myunique8, cat);
 
     uint8_t cbright = c.getAverageLight();
     int16_t deltabright = cbright - backgroundBrightness;
@@ -8454,14 +8342,14 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(
   StripUpdate();
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Fox()
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Fox()
 {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(false);
+  return SubTask_Segment_Animation__Base_Twinkle_Fox(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat()
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Cat()
 {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(true);
+  return SubTask_Segment_Animation__Base_Twinkle_Fox(true);
 }
 
 
@@ -8478,7 +8366,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16_t threshold)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8524,7 +8412,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16
 //   return spots_base((255 - _segments[segment_active_index].speed()) << 8);
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Spots()
+void mAnimatorLight::SubTask_Segment_Animation__Spots()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8532,7 +8420,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Spots()
   uint16_t stop_pixel    = _segments[segment_active_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
 
-  SubTask_Segment_Flasher_Animate_Function__Base_Spots((255 - _segments[segment_active_index].speed()) << 8);
+  SubTask_Segment_Animation__Base_Spots((255 - _segments[segment_active_index].speed()) << 8);
 }
 
 
@@ -8541,7 +8429,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Spots()
 // {
 // }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade_Spots()
+void mAnimatorLight::SubTask_Segment_Animation__Fade_Spots()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -8553,7 +8441,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fade_Spots()
   uint16_t t = triwave16(counter);
   uint16_t tr = (t >> 1) + (t >> 2);
 //   return spots_base(tr);
-  SubTask_Segment_Flasher_Animate_Function__Base_Spots(tr);
+  SubTask_Segment_Animation__Base_Spots(tr);
 }
 
 
@@ -8569,7 +8457,7 @@ void mAnimatorLight::mode_glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Glitter()
+void mAnimatorLight::SubTask_Segment_Animation__Glitter()
 {
 
   uint8_t segment_index  = segment_active_index;
@@ -8606,7 +8494,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Popcorn()
+void mAnimatorLight::SubTask_Segment_Animation__Popcorn()
 {
 
   uint8_t segment_index  = segment_active_index;
@@ -8695,17 +8583,17 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Popcorn()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Single()
+void mAnimatorLight::SubTask_Segment_Animation__Candle_Single()
 {
-  SubTask_Segment_Flasher_Animate_Function__Candle_Base(false);
+  SubTask_Segment_Animation__Candle_Base(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Multi()
+void mAnimatorLight::SubTask_Segment_Animation__Candle_Multi()
 {
-  SubTask_Segment_Flasher_Animate_Function__Candle_Base(true);
+  SubTask_Segment_Animation__Candle_Base(true);
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi)
+void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
 {
 
   uint8_t segment_index = segment_active_index;
@@ -8903,7 +8791,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette()
+void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette()
 {
 
   uint8_t segment_index = segment_active_index;
@@ -9194,7 +9082,7 @@ This appear functionally identical to candle single, and I will likely delete it
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fire_Flicker()
+void mAnimatorLight::SubTask_Segment_Animation__Fire_Flicker()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9252,7 +9140,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fire_Flicker()
    @param useRandomColors 
 *******************************************************************************************************************************************************************************************************************
 ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Plasma()
+void mAnimatorLight::SubTask_Segment_Animation__Plasma()
 {
 
   uint8_t thisPhase = beatsin8(6,-64,64);                       // Setting phase change for a couple of waves.
@@ -9285,7 +9173,7 @@ void mAnimatorLight::mode_percent(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Percent()
+void mAnimatorLight::SubTask_Segment_Animation__Percent()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9373,7 +9261,7 @@ void mAnimatorLight::mode_bouncing_balls(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Pacifica()
+void mAnimatorLight::SubTask_Segment_Animation__Pacifica()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9489,7 +9377,7 @@ void mAnimatorLight::mode_solid_glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Solid_Glitter()
+void mAnimatorLight::SubTask_Segment_Animation__Solid_Glitter()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -9524,7 +9412,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Solid_Glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sunrise()
+void mAnimatorLight::SubTask_Segment_Animation__Sunrise()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -9597,7 +9485,7 @@ void mAnimatorLight::mode_sinewave(void) {             // Adjustable sinewave. B
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinewave()
+void mAnimatorLight::SubTask_Segment_Animation__Sinewave()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -9642,7 +9530,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinewave()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Flow()
+void mAnimatorLight::SubTask_Segment_Animation__Flow()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -9709,7 +9597,7 @@ void mAnimatorLight::mode_static(void)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static()
+void mAnimatorLight::SubTask_Segment_Animation__Static()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -9743,7 +9631,7 @@ void mAnimatorLight::mode_static_pattern()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static_Pattern()
+void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -9788,7 +9676,7 @@ void mAnimatorLight::mode_tri_static_pattern()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-// void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Static_Pattern()
+// void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
 // {
   
 //   uint8_t segment_index  = segment_active_index;
@@ -9840,7 +9728,7 @@ void mAnimatorLight::mode_tri_static_pattern()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9901,7 +9789,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink()
+void mAnimatorLight::SubTask_Segment_Animation__Blink()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9909,7 +9797,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink()
   uint16_t stop_pixel    = _segments[segment_active_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
   // return 
-  SubTask_Segment_Flasher_Animate_Function__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
+  SubTask_Segment_Animation__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
   
 }
 
@@ -9927,7 +9815,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow()
+void mAnimatorLight::SubTask_Segment_Animation__Blink_Rainbow()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9935,7 +9823,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow()
   uint16_t stop_pixel    = _segments[segment_active_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
   // return 
-  SubTask_Segment_Flasher_Animate_Function__Base_Blink(color_wheel(_segment_runtimes[segment_active_index].call & 0xFF), SEGCOLOR(1), false, false);
+  SubTask_Segment_Animation__Base_Blink(color_wheel(_segment_runtimes[segment_active_index].call & 0xFF), SEGCOLOR(1), false, false);
   
   
 }
@@ -9955,7 +9843,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe()
+void mAnimatorLight::SubTask_Segment_Animation__Strobe()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -9963,7 +9851,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe()
   uint16_t stop_pixel    = _segments[segment_active_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
   // return blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
-  SubTask_Segment_Flasher_Animate_Function__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
+  SubTask_Segment_Animation__Base_Blink(SEGCOLOR(0), SEGCOLOR(1), true, true);
 
 }
 
@@ -9982,7 +9870,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Multi()
+void mAnimatorLight::SubTask_Segment_Animation__Strobe_Multi()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10030,7 +9918,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Multi()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow()
+void mAnimatorLight::SubTask_Segment_Animation__Strobe_Rainbow()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10038,7 +9926,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow()
   uint16_t stop_pixel    = _segments[segment_active_index].pixel_range.stop;
   _virtualSegmentLength = segment_length;
   // return blink(color_wheel(_segment_runtimes[segment_active_index].call & 0xFF), SEGCOLOR(1), true, false);
-  SubTask_Segment_Flasher_Animate_Function__Base_Blink(color_wheel(_segment_runtimes[segment_active_index].call & 0xFF), SEGCOLOR(1), true, false);
+  SubTask_Segment_Animation__Base_Blink(color_wheel(_segment_runtimes[segment_active_index].call & 0xFF), SEGCOLOR(1), true, false);
 
 }
 
@@ -10051,7 +9939,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rainbow()
+void mAnimatorLight::SubTask_Segment_Animation__Rainbow()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10089,7 +9977,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Rainbow()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Lightning()
+void mAnimatorLight::SubTask_Segment_Animation__Lightning()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10158,7 +10046,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Lightning()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fire_2012()
+void mAnimatorLight::SubTask_Segment_Animation__Fire_2012()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10218,7 +10106,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Fire_2012()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Railway()
+void mAnimatorLight::SubTask_Segment_Animation__Railway()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10271,7 +10159,7 @@ void mAnimatorLight::mode_heartbeat(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Heartbeat()
+void mAnimatorLight::SubTask_Segment_Animation__Heartbeat()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10325,7 +10213,7 @@ void mAnimatorLight::mode_fillnoise8()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__FillNoise8()
+void mAnimatorLight::SubTask_Segment_Animation__FillNoise8()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10359,7 +10247,7 @@ void mAnimatorLight::mode_noise16_1()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_1()
+void mAnimatorLight::SubTask_Segment_Animation__Noise16_1()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10408,7 +10296,7 @@ void mAnimatorLight::mode_noise16_2()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_2()
+void mAnimatorLight::SubTask_Segment_Animation__Noise16_2()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10453,7 +10341,7 @@ void mAnimatorLight::mode_noise16_3()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_3()
+void mAnimatorLight::SubTask_Segment_Animation__Noise16_3()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10502,7 +10390,7 @@ void mAnimatorLight::mode_noise16_4()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise16_4()
+void mAnimatorLight::SubTask_Segment_Animation__Noise16_4()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10535,7 +10423,7 @@ void mAnimatorLight::mode_noisepal(void) {                                    //
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise_Pal()
+void mAnimatorLight::SubTask_Segment_Animation__Noise_Pal()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10596,7 +10484,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Noise_Pal()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8_t moder)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Phased(uint8_t moder)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10632,13 +10520,13 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8
 }
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__PhasedNoise(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Phased(1);
+void mAnimatorLight::SubTask_Segment_Animation__PhasedNoise(void) {
+  return SubTask_Segment_Animation__Base_Phased(1);
 }
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Phased(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Phased(0);
+void mAnimatorLight::SubTask_Segment_Animation__Phased(void) {
+  return SubTask_Segment_Animation__Base_Phased(0);
 }
 
 
@@ -10664,7 +10552,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Phased(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool dual)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Scan(bool dual)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10712,9 +10600,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool du
 // void mAnimatorLight::mode_scan(void) {
 //   return scan(false);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Scan()
+void mAnimatorLight::SubTask_Segment_Animation__Scan()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Scan(false);
+  SubTask_Segment_Animation__Base_Scan(false);
 }
 
 
@@ -10725,9 +10613,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Scan()
 // void mAnimatorLight::mode_dual_scan(void) {
 //   return scan(true);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Scan_Dual()
+void mAnimatorLight::SubTask_Segment_Animation__Scan_Dual()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Scan(true);
+  SubTask_Segment_Animation__Base_Scan(true);
 }
 
 
@@ -10743,7 +10631,7 @@ void mAnimatorLight::larson_scanner(bool dual) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(bool dual)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Larson_Scanner(bool dual)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10789,8 +10677,8 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scann
  * Creates two Larson scanners moving in opposite directions
  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/DualLarson.h
  */
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Dual(void){
-  return SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(true);
+void mAnimatorLight::SubTask_Segment_Animation__Larson_Scanner_Dual(void){
+  return SubTask_Segment_Animation__Base_Larson_Scanner(true);
 }
 
 /*
@@ -10799,9 +10687,9 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Du
 // void mAnimatorLight::mode_larson_scanner(void){
 //   return larson_scanner(false);
 // }
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Larson_Scanner()
+void mAnimatorLight::SubTask_Segment_Animation__Larson_Scanner()
 {
-  SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(false);
+  SubTask_Segment_Animation__Base_Larson_Scanner(false);
 }
 
 
@@ -10818,7 +10706,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Larson_Scanner()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__ICU()
+void mAnimatorLight::SubTask_Segment_Animation__ICU()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10893,7 +10781,7 @@ typedef struct Ripple {
 
 
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Ripple(bool rainbow)
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -10973,12 +10861,12 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool 
   StripUpdate();
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Ripple(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Ripple(false);
+void mAnimatorLight::SubTask_Segment_Animation__Ripple(void) {
+  return SubTask_Segment_Animation__Base_Ripple(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Ripple(true);
+void mAnimatorLight::SubTask_Segment_Animation__Ripple_Rainbow(void) {
+  return SubTask_Segment_Animation__Base_Ripple(true);
 }
 
 
@@ -10996,7 +10884,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(vo
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Comet()
+void mAnimatorLight::SubTask_Segment_Animation__Comet()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -11045,7 +10933,7 @@ void mAnimatorLight::mode_chunchun(void)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Chunchun()
+void mAnimatorLight::SubTask_Segment_Animation__Chunchun()
 {
   
   uint8_t segment_index  = segment_active_index;
@@ -11095,7 +10983,7 @@ void mAnimatorLight::mode_bouncing_balls(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls()
+void mAnimatorLight::SubTask_Segment_Animation__Bouncing_Balls()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();
@@ -11171,7 +11059,7 @@ void mAnimatorLight::sinelon_base(bool dual, bool rainbow=false) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool dual, bool rainbow)
+void mAnimatorLight::SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rainbow)
 {
 
   uint8_t segment_index  = segment_active_index;
@@ -11214,16 +11102,16 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool
   StripUpdate();
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(false);
+void mAnimatorLight::SubTask_Segment_Animation__Sinelon(void) {
+  return SubTask_Segment_Animation__Base_Sinelon(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(true);
+void mAnimatorLight::SubTask_Segment_Animation__Sinelon_Dual(void) {
+  return SubTask_Segment_Animation__Base_Sinelon(true);
 }
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow(void) {
-  return SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(true, true);
+void mAnimatorLight::SubTask_Segment_Animation__Sinelon_Rainbow(void) {
+  return SubTask_Segment_Animation__Base_Sinelon(true, true);
 }
 
 
@@ -11252,7 +11140,7 @@ void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow(v
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Flasher_Animate_Function__Drip()
+void mAnimatorLight::SubTask_Segment_Animation__Drip()
 {
   uint8_t segment_index  = segment_active_index;
   uint16_t segment_length = _segments[segment_active_index].length();

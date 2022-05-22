@@ -306,9 +306,9 @@ uint32_t tSaved = millis();
 //         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
 
 //         AddLog(LOG_LEVEL_DEBUG,      PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
-//         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
-//         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
-//         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
+//         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
+//         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
+//         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
 
 //         sensor[sensor_id].sReadSensor = SPLIT_TASK_DONE_ID;
 

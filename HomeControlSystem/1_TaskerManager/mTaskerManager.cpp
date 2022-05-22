@@ -80,6 +80,14 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
     uint32_t start_millis = millis();
     #endif
     
+  //   if(function == FUNC_EVENT_INPUT_STATE_CHANGED_ID)
+  //   {
+  // DEBUG_LINE_HERE; ALOG_INF(PSTR("event_triggered.module_id = i%d f%d\t %d"),switch_index, function, pCONT_rules->event_triggered.module_id); 
+  //   }
+
+  // DEBUG_LINE_HERE;
+
+
     switch(function)
     {
       // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
@@ -420,8 +428,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_TREADMILL
     pModule[EM_MODULE_CONTROLLER_TREADMILL_ID] = new X();
   #endif
-  #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
-    pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID] = new mSensorColours();
+  #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+    pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID] = new mImmersionTankColour();
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME //phasing out
     pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new mDoorBell();
@@ -446,6 +454,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
     pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID] = new mFurnaceSensor();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+    pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID] = new mHeatingStripColour_Understairs();
   #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();

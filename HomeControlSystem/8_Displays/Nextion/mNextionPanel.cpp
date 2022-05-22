@@ -384,7 +384,7 @@ void mNextionPanel::Template_Load_Init_Display_Command(){
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+  ALOG_DBM( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);

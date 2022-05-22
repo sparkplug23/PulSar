@@ -178,7 +178,7 @@ void mEnergyPZEM004T::EveryLoop(){
         settings.active_sensor = 0; // reset to start or remain on single sensor 
         measure_time.millis = millis();
       }
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("settings.active_sensor = %d"),settings.active_sensor);
+      ALOG_DBM( PSTR("settings.active_sensor = %d"),settings.active_sensor);
     }
 
   }
@@ -224,10 +224,10 @@ void mEnergyPZEM004T::SplitTask_UpdateSensor(uint8_t device_id)
         if(!error)
         {
           //AddLog_Array(LOG_LEVEL_DEBUG_MORE, PSTR("buffer"), modbus_buffer, (uint8_t)30);
-          AddLog(LOG_LEVEL_DEBUG_MORE, "ReceiveCount() %d", modbus->ReceiveCount());
+          ALOG_DBM( "ReceiveCount() %d", modbus->ReceiveCount());
           // Check if response matches expected device
           // if(modbus_buffer[0] == pCONT_iEnergy->address[device_id][3]){
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
+            ALOG_DBM( PSTR("Read SUCCESS id=%d \tvolt=%d"), device_id, (int)data_modbus[device_id].voltage);
             ParseModbusBuffer(&data_modbus[device_id], modbus_buffer);
             stats.success_reads++;
             stats.end_time = millis();

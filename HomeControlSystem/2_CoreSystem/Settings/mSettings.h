@@ -20,10 +20,20 @@ return potato;
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  4000
+  #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+  #endif
+
 #else
-#define DATA_BUFFER_PAYLOAD_MAX_LENGTH  3000
+
+  #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
+  #endif
+
+
 #endif //USE_MODULE_NETWORK_WEBSERVER
+
+
 
 // #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
 
@@ -476,10 +486,47 @@ enum MODULE_STATUS{
  enum Shortcuts { SC_CLEAR, SC_DEFAULT, SC_USER };
 
 //TBR
-enum SettingsParmaIndex {P_HOLD_TIME, P_MAX_POWER_RETRY, 
-P_TUYA_DIMMER_ID, P_MDNS_DELAYED_START, P_BOOT_LOOP_OFFSET, 
-P_RGB_REMAP, P_MAX_PARAM8};  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
 
+// enum SettingsParmaIndex {P_HOLD_TIME, P_MAX_POWER_RETRY, 
+// P_TUYA_DIMMER_ID, P_MDNS_DELAYED_START, P_BOOT_LOOP_OFFSET, 
+// P_RGB_REMAP, 
+
+// P_HOLD_IGNORE,
+
+
+// P_MAX_PARAM8};  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
+
+/**
+ * @brief Initial used with buttons, but should be expanded into rule type events
+ * 
+ */
+enum INPUT_TYPE_IDS{ //style fron nextion
+  INPUT_TYPE_SINGLE_PRESS_ID,
+  INPUT_TYPE_MULTIPLE_PRESS_ID,
+  INPUT_TYPE_SINGLE_HOLD_ID,
+  INPUT_TYPE_LENGTH_ID
+};
+
+
+enum SO32_49Index { P_HOLD_TIME,              // SetOption32 - (Button/Switch) Key hold time detection in decaseconds (default 40)
+                    P_MAX_POWER_RETRY,        // SetOption33 - (Energy) Maximum number of retries before deciding power limit overflow (default 5)
+                    P_BACKLOG_DELAY,          // SetOption34 - (Backlog) Minimal delay in milliseconds between executing backlog commands (default 200)
+                    P_MDNS_DELAYED_START,     // SetOption35 - (mDNS) Number of seconds before mDNS is started (default 0) - Obsolete
+                    P_BOOT_LOOP_OFFSET,       // SetOption36 - (Restart) Number of restarts to start detecting boot loop (default 1)
+                    P_RGB_REMAP,              // SetOption37 - (Light) RGB and White channel separation (default 0)
+                    P_IR_UNKNOW_THRESHOLD,    // SetOption38 - (IR) Set the smallest sized "UNKNOWN" message packets we actually care about (default 6, max 255)
+                    P_CSE7766_INVALID_POWER,  // SetOption39 - (CSE7766) Number of invalid power measurements before declaring it invalid allowing low load measurments (default 128)
+                    P_HOLD_IGNORE,            // SetOption40 - (Button/Shutter) Ignore button change in seconds (default 0)
+                    P_ARP_GRATUITOUS,         // SetOption41 - (Wifi) Interval in seconds between gratuitous ARP requests (default 60)
+                    P_OVER_TEMP,              // SetOption42 - (Energy) Turn all power off at or above this temperature (default 90C)
+                    P_ROTARY_MAX_STEP,        // SetOption43 - (Rotary) Rotary step boundary (default 10)
+                    P_IR_TOLERANCE,           // SetOption44 - (IR) Base tolerance percentage for matching incoming IR messages (default 25, max 100)
+                    P_SO45_FREE,              // SetOption45
+                    P_SO46_FREE,              // SetOption46
+                    P_SO47_FREE,              // SetOption47
+                    P_SO48_FREE,              // SetOption48
+                    P_SO49_FREE               // SetOption49
+                  };  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
 
 
 
@@ -1416,8 +1463,14 @@ struct SYSCFG {
   uint8_t       sbaudrate;                 // 452
   uint8_t       sleep;                     // 453
 
-// remove params, to be handled as bitmap flags
-  uint8_t       param[PARAM8_SIZE];        // 2FC  SetOption32 .. SetOption49
+  /**
+   * @brief To be phased out, tasmota generic way to have SetOption list
+   * These style flags are to be changed to their own, or at least, recreated as a second `param` list to differentiate between legacy tas and my new code.
+   * 
+   */
+
+  // uint8_t       param[PARAM8_SIZE];        // 2FC  SetOption32 .. SetOption49
+  uint8_t       setoption_255[PARAM8_SIZE];
 
 
   // Network
@@ -1543,6 +1596,8 @@ struct SYSCFG {
   uint32_t      cfg_crc32;                 // FFC
 } Settings;
 
+// phasing over tas to mine
+// #define param setoption_255 
 
 void TestSettingsLoad();
 

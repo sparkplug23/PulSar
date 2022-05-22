@@ -102,7 +102,7 @@
 class mPubSubClient {
 private:
    Client* _client;
-   uint8_t buffer[MQTT_MAX_PACKET_SIZE];
+   uint8_t buffer[MQTT_MAX_PACKET_SIZE]; // OH!! Pubsub uses a buffer, why cant this just pass the pointer?
    uint16_t nextMsgId;
    unsigned long lastOutActivity;
    unsigned long lastInActivity;

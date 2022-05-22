@@ -58,13 +58,26 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
 
 void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
 {
-
+  
+  /**
+   * @brief Phasing out list, so remind me via messages that this should either be properly added into the code, or deleted code depending on the flag
+   * 
+   */
   #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
     #ifdef ENABLE_LOG_LEVEL_WARN
     AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS: Ready to remove 10Apr22")); // Save to remove
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     #warning "ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS"
   #endif 
+  #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #ifdef ENABLE_LOG_LEVEL_WARN
+    AddLog(LOG_LEVEL_WARN, PSTR("ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS: Not ready to remove 10May22")); // Save to remove
+    #endif // ENABLE_LOG_LEVEL_COMMANDS
+    #warning "ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS"
+  #endif 
+
+
+  
 
 
   /**
@@ -82,6 +95,9 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #endif 
   #ifdef ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
     #error "ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT -- Can be removed"
+  #endif 
+  #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+    #error "ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS -- Can be removed"
   #endif 
 
 

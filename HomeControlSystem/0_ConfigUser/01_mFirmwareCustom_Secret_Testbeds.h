@@ -57,10 +57,13 @@
 // #define DEVICE_TESTBED_CLIMATE_SENSOR_BREADBOARD
 // #define DEVICE_TESTBED_RTC_FASTBOOT
 // #define DEVICE_TESTBED_ANIMATION_ADDING_NOTIFICATION_MODE
-// #define DEVICE_TESTBED_ADDRESSABLE_DOUBLE_DIGIT
+// #define DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
 // #define DEVICE_TESTBED_HARDWARE_BME_ESP32
-#define DEVICE_TESTBED_H801_PWM_MANUAL
+// #define DEVICE_TESTBED_H801_PWM_MANUAL
 // #define DEVICE_TESTBED_BLENDING_VARIABLES
+// #define DEVICE_TESTBED_BUTTON_MULTIPRESS
+// #define DEVICE_TESTBED_H801_SUNELEVATION_REACTIVE_PALETTES
+
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
@@ -1395,6 +1398,87 @@
 #endif
 
 
+/**
+ * @brief Testing of some special palettes that change their progress based on sun elevation
+ * */
+#ifdef DEVICE_TESTBED_H801_SUNELEVATION_REACTIVE_PALETTES
+  #define DEVICENAME_CTR          "testbed_h801_sun_palettes"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed H801 Sun Palettes"
+    
+  #define USE_SERIAL_ALTERNATE_TX
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_PWM  
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+
+  #define ENABLE_DEVFEATURE_SOLAR_PALETTES
+  #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
+  #define DEBUG_TARGET_ANIMATOR_SEGMENTS
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
+  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+  #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+  
+  #define USE_MODULE_CORE_RULES
+
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"0\":\""  D_GPIO_FUNCTION_KEY1_INV_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+  "}";
+ 
+
+  #define STRIP_SIZE_MAX 1
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBcw\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":10,"
+    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"Buttons\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"light\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":\"Toggle\"" // toggle
+      "}"
+    "}"
+  "}";
+
+    
+#endif
+
+
 
 
 /**
@@ -1772,245 +1856,245 @@
 #endif
 
 
-#ifdef DEVICE_TESTBED_ADDRESSABLE_DOUBLE_DIGIT
-  #define DEVICENAME_CTR          "testbed_add_double_digit"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Addressable Digit"
-  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+// #ifdef DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
+//   #define DEVICENAME_CTR          "testbed_add_double_digit"
+//   #define DEVICENAME_FRIENDLY_CTR "Testbed Addressable Digit"
+//   #define DEVICENAME_ROOMHINT_CTR "Testbed"
  
 
-//  ##
-//   //#define FORCE_TEMPLATE_LOADING
-//   // #define SETTINGS_HOLDER 1
+// //  ##
+// //   //#define FORCE_TEMPLATE_LOADING
+// //   // #define SETTINGS_HOLDER 1
 
 
 
+// //   #define USE_LIGHTING_TEMPLATE
+// //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+// //   "{"
+// //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+// //     #ifdef STRIP_SIZE_MAX
+// //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+// //     #else
+// //     "\"" D_JSON_STRIP_SIZE       "\":50,"
+// //     #endif //STRIP_SIZE_MAX
+// //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","
+// //     "\"" D_JSON_TRANSITION       "\":{"
+// //       "\"" D_JSON_TIME_MS "\":0,"
+// //       "\"" D_JSON_RATE_MS "\":1000,"
+// //       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+// //       "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+// //     "},"
+// //     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+// //     "\"" D_JSON_EFFECTS "\":{" 
+// //       "\"" D_JSON_FUNCTION "\":29"
+// //     "},"
+// //     // "\"CCT_Temp\": 152,"
+// //     // "\"Hue\":25,"
+// //     // "\"Sat\":100,"
+// //     "\"" D_JSON_COLOUR_PALETTE "\":41,"
+// //     "\"BrightnessCCT\":10,"
+// //     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+
+// //   "}";
+
+
+
+//   // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+//   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+//   // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
+//   #define DISABLE_WEBSERVER  // phase out to only USE_MODULE_NETWORK_WEBSERVER
+
+//   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+
+//   #define USE_MODULE_DRIVERS_LEDS
+
+//   // #define USE_MODULE_DRIVERS_IRREMOTE
+//   // #define USE_IR_RECEIVE
+
+//   #define USE_MODULE_LIGHTS_INTERFACE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
+//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+//   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+//   #define STRIP_SIZE_MAX 93
+//   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+//   // #define USE_SK6812_METHOD_DEFAULT
+//   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+//   #define ENABLE_DEVFEATURE_RGB_CLOCK
+
+//   // {a,b,c,d,e,f,g}
+
+//   // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
+
+//   #define ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
+
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"   
+//     /**
+//      * @brief Right side
+//      **/
+//       #ifdef USE_MODULE_SENSORS_DS18X   
+//       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+//       "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+//       #endif // USE_MODULE_SENSORS_DS18X
+//       // TX0 - Debug Serial TX
+//       // RX0 - Debug Serial RX
+//       #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+//       "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
+//       #endif
+//       #ifdef USE_MODULE_SENSORS_DHT
+//       "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
+//       "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","
+//       #endif
+//       #ifdef USE_MODULE_SENSORS_MOTION
+//       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+//       #endif
+//       #ifdef USE_MODULE_DISPLAYS_NEXTION
+//       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+//       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+//       #endif
+//       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+//       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","   // Use the 12LED RGBW ring to permit led testing, and eventually, notification mode
+//       #endif 
+//       #ifdef USE_MODULE_DRIVERS_LEDS
+//       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+//       #endif
+//       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
+//       "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
+//       #endif
+//       /**
+//        * @brief Left side
+//        **/
+//       // EN
+//       // VP
+//       // VN
+//       #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+//       "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6
+//       #endif
+//       // 35 - adc1_7
+//       // 32 - Touch9
+//       // 33 - Touch8
+//       // 25 - DAC1 = LM386 Amplifier Module
+//       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+//       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+//       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+//       #endif
+//       // 14
+//       // 12
+//       // 13
+//       // Can I introduce a way that a comma at the end, does not make a broken json?
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+//     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+//   "}";
+
+//   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
+//   #define D_DEVICE_SENSOR_CLIMATE_BME "BedroomDesk-BME"
+//   #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDesk-DHT1"
+//   #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2"
+  
+  
+
+//   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
+//   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+//   #define D_DEVICE_SENSOR_DB18S20_1_NAME        "DB_02"
+//   #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,205,206,170,25]"
+//   #define D_DEVICE_SENSOR_DB18S20_2_NAME        "DB_03"
+//   #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,134,175,63]"
+//   #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
+//   #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,205,202,237,231]"
+//   #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
+//   #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,195,135,126,242]"
+//   #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
+//   #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,195,135,215,193]"
+  
+
+//   #define USE_FUNCTION_TEMPLATE
+//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//   "{"
+//     "\"" D_JSON_DEVICENAME "\":{"
+//       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+//         "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
+//         "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
+//         "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
+//         "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
+//         "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
+//       "],"
+//       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_CLIMATE_BME "\""
+//       "],"  
+//       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
+//         "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
+//       "],"  
+//       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+//         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+//       "]"  
+//     "},"
+//     "\"" D_JSON_SENSORADDRESS "\":{"
+//       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+//         D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+//         D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+//         D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+//         D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+//         D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
+//         D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
+//       "]"  
+//     "},"    
+//     "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+//   "}";
+
+  
+//   #define USE_RULES_TEMPLATE
+//   DEFINE_PGM_CTR(RULES_TEMPLATE)
+//   "{"
+//     // "\"AddRuleDefault\":\"Motion0=0\","
+//     // MOTION
+//     "\"Rule0\":{"
+//       "\"Trigger\":{"
+//         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+//         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+//         "\"DeviceName\":0,"
+//         "\"State\":\"On\""
+//       "},"
+//       "\"Command\":{"
+//         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+//         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+//         "\"DeviceName\":0," 
+//         "\"State\":\"Follow\""
+//       "}"
+//     "}"
+//   "}";
+
+//   #ifdef USE_MODULE_LIGHTS_INTERFACE
 //   #define USE_LIGHTING_TEMPLATE
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   "{"
-//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-//     #ifdef STRIP_SIZE_MAX
+//     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
 //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-//     #else
-//     "\"" D_JSON_STRIP_SIZE       "\":50,"
-//     #endif //STRIP_SIZE_MAX
-//     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","
-//     "\"" D_JSON_TRANSITION       "\":{"
-//       "\"" D_JSON_TIME_MS "\":0,"
-//       "\"" D_JSON_RATE_MS "\":1000,"
-//       "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-//       "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+//     "\"AnimationMode\": \"Effects\","
+//     "\"ColourOrder\": \"rgb\","
+//     "\"ColourPalette\": 0,"
+//     "\"Effects\": {"
+//       "\"Function\":\"Seven-Segment Manual\""
 //     "},"
-//     "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-//     "\"" D_JSON_EFFECTS "\":{" 
-//       "\"" D_JSON_FUNCTION "\":29"
-//     "},"
-//     // "\"CCT_Temp\": 152,"
-//     // "\"Hue\":25,"
-//     // "\"Sat\":100,"
-//     "\"" D_JSON_COLOUR_PALETTE "\":41,"
-//     "\"BrightnessCCT\":10,"
-//     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-
+//     "\"BrightnessRGB\": 5,"
+//     "\"Transition\": {"
+//       "\"TimeMs\": 500"
+//     "}"
 //   "}";
-
-
-
-  // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
-  // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
-  #define DISABLE_WEBSERVER  // phase out to only USE_MODULE_NETWORK_WEBSERVER
-
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-
-  #define USE_MODULE_DRIVERS_LEDS
-
-  // #define USE_MODULE_DRIVERS_IRREMOTE
-  // #define USE_IR_RECEIVE
-
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define STRIP_SIZE_MAX 93
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  // #define USE_SK6812_METHOD_DEFAULT
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define ENABLE_DEVFEATURE_RGB_CLOCK
-
-  // {a,b,c,d,e,f,g}
-
-  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
-
-  #define ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"   
-    /**
-     * @brief Right side
-     **/
-      #ifdef USE_MODULE_SENSORS_DS18X   
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      #endif // USE_MODULE_SENSORS_DS18X
-      // TX0 - Debug Serial TX
-      // RX0 - Debug Serial RX
-      #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-      "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
-      #endif
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-      #endif
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","   // Use the 12LED RGBW ring to permit led testing, and eventually, notification mode
-      #endif 
-      #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      #endif
-      #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
-      "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
-      #endif
-      /**
-       * @brief Left side
-       **/
-      // EN
-      // VP
-      // VN
-      #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6
-      #endif
-      // 35 - adc1_7
-      // 32 - Touch9
-      // 33 - Touch8
-      // 25 - DAC1 = LM386 Amplifier Module
-      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
-      #endif
-      // 14
-      // 12
-      // 13
-      // Can I introduce a way that a comma at the end, does not make a broken json?
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
-  #define D_DEVICE_SENSOR_CLIMATE_BME "BedroomDesk-BME"
-  #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDesk-DHT1"
-  #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2"
-  
-  
-
-  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
-  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
-  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "DB_02"
-  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,205,206,170,25]"
-  #define D_DEVICE_SENSOR_DB18S20_2_NAME        "DB_03"
-  #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,134,175,63]"
-  #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
-  #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,205,202,237,231]"
-  #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
-  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,195,135,126,242]"
-  #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
-  #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,195,135,215,193]"
-  
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_BME "\""
-      "],"  
-      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
-        "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
-      "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-      "]"  
-    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
-        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
-      "]"  
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
-  "}";
-
-  
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // "\"AddRuleDefault\":\"Motion0=0\","
-    // MOTION
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0," 
-        "\"State\":\"Follow\""
-      "}"
-    "}"
-  "}";
-
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"rgb\","
-    "\"ColourPalette\": 0,"
-    "\"Effects\": {"
-      "\"Function\":\"Seven-Segment Manual\""
-    "},"
-    "\"BrightnessRGB\": 5,"
-    "\"Transition\": {"
-      "\"TimeMs\": 500"
-    "}"
-  "}";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
+//   #endif // USE_MODULE_LIGHTS_INTERFACE
 
 
 
 
 
-#endif
+// #endif
 
 
 
@@ -5963,6 +6047,39 @@
 
 
 /**
+ * 
+ * */
+#ifdef DEVICE_TESTBED_BME_ESP8266
+  #define DEVICENAME_CTR          "testbed_bme_esp8266"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed BME280"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+
+
+
+
+
+
+/**
  * esp8266 version -- gy89
  * As part of measurement system, add 9 axis gyro (GY89) to sensors
  * */
@@ -6547,6 +6664,101 @@
   "}";
     
 #endif
+
+
+#ifdef DEVICE_TESTBED_BUTTON_MULTIPRESS
+  #define DEVICENAME_CTR          "testbed_button_longpress"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Button Longpress"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES
+
+  #define MAX_KEYS 1                 // Max number of keys or buttons
+
+  #define USE_MODULE_CORE_RULES
+
+  #define ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
+  #define ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
+
+  #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
+
+  #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
+
+  #define ENABLE_DEBUG_DEV_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"D7\":\""  D_GPIO_FUNCTION_KEY1_CTR  "\","
+      "\"4\":\""   D_GPIO_FUNCTION_REL1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Builtin Button as toggle
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule1\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule2\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Data\":[0,2]" // [state,button_hold]
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":3}}\""
+      "}"
+    "}"
+  "}";
+
+
+
+#endif
+
 
 
 #ifdef DEVICE_FORCED_TO_BE_TESTER

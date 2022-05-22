@@ -667,7 +667,7 @@ bool mShellyDimmer::SerialInput(void)
       // finished
 #ifdef SHELLY_DIMMER_DEBUG
       byte_counter++;
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "Rx Packet:"));
+      ALOG_DBM( PSTR(SHD_LOGNAME "Rx Packet:"));
       // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, buffer, byte_counter);
 #endif  // SHELLY_DIMMER_DEBUG
       byte_counter = 0;

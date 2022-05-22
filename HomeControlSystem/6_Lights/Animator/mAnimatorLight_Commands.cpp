@@ -64,6 +64,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 {
 
   JsonParserToken jtok = 0; 
+  JsonParserToken jtok_sub = 0; 
   int8_t tmp_id = 0;
   char buffer[50];
 
@@ -349,17 +350,106 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+
+  if(jtok = obj[PM_JSON_COLOUR_TYPE]){
+    // if(jtok.isStr()){
+    //   if((tmp_id=mPaletteI->GetColourTypeIDbyName(jtok.getStr()))>=0){
+    //     CommandSet_ColourTypeID(tmp_id, segment_index);
+    //     data_buffer.isserviced++;
+    //   }
+    // }else
+    if(jtok.isNum()){
+      CommandSet_ColourTypeID(jtok.getInt(), segment_index);
+      data_buffer.isserviced++;
+    }
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
   
   
   #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
   if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    ALOG_COM(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MANUAL_NUMBER)), lcd_display_show_number);
   }
   #endif // ENABLE_DEVFEATURE_RGB_CLOCK
+
+
+// Hue
+// Sat
+// ColourHeatMap:[style, cold_point, now_temp, hot_point]
+
+  if(jtok = obj["ColourHeatMap_Palette"])
+  {
+
+    uint8_t style_index  = 0;
+    if(jtok_sub = jtok.getObject()["Method"]) //different heatmap conversion method
+    {
+      style_index = jtok_sub.getInt();
+      ALOG_COM(PSTR(D_JSON_COMMAND_NVALUE_K("Method")), style_index);
+    }
+
+    if(jtok_sub = jtok.getObject()["Value"])
+    {
+      if(jtok_sub.isArray())
+      {
+        ALOG_COM(PSTR("is ARRAY"));
+
+        float array_val[4] = {0}; uint8_t array_ii = 0;
+        JsonParserArray array = jtok_sub;
+        for(auto v : array)
+        {
+          ALOG_COM(PSTR("v=%d"), (int)v.getFloat());
+          array_val[array_ii++] = v.getFloat();
+        }
+
+        CommandSet_ColourHeatMap_Palette(array_val, array_ii, style_index); // Dont pass palette, then assumes active
+        
+      }
+
+
+
+    }
+
+
+  }
+
+  
+  
+  // .getObject()["ClearTo"]){ 
+  //   if(jtok.isArray()){
+  //     RgbcctColor colour = RgbcctColor(0);
+
+  //     uint8_t index = 0;
+  //     JsonParserArray array = obj["Strip"].getObject()["ClearTo"];
+  //     for(auto v : array) {
+  //       switch(index){
+  //         case 0: colour.R = v.getInt();
+  //         case 1: colour.G = v.getInt();
+  //         case 2: colour.B = v.getInt();
+  //         case 3: colour.WC = v.getInt();
+  //         case 4: colour.WW = v.getInt();
+  //       }
+  //       int val = v.getInt();
+  //       // if(index > D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH){ break; }
+  //       // editable_mapped_array_data_array[index++] = val;
+  //       index++;
+  //       // pCONT_iLight->animation.mode_id =  pCONT_iLight->ANIMATION_MODE_MANUAL_SETPIXEL_ID;
+  //       // SetPixelColor(val, colour);
+  //       // animation_colours[val].DesiredColour = colour;
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_NEO D_JSON_MAPPED_MULTIPLIER_DATA " [i%d:v%d]"),index-1,val);
+  //   #endif// ENABLE_LOG_LEVEL_INFO          
+  //     }
+  //     SetPixelColor_All(colour);
+  //   }
+
+  // }
+
+
+
 
 
 
@@ -467,16 +557,6 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   //   }
     
 
-
-  // #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
-  // if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
-  //   lcd_display_show_number = jtok.getInt();
-  //   // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_MIN)), flashersettings.brightness_min);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-  // #endif // ENABLE_DEVFEATURE_RGB_CLOCK
 
 
   // if(jtok = obj[PM_RGB_DATA_STREAM]){  // PM_RGB_DATA_STREAM
@@ -1167,7 +1247,7 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
 
   if(!c){ return; }
   if(strlen(c)<=5){
-    // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
+    // ALOG_DBM( PSTR("Valid Length"));
   }else{
     // AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
     return;
@@ -1227,6 +1307,125 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
   #endif
 
 }
+
+
+
+void mAnimatorLight::CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index)
+{
+
+  // switch(id)
+  // {
+  //   default:
+
+  //   case 4: _segments[segment_index].colour_type = 
+
+  //   case 4: _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+  //   case 4: _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID;
+  // }
+  
+  _segments[segment_index].colour_type = (RgbcctColor_Controller::LightSubType)id;
+
+  ALOG_INF(PSTR("ColourType = %d"), _segments[segment_index].colour_type);
+
+}
+
+const char* mAnimatorLight::GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen)
+{
+  // switch(id){  default:    
+  
+  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:    memcpy(buffer, "RGB", sizeof("RGB")); break;
+  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:    memcpy(buffer, "RGBW", sizeof("RGBW")); break;
+  
+  // }
+  return buffer;
+}
+int8_t mAnimatorLight::GetColourTypeIDbyName(const char* c)
+{
+  if(c=='\0'){ return -1; }
+  // if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){  return TRANSITION_ORDER__RANDOM__ID;  }
+  // if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER__INORDER__ID; }
+
+  return -1;
+}
+
+
+/**
+ * @brief Method for setting colour of rgbcct palette using a value within a range. Use case: colour map ambient temperature into colour hue
+ * 
+ * @param array_val   : [min_point, current, max_point] .. alternate style may use multiple "inflection" points (ie not linear with multi slope conversions)
+ * @param array_length 
+ * @param style_index : default 0   : 10 to 20 celsius is cyan 180 to red 0
+ * @param palette_id  : default 255 : use the active palette id
+ */
+void mAnimatorLight::CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t array_length, uint8_t style_index, uint8_t palette_id)
+{
+
+  for(uint8_t ii=0;ii<array_length;ii++){ Serial.printf("%d=%f\n\r", ii, array_val[ii]); }
+
+  switch(style_index)
+  {
+    /**
+     * @brief 
+     * In this case, 10 to 20 Celsius will be from hue 180 to hue 0 (cyan to red)
+       Then above or below those ranges, will remain fixed at the red/cyan
+     */
+    default:
+    case 0:
+    {
+
+      float hue_f = mSupport::mapfloat(array_val[1], array_val[0], array_val[2], 180.0f, 0.0f);
+        hue_f = constrain(hue_f, 0.0f, 180.0f);
+      uint16_t hue_i = (uint16_t)hue_f;
+
+      CommandSet_ActiveSolidPalette_Hue_360(hue_i);
+      CommandSet_ActiveSolidPalette_Sat_255(255);
+
+    }
+    break;
+    /**
+     * @brief 
+     * In this case, 10 to 20 Celsius will be from hue 180 to hue 0 (cyan to red)
+       Then above or below those ranges, will go slightly pink and dark blue as solid colours
+     */
+    case 1:
+    
+      float hue_f = mSupport::mapfloat(array_val[1], array_val[0], array_val[2], 180.0f, 0.0f);
+
+      Serial.println(hue_f);
+
+      if(array_val[1] < array_val[0]) // force dark blue
+      {
+        ALOG_INF(PSTR("Force Dark Blue"));
+        hue_f = 240.0f;
+      }else
+      if(array_val[1] > array_val[2]) // force slightly hot pink
+      {
+        ALOG_INF(PSTR("Force Hot Pink"));
+        hue_f = 350.0f;
+      }
+      else // Just constrain within range
+      {
+        ALOG_INF(PSTR("Constrain"));
+        hue_f = constrain(hue_f, 0.0f, 180.0f);
+      }
+
+      uint16_t hue_i = (uint16_t)hue_f;
+
+      ALOG_COM(PSTR("Hue = %d"), hue_i);
+
+      CommandSet_ActiveSolidPalette_Hue_360(hue_i);
+      CommandSet_ActiveSolidPalette_Sat_255(255);
+
+
+    break;
+  }
+
+
+
+
+
+}
+
 
 
 
@@ -1709,9 +1908,9 @@ void mAnimatorLight::CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uin
   
   RgbcctColor c = _segment_runtimes[segment_index].rgbcct_controller->GetColourFullRange();
   
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("desired_colour=%d,%d,%d,%d,%d"),c.R,c.G,c.B,c.WC,c.WW);
-    #endif //  ENABLE_LOG_LEVEL_INFO
+  #endif //  ENABLE_LOG_LEVEL_INFO
   
   #ifdef USE_MODULE_NETWORK_MQTT
   pCONT_lAni->mqtthandler_flasher_teleperiod.flags.SendNow = true;

@@ -137,14 +137,20 @@ void mSettings::SystemSettings_DefaultBody_System(void)
   // strlcpy(Settings.state_text[3], MQTT_CMND_HOLD, sizeof(Settings.state_text[3]));
   
 DEBUG_LINE;
-  Settings.param[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
-  Settings.param[P_HOLD_TIME] = KEY_HOLD_TIME;  // Default 4 seconds hold time
-  Settings.param[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
+
+/**
+ * @brief Need to change the array access to be "CommandSet_SetOption(id, value)" and "CommandGet_SetOption(id)"
+ * 
+ */
+
+  Settings.setoption_255[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
+  Settings.setoption_255[P_HOLD_TIME] = KEY_HOLD_TIME;  // Default 4 seconds hold time
+  Settings.setoption_255[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
   #ifdef USE_NETWORK_MDNS
-  Settings.param[P_MDNS_DELAYED_START] = 0;
+  Settings.setoption_255[P_MDNS_DELAYED_START] = 0;
   #endif // #ifdef USE_NETWORK_MDNS
-  Settings.param[P_RGB_REMAP] = 0;//RGB_REMAP_RGBW;
-  Settings.param[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
+  Settings.setoption_255[P_RGB_REMAP] = 0;//RGB_REMAP_RGBW;
+  Settings.setoption_255[P_BOOT_LOOP_OFFSET] = BOOT_LOOP_OFFSET;
 
 DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -463,7 +469,7 @@ void mSettings::SystemSettings_DefaultBody_Energy(){
 //   flag2.energy_resolution |= ENERGY_RESOLUTION;
 //   flag3.dds2382_model |= ENERGY_DDS2382_MODE;
 //   flag3.hardware_energy_total |= ENERGY_HARDWARE_TOTALS;
-//   Settings.param[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
+//   Settings.setoption_255[P_MAX_POWER_RETRY] = MAX_POWER_RETRY;
 // //  Settings.energy_power_delta[0] = 0;
 // //  Settings.energy_power_delta[1] = 0;
 // //  Settings.energy_power_delta[2] = 0;
@@ -491,7 +497,7 @@ void mSettings::SystemSettings_DefaultBody_Energy(){
 //   RtcSettings.energy_kWhtotal = 0;
 // //  memset((char*)&Settings.energy_usage, 0x00, sizeof(Settings.energy_usage));
 //   memset((char*)&RtcSettings.energy_usage, 0x00, sizeof(RtcSettings.energy_usage));
-//   Settings.param[P_OVER_TEMP] = ENERGY_OVERTEMP;
+//   Settings.setoption_255[P_OVER_TEMP] = ENERGY_OVERTEMP;
   #endif
 
 }
@@ -603,7 +609,7 @@ DEBUG_LINE;
 
   #ifdef USE_NETWORK_MDNS
   Settings.flag_network.mdns_enabled = 1;//USE_NETWORK_MDNS;
-  mdns_delayed_start = 60;//Settings.param[P_MDNS_DELAYED_START];
+  mdns_delayed_start = 60;//Settings.setoption_255[P_MDNS_DELAYED_START];
   #endif // #ifdef USE_NETWORK_MDNS
 
 
@@ -620,9 +626,17 @@ DEBUG_LINE;
   Settings.flag_system.save_state = SAVE_STATE;
 //  for (uint8_t i = 1; i < MAX_PULSETIMERS; i++) { Settings.pulse_timer[i] = 0; }
   // Settings.flag_power.emulation = EMULATION;
-//  Settings.flag_system.button_restrict = 0;
-//  Settings.flag_system.button_swap = 0;
-//  Settings.flag_system.button_single = 0;
+ Settings.flag_system.button_restrict = 0;
+ Settings.flag_system.button_swap = 0;
+
+ Settings.flag_system.button_single = 0; // support only single press to support faster button recognition (disable to allow multipress)
+
+
+#ifdef ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE
+Settings.flag_system.button_single = ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE;
+#endif // ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE
+
+
   Settings.flag_system.mqtt_enabled = true;
 //  Settings.flag_system.mqtt_response = 0;
   Settings.flag_system.mqtt_power_retain = 0;//MQTT_POWER_RETAIN;

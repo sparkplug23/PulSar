@@ -43,6 +43,9 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
   }
 
+// ALOG_DBM(PSTR("TESTPOINT"));
+// return;
+
   /**
    *  @note Timer Commands
    * */
@@ -120,6 +123,8 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["HVACZone"].getObject()["SetSensor"])
   { 
+    
+    ALOG_DBM(PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
   
     JsonParserArray array = jtok;
     uint8_t index = 0;

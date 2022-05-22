@@ -16,6 +16,10 @@
 #include "2_CoreSystem/Support/mSupport.h"
 #include "2_CoreSystem/Settings/mSettings.h"
 
+// Added 2 lines to try get AddLog into header, might cause issues
+// #include "2_CoreSystem/Logging/mLogging.h"
+#include "2_CoreSystem/mGlobalMacros.h"
+
 // #define DEBUG_JSON_BUILDER
 
 enum IDENTIFIER_IDS{
@@ -217,6 +221,14 @@ char* GetPtr();
         float f = 0;     memcpy(&f,&value,sizeof(f));
         char fvalue[20]; dtostrfd2(f,3,fvalue);
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+      }
+
+      /**
+       * @brief debug size
+       **/
+      if(*writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
+      {
+        //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), *writer.length);
       }
 
     }

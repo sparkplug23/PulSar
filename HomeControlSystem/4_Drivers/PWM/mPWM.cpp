@@ -29,7 +29,7 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:
       EverySecond();
     break;
-    case FUNC_EVERY_50_MSECOND:    {
+    case FUNC_EVERY_50_MSECOND:{
 
 
     /**

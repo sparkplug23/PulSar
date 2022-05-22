@@ -213,7 +213,7 @@ class DeviceNameList{
 //   if(found_index == -1){
 //     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+//     ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
 //     #endif // ENABLE_LOG_LEVEL_INFO
 //     return buffer;
 //   }
@@ -488,7 +488,7 @@ class DeviceNameList{
 //   if(found_index == -1){
 //     memcpy(buffer,PM_SEARCH_NOMATCH,sizeof(PM_SEARCH_NOMATCH));
 //     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
+//     ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,PM_SEARCH_NOMATCH);
 //     #endif // ENABLE_LOG_LEVEL_INFO
 //     return buffer;
 //   }

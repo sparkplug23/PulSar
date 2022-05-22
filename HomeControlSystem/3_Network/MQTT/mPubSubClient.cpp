@@ -130,7 +130,7 @@ boolean mPubSubClient::connect(const char *id, const char* willTopic, uint8_t wi
 boolean mPubSubClient::connect(const char *id, const char *user, const char *pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
     if (!connected()) {
 
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_ERROR " \"Not connected\""));
+        ALOG_DBM( PSTR(D_LOG_PUBSUB D_ERROR " \"Not connected\""));
 
         stats.reconnects_counter++;
 
@@ -150,7 +150,7 @@ boolean mPubSubClient::connect(const char *id, const char *user, const char *pas
         // Serial.print("[PUBSUB] this->ip="); Serial.println(this->ip);
             result = _client->connect(this->ip, this->port);
             
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "_client->connect result=%d"),result);
+        ALOG_DBM( PSTR(D_LOG_PUBSUB "_client->connect result=%d"),result);
 
         // Serial.print("[PUBSUB] this->result="); Serial.println(result);
         //delay(1000);
@@ -249,7 +249,7 @@ boolean mPubSubClient::connect(const char *id, const char *user, const char *pas
                     _state = MQTT_CONNECTED;
                     //Serial.println("[PUBSUB] MQTT_CONNECTED");
 
-                    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_CONNECTED));
+                    ALOG_DBM( PSTR(D_LOG_PUBSUB D_CONNECTED));
 
                     return true;
                 } else {
@@ -260,7 +260,7 @@ boolean mPubSubClient::connect(const char *id, const char *user, const char *pas
         } else {
             _state = MQTT_CONNECT_FAILED;
             
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_ERROR " _state = %s"),state_ctr());
+            ALOG_DBM( PSTR(D_LOG_PUBSUB D_ERROR " _state = %s"),state_ctr());
             //Serial.println("[PUBSUB] _state = MQTT_CONNECT_FAILED");
             _client->stop(); //ADDED BY ME
             //delay(500);
@@ -366,7 +366,7 @@ boolean mPubSubClient::loop() {
       }else{
         stats.connection_downtime++;
         stats.connection_uptime = 0;
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "Connection_downtime>> %d"),stats.connection_downtime);
+        ALOG_DBM( PSTR(D_LOG_PUBSUB "Connection_downtime>> %d"),stats.connection_downtime);
         //Serial.print("[MQTT] connection_downtime>> "); Serial.println(stats.connection_downtime);
       }
     }
@@ -384,14 +384,14 @@ boolean mPubSubClient::loop() {
         unsigned long t = millis();
         if ((t - lastInActivity > MQTT_KEEPALIVE*1000UL) || (t - lastOutActivity > MQTT_KEEPALIVE*1000UL)) {
             
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_SENDING " \"MQTT_KEEPALIVE\""));
+            ALOG_DBM( PSTR(D_LOG_PUBSUB D_SENDING " \"MQTT_KEEPALIVE\""));
             if (pingOutstanding) {
                 this->_state = MQTT_CONNECTION_TIMEOUT;
                 _client->stop();
-                AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_ERROR " \"MQTT_CONNECTION_TIMEOUT\""));
+                ALOG_DBM( PSTR(D_LOG_PUBSUB D_ERROR " \"MQTT_CONNECTION_TIMEOUT\""));
                 return false;
             } else { 
-                AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_SENDING " \"MQTTPINGREQ\""));
+                ALOG_DBM( PSTR(D_LOG_PUBSUB D_SENDING " \"MQTTPINGREQ\""));
                 buffer[0] = MQTTPINGREQ;
                 buffer[1] = 0;
                 _client->write(buffer,2);
@@ -402,7 +402,7 @@ boolean mPubSubClient::loop() {
 
         }
         if (_client->available()) {
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_SENDING " \"_client->available()\""));
+            ALOG_DBM( PSTR(D_LOG_PUBSUB D_SENDING " \"_client->available()\""));
             uint8_t llen;
             uint16_t len = readPacket(&llen);
             uint16_t msgId = 0;
@@ -414,7 +414,7 @@ boolean mPubSubClient::loop() {
                 lastInActivity = t;
                 uint8_t type = buffer[0]&0xF0;
                 if (type == MQTTPUBLISH) {
-                    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_SENDING " \"type == MQTTPUBLISH\""));
+                    ALOG_DBM( PSTR(D_LOG_PUBSUB D_SENDING " \"type == MQTTPUBLISH\""));
                   
                     uint16_t tl = (buffer[llen+1]<<8)+buffer[llen+2];
                     char topic[tl+1];
@@ -451,10 +451,10 @@ boolean mPubSubClient::loop() {
                     buffer[0] = MQTTPINGRESP;
                     buffer[1] = 0;
                     _client->write(buffer,2);
-                    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_SENDING " \"MQTTPINGREQ\""));
+                    ALOG_DBM( PSTR(D_LOG_PUBSUB D_SENDING " \"MQTTPINGREQ\""));
                 } else if (type == MQTTPINGRESP) {
                     pingOutstanding = false;
-                    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB  "\"MQTTPINGRESP\""));
+                    ALOG_DBM( PSTR(D_LOG_PUBSUB  "\"MQTTPINGRESP\""));
                 }
             }
         }
@@ -703,9 +703,9 @@ if(_client->connected()){
     // delay(1000);
     
     rc = _client->write(buf+(4-llen),length+1+llen);
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "\"_client->write is connected\""));
+    ALOG_DBM( PSTR(D_LOG_PUBSUB "\"_client->write is connected\""));
 }else{
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "\"_client->write NOT CONNECTED\""));
+    ALOG_DBM( PSTR(D_LOG_PUBSUB "\"_client->write NOT CONNECTED\""));
 }
 
 DEBUG_LINE;

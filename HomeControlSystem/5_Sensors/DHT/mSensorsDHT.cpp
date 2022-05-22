@@ -175,7 +175,10 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
         ComfortState cf;
 
         // Check if any reads failed and exit early (to try again).
-        if (sensor[sensor_id].dht->getStatus() != 0) {
+        if (
+          (sensor[sensor_id].dht->getStatus() != 0) ||
+          (newValues.temperature == -1.0f)
+        ){
           AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "Read error"));
           sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_ERROR_ID;
           sensor[sensor_id].instant.isvalid = false;
@@ -249,14 +252,14 @@ void mSensorsDHT::EveryLoop(){
       if(!settings.sensor_active_count){ // Retry init if lost after found during boot
         init(); //search again
       }else{
-          SplitTask_UpdateClimateSensors(sensor_id,DONTREQUIRE_COMPLETE);
-          if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_DONE_ID){ // when its finished, reset timer
-            sensor[sensor_id].instant.sUpdateClimateSensors=SPLIT_TASK_SUCCESS_ID;
-            sensor[sensor_id].instant.tSavedMeasureClimate = millis();
-          }else
-          if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_ERROR_ID){ 
-            sensor[sensor_id].instant.tSavedMeasureClimate = millis();//+5000; //backoff for 5 seconds
-          }
+        SplitTask_UpdateClimateSensors(sensor_id,DONTREQUIRE_COMPLETE);
+        if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_DONE_ID){ // when its finished, reset timer
+          sensor[sensor_id].instant.sUpdateClimateSensors=SPLIT_TASK_SUCCESS_ID;
+          sensor[sensor_id].instant.tSavedMeasureClimate = millis();
+        }else
+        if(sensor[sensor_id].instant.sUpdateClimateSensors==SPLIT_TASK_ERROR_ID){ 
+          sensor[sensor_id].instant.tSavedMeasureClimate = millis();//+5000; //backoff for 5 seconds
+        }
       }
 
     }

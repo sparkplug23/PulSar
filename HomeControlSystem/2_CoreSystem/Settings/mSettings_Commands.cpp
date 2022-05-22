@@ -70,12 +70,12 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
 
       sprintf_P(module_friendlyname_buffer,"%S",pCONT->GetModuleFriendlyName(module_list_id));
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+      ALOG_DBM( PSTR("CHECKING module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
       #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS    
   
       if(jtok = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer]){ 
         #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
+        ALOG_DBM( PSTR("found module_friendlyname_buffer = %s"),module_friendlyname_buffer); 
         #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
         
         JsonParserArray arr = obj[PM_JSON_DEVICENAME].getObject()[module_friendlyname_buffer];
@@ -88,8 +88,8 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
             // DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             DLI->AddDeviceName(device_name_ctr,module_id,device_count++);
             #ifdef ENABLE_LOG_LEVEL_COMMANDS
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
+            ALOG_DBM( PSTR(D_LOG_RELAYS "device_name_ctr = %s"),device_name_ctr); 
+            ALOG_DBM( PSTR(D_LOG_RELAYS "device_count = %d"),device_count);  
             #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
           } //if array
         }//if array

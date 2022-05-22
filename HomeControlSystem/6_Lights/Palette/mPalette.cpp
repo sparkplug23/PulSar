@@ -826,29 +826,32 @@ void mPalette::init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id){
 }
 
 
-void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id){
+void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id)
+{
 
-// {
-//   "ColourPalette": 15,
-//   "PaletteEdit": {
-//     "ColourPalette": 15,
-//     "Data": [
-//       3,
-//       6,
-//       0,
-//       0,
-//       0,
-//       255,0,0,
-//       0,255,0,
-//       0,0,255
-//     ]
-//   },
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": "Static"
-//   },
-//   "Rate":1
-// }
+/*
+{
+  "ColourPalette": 15,
+  "PaletteEdit": {
+    "ColourPalette": 15,
+    "Data": [
+      3,
+      6,
+      0,
+      0,
+      0,
+      255,0,0,
+      0,255,0,
+      0,0,255
+    ]
+  },
+  "AnimationMode": "Effects",
+  "Effects": {
+    "Function": "Static"
+  },
+  "Rate":1
+}
+*/
 
   /**
    * [0] pixel_size, used with map_type to generate map_size (ie colour_map_size = pixel_width*pixel_count)
@@ -1212,8 +1215,6 @@ RgbcctColor mPalette::GetColourFromPalette_Gradient(uint16_t palette_id, uint16_
  */
 RgbcctColor mPalette::GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num, int16_t *pixel_position)
 {
-
-
   /**
    * @brief 
    * New method that includes fastled/wled palette IDs. If the pointer is null
@@ -1472,7 +1473,7 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   // Check for matches with variables names  
   // if ((index_found = pCONT_sup->GetDListIDbyNameCtr(buffer, sizeof(buffer), c, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr)) >= 0) {
   //   // index_found = STATE_NUMBER_OFF__ID;    
-  //     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("index_found = %d"),index_found);    
+  //     ALOG_DBM( PSTR("index_found = %d"),index_found);    
   //     return index_found;
   // }
 
@@ -1484,21 +1485,21 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 
     if(ptr->friendly_name_ctr == nullptr){ 
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("ptr->friendly_name_ctr == nullptr %d %s"),ii,c);     //skipping names not set, including variables names which dont use pointer to name (unless I point to its place later, and include its name length?) Store variable name in dlist 
+      ALOG_DBM( PSTR("ptr->friendly_name_ctr == nullptr %d %s"),ii,c);     //skipping names not set, including variables names which dont use pointer to name (unless I point to its place later, and include its name length?) Store variable name in dlist 
       // move variable name to join standard devicename and just include as indexed? ie 0-20 is their names?
       #endif // ENABLE_LOG_LEVEL_COMMANDS
     }
     if(ptr->friendly_name_ctr != nullptr){ 
       if(ii>PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
         // if(strcmp_P(c,ptr->friendly_name_ctr)==0){
-        //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
+        //   ALOG_DBM( PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
         //   return ii;
         // }
 
         if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr)){ 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
+          ALOG_DBM( PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
     #endif // ENABLE_LOG_LEVEL_INFO
           return ii;            
            
@@ -1617,6 +1618,8 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
   uint16_t pixel_width = 0;
   uint16_t pixel_length = 0;
 
+  // DEBUG_LINE_HERE;
+
   if(ptr == nullptr)
   {
     ptr = palettelist.ptr; // use internal if not set already
@@ -1624,12 +1627,9 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
 
   switch(ptr->flags.fMapIDs_Type){
     default:
-    
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_ERROR, PSTR("ERROR pixel_length=%d"),pixel_length);
+      ALOG_ERR( PSTR("ERROR pixel_length=%d"),pixel_length);
 
-    #endif // ENABLE_LOG_LEVEL_INFO
-
+  // DEBUG_LINE_HERE;
     break;
     case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID: pixel_width = 1; break;
     case MAPIDS_TYPE_HSBCOLOUR_NOINDEX__ID: pixel_width = 1; break;
@@ -1649,6 +1649,17 @@ uint16_t mPalette::GetPixelsInMap(PALETTELIST::PALETTE *ptr, uint8_t pixel_width
   // GetDefaultColourPaletteUserIDsCount
   // GetColourMapSize()
   // Dont do this everytime, as its costly on memory, only update on change
+
+  // DEBUG_LINE_HERE;
+  if(pixel_width==0)
+  {
+  // 
+    ALOG_ERR(PSTR("pixel_width==0, crash error"));
+    ALOG_ERR(PSTR("pixel_width==0, crash errorAA =%S"), ptr->friendly_name_ctr);
+    DEBUG_LINE_HERE_PAUSE;
+    return 1;
+  }
+  // DEBUG_LINE_HERE;
 
   // if(pixel_width){ //so we can divide if not 0
     pixel_length = ptr->colour_map_size/pixel_width; 

@@ -87,7 +87,7 @@ class mDS18X :
 
 
     struct DB18_SENSOR_INFO{ //single sensor data
-      DeviceAddress address = {0}; //phase out
+      DeviceAddress address = {0}; //phase out. May2022: Why? I should need this
       // uint8_t address_stored[8];
       int8_t sensor_group_id = -1; // which pin it comes from 
 

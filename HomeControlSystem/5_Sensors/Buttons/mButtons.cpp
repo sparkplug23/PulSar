@@ -40,6 +40,27 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
 
     // break;
     /************
+     * EVENTS SECTION * 
+    *******************/
+    case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
+      // CommandSet_SDCard_OpenClose_Toggle();
+   
+    
+      // Event for this
+      if(pCONT_rules->event_triggered.module_id == EM_MODULE_SENSORS_BUTTONS_ID)
+      {
+   
+        ALOG_INF(PSTR("Button State Changed1 : MQTTHandler_Sender"));
+   
+        // Send immediately (Button type is held in event, so ConstructJson can make the correct formatted data)
+        mqtthandler_sensor_ifchanged.flags.SendNow = true;
+        MQTTHandler_Sender();
+   
+      }   
+
+
+    break;
+    /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
@@ -348,23 +369,23 @@ void mButtons::ButtonHandler(void)
 
 //held buttons
       if (BUTTON_NOT_PRESSED_ID == state) {
-        buttons[button_index].holdbutton = 0;
+        buttons[button_index].hold_timer = 0;
       } else {
-        buttons[button_index].holdbutton++;
+        buttons[button_index].hold_timer++;
         if (pCONT_set->Settings.flag_system.button_single) {                   // Allow only single button press for immediate action
-          if (buttons[button_index].holdbutton == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
+          if (buttons[button_index].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // Button held for factor times longer
             pCONT_set->Settings.flag_system.button_single = 0;
             // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_SETOPTION "13 0"));  // Disable single press only
             // ExecuteCommand(scmnd, SRC_BUTTON);
           }
         } else {
           if (pCONT_set->Settings.flag_system.button_restrict) {               // Button restriction
-            if (buttons[button_index].holdbutton == loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button hold
+            if (buttons[button_index].hold_timer == loops_per_second * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // Button hold
               buttons[button_index].multipress = 0;
               // SendKey(0, button_index, 3);                // Execute Hold command via MQTT if ButtonTopic is set
             }
           } else {
-            if (buttons[button_index].holdbutton == loops_per_second * hold_time_extent * pCONT_set->Settings.param[P_HOLD_TIME] / 10) {  // Button held for factor times longer
+            if (buttons[button_index].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // Button held for factor times longer
               buttons[button_index].multipress = 0;
               // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_JSON_RESET " 1"));
               // Serial.println("WARNING -- Disabled \"ExecuteCommand(scmnd, SRC_BUTTON);\" command from support_button");
@@ -536,10 +557,7 @@ void mButtons::ButtonHandler(void) {
           buttons[id].window_timer = loops_per_second / 2;  // 0.5 second multi press window
           // No immediate action here -- awaiting for multiple presses            
         }
-              
-        #ifdef USE_MODULE_NETWORK_MQTT
-        mqtthandler_sensor_ifchanged.flags.SendNow = true;
-        #endif // USE_MODULE_NETWORK_MQTT     
+                
 
       } // if button state changed
 
@@ -564,7 +582,7 @@ void mButtons::ButtonHandler(void) {
           if (buttons[id].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button held for factor times longer
             // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_SETOPTION "13 0"));  // Disable single press only             // ExecuteCommand(scmnd, SRC_BUTTON); 
           // <length of data>,<state>,<type ie single/multi/hold><count>  
-            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);
+            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // ERROR - Not sure what this section will do, long press no multi?
           }
         } 
         else 
@@ -580,8 +598,7 @@ void mButtons::ButtonHandler(void) {
           
             // 3 = button pressed state, presses of button, type is long press?
             // <length of data>,<state>,<type ie single/multi/hold><count>  
-            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
-
+            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID); 
           }
           // Long pressed not yet reached 
           else {
@@ -596,7 +613,7 @@ void mButtons::ButtonHandler(void) {
                 // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_RESET " 1"));
                 // ExecuteCommand(scmnd, SRC_BUTTON);                
                 ALOG_INF(PSTR(D_LOG_BUTTONS D_CMND_RESET " 1"));                
-                pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
+                pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // Resetting command
               }
             }
           }
@@ -621,7 +638,9 @@ void mButtons::ButtonHandler(void) {
              * @brief What to do with multiple key presses
              **/
             // <length of data>,<state>,<type ie single/multi/hold><count>  
-            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
+            // Single or Multiple Events 
+
+            pCONT_rules->NewEventRun_NumArg(EM_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 3, state, buttons[id].press_counter == 1 ? INPUT_TYPE_SINGLE_PRESS_ID : INPUT_TYPE_MULTIPLE_PRESS_ID, buttons[id].press_counter);
 
             buttons[id].press_counter = 0;
           }

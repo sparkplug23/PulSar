@@ -136,7 +136,7 @@ const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_
       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName(pCONT->GetVectorIndexbyModuleUniqueID(module_id)), device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+      ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
       #endif // ENABLE_LOG_LEVEL_INFO
     }
     return buffer;
@@ -211,9 +211,7 @@ int16_t DeviceNameList::GetDeviceIDbyName(const char* name_tofind, int8_t device
   char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);
 
   if(p_start_of_found == NULL){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("p_start_of_found == NOT FOUND"));
-    #endif// ENABLE_LOG_LEVEL_INFO
+    ALOG_DBM( PSTR("p_start_of_found == NOT FOUND") );
     return -1;
   }
 
@@ -267,19 +265,19 @@ int16_t DeviceNameList::GetDeviceIDbyName(const char* name_tofind, int8_t device
 
   #ifdef ENABLE_LOG_LEVEL_INFO
           // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,number_buffer.unique_group_ids[delimeter_count]);
-          AddLog(LOG_LEVEL_TEST,
-            PSTR(
-              "\n\rSearching \"%s\"\n\r"
-              "Found \"%s\" @ index %d\n\r"
-              "delimeter_count %d\n\r"
-              "delimeter_within_class_count %d\n\r"
-            ),         
-            name_tofind,
-            p_start_of_found,
-            p_start_of_found - haystack, // pointer distance
-            delimeter_count,
-            delimeter_within_class_count
-          );
+          // AddLog(LOG_LEVEL_TEST,
+          //   PSTR(
+          //     "\n\rSearching \"%s\"\n\r"
+          //     "Found \"%s\" @ index %d\n\r"
+          //     "delimeter_count %d\n\r"
+          //     "delimeter_within_class_count %d\n\r"
+          //   ),         
+          //   name_tofind,
+          //   p_start_of_found,
+          //   p_start_of_found - haystack, // pointer distance
+          //   delimeter_count,
+          //   delimeter_within_class_count
+          // );
           #endif // ENABLE_LOG_LEVEL_INFO
 
   return delimeter_within_class_count;

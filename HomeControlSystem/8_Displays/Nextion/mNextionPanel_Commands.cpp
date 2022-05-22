@@ -108,7 +108,7 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
     if(jtok = obj["commands_formatted"]){
         JsonParserArray array = jtok;
         for(auto val : array) {
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+            ALOG_DBM( PSTR("F::%s %s"),__FUNCTION__,val.getStr());
             nextionSendCmd_ContainingFormattedText(val.getStr());
         }
     }

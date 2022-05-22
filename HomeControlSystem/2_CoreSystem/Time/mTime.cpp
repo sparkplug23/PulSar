@@ -55,9 +55,11 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_SECOND:{
       
+      #ifdef ENABLE_DEVFEATURE_SHOW_UPTIME_SECONDS
       // #ifndef DISABLE_SERIAL0_CORE
-      // Serial.println(GetUptime());
+      Serial.println(GetUptime());
       // #endif
+      #endif // ENABLE_DEVFEATURE_SHOW_UPTIME_SECONDS
       
 
       //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);

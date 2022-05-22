@@ -622,7 +622,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
     anim_progress_mqtt_function_callback(); // Call the function
     return JsonBuilderI->End();
   }
-  return 0; // None to send
+  return false;
 
 }
 
@@ -808,7 +808,7 @@ if(indexPixel<10)
       pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,indexPixel);
     } // pixel_group.flags.fEnabled
 
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
+    ALOG_DBM( PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
 
   #else
 
@@ -826,7 +826,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
   DEBUG_LINE;
   if(stripbus == nullptr){    
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "stripbus == nullptr"));
+    ALOG_DBM( PSTR(D_LOG_NEO "stripbus == nullptr"));
     #endif
   }
 
@@ -926,7 +926,7 @@ color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
       color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
     } // pixel_group.flags.fEnabled
 
-  //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
+  //   ALOG_DBM( PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
 
     // RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
 
@@ -1087,7 +1087,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 // void mAnimatorLight::FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor){ 
 
 //   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "FadeToNewColour"));
+//   ALOG_DBM( PSTR(D_LOG_NEO "FadeToNewColour"));
 //   #endif
   
 //     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -1124,8 +1124,8 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 //   RgbcctColor targetColor_npb = targetColor;//RgbcctColor(targetColor.R,targetColor.G,targetColor.B);
 
 //   #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-//   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("fromcolor_npb=%d,%d,%d"),fromcolor_npb.R,fromcolor_npb.G,fromcolor_npb.B);
-//   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("targetColor_npb=%d,%d,%d"),targetColor_npb.R,targetColor_npb.G,targetColor_npb.B);
+//   // ALOG_DBM( PSTR("fromcolor_npb=%d,%d,%d"),fromcolor_npb.R,fromcolor_npb.G,fromcolor_npb.B);
+//   // ALOG_DBM( PSTR("targetColor_npb=%d,%d,%d"),targetColor_npb.R,targetColor_npb.G,targetColor_npb.B);
 //   #endif // ENABLE_LOG_LEVEL_DEBUG_MORE
 
 //   //load start
@@ -1276,7 +1276,8 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE) {
+mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE)
+{
   this->anim_progress_mqtt_function_callback = anim_progress_mqtt_function_callback;
   return *this;
 }
@@ -1679,7 +1680,7 @@ uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level){
   // Awaiting total redesign
   
   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
+  // ALOG_DBM( PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
   // #endif
 
   JBI->Start();

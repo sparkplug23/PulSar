@@ -150,7 +150,7 @@ void mSettings::Function_Template_Load(){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR("RULES_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  ALOG_DBM( PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
@@ -567,26 +567,26 @@ bool mSettings::SettingsBufferAlloc(void)
  * */
 void mSettings::SettingsLoad_CheckSuccessful(){
   
-  // if (Settings.param[P_BOOT_LOOP_OFFSET]) {
+  // if (Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {
   //   // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
-  //   if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET]) {       // Restart twice
+  //   if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
   //     Settings.flag_network.user_esp8285_enable = 0;       // Disable ESP8285 Generic GPIOs interfering with flash SPI
-  //     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
+  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
   //       // for (uint8_t i = 0; i < MAX_RULE_SETS; i++) {
   //       //   // if (bitRead(Settings.rule_stop, i)) {
   //       //   //   bitWrite(Settings.rule_enabled, i, 0);  // Disable rules causing boot loop
   //       //   // }
   //       // }
   //     }
-  //     // if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
+  //     // if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
   //     //   Settings.rule_enabled = 0;                  // Disable all rules
   //     // }
-  //     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
+  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
   //       for (uint8_t i = 0; i < sizeof(Settings.module_pins); i++) {
   //         Settings.module_pins.io[i] = GPIO_NONE_ID;         // Reset user defined GPIO disabling sensors
   //       }
   //     }
-  //     if (RtcReboot.fast_reboot_count > Settings.param[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
+  //     if (RtcReboot.fast_reboot_count > Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
   //       Settings.module = MODULE_WEMOS_ID;             // Reset module to Sonoff Basic
   //       Settings.last_module = MODULE_WEMOS_ID;
   //     }

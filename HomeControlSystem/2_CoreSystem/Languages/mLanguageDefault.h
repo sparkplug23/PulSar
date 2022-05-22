@@ -310,8 +310,11 @@
   #define D_MODULE_CONTROLLER_FAN_PWM_CTR              "mFan"
   #define D_MODULE_CONTROLLER_FAN_PWM_FRIENDLY_CTR              "fan"
 
-#define D_MODULE_CONTROLLER_SENSOR_COLOURS_CTR "mSensorColours"
-#define D_MODULE_CONTROLLER_SENSOR_COLOURS_FRIENDLY_CTR "sensor_colours"
+  #define D_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_CTR "hvac_strip_colour"
+  #define D_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_FRIENDLY_CTR "hvac_strip_colour"
+
+#define D_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR "mImmersionTankColour"
+#define D_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_FRIENDLY_CTR "sensor_colours"
 
 #define D_MODULE_CONTROLLER_TREADMILL_CTR "mTreadmill"
 #define D_MODULE_CONTROLLER_TREADMILL_FRIENDLY_CTR "treadmill"
@@ -1248,6 +1251,8 @@
 #define D_UNIT_WATTHOUR "Wh"
 #define D_UNIT_WATT_METER_QUADRAT "W/m²"
 
+#define D_CMND_RESET "CommandReset"
+
 /**
  *  Log message prefix
  * */
@@ -1755,6 +1760,8 @@
 #define D_JSON_PALETTE_GENERATION "PaletteGeneration"
 
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
+
+#define D_JSON_COLOUR_TYPE "ColourType"
 
 
 #define D_JSON_HARDWARE_TYPE "HardwareType"

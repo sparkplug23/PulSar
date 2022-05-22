@@ -718,6 +718,18 @@ void mMQTT::parsesub_MQTTSettingsCommand(){
 
 void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, const char* postfix_topic_ctr){
 
+  if(pubsub==nullptr)
+  {
+      DEBUG_LINE_HERE;
+      return; // to stop crashing as some buffers below are only configured on connection
+
+  }
+
+  if(!pubsub->connected())
+  {
+    return; // to stop crashing as some buffers below are only configured on connection
+  }
+
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
 
   uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
@@ -762,9 +774,9 @@ void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const cha
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
   snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix);  //PSTR may broke this?
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "topic_ctr=\"%s\""),topic_ctr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  #endif// ENABLE_LOG_LEVEL_INFO
   
   ppublish(topic_ctr,payload_ctr,retain_flag);
 
@@ -840,15 +852,15 @@ DEBUG_LINE;
 DEBUG_LINE;
 //TRACE();
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
+    ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
+    ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
     #endif// ENABLE_LOG_LEVEL_INFO
 
 DEBUG_LINE;
 // //TRACE();
 //     #ifdef SERIAL_DEBUG_LOW_LEVEL
 //     if(strstr(payload,"{}")){
-//         AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_PUBSUB D_ERROR "> {}"));
+//         ALOG_DBM( PSTR(D_LOG_PUBSUB D_ERROR "> {}"));
 //     }
 //     #endif
 
@@ -867,17 +879,23 @@ boolean mMQTT::psubscribe(const char* topic) {
   char ttopic[70];
   memset(ttopic,0,sizeof(ttopic));
   sprintf(ttopic,PSTR("%s/%s"),pCONT_set->Settings.mqtt.prefixtopic,topic);
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR("Subscribing to \"%s\""), ttopic);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
   return pubsub->subscribe(ttopic, 0);
 }
 
 
 
 
+/**
+ * @brief This is not thread safe
+ * 
+ * @return const char* 
+ */
+const char* mMQTT::state_ctr(void)
+{
 
-const char* mMQTT::state_ctr(void){
+  ALOG_ERR( PSTR("mMQTT::state_ctr - Not thread safe") );
+
   DEBUG_PRINT_FUNCTION_NAME;
     switch(pubsub->state()){
       case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");

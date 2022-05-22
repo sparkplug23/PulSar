@@ -61,7 +61,7 @@ class mRuleEngine :
     }jsonbuffer;
 
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
-    void ShowRuleEvent_AddLogByIndex(uint8_t show_type = 0);
+    void ShowRuleEvent_AddLog(uint8_t show_type = 0);
 
     bool AppendEventToRules(mEvent::EVENT_PART* trigger, mEvent::EVENT_PART* command);
 
@@ -80,8 +80,9 @@ class mRuleEngine :
     // ~mRuleEngine(){
     //   deallocateData();
     // };
-uint8_t GetConfiguredCount();
-uint8_t GetEnabledCount();
+
+    uint8_t GetConfiguredCount();
+    uint8_t GetEnabledCount();
 
     // bool allocateData(uint16_t len){
     //   // Serial.println("allocateData");
@@ -241,6 +242,10 @@ uint8_t rule_count2 = 0;
     //   event_triggered.value.data[0] = _state;
     //   pCONT->Tasker_Interface(0);
     // };
+
+    void NewEventRun_NumArg(uint16_t _module_id=0, uint16_t function_event=0, uint8_t _index=0, uint8_t _data_length=0, ...); 
+
+
     void Encoding( uint8_t encoding){
       event_triggered.value.encoding = encoding;
     };

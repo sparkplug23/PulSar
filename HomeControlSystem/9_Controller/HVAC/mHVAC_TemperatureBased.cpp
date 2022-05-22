@@ -74,11 +74,27 @@ void mHVAC::FunctionHandler_Programs_Temps(void){
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
 
-    // Update sensor values    
+    // // Update sensor values    
+    // sensors_reading_t reading;
+    // pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)->GetSensorReading(&reading);
+    // zone[zone_id].sensor.temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
+    // zone[zone_id].sensor.humidity    = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+
+// I need to add checks, for when a sensor is not configured properly!
+
+#ifdef ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
+ 
     sensors_reading_t reading;
-    pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)->GetSensorReading(&reading);
+    pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)->GetSensorReading(&reading, zone[zone_id].sensor.index);
     zone[zone_id].sensor.temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
     zone[zone_id].sensor.humidity    = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+
+#else
+zone[zone_id].sensor.temperature = 1.1;
+zone[zone_id].sensor.humidity = 2.2;
+  
+#endif // ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
+
 
     // Store current temperature
     zone[zone_id].program_temp_method->SetCurrentTemperature(zone[zone_id].sensor.temperature);
@@ -89,7 +105,7 @@ void mHVAC::FunctionHandler_Programs_Temps(void){
     //  React if timer has started or ended
     if(zone[zone_id].program_temp_method->IsChangedThenReset())
     {
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("program_temp_method IsChangedThenReset %d"), zone_id);
+      ALOG_DBM( PSTR("program_temp_method IsChangedThenReset %d"), zone_id);
       if(zone[zone_id].program_temp_method->OutputDesiredState())
       {
         SetZoneActive(zone_id, 1); // This can be changed to "FUNC_SET_POWER" for internal relay driver control

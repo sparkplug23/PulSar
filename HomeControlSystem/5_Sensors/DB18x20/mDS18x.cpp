@@ -41,7 +41,7 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
   }
   
   // Only continue to remaining functions if sensor has been detected and enabled
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -265,7 +265,7 @@ void mDS18X::Pre_Init(){
 
 void mDS18X::Init(void){
 
-  AddLog(LOG_LEVEL_DEBUG,PSTR("mDS18X::init"));
+  // AddLog(LOG_LEVEL_DEBUG,PSTR("mDS18X::init"));
 
   // sensor group 1 exists
   uint8_t sensor_group_count = 0;
@@ -295,7 +295,8 @@ void mDS18X::Init(void){
                   sensor_id<group_sensor_found;
                   sensor_id++
           ){
-      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "FOR sensor_id=%d, group_sensor_found=%d"),sensor_id,group_sensor_found);
+          
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "FOR sensor_id=%d, group_sensor_found=%d"),sensor_id,group_sensor_found);
         // get sensor and add to list 
         
         if(sensor_group[sensor_group_id].dallas->getAddress(sensor[sensor_count].address,sensor_id))
@@ -327,8 +328,9 @@ void mDS18X::Init(void){
 
 
   if(!sensor_count){    
-    AddLog(LOG_LEVEL_ERROR,PSTR("No sensor address found"));
     db18_sensors_active = 0; // reset to none found so backoff will correctly happen
+    tSavedMeasureSensor = millis() + 10000; // 10 second backoff
+    ALOG_DBG(PSTR(D_LOG_DSB "None Found: Backoff 10s"));
     return;
   }
 
@@ -463,14 +465,14 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = [%d]"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+              ALOG_DBM( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = [%d]"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }
             else
             {
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+              ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
             }
           
           } // end if
@@ -565,7 +567,7 @@ void mDS18X::ScanSensorAddresses_JsonObject(char* buffer, uint8_t buflen)
 // Update: when temps have changed (add flag for new value), or 60 seconds has elapsed (REQUIRES: retain)
 uint8_t mDS18X::ConstructJSON_Sensor(uint8_t json_level){
 
-  JsonBuilderI->Start();
+  JBI->Start();
   
   char buffer[40];
   char title [40];
@@ -576,23 +578,28 @@ uint8_t mDS18X::ConstructJSON_Sensor(uint8_t json_level){
     
     if(sensor[sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){  
 
-      JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
-        JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].reading.val);
-        JsonBuilderI->Add(D_JSON_ISVALID, sensor[sensor_id].reading.isvalid);
-        JsonBuilderI->Add(D_JSON_CAPTURE_UPSECONDS, sensor[corrected_sensor_id].reading.captureupsecs);
+      JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+        JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].reading.val);
+        JBI->Add(D_JSON_ADDRESS,     sensor[sensor_id].address[7]);
 
-        // if(json_level <= JSON_LEVEL_DEBUG){
-          JsonBuilderI->Add(D_JSON_ADDRESS, sensor[sensor_id].address[7]);
-          JBI->Add("set_from_known_address",sensor[sensor_id].flag.set_from_known_address);
-        //   JsonBuilderI->Add("ID", sensor_id);
-        //   JsonBuilderI->Add("Corrected_ID", corrected_sensor_id);
-        // }
-      JsonBuilderI->Level_End();  
+        if(json_level >= JSON_LEVEL_DETAILED)
+        {
+          JBI->Add(D_JSON_ISVALID, sensor[sensor_id].reading.isvalid);
+          JBI->Add(D_JSON_CAPTURE_UPSECONDS, sensor[corrected_sensor_id].reading.captureupsecs);
+        }
+
+        if(json_level >= JSON_LEVEL_DEBUG)
+        {
+          JBI->Add("set_address",sensor[sensor_id].flag.set_from_known_address);
+          JBI->Add("ID", sensor_id);
+          JBI->Add("Corrected_ID", corrected_sensor_id);
+        }
+      JBI->Level_End();  
     }
 
   } // END for
-    
-  return JsonBuilderI->End();
+
+  return JBI->End();
 
 }
 
@@ -600,16 +607,52 @@ uint8_t mDS18X::ConstructJSON_Settings(uint8_t json_level){
 
   char buffer[20];
 
-  JsonBuilderI->Start();
+  JBI->Start();
   
-  JsonBuilderI->Add("found", db18_sensors_active);
+  JBI->Add("found", db18_sensors_active);
 
-  JsonBuilderI->Level_Start("Address");
+  JBI->Level_Start("Address");
 
   for(int id=0;id<settings.nSensorsFound;id++){
     snprintf(buffer, sizeof(buffer), "sens%d_%d_%d", id, sensor[id].address[6], sensor[id].address[7]);
-    JsonBuilderI->Array_AddArray(buffer, &sensor[id].address[0], 8);
+    JBI->Array_AddArray(buffer, &sensor[id].address[0], 8);
   }
+
+
+  JBI->Array_Start("getResolution");
+  // check both groups
+  for(uint8_t sensor_group_id=0;
+                  sensor_group_id<settings.group_count;
+                  sensor_group_id++
+  ){
+    // Search for id match 
+      for(int sensor_id=0;
+                sensor_id<db18_sensors_active;
+                sensor_id++
+      ){
+
+        if(sensor[sensor_id].sensor_group_id == sensor_group_id)
+        {
+          uint8_t resolution = sensor_group[sensor_group_id].dallas->getResolution(sensor[sensor_id].address);
+          
+          JBI->Add(resolution);
+
+        }
+
+      }
+
+  }
+
+
+  JBI->Array_End();
+
+
+
+
+
+
+  JBI->Add("found_p0", sensor_group[0].sensor_count);
+  JBI->Add("found_p1", sensor_group[1].sensor_count);
 
 
   JBI->Add("pin0", sensor_group[0].pin);
@@ -627,9 +670,9 @@ uint8_t mDS18X::ConstructJSON_Settings(uint8_t json_level){
 
 
 
-  JsonBuilderI->Level_End();
+  JBI->Level_End();
 
-  // JsonBuilderI->Level_Start("AddressFull");
+  // JBI->Level_Start("AddressFull");
 
   //   root["rate_measure_ms"] = settings.rate_measure_ms;
   //   // root["tRateSecs"] = mqtthandler_sensor_ifchanged.tRateSecs;
@@ -641,7 +684,7 @@ uint8_t mDS18X::ConstructJSON_Settings(uint8_t json_level){
   //   //Add here - function that takes handler list and appends its config here by name 
 
 
-  return JsonBuilderI->End();
+  return JBI->End();
 
 
 }
@@ -694,10 +737,10 @@ void mDS18X::WebAppend_Root_Status_Table_Draw(){
   char buffer[100];
 
   for(int sensor_id=0;sensor_id<db18_sensors_active;sensor_id++){ //add number in name? List needed? also hold user defined name?
-    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      JsonBuilderI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
-      JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_db18","?");   
-    JsonBuilderI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+    JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+      JBI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+      JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_db18","?");   
+    JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }
 
 }
@@ -707,7 +750,7 @@ void mDS18X::WebAppend_Root_Status_Table_Data(){
   
   uint8_t sensor_counter = 0;
   
-  JsonBuilderI->Array_Start("tab_db18");// Class name
+  JBI->Array_Start("tab_db18");// Class name
   uint8_t corrected_sensor_id = 0;
 
   for(int sensor_id=0;sensor_id<db18_sensors_active;sensor_id++){
@@ -736,15 +779,15 @@ void mDS18X::WebAppend_Root_Status_Table_Data(){
       sprintf(colour_ctr,"%s","#ffffff");
     }
 
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",sensor_id);
-      JsonBuilderI->Add("ih",table_row);
-      JsonBuilderI->Add("fc",colour_ctr);
-    JsonBuilderI->Level_End();
+    JBI->Level_Start();
+      JBI->Add("id",sensor_id);
+      JBI->Add("ih",table_row);
+      JBI->Add("fc",colour_ctr);
+    JBI->Level_End();
   
   }
 
-  JsonBuilderI->Array_End();
+  JBI->Array_End();
 
 }
 #endif // USE_MODULE_NETWORK_WEBSERVER
@@ -758,21 +801,13 @@ void mDS18X::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
 
   // memcpy(sensor[device_id].address_stored,address_to_find,sizeof(sensor[device_id].address_stored));
 
-
   uint8_t sensor_count = 0; // reset
   // Address moved into struct, I need to rearrange now with ids
-
-  // DEBUG_LINE_HERE;
-  // DEBUG_LINE_HERE;
-  // DEBUG_LINE_HERE;
-  // delay(3000);
-
-  
+ 
   AddLog(LOG_LEVEL_INFO, "searching start address_id=%d", address_id);
 
-  
-      AddLog_Array(LOG_LEVEL_COMMANDS, "address_to_find",address_to_find, (uint8_t)8);
-      AddLog_Array(LOG_LEVEL_COMMANDS, "address_saved",  sensor[0].address, (uint8_t)8);
+  AddLog_Array(LOG_LEVEL_COMMANDS, "address_to_find",address_to_find, (uint8_t)8);
+  AddLog_Array(LOG_LEVEL_COMMANDS, "address_saved",  sensor[0].address, (uint8_t)8);
 
 
   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){

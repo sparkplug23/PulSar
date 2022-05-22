@@ -176,7 +176,7 @@ int8_t mDoorBell::Tasker(uint8_t function, JsonParserObject obj){
 
 void mDoorBell::EveryLoop(){
 
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Tasker::mDoorBell"));
+  ALOG_DBM( PSTR("Tasker::mDoorBell"));
 
   if((BellSwitch_OnOff()!=doorbell_switch.event.state)
       &&mTime::TimeReachedNonReset(&tDetectTimeforDebounce,100)

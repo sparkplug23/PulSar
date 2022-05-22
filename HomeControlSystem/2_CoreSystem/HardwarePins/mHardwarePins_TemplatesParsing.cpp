@@ -98,12 +98,12 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
       
       real_pin = GetRealPinNumberFromName(key);
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
+      ALOG_DBM( PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
       #endif // ENABLE_LOG_LEVEL_COMMANDS
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+      ALOG_DBM( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
       #endif // ENABLE_LOG_LEVEL_COMMANDS
       
       if(index_pin>=0){
@@ -144,7 +144,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
     
     const char* base_ctr = jtok.getStr();
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
+    ALOG_DBM( PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
     #endif // ENABLE_LOG_LEVEL_COMMANDS
     pCONT_set->Settings.module = GetModuleIDbyName(base_ctr);
     char buffer[40];
@@ -452,7 +452,7 @@ void mHardwarePins::GpioInit(void)
   // #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
+    ALOG_DBM( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
 
     #endif //  ENABLE_LOG_LEVEL_INFO
   //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -605,7 +605,7 @@ void mHardwarePins::GpioInit(void)
     
     DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
+    ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
     #endif // ENABLE_LOG_LEVEL_INFO
     
     if (((i < 6) || (i > 11)) && (0 == mgpio))

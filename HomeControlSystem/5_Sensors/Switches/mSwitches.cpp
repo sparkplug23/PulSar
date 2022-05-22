@@ -368,7 +368,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
           break;
         case SWITCHMODE_PUSHBUTTONHOLD_ID:
           if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch)) {
-            switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
+            switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10;
           }
           if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
             switches[i].holdwallswitch = 0;
@@ -377,7 +377,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
           break;
         case SWITCHMODE_PUSHBUTTONHOLD_INV_ID:
           if ((SWITCH_NOT_PRESSED_ID == state) && (SWITCH_PRESSED_ID == switches[i].lastwallswitch)) {
-            switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.param[P_HOLD_TIME] / 10;
+            switches[i].holdwallswitch = loops_per_second * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10;
           }
           if ((SWITCH_PRESSED_ID == state) && (SWITCH_NOT_PRESSED_ID == switches[i].lastwallswitch) && (switches[i].holdwallswitch)) {
             switches[i].holdwallswitch = 0;

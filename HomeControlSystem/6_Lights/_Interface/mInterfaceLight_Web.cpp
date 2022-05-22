@@ -521,7 +521,7 @@ void mInterfaceLight::GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g
   // DEBUG_LINE;
   // if(stripbus == nullptr){    
   //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "stripbus == nullptr"));
+  //   ALOG_DBM( PSTR(D_LOG_NEO "stripbus == nullptr"));
   //   #endif
   // }
   // RgbTypeColor color_hardware = stripbus->GetPixelColor(indexPixel);

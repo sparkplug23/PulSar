@@ -148,7 +148,10 @@
 #define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
 #define MQTT_USER                     "DVES_USER"       // [MqttUser] MQTT user
 #define MQTT_PASS                     "DVES_PASS"       // [MqttPassword] MQTT password
-#define MQTT_MAX_PACKET_SIZE          2000
+
+#ifndef   MQTT_MAX_PACKET_SIZE
+#define   MQTT_MAX_PACKET_SIZE          2000
+#endif // MQTT_MAX_PACKET_SIZE
 
 #define ENABLE_MQTT_DEBUG_TELEMETRY
 #define USE_MQTT_RETAINED_VERSION_HISTORY_CHECK
@@ -247,7 +250,7 @@
 
 #define KEY_CHECK_TIME         1000
 #define KEY_DEBOUNCE_TIME      50                // [ButtonDebounce] Number of mSeconds button press debounce time
-#define KEY_HOLD_TIME          40                // [SetOption32] Number of 0.1 seconds to hold Button or external Pushbutton before sending HOLD message
+#define KEY_HOLD_TIME          20                // [SetOption32] Number of 0.1 seconds to hold Button or external Pushbutton before sending HOLD message
 #define SWITCH_DEBOUNCE_TIME   50                // [SwitchDebounce] Number of mSeconds switch press debounce time
 #define SWITCH_MODE            SWITCHMODE_TOGGLE_ID            // [SwitchMode] TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV, PUSHBUTTON_TOGGLE (the wall switch state)
 #define WS2812_LEDS            20                // [Pixels] Number of WS2812 ledout.index to start with (max is 512)
@@ -264,9 +267,9 @@
 #define FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES   false
 
 
-  #ifndef SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS
-  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 10
-  #endif
+#ifndef SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS
+#define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 10
+#endif
 
 
 /*********************************************************************************************\

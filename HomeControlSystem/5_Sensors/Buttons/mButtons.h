@@ -29,7 +29,15 @@
 
 #include "2_CoreSystem/Time/mTime.h"
 
-enum ButtonStates { BUTTON_PRESSED_ID, BUTTON_NOT_PRESSED_ID };
+enum ButtonStates { 
+  BUTTON_PRESSED_ID, 
+  BUTTON_NOT_PRESSED_ID };
+
+
+
+
+
+// BUTTON_HOLD_PRESSED_ID
 
 DEFINE_PGM_CTR(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR) "button_table";
 
@@ -76,30 +84,52 @@ class mButtons :
     
 bool ModuleEnabled();
 
+
+#ifndef MAX_KEYS
 #define MAX_KEYS 8                 // Max number of keys or buttons
+#endif // MAX_KEYS
 
 uint8_t GetHardwareSpecificPullMethod(uint8_t real_pin);
 
 // unsigned long button_debounce = 0;          // Button debounce timer
 
 struct BUTTONS{
-  uint16_t holdbutton =0;      // Timer for button hold
-  uint8_t multiwindow = 0;      // Max time between button presses to record press count
-  uint8_t multipress = 0;       // Number of button presses within multiwindow
+  uint16_t hold_timer =0;      // Timer for button hold
+  uint8_t window_timer = 0;//multiwindow = 0;      // Max time between button presses to record press count
+  uint8_t press_counter = 0;//multipress = 0;       // Number of button presses within multiwindow
   
-  uint8_t lastbutton_active_state = BUTTON_NOT_PRESSED_ID;  // Last button states
+  // uint8_t lastbutton_active_state = BUTTON_NOT_PRESSED_ID;  // Last button states
+  uint8_t last_state = BUTTON_NOT_PRESSED_ID;  // Last button states
+
+
   uint8_t active_state_value = false; //defualt active high
 
   /**
    * @note isactive will always signify active or not
    * */
   uint8_t  isactive     = false;
-  uint8_t  state     = false;
+  uint8_t  state     = BUTTON_NOT_PRESSED_ID;
   // uint8_t  isactive  = false;
   uint8_t  ischanged = false;
   int8_t pin = -1; // -1 is not active
 
 }buttons[MAX_KEYS];
+
+/**
+ * @brief Need button event, so its stored as last event
+ * Single/Multi/Hold
+ * 
+ * If the event is reported BEFORE rules_event can clear, then it can be used in the json mqtt message
+ * 
+ * 
+ **/
+// struct BUTTON_EVENT{
+//   uint8_t type_id = INPUT_TYPE_LENGTH_ID;
+//   uint8_t device_id = 0;
+//   uint8_t state = 0;
+//   uint8_t count = 0;
+// }last_event;
+
 
 uint8_t dual_hex_code = 0;                  // Sonoff dual input flag
 uint8_t key_no_pullup = 0x00;                  // key no pullup flag (1 = no pullup)

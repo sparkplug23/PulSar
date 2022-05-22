@@ -7,8 +7,7 @@
 void mRelays::parse_JSONCommand(JsonParserObject obj)
 {
 
-
-  // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::parse_JSONCommand"));
+  ALOG_INF(PSTR("mRelays::parse_JSONCommand"));
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;

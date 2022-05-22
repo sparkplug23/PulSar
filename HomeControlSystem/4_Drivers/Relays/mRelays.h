@@ -120,11 +120,11 @@ class mRelays :
     uint32_t tSavedTick = millis(),tSavedForceUpdate;
     uint8_t toggle_bit = 0;
     
-  #ifndef DISABLE_WEBSERVER
-    void WebAppend_Root_Status_Table();
-    void WebAppend_Root_Draw_PageTable();
-    void WebAppend_Root_Add_Buttons();
-  #endif // DISABLE_WEBSERVER
+  // #ifndef DISABLE_WEBSERVER
+  //   void WebAppend_Root_Status_Table();
+  //   void WebAppend_Root_Draw_PageTable();
+  //   void WebAppend_Root_Add_Buttons();
+  // #endif // DISABLE_WEBSERVER
 
     // uint32_t tSavedTest = millis();
 

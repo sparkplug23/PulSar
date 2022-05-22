@@ -75,7 +75,7 @@ uint16_t mShellyDimmer::CommandGet_SecondsToRemainOn()
 bool mShellyDimmer::SetChannels(void)
 {
 #ifdef SHELLY_DIMMER_DEBUG
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(SHD_LOGNAME "SetChannels:"));
+    ALOG_DBM( PSTR(SHD_LOGNAME "SetChannels:"));
     // AddLogBuffer(LOG_LEVEL_DEBUG_MORE, (uint8_t *)XdrvMailbox.data, XdrvMailbox.data_len);
 #endif  // SHELLY_DIMMER_DEBUG
 

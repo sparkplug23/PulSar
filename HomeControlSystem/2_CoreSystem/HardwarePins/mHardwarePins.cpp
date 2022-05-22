@@ -280,7 +280,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetRealPinNumberFromName = %d"), pin);
+    ALOG_DBM( PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP8266
 
@@ -297,7 +297,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
     if(strcmp(c,buffer)==0)
     {
       pin = gpio_pin_by_index[i];
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("matched pin %d %d"),pin,i);
+      ALOG_DBM( PSTR("matched pin %d %d"),pin,i);
       break;
     }else{
 
@@ -319,7 +319,7 @@ int8_t mHardwarePins::GetRealPinNumberFromName(const char* c){
   // }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetRealPinNumberFromName = %d"), pin);
+    ALOG_DBM( PSTR("GetRealPinNumberFromName = %d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
   #endif // ESP32
 
@@ -455,7 +455,7 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) {
 {
   
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
+    ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
     #endif // ENABLE_LOG_LEVEL_COMMANDS
   
   

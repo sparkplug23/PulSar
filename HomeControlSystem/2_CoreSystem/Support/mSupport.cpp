@@ -23,7 +23,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
         // randomSeed(analogRead(34)); //esp32
       #endif
 
-      // pinMode(18, OUTPUT);
+      // pinMode(14, OUTPUT);
       // pinMode(19, OUTPUT);
 
   #ifndef USE_MODULE_NETWORK_WIFI
@@ -53,7 +53,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_SECOND:{
 
-      // DIGITAL_INVERT_PIN(18);
+      // DIGITAL_INVERT_PIN(14);
       // DIGITAL_INVERT_PIN(19);
 
 

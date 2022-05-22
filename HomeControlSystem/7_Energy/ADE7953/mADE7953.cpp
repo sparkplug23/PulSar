@@ -154,7 +154,7 @@ void mEnergyADE7953::GetData(void)
       reg[i >> 2][i &3] = value;
     }
   }
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("ADE: %d, %d, [%d, %d, %d, %d], [%d, %d, %d, %d]"),
+  ALOG_DBM( PSTR("ADE: %d, %d, [%d, %d, %d, %d], [%d, %d, %d, %d]"),
     measured.voltage_rms, measured.period,
     reg[0][0], reg[0][1], reg[0][2], reg[0][3],
     reg[1][0], reg[1][1], reg[1][2], reg[1][3]);
@@ -177,7 +177,7 @@ void mEnergyADE7953::GetData(void)
   uint32_t current_rms_sum = measured.current_rms[0] + measured.current_rms[1];
   uint32_t active_power_sum = measured.active_power[0] + measured.active_power[1];
 
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("ADE: U %d, C %d, I %d + %d = %d, P %d + %d = %d"),
+  ALOG_DBM( PSTR("ADE: U %d, C %d, I %d + %d = %d, P %d + %d = %d"),
     measured.voltage_rms, measured.period,
     measured.current_rms[0], measured.current_rms[1], current_rms_sum,
     measured.active_power[0], measured.active_power[1], active_power_sum);

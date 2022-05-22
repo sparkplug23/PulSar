@@ -157,27 +157,26 @@ void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 }
 
 // Event (not command or trigger)
-void mRuleEngine::ShowRuleEvent_AddLogByIndex(uint8_t show_type)
+void mRuleEngine::ShowRuleEvent_AddLog(uint8_t show_type)
 {
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR("1"
-      "\n\rIndex:\t %d\n\r"
+  AddLog(LOG_LEVEL_INFO, PSTR(""
+      "\n\r\n\r"
       "Event>>\n\r"
       "\tmodule:\t%d\n\r"
       "\tfunction:\t%d\n\r"
       "\tdevice_id:\t%d\n\r"
       "\tvalue:\t\t\t[%d,%d,%d,%d,%d]\n\r"
-    "2"),
-    pCONT_rules->rules_active_index,
-    pCONT_rules->event_triggered.module_id, 
-    pCONT_rules->event_triggered.function_id, 
-    pCONT_rules->event_triggered.device_id, 
-    pCONT_rules->event_triggered.value.data[0], 
-    pCONT_rules->event_triggered.value.data[1], 
-    pCONT_rules->event_triggered.value.data[2], 
-    pCONT_rules->event_triggered.value.data[3], 
-    pCONT_rules->event_triggered.value.data[4]
+    ""),
+    event_triggered.module_id, 
+    event_triggered.function_id, 
+    event_triggered.device_id, 
+    event_triggered.value.data[0], 
+    event_triggered.value.data[1], 
+    event_triggered.value.data[2], 
+    event_triggered.value.data[3], 
+    event_triggered.value.data[4]
   );
     
     #endif //  ENABLE_LOG_LEVEL_INFO
@@ -197,7 +196,11 @@ void mRuleEngine::NewEventRun(uint16_t _module_id, uint16_t function_event, uint
   Reset();
   event_triggered.module_id = _module_id;
   event_triggered.device_id = _index;
+  event_triggered.function_id = function_event;
   event_triggered.value.data[0] = _state;
+
+  
+      ALOG_ERR(PSTR("NewEventRun_NumArg Exceeded"));
 
   /**
    * @brief Mess version for now, added to here
@@ -209,6 +212,61 @@ void mRuleEngine::NewEventRun(uint16_t _module_id, uint16_t function_event, uint
   Tasker_Rules_Interface(function_event);
 
 }
+
+
+/**
+ * @brief Version 2 of triggering rules, adding the event but also include the type of function. Thie function can choose to pass that on, ignore or change the function type 
+ * 
+ * @param _module_id 
+ * @param function_event 
+ * @param _index 
+ * @param _data_length
+ * @param ... Each byte of the data is its own argument which depends on the type of event (another method might use vectors) 
+ */
+void mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_event, uint8_t _index, uint8_t _data_length, ...)
+{
+  Reset();
+  event_triggered.module_id = _module_id;
+  event_triggered.function_id = function_event;
+  event_triggered.device_id = _index;
+  
+  va_list arg;
+  
+  va_start(arg, _data_length);
+  for(int i = 0; i < _data_length; i++) {
+
+    if(i>D_RULE_DATA_VALUE_MAX_LENGTH-1){
+      ALOG_ERR(PSTR("NewEventRun_NumArg Exceeded"));
+      break;
+    }
+
+    event_triggered.value.data[i] = va_arg(arg, int);
+
+  }
+  va_end(arg);
+
+  AddLog_Array_Int(LOG_LEVEL_HIGHLIGHT, "data", event_triggered.value.data, ARRAY_SIZE(event_triggered.value.data));
+
+  // DEBUG_LINE_HERE; ALOG_INF(PSTR("event_triggered.module_id = %d"), event_triggered.module_id);
+
+  // ShowRuleEvent_AddLog();
+
+  // va_start(arg, formatP);
+  // vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
+  // va_end(arg);
+
+  /**
+   * @brief Mess version for now, added to here
+   *  */
+
+  // Legacy option, pass to all tasker_interfaces. This allows hard coded things to happen. ie Time runs out, turn relay off
+  pCONT->Tasker_Interface(function_event);
+  // New method to check the rules
+  Tasker_Rules_Interface(function_event);
+
+}
+
+void NewEventRun_Arg(uint16_t _module_id=0, uint16_t function_event = 0, uint8_t _index=0, ...); 
 
 uint8_t mRuleEngine::GetConfiguredCount()
 {
@@ -236,10 +294,11 @@ uint8_t mRuleEngine::GetEnabledCount()
 void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
-    #endif // ENABLE_LOG_LEVEL_INFO
-//maybe need to return rule(s) handled then leave taasker_interface
+  #endif // ENABLE_LOG_LEVEL_INFO
+
+  //maybe need to return rule(s) handled then leave taasker_interface
 
 
   for (int rule_index=0;rule_index<D_MAX_RULES;rule_index++)
@@ -254,7 +313,6 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED function_input[%d] to rule[%d]"),function_input,rule_index);
-
     #endif // ENABLE_LOG_LEVEL_INFO
 
       rules_active_index = rule_index;
@@ -270,8 +328,8 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
     #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
-
     #endif// ENABLE_LOG_LEVEL_INFO
+
         // char message[50];
         // memset(message,0,sizeof(message));
         // sprintf_P(message,PSTR("{\"Rule\":%d,\"EventIndex\":%d}"), rule_index, Event.index);

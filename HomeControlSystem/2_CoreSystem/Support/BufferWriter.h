@@ -23,8 +23,7 @@ class BufferWriter{
     // External function to get instance
     static BufferWriter* GetInstance();
     /* Here will be the instance stored. */
-    static BufferWriter* instance;
-    
+    static BufferWriter* instance;    
 
     void Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size);
     void Start();

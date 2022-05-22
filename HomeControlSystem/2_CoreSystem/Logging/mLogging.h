@@ -110,6 +110,27 @@ enum LoggingLevels {LOG_LEVEL_NONE,
  * #ifdef ENABLE_LOG_LEVEL_INFO
  *   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
  * #endif// ENABLE_LOG_LEVEL_INFO
+ * 
+enum LoggingLevels {LOG_LEVEL_NONE, 
+                    LOG_LEVEL_ERROR, 
+                    LOG_LEVEL_WARN, 
+                    /**
+                     * Used when developing a new thing
+                     * *
+                    LOG_LEVEL_TEST, // New level with elevated previledge - during code development use only
+                    /**
+                     * Should be used only when I want to highlight it in the serial monitor, it will add new lines to show it better
+                     * *
+                    LOG_LEVEL_HIGHLIGHT, // New level with elevated previledge - during code development use only
+                    LOG_LEVEL_INFO,
+                    LOG_LEVEL_COMMANDS, // extra case, this will show when cases are matched 
+                    LOG_LEVEL_DEBUG, 
+                    LOG_LEVEL_DEBUG_MORE,
+                    //#ifdef ENABLE_ADVANCED_DEBUGGING 
+                    LOG_LEVEL_DEBUG_LOWLEVEL, 
+                    //#endif
+                    LOG_LEVEL_ALL
+                  };
  */
 #ifdef ENABLE_LOG_LEVEL_ERROR
 #define ALOG_ERR(...) AddLog(LOG_LEVEL_ERROR, __VA_ARGS__)
@@ -129,11 +150,27 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #define ALOG_INF(...)
 #endif
 
+#ifdef ENABLE_LOG_LEVEL_DEBUG
+#define ALOG_DBG(...) AddLog(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+#define ALOG_DBG(...)
+#endif
+
 #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-#define ALOG_DBM(...) AddLog(LOG_LEVEL_DEBUG_MORE, __VA_ARGS__)
+#define ALOG_DBM(...) AddLog(LOG_LEVEL_DEBUG_MORE,  __VA_ARGS__)
 #else
 #define ALOG_DBM(...)
 #endif
+
+#ifdef ENABLE_LOG_LEVEL_COMMANDS
+#define ALOG_COM(...) AddLog(LOG_LEVEL_COMMANDS, __VA_ARGS__)
+#else
+#define ALOG_COM(...)
+#endif
+
+
+#define ALOG_DEBUG_LINE_HERE ALOG_DBG(PSTR("DP:%s|%d"),__FILE__,__LINE__);
+
 
 //For single test use, no ifdefs
 // #ifdef USE_DEBUG_LINE
@@ -142,7 +179,6 @@ enum LoggingLevels {LOG_LEVEL_NONE,
                         SERIAL_DEBUG.print(__FILE__);\
                         SERIAL_DEBUG.println(__LINE__);\
                         SERIAL_DEBUG.flush();
-
 #else
   #define DEBUG_LINE_HERE   //nothing, no code
 #endif
@@ -270,10 +306,53 @@ extern "C" {
 
 //https://eli.thegreenplace.net/2014/variadic-templates-in-c/
 
+// template<typename T, typename U>
+// void AddLog_Array3(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len);
+
+
+// /**
+//  * @brief Form into message then pass into normal AddLog
+//  * 
+//  * @tparam T 
+//  * @tparam U 
+//  * @param loglevel 
+//  * @param name_ctr 
+//  * @param arr 
+//  * @param arr_len 
+//  */
+// template<typename T, typename U>
+// void AddLog_Array3(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
+
+//   // form into string then send to normal addlog
+
+//   // char buffer[100] = {0}; // short buffer
+//   // uint16_t buflen = 0;
+
+//   // buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array3 %s = ", name_ctr);
+
+//   // AddLog(loglevel, "%s", buffer);
+
+
+//   // #ifndef DISABLE_SERIAL_LOGGING
+//   // SERIAL_DEBUG.printf("%s = ",name_ctr);
+//   // for(T index=0;index<arr_len;index++){
+//   //   SERIAL_DEBUG.printf("%d,", arr[index]);
+//   // }
+//   // SERIAL_DEBUG.printf("\n\r");
+//   // #endif
+
+// };
+
+
+
+
 void AddLog(uint8_t loglevel, PGM_P formatP, ...);
 
 
 void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);
+
+
 
 
 // void AddLog(PGM_P formatP, ...);
@@ -281,7 +360,6 @@ void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP
 int Response_mP(const char* format, ...);
 int ResponseAppend_mP(const char* format, ...);
 void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
-
 
 
 template<typename T, typename U>
@@ -297,6 +375,43 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
   #endif
 
 }
+
+
+/**
+ * @brief Form into message then pass into normal AddLog
+ * 
+ * @tparam T 
+ * @tparam U 
+ * @param loglevel 
+ * @param name_ctr 
+ * @param arr 
+ * @param arr_len 
+ */
+template<typename T, typename U>
+void AddLog_Array2(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+{
+
+  // form into string then send to normal addlog
+
+  char buffer[100] = {0}; // short buffer
+  uint16_t buflen = 0;
+
+  buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array2 %s = ", name_ctr);
+
+  AddLog(loglevel, buffer);
+
+
+  // #ifndef DISABLE_SERIAL_LOGGING
+  // SERIAL_DEBUG.printf("%s = ",name_ctr);
+  // for(T index=0;index<arr_len;index++){
+  //   SERIAL_DEBUG.printf("%d,", arr[index]);
+  // }
+  // SERIAL_DEBUG.printf("\n\r");
+  // #endif
+
+}
+
+
 
 template<typename T, typename U>
 void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
@@ -389,6 +504,26 @@ public:
     void AddLogSerial(uint8_t loglevel);
     void AddLogMissed(char *sensor, uint8_t misses);
 
+// template<typename T, typename U>
+// void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len);
+
+template<typename T, typename U>
+void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+{
+
+
+  char buffer[100] = {0}; // short buffer
+  uint16_t buflen = 0;
+
+  buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
+
+  AddLog(loglevel, buffer);
+
+
+
+}
+
+
     int8_t SetLogLevelIDbyName(const char* name);
     const char* GetLogLevelNameShort(char* buffer);   
     const char* GetLogLevelNamebyID(uint8_t id, char* buffer); 
@@ -404,5 +539,51 @@ public:
     bool telnet_started = false;
     
 };
+
+// need to work out type for this to be generic using json methods
+template<typename T, typename U>
+void AddLog_Array5(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+{
+  
+  char buffer[100] = {0}; // short buffer
+  uint16_t buflen = 0;
+
+  buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
+
+  for(T index=0;index<arr_len;index++)
+  {
+    buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
+      arr[index], 
+      index==arr_len ? "," : ""      
+    );
+  }
+
+  AddLog(loglevel, "%s", buffer);
+
+}
+
+
+template<typename T, typename U>
+void AddLog_Array_Int(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+{
+  
+  char buffer[100] = {0}; // short buffer
+  uint16_t buflen = 0;
+
+  buflen += snprintf(buffer+buflen, sizeof(buffer), "Array_Int %s = ", name_ctr);
+
+  for(T index=0;index<arr_len;index++)
+  {
+    buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
+      arr[index], 
+      index<(arr_len-1) ? "," : ""      
+    );
+  }
+
+  AddLog(loglevel, "%s", buffer);
+
+}
+
+
 
 #endif // header guard

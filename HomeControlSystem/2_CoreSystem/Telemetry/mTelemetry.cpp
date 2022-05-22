@@ -250,7 +250,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_VERSIONNAME,     pCONT_set->firmware_version.current.name_ctr);
 
 
-    JsonBuilderI->Add(PM_JSON_SERIAL,          pCONT_sto->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
+    JsonBuilderI->Add(PM_JSON_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
     JsonBuilderI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
     JsonBuilderI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
     JsonBuilderI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer, sizeof(buffer)));
@@ -278,10 +278,10 @@ uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level){
   char buffer[30];
   JsonBuilderI->Start();
     JsonBuilderI->Level_Start(PM_JSON_LOGLEVELS);
-      JsonBuilderI->Add(PM_JSON_SERIAL, pCONT_sto->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
-      JsonBuilderI->Add(PM_JSON_SYSTEM, pCONT_sto->GetLogLevelNamebyID(pCONT_set->Settings.syslog_level, buffer));
-      JsonBuilderI->Add(PM_JSON_WEB,    pCONT_sto->GetLogLevelNamebyID(pCONT_set->Settings.weblog_level, buffer));
-      JsonBuilderI->Add(PM_JSON_TELNET, pCONT_sto->GetLogLevelNamebyID(pCONT_set->Settings.telnetlog_level, buffer));
+      JsonBuilderI->Add(PM_JSON_SERIAL, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
+      JsonBuilderI->Add(PM_JSON_SYSTEM, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.syslog_level, buffer));
+      JsonBuilderI->Add(PM_JSON_WEB,    pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.weblog_level, buffer));
+      JsonBuilderI->Add(PM_JSON_TELNET, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.telnetlog_level, buffer));
     JsonBuilderI->Level_End();
   return JsonBuilderI->End();
 }
@@ -445,23 +445,32 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
     JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.device_id));
     JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id));
     JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);
+    JsonBuilderI->Add("Buflen",        strlen(pCONT_set->Settings.device_name_buffer.name_buffer));
+
+    uint8_t count = 0;
+    if(strlen(pCONT_set->Settings.device_name_buffer.name_buffer)){ //if anything in buffer
+      count = DLI->CountCharInCtr(pCONT_set->Settings.device_name_buffer.name_buffer,'|'); // first | indicates index from 0
+    }
+    JBI->Add("ItemCount", count);
 
     
     if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
     {
 
-#ifdef ESP32
+      #ifdef ESP32
       JBI->Add("I2C_BusSpeed", pCONT_sup->wire->getClock());
-#endif
-  char mqtt_data[300];
-  pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
-  // Serial.println(mqtt_data);
-  
-  //need to escape option to function above
-    // JsonBuilderI->Add("I2C_Scan",          mqtt_data);
+      #endif
 
-    BufferWriterI->Append(",\"I2C_Scan\":");
-    BufferWriterI->Append(mqtt_data);
+      char mqtt_data[300];
+      pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+      // Serial.println(mqtt_data);
+
+      //need to escape option to function above
+      // JsonBuilderI->Add("I2C_Scan",          mqtt_data);
+
+      BufferWriterI->Append(",\"I2C_Scan\":");
+      BufferWriterI->Append(mqtt_data);
+
     }
 
     // BufferWriterI->Append(",\"I2C_Scan\":");

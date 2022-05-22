@@ -161,10 +161,11 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level){
   char buffer[25];
 
   JBI->Start();
+
   for(int zone_id=0;zone_id<settings.active_zones;zone_id++){
     JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_HVAC_ID, zone_id, buffer, sizeof(buffer)));
-      if(zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, zone[zone_id].sensor.temperature); }
-      if(zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, zone[zone_id].sensor.humidity);       }
+      // if(zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, zone[zone_id].sensor.temperature); }
+      // if(zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, zone[zone_id].sensor.humidity);       }
       JBI->Add("ModuleID",zone[zone_id].sensor.module_id);
       JBI->Add("Index",zone[zone_id].sensor.index);
     JBI->Level_End();
@@ -208,17 +209,17 @@ Serial.printf("settings.active_zones=%d", settings.active_zones); Serial.flush()
 
     JBI->Level_Start("Zone");
     
-        JBI->Level_Start("BitPacked_Modes_Enabled");
-          for(int8_t zone_id=0;zone_id<settings.active_zones;zone_id++)
-          {
-            JBI->Array_Start_P(PSTR("Zone%d"),zone_id);
-              for(int8_t bits=0; bits<8; bits++)
-              {
-                JBI->Add(bitRead(zone[zone_id].bitpacked_modes_enabled,bits));
-              }
-            JBI->Array_End();
-          }         
-        JBI->Level_End();
+        // JBI->Level_Start("BitPacked_Modes_Enabled");
+        //   for(int8_t zone_id=0;zone_id<settings.active_zones;zone_id++)
+        //   {
+        //     JBI->Array_Start_P(PSTR("Zone%d"),zone_id);
+        //       for(int8_t bits=0; bits<8; bits++)
+        //       {
+        //         JBI->Add(bitRead(zone[zone_id].bitpacked_modes_enabled,bits));
+        //       }
+        //     JBI->Array_End();
+        //   }         
+        // JBI->Level_End();
 
 
 
@@ -227,6 +228,12 @@ Serial.printf("settings.active_zones=%d", settings.active_zones); Serial.flush()
         JBI->Array_Start("ModuleID");
         for(int8_t i=0; i<settings.active_zones; i++){
           JBI->Add(zone[i].output.module_ids[0]);
+        }
+        JBI->Array_End();
+
+        JBI->Array_Start("Index");
+        for(int8_t i=0; i<settings.active_zones; i++){
+          JBI->Add(zone[i].output.index[0]);
         }
         JBI->Array_End();
       

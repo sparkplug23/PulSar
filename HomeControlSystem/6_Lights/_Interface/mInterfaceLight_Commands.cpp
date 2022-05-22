@@ -288,7 +288,7 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
     
 //   if(!c){ return; }
 //   if(strlen(c)<=5){
-//     AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Valid Length"));
+//     ALOG_DBM( PSTR("Valid Length"));
 //   }else{
 //     AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
 //     return;
@@ -328,7 +328,7 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 //   }
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+//   ALOG_DBM( PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
 //     order->r,
 //     order->g,
 //     order->b,
@@ -366,7 +366,7 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 //   }
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
+//   ALOG_DBM( PSTR("red=%d, green=%d, blue=%d, cold_white=%d, warm_white=%d"),
 //    pCONT_lAni-> _segments[0].hardware_element_colour_order.r,
 //    pCONT_lAni-> _segments[0].hardware_element_colour_order.g,
 //    pCONT_lAni-> _segments[0].hardware_element_colour_order.b,
@@ -1398,11 +1398,11 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
     // Clear the entire new colour to the "unset" values
     memset(palette_buffer,COLOUR_MAP_NONE__ID,20); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
     
-  // Add to select correct buffer depending on palette type
-  memcpy(palette_buffer,buffer,buflen);
+    // Add to select correct buffer depending on palette type
+    memcpy(palette_buffer,buffer,buflen);
 
-  // rgbcct_controller.UpdateFromExternalBuffer();
-  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+    // rgbcct_controller.UpdateFromExternalBuffer();
+    pCONT_lAni->_segments[0].flags.fForceUpdate = true;
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID)){
@@ -1412,14 +1412,14 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;    
     palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
-   memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
+    memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
 
-   
     // Add to select correct buffer depending on palette type
     memcpy(palette_buffer,buffer,buflen);
 
-  pCONT_lAni->_segment_runtimes[0].rgbcct_controller->UpdateFromExternalBuffer();
-  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+    pCONT_lAni->_segment_runtimes[0].rgbcct_controller->UpdateFromExternalBuffer();
+    pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)){
     // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
@@ -1431,13 +1431,12 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID;    
     palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;
 
-    
     // AddLog(LOG_LEVEL_TEST, PSTR("Buffer len %d"),buflen);
     
     // pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)*palette_id_adjusted_to_array_index];
     
     // Clear old buffer space
-    memset(palette_buffer,0,palette_encoded_users_colour_map_LENGTH); //200 now   
+    memset(palette_buffer, 0, palette_encoded_users_colour_map_LENGTH); //200 now   
     // Write new palette data into buffer space
     memcpy(palette_buffer,buffer,buflen);
     // Parse buffer data to correctly set data parameters

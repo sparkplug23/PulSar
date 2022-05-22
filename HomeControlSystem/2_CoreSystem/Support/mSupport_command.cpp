@@ -236,7 +236,7 @@
 //     DEBUG_CORE_LOG(PSTR("CMD: Payload %d"), payload);
 
 // //    backlog_delay = millis() + (100 * MIN_BACKLOG_DELAY);
-//     backlog_delay = millis() + Settings.param[P_BACKLOG_DELAY];
+//     backlog_delay = millis() + Settings.setoption_255[P_BACKLOG_DELAY];
 
 //     char command[CMDSZ] = { 0 };
 //     XdrvMailbox.command = command;
@@ -826,7 +826,7 @@ void mSupport::CmndRestart(void)
 //             break;
 //         }
 //         if ((XdrvMailbox.payload >= param_low) && (XdrvMailbox.payload <= param_high)) {
-//           Settings.param[pindex] = XdrvMailbox.payload;
+//           Settings.setoption_255[pindex] = XdrvMailbox.payload;
 // #ifdef USE_LIGHT
 //           if (P_RGB_REMAP == pindex) {
 //             LightUpdateColorMapping();
@@ -907,7 +907,7 @@ void mSupport::CmndRestart(void)
 
 //     if (ptype < 99) {
 //       if (1 == ptype) {
-//         ResponseCmndIdxNumber(Settings.param[pindex]);
+//         ResponseCmndIdxNumber(Settings.setoption_255[pindex]);
 //       } else {
 //         uint32_t flag = Settings.flag.data;
 //         if (3 == ptype) {
@@ -2318,7 +2318,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //               break;
 //           }
 //           if ((payload >= param_low) && (payload <= param_high)) {
-//             Settings.param[pindex] = payload;
+//             Settings.setoption_255[pindex] = payload;
 //             switch (pindex) {
 // #ifdef USE_LIGHT
 //              case P_RGB_REMAP:
@@ -2335,7 +2335,7 @@ void mSupport::MqttDataHandler(char* topic, uint8_t* data, unsigned int data_len
 //         }
 //       }
 //       if (ptype < 99) {
-//         if (2 == ptype) snprintf_P(stemp1, sizeof(stemp1), PSTR("%d"), Settings.param[pindex]);
+//         if (2 == ptype) snprintf_P(stemp1, sizeof(stemp1), PSTR("%d"), Settings.setoption_255[pindex]);
 //         Response_P(S_JSON_COMMAND_INDEX_SVALUE, command, index, (2 == ptype) ? stemp1 : (1 == ptype) ? GetStateText(bitRead(Settings.flag_network.data, pindex)) : GetStateText(bitRead(Settings.flag_system.data, pindex)));
 //       }
 //     }

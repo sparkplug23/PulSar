@@ -99,6 +99,8 @@ void mHVAC::Every_Second()
 {
 // Handled 
 
+// DIGITAL_INVERT_PIN(12);
+
 
 }
 
@@ -106,16 +108,7 @@ void mHVAC::Every_Second()
 void mHVAC::FunctionHandler_Update_Sensors()
 {
 
-// I need to add checks, for when a sensor is not configured properly!
 
-
-  for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
-  {
-    sensors_reading_t reading;
-    pCONT->GetModuleObjectbyUniqueID(zone[zone_id].sensor.module_id)->GetSensorReading(&reading, zone[zone_id].sensor.index);
-    zone[zone_id].sensor.temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
-    zone[zone_id].sensor.humidity    = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-  }
 
 }
 
@@ -126,7 +119,10 @@ void mHVAC::Pre_Init(void){
 
 }
 
-void mHVAC::init(void){
+void mHVAC::init(void)
+{
+
+  // pinMode(12, OUTPUT);
 
   for(uint8_t id=0; id<settings.active_zones; id++)
   {

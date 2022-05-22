@@ -755,13 +755,13 @@ uint32_t WcSetup(int32_t fsiz) {
 //   }
 //   client.stop();
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CAM: Sending image #: %d"), bnum+1);
+//   ALOG_DBM( PSTR("CAM: Sending image #: %d"), bnum+1);
 // }
 
 // void HandleImageBasic(void) {
 //   if (!HttpCheckPriviledgedAccess()) { return; }
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HTTP "Capture image"));
+//   ALOG_DBM( PSTR(D_LOG_HTTP "Capture image"));
 
 //   if (pCONT_set->Settings.webcam_config.stream) {
 //     if (!Wc.CamServer) {
@@ -799,7 +799,7 @@ uint32_t WcSetup(int32_t fsiz) {
 
 //   esp_camera_fb_return(wc_fb);  // Free frame buffer
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CAM: Image sent"));
+//   ALOG_DBM( PSTR("CAM: Image sent"));
 // }
 
 void mCameraOV2640::HandleWebcamMjpeg(void) {

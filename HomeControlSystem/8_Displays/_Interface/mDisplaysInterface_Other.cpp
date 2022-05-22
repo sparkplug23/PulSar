@@ -1175,7 +1175,7 @@
 
 //   if (!renderer) return;
 //     if (touched) {
-//       // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("touch after convert %d - %d"), pLoc.x, pLoc.y);
+//       // ALOG_DBM( PSTR("touch after convert %d - %d"), pLoc.x, pLoc.y);
 //       // now must compare with defined buttons
 //       for (uint8_t count = 0; count < MAX_TOUCH_BUTTONS; count++) {
 //         if (buttons[count]) {

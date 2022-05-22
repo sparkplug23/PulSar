@@ -420,6 +420,23 @@
     // //enabled CCT by azimuth 
     // EFFECTS_FUNCTION__SUNPOSITIONS_STEP_RGBCCT_SUN_ELEVATION_01,
 
+    
+    #ifdef ENABLE_EXTRA_EFFECTS_SUNPOSITIONS 
+    /**
+     * @brief Same as above, but no blending on palette colours, just use stepped values
+     **/
+    EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID,
+    /**
+     * @brief Using the elevation of the sun stored in settings, linear blend between all colours in a palette
+     *        The start and end colour from the palette (0 to 100% index) is defined by the max/min elevation for that day
+     *        I will also want a way to pick what these max/min are (ie setting dusk/dawn as limits for transition for CCT colours etc)
+     **/
+    EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID,
+   
+
+
+    #endif // ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+
     // /******************************************************************************************************************************************************************************
     // ******************************************************************************************************************************************************************************
     // ******************************************************************************************************************************************************************************
@@ -843,10 +860,10 @@
      * */
     typedef struct Segment 
     { // 24 bytes
-        struct PIXEL_INDEX_RANGE{
-            uint16_t start = 0;
-            uint16_t stop  = 0; // if equal, range is not active
-        }pixel_range;
+      struct PIXEL_INDEX_RANGE{
+          uint16_t start = 0;
+          uint16_t stop  = 0; // if equal, range is not active
+      }pixel_range;
 
       uint8_t options = NO_OPTIONS; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
       uint8_t grouping = 1; //multiplers
@@ -972,10 +989,18 @@
       {
         return pixel_range.stop > pixel_range.start;
       }
+      #ifdef USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
+      uint16_t length()
+      {
+        return pixel_range.stop - pixel_range.start; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
+      }
+      #else
       uint16_t length()
       {
         return pixel_range.stop - pixel_range.start + 1; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
       }
+      #endif // USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
+      
       uint16_t length_m() //temporary using my version until the above function indexing is fixed
       {
         return pixel_range.stop - pixel_range.start; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
@@ -1208,162 +1233,167 @@
   void SubTask_Segment_Animate_Function__Solid_Static_Single_Colour(); 
   void SubTask_Segment_Animate_Function__Static_Palette();
   void SubTask_Segment_Animate_Function__Slow_Glow();
-  void SubTask_Segment_Flasher_Animate_Function__Sequential_Palette();
-  void SubTask_Segment_Flasher_Animate_Function__Rotating_Palette();
+  void SubTask_Segment_Animation__Sequential_Palette();
+  void SubTask_Segment_Animation__Rotating_Palette();
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
+  #ifdef ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
+  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+  #endif // ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+
   void SubTask_Flasher_Animate_Function_Tester();
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
 
   
   // Static
-  void SubTask_Segment_Flasher_Animate_Function__Static();
-  void SubTask_Segment_Flasher_Animate_Function__Static_Pattern();
-  void SubTask_Segment_Flasher_Animate_Function__Tri_Static_Pattern();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Spots(uint16_t threshold);
-  void SubTask_Segment_Flasher_Animate_Function__Spots();
-  void SubTask_Segment_Flasher_Animate_Function__Percent();
+  void SubTask_Segment_Animation__Static();
+  void SubTask_Segment_Animation__Static_Pattern();
+  void SubTask_Segment_Animation__Tri_Static_Pattern();
+  void SubTask_Segment_Animation__Base_Spots(uint16_t threshold);
+  void SubTask_Segment_Animation__Spots();
+  void SubTask_Segment_Animation__Percent();
   // One colour changes
-  void SubTask_Segment_Flasher_Animate_Function__Random_Colour();
+  void SubTask_Segment_Animation__Random_Colour();
   // Wipe/Sweep/Runners 
-  void BaseSubTask_Segment_Flasher_Animate_Function__Base_Colour_Wipe(bool rev, bool useRandomColors);
-  void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe();
-  void SubTask_Segment_Flasher_Animate_Function__Colour_Wipe_Random();
-  void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep();
-  void SubTask_Segment_Flasher_Animate_Function__Colour_Sweep_Random();
-  void SubTask_Segment_Flasher_Animate_Function__TriColour();
-  void SubTask_Segment_Flasher_Animate_Function__Android();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Running(bool saw);
-  void SubTask_Segment_Flasher_Animate_Function__Base_Running(uint32_t color1, uint32_t color2);
-  void SubTask_Segment_Flasher_Animate_Function__Running_Red_Blue();
+  void BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, bool useRandomColors);
+  void SubTask_Segment_Animation__Colour_Wipe();
+  void SubTask_Segment_Animation__Colour_Wipe_Random();
+  void SubTask_Segment_Animation__Colour_Sweep();
+  void SubTask_Segment_Animation__Colour_Sweep_Random();
+  void SubTask_Segment_Animation__TriColour();
+  void SubTask_Segment_Animation__Android();
+  void SubTask_Segment_Animation__Base_Running(bool saw);
+  void SubTask_Segment_Animation__Base_Running(uint32_t color1, uint32_t color2);
+  void SubTask_Segment_Animation__Running_Red_Blue();
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
-  void SubTask_Segment_Flasher_Animate_Function__Running_Colour();
-  void SubTask_Segment_Flasher_Animate_Function__Running_Random();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Gradient(bool loading);
-  void SubTask_Segment_Flasher_Animate_Function__Gradient();
-  void SubTask_Segment_Flasher_Animate_Function__Loading();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Police(uint32_t color1, uint32_t color2, bool all);
-  void SubTask_Segment_Flasher_Animate_Function__Police();
-  void SubTask_Segment_Flasher_Animate_Function__Polce_All();
-  void SubTask_Segment_Flasher_Animate_Function__Two_Dots();
-  void SubTask_Segment_Flasher_Animate_Function__Two_Areas();
-  void SubTask_Segment_Flasher_Animate_Function__Multi_Comet();
-  void SubTask_Segment_Flasher_Animate_Function__Oscillate();
-  void SubTask_Segment_Flasher_Animate_Function__BPM();
-  void SubTask_Segment_Flasher_Animate_Function__Juggle();
-  void SubTask_Segment_Flasher_Animate_Function__Palette();
-  void SubTask_Segment_Flasher_Animate_Function__ColourWaves();
-  void SubTask_Segment_Flasher_Animate_Function__Lake();
-  void SubTask_Segment_Flasher_Animate_Function__Glitter();
-  void SubTask_Segment_Flasher_Animate_Function__Meteor();
-  void SubTask_Segment_Flasher_Animate_Function__Metoer_Smooth();    
-  void SubTask_Segment_Flasher_Animate_Function__Pride_2015();    
+  void SubTask_Segment_Animation__Running_Colour();
+  void SubTask_Segment_Animation__Running_Random();
+  void SubTask_Segment_Animation__Base_Gradient(bool loading);
+  void SubTask_Segment_Animation__Gradient();
+  void SubTask_Segment_Animation__Loading();
+  void SubTask_Segment_Animation__Base_Police(uint32_t color1, uint32_t color2, bool all);
+  void SubTask_Segment_Animation__Police();
+  void SubTask_Segment_Animation__Polce_All();
+  void SubTask_Segment_Animation__Two_Dots();
+  void SubTask_Segment_Animation__Two_Areas();
+  void SubTask_Segment_Animation__Multi_Comet();
+  void SubTask_Segment_Animation__Oscillate();
+  void SubTask_Segment_Animation__BPM();
+  void SubTask_Segment_Animation__Juggle();
+  void SubTask_Segment_Animation__Palette();
+  void SubTask_Segment_Animation__ColourWaves();
+  void SubTask_Segment_Animation__Lake();
+  void SubTask_Segment_Animation__Glitter();
+  void SubTask_Segment_Animation__Meteor();
+  void SubTask_Segment_Animation__Metoer_Smooth();    
+  void SubTask_Segment_Animation__Pride_2015();    
   CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
-  void SubTask_Segment_Flasher_Animate_Function__Pacifica();    
-  void SubTask_Segment_Flasher_Animate_Function__Sunrise();    
-  void SubTask_Segment_Flasher_Animate_Function__Sinewave();    
-  void SubTask_Segment_Flasher_Animate_Function__Flow();    
-  void SubTask_Segment_Flasher_Animate_Function__Base_Phased(uint8_t moder);
-  void SubTask_Segment_Flasher_Animate_Function__PhasedNoise();    
-  void SubTask_Segment_Flasher_Animate_Function__Phased();    
-  void SubTask_Segment_Flasher_Animate_Function__Running_Lights();    
-  void SubTask_Segment_Flasher_Animate_Function__Rainbow_Cycle();    
-  void SubTask_Segment_Flasher_Animate_Function__Merry_Christmas();    
-  void SubTask_Segment_Flasher_Animate_Function__Halloween();    
+  void SubTask_Segment_Animation__Pacifica();    
+  void SubTask_Segment_Animation__Sunrise();    
+  void SubTask_Segment_Animation__Sinewave();    
+  void SubTask_Segment_Animation__Flow();    
+  void SubTask_Segment_Animation__Base_Phased(uint8_t moder);
+  void SubTask_Segment_Animation__PhasedNoise();    
+  void SubTask_Segment_Animation__Phased();    
+  void SubTask_Segment_Animation__Running_Lights();    
+  void SubTask_Segment_Animation__Rainbow_Cycle();    
+  void SubTask_Segment_Animation__Merry_Christmas();    
+  void SubTask_Segment_Animation__Halloween();    
   // Chase    
-  void SubTask_Segment_Flasher_Animate_Function__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Colour();
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Random();
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Flash();
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Flash_Random();
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Rainbow_White();
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Theater();
-  void SubTask_Segment_Flasher_Animate_Function__Chase_Theatre_Rainbow();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
-  void SubTask_Segment_Flasher_Animate_Function__Chase_TriColour();
-  void SubTask_Segment_Flasher_Animate_Function__Circus_Combustus();
+  void SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
+  void SubTask_Segment_Animation__Chase_Colour();
+  void SubTask_Segment_Animation__Chase_Random();
+  void SubTask_Segment_Animation__Chase_Rainbow();
+  void SubTask_Segment_Animation__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
+  void SubTask_Segment_Animation__Chase_Flash();
+  void SubTask_Segment_Animation__Chase_Flash_Random();
+  void SubTask_Segment_Animation__Chase_Rainbow_White();
+  void SubTask_Segment_Animation__Chase_Theater();
+  void SubTask_Segment_Animation__Chase_Theatre_Rainbow();
+  void SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
+  void SubTask_Segment_Animation__Chase_TriColour();
+  void SubTask_Segment_Animation__Circus_Combustus();
   // Breathe/Fade/Pulse
-  void SubTask_Segment_Flasher_Animate_Function__Breath();
-  void SubTask_Segment_Flasher_Animate_Function__Fade();
-  void SubTask_Segment_Flasher_Animate_Function__Fade_TriColour();
-  void SubTask_Segment_Flasher_Animate_Function__Fade_Spots();
+  void SubTask_Segment_Animation__Breath();
+  void SubTask_Segment_Animation__Fade();
+  void SubTask_Segment_Animation__Fade_TriColour();
+  void SubTask_Segment_Animation__Fade_Spots();
   #endif // ENABLE_EXTRA_WLED_EFFECTS
   // Fireworks
-  void SubTask_Segment_Flasher_Animate_Function__Fireworks();
-  void SubTask_Segment_Flasher_Animate_Function__Exploding_Fireworks();
-  void SubTask_Segment_Flasher_Animate_Function__Fireworks_Starburst();
-  void SubTask_Segment_Flasher_Animate_Function__Rain();
+  void SubTask_Segment_Animation__Fireworks();
+  void SubTask_Segment_Animation__Exploding_Fireworks();
+  void SubTask_Segment_Animation__Fireworks_Starburst();
+  void SubTask_Segment_Animation__Rain();
 // Sparkle/Twinkle
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
-  void SubTask_Segment_Flasher_Animate_Function__Solid_Glitter();
-  void SubTask_Segment_Flasher_Animate_Function__Popcorn();
-  void SubTask_Segment_Flasher_Animate_Function__Plasma();
-  void SubTask_Segment_Flasher_Animate_Function__Sparkle();
-  void SubTask_Segment_Flasher_Animate_Function__Sparkle_Flash();
-  void SubTask_Segment_Flasher_Animate_Function__Sparkle_Hyper();
-  void SubTask_Segment_Flasher_Animate_Function__Twinkle();
-  CRGB SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
-  void SubTask_Segment_Flasher_Animate_Function__Base_Twinkle_Fox(bool cat);
-  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Colour();
-  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Fox();
-  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Cat();
-  void SubTask_Segment_Flasher_Animate_Function__Twinkle_Up();
-  void SubTask_Segment_Flasher_Animate_Function__Dynamic();
-  void SubTask_Segment_Flasher_Animate_Function__Saw();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Dissolve(uint32_t color);
-  void SubTask_Segment_Flasher_Animate_Function__Dissolve();
-  void SubTask_Segment_Flasher_Animate_Function__Dissolve_Random();
-  void SubTask_Segment_Flasher_Animate_Function__ColourFul();
-  void SubTask_Segment_Flasher_Animate_Function__Traffic_Light();
+  void SubTask_Segment_Animation__Solid_Glitter();
+  void SubTask_Segment_Animation__Popcorn();
+  void SubTask_Segment_Animation__Plasma();
+  void SubTask_Segment_Animation__Sparkle();
+  void SubTask_Segment_Animation__Sparkle_Flash();
+  void SubTask_Segment_Animation__Sparkle_Hyper();
+  void SubTask_Segment_Animation__Twinkle();
+  CRGB SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
+  void SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat);
+  void SubTask_Segment_Animation__Twinkle_Colour();
+  void SubTask_Segment_Animation__Twinkle_Fox();
+  void SubTask_Segment_Animation__Twinkle_Cat();
+  void SubTask_Segment_Animation__Twinkle_Up();
+  void SubTask_Segment_Animation__Dynamic();
+  void SubTask_Segment_Animation__Saw();
+  void SubTask_Segment_Animation__Base_Dissolve(uint32_t color);
+  void SubTask_Segment_Animation__Dissolve();
+  void SubTask_Segment_Animation__Dissolve_Random();
+  void SubTask_Segment_Animation__ColourFul();
+  void SubTask_Segment_Animation__Traffic_Light();
   #endif // ENABLE_EXTRA_WLED_EFFECTS
-  void SubTask_Segment_Flasher_Animate_Function__Candle_Base(uint8_t use_multi = false);
-  void SubTask_Segment_Flasher_Animate_Function__Candle_Single();
-  void SubTask_Segment_Flasher_Animate_Function__Candle_Multi();
-  void SubTask_Segment_Flasher_Animate_Function__Fire_Flicker();
-  void SubTask_Segment_Flasher_Animate_Function__Shimmering_Palette();
+  void SubTask_Segment_Animation__Candle_Base(uint8_t use_multi = false);
+  void SubTask_Segment_Animation__Candle_Single();
+  void SubTask_Segment_Animation__Candle_Multi();
+  void SubTask_Segment_Animation__Fire_Flicker();
+  void SubTask_Segment_Animation__Shimmering_Palette();
   
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
   // Blink/Strobe
-  void SubTask_Segment_Flasher_Animate_Function__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
-  void SubTask_Segment_Flasher_Animate_Function__Blink();
-  void SubTask_Segment_Flasher_Animate_Function__Blink_Rainbow();
-  void SubTask_Segment_Flasher_Animate_Function__Strobe();
-  void SubTask_Segment_Flasher_Animate_Function__Strobe_Multi();
-  void SubTask_Segment_Flasher_Animate_Function__Strobe_Rainbow();
-  void SubTask_Segment_Flasher_Animate_Function__Rainbow();
-  void SubTask_Segment_Flasher_Animate_Function__Lightning();
-  void SubTask_Segment_Flasher_Animate_Function__Fire_2012();
-  void SubTask_Segment_Flasher_Animate_Function__Railway();
-  void SubTask_Segment_Flasher_Animate_Function__Heartbeat();
+  void SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
+  void SubTask_Segment_Animation__Blink();
+  void SubTask_Segment_Animation__Blink_Rainbow();
+  void SubTask_Segment_Animation__Strobe();
+  void SubTask_Segment_Animation__Strobe_Multi();
+  void SubTask_Segment_Animation__Strobe_Rainbow();
+  void SubTask_Segment_Animation__Rainbow();
+  void SubTask_Segment_Animation__Lightning();
+  void SubTask_Segment_Animation__Fire_2012();
+  void SubTask_Segment_Animation__Railway();
+  void SubTask_Segment_Animation__Heartbeat();
   //Noise
-  void SubTask_Segment_Flasher_Animate_Function__FillNoise8();
-  void SubTask_Segment_Flasher_Animate_Function__Noise16_1();
-  void SubTask_Segment_Flasher_Animate_Function__Noise16_2();
-  void SubTask_Segment_Flasher_Animate_Function__Noise16_3();
-  void SubTask_Segment_Flasher_Animate_Function__Noise16_4();
-  void SubTask_Segment_Flasher_Animate_Function__Noise_Pal();
+  void SubTask_Segment_Animation__FillNoise8();
+  void SubTask_Segment_Animation__Noise16_1();
+  void SubTask_Segment_Animation__Noise16_2();
+  void SubTask_Segment_Animation__Noise16_3();
+  void SubTask_Segment_Animation__Noise16_4();
+  void SubTask_Segment_Animation__Noise_Pal();
   // Scan
-  void SubTask_Segment_Flasher_Animate_Function__Base_Scan(bool dual);
-  void SubTask_Segment_Flasher_Animate_Function__Scan();
-  void SubTask_Segment_Flasher_Animate_Function__Scan_Dual();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Larson_Scanner(bool dual);
-  void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner();
-  void SubTask_Segment_Flasher_Animate_Function__Larson_Scanner_Dual();
-  void SubTask_Segment_Flasher_Animate_Function__ICU();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Ripple(bool rainbow);
-  void SubTask_Segment_Flasher_Animate_Function__Ripple();
-  void SubTask_Segment_Flasher_Animate_Function__Ripple_Rainbow(); 
-  void SubTask_Segment_Flasher_Animate_Function__Comet();
-  void SubTask_Segment_Flasher_Animate_Function__Chunchun();
-  void SubTask_Segment_Flasher_Animate_Function__Bouncing_Balls();
-  void SubTask_Segment_Flasher_Animate_Function__Base_Sinelon(bool dual, bool rainbow=false);
-  void SubTask_Segment_Flasher_Animate_Function__Sinelon();
-  void SubTask_Segment_Flasher_Animate_Function__Sinelon_Dual();
-  void SubTask_Segment_Flasher_Animate_Function__Sinelon_Rainbow();
-  void SubTask_Segment_Flasher_Animate_Function__Drip();
+  void SubTask_Segment_Animation__Base_Scan(bool dual);
+  void SubTask_Segment_Animation__Scan();
+  void SubTask_Segment_Animation__Scan_Dual();
+  void SubTask_Segment_Animation__Base_Larson_Scanner(bool dual);
+  void SubTask_Segment_Animation__Larson_Scanner();
+  void SubTask_Segment_Animation__Larson_Scanner_Dual();
+  void SubTask_Segment_Animation__ICU();
+  void SubTask_Segment_Animation__Base_Ripple(bool rainbow);
+  void SubTask_Segment_Animation__Ripple();
+  void SubTask_Segment_Animation__Ripple_Rainbow(); 
+  void SubTask_Segment_Animation__Comet();
+  void SubTask_Segment_Animation__Chunchun();
+  void SubTask_Segment_Animation__Bouncing_Balls();
+  void SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rainbow=false);
+  void SubTask_Segment_Animation__Sinelon();
+  void SubTask_Segment_Animation__Sinelon_Dual();
+  void SubTask_Segment_Animation__Sinelon_Rainbow();
+  void SubTask_Segment_Animation__Drip();
   #endif // ENABLE_EXTRA_WLED_EFFECTS
 
   // Temporary helper functions to be cleaned up and converted
@@ -1374,6 +1404,16 @@
   uint8_t get_random_wheel_index(uint8_t pos);
   uint16_t triwave16(uint16_t in);
   uint16_t mode_palette();
+
+
+
+  void CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
+  const char* GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
+  int8_t GetColourTypeIDbyName(const char* c);
+
+  void CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t array_length, uint8_t style_index = 0, uint8_t palette_id = 255);
+
+
 
   void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
 
@@ -1530,6 +1570,8 @@
     void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
     void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
     void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+    void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
+    void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
     void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
     void LCDDisplay_showDigit(byte digit, byte color, byte pos);
     void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
@@ -1554,7 +1596,7 @@
      * START
      * *********************/
     
-    void CommandSet_PaletteID(uint8_t value, uint8_t segment_index);
+    void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
 
     void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
     int8_t GetFlasherFunctionIDbyName(const char* f);
@@ -1564,6 +1606,7 @@
     void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
 
     void CommandSet_HardwareColourOrderTypeByStr(const char* value, uint8_t segment_index = 0);
+    void CommandSet_ColourTypeByStr(const char* value, uint8_t segment_index = 0);
     const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
     const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
 
@@ -1589,7 +1632,7 @@
     // void CommandSet_PixelHardwareTypeID(uint8_t value);
     // void CommandSet_LightPowerState(uint8_t value);
     // void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
-    void CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint8_t segment_index);
+    void CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint8_t segment_index = 0);
     // void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
     void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);

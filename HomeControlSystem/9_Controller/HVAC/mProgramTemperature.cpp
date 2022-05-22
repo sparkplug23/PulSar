@@ -85,7 +85,7 @@ void ProgramTemperature::CheckRunningProgram_Heating_Profile1()
 
   }// time_on is not running
   else{ 
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_on is not running"));
+    ALOG_DBM( PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_on is not running"));
     // isrunning_heating = false;
   }
 
@@ -139,7 +139,7 @@ void ProgramTemperature::CheckRunningProgram_Cooling()
 
   }// time_on is not running
   else{ 
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_on is not running"));
+    ALOG_DBM( PSTR(D_LOG_HEATING D_HVAC_PROGRAM_TEMP "time_on is not running"));
   }
 
 

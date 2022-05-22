@@ -523,7 +523,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
     do {
       char* tmp;
       size_t len;
-      pCONT_sto->GetLog(counter, &tmp, &len);
+      pCONT_log->GetLog(counter, &tmp, &len);
       if (len) { //if there is new log data
       // and is not larger than buffer
         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }

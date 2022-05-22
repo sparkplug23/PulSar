@@ -62,7 +62,7 @@ void mHVAC::FunctionHandler_Programs_Timers(void){
     //  React if timer has started or ended
     if(zone[zone_id].program_timer_method->IsChangedThenReset())
     {
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("program_timer_method IsChangedThenReset %d"), zone_id);
+      ALOG_DBM( PSTR("program_timer_method IsChangedThenReset %d"), zone_id);
       if(zone[zone_id].program_timer_method->OutputDesiredState())
       {
         SetZoneActive(zone_id, 1); // This can be changed to "FUNC_SET_POWER" for internal relay driver control

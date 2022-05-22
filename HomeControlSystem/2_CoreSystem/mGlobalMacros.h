@@ -17,6 +17,7 @@
   const char X[] PROGMEM = Y;
 
 // enable additional debug output
+// Need to add disables here! 
 #define DEBUG_PRINT Serial.print
 #define DEBUG_PRINTLN Serial.println
 #define DEBUG_PRINTF Serial.printf

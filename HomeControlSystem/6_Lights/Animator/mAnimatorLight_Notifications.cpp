@@ -272,7 +272,7 @@ void mAnimatorLight::SubTask_Notifications(){
   if(mTime::TimeReached(&notif.tSaved.AutoOff,1000)){// if 1 second past
     for(int i=0;i<STRIP_NOTIFICATION_SIZE;i++){ //check all
       #ifdef ENABLE_LOG_LEVEL_DEBUG
-      AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].auto_time_off_secs);
+      ALOG_DBM( PSTR(D_LOG_NEO "Notif tSaved.AutoOff [%d]"),notif.pixel[i].auto_time_off_secs);
       #endif
       if(notif.pixel[i].auto_time_off_secs==1){ //if =1 then turn off and clear to 0
         SetPixelColor(i,0);

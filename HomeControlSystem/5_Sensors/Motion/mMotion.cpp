@@ -143,7 +143,7 @@ void mMotion::RulesEvent_Motion_Change(){
 // };
 
 pCONT_rules->ShowRuleAddLogByIndex();
-pCONT_rules->ShowRuleEvent_AddLogByIndex();
+pCONT_rules->ShowRuleEvent_AddLog();
 
 //     if(command_state_in == SWITCHMODE_FOLLOW_ID)
 //     {

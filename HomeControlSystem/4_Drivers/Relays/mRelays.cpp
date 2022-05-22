@@ -34,6 +34,9 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:
       SubTask_Relay_Time_To_Remain_On_Seconds();
       SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
+      
+  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVERY_SECOND"));
+
     break;
     case FUNC_EVERY_MINUTE:
       SubTask_Every_Minute();
@@ -76,17 +79,17 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifndef DISABLE_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Draw_PageTable();
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table();
-    break;
-    case FUNC_WEB_APPEND_ROOT_BUTTONS:
-      WebAppend_Root_Add_Buttons();
-    break;
-    #endif // DISABLE_WEBSERVER
+    // #ifndef DISABLE_WEBSERVER
+    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    //   WebAppend_Root_Draw_PageTable();
+    // break;
+    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    //   WebAppend_Root_Status_Table();
+    // break;
+    // case FUNC_WEB_APPEND_ROOT_BUTTONS:
+    //   WebAppend_Root_Add_Buttons();
+    // break;
+    // #endif // DISABLE_WEBSERVER
   } // end switch
 } // END function
 
@@ -352,7 +355,7 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
   char buffer_internal[50];
   sprintf(buffer, "%s %s", GetRelayNamebyIDCtr(device_id, buffer_internal, sizeof(buffer_internal)), onoffctr);
 
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
+  ALOG_DBM( PSTR("GetRelayNameWithStateLongbyIDCtr=%s"),buffer);
 
   return buffer;
 }

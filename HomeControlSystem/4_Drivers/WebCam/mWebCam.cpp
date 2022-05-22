@@ -248,7 +248,7 @@ uint32_t WcSetup(int32_t fsiz)
   // //   AddLog(LOG_LEVEL_ERROR, "CAM: cannot allocated ledc cahnnel, remove a PWM GPIO");
   // // }
   // // config.ledc_channel = (ledc_channel_t) ledc_channel;
-  // AddLog(LOG_LEVEL_DEBUG_MORE, "CAM: XCLK on GPIO %i using ledc channel %i", config.pin_xclk, config.ledc_channel);
+  // ALOG_DBM( "CAM: XCLK on GPIO %i using ledc channel %i", config.pin_xclk, config.ledc_channel);
   // config.ledc_timer = LEDC_TIMER_0;
   // config.xclk_freq_hz = 20000000;
   // config.pixel_format = PIXFORMAT_JPEG;
@@ -700,13 +700,13 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 //   }
 //   client.stop();
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CAM: Sending image #: %d"), bnum+1);
+//   ALOG_DBM( PSTR("CAM: Sending image #: %d"), bnum+1);
 // }
 
 // void HandleImageBasic(void) {
 //   if (!HttpCheckPriviledgedAccess()) { return; }
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_HTTP "Capture image"));
+//   ALOG_DBM( PSTR(D_LOG_HTTP "Capture image"));
 
 //   if (Settings->webcam_config.stream) {
 //     if (!Wc.CamServer) {
@@ -744,7 +744,7 @@ uint32_t WcGetPicstore(int32_t num, uint8_t **buff) {
 
 //   esp_camera_fb_return(wc_fb);  // Free frame buffer
 
-//   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CAM: Image sent"));
+//   ALOG_DBM( PSTR("CAM: Image sent"));
 // }
 
 void HandleWebcamMjpeg(void) {

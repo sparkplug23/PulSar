@@ -517,7 +517,7 @@ void mEnergyInterface::EnergyMarginCheck(void)
 //           EnergyMqttShow();
 //           SetAllPower(POWER_ALL_OFF, SRC_MAXPOWER);
 //           if (!Energy.mplr_counter) {
-//             Energy.mplr_counter = Settings.param[P_MAX_POWER_RETRY] +1;
+//             Energy.mplr_counter = Settings.setoption_255[P_MAX_POWER_RETRY] +1;
 //           }
 //           Energy.mplw_counter = Settings.energy_max_power_limit_window;
 //         }
@@ -577,7 +577,7 @@ void mEnergyInterface::EnergyEverySecond(void)
 {
   // Overtemp check
   // if (global_update) {
-  //   if (power && (global_temperature != 9999) && (global_temperature > Settings.param[P_OVER_TEMP])) {  // Device overtemp, turn off relays
+  //   if (power && (global_temperature != 9999) && (global_temperature > Settings.setoption_255[P_OVER_TEMP])) {  // Device overtemp, turn off relays
   //     SetAllPower(POWER_ALL_OFF, SRC_OVERTEMP);
   //   }
   // }

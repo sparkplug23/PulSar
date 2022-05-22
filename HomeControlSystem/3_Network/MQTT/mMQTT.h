@@ -297,6 +297,7 @@ const char* state_ctr(void);
       if(handler_ptr == nullptr){
         return;
       }
+      
       // Block non matching ids
       // if(optional_desired_id>=0)  // need to change =0 default to -1
       // {
@@ -326,6 +327,7 @@ const char* state_ctr(void);
           }
         }
       }
+
       if(handler_ptr->flags.SendNow){ 
         handler_ptr->flags.SendNow = false;
         handler_ptr->tSavedLastSent = millis();    

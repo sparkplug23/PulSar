@@ -83,7 +83,13 @@ void mRelays::MQTTHandler_Set_TelePeriod()
  * */
 void mRelays::MQTTHandler_Sender(uint8_t id)
 {
+
+// ALOG_DEBUG_LINE_HERE;
+
   for(auto& handle:mqtthandler_list){
+
+// if(mqtthandler_list[1].)
+
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_RELAY_ID, handle, id);
   }
 }

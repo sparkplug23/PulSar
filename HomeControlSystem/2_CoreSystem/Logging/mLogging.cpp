@@ -19,7 +19,7 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
     // Serial.println("mLogging::Tasker");
       // if(!Telnet) StartTelnetServer();
       if(telnet_started){      handleTelnet();    }
-      // pCONT_sto->Telnet.println("FUNC_LOOP: ");
+      // pCONT_log->Telnet.println("FUNC_LOOP: ");
     break;
     case FUNC_EVERY_SECOND:
       // Serial.println("mLogging::Tasker");
@@ -74,21 +74,43 @@ void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP
   }
 }
 
+
+
+// template<typename T, typename U>
+// void mLogging::AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+// {
+
+
+//   char buffer[100] = {0}; // short buffer
+//   uint16_t buflen = 0;
+
+//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
+
+//   AddLog(loglevel, buffer);
+
+
+
+// }
+
+
+
+
+
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
   //Block software stream for now
   // if(fDebugOutputMode==DEBUG_OUTPUT_SOFTWARE_ID){return;}
   // if(!fDebugSerialMode){return;}
 
-  // if(pCONT_sto->Telnet!=nullptr){
-    //   if(!pCONT_sto->client.connected()) {
+  // if(pCONT_log->Telnet!=nullptr){
+    //   if(!pCONT_log->client.connected()) {
       
-    //     pCONT_sto->client = pCONT_sto->server->available();
+    //     pCONT_log->client = pCONT_log->server->available();
     //   }
 //     if(pCONT_time->uptime.seconds_nonreset>30){
-  // pCONT_sto->Telnet.println("AddLog: ");
-//     //   if(pCONT_sto->client.connected()) {
-//     //     pCONT_sto->client.printf("%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+  // pCONT_log->Telnet.println("AddLog: ");
+//     //   if(pCONT_log->client.connected()) {
+//     //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
 //     //   }
 //     // }
 //     // }else{
@@ -191,7 +213,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         ESP.getFreeHeap(), //4 * (sp - g_pcont->stack), 
         isconnected ? 'Y' : 'N',
         pCONT_time->uptime.minute,pCONT_time->uptime.second,
-        pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),
+        pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),
         pCONT_set->log_data
       );
     #else
@@ -202,7 +224,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
 
 
-      SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
+      SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
 
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT END<<\n\r\n\r"); }
       #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
@@ -231,19 +253,19 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   // LOG : TELNET
   // #ifdef ENABLE_TELNET_LOGGING // off by default for performance
   // if (loglevel <= pCONT_set->Settings.telnetlog_level) {
-    // if(pCONT_sto->server!=nullptr){ // needs ignored before it has been started!
+    // if(pCONT_log->server!=nullptr){ // needs ignored before it has been started!
     
-  if(pCONT_sto->Telnet){
-    //   if(!pCONT_sto->client.connected()) {
+  if(pCONT_log->Telnet){
+    //   if(!pCONT_log->client.connected()) {
       
-    //     pCONT_sto->client = pCONT_sto->server->available();
+    //     pCONT_log->client = pCONT_log->server->available();
     //   }
     
-  pCONT_sto->Telnet.printf(
+  pCONT_log->Telnet.printf(
     // "uptime2: ");
-    //   if(pCONT_sto->client.connected()) {
-    //     pCONT_sto->client.printf(
-      "%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+    //   if(pCONT_log->client.connected()) {
+    //     pCONT_log->client.printf(
+      "%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
     //   }
     // }
     }
@@ -272,7 +294,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         memmove(pCONT_set->web_log, it, WEB_LOG_SIZE -(it-pCONT_set->web_log));  // Move buffer forward to remove oldest log line
       }
       // creates line formatted with \1 meaning EOL
-      snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+      snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
       if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
     }
@@ -370,13 +392,13 @@ void mLogging::handleTelnet(){
 
 //   // Overrides
 //   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
-//   //pCONT_sto->seriallog_level = LOG_LEVEL_DEBUG_MORE;
+//   //pCONT_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
 //   //pCONT_set->Settings.seriallog_level = LOG_LEVEL_DEBUG;
 //   //pCONT_set->Settings.weblog_level = LOG_LEVEL_INFO;
 
 //   // LOG : SERIAL
 //   if (loglevel <= pCONT_set->Settings.seriallog_level) {
-//     SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
+//     SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
 //     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
 //     // SERIAL_DEBUG.flush();
 //   }
@@ -430,7 +452,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
   // Overrides
   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //pCONT_sto->seriallog_level = LOG_LEVEL_DEBUG_MORE;
+  //pCONT_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
   //pCONT_set->Settings.seriallog_level = LOG_LEVEL_DEBUG;
   //pCONT_set->Settings.weblog_level = LOG_LEVEL_INFO;
 
@@ -438,7 +460,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   if (loglevel <= pCONT_set->Settings.seriallog_level) {
     SERIAL_DEBUG.printf("%s%s %s\r\n", 
     mxtime,
-    pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  
+    pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  
     pCONT_set->log_data);
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // SERIAL_DEBUG.flush();
@@ -446,24 +468,24 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
   // LOG : TELNET
   // if (loglevel <= pCONT_set->Settings.telnetlog_level) {
-  //   if((pCONT_sto!=NULL)&&(pCONT_sto->server!=NULL)){
-  //     if(!pCONT_sto->client.connected()) {
-  //       pCONT_sto->client = pCONT_sto->server->available();
+  //   if((pCONT_log!=NULL)&&(pCONT_log->server!=NULL)){
+  //     if(!pCONT_log->client.connected()) {
+  //       pCONT_log->client = pCONT_log->server->available();
   //     }
-  //     if(pCONT_sto->client.connected()) {
-  //       pCONT_sto->client.printf("%s%s %s\r\n", mxtime,pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+  //     if(pCONT_log->client.connected()) {
+  //       pCONT_log->client.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
   //     }
   //   }
   // }
-  if(pCONT_sto->Telnet){
-    //   if(!pCONT_sto->client.connected()) {
+  if(pCONT_log->Telnet){
+    //   if(!pCONT_log->client.connected()) {
       
-    //     pCONT_sto->client = pCONT_sto->server->available();
+    //     pCONT_log->client = pCONT_log->server->available();
     //   }
     
-  pCONT_sto->Telnet.println("uptime: ");
-    //   if(pCONT_sto->client.connected()) {
-    //     pCONT_sto->client.printf("%s%s %s\r\n", mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+  pCONT_log->Telnet.println("uptime: ");
+    //   if(pCONT_log->client.connected()) {
+    //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
     //   }
     // }
     }
@@ -486,7 +508,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
     }
 
     // creates line formatted with \1 meaning EOL
-    snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+    snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
     if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
   
   // SERIAL_DEBUG.printf("WEBLOG");
@@ -525,7 +547,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 //   if (loglevel <= pCONT_set->Settings.seriallog_level) {
 //     SERIAL_DEBUG.printf("%s%s %s\r\n", 
 //       mxtime,
-//       pCONT_sto->GetLogLevelNameShortbyID(loglevel, level_buffer),  
+//       pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  
 //       pCONT_set->log_data
 //     );
 //   }

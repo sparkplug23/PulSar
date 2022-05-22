@@ -112,18 +112,18 @@ int mUltraSonicSensor::GetDurationReading(void)
     // ultrasonic.threshold.lowervalue = lower;
     // ultrasonic.threshold.uppervalue = upper;
 
-    // // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "Lower<duration|Duration<Upper: [\t%d\t%d\t%d\t%d]"),(int)lower,(int)ultrasonic.duration,(int)duration,(int)upper);
+    // // ALOG_DBM( PSTR(D_LOG_ULTRASONIC "Lower<duration|Duration<Upper: [\t%d\t%d\t%d\t%d]"),(int)lower,(int)ultrasonic.duration,(int)duration,(int)upper);
 
     // // New method under test
     // // GET how new duration relates to previous
     // if(duration>ultrasonic.duration){ // Positive range
     //   ultrasonic.threshold.ratio_pos = duration/ultrasonic.threshold.uppervalue;
     //   ultrasonic.threshold.relative = ultrasonic.threshold.ratio_pos;  
-    //   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration > ultrasonic.duration"));
+    //   // ALOG_DBM( PSTR(D_LOG_ULTRASONIC "duration > ultrasonic.duration"));
     // }else{ // Negative range
     //   ultrasonic.threshold.ratio_neg = -1*(ultrasonic.threshold.lowervalue/duration);
     //   ultrasonic.threshold.relative = ultrasonic.threshold.ratio_neg; 
-    //   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "duration < ultrasonic.duration"));
+    //   // ALOG_DBM( PSTR(D_LOG_ULTRASONIC "duration < ultrasonic.duration"));
     // }
 
     // // Check if its within threshold
@@ -161,15 +161,15 @@ int mUltraSonicSensor::GetDurationReading(void)
     // if(ultrasonic.threshold.insidecount>200){ultrasonic.threshold.insidecount=200;}
     // if(ultrasonic.threshold.outsidecount>200){ultrasonic.threshold.outsidecount=200;}
 
-    // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "fabsf(ultrasonic.threshold.relative) %f"),fabsf(ultrasonic.threshold.relative));
+    // ALOG_DBM( PSTR(D_LOG_ULTRASONIC "fabsf(ultrasonic.threshold.relative) %f"),fabsf(ultrasonic.threshold.relative));
 
     // if(fabsf(ultrasonic.threshold.relative)<=1){ 
-    //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "[ULTRA]if(abs(ultrasonic.threshold.relative)<=1) \t\t"));
+    //   ALOG_DBM( PSTR(D_LOG_ULTRASONIC "[ULTRA]if(abs(ultrasonic.threshold.relative)<=1) \t\t"));
       ultrasonic.isvalid = true;
     //   ultrasonic.ischanged = true;
     //   ultrasonic.accuracy.insidecount++;
     // }else{
-    //   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_ULTRASONIC "[ULTRA] NOT if(abs(ultrasonic.threshold.relative)<=1)"));
+    //   ALOG_DBM( PSTR(D_LOG_ULTRASONIC "[ULTRA] NOT if(abs(ultrasonic.threshold.relative)<=1)"));
     //   ultrasonic.isvalid = false;
     //   ultrasonic.ischanged = false;
     //   ultrasonic.accuracy.outsidecount++;
@@ -267,7 +267,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres()
 
   ultrasonic.speedofsound = speedofsound_inmps;
   
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("speedofsound=%d"),(int)ultrasonic.speedofsound);
+  ALOG_DBM( PSTR("speedofsound=%d"),(int)ultrasonic.speedofsound);
 
   return speedofsound_inmps;
 

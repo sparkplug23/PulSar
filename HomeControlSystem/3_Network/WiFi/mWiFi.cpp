@@ -582,7 +582,7 @@ void mWiFi::WifiSetState(uint8_t state)
 
   }
   // if(pCONT_time==NULL){
-  //    AddLog(LOG_LEVEL_DEBUG_MORE, "pCONT_time==NULL");
+  //    ALOG_DBM( "pCONT_time==NULL");
   // }
   pCONT_set->global_state.wifi_down = state ^1;
   if (!pCONT_set->global_state.wifi_down) {
@@ -761,7 +761,7 @@ void mWiFi::WifiCheckIp(void)
         connection.fReconnect = true;
         break;
       // case WL_IDLE_STATUS: AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "case WL_IDLE_STATUS"));
-      // case WL_DISCONNECTED: AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_WIFI "case WL_DISCONNECTED"));
+      // case WL_DISCONNECTED: ALOG_DBM( PSTR(D_LOG_WIFI "case WL_DISCONNECTED"));
       default:  // WL_IDLE_STATUS and WL_DISCONNECTED
         //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "default"));
 
@@ -781,7 +781,7 @@ void mWiFi::WifiCheckIp(void)
           } 
           else {
     #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "1"));
+            ALOG_DBM( PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "1"));
     #endif// ENABLE_LOG_LEVEL_INFO
           }
         }
@@ -1215,7 +1215,7 @@ void mWiFi::EspRestart(void)
 // void wifiKeepAlive(void) {
 //   static uint32_t wifi_timer = 0;                            // Wifi keepalive timer
 
-//   uint32_t wifiTimerSec = Settings.param[P_ARP_GRATUITOUS];  // 8-bits number of seconds, or minutes if > 100
+//   uint32_t wifiTimerSec = Settings.setoption_255[P_ARP_GRATUITOUS];  // 8-bits number of seconds, or minutes if > 100
 
 //   if ((WL_CONNECTED != Wifi.status) || (0 == wifiTimerSec)) { return; }   // quick exit if wifi not connected or feature disabled
 
@@ -1469,7 +1469,7 @@ void mWiFi::MdnsUpdate(void)
   MDNS.update();
   if (2 == Mdns.begun) {
     MDNS.update(); // this is basically passpacket like a webserver
-   // AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MDNS "MDNS.update"));
+   // ALOG_DBM( PSTR(D_LOG_MDNS "MDNS.update"));
   }
 }
 #endif  // ESP8266

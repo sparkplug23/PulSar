@@ -128,7 +128,7 @@ bool mInterfaceLight::Pre_Init(void)
   //   uint32_t pwm_channels = (Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (Settings.light_settings.type & 7);
   //   if (0 == pwm_channels) { pwm_channels = 1; }
   //   devices_present += pwm_channels - 1;    // add the pwm channels controls at the end
-  // } else if ((Settings.param[P_RGB_REMAP] & 128) && (LST_RGBW <= (Settings.light_settings.type & 7))) {
+  // } else if ((Settings.setoption_255[P_RGB_REMAP] & 128) && (LST_RGBW <= (Settings.light_settings.type & 7))) {
   //   // if RGBW or RGBCW, and SetOption37 >= 128, we manage RGB and W separately, hence adding a device
   //   devices_present++;
   // }
@@ -162,7 +162,7 @@ void mInterfaceLight::Template_Load(){
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
+  ALOG_DBM( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
@@ -217,7 +217,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   // if (LST_RGBW <= subtype) {
   //   // only change if RGBW or RGBCW
   //   // do not allow independant RGB and WC colors
-  //   bool ct_rgb_linked = 0;// !(pCONT_set->Settings.param[P_RGB_REMAP] & 128);
+  //   bool ct_rgb_linked = 0;// !(pCONT_set->Settings.setoption_255[P_RGB_REMAP] & 128);
   //   CommandSet_RGBCT_Linked(ct_rgb_linked);
   // }
 
@@ -376,7 +376,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //     uint32_t pwm_channels = (Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (Settings.light_settings.type & 7);
 //     if (0 == pwm_channels) { pwm_channels = 1; }
 //     devices_present += pwm_channels - 1;    // add the pwm channels controls at the end
-//   } else if ((Settings.param[P_RGB_REMAP] & 128) && (LST_RGBW <= (Settings.light_settings.type & 7))) {
+//   } else if ((Settings.setoption_255[P_RGB_REMAP] & 128) && (LST_RGBW <= (Settings.light_settings.type & 7))) {
 //     // if RGBW or RGBCW, and SetOption37 >= 128, we manage RGB and W separately, hence adding a device
 //     devices_present++;
 //   }
@@ -847,7 +847,7 @@ void mInterfaceLight::EveryLoop(){
   else
   {
     #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("Invalid Light Type"));
+    ALOG_DBM( PSTR("Invalid Light Type"));
     #endif
   }
 
@@ -858,7 +858,7 @@ void mInterfaceLight::EveryLoop(){
 
 void mInterfaceLight::EverySecond_AutoOff(){
 
-  //AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
+  //ALOG_DBM( PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
   if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
     // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -936,22 +936,16 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
   
-
-  JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-getHue360());
-  JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-getSat255());
-
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-getBrightnessRGB255());
+  JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getHue360());
+  JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
 
   
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_colour_order);
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_c12olour_order);
 
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
-getBrightnessCCT255());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessCCT255());
 
 
   // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
@@ -977,7 +971,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
     //   JsonBuilderI->Add("B", rgbcct_controller.B); 
     //   JsonBuilderI->Add("WW", rgbcct_controller.WW); 
     //   JsonBuilderI->Add("WC", rgbcct_controller.WC); 
-    JsonBuilderI->Level_End();
+    // JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("type");
     
     JsonBuilderI->Add("R", pCONT_lAni->_segments[0].hardware_element_colour_order.r); 
@@ -992,6 +986,15 @@ uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
     // JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
 
   JsonBuilderI->Level_End();
+
+
+  if(pCONT_lAni->_segments[0].palette.id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
+  {
+
+    JBI->Array_AddArray("encoded", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, ARRAY_SIZE(pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map));
+
+  }
+
 
   // JsonBuilderI->Level_Start("singlecolour");
   //   JsonBuilderI->Add_P(PM_R", mode_singlecolour.colour.R);

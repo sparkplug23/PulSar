@@ -32,6 +32,7 @@
  * In order of importance
  * */
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Personal.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
 /**
@@ -41,6 +42,8 @@
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
 #include "2_CoreSystem/Events/mEvents.h"
+
+#include "2c_Internal_IsolatedNoTaskerSystems/Decounter/decounter.h"
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
@@ -348,7 +351,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_MPU9250
     EM_MODULE_SENSORS_MPU9250_ID,
   #endif
-  // Controllers
+  // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
   #endif
@@ -376,9 +379,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_TREADMILL
     EM_MODULE_CONTROLLER_TREADMILL_ID,
   #endif
-  #ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
-    EM_MODULE_CONTROLLER_SENSORCOLOURS_ID,
-  #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     EM_MODULE_CONTROLLER_DOORBELL_ID,
   #endif
@@ -403,6 +403,14 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
     EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+    EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID,
+  #endif
+  // 10 Controller (Unique to one use case)
+  #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+    EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID,
+  #endif
+
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -425,7 +433,7 @@ enum MODULE_IDS{
 #endif 
 #ifdef USE_MODULE_CORE_LOGGING
   #include "2_CoreSystem/Logging/mLogging.h"
-  #define   pCONT_sto                               static_cast<mLogging*>(pCONT->pModule[EM_MODULE_CORE_LOGGING_ID])
+  #define   pCONT_log                               static_cast<mLogging*>(pCONT->pModule[EM_MODULE_CORE_LOGGING_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
   #include "2_CoreSystem/Telemetry/mTelemetry.h"
@@ -719,10 +727,6 @@ enum MODULE_IDS{
   #include "9_Controller/Treadmill/mTreadmill.h"
   #define pCONT_sbut                            static_cast<mTreadmill*>(pCONT->pModule[EM_MODULE_CONTROLLER_TREADMILL_ID])
 #endif
-#ifdef USE_MODULE_CONTROLLER_SENSORCOLOURS
-  #include "9_Controller/SensorColours/mSensorColours.h"
-  #define pCONT_msenscol                        static_cast<mSensorColours*>(pCONT->pModule[EM_MODULE_CONTROLLER_SENSORCOLOURS_ID])
-#endif
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
   #include "9_Controller/DoorBell/mDoorBell.h"
   #define pCONT_doorbell                        static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
@@ -756,6 +760,18 @@ enum MODULE_IDS{
   #include "9_Controller/FurnaceSensor/mFurnaceSensor.h"
   #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+  #include "9_Controller/HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
+  #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
+#endif
+// 10 Controller (Unique to one use case)
+#ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+  #include "10_Controller_Specialised/ImmersionTankColour/mImmersionTankColour.h"
+  #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
+#endif
+
+
+
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
