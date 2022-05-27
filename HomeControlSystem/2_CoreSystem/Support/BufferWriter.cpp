@@ -10,7 +10,7 @@ BufferWriter* BufferWriter::GetInstance(){
   return instance;
 }
 
-char* BufferWriter::GetPtr(){
+char* BufferWriter::GetBufferPtr(){
   return writer.buffer;
 }
 uint16_t BufferWriter::GetLength(){

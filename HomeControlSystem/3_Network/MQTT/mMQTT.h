@@ -165,7 +165,7 @@ class mMQTT :
     static const char* PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_MQTT_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_MQTT_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_MQTT_ID; }
 
     // char lwt_message_ondisconnect_ctr[50];#
   

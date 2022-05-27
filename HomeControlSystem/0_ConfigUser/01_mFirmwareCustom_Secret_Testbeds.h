@@ -13,7 +13,7 @@
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "6_Lights/_Interface/mInterfaceLight_Defines.h"
+#include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
 #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
 
 /**
@@ -69,6 +69,8 @@
 // #define DEVICE_ESP32_WEBCAM1
 // #define DEVICE_ESP32_WEBCAM2
 // #define DEVICE_ESP32_WEBCAM3
+
+// #define DEVICE_TESTBED_BME_ESP32
 
 
 // Include the home devices, which should ONLY contain final hardware
@@ -4742,6 +4744,7 @@
 #ifdef DEVICE_TESTBED_SHELLY1_01
   #define DEVICENAME_CTR          "testbed_shelly1_01"
   #define DEVICENAME_FRIENDLY_CTR "Shelly1 Tester"
+  #define DEVICENAME_ROOMHINT_CTR   "Outdoor|Driveway"
 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
@@ -4775,7 +4778,8 @@
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
     
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Side Door"
@@ -4795,7 +4799,7 @@
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
       "]"    
     "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D18:00:00\",\"OffTime\":\"00D06:00:00\"}"
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D21:00:00\",\"OffTime\":\"00D05:00:00\"}"
   "}";
 
 
@@ -6074,6 +6078,85 @@
 #endif
 
 
+#ifdef DEVICE_TESTBED_BME_ESP32
+  #define DEVICENAME_CTR          "testbed_bme_esp32"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed BME280"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+
+  // try tas to test it for esp32 and i2c scanning
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+
+
+#ifdef DEVICE_TESTBED_BME_ESP8266
+  #define DEVICENAME_CTR          "testbed_bme_esp8266"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed BME280"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_BH1750
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+
+
+#ifdef DEVICE_TESTBED_SENSORS_ESP8266
+  #define DEVICENAME_CTR          "testbed_sensor_esp8266"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed BME280"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_BH1750
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif  
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
 
 
 

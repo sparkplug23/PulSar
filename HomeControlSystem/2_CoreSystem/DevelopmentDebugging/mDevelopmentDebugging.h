@@ -23,7 +23,7 @@ class mDevelopmentDebugging :
     static const char* PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID; }
     
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){

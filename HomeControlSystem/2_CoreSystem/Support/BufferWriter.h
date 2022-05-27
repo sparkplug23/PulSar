@@ -29,7 +29,7 @@ class BufferWriter{
     void Start();
     void Clear();
     bool End();
-    char* GetPtr();
+    char* GetBufferPtr();
     uint16_t* GetLengthPtr();
     uint16_t GetLength();
     uint16_t GetBufferSize();

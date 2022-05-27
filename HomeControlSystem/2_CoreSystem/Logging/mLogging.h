@@ -465,7 +465,7 @@ public:
     static const char* PM_MODULE_CORE_LOGGING_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_LOGGING_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
 
     void parse_JSONCommand(JsonParserObject obj);
 

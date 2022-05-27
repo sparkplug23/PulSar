@@ -4,7 +4,7 @@
 #define mUserConfigSecret_Example_H
 
 #include "2_CoreSystem/mGlobalMacros.h"
-// #include "6_Lights/_Interface/palettes.h"
+// #include "6_Lights/00_Interface/palettes.h"
 #ifdef ESP8266
 #include <avr/pgmspace.h>
 #endif // ESP8266

@@ -64,7 +64,7 @@ class mWiFi :
     static const char* PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WIFI_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WIFI_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WIFI_ID; }
 
     void parse_JSONCommand(JsonParserObject obj);
    

@@ -88,7 +88,7 @@ class mTelemetry :
     static const char* PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
 
 
     #ifdef USE_DEBUG_CLASS_SIZE

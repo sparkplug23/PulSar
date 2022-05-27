@@ -480,7 +480,7 @@ enum MODULE_IDS{
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
-  #include "8_Displays/_Interface/mDisplaysInterface.h"
+  #include "8_Displays/00_Interface/mDisplaysInterface.h"
   #define pCONT_iDisp                               static_cast<mDisplaysInterface*>(pCONT->pModule[EM_MODULE_DISPLAYS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
@@ -493,11 +493,19 @@ enum MODULE_IDS{
 #endif
 
 
-// Drivers (Range 40-129)
+/**
+ * @brief DRIVERS
+ * @note  Clases with threaded "Tasks" that control external hardware
+ **/
+
 #ifdef USE_MODULE_DRIVERS_INTERFACE
-  #include "4_Drivers/_Interface/Interface_Drivers.h"
+  #include "4_Drivers/00_Interface/Interface_Drivers.h"
   // #define pCONT_iDrivers                           static_cast<mSensorsInterface*>(pCONT->pModule[EM_MODULE_SENSORS_INTERFACE_ID])
 #endif
+
+
+
+
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
   #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
   #define pCONT_mdhbridge                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
@@ -507,7 +515,7 @@ enum MODULE_IDS{
   #define pCONT_mdirt                               static_cast<mIRtransceiver*>(pCONT->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
-  #include "4_Drivers/Relays/mRelays.h"
+  #include "4_Drivers/02_Relays/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
@@ -519,7 +527,7 @@ enum MODULE_IDS{
   #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_GPS
-  #include "4_Drivers/GPS_UBX/mGPS.h"
+  #include "4_Drivers/20_GPS_UBX/mGPS.h"
   #define pCONT_gps                                 static_cast<mGPS*>(pCONT->pModule[EM_MODULE_DRIVERS_GPS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART
@@ -565,7 +573,7 @@ enum MODULE_IDS{
 
 // Energy (Range 130-139)
 #ifdef USE_MODULE_ENERGY_INTERFACE
-  #include "7_Energy/_Interface/mEnergyInterface.h"
+  #include "7_Energy/00_Interface/mEnergyInterface.h"
   #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
@@ -583,7 +591,7 @@ enum MODULE_IDS{
 
 // Lights (Range 140-169)
 #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #include "6_Lights/_Interface/mInterfaceLight.h"
+  #include "6_Lights/00_Interface/mInterfaceLight.h"
   #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->pModule[EM_MODULE_LIGHTS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
@@ -599,18 +607,43 @@ enum MODULE_IDS{
   #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pModule[EM_MODULE_LIGHTS_PWM_ID])
 #endif
 
-// Sensors (Range 120-169)
+/**
+ * @brief SENSORS
+ * @note  Clases with threaded "Tasks" that sense/record external 
+ **/
 #ifdef USE_MODULE_SENSORS_INTERFACE
-  #include "5_Sensors/_Interface/mSensorsInterface.h"
+  #include "5_Sensors/00_Interface/mSensorsInterface.h"
   #define pCONT_iSensors                         static_cast<mSensorsInterface*>(pCONT->pModule[EM_MODULE_SENSORS_INTERFACE_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_SWITCHES
+  #include "5_Sensors/01_Switches/mSwitches.h"
+  #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
+#endif
+
+#ifdef USE_MODULE_SENSORS_DS18X
+  #include "5_Sensors/03_DB18x20/mDS18X.h"
+  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_BME
+  #include "5_Sensors/04_BME/mBME.h"
+  #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
+#endif
+
+#ifdef USE_MODULE_SENSORS_DHT
+  #include "5_Sensors/06_DHT/mSensorsDHT.h"
+  #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_MOTION
+  #include "5_Sensors/07_Motion/mMotion.h"
+  #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
+#endif
+
+
+
+
 #ifdef USE_MODULE_SENSORS_BUTTONS
   #include "5_Sensors/Buttons/mButtons.h"
   #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_SWITCHES
-  #include "5_Sensors/Switches/mSwitches.h"
-  #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
   #include "5_Sensors/LDRBasic/mLDRBasic.h"
@@ -620,18 +653,6 @@ enum MODULE_IDS{
   #include "5_Sensors/Analog_PhasedIntoADCInternal/mSensorsAnalog.h"
   #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pModule[EM_MODULE_SENSORS_ANALOG_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_DHT
-  #include "5_Sensors/DHT/mSensorsDHT.h"
-  #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_BME
-  #include "5_Sensors/BME/mBME.h"
-  #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_DS18X
-  #include "5_Sensors/DB18x20/mDS18X.h"
-  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
-#endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
@@ -640,10 +661,7 @@ enum MODULE_IDS{
   #include "5_Sensors/Door/mDoorSensor.h"
   #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_MOTION
-  #include "5_Sensors/Motion/mMotion.h"
-  #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
-#endif
+
 #ifdef USE_MODULE_SENSORS_MOISTURE
   #include "5_Sensors/Moisture/mMoistureSensor.h"
   #define pCONT_srmoisture                      static_cast<mMoistureSensor*>(pCONT->pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
@@ -698,10 +716,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_HVAC
   #include "9_Controller/HVAC/mHVAC.h"
   #define pCONT_heating2                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER_HVAC_ID])
-#endif
-#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-  #include "9_Controller/RadiatorFan/mRadiatorFan.h"
-  #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
@@ -760,22 +774,26 @@ enum MODULE_IDS{
   #include "9_Controller/FurnaceSensor/mFurnaceSensor.h"
   #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
 #endif
-#ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  #include "9_Controller/HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
-  #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
-#endif
-// 10 Controller (Unique to one use case)
-#ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-  #include "10_Controller_Specialised/ImmersionTankColour/mImmersionTankColour.h"
-  #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
-#endif
-
-
-
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
 #endif
+
+// 10 Controller (Unique to one use case)
+#ifdef USE_MODULE_CONTROLLER_RADIATORFAN
+  #include "10_Controller_Specialised/00_RadiatorFan/mRadiatorFan.h"
+  #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+  #include "10_Controller_Specialised/01_ImmersionTankColour/mImmersionTankColour.h"
+  #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+  #include "10_Controller_Specialised/02_HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
+  #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
+#endif
+
+
 
 #include  "1_TaskerManager/mTaskerInterface.h"
 

@@ -39,7 +39,7 @@ public:
     static const char* PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
@@ -629,7 +629,7 @@ public:
 // //     static const char* PM_MODULE_CORE_TIME_FRIENDLY_CTR;
 // //     PGM_P GetModuleName(){          return PM_MODULE_CORE_TIME_CTR; }
 // //     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_TIME_FRIENDLY_CTR; }
-// //     uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TIME_ID; }
+// //     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TIME_ID; }
     
 // //     #ifdef USE_DEBUG_CLASS_SIZE
 // //     uint16_t GetClassSize(){

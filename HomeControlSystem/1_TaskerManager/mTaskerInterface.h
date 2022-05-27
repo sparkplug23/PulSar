@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "5_Sensors/_Interface/mSensorType.h"
+#include "5_Sensors/00_Interface/mSensorType.h"
 
 /**
  * @brief 
@@ -17,7 +17,7 @@ class mTaskerInterface
     virtual int8_t Tasker(uint8_t function, JsonParserObject obj);
     virtual PGM_P GetModuleName();
     virtual PGM_P GetModuleFriendlyName();
-    virtual uint8_t GetModuleUniqueID();
+    virtual uint16_t GetModuleUniqueID();
     #ifdef USE_DEBUG_CLASS_SIZE
     virtual uint16_t GetClassSize();
     #endif    

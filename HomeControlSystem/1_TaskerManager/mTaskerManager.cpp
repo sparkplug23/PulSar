@@ -407,9 +407,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_HVAC
     pModule[EM_MODULE_CONTROLLER_HVAC_ID] = new mHVAC();
   #endif
-  #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-    pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID] = new mRadiatorFan();
-  #endif
   #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
     pModule[EM_MODULE_CONTROLLER_IRTRANSMITTER_ID] = new X();
   #endif
@@ -427,9 +424,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_TREADMILL
     pModule[EM_MODULE_CONTROLLER_TREADMILL_ID] = new X();
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-    pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID] = new mImmersionTankColour();
   #endif
   #ifdef USE_MODULE_CONTROLLER_DOORCHIME //phasing out
     pModule[EM_MODULE_CONTROLLER_DOORBELL_ID] = new mDoorBell();
@@ -455,13 +449,20 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
     pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID] = new mFurnaceSensor();
   #endif
-  #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-    pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID] = new mHeatingStripColour_Understairs();
-  #endif
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID] = new mUserMod_01();
   #endif
-
+  
+// 10 Controller (Unique to one use case)
+  #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
+    pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID] = new mRadiatorFan();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+    pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID] = new mImmersionTankColour();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+    pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID] = new mHeatingStripColour_Understairs();
+  #endif
 };
 
 

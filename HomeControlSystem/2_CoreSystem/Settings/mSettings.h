@@ -141,7 +141,7 @@ typedef union {
 
 #include "2_CoreSystem/Time/mTime.h"
 
-#include "5_Sensors/Switches/mSwitches.h"
+#include "5_Sensors/01_Switches/mSwitches.h"
 
 
 
@@ -612,7 +612,7 @@ class mSettings :
     static const char* PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
     
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){

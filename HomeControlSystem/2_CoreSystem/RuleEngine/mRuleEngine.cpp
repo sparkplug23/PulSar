@@ -200,7 +200,7 @@ void mRuleEngine::NewEventRun(uint16_t _module_id, uint16_t function_event, uint
   event_triggered.value.data[0] = _state;
 
   
-      ALOG_ERR(PSTR("NewEventRun_NumArg Exceeded"));
+      // ALOG_ERR(PSTR("NewEventRun_NumArg Exceeded"));
 
   /**
    * @brief Mess version for now, added to here

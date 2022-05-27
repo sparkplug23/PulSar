@@ -23,8 +23,8 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
         // randomSeed(analogRead(34)); //esp32
       #endif
 
-      // pinMode(14, OUTPUT);
-      // pinMode(19, OUTPUT);
+      // pinMode(22, OUTPUT);
+      // pinMode(4, OUTPUT);
 
   #ifndef USE_MODULE_NETWORK_WIFI
   WiFi.mode(WIFI_OFF);
@@ -53,8 +53,20 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_SECOND:{
 
-      // DIGITAL_INVERT_PIN(14);
-      // DIGITAL_INVERT_PIN(19);
+/**
+ * @brief Turn this into a define for template for easy testing of pin
+ * 
+ */
+      // DIGITAL_INVERT_PIN(22);
+      // DIGITAL_INVERT_PIN(4);
+
+      // Debug_I2CScan_To_Serial();
+
+
+        // ALOG_INF( PSTR("0x77 = %d"), I2cDevice_IsConnected(0x77));
+
+
+
 
 
   // char mqtt_data[300];
@@ -106,6 +118,34 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
   
 }
 
+
+
+void mSupport::Debug_I2CScan_To_Serial()
+{
+ 
+  if(pCONT_pins->PinUsed(GPIO_I2C_SCL_ID)&&pCONT_pins->PinUsed(GPIO_I2C_SDA_ID))
+  {
+
+    #ifdef ESP32
+    JBI->Add("I2C_BusSpeed", pCONT_sup->wire->getClock());
+    #endif
+
+    char mqtt_data[300];
+    pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+    // Serial.println(mqtt_data);
+
+    //need to escape option to function above
+    // JsonBuilderI->Add("I2C_Scan",          mqtt_data);
+
+    BufferWriterI->Start();
+    BufferWriterI->Append("\"I2C_Scan\":");
+    BufferWriterI->Append(mqtt_data);
+
+    ALOG_INF( PSTR("buffer=%s"), BufferWriterI->GetBufferPtr() );
+
+  }
+
+}
 
 
 

@@ -292,7 +292,7 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
     
     // Trigger0
-    pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true;   
+    pCONT_rules->rules[pCONT_rules->rules_active_index].flag_enabled = true;   
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
     p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;
@@ -309,7 +309,7 @@ void mRuleEngine::DefaultRule_Shelly_2p5(){
     pCONT_rules->rules_active_index++;
 
     // Trigger1
-    pCONT_rules->rules[pCONT_rules->rules_active_index].enabled = true; 
+    pCONT_rules->rules[pCONT_rules->rules_active_index].flag_enabled = true; 
     p_event = &pCONT_rules->rules[pCONT_rules->rules_active_index].trigger;   
     p_event->module_id = EM_MODULE_SENSORS_SWITCHES_ID;
     p_event->function_id = FUNC_EVENT_INPUT_STATE_CHANGED_ID;

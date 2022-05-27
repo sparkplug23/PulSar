@@ -36,10 +36,8 @@
  * 
  */
 // #define DEVICE_RGBDESK
-// #define DEVICE_DESKSENSOR_AS_LONGTERM_TEST_DEVICE
+// #define DEVICE_DESKSENSOR
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
-// #define DEVICE_RGBCLOCK_BEDROOM_WALL
-// #define DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
 
 
 /**************************************************************************************************************************************************
@@ -47,127 +45,6 @@
 ****** Bedroom ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
-
-
-
-//rgbmicro2/set/light///Scene
-//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
-#ifdef DEVICE_RGBCLOCK_BEDROOM_WALL
-  #define DEVICENAME_CTR          "rgbclock_bedroom_wall"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Clock 01"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 93  
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-  
-  #define ENABLE_DEVFEATURE_RGB_CLOCK
-  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-  #define DISABLE_WEBSERVER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":950,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"Clock Basic 01\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":34,"
-    "\"BrightnessCCT\":0,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-
-  "}";
-
-
-#endif
-
-#ifdef DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
-  #define DEVICENAME_CTR          "seven_segment_white_double"
-  #define DEVICENAME_FRIENDLY_CTR "7-Segment White Display"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 93  
-  
-  #define ENABLE_DEVFEATURE_RGB_CLOCK
-  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  
-  #define DISABLE_WEBSERVER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_EFFECTS "\"," 
-    "\"ColourPalette\":10," 
-    "\"Effects\":{"
-      "\"Function\":\"Seven-Segment Manual\""
-    "},"
-    "\"Hue\":10,\"Sat\":100,"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":1"
-  "}";
-
-
-
-#endif
 
 
 
@@ -236,7 +113,7 @@
 
 /**
  * @brief 
- * DEVICE_DESKSENSOR_AS_LONGTERM_TEST_DEVICE
+ * DEVICE_DESKSENSOR
  * - This will be the test device, full of as many sensors as possible, and also use 4 LEDs to emulate relay outputs
  * - This will be used as a rapid/testbed device for improving as many sensors as possible (at minimum, the "...sensor" devices)
  * 
@@ -257,7 +134,7 @@
  * development branch only
  * 
  **/
-#ifdef DEVICE_DESKSENSOR_AS_LONGTERM_TEST_DEVICE
+#ifdef DEVICE_DESKSENSOR
   #define DEVICENAME_CTR          "desksensor"
   #define DEVICENAME_FRIENDLY_CTR "Desk Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
@@ -268,42 +145,42 @@
   // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
   #define DISABLE_WEBSERVER  // phase out to only USE_MODULE_NETWORK_WEBSERVER
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
-  #define USE_MODULE_DRIVERS_LEDS
+  // #define USE_MODULE_DRIVERS_LEDS
 
   // #define USE_MODULE_DRIVERS_IRREMOTE
   // #define USE_IR_RECEIVE
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
 
   #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_DHT
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_LDR_BASIC
+  // #define USE_MODULE_SENSORS_SWITCHES
+  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_LDR_BASIC
 
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC
-    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  #endif // USE_MODULE_SENSORS_LDR_BASIC
+  // #ifdef USE_MODULE_SENSORS_LDR_BASIC
+  //   #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+  //   #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+  // #endif // USE_MODULE_SENSORS_LDR_BASIC
   
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define STRIP_SIZE_MAX 12
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  // #define STRIP_SIZE_MAX 12
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  // #define USE_SK6812_METHOD_DEFAULT
+  // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 
-  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  // // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
 
-  #define ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
+  // #define ENABLE_SEGMENT_EFFECTS_SELECTIVE_NOTIFICATIONS
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -484,8 +361,8 @@
     "},"
     "\"Hue\": 0,"
     "\"Sat\": 100,"
-    "\"BrightnessRGB\": 2,"
-    "\"BrightnessCCT\": 10,"
+    "\"BrightnessRGB\": 0,"
+    "\"BrightnessCCT\": 0,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"
       "\"Time\": 1"

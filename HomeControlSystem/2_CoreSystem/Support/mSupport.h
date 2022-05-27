@@ -325,7 +325,7 @@ class mSupport :
     static const char* PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
@@ -333,9 +333,9 @@ class mSupport :
     };
     #endif
 
-          void CheckResetConditions();
-          void Handle_OTA_URLS();
-          void Handle_Check_Power_Saving();
+    void CheckResetConditions();
+    void Handle_OTA_URLS();
+    void Handle_Check_Power_Saving();
 
 
     // #ifdef ENABLE_DEVFEATURE_OTA_METHOD
@@ -425,6 +425,7 @@ class mSupport :
     bool I2cActive(uint32_t addr);
     bool I2cSetDevice(uint32_t addr);
     bool I2cEnabled(uint32_t i2c_index);
+    void Debug_I2CScan_To_Serial();
     #endif // USE_I2C
 
 
