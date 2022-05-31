@@ -19,7 +19,7 @@
 #ifndef HEADER_MODULE_DRIVERS_LEDS_H
 #define HEADER_MODULE_DRIVERS_LEDS_H
   
-#define D_UNIQUE_MODULE_DRIVERS_LEDS_ID 132
+#define D_UNIQUE_MODULE_DRIVERS_LEDS_ID ((4*1000)+03)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

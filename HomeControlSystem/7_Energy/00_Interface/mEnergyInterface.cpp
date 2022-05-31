@@ -219,7 +219,7 @@ for(int i=0;i<MAX_ENERGY_SENSORS;i++){
  * */
 void mEnergyInterface::Settings_Default()
 {
-  pCONT_iEnergy->Energy.phase_count = 0;
+  Energy.phase_count = 0;
 
 
 }
@@ -266,9 +266,9 @@ return 0;
 void mEnergyInterface::SetEnergyDeviceCount(uint8_t address_length)
 {
 
-  pCONT_iEnergy->Energy.phase_count = address_length;
+  Energy.phase_count = address_length;
 
-  AddLog(LOG_LEVEL_TEST, PSTR("Energy.phase_count=%d"),pCONT_iEnergy->Energy.phase_count);
+  AddLog(LOG_LEVEL_TEST, PSTR("Energy.phase_count=%d"),Energy.phase_count);
 
 }
 

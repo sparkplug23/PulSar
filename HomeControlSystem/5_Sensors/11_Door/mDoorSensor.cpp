@@ -126,10 +126,10 @@ void mDoorSensor::EveryLoop(){
     if(door_detect.state){ 
       door_detect.isactive = true;
       door_detect.detected_time = pCONT_time->GetTimeShortNow();
-      pCONT_rules->NewEventRun(EM_MODULE_SENSORS_DOOR_ID, FUNC_EVENT_MOTION_STARTED_ID, 0, door_detect.isactive);
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_STARTED_ID, 0, door_detect.isactive);
     }else{ 
       door_detect.isactive = false;
-      pCONT_rules->NewEventRun(EM_MODULE_SENSORS_DOOR_ID, FUNC_EVENT_MOTION_ENDED_ID, 0, door_detect.isactive);
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_ENDED_ID, 0, door_detect.isactive);
     }
     door_detect.ischanged = true;
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
@@ -230,7 +230,7 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50];
 
   JsonBuilderI->Start();
-  JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DOOR_ID,0,buffer,sizeof(buffer)));
+  JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
   JsonBuilderI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
   
   if(json_level >= JSON_LEVEL_IFCHANGED){

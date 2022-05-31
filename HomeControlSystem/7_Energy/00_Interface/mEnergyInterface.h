@@ -304,6 +304,7 @@ void Settings_Save();
   //     #endif  // USE_ENERGY_POWER_LIMIT
   // #endif  // USE_ENERGY_MARGIN_DETECTION
 
+void CommandSet_MQTT_Reporting_Priority(uint8_t value);
   void parse_JSONCommand();
   void parse_JSONCommand_BootSafe(JsonParserObject obj);
 

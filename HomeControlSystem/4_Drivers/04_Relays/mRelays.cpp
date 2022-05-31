@@ -35,7 +35,8 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       SubTask_Relay_Time_To_Remain_On_Seconds();
       SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
       
-  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVERY_SECOND"));
+  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVERY_SECOND"));
+  MQTTHandler_Set_RefreshAll();
 
     break;
     case FUNC_EVERY_MINUTE:
@@ -61,7 +62,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * MQTT SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORKS_MQTT
+    // #ifdef USE_MODULE_NETWORKS_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
     case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
@@ -70,12 +71,12 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      // MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
     break;
-    #endif    
+    // #endif    
     /************
      * WEBPAGE SECTION * 
     *******************/
@@ -341,7 +342,8 @@ const char* mRelays::GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_
     return PM_SEARCH_NOMATCH; 
   }
   DEBUG_LINE;
-  return DLI->GetDeviceNameWithEnumNumber(EM_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
+  // return DLI->GetDeviceNameWithEnumNumber(E M_MODULE_DRIVERS_RELAY_ID, device_id, buffer, buffer_length);
+  return DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), device_id, buffer, buffer_length);
 }
 
 const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length){
@@ -365,11 +367,13 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
 int8_t mRelays::GetRelayIDbyName(const char* c){
   if(c=='\0'){ return -1; }  
 
-  int8_t device_id;
-  int8_t class_id = EM_MODULE_DRIVERS_RELAY_ID;
+  // int8_t device_id; // not needed, to be phased out
+  int16_t class_id = GetModuleUniqueID();//E M_MODULE_DRIVERS_RELAY_ID;
 
-  int16_t device_id_found = DLI->GetDeviceIDbyName(c,device_id,class_id);
-  AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+  // int16_t device_id_found = DLI->GetDeviceIDbyName(c,device_id,class_id);
+  int16_t device_id_found = DLI->GetDeviceIDbyName(c,class_id);
+
+  AddLog(LOG_LEVEL_HIGHLIGHT,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
   // show options
   if(device_id_found == -1){

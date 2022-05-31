@@ -2,7 +2,7 @@
 #ifndef _MBUTTON_H_
 #define _MBUTTON_H_
 
-#define D_UNIQUE_MODULE_SENSORS_BUTTONS_ID 120
+#define D_UNIQUE_MODULE_SENSORS_BUTTONS_ID ((5*1000)+02)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

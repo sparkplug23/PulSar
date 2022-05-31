@@ -1,7 +1,7 @@
 #ifndef _MODULE_SENSORS_INTERFACE_H
 #define _MODULE_SENSORS_INTERFACE_H
 
-#define D_UNIQUE_MODULE_SENSORS_INTERFACE_ID   139  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_SENSORS_INTERFACE_ID   ((5*1000)+00)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 #define D_GROUP_MODULE_SENSORS_INTERFACE_ID    0    // Numerical accesending order of module within a group
 
 #include "stdint.h"
@@ -16,7 +16,7 @@ typedef struct event_motion_s{
   uint32_t tEndedTime;
   uint32_t detected_time;
   struct devove_name_t{
-    uint16_t module_id = 0; 
+    uint16_t unique_module_id = 0;  // unique, not "em_##_id"
     uint8_t device_id = 0;
   }device_name;
 }event_motion_t;

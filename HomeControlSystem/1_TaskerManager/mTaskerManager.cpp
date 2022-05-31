@@ -496,6 +496,44 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
 }
 
 
+/**
+ * @brief Method for going between EM_MODULE_ID (ie small int) and UniqueID (ie 1000's)
+ * 
+ * @return uint16_t 
+ */
+// uint16_t mTaskerManager::GetModuleUniqueID_UsingEmNumberID()
+// {
+
+//   for(int ii=0;ii<GetClassCount();ii++)
+//   {
+
+//     if()
+
+
+
+//   }
+
+// }
+
+uint16_t mTaskerManager::GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id)
+// ModuleUniqueID_UsingEmNumberID()
+{
+
+  for(int ii=0;ii<GetClassCount();ii++)
+  {
+
+    if( unique_id == pModule[ii]->GetModuleUniqueID() )
+    {
+      return pModule[ii]->GetModuleUniqueID();
+    }
+
+  }
+
+}
+
+
+
+
 int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)
 {
   int16_t index = GetModuleIndexbyFriendlyName(c);
@@ -508,7 +546,7 @@ int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)
 /**
  * @brief Using the unique ID each module must have, get the TaskerInterface array enum ID
  * */
-int16_t mTaskerManager::GetVectorIndexbyModuleUniqueID(int16_t unique_id)
+int16_t mTaskerManager::GetEnumVectorIndexbyModuleUniqueID(int16_t unique_id)
 {
   for(int ii=0;ii<GetClassCount();ii++)
   {
@@ -528,7 +566,7 @@ uint16_t mTaskerManager::GetModuleUniqueIDbyVectorIndex(uint8_t id)
 
 mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
 {
-  return pModule[GetVectorIndexbyModuleUniqueID(id)];
+  return pModule[GetEnumVectorIndexbyModuleUniqueID(id)];
 }
 
 /**
@@ -542,7 +580,7 @@ mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
 
 // safe way by returning a default class
 
-//   return pModule[GetVectorIndexbyModuleUniqueID(id)];
+//   return pModule[GetEnumVectorIndexbyModuleUniqueID(id)];
 // }
 
 
@@ -556,6 +594,18 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t id)
   if(ValidTaskID(id))
   {
     return pModule[id]->GetModuleFriendlyName();
+  }  
+  return PM_SEARCH_NOMATCH;
+}
+
+PGM_P mTaskerManager::GetModuleFriendlyName_WithUniqueID(uint8_t unique_id)
+{
+
+  uint8_t enum_id = GetEnumVectorIndexbyModuleUniqueID(unique_id);
+
+  if(ValidTaskID(enum_id))
+  {
+    return pModule[enum_id]->GetModuleFriendlyName();
   }  
   return PM_SEARCH_NOMATCH;
 }

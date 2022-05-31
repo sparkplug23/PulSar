@@ -254,7 +254,7 @@ char buffer[50];
   {
     //Get any sensors in module
     uint8_t sensors_available = pmod->GetSensorCount();
-    uint16_t module_id = pCONT->GetVectorIndexbyModuleUniqueID(pmod->GetModuleUniqueID());
+    uint16_t module_id_unique = pmod->GetModuleUniqueID();
 
     if(sensors_available)
     {
@@ -270,14 +270,14 @@ char buffer[50];
           int8_t device_name_id = sensor_id;
           #ifdef USE_MODULE_SENSORS_DS18X
           //temp fix
-          if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+          if(module_id_unique == pCONT_msdb18->GetModuleUniqueID())
           {
             device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
           }
           #endif // USE_MODULE_SENSORS_DS18X
 
           JBI->Add(
-            DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
+            DLI->GetDeviceName_WithModuleUniqueID( module_id_unique, device_name_id, buffer, sizeof(buffer)),
             val.GetValue(SENSOR_TYPE_TEMPERATURE_ID)
           );
         }
@@ -303,7 +303,7 @@ char buffer[50];
            * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
            * This means, on setting name, I should search for the address of X and put it into index X.. swap?
            * */
-          if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+          if(module_id_unique == pCONT_msdb18->GetModuleUniqueID())
           {
             device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
           }
@@ -314,7 +314,7 @@ char buffer[50];
           RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps(temperature,0);
 
           JBI->Add_FV(
-            DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
+            DLI->GetDeviceName_WithModuleUniqueID( module_id_unique, device_name_id, buffer, sizeof(buffer)),
             PSTR("\"%02X%02X%02X\""),
             colour.R, colour.G, colour.B
           );
@@ -339,7 +339,7 @@ char buffer[50];
            * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
            * This means, on setting name, I should search for the address of X and put it into index X.. swap?
            * */
-          if(module_id == EM_MODULE_SENSORS_DB18S20_ID)
+          if(module_id_unique == pCONT_msdb18->GetModuleUniqueID())
           {
             device_name_id = pCONT_msdb18->sensor[sensor_id].address_id;
           }
@@ -350,7 +350,7 @@ char buffer[50];
           RgbColor colour  = pCONT_iLight->GetColourValueUsingMapsMaximumBrightness(temperature,0);
 
           JBI->Add_FV(
-            DLI->GetDeviceNameWithEnumNumber(module_id, device_name_id, buffer, sizeof(buffer)),
+            DLI->GetDeviceName_WithModuleUniqueID( module_id_unique, device_name_id, buffer, sizeof(buffer)),
             PSTR("\"%02X%02X%02X\""),
             colour.R, colour.G, colour.B
           );
@@ -394,7 +394,7 @@ uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
       
   //     pir_detect[sensor_id].ischanged = false;
       
-  //     JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
+  //     JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
   //     JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
   //     JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
   //triggering sensor (via module id)

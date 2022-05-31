@@ -13,15 +13,18 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   int8_t tmp_id = 0;
   JsonParserObject jobj = 0;
  
-  uint8_t relay_id= 0,state=-1;    //assume index 0 if none given
+  int8_t relay_id= -1,state=-1;    //assume index 0 if none given
 
   if(jtok = obj[PM_JSON_POWERNAME]){
     if(jtok.isStr()){
       relay_id = GetRelayIDbyName(jtok.getStr());
+    ALOG_INF( PSTR("relay_id = %s"), jtok.getStr() );
     }else 
     if(jtok.isNum()){
       relay_id  = jtok.getInt();
     }
+
+    ALOG_INF( PSTR("relay_id = %d"), relay_id );
   }
 
   // Primary method since v0.86.14.21
@@ -49,6 +52,11 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
 
   }
 
+
+
+
+
+  #ifndef ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
   // PHASE OUT by version 0.87
   if(jtok = obj[PM_JSON_ONOFF]){
     AddLog(LOG_LEVEL_ERROR, PSTR("PHASE OUT -- Invalid Command"));
@@ -59,6 +67,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
       state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
     }
   }
+  #endif // ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
 
 
   
@@ -77,13 +86,6 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_OFF_THEN_ON_SECS]){
     CommandSet_RelayAsRessetingDevice_TurnOffThenOnAgain(jtok.getInt(), relay_id);
   }
-
-
-
-
-
-
-
 
 
   if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.relays_connected)){

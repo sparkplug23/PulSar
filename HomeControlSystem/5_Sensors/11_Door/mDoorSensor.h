@@ -1,7 +1,7 @@
 #ifndef _MDOORSENSOR_H
 #define _MDOORSENSOR_H 0.2
 
-#define D_UNIQUE_MODULE_SENSORS_DOOR_ID 130
+#define D_UNIQUE_MODULE_SENSORS_DOOR_ID ((5*1000)+11)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

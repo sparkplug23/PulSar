@@ -299,7 +299,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
       //  &&(sensor[sensor_id].instant.isvalid)
       ){
 
-      JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
+      JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
         JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
@@ -311,7 +311,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
 
   }
   //   for(int dht_id=0;dht_id<2;dht_id++){
-  //   JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
+  //   JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
   //     JBI->Add(D_JSON_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
   //     JBI->Add(D_JSON_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
   //     JBI->Add(D_JSON_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);

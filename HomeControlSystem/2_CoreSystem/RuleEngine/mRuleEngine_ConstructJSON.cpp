@@ -60,8 +60,8 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
                 //     JBI->Add("json", buffer); 
 
                     
-                char buffer_unescaped[200] = {0};
-                char buffer_escaped[200] = {0};
+                char buffer_unescaped[D_JSON_COMMAND_BUFFER_LENGTH] = {0};
+                char buffer_escaped[D_JSON_COMMAND_BUFFER_LENGTH+50] = {0};
                 uint8_t len  = 0;
                 
                 pCONT_sup->GetTextIndexed(
@@ -93,6 +93,9 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
     JBI->Add("ConfigCount", GetConfiguredCount());
     // JBI->Add("ConfigCount2", rule_count2);
     JBI->Add("EnabledCount", GetEnabledCount());
+
+      // JBI->Add("jsonbuffer_data", jsonbuffer.data);    
+      JBI->Add("jsonbuffer_bytes_used", jsonbuffer.bytes_used);    
   
   return JsonBuilderI->End();
 
@@ -108,6 +111,11 @@ uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method){
       JBI->Add("DeviceID", event_triggered.device_id);
       JBI->Add("FunctionID", event_triggered.function_id);    
       JBI->Add("ModuleID", event_triggered.module_id);    
+
+
+
+
+      
 
     JBI->Level_End();
 

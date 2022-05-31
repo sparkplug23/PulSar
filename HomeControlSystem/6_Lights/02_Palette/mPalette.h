@@ -40,7 +40,7 @@ Change option to make all palettes gradient mode or node, or how to use it
 // #endif // USE_DEVFEATURE_METHOD_WLED_BUILD
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/FastLED_Modified/FastLED.h"
+#include "6_Lights/98_FastLED_Modified/FastLED.h"
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 //Remember to sync with what is in palette_progmem.h

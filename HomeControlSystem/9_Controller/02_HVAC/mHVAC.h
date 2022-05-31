@@ -36,9 +36,9 @@
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
-#include "9_Controller/HVAC/mProgramTimer.h"
+#include "9_Controller/02_HVAC/mProgramTimer.h"
 class ProgramTimer; //tmp fix
-#include "9_Controller/HVAC/mProgramTemperatue.h"
+#include "9_Controller/02_HVAC/mProgramTemperatue.h"
 class ProgramTemperature; //tmp fix
 
 

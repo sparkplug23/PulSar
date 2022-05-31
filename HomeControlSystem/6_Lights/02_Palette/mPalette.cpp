@@ -1477,6 +1477,8 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   //     return index_found;
   // }
 
+  // ALOG_INF( PSTR("GetPaletteIDbyName = \"%s\""), c );
+
   // Check against stored progmem static names
   for(uint8_t ii=0;ii<PALETTELIST_STATIC_LENGTH__ID;ii++){
     ptr = GetPalettePointerByID(ii);
@@ -1523,18 +1525,18 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
       return PALETTELIST_VARIABLE_HSBID_01__ID+ii;
     }
   }
-
+// DEBUG_LINE_HERE;
   // Check for default user names 
   for(uint8_t ii=0;ii<(PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);ii++){
     memset(name_ctr,0,sizeof(name_ctr));
     sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
     // Default names
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("Searching \"%s\""),name_ctr);
-    #endif // ENABLE_LOG_LEVEL_INFO
+// DEBUG_LINE_HERE;
+//     ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Searching with \"%s\" for \"%s\""),name_ctr,c );
 
     if(strcmp(c,name_ctr)==0){
+// DEBUG_LINE_HERE;
       return PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID+ii;
     }
   }
@@ -1545,6 +1547,7 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
     return found_index;
   }
 
+// DEBUG_LINE_HERE;
   return -1;
 
 }
@@ -1561,10 +1564,51 @@ const char* mPalette::GetPaletteFriendlyName(char* buffer, uint8_t buflen){
 const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8_t buflen){
 
   PALETTELIST::PALETTE *ptr = GetPalettePointerByID(id);
-  
+
+  // AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(" %d GetPaletteFriendlyNameByID"),id);
+
+  // DEBUG_LINE_HERE;
+
   if(id<PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
     // dList
-    return pCONT_sup->GetTextIndexed(buffer, buflen, id, pCONT_set->Settings.device_name_buffer.name_buffer);
+
+
+    #ifdef ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
+
+    // char buffer[100]; // temp fix, will just use pointer, need another function below to do the same without buffer input
+
+
+  // I need to offset where it starts
+
+
+// unstable, fix next.
+// No more flashing of devices until id searching per class is found to be stable and working
+
+    // const char* name_p = DLI->GetDeviceNameWithEnumNumber( E M_MODULE_LIGHTS_INTERFACE_ID, id,buffer,sizeof(buffer)); 
+
+    const char* name_p = DLI->GetDeviceName_WithModuleUniqueID( pCONT_iLight->GetModuleUniqueID(), id, buffer, buflen); 
+
+    
+    ALOG_INF( PSTR(" %d = \"%S\""),id,name_p);
+
+    if(name_p==nullptr)
+    {
+      return PM_SEARCH_NOMATCH;
+    }
+
+    return name_p;
+
+
+    #else
+
+    
+    const char* name_p = pCONT_sup->GetTextIndexed(buffer, buflen, id, pCONT_set->Settings.device_name_buffer.name_buffer);
+    AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(" %d = \"%s\""),id,name_p);
+
+    // This assumes indexing begins from start (ie lights MUST be the first class_id), needs fixing
+    return name_p;
+
+    #endif 
 
     // return pCONT_sup->GetTextIndexed_P(buffer, buflen, id, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr);
   }

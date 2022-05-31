@@ -27,13 +27,11 @@
  * 
  * masterbedroom/under dresser floor light for mum so it auto comes on for mum to toilet
  * 
- *  * 
- * sidedoor reed to be sent as a motion sensor (Install 2 PIR outside? one beside camera)
+ *  *  (Install 2 PIR outside? one beside camera)
  * 
  * Home ToDo:
  * - TAPE!! fence camera wiring (consider inline box?)
  * - TAPE!! and add plastic for backdoor camera
- * - hallway board?
  * - Go around and take pictures of all boards, add a folder to keep track of the current hardware config (folder per device), so I can always compare hardware to software pins easily
  * -
  * 
@@ -106,9 +104,9 @@ Hallway + Understairs
   - front door/table socket
   - hallway table
  */
-#define DEVICE_RADIATORFAN
+// #define DEVICE_RADIATORFAN
 // #define DEVICE_CANDLE_ELECTRIC_HALLWAY  // Socket_SocketNumber16_Power
-// #define DEVICE_SHELLYDIMMER_HALLWAY_LAMP
+// #define DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
 // #define DEVICE_HEATING
 
 /**
@@ -191,6 +189,7 @@ Bathroom
 // #define DEVICE_BLACK_STAND_LIGHT
 // #define DEVICE_RGBCLOCK_BEDROOM_WALL                             // Make this into an alarm? flashing effect and buzzer/speaker with esp32
 // #define DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
+// #define DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE
 
 
 /**
@@ -256,10 +255,6 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 10
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN
-  #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 11
-#endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__BEDRROM_DESK_5V_PSU
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 12
@@ -313,6 +308,12 @@ Bathroom
   #define DEVICENAME_SOCKET_NUMBER_CTR 24
 #endif
 
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN  
+  #define SUB_DEVICE_SONOFF_BASIC__DEFAULT_CONFIG_NAMED
+  #define DEVICENAME_CTR          "extractor_fan"
+  #define DEVICENAME_FRIENDLY_CTR "Extractor Fan"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"  
+#endif
 
 
 #ifdef DEVICE_SOCKET_NUMBERED
@@ -377,7 +378,6 @@ Bathroom
 
 
 #ifdef DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
-  // #define DEVICENAME_SOCKET_NUMBER_CTR 2
   #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   
@@ -388,14 +388,15 @@ Bathroom
    * */
   // #define DISABLE_SERIAL_LOGGING
   
-  #define DISABLE_WEBSERVER
   #define USE_MODULE_CORE_RULES
   
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
+    #define ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
   
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 1
   #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 1
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -462,6 +463,101 @@ Bathroom
 #endif
 
 
+/**
+ * @brief "SUB_DEVICE" is a template that is the same as others, only differing by its name that is set above
+ * @note Generic Sonoff Basic configuration. Serial RX pin used to also toggle relay
+ */
+#ifdef SUB_DEVICE_SONOFF_BASIC__DEFAULT_CONFIG_NAMED
+  #ifndef DEVICENAME_CTR
+  #error "DEVICENAME_CTR missing"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #error "DEVICENAME_FRIENDLY_CTR missing"
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #error "DEVICENAME_ROOMHINT_CTR missing"
+  #endif
+
+  /**
+   * Disable serial logging
+   * Use RX pin, gpio 1, as switch input
+   * TX pin should still allow debugging
+   * */
+  // #define DISABLE_SERIAL_LOGGING
+  
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 1
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    /**
+     * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
+     * */
+    // "\"" D_JSON_GPIOC "\":{"
+    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    // "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+  
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Builtin Button as toggle
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule1\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "}"
+  "}";
+
+#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -470,10 +566,23 @@ Bathroom
 *******************************************************************************************************************************************/
 
 #ifdef DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
+  #define SUB_DEVICE_SHELLY_DIMMER__DEFAULT_CONFIG_NAMED
+  #define DEVICENAME_CTR          "dimmer_hallway_lamp"
+  #define DEVICENAME_FRIENDLY_CTR "Dimmer Hallway Lamp"
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"
+#endif
+#ifdef DEVICE_DEFAULT_SHELLY_DIMMER__LIVINGROOM_LAMP1
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 04
 #endif
-#ifdef DEVICE_DEFAULT_SHELLY_DIMMER__LIVINGROOM_LAMP1
+#ifdef DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE // Insitu tester
+  #define SUB_DEVICE_SHELLY_DIMMER__DEFAULT_CONFIG_NAMED
+  #define DEVICENAME_CTR          "dimmer_bedroom_globe"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Bedroom Globe"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  // #define USE_HARDWARE_DEFAULT_RULES_SHELLY_DIMMER_BOTH_INPUTS_TOGGLE_OUTPUT // Going to install 2gang so I can test this going forward
+#endif
+#ifdef DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_CEILING
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 04
 #endif
@@ -539,6 +648,60 @@ Bathroom
 
 #endif
 
+/**
+ * @brief "SUB_DEVICE" is a template that is the same as others, only differing by its name that is set above
+ * @note Generic Shelly Dimmer Version2 configuration. Either switch input with toggle
+ */
+#ifdef SUB_DEVICE_SHELLY_DIMMER__DEFAULT_CONFIG_NAMED
+  #ifndef DEVICENAME_CTR
+  #error "DEVICENAME_CTR missing"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #error "DEVICENAME_FRIENDLY_CTR missing"
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #error "DEVICENAME_ROOMHINT_CTR missing"
+  #endif
+    
+  #define DISABLE_SERIAL_LOGGING //temp measure
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER    
+    #define ENABLE_DEVFEATURE_SHELLY_DIMMER_FORCED_BRIGHTNESS_TO_REQUESTED
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
+  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
 
 
 /**************************************************************************************************************************************************
@@ -557,19 +720,18 @@ Bathroom
  * */
   #define DEVICENAME_CTR          "kitchenlight1"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 1 [Main Kitchen]"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-  
-  #define USE_MODULE_SENSORS_SWITCHES
-
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 1
-  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
 
-  #define DISABLE_SLEEP
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_ADE7953
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 2
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -585,14 +747,16 @@ Bathroom
       "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       #endif 
+      #ifdef USE_MODULE_ENERGY_ADE7953
+      "\"16\":\""  D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
+      "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif 
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
       // Button1 GPIO2
-      // I2C SDA 12
-      // I2C SCL 14
-      // ADE7953 IRQ GPIO16
-      // Energy metering is done by a ADE7953 chip connected via I2C and IRQ on GPIO16.
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
@@ -649,14 +813,15 @@ Bathroom
 
 #endif
 
+/**
+ * 
+ * Button is on shelly PCB, mains, not to be used in normal operation (perhaps reset later?)
+ * */
 #ifdef DEVICE_KITCHENLIGHT2
   #define DEVICENAME_CTR          "kitchenlight2"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 2 [Table/Window]"
-  
-  // //#define FORCE_TEMPLATE_LOADING
-  // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_CORE_RULES
-  
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+    
   /*
     Method should only activate if boot loop happens 10 times
     Method A: Switch to Wifi.begin hardcoded ssid/pw, start OTA and wait, rebooting every 10 minutes if wifi does not connect
@@ -665,51 +830,35 @@ Bathroom
   #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_ADE7953
+  #define USE_MODULE_NETWORKS_MQTT
+  #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_BUTTONS
 
-  #define USE_MODULE_NETWORKS_MQTT
-
-  #define USE_MODULE_CORE_RULES
-
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 2
-    
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_JSON_GPIOC "\":{"
-  //     #ifdef USE_MODULE_SENSORS_SWITCHES
-  //     "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-  //     "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-  //     #endif
-  //     #ifdef USE_MODULE_DRIVERS_RELAY
-  //     "\"4\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-  //     "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-  //     #endif 
-  //     "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-  //   "},"
-  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  // "}";
+    #define ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
+    #define MAX_RELAYS 2
   
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_ADE7953
+      
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Dining Room"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Window"
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG  "Window"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG  "Dining Room"
+  #define D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "Dining Room"
+  #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Window"
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -720,45 +869,11 @@ Bathroom
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
         "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+          "\"" D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "\","
+          "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\""
         "]"
     "}"
   "}";
-
-  
-  // #define USE_RULES_TEMPLATE
-  // DEFINE_PGM_CTR(RULES_TEMPLATE)
-  // "{"
-  //   "\"Rule0\":{"
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"Switches\","
-  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-  //       "\"DeviceName\":0,"
-  //       "\"State\":2"
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"Relays\","
-  //       "\"Function\":\"SetPower\","
-  //       "\"DeviceName\":1,"
-  //       "\"State\":2" 
-  //     "}"
-  //   "},"
-  //   "\"Rule1\":{"
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"Switches\","
-  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-  //       "\"DeviceName\":1,"
-  //       "\"State\":2"
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"Relays\","
-  //       "\"Function\":\"SetPower\","
-  //       "\"DeviceName\":0,"
-  //       "\"State\":2"
-  //     "}"
-  //   "}"
-  // "}";
 
   /**
    * NOTE: indexes swapped
@@ -818,19 +933,25 @@ Bathroom
 #endif
 
 
-
+/**
+ * @brief Virtual Switch, installed in kitchen 4gang (left most switch)
+ * Shelly 1, switch input only, relay not enabled
+ * Sends command to cupboard lights directly with mqtt (downlights)
+ * cupboard_spot vs cupboard_under
+ */
 #ifdef DEVICE_KITCHENLIGHT3
   #define DEVICENAME_CTR          "kitchenlight3"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen 3 VirtualSwt"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   
   //#define FORCE_TEMPLATE_LOADING
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_SWITCHES
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 1
   #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 1
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -842,11 +963,12 @@ Bathroom
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","  // Just so it gets turned off as a known state
       #endif 
       "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Switch4_Virtual"
@@ -876,11 +998,13 @@ Bathroom
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\"," //mqtt function
+        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\"," //mqtt_send
         "\"DeviceName\":0,"
         "\"State\":0,"
-        "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"socket_number_11/set\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
+        // Even though I will use sonoff basics for cupboard lights (or else buy shelly 2.5), the command will be set as kitchenlight#
+        // "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchen_cupboard/set\\\",\\\"Payload\\\":\\\"{~PowerName~:~Downlight~,~PowerState~:2}\\\"}}\""
+        "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchen_cupboard/set\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
       "}"
     "}"
   "}";
@@ -891,22 +1015,24 @@ Bathroom
 #ifdef DEVICE_KITCHENLIGHT4                                        
   #define DEVICENAME_CTR          "kitchenlight4"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Cupboard Lights"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
 
   #define USE_MODULE_SENSORS_BUTTONS
 
-  #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 1
   #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 1
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Cupboard"
@@ -1214,20 +1340,20 @@ Bathroom
 #ifdef DEVICE_RGBCOOKER
   #define DEVICENAME_CTR          "rgbcooker"
   #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
       
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
 
   #define DISABLE_WEBSERVER
-
+    
   #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_PWM
-  
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_PWM  
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    #define MAX_NUM_SEGMENTS 5  
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1238,24 +1364,21 @@ Bathroom
       "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
       "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
   #define STRIP_SIZE_MAX 1
- #define USE_LIGHTING_TEMPLATE
+  #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
     "\"" D_JSON_STRIP_SIZE       "\":1,"
-    #endif //STRIP_SIZE_MAX
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":8},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
     "\"" D_JSON_BRIGHTNESS     "\":100"
   "}";
 
@@ -1280,6 +1403,7 @@ Bathroom
 #ifdef DEVICE_KITCHENSENSOR
   #define DEVICENAME_CTR          "kitchensensor"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
 
   #define USE_MODULE_CORE_RULES
        
@@ -1304,7 +1428,8 @@ Bathroom
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Kitchen"
@@ -1654,10 +1779,9 @@ Bathroom
 #ifdef DEVICE_CONSUMERUNIT
   #define DEVICENAME_CTR          "consumerunit"
   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
-  #define ESP32
+  #define DEVICENAME_ROOMHINT_CTR "Downstairs Toilet"
     
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
-
   #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1 // temporary force the value, should be handled by command
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -1667,21 +1791,17 @@ Bathroom
 
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_PZEM004T_V3
+    #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-  #define STRIP_SIZE_MAX 55
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
-  // Hard coded to alternate pin until I make this template based
-  #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
-  #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define STRIP_SIZE_MAX 55
+    #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+    #define USE_SK6812_METHOD_DEFAULT
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1689,7 +1809,7 @@ Bathroom
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
     "\"ColourPalette\":10," 
     "\"Hue\":25," 
     "\"Sat\":70," 
@@ -1718,15 +1838,14 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" 
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Downstairs Toilet"
-
-
   #define D_DEVICE_SENSOR_CLIMATE "Downstairs Toilet"
   #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "1"
   #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "2"
@@ -1827,7 +1946,8 @@ Bathroom
     "\"" D_JSON_ENERGY "\":{"
         "\"DeviceCount\":12"    
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1},"
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
   /**
@@ -1835,8 +1955,7 @@ Bathroom
    * */
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-      // for PIR to follow
+  "{" // for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
@@ -1989,54 +2108,6 @@ Bathroom
 #endif
 
 
-#ifdef DEVICE_SHELLYDIMMER_HALLWAY_LAMP
-  #define DEVICENAME_CTR          "dimmer_hallway_lamp"
-  #define DEVICENAME_FRIENDLY_CTR "Dimmer Hallway Lamp"
-  #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-
-  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
-  
-  #define USE_MODULE_SENSORS_SWITCHES
-
-  #define USE_MODULE_CORE_RULES
-  #define USE_HARDWARE_DEFAULT_RULES_1
-
-  #define DISABLE_SERIAL_LOGGING //temp measure
-  // #define DISABLE_SERIAL0_CORE //dont think its needed
-
-  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
-  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
-  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
 
 
 
@@ -2101,7 +2172,9 @@ Bathroom
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
+    #define USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME
   #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_DHT
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
@@ -2122,10 +2195,10 @@ Bathroom
       // RJ45 Connector   
       #ifdef USE_MODULE_SENSORS_BME
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","     // bme not working, check wiring
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","     // not working? need to test/check wiring
+      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X
       "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
@@ -2139,13 +2212,13 @@ Bathroom
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define D_DEVICE_DRIVER_RELAY_NAME_LONG "Fan"
-  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "OutsideVent"
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "InsideVent"
-  #define D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG "RadiatorPipe"
-  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "Hallway" //BME primary
-  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "Hallway-DHT" //secondary
+  #define D_DEVICE_DRIVER_RELAY_NAME_LONG               "Fan"
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG    "Hallway"
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG            "OutsideVent"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG            "InsideVent"
+  #define D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG     "RadiatorPipe"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG            "Hallway"     // BME Primary
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG            "Hallway-DHT" // Secondary
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -2180,8 +2253,7 @@ Bathroom
 
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // MOTION
+  "{"     // MOTION
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
@@ -2290,15 +2362,13 @@ Bathroom
   #define DISABLE_WEBSERVER
 
   #define USE_MODULE_CONTROLLER_HVAC
-
-  // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-
-  // #define ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
+    // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+    #define ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
 
   #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_DS18X
-  // #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
-  // #define USE_MODULE_SENSORS_DHT
+  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
+  #define USE_MODULE_SENSORS_DHT
 
   //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on)) 30+ pins == use this to know what has been turned on manually.
   //Also need to add a mains detector for the furnace trigger (orange wire from servos)
@@ -2319,10 +2389,17 @@ Bathroom
   // #define USE_MODULE_DISPLAYS_NEXTION
   // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
 
+  // Actual
   #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_INV_CTR
   #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_INV_CTR
   #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
   #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
+
+  // Test GPIO
+  // #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
+  // #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
+  // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_CTR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2337,8 +2414,8 @@ Bathroom
       "\"18\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"12\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
       "\"25\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT 
+      // "\"12\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
@@ -2459,8 +2536,8 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_29_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\""
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
@@ -2491,8 +2568,10 @@ Bathroom
     "},"
     "\"" "HVACZone" "\":{"
       "\"" "SetSensor" "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\"," //debug fix
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\"," //debig fix
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\""
       "],"
@@ -2733,6 +2812,7 @@ Bathroom
 #ifdef DEVICE_GAZEBO_SONOFF_4CHPRO
   #define DEVICENAME_CTR          "gazebo_sonoff_4chpro"
   #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
+  #define DEVICENAME_ROOMHINT_CTR  "Gazebo"
   
   #define USE_MODULE_CORE_RULES
   
@@ -2749,7 +2829,8 @@ Bathroom
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   // {"RfReceived":{"Data":11071155,"Bits":24,"Protocol":1,"Pulse":191,"millis":83687314,"Time":"18:48:02"}} // black doorbell
@@ -2757,52 +2838,39 @@ Bathroom
 #endif
 
 
-// gazebosensor for motion, light, temperature... these may all become esp32 with wired POE
-
 /**
  * @brief Presence detector
  * - PIR 
  * - BME280
  * - BH1750
  * 
- * Ethernet Interface Layout A [gnd, 5v, pir, -, -, 3v3, i2c_data, i2c_clock] where [w/o, o/w, w/g, bl/w, w/bl, g/w, w/br, br/w] == kitchen/utility are the same, probably make the same for livingroom, same room? 3d print a box
- */
-
-
-#ifdef DEVICE_GAZEBO_SENSOR //new esp32
+ **/
+#ifdef DEVICE_GAZEBO_SENSOR
   #define DEVICENAME_CTR          "gazebosensor"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
-
+  #define DEVICENAME_ROOMHINT_CTR "Gazebo"
+  
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
 
-  #define   ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
-  #define ENABLE_CRGBPALETTES_IN_PROGMEM
-  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
-  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
-
-  // Hard coded to alternate pin until I make this template based
-  #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
-  #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
-  
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    #define STRIP_SIZE_MAX 100
+    
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS2812" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
     "\"ColourPalette\":15," 
     "\"PaletteEdit\": {"
       "\"ColourPalette\": 15,"
@@ -2821,7 +2889,8 @@ Bathroom
       "\"TimeMs\":900,"
       "\"RateMs\":1000"
     "},"    
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRGB\":100,"
+    "\"TimeOn\":3600" // 1 hour
   "}";
 
   #define USE_MODULE_TEMPLATE
@@ -2840,7 +2909,8 @@ Bathroom
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"," // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Gazebo"
@@ -2886,35 +2956,28 @@ Bathroom
 #endif
 
 
+/**
+ * 24W/meter
+ * Approx 5.5m used, 24*5.5 = 132W so 132/12 = 11Amps at 12V
+ * 20A 12V should be enough
+ * */
 #ifdef DEVICE_H801_RGBGAZEBO
   #define DEVICENAME_CTR          "h801_rgbgazebo"
   #define DEVICENAME_FRIENDLY_CTR "H801 RGB Gazebo RGBCCT Strip"
   #define DEVICENAME_ROOMHINT_CTR "Gazebo"
 
-  /**
-   * 24W/meter
-   * Approx 5.5m used, 24*5.5 = 132W so 132/12 = 11Amps at 12V
-   * 20A 12V should be enough
-   * */
-
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-  #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-  #define DEBUG_TARGET_ANIMATOR_SEGMENTS
+  
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  #define MAX_NUM_SEGMENTS 5  
-  #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
-  #define ENABLE_CRGBPALETTES_IN_PROGMEM
-  #define ENABLE_DEVFEATURE_SHIMMERING_PALETTE_BRIGHTNESS_LIMIT
-  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
-
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-  
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+    #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
+    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define MAX_NUM_SEGMENTS 5  
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 

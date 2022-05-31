@@ -26,7 +26,7 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_method){
     // ii<2;
     ii++
   ){
-    JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_ENERGY_PZEM004T_V3_ID, ii, buffer, sizeof(buffer)));
+    JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
       JBI->Add(D_JSON_VOLTAGE,      data_modbus[ii].voltage);
       JBI->Add(D_JSON_CURRENT,      data_modbus[ii].current);
       JBI->Add(D_JSON_ACTIVE_POWER, data_modbus[ii].active_power);

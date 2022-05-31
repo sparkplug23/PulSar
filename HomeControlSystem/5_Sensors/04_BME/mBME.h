@@ -19,7 +19,7 @@
 #ifndef MSENSORSBME_H
 #define MSENSORSBME_H
 
-#define D_UNIQUE_MODULE_SENSORS_BME_ID 143
+#define D_UNIQUE_MODULE_SENSORS_BME_ID ((5*1000)+04)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

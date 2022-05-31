@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_DRIVERS_SHELLY_DIMMER_H
-#define _USE_MODULE_DRIVERS_SHELLY_DIMMER_H 0.3
+#define _USE_MODULE_DRIVERS_SHELLY_DIMMER_H
 
-#define D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID 50
+#define D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID ((4*100015)+15)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -259,7 +259,6 @@ class mShellyDimmer :
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     struct handler<mShellyDimmer>  mqtthandler_settings_teleperiod;
-    struct handler<mShellyDimmer>  mqtthandler_state_ifchanged;
     struct handler<mShellyDimmer>  mqtthandler_state_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;

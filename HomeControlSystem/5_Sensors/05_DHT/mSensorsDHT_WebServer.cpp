@@ -10,7 +10,7 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Draw(){
       char name_buffer_tmp[25];
       // pCONT_sup->GetTextIndexed_P(name_buffer_tmp, sizeof(name_buffer_tmp), ii, name_buffer);
 
-      DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DHT_ID, ii, name_buffer_tmp, sizeof(name_buffer_tmp));
+      DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, name_buffer_tmp, sizeof(name_buffer_tmp));
 
       uint8_t multiline_enabled = false;
 

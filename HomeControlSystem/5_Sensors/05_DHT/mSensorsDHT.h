@@ -1,7 +1,7 @@
 #ifndef MSENSORSDHT_H
 #define MSENSORSDHT_H 0.2
 
-#define D_UNIQUE_MODULE_SENSORS_DHT_ID 125
+#define D_UNIQUE_MODULE_SENSORS_DHT_ID ((5*1000)+05)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

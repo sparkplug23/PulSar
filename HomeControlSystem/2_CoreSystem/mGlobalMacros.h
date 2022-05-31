@@ -9,6 +9,9 @@
 #define PROGMEM // is nothing, as "const" is enough in esp32 to push to progmem space
 #endif
 
+#define D_MAX_UINT8  255
+#define D_MAX_UINT16 65535
+
 #define DEFINE_PGM_CTR(X) \
   const char X[] PROGMEM =
 #define DEFINE_SPGM_CTR(X) \

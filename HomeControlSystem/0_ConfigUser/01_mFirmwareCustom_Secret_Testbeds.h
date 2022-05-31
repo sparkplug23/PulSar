@@ -63,6 +63,8 @@
 // #define DEVICE_TESTBED_BLENDING_VARIABLES
 // #define DEVICE_TESTBED_BUTTON_MULTIPRESS
 // #define DEVICE_TESTBED_H801_SUNELEVATION_REACTIVE_PALETTES
+// #define DEVICE_TESTBED_RJ45_ESP8266_STANDARD_GPIO_CONFIG_TOGGLE_ALL_PINS
+// #define DEVICE_TESTBED_PIXEL_HEART
 
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
@@ -1306,6 +1308,126 @@
 
 
 /**
+ * @brief First created to fix
+ * // This assumes indexing begins from start (ie lights MUST be the first class_id), needs fixing
+    return pCONT_sup->GetTextIndexed(buffer, buflen, id, pCONT_set->Settings.device_name_buffer.name_buffer);
+ * 
+ */
+#ifdef DEVICE_TESTBED_PIXEL_HEART
+  #define DEVICENAME_CTR          "testbed_pixel_heart"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Pixel Heart 01"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 100                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  // #define ENABLE_DEVFEATURE_USE_UNIQUE_IDS_INSTEAD_OF_ENUM_FOR_DEVICENAME_INDEXING
+
+
+  /**
+   * @brief Uncomment one line to use testing template configs for lighting_template
+   * 
+   */
+  // #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SHIMMERING_PALETTE                                         // Change: You can pick one as examples
+  #define LIGHTING_TEMPLATE_SINGLE_SEGMENT_SLOW_GLOW
+   
+  /**
+   * @brief Mostly for me testing, switching between my segments or testing orginal wled effects
+   **/
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define D_EFFECT_INSIDE_TEMPLATE "Effects"
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    #define ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
+  /**
+   * @brief defines to be tested and incorporated fully
+   **/
+  // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
+  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
+  // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
+  // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
+  /**
+   * @brief Debug flags, used mostly be me
+   * 
+   */  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define DEBUG_WLED_EFFECT_FUNCTIONS
+  // #define ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_SWITCHES
+  // #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BUTTONS
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"D1\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"D2\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
+      #endif
+    #ifdef ESP8266 // default pins for ws28xx
+      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #else
+      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_EFFECT_INSIDE_TEMPLATE "\"," 
+    "\"ColourPalette\":\"Coloured MultiColoured Warmer\"," 
+    "\"Effects\":{"
+      "\"Function\":\"Shimmering Palette\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":23"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+
+  
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "KitchenM"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "KitchenC"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+
+
+  
+#endif
+
+
+/**
  * @brief Using PWM manually, with blend time between previous and new number
  * This will fill the gap until PWM single channels in lighting is properly added
  * This will mean, each segment in lighting would be a single channel led with assigned pwm output
@@ -1411,7 +1533,8 @@
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
   #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+
+  #define ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -1424,7 +1547,6 @@
   #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
   #define DEBUG_TARGET_ANIMATOR_SEGMENTS
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-  #define ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
   #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
   
   #define USE_MODULE_CORE_RULES
@@ -4974,6 +5096,47 @@
   
 
 #endif
+
+#ifdef DEVICE_TESTBED_RJ45_ESP8266_STANDARD_GPIO_CONFIG_TOGGLE_ALL_PINS
+  #define DEVICENAME_CTR          "testbed_rj45_gpio_toggle"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Motion Climate Sensor"
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 2
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" "BLUE_WHITE_B_W" "\","
+        "\"" "WHITE_BLUE_W_B" "\""
+      "]"
+    "}"
+  "}";
+
+  // #define INSERT_CODE_INIT
+  #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
+
+  // WILL ADD THIS toggle via rules (per second) in the future
+  
+#endif
+
 
 /**
  * @brief Test sensor code

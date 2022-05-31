@@ -41,7 +41,7 @@
 #include "mAnimatorLight_web.h"
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/FastLED_Modified/FastLED.h"
+#include "6_Lights/98_FastLED_Modified/FastLED.h"
 
 // #define ENABLE_PIXEL_FUNCTION_PIXELGROUPING
 
@@ -127,7 +127,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR)   "debug/a
 /**
  * Effect Names
  **/
-#include "6_Lights/Animator/mAnimatorLight_ProgMem_Defines.h"
+#include "6_Lights/03_Animator/mAnimatorLight_ProgMem_Defines.h"
 
 
 #include <functional>
@@ -768,7 +768,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 ******************************************************************************************************************************************************************************/
 
 #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-#include "6_Lights/Animator/mAnimatorLight_Segments.h"   
+#include "6_Lights/03_Animator/mAnimatorLight_Segments.h"   
 #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 /******************************************************************************************************************************************************************************

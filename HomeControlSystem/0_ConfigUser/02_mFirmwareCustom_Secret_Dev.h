@@ -1497,9 +1497,6 @@
 //   "}";
 // #endif
 
-// #ifdef DEVICE_CONSUMERUNIT
-//   #define DEVICENAME_CTR          "consumerunit33"
-//   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit33"
   
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
@@ -5301,86 +5298,86 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 
 
 
-#ifdef DEVICE_SHELLYDIMMER_GLOBE
-  #define DEVICENAME_CTR          "shellydimmer_globe" //shelly1
-  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer 1 Globe"
+// #ifdef DEVICE_SHELLYDIMMER_GLOBE
+//   #define DEVICENAME_CTR          "shellydimmer_globe" //shelly1
+//   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer 1 Globe"
   
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
+//   //#define FORCE_TEMPLATE_LOADING
+//   #define SETTINGS_HOLDER 2
   
-  #define USE_MODULE_SENSORS_SWITCHES
+//   #define USE_MODULE_SENSORS_SWITCHES
 
-  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
-  #define DISABLE_SERIAL_LOGGING //temp measure
+//   #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+//   #define DISABLE_SERIAL_LOGGING //temp measure
 
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
-  // #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
+//   // #define USE_MODULE_SENSORS_MOTION
+//   // #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
+//   // #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"
   
-  // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //remote controls for now
+//   // #define USE_MODULE_CONTROLLER_SECURITY_LIGHT //remote controls for now
 
-  // #define USE_MODULE_DRIVERS_RELAY
-  // #define MAX_RELAYS 2
-  // #define USE_MODULE_DRIVERS_INTERFACE
+//   // #define USE_MODULE_DRIVERS_RELAY
+//   // #define MAX_RELAYS 2
+//   // #define USE_MODULE_DRIVERS_INTERFACE
     
 
-      #define PIN_GPIO_SHELLY_DIMMER_RST_INV 5
-      #define PIN_GPIO_SHELLY_DIMMER_BOOT0   4
+//       #define PIN_GPIO_SHELLY_DIMMER_RST_INV 5
+//       #define PIN_GPIO_SHELLY_DIMMER_BOOT0   4
 
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      //0,<100>,0,<101>,<174>,<175>,0,0,<6>,0,<6>,0,<10>,<148>
-      //0,    1,2,    3,    4,    5,9,10,11,12,13,14,15,16
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       //0,<100>,0,<101>,<174>,<175>,0,0,<6>,0,<6>,0,<10>,<148>
+//       //0,    1,2,    3,    4,    5,9,10,11,12,13,14,15,16
 
-      //1=100, TX
-      //3=101, RX
-      "\"1\":\"" D_GPIO_FUNCTION_HWSERIAL0_TX_CTR  "\","
-      "\"3\":\"" D_GPIO_FUNCTION_HWSERIAL0_RX_CTR  "\","
-      //4=174, GPIO_SHELLY_DIMMER_BOOT0
-      //5=175, GPIO_SHELLY_DIMMER_RST_INV
+//       //1=100, TX
+//       //3=101, RX
+//       "\"1\":\"" D_GPIO_FUNCTION_HWSERIAL0_TX_CTR  "\","
+//       "\"3\":\"" D_GPIO_FUNCTION_HWSERIAL0_RX_CTR  "\","
+//       //4=174, GPIO_SHELLY_DIMMER_BOOT0
+//       //5=175, GPIO_SHELLY_DIMMER_RST_INV
 
-      //11=6, GPIO_SWT1_NP
-      //13=6, GPIO_SWT1_NP
-      #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"14\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
-      #endif
-      //16=148, GPIO_ADC_TEMP
+//       //11=6, GPIO_SWT1_NP
+//       //13=6, GPIO_SWT1_NP
+//       #ifdef USE_MODULE_SENSORS_SWITCHES
+//       "\"14\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
+//       "\"12\":\"" D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
+//       #endif
+//       //16=148, GPIO_ADC_TEMP
       
-      //15=10, GPIO_LED1_INV
-      "\"16\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
+//       //15=10, GPIO_LED1_INV
+//       "\"16\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway Light"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden Light"
-  // #define SET_POWERONSTATE_AS_ON
+//   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway Light"
+//   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden Light"
+//   // #define SET_POWERONSTATE_AS_ON
 
-  // Drivers, Sensors and lights?
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    //device_names:{"module_name":["relay1","relay2"]}
-    "\"" D_JSON_DEVICENAME "\":{"
-        "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-        "],"
-        "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-          "\"" "Switch1" "\","
-          "\"" "Switch2" "\""
-        // "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        //   "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
-        //   "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
-        "]"
-    "}"
-  "}";
-#endif
+//   // Drivers, Sensors and lights?
+//   #define USE_FUNCTION_TEMPLATE
+//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+//   "{"
+//     //device_names:{"module_name":["relay1","relay2"]}
+//     "\"" D_JSON_DEVICENAME "\":{"
+//         "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+//           "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+//           "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+//         "],"
+//         "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+//           "\"" "Switch1" "\","
+//           "\"" "Switch2" "\""
+//         // "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+//         //   "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+//         //   "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+//         "]"
+//     "}"
+//   "}";
+// #endif
 
 
 

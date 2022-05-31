@@ -18,8 +18,6 @@
   #include "2_CoreSystem/HardwarePins/mHardwarePins_Esp32.h"
 #endif
 
-  // #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
-
 #include "1_TaskerManager/mTaskerInterface.h"
   
 

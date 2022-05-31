@@ -159,7 +159,7 @@ void mEnergyPZEM004T::EveryLoop(){
       stats.timeout_reads++;
     }
 
-    if(transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID)
+    if((transceive_mode == TRANSCEIVE_RESPONSE_SUCCESS_ID) && (settings.active_sensor == settings.found-1)) // if(success) AND (last to read)
     {
       mqtthandler_sensor_ifchanged.flags.SendNow = true;
     }

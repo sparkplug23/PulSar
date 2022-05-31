@@ -465,14 +465,14 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
               sensor[sensor_id].reading.isvalid = true; 
               sensor[sensor_id].reading.captureupsecs = pCONT_time->uptime.seconds_nonreset;
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              ALOG_DBM( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = [%d]"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
+              ALOG_DBM( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = [%d]"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)),(int)tmp_float);
             }
             else
             {
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+              ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)));
             }
           
           } // end if
@@ -578,7 +578,7 @@ uint8_t mDS18X::ConstructJSON_Sensor(uint8_t json_level){
     
     if(sensor[sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){  
 
-      JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+      JBI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(),sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
         JBI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].reading.val);
         JBI->Add(D_JSON_ADDRESS,     sensor[sensor_id].address[7]);
 
@@ -738,7 +738,7 @@ void mDS18X::WebAppend_Root_Status_Table_Draw(){
 
   for(int sensor_id=0;sensor_id<db18_sensors_active;sensor_id++){ //add number in name? List needed? also hold user defined name?
     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-      JBI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID, sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+      JBI->Append_P(PSTR("<td>DB18 %02d Temperature %s</td>"),sensor_id,DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)));
       JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_CLASS_TYPE_2V,"tab_db18","?");   
     JBI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
   }

@@ -1,8 +1,7 @@
 #ifndef _MODULE_SENSORS_MOTION_H
 #define _MODULE_SENSORS_MOTION_H
 
-#define D_UNIQUE_MODULE_SENSORS_MOTION_ID   133  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_SENSORS_MOTION_ID    1    // Numerical accesending order of module within a group
+#define D_UNIQUE_MODULE_SENSORS_MOTION_ID   ((5*1000)+07)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

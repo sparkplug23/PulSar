@@ -53,8 +53,9 @@ class mRuleEngine :
     uint16_t _dataLen = 0;
     uint16_t _dataUsedLen = 0;
 
+    #define D_JSON_COMMAND_BUFFER_LENGTH 255
     struct JSONCOMMANDS{
-      char data[255] = {0}; //use | delims
+      char data[D_JSON_COMMAND_BUFFER_LENGTH] = {0}; //use | delims
       uint8_t bytes_used = 0;
       int8_t delims_used = 0;
 

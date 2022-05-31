@@ -2,54 +2,6 @@
 
 #ifdef USE_MODULE_ENERGY_INTERFACE
 
-
-// void mEnergyInterface::parse_JSONCommand(){
-
-//   return;// THIS IS WRONG!!
-
-//   // Check if instruction is for me
-//   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/energy")>=0){
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_NEXTION));
-//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
-//     // fOpenHABDataStreamActive_last_secs = 1; // set to be positive to start
-//     // fOpenHABDataStreamActive = true;
-//   }else{
-//     return; // not meant for here
-//   }
-
-//   // u
-//   // int8_t tmp_id = 0;
-
-//   // #ifdef JSONDOCUMENT_STATIC
-//   //   StaticJsonDocument<800> doc;
-//   // #else
-//   //   DynamicJsonDocument doc(600);
-//   // #endif
-//   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
-  
-//   // if(error){
-//   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_JSON_DESERIALIZATION_ERROR));
-//   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_JSON_DESERIALIZATION_ERROR);
-//   //   return 0;
-//   // }
-//   // JsonObject obj = doc.as<JsonObject>();
-  
-//   // if(!obj["command"].isNull()){ 
-//   //   const char* command = obj["command"];
-//   //   if(strstr(command,"system_send_all")){ 
-//   //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
-//   //     MQTTHandler_Set_RefreshAll();
-//   //     isserviced++;
-//   //   }
-//   //   else{
-//   //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
-//   //   }
-//   // }
-
-//   // 
-
-// } // END FUNCTION
-
 uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_method){
 
   // Serial.println("mEnergyInterface::ConstructJSON_Sensor"); Serial.flush();
@@ -211,6 +163,8 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
       JBI->Array_End();
     }
     JBI->Level_End();
+
+
   
   return JsonBuilderI->End();
 

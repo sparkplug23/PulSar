@@ -136,7 +136,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
 
 
       // if(jsonbuffer.data != nullptr){
-        if(strlen(jsonbuffer.data)<200){
+        if(strlen(jsonbuffer.data) < sizeof(jsonbuffer.data)){
 
           // uint16_t available_space = 255 - strlen(event->p_json_commands);
 
@@ -158,10 +158,10 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, mEvent::EVENT_PART* 
           // I need to create the ability to move to add/edit buffer (like tas)
           // Rules can therefore only be created once at starttime for now          
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
+          #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
           AddLog(LOG_LEVEL_INFO, PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
-    #endif // ENABLE_LOG_LEVEL_INFO
+          #endif // ENABLE_LOG_LEVEL_INFO
 
           // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
         }

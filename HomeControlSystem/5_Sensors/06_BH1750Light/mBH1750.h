@@ -1,7 +1,7 @@
 #ifndef _MODULE_SENSORS_BH1750_H
 #define _MODULE_SENSORS_BH1750_H
 
-#define D_UNIQUE_MODULE_SENSORS_BH1750_ID   140  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_SENSORS_BH1750_ID   ((5*1000)+06)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

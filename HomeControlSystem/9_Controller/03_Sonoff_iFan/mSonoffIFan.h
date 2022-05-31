@@ -1,7 +1,7 @@
 #ifndef _MCEILINGFAN_H
-#define _MCEILINGFAN_H 0.3
+#define _MCEILINGFAN_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID 179
+#define D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID ((9*1000)+03)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

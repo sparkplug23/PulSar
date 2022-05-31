@@ -1,7 +1,7 @@
 #ifndef _MSWITCHES_H_
 #define _MSWITCHES_H_
 
-#define D_UNIQUE_MODULE_SENSORS_SWITCHES_ID 121
+#define D_UNIQUE_MODULE_SENSORS_SWITCHES_ID  ((5*1000)+01) 
 
 #include "1_TaskerManager/mTaskerManager.h"
 

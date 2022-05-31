@@ -195,17 +195,18 @@ void mInterfaceLight::Init(void) //LightInit(void)
   
   char buffer[30];
   // Default user names for palette
-  for (int ii=mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID);ii++){ 
+  for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID);ii++){ 
     sprintf(buffer, "User Test %02d", ii);
-    DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
+    // DLI->AddDeviceName(buffer,E M_MODULE_LIGHTS_INTERFACE_ID,ii);
+    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID);
   }
-  for (int ii=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID);ii++){ 
+  for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);ii++){ 
     sprintf(buffer, "Solid Rgbcct %02d", ii);
-    DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
+    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
   }
-  for (int ii=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID);ii++){ 
+  for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID);ii++){ 
     sprintf(buffer, "Encoded %02d", ii);
-    DLI->AddDeviceName(buffer,EM_MODULE_LIGHTS_INTERFACE_ID,ii);
+    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID);
   }
 
   #ifdef USE_MODULE_LIGHTS_PWM

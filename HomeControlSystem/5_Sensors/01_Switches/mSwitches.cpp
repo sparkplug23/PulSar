@@ -17,8 +17,8 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
     break;
     case FUNC_EVERY_SECOND:
 
-      AddLog(LOG_LEVEL_INFO,PSTR("swt=%s"),IsSwitchActive(0)?"On":"Off");
-      AddLog(LOG_LEVEL_INFO,PSTR("swt=%d"), digitalRead(5) );
+      // AddLog(LOG_LEVEL_INFO,PSTR("swt=%s"),IsSwitchActive(0)?"On":"Off");
+      // AddLog(LOG_LEVEL_INFO,PSTR("swt=%d"), digitalRead(5) );
       
       
       
@@ -51,7 +51,7 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init(); 
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      // MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_TelePeriod();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -400,9 +400,10 @@ void mSwitches::SwitchHandler(uint8_t mode)
             AddLog(LOG_LEVEL_INFO, PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
 
             // #ifdef ENABLE_RULES_TRIGGER_METHOD_V2
-              pCONT_rules->NewEventRun(EM_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
+              // pCONT_rules->NewEventRun(E M_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
+             pCONT_rules->NewEventRun(D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
             // #else // OLD METHOD, to delete
-            //   pCONT_rules->NewEvent(EM_MODULE_SENSORS_SWITCHES_ID, i, new_state); // Event has occured, save and check it
+            //   pCONT_rules->NewEvent(E M_MODULE_SENSORS_SWITCHES_ID, i, new_state); // Event has occured, save and check it
             //   pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID); // This should maybe be rolled into "NewEvent" so NewEvent of switch would automtically call this        
             // #endif
 
@@ -517,7 +518,7 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
   for(uint8_t sensor_id=0;sensor_id<settings.switches_found;sensor_id++){
     if(switches[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
       
-      JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_SWITCHES_ID, sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
         JsonBuilderI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
         JsonBuilderI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
 

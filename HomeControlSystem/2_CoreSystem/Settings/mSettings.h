@@ -35,8 +35,6 @@ return potato;
 
 
 
-// #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
-
 
 enum DATA_BUFFER_FLAG_SOURCE_IDS{
   DATA_BUFFER_FLAG_SOURCE_MQTT=0,
@@ -1329,9 +1327,10 @@ struct DeviceNameBuffer{ // size(230)
   // index array that holds name_list sensor (class name, sensor number)
   /**
    * This needs to be the large unique identifier
+   * "Unused" will be the largest possible value, instead of using signed value and setting to "-1", which makes -2->minimum wasted 
    * */
-  int16_t class_id[DEVICENAMEBUFFER_NAME_INDEX_LENGTH]; //hold class id
-  int8_t  device_id[DEVICENAMEBUFFER_NAME_INDEX_LENGTH];  //max of X sensors per module
+  uint16_t class_id[DEVICENAMEBUFFER_NAME_INDEX_LENGTH]  = { D_MAX_UINT16 }; //hold class id
+  uint8_t  device_id[DEVICENAMEBUFFER_NAME_INDEX_LENGTH] = { D_MAX_UINT8  };  //max of X sensors per module
 };
 
 
@@ -1371,6 +1370,16 @@ struct SettingsMQTT{
   char client_name[40]; 
   char hostname_ctr[20];
   char prefixtopic[50]; // "<devicename>/User extras?"
+
+  /**
+   * @brief devfeature
+   * @note  enable flags (to be condensed to bitmap) that allow interface to be priority, and reduce subclass reporting for ifchanged
+   * 
+   */
+  struct interface_priority_flags_s{
+    uint8_t energy = 0;
+    uint8_t light = 0;
+  }interface_reporting_priority;
 
 };
 

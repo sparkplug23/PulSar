@@ -123,9 +123,10 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
  
   if(jtok = obj[PM_JSON_PALETTE_EDIT].getObject()[PM_JSON_COLOUR_PALETTE]){
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("Palette: PM_JSON_PALETTE_EDIT "));
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // AddLog(LOG_LEVEL_TEST, PSTR("Palette: PM_JSON_PALETTE_EDIT "));
+    // #endif // ENABLE_LOG_LEVEL_INFO
+
     JsonParserToken jtok_data = obj[PM_JSON_PALETTE_EDIT].getObject()[PM_JSON_DATA];
     if(!jtok_data.isNull()){ 
 

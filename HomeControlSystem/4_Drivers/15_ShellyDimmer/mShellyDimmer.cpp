@@ -168,6 +168,8 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
 
     timer_decounter.seconds=0;
 
+    mqtthandler_state_teleperiod.flags.SendNow = true; // To show cleared back to zero and off
+
   }else
   if(timer_decounter.seconds>1){ // if =1 then turn off and clear to 0
     timer_decounter.seconds--;   // decrease
@@ -180,7 +182,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
     #endif
 
-    mqtthandler_state_ifchanged.flags.SendNow = true;
+    mqtthandler_state_teleperiod.flags.SendNow = true;
 
   }else{
     //assumed off ie == 0
@@ -312,6 +314,10 @@ void mShellyDimmer::SetBrightnessReq()
 {
   // Payload format:
   // [0-1] Brightness (%) * 10
+  
+  #ifdef ENABLE_DEVFEATURE_SHELLY_DIMMER_FORCED_BRIGHTNESS_TO_REQUESTED
+  dimmer.brightness = req_brightness; // forced until I redo the commands to my own
+  #endif
 
   uint8_t payload[SHD_SWITCH_SIZE];
 

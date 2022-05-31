@@ -238,7 +238,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
     // pCONT_msdb18->sensor[ii].reading.val = 20+(5*ii);
     
     int8_t device_id = -1;
-    uint16_t unique_module_id = pCONT->GetModuleUniqueIDbyVectorIndex(EM_MODULE_SENSORS_DB18S20_ID);
+    uint16_t unique_module_id = pCONT_msdb18->GetModuleUniqueID();// ->GetModuleUniqueIDbyVectorIndex(E M_MODULE_SENSORS_DB18S20_ID);
 
 
     //temp solution

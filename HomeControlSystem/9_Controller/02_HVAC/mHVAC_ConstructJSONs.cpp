@@ -32,7 +32,7 @@ uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level){
   
   for(uint8_t zone_id=0; zone_id<settings.active_zones; zone_id++)
   {
-    JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_HVAC_ID,zone_id,buffer,sizeof(buffer)));
+    JBI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),zone_id,buffer,sizeof(buffer)));
     /**
      * If time -1, ie disabled, then just send as zero
      * */
@@ -54,7 +54,7 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level){
   JBI->Start();
   for(int zone_id=0; zone_id<settings.active_zones; zone_id++){
 
-    JBI->Level_Start_P( DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_HVAC_ID,zone_id,buffer,sizeof(buffer)) );
+    JBI->Level_Start_P( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),zone_id,buffer,sizeof(buffer)) );
   
       JBI->Level_Start_P(D_JSON_TEMPERATURE);   
         JBI->Add(D_JSON_CURRENT, zone[zone_id].program_temp_method->GetCurrentTemperature());
@@ -143,7 +143,7 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level){
   char buffer[50];
   JBI->Start();
   for(int device_id=0;device_id<settings.active_zones;device_id++){
-    JBI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_DRIVERS_RELAY_ID, device_id, buffer, sizeof(buffer)));
+    JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID(pCONT_mry->GetModuleUniqueID(), device_id, buffer, sizeof(buffer)));
       JBI->Add_FV(D_JSON_ONTIME, PSTR("\"%02d:%02d:%02d\""),  pCONT_mry->relay_status[device_id].last.ontime.hour,  pCONT_mry->relay_status[device_id].last.ontime.minute,  pCONT_mry->relay_status[device_id].last.ontime.second);
       JBI->Add_FV(D_JSON_OFFTIME, PSTR("\"%02d:%02d:%02d\""), pCONT_mry->relay_status[device_id].last.offtime.hour,  pCONT_mry->relay_status[device_id].last.offtime.minute,  pCONT_mry->relay_status[device_id].last.offtime.second);
       JBI->Add(D_JSON_TIME_ON "_Seconds",   pCONT_mry->relay_status[device_id].time_seconds_on);
@@ -163,7 +163,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level){
   JBI->Start();
 
   for(int zone_id=0;zone_id<settings.active_zones;zone_id++){
-    JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_CONTROLLER_HVAC_ID, zone_id, buffer, sizeof(buffer)));
+    JBI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), zone_id, buffer, sizeof(buffer)));
       // if(zone[zone_id].sensor.temperature){ JBI->Add(D_JSON_TEMPERATURE, zone[zone_id].sensor.temperature); }
       // if(zone[zone_id].sensor.humidity)   { JBI->Add(D_JSON_HUMIDITY, zone[zone_id].sensor.humidity);       }
       JBI->Add("ModuleID",zone[zone_id].sensor.module_id);

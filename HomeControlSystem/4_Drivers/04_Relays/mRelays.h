@@ -1,7 +1,7 @@
 #ifndef _MRELAYS_H
 #define _MRELAYS_H 0.1
 
-#define D_UNIQUE_MODULE_DRIVERS_RELAY_ID ((4*100)+02)  // go with 945 ie Group/file 9/45  // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_DRIVERS_RELAY_ID ((4*1000)+02)  // go with 945 ie Group/file 9/45  // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -227,8 +227,8 @@ uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
 
     const char* GetRelayNamebyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
     const char* GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* buffer, uint8_t buffer_length);//D_DEFAULT_DEVICE_BUFFER_LENGTH);
+    
     int8_t GetRelayIDbyName(const char* c);
-
     int8_t GetDeviceIDbyName(const char* c);
 
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);

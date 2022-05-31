@@ -114,7 +114,11 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level)
       JsonBuilderI->Level_Start("InternalSensors");
         for(int sensor_id=0;sensor_id<3;sensor_id++)
         { 
-          JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_DB18S20_ID,pCONT_msdb18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+          // JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_msdb18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
+          JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_msdb18->GetModuleUniqueID() ,pCONT_msdb18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+
+
+          
             JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_msdb18->sensor[sensor_id].reading.val);
           JsonBuilderI->Level_End();  
         }

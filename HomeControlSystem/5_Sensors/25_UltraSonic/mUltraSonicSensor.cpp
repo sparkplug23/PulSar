@@ -238,7 +238,7 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres()
       #ifdef USE_MODULE_SENSORS_DS18X
       int tempsensorid = -1;
       float ambient_temperature;
-      if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t)EM_MODULE_SENSORS_DB18S20_ID))>=0){
+      if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t) /*EM_MODULE_SENSORS_DB18S20_ID*/ pCONT_db18->GetModuleUniqueID()))>=0){
           if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
           ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
           
@@ -499,7 +499,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void)
     char buffer[50];
       
     JsonBuilderI->Start();
-      JsonBuilderI->Add("location", DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_ULTRASONIC_ID, 0, buffer, sizeof(buffer)));
+      JsonBuilderI->Add("location", DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
       JsonBuilderI->Add("time", pCONT_time->RtcTime.hhmmss_ctr);
     JsonBuilderI->End();
 

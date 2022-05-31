@@ -26,12 +26,12 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
       // pinMode(22, OUTPUT);
       // pinMode(4, OUTPUT);
 
-  #ifndef USE_MODULE_NETWORK_WIFI
-  WiFi.mode(WIFI_OFF);
-  #ifdef ESP32
-  btStop();
-  #endif // esp32
-  #endif // USE_MODULE_NETWORK_WIFI
+      #ifndef USE_MODULE_NETWORK_WIFI
+      WiFi.mode(WIFI_OFF);
+      #ifdef ESP32
+      btStop();
+      #endif // esp32
+      #endif // USE_MODULE_NETWORK_WIFI
 
     break;
     case FUNC_LOOP: {
@@ -65,13 +65,14 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
         // ALOG_INF( PSTR("0x77 = %d"), I2cDevice_IsConnected(0x77));
 
+      #ifdef INSERT_CODE_EVERY_SECOND
+      INSERT_CODE_EVERY_SECOND;
+      #endif // INSERT_CODE_EVERY_SECOND
 
 
-
-
-  // char mqtt_data[300];
-  // pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
-  // Serial.println(mqtt_data);
+    // char mqtt_data[300];
+    // pCONT_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+    // Serial.println(mqtt_data);
     //add back that I divide supports into subtasks to split tasks evenly across a second
 
       // #ifdef ENABLE_DEVFEATURE_TESTING_LONG_LOOPS
@@ -1623,32 +1624,46 @@ char* mSupport::GetTextIndexed_P(char* destination, size_t destination_size, uin
 
 char* mSupport::GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack)
 {
+
+  DEBUG_LINE_HERE;
   // Returns empty string if not found
   // Returns text of found
   char* write = destination;
   const char* read = haystack;
+
+      // Serial.println(index);
+      // Serial.println(destination_size);
+      // Serial.printf("destination_size=%d\n\r", destination_size);
 
   index++;
   while (index--) {
     size_t size = destination_size -1;
     write = destination;
     char ch = '.';
+      // Serial.printf("index=%d\n\r", index);
+  // DEBUG_LINE_HERE;
     while ((ch != '\0') && (ch != '|')) {
 
+  // DEBUG_LINE_HERE;
       // (addr) (*(const uint8_t *)(addr))
 
       ch = *read; //get vlaue from pointer
       read++; // move pointer forward
 
+      // Serial.print(ch);
+
       // ch = pgm_read_byte(read++);  //pads
 
       if (size && (ch != '|'))  {
+  // DEBUG_LINE_HERE;
         *write++ = ch;
         size--;
       }
     }
     if (0 == ch) {
+  // DEBUG_LINE_HERE;
       if (index) {
+  // DEBUG_LINE_HERE;
         write = destination;
       }
       break;

@@ -155,8 +155,28 @@ void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
   //     AddLog(LOG_LEVEL_TEST, PSTR(" NOT FOUND group_iter.getInt()) = %d"));
   // }
 
+  if(jtok = obj["MQTT_Interface_Priority"].getObject()[D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR])
+  {
+    CommandSet_MQTT_Reporting_Priority(jtok.getInt());
+  }
+
+
+
+
 }
 
+
+void mEnergyInterface::CommandSet_MQTT_Reporting_Priority(uint8_t value)
+{
+  
+  pCONT_set->Settings.mqtt.interface_reporting_priority.energy = value;
+
+  // if(pCONT_set->Settings.mqtt.interface_reporting_priority.energy == 1)
+  // {
+  //   mqtt
+  // }
+
+}
 
 // void mEnergyInterface::parse_JSONCommand(JsonParserObject obj){
 

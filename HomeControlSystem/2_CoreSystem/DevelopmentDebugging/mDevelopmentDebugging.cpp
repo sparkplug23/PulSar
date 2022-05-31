@@ -99,6 +99,18 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
     #error "ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS -- Can be removed"
   #endif 
+  #ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
+    #error "ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE -- Can be removed"
+  #endif 
+  #ifdef PINSET_TEMP_METHOD_RGB_PIN_RGB
+    #error "PINSET_TEMP_METHOD_RGB_PIN_RGB -- Can be removed"
+  #endif 
+  #ifdef ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
+  #error "ENABLE_DEVFEATURE_BUTTON_HANDLER_V2 - Needs to be removed"
+  #endif
+  #ifdef ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
+  #error "ENABLE_DEVFEATURE_BUTTON_MULTIPRESS - Needs to be removed"
+  #endif
 
 
 

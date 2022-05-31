@@ -392,7 +392,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
 
       // int8_t device_id;
-      // int8_t class_id = EM_MODULE_DRIVERS_RELAY_ID;
+      // int8_t class_id = E M_MODULE_DRIVERS_RELAY_ID;
       // AddLog(LOG_LEVEL_INFO,PSTR("FUNC_EVERY_FIVE_SECOND\n\r\n\r"));
 
       // int16_t device_id_found = GetDeviceIDbyName("Socket",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);

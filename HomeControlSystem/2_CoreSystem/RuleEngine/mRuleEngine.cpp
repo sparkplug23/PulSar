@@ -304,6 +304,23 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
   for (int rule_index=0;rule_index<D_MAX_RULES;rule_index++)
   {
 
+    /**
+     * @brief Debug check for old code
+     **/
+    if(rules[rule_index].trigger.module_id < 1000)
+    {
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ERROR rules[rule_index].trigger.module_id=%d"), rules[rule_index].trigger.module_id );
+    }
+    if(rules[rule_index].command.module_id < 1000)
+    {
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ERROR rules[rule_index].command.module_id=%d"), rules[rule_index].command.module_id );
+    }
+    if(event_triggered.module_id < 1000)
+    {
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ERROR event_triggered.module_id=%d"), event_triggered.module_id );
+    }
+
+
     // Only run if configured and enabled
     if(rules[rule_index].flag_configured && rules[rule_index].flag_enabled)
     {

@@ -101,7 +101,11 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
    * 
    */
-  if(jtok = obj[PM_JSON_COLOUR_PALETTE]){
+  if(jtok = obj[PM_JSON_COLOUR_PALETTE])
+  {
+
+    // ALOG_INF( PSTR("PM_JSON_COLOUR_PALETTE") );
+
     if(jtok.isStr()){
       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
         CommandSet_PaletteID(tmp_id, segment_index);
@@ -112,9 +116,10 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       CommandSet_PaletteID(jtok.getInt(), segment_index);
       data_buffer.isserviced++;
     }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+    ALOG_COM( 
+      PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), 
+      mPaletteI->GetPaletteNameByID(_segments[segment_index].palette.id, buffer, sizeof(buffer))
+    );
   }
   
   if(jtok = obj["PixelRange"]){ 

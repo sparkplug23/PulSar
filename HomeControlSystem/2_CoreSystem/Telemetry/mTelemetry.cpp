@@ -246,10 +246,10 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
 uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
   char buffer[30];
   JsonBuilderI->Start();
-    JsonBuilderI->Add(PM_JSON_BUILDDATE,       __DATE__);
+  
     JsonBuilderI->Add(PM_JSON_VERSIONNAME,     pCONT_set->firmware_version.current.name_ctr);
-
-
+    JsonBuilderI->Add(PM_JSON_BUILDDATE,       __DATE__);
+    
     JsonBuilderI->Add(PM_JSON_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
     JsonBuilderI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
     JsonBuilderI->Add(PM_JSON_BOOTCOUNTERRORS, pCONT_set->Settings.bootcount_errors_only);
@@ -373,6 +373,20 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
 
 
     JsonBuilderI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
+
+    
+    #ifdef ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
+    
+  JsonBuilderI->Level_Start("Interface_Priority");
+    JsonBuilderI->Add(D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR, pCONT_set->Settings.mqtt.interface_reporting_priority.energy);
+    
+
+  JsonBuilderI->Level_End();
+
+    #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
+
+
+
   return JsonBuilderI->End();
 
 }
@@ -442,8 +456,15 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_MODULENAME,          pCONT_set->Settings.module);
-    JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.device_id));
-    JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id));
+    // If debug mode, show entire message
+    // JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.device_id));
+    // JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  ARRAY_SIZE(pCONT_set->Settings.device_name_buffer.class_id));
+    // else, only show ysed
+    JBI->Add("DLI->GetLengthIndexUsed()", DLI->GetLengthIndexUsed());
+    JsonBuilderI->Array_AddArray(PM_JSON_DEVICEID, pCONT_set->Settings.device_name_buffer.device_id, DLI->GetLengthIndexUsed());
+    JsonBuilderI->Array_AddArray(PM_JSON_CLASSID,  pCONT_set->Settings.device_name_buffer.class_id,  DLI->GetLengthIndexUsed());
+    
+    
     JsonBuilderI->Add("Buffer",        pCONT_set->Settings.device_name_buffer.name_buffer);
     JsonBuilderI->Add("Buflen",        strlen(pCONT_set->Settings.device_name_buffer.name_buffer));
 
@@ -671,7 +692,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level){ //B
   JBI->Array_Start("ModuleIDs");
   for(int ii=0;ii<pCONT->GetClassCount();ii++)
   {
-    snprintf_P(buffer, sizeof(buffer), PSTR("%d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
+    snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
 
     JBI->Add(buffer);
   }

@@ -484,7 +484,7 @@ enum MODULE_IDS{
   #define pCONT_iDisp                               static_cast<mDisplaysInterface*>(pCONT->pModule[EM_MODULE_DISPLAYS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
-  #include "8_Displays/Nextion/mNextionPanel.h"
+  #include "8_Displays/01_Nextion/mNextionPanel.h"
   #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -503,6 +503,27 @@ enum MODULE_IDS{
   // #define pCONT_iDrivers                           static_cast<mSensorsInterface*>(pCONT->pModule[EM_MODULE_SENSORS_INTERFACE_ID])
 #endif
 
+#ifdef USE_MODULE_DRIVERS_LEDS
+#include "4_Drivers/03_LEDs/mLEDs.h"
+  #define pCONT_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_RELAY
+  #include "4_Drivers/04_Relays/mRelays.h"
+  #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+  #include "4_Drivers/09_RCSwitch/mRCSwitch.h"
+  #define pCONT_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
+#endif
+
+
+#ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
+  #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
+  #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
+#endif
+
+
+
 
 
 
@@ -513,10 +534,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
   #define pCONT_mdirt                               static_cast<mIRtransceiver*>(pCONT->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_RELAY
-  #include "4_Drivers/02_Relays/mRelays.h"
-  #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
   #include "4_Drivers/PWM/mPWM.h"
@@ -534,10 +551,6 @@ enum MODULE_IDS{
   #include "4_Drivers/SerialUART/mSerialUART.h"
   #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
-  #include "4_Drivers/ShellyDimmer/mShellyDimmer.h"
-  #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
-#endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
   #include "4_Drivers/CAM_OV2640/mCamera.h"
   #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
@@ -550,10 +563,6 @@ enum MODULE_IDS{
   #include "4_Drivers/WebCam/mWebCam.h"
   #define pCONT_camera                              static_cast<mWebCam*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_LEDS
-#include "4_Drivers/LEDs/mLEDs.h"
-  #define pCONT_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
-#endif
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   #include "4_Drivers/FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
@@ -561,10 +570,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_BUZZER
   #include "4_Drivers/Buzzer/mBuzzer.h"
   #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
-  #include "4_Drivers/RCSwitch/mRCSwitch.h"
-  #define pCONT_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
 #include "4_Drivers/IRRemote/mIRRemote.h"
@@ -577,11 +582,11 @@ enum MODULE_IDS{
   #define pCONT_iEnergy                           static_cast<mEnergyInterface*>(pCONT->pModule[EM_MODULE_ENERGY_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-  #include "7_Energy/Pzem004T_v3/mPZEM004T.h"
+  #include "7_Energy/01_Pzem004T_v3/mPZEM004T.h"
   #define pCONT_pzem                            static_cast<mEnergyPZEM004T*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_V3_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_ADE7953
-  #include "7_Energy/ADE7953/mADE7953.h"
+  #include "7_Energy/02_ADE7953/mADE7953.h"
   #define pCONT_ade7953                         static_cast<mEnergyADE7953*>(pCONT->pModule[EM_MODULE_ENERGY_ADE7953_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_INA219
@@ -595,15 +600,15 @@ enum MODULE_IDS{
   #define pCONT_iLight                          static_cast<mInterfaceLight*>(pCONT->pModule[EM_MODULE_LIGHTS_INTERFACE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  #include "6_Lights/Animator/mAnimatorLight.h"
+  #include "6_Lights/03_Animator/mAnimatorLight.h"
   #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->pModule[EM_MODULE_LIGHTS_ANIMATOR_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  #include "6_Lights/Hardware/Addressable/mAddressableLight.h"
+  #include "6_Lights/01_Hardware/Addressable/mAddressableLight.h"
   #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->pModule[EM_MODULE_LIGHTS_ADDRESSABLE_ID])
 #endif
 #ifdef USE_MODULE_LIGHTS_PWM
-  #include "6_Lights/Hardware/PWM/mPWMLight.h"
+  #include "6_Lights/01_Hardware/PWM/mPWMLight.h"
   #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pModule[EM_MODULE_LIGHTS_PWM_ID])
 #endif
 
@@ -619,7 +624,10 @@ enum MODULE_IDS{
   #include "5_Sensors/01_Switches/mSwitches.h"
   #define pCONT_swt                            static_cast<mSwitches*>(pCONT->pModule[EM_MODULE_SENSORS_SWITCHES_ID])
 #endif
-
+#ifdef USE_MODULE_SENSORS_BUTTONS
+  #include "5_Sensors/02_Buttons/mButtons.h"
+  #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
+#endif
 #ifdef USE_MODULE_SENSORS_DS18X
   #include "5_Sensors/03_DB18x20/mDS18X.h"
   #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
@@ -630,25 +638,30 @@ enum MODULE_IDS{
 #endif
 
 #ifdef USE_MODULE_SENSORS_DHT
-  #include "5_Sensors/06_DHT/mSensorsDHT.h"
+  #include "5_Sensors/05_DHT/mSensorsDHT.h"
   #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_BH1750
+  #include "5_Sensors/06_BH1750Light/mBH1750.h"
+  #define pCONT_motion                          static_cast<mBH1750*>(pCONT->pModule[EM_MODULE_SENSORS_BH1750_ID])
+#endif
+
 #ifdef USE_MODULE_SENSORS_MOTION
   #include "5_Sensors/07_Motion/mMotion.h"
   #define pCONT_smot                            static_cast<mMotionSensor*>(pCONT->pModule[EM_MODULE_SENSORS_MOTION_ID])
 #endif
-
-
-
-
-#ifdef USE_MODULE_SENSORS_BUTTONS
-  #include "5_Sensors/Buttons/mButtons.h"
-  #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
+#ifdef USE_MODULE_SENSORS_DOOR
+  #include "5_Sensors/11_Door/mDoorSensor.h"
+  #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
+
+
+
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
-  #include "5_Sensors/LDRBasic/mLDRBasic.h"
+  #include "5_Sensors/14_LDRBasic/mLDRBasic.h"
   #define pCONT_ldr_basic                      static_cast<mLDRBasic*>(pCONT->pModule[EM_MODULE_SENSORS_LDR_BASIC_ID])
 #endif
+
 #ifdef USE_MODULE_SENSORS_ANALOG
   #include "5_Sensors/Analog_PhasedIntoADCInternal/mSensorsAnalog.h"
   #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pModule[EM_MODULE_SENSORS_ANALOG_ID])
@@ -656,10 +669,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   #define pCONT_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_DOOR
-  #include "5_Sensors/Door/mDoorSensor.h"
-  #define pCONT_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
 
 #ifdef USE_MODULE_SENSORS_MOISTURE
@@ -669,10 +678,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
   #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_BH1750
-  #include "5_Sensors/BH1750Light/mBH1750.h"
-  #define pCONT_motion                          static_cast<mBH1750*>(pCONT->pModule[EM_MODULE_SENSORS_BH1750_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_SR04
   #include "5_Sensors/SR04/mSR04.h"
@@ -709,13 +714,16 @@ enum MODULE_IDS{
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
+
+#ifdef USE_MODULE_CONTROLLER_HVAC
+  #include "9_Controller/02_HVAC/mHVAC.h"
+  #define pCONT_heating2                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER_HVAC_ID])
+#endif
+
+
 #ifdef USE_MODULE_CONTROLLER_BLINDS
   #include "9_Controller/Blinds/mBlinds.h"
   #define pCONT_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
-#endif
-#ifdef USE_MODULE_CONTROLLER_HVAC
-  #include "9_Controller/HVAC/mHVAC.h"
-  #define pCONT_heating2                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER_HVAC_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
@@ -828,6 +836,9 @@ class mTaskerManager{
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
     uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
 
+    
+PGM_P GetModuleFriendlyName_WithUniqueID(uint8_t unique_id);
+
     #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
       char buffer_taskname[50];
     #endif
@@ -843,11 +854,14 @@ class mTaskerManager{
     PGM_P GetModuleFriendlyName(uint8_t module_id);
     uint16_t GetClassCount();
 
+    
+    uint16_t GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id);
+
     bool ValidTaskID(uint8_t module_id);
     
     mTaskerInterface* GetModuleObjectbyUniqueID(uint16_t id);
     
-    int16_t GetVectorIndexbyModuleUniqueID(int16_t);
+    int16_t GetEnumVectorIndexbyModuleUniqueID(int16_t unique_id);
 
     #ifdef ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
     // #define CLASS_ID_MAX 255
