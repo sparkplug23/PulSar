@@ -4,15 +4,15 @@
 #define mUserConfigSecret_Example_H
 
 #include "2_CoreSystem/mGlobalMacros.h"
-// #include "6_Lights/_Interface/palettes.h"
+// #include "6_Lights/00_Interface/palettes.h"
 #ifdef ESP8266
 #include <avr/pgmspace.h>
 #endif // ESP8266
 #ifdef ESP32
 #define PROGMEM // is nothing, as "const" is enough in esp32 to push to progmem space
 #endif
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 

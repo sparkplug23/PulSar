@@ -1,7 +1,7 @@
 #pragma once
 
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 //move functions into taskermanager
 enum XsnsFunctions {

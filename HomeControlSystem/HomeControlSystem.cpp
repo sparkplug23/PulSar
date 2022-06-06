@@ -1,20 +1,27 @@
+/**
+ * @file    HomeControlSystem.cpp
+ * @author  Michael Doone (michaeldoonehub@gmail.com)
+ * @brief   Primary code setup() and loop()
+ * @version 1.0
+ * @date    2022-04-20
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
 
-// #define D_USER_MICHAEL // maybe undef later?
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-// #define USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 
 #include "1_TaskerManager/mTaskerManager.h"
-
-#ifdef ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
-void hw_wdt_disable(){
-  *((volatile uint32_t*) 0x60000900) &= ~(1); // Hardware WDT OFF 
-}
-
-void hw_wdt_enable(){ 
-  *((volatile uint32_t*) 0x60000900) |= 1; // Hardware WDT ON 
-}
-#endif
-
 
 /*********************************************************************************************
  * Hardware related
@@ -25,47 +32,59 @@ void hw_wdt_enable(){
   #include "soc/rtc_cntl_reg.h"
   #define DISABLE_ESP32_BROWNOUT
   void DisableBrownout(void) 
-  {
-    // https://github.com/espressif/arduino-esp32/issues/863#issuecomment-347179737
+  { // https://github.com/espressif/arduino-esp32/issues/863#issuecomment-347179737
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // Disable brownout detector
   }
+  #ifdef ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
+  void hw_wdt_disable(){
+    *((volatile uint32_t*) 0x60000900) &= ~(1); // Hardware WDT OFF 
+  }
+  void hw_wdt_enable(){ 
+    *((volatile uint32_t*) 0x60000900) |= 1; // Hardware WDT ON 
+  }
+#endif
+
 #endif // ESP32
 
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
 /********************************************************************************************/
 
-// #define ENABLE_DEBUG_USE_ALTERNATE_SETUP_AND_LOOP
-
-// #define ENABLE_DEBUG_DISABLE_PRIMARY_SETUP_AND_LOOP
-
-#ifdef ENABLE_DEBUG_DISABLE_PRIMARY_SETUP_AND_LOOP
-#warning "ENABLE_DEBUG_DISABLE_PRIMARY_SETUP_AND_LOOP has been set!!!"
-#endif // ENABLE_DEBUG_DISABLE_PRIMARY_SETUP_AND_LOOP
-
-
-#ifndef ENABLE_DEBUG_DISABLE_PRIMARY_SETUP_AND_LOOP
 void setup(void)
 { 
-  #ifdef ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
-  // hw_wdt_disable();
-  //hw_wdt_enable();
-  #endif
-    
-  #ifndef USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_TESTING
+
+/********************************************************************************************
+ ** Brownout ********************************************************************************
+ ********************************************************************************************/
+ 
   #ifdef ESP32
   #ifdef DISABLE_ESP32_BROWNOUT
-    DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
+    DisableBrownout();
   #endif
-  #endif
+  #ifdef CONFIG_IDF_TARGET_ESP32
+    // // restore GPIO16/17 if no PSRAM is found
+    // if (!FoundPSRAM()) {
+    //   // test if the CPU is not pico
+    //   uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
+    //   uint32_t pkg_version = chip_ver & 0x7;
+    //   if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
+    //     gpio_reset_pin(GPIO_NUM_16);
+    //     gpio_reset_pin(GPIO_NUM_17);
+    //   }
+    // }
+  #endif  // CONFIG_IDF_TARGET_ESP32
+  #endif  // ESP32
 
+/********************************************************************************************
+ ** Serial **********************************************************************************
+ ********************************************************************************************/
+ 
   #ifndef DISABLE_SERIAL0_CORE
   Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
-  #endif
-  
-  #ifdef USE_SERIAL_ALTERNATE_TX // for H801
+  #endif // DISABLE_SERIAL0_CORE
+  #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
-  #endif
+  #endif // USE_SERIAL_ALTERNATE_TX
   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
   #ifndef DISABLE_SERIAL_LOGGING
   #ifdef ENABLE_BUG_TRACING
@@ -73,16 +92,22 @@ void setup(void)
   #endif
   #endif
 
+/********************************************************************************************
+ ** Init Pointers ***************************************************************************
+ ********************************************************************************************/
+ 
   // Init Json builder with memory address and size
-  JsonBuilderI->Start(data_buffer.payload.ctr,&data_buffer.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-  BufferWriterI->Start(data_buffer.payload.ctr,&data_buffer.payload.len,DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-
-  // msup.WDT_Begin();
+  JsonBuilderI ->Start(data_buffer.payload.ctr, &data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  BufferWriterI->Start(data_buffer.payload.ctr, &data_buffer.payload.len, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   
   /**
    * @brief Start the Tasker_Interface module
    **/
   pCONT->Instance_Init();
+
+/********************************************************************************************
+ ** Set boottime values *********************************************************************
+ ********************************************************************************************/
 
   // Set boot method
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
@@ -90,16 +115,16 @@ void setup(void)
   
   RESET_BOOT_STATUS();
 
-  #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+/********************************************************************************************
+ ** RTC and Fastboot ************************************************************************
+ ********************************************************************************************/
 
+  #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
   // fastboot is currently contained within settings class, but this requires a stable class config.
   // I should consider not using cpp classes for the RTC, perhaps just header code, so truly basic and simple/safe code will always work
   // For now, get working as tas did (for v2) and use the header only method as version 3
-  
   pCONT_set->RtcPreInit();
-  #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
-  #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
   pCONT_set->RtcRebootLoad();
   if (!pCONT_set->RtcRebootValid()) {
     pCONT_set->RtcReboot.fast_reboot_count = 0;
@@ -124,21 +149,24 @@ void setup(void)
 #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
 
+                      /**
+                       * @brief TO BE DELETED
+                       * 
+                       */
+                        #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+                        pCONT_set->RtcRebootLoad();
+                        if(!pCONT_set->RtcRebootValid()) { 
+                          pCONT_set->RtcReboot.fast_reboot_count = 0; 
+                        }
+                        pCONT_set->RtcReboot.fast_reboot_count++;
+                        pCONT_set->RtcRebootSave();
+                        #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
-  #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
-  pCONT_set->RtcRebootLoad();
-  if(!pCONT_set->RtcRebootValid()) { 
-    pCONT_set->RtcReboot.fast_reboot_count = 0; 
-  }
-  pCONT_set->RtcReboot.fast_reboot_count++;
-  pCONT_set->RtcRebootSave();
-  #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+/********************************************************************************************
+ ** Show PSRAM Present **********************************************************************
+ ********************************************************************************************/
 
-
-
-
-
-// //  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
+//  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
 // #ifdef ESP32
 //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
 //             FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
@@ -152,42 +180,29 @@ void setup(void)
 //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
 // #endif // ESP32
 
+/********************************************************************************************
+ ** File System *****************************************************************************
+ ********************************************************************************************/
+
 // #ifdef USE_UFILESYS
 //   UfsInit();  // xdrv_50_filesystem.ino
 // #endif
+  // #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  // pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
+  // #endif
 
-
+/********************************************************************************************
+ ** Settings ********************************************************************************
+ ********************************************************************************************/
 
   pCONT_sup->init_FirmwareVersion();
 
-  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
-  #endif
-
-  // Load config from memory
- // #ifndef DEBUG_NUM1
-
-  //DEBUG_LINE_HERE;
-
-  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before"));
   // pCONT_set->TestSettingsLoad();
   // pCONT_set->TestSettings_ShowLocal_Header();
-  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, before1"));
-  // delay(1000);
 
   ALOG_INF(PSTR("Loading minimal defaults"));
 
   pCONT_set->SettingsDefault(); //preload minimal required
-
-  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after"));
-  // pCONT_set->TestSettingsLoad();
-  // pCONT_set->TestSettings_ShowLocal_Header();
-  // AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("setup, after1"));
-  // delay(1000);
-  
-
- // #endif // DEBUG_NUM1
-  // #ifdef ENABLE_SETTINGS_STORAGE
 
   ALOG_INF(PSTR("Loading settings from saved memory"));
   
@@ -208,8 +223,9 @@ void setup(void)
 
   // pCONT_set->TestSettingsLoad();
 
-  // DEBUG_HOLD_POINT;
-  // delay(10000);
+/********************************************************************************************
+ ** Load Templates **************************************************************************
+ ********************************************************************************************/
 
   // if (1 == RtcReboot.fast_reboot_count) {      // Allow setting override only when all is well
   //   UpdateQuickPowerCycle(true);
@@ -231,10 +247,14 @@ void setup(void)
   // #warning "FORCE_TEMPLATE_LOADING is disabled, trying to use settings may result in improper loaded values"
   // #endif
   
-  // Set boot method
-  pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
-  pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
+  // // Set boot method
+  // pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
+  // pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
   
+/********************************************************************************************
+ ** Initialise System and Modules ***********************************************************
+ ********************************************************************************************/
+
   // Init the GPIOs
   pCONT_pins->GpioInit();
   // Start pins in modules
@@ -275,17 +295,11 @@ void setup(void)
   pCONT->Tasker_Interface(FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
   #endif 
   
-  // Used to show progress of boot in logs
+/********************************************************************************************
+ ** Boot Completed **************************************************************************
+ ********************************************************************************************/
+
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
-
-  #endif // USE_DEVFEATURE_DISABLE_ALL_PROJECT_FOR_
-
-  #ifndef USE_MODULE_NETWORK_WIFI
-  WiFi.mode(WIFI_OFF);
-  #ifdef ESP32
-  btStop();
-  #endif // esp32
-  #endif // USE_MODULE_NETWORK_WIFI
 
 }
 
@@ -364,505 +378,3 @@ void loop(void)
   pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
 
 }
-
-#endif // ENABLE_DEBUG_USE_ALTERNATE_SETUP_AND_LOOP
-
-
-
-
-
-
-#ifdef ENABLE_DEBUG_USE_ALTERNATE_SETUP_AND_LOOP
-
-/*
-
-  This is a simple MJPEG streaming webserver implemented for AI-Thinker ESP32-CAM
-  and ESP-EYE modules.
-  This is tested to work with VLC and Blynk video widget and can support up to 10
-  simultaneously connected streaming clients.
-  Simultaneous streaming is implemented with FreeRTOS tasks.
-
-  Inspired by and based on this Instructable: $9 RTSP Video Streamer Using the ESP32-CAM Board
-  (https://www.instructables.com/id/9-RTSP-Video-Streamer-Using-the-ESP32-CAM-Board/)
-
-  Board: AI-Thinker ESP32-CAM or ESP-EYE
-  Compile as:
-   ESP32 Dev Module
-   CPU Freq: 240
-   Flash Freq: 80
-   Flash mode: QIO
-   Flash Size: 4Mb
-   Partrition: Minimal SPIFFS
-   PSRAM: Enabled
-*/
-
-// ESP32 has two cores: APPlication core and PROcess core (the one that runs ESP32 SDK stack)
-#define APP_CPU 1
-#define PRO_CPU 0
-
-#include "esp_camera.h"
-#include "4_Drivers/Camera_OV2640/internal/ov2640.h"//"ov2640.h"
-#include <WiFi.h>
-#include <WebServer.h>
-#include <WiFiClient.h>
-
-#include <esp_bt.h>
-#include <esp_wifi.h>
-#include <esp_sleep.h>
-#include <driver/rtc_io.h>
-
-#define CAMERA_MODEL_AI_THINKER
-
-#include "4_Drivers/Camera_OV2640/internal/camera_pins.h"
-
-// void camCB(void* pvParameters);
-// void streamCB(void * pvParameters) ;
-// void handleJPGSstream(void);
-
-// char* allocateMemory(char* aPtr, size_t aSize) ;
-// void handleJPG(void);
-// void handleNotFound();
-
-#define SSID1 "HACS2400"
-#define PWD1 "af4d8bc9ab"
-
-//OV2640 cam;
-
-WebServer server(80);
-
-// ===== rtos task handles =========================
-// Streaming is implemented with 3 tasks:
-TaskHandle_t tMjpeg;   // handles client connections to the webserver
-TaskHandle_t tCam;     // handles getting picture frames from the camera and storing them locally
-TaskHandle_t tStream;  // actually streaming frames to all connected clients
-
-// frameSync semaphore is used to prevent streaming buffer as it is replaced with the next frame
-SemaphoreHandle_t frameSync = NULL;
-
-// Queue stores currently connected clients to whom we are streaming
-QueueHandle_t streamingClients;
-
-// We will try to achieve 25 FPS frame rate
-const int FPS = 10;
-
-// We will handle web client requests every 50 ms (20 Hz)
-const int WSINTERVAL = 50;
-
-
-
-static const char *TAG = "camera";
-
-// Commonly used variables:
-volatile size_t camSize;    // size of the current frame, byte
-volatile char* camBuf;      // pointer to the current frame
-
-
-// ==== Memory allocator that takes advantage of PSRAM if present =======================
-char* allocateMemory(char* aPtr, size_t aSize) {
-
-  //  Since current buffer is too smal, free it
-  if (aPtr != NULL) free(aPtr);
-
-
-  size_t freeHeap = ESP.getFreeHeap();
-  char* ptr = NULL;
-
-  // If memory requested is more than 2/3 of the currently free heap, try PSRAM immediately
-  if ( aSize > freeHeap * 2 / 3 ) {
-    if ( psramFound() && ESP.getFreePsram() > aSize ) {
-      ptr = (char*) ps_malloc(aSize);
-    }
-  }
-  else {
-    //  Enough free heap - let's try allocating fast RAM as a buffer
-    ptr = (char*) malloc(aSize);
-
-    //  If allocation on the heap failed, let's give PSRAM one more chance:
-    if ( ptr == NULL && psramFound() && ESP.getFreePsram() > aSize) {
-      ptr = (char*) ps_malloc(aSize);
-    }
-  }
-
-  // Finally, if the memory pointer is NULL, we were not able to allocate any memory, and that is a terminal condition.
-  if (ptr == NULL) {
-    ESP.restart();
-  }
-  return ptr;
-}
-
-
-// ==== RTOS task to grab frames from the camera =========================
-void camCB(void* pvParameters) {
-
-  TickType_t xLastWakeTime;
-
-  //  A running interval associated with currently desired frame rate
-  const TickType_t xFrequency = pdMS_TO_TICKS(1000 / FPS);
-
-  // Mutex for the critical section of swithing the active frames around
-  portMUX_TYPE xSemaphore = portMUX_INITIALIZER_UNLOCKED;
-
-  //  Pointers to the 2 frames, their respective sizes and index of the current frame
-  char* fbs[2] = { NULL, NULL };
-  size_t fSize[2] = { 0, 0 };
-  int ifb = 0;
-
-  //=== loop() section  ===================
-  xLastWakeTime = xTaskGetTickCount();
-
-  for (;;) {
-
-    //  Grab a frame from the camera and query its size
-    camera_fb_t* fb = NULL;
-
-    fb = esp_camera_fb_get();
-    size_t s = fb->len;
-    
-    ESP_LOGE(TAG, "s=%d", s);    
-
-    //  If frame size is more that we have previously allocated - request  125% of the current frame space
-    if (s > fSize[ifb]) {
-      fSize[ifb] = s * 4 / 3;
-      fbs[ifb] = allocateMemory(fbs[ifb], fSize[ifb]);
-    }
-
-    //  Copy current frame into local buffer
-    char* b = (char *)fb->buf;
-    memcpy(fbs[ifb], b, s);
-    esp_camera_fb_return(fb);
-
-    //  Let other tasks run and wait until the end of the current frame rate interval (if any time left)
-    taskYIELD();
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
-    //  Only switch frames around if no frame is currently being streamed to a client
-    //  Wait on a semaphore until client operation completes
-    xSemaphoreTake( frameSync, portMAX_DELAY );
-
-    //  Do not allow interrupts while switching the current frame
-    taskENTER_CRITICAL(&xSemaphore);
-    camBuf = fbs[ifb];
-    camSize = s;
-    ifb = (++ifb) & 1;  // this should produce 1, 0, 1, 0, 1 ... sequence
-    taskEXIT_CRITICAL(&xSemaphore);
-
-    //  Let anyone waiting for a frame know that the frame is ready
-    xSemaphoreGive( frameSync );
-
-    //  Technically only needed once: let the streaming task know that we have at least one frame
-    //  and it could start sending frames to the clients, if any
-    xTaskNotifyGive( tStream );
-
-    //  Immediately let other (streaming) tasks run
-    taskYIELD();
-
-    //  If streaming task has suspended itself (no active clients to stream to)
-    //  there is no need to grab frames from the camera. We can save some juice
-    //  by suspedning the tasks
-    if ( eTaskGetState( tStream ) == eSuspended ) {
-      vTaskSuspend(NULL);  // passing NULL means "suspend yourself"
-    }
-  }
-}
-
-
-
-// ==== STREAMING ======================================================
-const char HEADER[] = "HTTP/1.1 200 OK\r\n" \
-                      "Access-Control-Allow-Origin: *\r\n" \
-                      "Content-Type: multipart/x-mixed-replace; boundary=123456789000000000000987654321\r\n";
-const char BOUNDARY[] = "\r\n--123456789000000000000987654321\r\n";
-const char CTNTTYPE[] = "Content-Type: image/jpeg\r\nContent-Length: ";
-const int hdrLen = strlen(HEADER);
-const int bdrLen = strlen(BOUNDARY);
-const int cntLen = strlen(CTNTTYPE);
-
-
-// ==== Handle connection request from clients ===============================
-void handleJPGSstream(void)
-{
-  //  Can only acommodate 10 clients. The limit is a default for WiFi connections
-  if ( !uxQueueSpacesAvailable(streamingClients) ) return;
-
-
-  //  Create a new WiFi Client object to keep track of this one
-  WiFiClient* client = new WiFiClient();
-  *client = server.client();
-
-  //  Immediately send this client a header
-  client->write(HEADER, hdrLen);
-  client->write(BOUNDARY, bdrLen);
-
-  // Push the client to the streaming queue
-  xQueueSend(streamingClients, (void *) &client, 0);
-
-  // Wake up streaming tasks, if they were previously suspended:
-  if ( eTaskGetState( tCam ) == eSuspended ) vTaskResume( tCam );
-  if ( eTaskGetState( tStream ) == eSuspended ) vTaskResume( tStream );
-}
-
-
-// ==== Actually stream content to all connected clients ========================
-void streamCB(void * pvParameters) {
-  char buf[16];
-  TickType_t xLastWakeTime;
-  TickType_t xFrequency;
-
-  //  Wait until the first frame is captured and there is something to send
-  //  to clients
-  ulTaskNotifyTake( pdTRUE,          /* Clear the notification value before exiting. */
-                    portMAX_DELAY ); /* Block indefinitely. */
-
-  xLastWakeTime = xTaskGetTickCount();
-  for (;;) {
-    // Default assumption we are running according to the FPS
-    xFrequency = pdMS_TO_TICKS(1000 / FPS);
-
-    //  Only bother to send anything if there is someone watching
-    UBaseType_t activeClients = uxQueueMessagesWaiting(streamingClients);
-    if ( activeClients ) {
-      // Adjust the period to the number of connected clients
-      xFrequency /= activeClients;
-
-      //  Since we are sending the same frame to everyone,
-      //  pop a client from the the front of the queue
-      WiFiClient *client;
-      xQueueReceive (streamingClients, (void*) &client, 0);
-
-      //  Check if this client is still connected.
-
-      if (!client->connected()) {
-        //  delete this client reference if s/he has disconnected
-        //  and don't put it back on the queue anymore. Bye!
-        delete client;
-      }
-      else {
-
-        //  Ok. This is an actively connected client.
-        //  Let's grab a semaphore to prevent frame changes while we
-        //  are serving this frame
-        xSemaphoreTake( frameSync, portMAX_DELAY );
-
-        client->write(CTNTTYPE, cntLen);
-        sprintf(buf, "%d\r\n\r\n", camSize);
-        client->write(buf, strlen(buf));
-        client->write((char*) camBuf, (size_t)camSize);
-        client->write(BOUNDARY, bdrLen);
-
-        // Since this client is still connected, push it to the end
-        // of the queue for further processing
-        xQueueSend(streamingClients, (void *) &client, 0);
-
-        //  The frame has been served. Release the semaphore and let other tasks run.
-        //  If there is a frame switch ready, it will happen now in between frames
-        xSemaphoreGive( frameSync );
-        taskYIELD();
-      }
-    }
-    else {
-      //  Since there are no connected clients, there is no reason to waste battery running
-      vTaskSuspend(NULL);
-    }
-    //  Let other tasks run after serving every client
-    taskYIELD();
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-  }
-}
-
-
-
-const char JHEADER[] = "HTTP/1.1 200 OK\r\n" \
-                       "Content-disposition: inline; filename=capture.jpg\r\n" \
-                       "Content-type: image/jpeg\r\n\r\n";
-const int jhdLen = strlen(JHEADER);
-
-// ==== Serve up one JPEG frame =============================================
-void handleJPG(void)
-{
-  WiFiClient client = server.client();
-  camera_fb_t* fb = esp_camera_fb_get();
-
-  if (!client.connected()) return;
-  client.write(JHEADER, jhdLen);
-  client.write((char*)fb->buf, fb->len);
-  esp_camera_fb_return(fb);
-}
-
-
-// ==== Handle invalid URL requests ============================================
-void handleNotFound()
-{
-  String message = "Server is running!\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  server.send(200, "text / plain", message);
-}
-
-
-// ======== Server Connection Handler Task ==========================
-void mjpegCB(void* pvParameters) 
-{
-  TickType_t xLastWakeTime;
-  const TickType_t xFrequency = pdMS_TO_TICKS(WSINTERVAL);
-
-  // Creating frame synchronization semaphore and initializing it
-  frameSync = xSemaphoreCreateBinary();
-  xSemaphoreGive( frameSync );
-
-  // Creating a queue to track all connected clients
-  streamingClients = xQueueCreate( 10, sizeof(WiFiClient*) );
-
-  //=== setup section  ==================
-
-  //  Creating RTOS task for grabbing frames from the camera
-  xTaskCreatePinnedToCore(
-    camCB,        // callback
-    "cam",        // name
-    4096,         // stacj size
-    NULL,         // parameters
-    2,            // priority
-    &tCam,        // RTOS task handle
-    APP_CPU);     // core
-
-  //  Creating task to push the stream to all connected clients
-  xTaskCreatePinnedToCore(
-    streamCB,
-    "strmCB",
-    4096,
-    NULL, //(void*) handler,
-    2,
-    &tStream,
-    //    APP_CPU);
-    PRO_CPU);
-
-  //  Registering webserver handling routines
-  server.on("/mjpeg/1", HTTP_GET, handleJPGSstream);
-  server.on("/jpg", HTTP_GET, handleJPG);
-  server.onNotFound(handleNotFound);
-
-  //  Starting webserver
-  server.begin();
-
-  //=== loop() section  ===================
-  xLastWakeTime = xTaskGetTickCount();
-  for (;;) {
-    server.handleClient();
-
-    //  After every server client handling request, we let other tasks run and then pause
-    taskYIELD();
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-  }
-}
-
-// ==== SETUP method ==================================================================
-void setup()
-{
-
-  // Setup Serial connection:
-  Serial.begin(115200);
-  
-  static camera_config_t camera_config = {
-    .pin_pwdn       = PWDN_GPIO_NUM,
-    .pin_reset      = RESET_GPIO_NUM,
-    .pin_xclk       = XCLK_GPIO_NUM,
-    .pin_sscb_sda   = SIOD_GPIO_NUM,
-    .pin_sscb_scl   = SIOC_GPIO_NUM,
-    .pin_d7         = Y9_GPIO_NUM,
-    .pin_d6         = Y8_GPIO_NUM,
-    .pin_d5         = Y7_GPIO_NUM,
-    .pin_d4         = Y6_GPIO_NUM,
-    .pin_d3         = Y5_GPIO_NUM,
-    .pin_d2         = Y4_GPIO_NUM,
-    .pin_d1         = Y3_GPIO_NUM,
-    .pin_d0         = Y2_GPIO_NUM,
-    .pin_vsync      = VSYNC_GPIO_NUM,
-    .pin_href       = HREF_GPIO_NUM,
-    .pin_pclk       = PCLK_GPIO_NUM,
-    .xclk_freq_hz   = 20000000,
-    .ledc_timer     = LEDC_TIMER_0,
-    .ledc_channel   = LEDC_CHANNEL_0,
-    .pixel_format   = PIXFORMAT_JPEG,
-    .frame_size     = FRAMESIZE_SVGA,
-    .jpeg_quality   = 12,
-    .fb_count       = 2
-  };
-
-  if (esp_camera_init(&camera_config) != ESP_OK) {
-    Serial.println("Error initializing the camera");
-    delay(10000);
-    ESP.restart();
-  }else{
-    Serial.println("SUCCESS initializing the camera");    
-  }
-
-//  sensor_t* s = esp_camera_sensor_get();
-//  s->set_vflip(s, true);
-
-  //  Configure and connect to WiFi
-  IPAddress ip;
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID1, PWD1);
-  Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(F("."));
-  }
-  ip = WiFi.localIP();
-  Serial.println(F("WiFi connected"));
-  Serial.println("");
-  Serial.print("Stream Link: http://");
-  Serial.print(ip);
-  Serial.println("/mjpeg/1");
-
-//    ESP_LOGE(TAG, "/mjpeg/1=%d", 1);   
-
-  // Start mainstreaming RTOS task
-  xTaskCreatePinnedToCore(
-    mjpegCB,
-    "mjpeg",
-    4096,
-    NULL,
-    2,
-    &tMjpeg,
-    APP_CPU);
-}
-
-void loop() {
-  vTaskDelay(100);
-}
-
-#endif // ENABLE_DEBUG_USE_ALTERNATE_SETUP_AND_LOOP
-
-
-
-// mCameraOV2640 cam;
-
-// void setup()
-// {
-//   Serial.begin(115200);
-// //   DEBUG_LINE_HERE;
-
-//   // cam.setup_cam();
-
-//   // cam.StartLocalServer();
-
-// cam.init();
-
-// }
-
-
-// void loop()
-// {
-
-//  vTaskDelay(pdMS_TO_TICKS(100)); 
-
-// }
-
-

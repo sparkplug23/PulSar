@@ -9,6 +9,9 @@
 #define PROGMEM // is nothing, as "const" is enough in esp32 to push to progmem space
 #endif
 
+#define D_MAX_UINT8  255
+#define D_MAX_UINT16 65535
+
 #define DEFINE_PGM_CTR(X) \
   const char X[] PROGMEM =
 #define DEFINE_SPGM_CTR(X) \
@@ -17,6 +20,7 @@
   const char X[] PROGMEM = Y;
 
 // enable additional debug output
+// Need to add disables here! 
 #define DEBUG_PRINT Serial.print
 #define DEBUG_PRINTLN Serial.println
 #define DEBUG_PRINTF Serial.printf
@@ -43,6 +47,8 @@
 // #else
 // #define DEBUG_TRACE_LOG(...)
 // #endif
+
+#define DIGITAL_INVERT_PIN(pin) digitalWrite(pin,!digitalRead(pin))
 
 
 

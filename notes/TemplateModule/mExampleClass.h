@@ -22,7 +22,7 @@ class mExampleClass :
     static const char* PM_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_EXAMPLE_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_EXAMPLE_FRIENDLY_CTR; }
-    uint8_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_EXAMPLE_ID; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_EXAMPLE_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
