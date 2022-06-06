@@ -10,11 +10,11 @@
 #include <Ticker.h>
 
 #include "2_CoreSystem/mBaseConfig.h"
-#include "2_CoreSystem/Time/mTime.h"
-#include "2_CoreSystem/Logging/mLogging.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/05_Logging/mLogging.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 #include "3_Network/MQTT/mMQTT.h"
-#include "2_CoreSystem/Time/mTime.h"
+#include "2_CoreSystem/02_Time/mTime.h"
 
 #include <Ticker.h>
 

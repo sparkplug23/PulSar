@@ -50,7 +50,7 @@ typedef PGM_P str_P;
 #include "GPSfix.h"
 #include "4_Drivers/20_GPS_UBX/internal/configs/NMEAGPS_cfg.h"
 
-// #include "2_CoreSystem/Logging/mLogging.h"
+// #include "2_CoreSystem/05_Logging/mLogging.h"
 
 //------------------------------------------------------
 //

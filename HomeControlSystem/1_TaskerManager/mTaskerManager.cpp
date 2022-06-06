@@ -3,14 +3,15 @@
 mTaskerManager* mTaskerManager::instance = nullptr;
 
 
-int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
+int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
   int8_t result = 0;
 
   if(target_tasker){
+// DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));
+    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
     #endif// ENABLE_LOG_LEVEL_INFO
   }
 
@@ -39,16 +40,28 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
       for(uint8_t i=0;i<GetClassCount();i++)
       { 
-        switch_index = target_tasker ? target_tasker : i;
+        // switch_index = target_tasker ? target_tasker : i;
+
+        
+    if(target_tasker){
+      switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
+    }else{
+      switch_index = i; // Normally index is synonomous with enum list
+    }
+
+          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
+
+
         pModule[switch_index]->Tasker(function, obj);
         if(target_tasker)
         {
-          #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-          AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName(target_tasker));  
-          #endif // ENABLE_LOG_LEVEL_COMMANDS          
+          // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+          AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));  
+          // #endif // ENABLE_LOG_LEVEL_COMMANDS          
           break; 
         }
       }
+// DEBUG_LINE_HERE;
       return 0; // needs to return via "Tasker"
     } 
     break;
@@ -66,7 +79,15 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
 
-    switch_index = target_tasker ? target_tasker : i;
+    if(target_tasker){
+      switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
+    }else{
+      switch_index = i; // Normally index is synonomous with enum list
+    }
+
+
+
+    // switch_index = target_tasker ? target_tasker : i;
     // #ifdef ENABLE_ADVANCED_DEBUGGING
     // Serial.printf("switch_index=%d\n\r",switch_index);
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
@@ -87,6 +108,12 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
 
   // DEBUG_LINE_HERE;
 
+  /**
+   * @brief Convert "unique_module_id" to "enum_index"
+   * 
+   */
+
+// DEBUG_LINE_HERE;
 
     switch(function)
     {
@@ -100,7 +127,10 @@ int8_t mTaskerManager::Tasker_Interface(uint8_t function, uint8_t target_tasker)
       //   }
       break;
       default:
+
+      // DEBUG_LINE_HERE;
       
+          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
         // switch(switch_index)
         // {
         //   case EM_MODULE_CORE_HARDWAREPINS_ID:
@@ -485,6 +515,9 @@ uint16_t mTaskerManager::GetClassSizeByID(uint8_t class_id)
 
 int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
 {
+
+  ALOG_WRN( PSTR("GetModuleIndexbyFriendlyName, should this be GetModule_UniqueID_byFriendlyName") );
+
   if(c=='\0'){ return -1; }
   for(int ii=0;ii<GetClassCount();ii++){
     if(strcasecmp_P(c, pModule[ii]->GetModuleFriendlyName())==0){
@@ -493,6 +526,18 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
     }    
   }
   return -1;
+}
+
+uint16_t mTaskerManager::GetModule_UniqueID_byFriendlyName(const char* c)
+{
+  if(c=='\0'){ return -1; }
+  for(int ii=0;ii<GetClassCount();ii++){
+    if(strcasecmp_P(c, pModule[ii]->GetModuleFriendlyName())==0){
+      //AddLog(LOG_LEVEL_TEST, PSTR("MATCHED GetModuleIDbyFriendlyName \"%s\" => \"%s\" %d"),c,pModule[ii]->GetModuleFriendlyName(),ii);
+      return pModule[ii]->GetModuleUniqueID();
+    }    
+  }
+  return 0;
 }
 
 
@@ -524,7 +569,7 @@ uint16_t mTaskerManager::GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id)
 
     if( unique_id == pModule[ii]->GetModuleUniqueID() )
     {
-      return pModule[ii]->GetModuleUniqueID();
+      return ii;
     }
 
   }
@@ -598,7 +643,7 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t id)
   return PM_SEARCH_NOMATCH;
 }
 
-PGM_P mTaskerManager::GetModuleFriendlyName_WithUniqueID(uint8_t unique_id)
+PGM_P mTaskerManager::GetModuleFriendlyName_WithUniqueID(uint16_t unique_id)
 {
 
   uint8_t enum_id = GetEnumVectorIndexbyModuleUniqueID(unique_id);

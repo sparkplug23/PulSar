@@ -1573,7 +1573,7 @@ const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8
     // dList
 
 
-    #ifdef ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
+    // #ifdef ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
 
     // char buffer[100]; // temp fix, will just use pointer, need another function below to do the same without buffer input
 
@@ -1599,16 +1599,16 @@ const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8
     return name_p;
 
 
-    #else
+    // #else
 
     
-    const char* name_p = pCONT_sup->GetTextIndexed(buffer, buflen, id, pCONT_set->Settings.device_name_buffer.name_buffer);
-    AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(" %d = \"%s\""),id,name_p);
+    // const char* name_p = pCONT_sup->GetTextIndexed(buffer, buflen, id, pCONT_set->Settings.device_name_buffer.name_buffer);
+    // AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(" %d = \"%s\""),id,name_p);
 
-    // This assumes indexing begins from start (ie lights MUST be the first class_id), needs fixing
-    return name_p;
+    // // This assumes indexing begins from start (ie lights MUST be the first class_id), needs fixing
+    // return name_p;
 
-    #endif 
+    // #endif 
 
     // return pCONT_sup->GetTextIndexed_P(buffer, buflen, id, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr);
   }

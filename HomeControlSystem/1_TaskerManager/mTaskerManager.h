@@ -41,19 +41,19 @@
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
-#include "2_CoreSystem/Events/mEvents.h"
+#include "2_CoreSystem/09_Events/mEvents.h"
 
 #include "2c_Internal_IsolatedNoTaskerSystems/Decounter/decounter.h"
 
 #ifdef USE_MODULE_CORE_RULES
-#include "2_CoreSystem/RuleEngine/mRuleEngine.h"
+#include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
 #endif
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
-#include "2_CoreSystem/Languages/mLanguageDefault.h"                           // Language support configured by .h
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "1_TaskerManager/mTaskerManager_Defines.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
-#include "2_CoreSystem/Support/BufferWriter.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
+#include "2_CoreSystem/06_Support/BufferWriter.h"
 
 #include "1_TaskerManager/mTasks.h"
 #include <WiFiClient.h>
@@ -62,11 +62,11 @@
 #endif
 
 #ifdef ESP8266
-  #include "2_CoreSystem/Support/SupportESP8266.h"
+  #include "2_CoreSystem/06_Support/SupportESP8266.h"
   #define mSupportHardware SupportESP8266
 #endif
 #ifdef ESP32
-  #include "2_CoreSystem/Support/SupportESP32.h"
+  #include "2_CoreSystem/06_Support/SupportESP32.h"
   #define mSupportHardware SupportESP32
 #endif
 
@@ -135,8 +135,8 @@ enum FUNCTION_RESULT_IDS{
   #endif //USE_MODULE_NETWORK_WEBSERVER
 #endif
 
-#include "2_CoreSystem/JSON/mJSON.h"
-#include "2_CoreSystem/Support/mSupport.h"
+#include "2_CoreSystem/08_JSON/mJSON.h"
+#include "2_CoreSystem/06_Support/mSupport.h"
 
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
@@ -420,31 +420,31 @@ enum MODULE_IDS{
 
 // CoreSystem (Range 0-29)
 #ifdef USE_MODULE_CORE_HARDWAREPINS
-  #include "2_CoreSystem/HardwarePins/mHardwarePins.h"
+  #include "2_CoreSystem/04_HardwarePins/mHardwarePins.h"
   #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
 #endif 
 #ifdef USE_MODULE_CORE_SETTINGS
-  #include "2_CoreSystem/Settings/mSettings.h"
+  #include "2_CoreSystem/01_Settings/mSettings.h"
   #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
 #endif 
 #ifdef USE_MODULE_CORE_SUPPORT
-  #include "2_CoreSystem/Support/mSupport.h"
+  #include "2_CoreSystem/06_Support/mSupport.h"
   #define   pCONT_sup                               static_cast<mSupport*>(pCONT->pModule[EM_MODULE_CORE_SUPPORT_ID])
 #endif 
 #ifdef USE_MODULE_CORE_LOGGING
-  #include "2_CoreSystem/Logging/mLogging.h"
+  #include "2_CoreSystem/05_Logging/mLogging.h"
   #define   pCONT_log                               static_cast<mLogging*>(pCONT->pModule[EM_MODULE_CORE_LOGGING_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
-  #include "2_CoreSystem/Telemetry/mTelemetry.h"
+  #include "2_CoreSystem/07_Telemetry/mTelemetry.h"
   #define   pCONT_tel                               static_cast<mTelemetry*>(pCONT->pModule[EM_MODULE_CORE_TELEMETRY_ID])
 #endif 
 #ifdef USE_MODULE_CORE_TIME
-  #include "2_CoreSystem/Time/mTime.h"
+  #include "2_CoreSystem/02_Time/mTime.h"
   #define   pCONT_time                              static_cast<mTime*>(pCONT->pModule[EM_MODULE_CORE_TIME_ID])
 #endif 
 #ifdef USE_MODULE_CORE_RULES
-  #include "2_CoreSystem/RuleEngine/mRuleEngine.h"
+  #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
   #define   pCONT_rules                             static_cast<mRuleEngine*>(pCONT->pModule[EM_MODULE_CORE_RULES_ID])
 #endif
 #ifdef USE_MODULE_CORE_UPDATES
@@ -452,30 +452,30 @@ enum MODULE_IDS{
   #define   pCONT_updates                           static_cast<mUpdates*>(pCONT->pModule[EM_MODULE_CORE_UPDATES_ID])
 #endif
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
-  #include "2_CoreSystem/DevelopmentDebugging/mDevelopmentDebugging.h"
+  #include "2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h"
   #define   pCONT_mDevelopmentDebugging             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
 #endif 
 
 // Subsystems (x-x)
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  #include "2b_Internal_TaskerSystems/SolarLunar/mSolarLunar.h"
+  #include "2b_Internal_TaskerSystems/01_SolarLunar/mSolarLunar.h"
   #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
 #endif
 
 
 // Network (20-29)
-#ifdef USE_MODULE_NETWORK_WIFI
-  #include "3_Network/WiFi/mWiFi.h"
-  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
-#endif 
 #ifdef USE_MODULE_NETWORK_MQTT
-  #include "3_Network/MQTT/mMQTT.h"
+  #include "3_Network/01_MQTT/mMQTT.h"
   #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include "3_Network/WebServer/mWebServer.h"
+  #include "3_Network/02_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
+#ifdef USE_MODULE_NETWORK_WIFI
+  #include "3_Network/03_WiFi/mWiFi.h"
+  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
+#endif 
 
 
 // Displays (30-39)
@@ -510,6 +510,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/04_Relays/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_BUZZER
+  #include "4_Drivers/05_Buzzer/mBuzzer.h"
+  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
   #include "4_Drivers/09_RCSwitch/mRCSwitch.h"
@@ -566,10 +570,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   #include "4_Drivers/FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_BUZZER
-  #include "4_Drivers/Buzzer/mBuzzer.h"
-  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
 #include "4_Drivers/IRRemote/mIRRemote.h"
@@ -662,6 +662,18 @@ enum MODULE_IDS{
   #define pCONT_ldr_basic                      static_cast<mLDRBasic*>(pCONT->pModule[EM_MODULE_SENSORS_LDR_BASIC_ID])
 #endif
 
+#ifdef USE_MODULE_SENSORS_SR04
+  #include "5_Sensors/17_SR04/mSR04.h"
+  #define pCONT_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
+#endif
+
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
+  #include "5_Sensors/30_ADCInternal/mADCInternal.h"
+  #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
+#endif
+
+
+
 #ifdef USE_MODULE_SENSORS_ANALOG
   #include "5_Sensors/Analog_PhasedIntoADCInternal/mSensorsAnalog.h"
   #define pCONT_msanalog                        static_cast<mSensorsAnalog*>(pCONT->pModule[EM_MODULE_SENSORS_ANALOG_ID])
@@ -679,17 +691,9 @@ enum MODULE_IDS{
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
   #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_SR04
-  #include "5_Sensors/SR04/mSR04.h"
-  #define pCONT_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
-#endif
 #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
   #include "5_Sensors/RemoteDevice/mRemoteDevice.h"
   #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
-  #include "5_Sensors/ADCInternal/mADCInternal.h"
-  #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   #include "5_Sensors/ADCInternal_ESP32/mADCInternal.h"
@@ -720,7 +724,15 @@ enum MODULE_IDS{
   #define pCONT_heating2                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER_HVAC_ID])
 #endif
 
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
+  #include "9_Controller/03_Sonoff_iFan/mSonoffIFan.h"
+  #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
+#endif
 
+#ifdef USE_MODULE_CONTROLLER_TANKVOLUME
+  #include "9_Controller/08_TankVolume/mTankVolume.h"
+  #define pCONT_tankvolume                      static_cast<mTankVolume*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
+#endif
 #ifdef USE_MODULE_CONTROLLER_BLINDS
   #include "9_Controller/Blinds/mBlinds.h"
   #define pCONT_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
@@ -729,17 +741,9 @@ enum MODULE_IDS{
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
   #define pCONT_ir                              static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-#ifdef USE_MODULE_CONTROLLER_TANKVOLUME
-  #include "9_Controller/TankVolume/mTankVolume.h"
-  #define pCONT_tankvolume                      static_cast<mTankVolume*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
-#endif
 #ifdef USE_MODULE_CONTROLLER_EXERCISE_BIKE
   #include "9_Controller/ExerciseBike/mExerciseBike.h"
   #define pCONT_bike                            static_cast<mExerciseBike*>(pCONT->pModule[EM_MODULE_CONTROLLER_EXERCISEBIKE_ID])
-#endif
-#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
-  #include "9_Controller/Sonoff_iFan/mSonoffIFan.h"
-  #define pCONT_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FAN
   #include "9_Controller/Fan/mFan.h"
@@ -778,10 +782,6 @@ enum MODULE_IDS{
   #include "9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
   #define pCONT_bucket_water_level                static_cast<mBucketWaterLevel*>(pCONT->pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID])
 #endif
-#ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
-  #include "9_Controller/FurnaceSensor/mFurnaceSensor.h"
-  #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
-#endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define pCONT_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
@@ -800,6 +800,11 @@ enum MODULE_IDS{
   #include "10_Controller_Specialised/02_HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
   #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
+  #include "10_Controller_Specialised/03_FurnaceSensor/mFurnaceSensor.h"
+  #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
+#endif
+
 
 
 
@@ -836,8 +841,9 @@ class mTaskerManager{
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
     uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
 
+    uint16_t GetModule_UniqueID_byFriendlyName(const char* c);
     
-PGM_P GetModuleFriendlyName_WithUniqueID(uint8_t unique_id);
+    PGM_P GetModuleFriendlyName_WithUniqueID(uint16_t unique_id);
 
     #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
       char buffer_taskname[50];
@@ -846,7 +852,7 @@ PGM_P GetModuleFriendlyName_WithUniqueID(uint8_t unique_id);
     uint8_t Instance_Init();
     uint8_t CheckPointersPass();
     
-    int8_t Tasker_Interface(uint8_t function, uint8_t target_tasker = 0);    
+    int8_t Tasker_Interface(uint16_t function, uint16_t target_tasker = 0);    
     
     uint16_t GetClassSizeByID(uint8_t class_id);
 
@@ -880,7 +886,7 @@ PGM_P GetModuleFriendlyName_WithUniqueID(uint8_t unique_id);
 
     uint8_t fExitTaskerWithCompletion = false;
 
-    uint8_t switch_index = 0;
+    uint16_t switch_index = 0;
     
     int16_t GetModuleIDbyFriendlyName(const char* c);
 

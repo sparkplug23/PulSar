@@ -17,8 +17,8 @@
 #define USE_MODULE_CORE_RULES
 
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 /**************************************************************************************************************************************************
@@ -147,7 +147,7 @@
 
   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
-  #define USE_MODULE_DRIVERS_LEDS
+  // #define USE_MODULE_DRIVERS_LEDS
 
   // #define USE_MODULE_DRIVERS_IRREMOTE
   // #define USE_IR_RECEIVE
@@ -162,7 +162,6 @@
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
-    #define USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME
   #define USE_MODULE_SENSORS_LDR_BASIC
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
@@ -250,8 +249,7 @@
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
   #define D_DEVICE_SENSOR_CLIMATE_BME "BedroomDesk-BME"
   #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDesk-DHT1"
-  #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2"
-  
+  #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2" 
   
 
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
@@ -289,6 +287,9 @@
       "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"  
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -300,8 +301,9 @@
         D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
         D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
       "]"  
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "}"    
+    // "},"    
+    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
   
@@ -360,9 +362,9 @@
     "\"Effects\": {"
       "\"Function\": \"Solid RGBCCT\""
     "},"
-    "\"Hue\": 0,"
+    "\"Hue\": 20,"
     "\"Sat\": 100,"
-    "\"BrightnessRGB\": 0,"
+    "\"BrightnessRGB\": 1,"
     "\"BrightnessCCT\": 0,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"

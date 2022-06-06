@@ -14,8 +14,8 @@
 #define USE_MODULE_CORE_RULES
 
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 /**************************************************************************************************************************************************

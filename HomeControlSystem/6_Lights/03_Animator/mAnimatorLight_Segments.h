@@ -361,7 +361,7 @@
     //  * */
 
     // this will likely just use candle effect, maybe forced colour palette?/
-    //  EFFECTS_FUNCTION__FIREPLACE_1D_01__ID, // solid colours, 1 100%, moving from previous to next
+     EFFECTS_FUNCTION__FIREPLACE_1D_01__ID, // Custom to using matrix for fireplace light effect
 
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -1236,6 +1236,7 @@
   void SubTask_Segment_Animation__Sequential_Palette();
   void SubTask_Segment_Animation__Rotating_Palette();
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
+  void SubTask_Segment_Animate__Fireplace_1D_01();
   #ifdef ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   

@@ -7,7 +7,7 @@
 
 // #ifdef USE_MODULE_SENSORS_MOTION
 
-// #include "2_CoreSystem/Time/mTime.h"
+// #include "2_CoreSystem/02_Time/mTime.h"
 
 // typedef struct pir_detect_s{
 //   uint8_t  state     = false;

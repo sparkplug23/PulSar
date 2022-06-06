@@ -19,7 +19,8 @@ void mSonoffIFan::parse_JSONCommand(JsonParserObject obj){
     }else{
       SetLightState(light);      
     }
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
+
+    ALOG_COM( PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_SVALUE),D_JSON_LIGHTPOWER,GetLightState()?"On":"Off");
     // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_LIGHTPWER,D_TOGGLE);
   }
 
@@ -27,13 +28,13 @@ void mSonoffIFan::parse_JSONCommand(JsonParserObject obj){
   if(jtok = obj[D_JSON_FANSPEED]){
     int speed = jtok.getInt();
     if(speed>3){
-      Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
+      // Response_mP(S_JSON_COMMAND_SVALUE, D_JSON_FANSPEED,D_PARSING_NOMATCH);
       speed=0; //default off
     }      
     SetFanSpeed(speed, false);
     AddLog(LOG_LEVEL_INFO,PSTR("GetFanspeed=%d"),GetFanspeed());
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_FANSPEED,speed);
-    Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
+    // Response_mP(S_JSON_COMMAND_NVALUE,D_JSON_FANSPEED,speed);
   }
   
   mqtthandler_power_ifchanged.flags.SendNow = true;

@@ -1,9 +1,7 @@
 #ifndef _MCUSE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_H
-#define _MCUSE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_H 0.3
+#define _MCUSE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID   230  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
-#define D_GROUP_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID    5    // Numerical accesending order of module within a group
-
+#define D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID     ((10*1000)+01)
 /**
  * Using sensor readings, to generate colour palettes
  * This will be part of the new "sensor_struct" to hold all types

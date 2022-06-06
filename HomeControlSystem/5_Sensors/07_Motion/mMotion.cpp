@@ -171,6 +171,7 @@ switch(command_state_in)
     break;
   case STATE_NUMBER_FOLLOW_ID: 
     command_state_out = newevent_command_state_in;
+    ALOG_INF( PSTR("STATE_NUMBER_FOLLOW_ID command_state_out = %d"), command_state_out );
     break;
   case STATE_NUMBER_FOLLOW_INV_ID: 
     command_state_out = newevent_command_state_in?0:1;
@@ -226,6 +227,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, 
       else
       {
         pir_detect[sensor_id].tEndedTime = millis();
+        pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNowU32();
         pir_detect[sensor_id].isactive = false;
 
         // #ifdef USE_MODULE_CORE_RULES
@@ -240,8 +242,6 @@ AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, 
  **/
       pir_detect[sensor_id].device_name.unique_module_id = pCONT_rules->event_triggered.module_id;
       pir_detect[sensor_id].device_name.device_id = pCONT_rules->event_triggered.device_id;
-
-
       pir_detect[sensor_id].ischanged = true;
       mqtthandler_sensor_ifchanged.flags.SendNow = true;
   //   }
@@ -271,7 +271,7 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
 
     for(
       uint8_t sensor_id = 0;//pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
-      // uint8_t pir_detect_isactive  = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
+      //
       sensor_id<settings.sensors_active;sensor_id++)
     {
 
@@ -279,11 +279,11 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
       
       pir_detect[sensor_id].ischanged = false;
       
-      #if defined(USE_DEVFEATURE_MOTION_EVENT_WITH_RULE_IDS_FOR_DOORSENSOR) || defined(USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME)
+      // #if defined(USE_DEVFEATURE_MOTION_EVENT_WITH_RULE_IDS_FOR_DOORSENSOR) || defined(USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME)
 
       uint16_t device_name_module_id = pir_detect[sensor_id].device_name.unique_module_id;
       uint8_t device_name_device_id = pir_detect[sensor_id].device_name.device_id; // this needs to be constrained/checked for when rules are used for SWITCH==>MOTION linkage
-
+      // uint8_t pir_detect_isactive  = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
       /**
        * @brief Need to convert from unique_module_id to e m_module_id
        * 
@@ -295,14 +295,15 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
       JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( device_name_module_id, device_name_device_id, buffer, sizeof(buffer))); 
 
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      JsonBuilderI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
-      #else
-      //Phase out
-      JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-      JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
-      #endif
+      // #else
+      // //Phase out
+      // JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
+      // JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
+      // JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
+      // #endif
 
 
   //     JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));

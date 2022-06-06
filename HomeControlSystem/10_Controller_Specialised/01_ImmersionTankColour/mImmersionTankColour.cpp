@@ -251,7 +251,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
       case 5: sprintf(name, "TankPosition00\0"); break;
     }
 
-    int16_t device_id_found = DLI->GetDeviceIDbyName(name, device_id, unique_module_id);
+    int16_t device_id_found = DLI->GetDeviceIDbyName(name, unique_module_id);
 
     // AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
     //AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %s %d %d"), name, device_id_found, (int)pCONT_msdb18->sensor[device_id_found].reading.val);

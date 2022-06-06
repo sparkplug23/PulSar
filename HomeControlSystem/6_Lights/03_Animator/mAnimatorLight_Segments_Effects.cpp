@@ -493,6 +493,79 @@ void mAnimatorLight::SubTask_Segment_Animation__Sequential_Palette()
 
 }
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Fireplace light effect using matrix of rgb
+ * @note : Custom to whitehall, but should be used elsewhere
+ *  
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::SubTask_Segment_Animate__Fireplace_1D_01()
+{
+
+  uint16_t dataSize = GetSizeOfPixel(_segments[segment_active_index].colour_type) * 2 * _segments[segment_active_index].length(); //allocate space for 10 test pixels
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Segment_Animate__Fireplace_1D_01 dataSize = %d"), dataSize);
+  // AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].colour_type  = %d"), _segments[segment_active_index].colour_type);
+
+  if (!_segment_runtimes[segment_active_index].allocateData(dataSize))
+  {
+    #ifdef ENABLE_LOG_LEVEL_ERROR
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    #endif // ENABLE_LOG_LEVEL_INFO
+    _segments[segment_active_index].mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
+  
+  // this should probably force order as random, then introduce static "inorder" option
+  _segments[segment_active_index].transition.order_id = TRANSITION_ORDER__RANDOM__ID;  
+  // So colour region does not need to change each loop to prevent colour crushing
+  _segments[segment_active_index].flags.brightness_applied_during_colour_generation = true;
+  
+  // Pick new colours
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(_segments[segment_active_index].palette.id, segment_active_index);
+  // Check if output multiplying has been set, if so, change desiredcolour array
+  // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  setAnimFunctionCallback_Segments_Indexed(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+
+// #ifdef ENABLE_DEVFEATURE_FIREPLACE_SEGMENT_EXTRA_GENERATE
+//   HsbColor colour_in = HsbColor(RgbColor(0));
+  
+//  #ifndef USE_WS28XX_FEATURE_4_PIXEL_TYPE
+//   //Overwrite random brightness on special range
+//   for(uint16_t index=256;index<300;index++){
+
+//     colour_in = animation_colours[index].DesiredColour;
+
+//     if(colour_in.B==0){ //if colour was off, I need to set the colour to a defined value or it willl turn up brightness to show white
+//       colour_in.H = 0.0f;
+//       colour_in.S = 1.0f;
+//     }
+//     colour_in.B = pCONT_iLight->BrtN2F(random(0,10)*10);
+
+//     // colour_in.H = pCONT_iLight->BrtN2F(random(0,100));
+  
+//   // This will be the introduction of segments into my code!!
+//     animation_colours[random(256,299)].DesiredColour = colour_in;
+
+//     // animation_colours[random(40,49)].DesiredColour = colour_in;
+
+
+}
+
+
+
+
 
 #ifdef ENABLE_EXTRA_EFFECTS_SUNPOSITIONS 
 

@@ -23,7 +23,7 @@ Manufacturer Warranty	2 Years
 
 // #define USE_MQTT_OILFURNACE
 
-#define D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID 55
+#define D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID   ((9*1000)+8)
 
 //https://www.weather.gov/media/epz/wxcalc/speedOfSound.pdf
 /*
@@ -46,9 +46,6 @@ Tcelius = Tkelvin - 273.
 
 #include <math.h>
 
-// #include "EEPROM.h"
-
-// #include "3_Network/MQTT/mMQTT.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR) "litres";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR) "furnace";

@@ -35,8 +35,8 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       SubTask_Relay_Time_To_Remain_On_Seconds();
       SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
       
-  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVERY_SECOND"));
-  MQTTHandler_Set_RefreshAll();
+  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED FUNC_EVERY_SECOND"));
+  // MQTTHandler_Set_RefreshAll();
 
     break;
     case FUNC_EVERY_MINUTE:
@@ -71,7 +71,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      // MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();

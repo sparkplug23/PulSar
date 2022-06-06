@@ -196,11 +196,14 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
 
 void mShellyDimmer::RulesEvent_Set_Power(){
   
-  AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
+  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power"));
 
   uint8_t relay_index = pCONT_rules->rules[pCONT_rules->rules_active_index].command.device_id;
   uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
   uint8_t brightness_on_value = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[1];
+
+  // AddLog(LOG_LEVEL_TEST, PSTR("MATCHED RulesEvent_Set_Power %d %d %d"),relay_index, relay_state, brightness_on_value);
+
 
   if(relay_state==2){
     if(req_brightness){
@@ -209,8 +212,11 @@ void mShellyDimmer::RulesEvent_Set_Power(){
       req_brightness = map(brightness_on_value,0,100,0,1000);
     }
   }
+  // AddLog(LOG_LEVEL_TEST, PSTR("BBBBBBBBBBBBBMATCHED RulesEvent_Set_Power %d %d %d %d"),relay_index, relay_state, brightness_on_value, req_brightness);
 
-  SetBrightness();
+
+
+  SetBrightness(req_brightness);
 
 }
 #endif // USE_MODULE_CORE_RULES
@@ -327,7 +333,7 @@ void mShellyDimmer::SetBrightnessReq()
   SendCmd(SHD_SWITCH_CMD, payload, SHD_SWITCH_SIZE);
 }
 
-void mShellyDimmer::SetBrightness(uint8_t brightness)
+void mShellyDimmer::SetBrightness(uint16_t brightness)
 {
   // Payload format:
   // [0-1] Brightness (%) * 10

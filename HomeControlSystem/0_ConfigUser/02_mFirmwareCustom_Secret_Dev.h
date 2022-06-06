@@ -25,9 +25,9 @@
 // //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 //--------------------------------[Enable Device]-------------------------------------
 
@@ -5766,9 +5766,9 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // // //#define FORCE_TEMPLATE_LOADING
 
 // #include "2_CoreSystem/mGlobalMacros.h"
-// #include "2_CoreSystem/Languages/mLanguageDefault.h"
+// #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 // #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-// #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+// #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 // /**
@@ -6550,9 +6550,9 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // // // //#define FORCE_TEMPLATE_LOADING
 
 // // #include "2_CoreSystem/mGlobalMacros.h"
-// // #include "2_CoreSystem/Languages/mLanguageDefault.h"
+// // #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 // // #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-// // #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+// // #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 // // /**
@@ -7379,9 +7379,9 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 // // //#define FORCE_TEMPLATE_LOADING
 
 // // #include "2_CoreSystem/mGlobalMacros.h"
-// // #include "2_CoreSystem/Languages/mLanguageDefault.h"
+// // #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 // // #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-// // #include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+// // #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 // // // //--------------------------------[Enable Device]-------------------------------------
 

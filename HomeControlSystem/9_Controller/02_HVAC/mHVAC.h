@@ -52,9 +52,9 @@ class ProgramTemperature; //tmp fix
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "2_CoreSystem/Time/mTime.h"
+#include "2_CoreSystem/02_Time/mTime.h"
 
-#include "2_CoreSystem/Logging/mLogging.h"
+#include "2_CoreSystem/05_Logging/mLogging.h"
 
 
 

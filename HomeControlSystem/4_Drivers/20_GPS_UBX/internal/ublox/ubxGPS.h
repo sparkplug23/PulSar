@@ -24,7 +24,7 @@
 
 // #include "4_Drivers/20_GPS_UBX/internal/NMEA_Parser.h"
 
-// #include "2_CoreSystem/Logging/mLogging.h"
+// #include "2_CoreSystem/05_Logging/mLogging.h"
 
 
 #ifdef USE_MODULE_DRIVERS_GPS

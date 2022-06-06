@@ -46,9 +46,6 @@
 
 // #include <math.h>
 
-// // #include "EEPROM.h"
-
-// // #include "3_Network/MQTT/mMQTT.h"
 
 // DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR) "litres";
 // DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR) "furnace";

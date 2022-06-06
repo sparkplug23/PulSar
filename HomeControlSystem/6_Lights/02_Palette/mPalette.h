@@ -31,7 +31,7 @@ Change option to make all palettes gradient mode or node, or how to use it
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 
-#include "2_CoreSystem/Languages/mLanguageProgmem.h"
+#include "2_CoreSystem/11_Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"
 
 // #ifdef USE_DEVFEATURE_METHOD_WLED_BUILD

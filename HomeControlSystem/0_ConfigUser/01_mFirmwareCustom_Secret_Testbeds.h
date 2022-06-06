@@ -12,9 +12,9 @@
 // //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 /**
  *  TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- 
@@ -1341,7 +1341,6 @@
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     #define D_EFFECT_INSIDE_TEMPLATE "Effects"
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-    #define ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
   /**
    * @brief defines to be tested and incorporated fully
    **/
@@ -1533,8 +1532,6 @@
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
   #define USE_MODULE_SENSORS_BUTTONS
-
-  #define ENABLE_DEVFEATURE_GETPALETTE_ID_FROM_NAME_V2
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_ANIMATOR

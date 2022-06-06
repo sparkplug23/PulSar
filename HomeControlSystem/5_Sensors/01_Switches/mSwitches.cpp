@@ -333,7 +333,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
       {
         switches[i].ischanged = true;
 
-        AddLog(LOG_LEVEL_HIGHLIGHT,PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
+        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
                               i, 
                               state,
                               state==active_state?"ACTIVE":"Not Active"
@@ -399,9 +399,18 @@ void mSwitches::SwitchHandler(uint8_t mode)
             
             AddLog(LOG_LEVEL_INFO, PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
 
+
             // #ifdef ENABLE_RULES_TRIGGER_METHOD_V2
               // pCONT_rules->NewEventRun(E M_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
-             pCONT_rules->NewEventRun(D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
+             pCONT_rules->NewEventRun_NumArg(
+               D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
+               FUNC_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
+               i, // SWitch index
+               1, // Embedded data length
+               new_state); // Event has occured, save and check it            
+
+
+
             // #else // OLD METHOD, to delete
             //   pCONT_rules->NewEvent(E M_MODULE_SENSORS_SWITCHES_ID, i, new_state); // Event has occured, save and check it
             //   pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID); // This should maybe be rolled into "NewEvent" so NewEvent of switch would automtically call this        

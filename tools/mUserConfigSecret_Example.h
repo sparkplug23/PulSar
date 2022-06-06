@@ -11,8 +11,8 @@
 #ifdef ESP32
 #define PROGMEM // is nothing, as "const" is enough in esp32 to push to progmem space
 #endif
-#include "2_CoreSystem/Languages/mLanguageDefault.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 

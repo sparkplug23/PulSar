@@ -10,14 +10,14 @@
 
 
 
-#include "2_CoreSystem/Time/mTime.h"
-#include "2_CoreSystem/Logging/mLogging.h"
+#include "2_CoreSystem/02_Time/mTime.h"
+#include "2_CoreSystem/05_Logging/mLogging.h"
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 
-//#include "//2_CoreSystem/Languages/mLanguage.h"
-#include "2_CoreSystem/HardwareTemplates/mHardwareTemplates.h"
+//#include "//2_CoreSystem/11_Languages/mLanguage.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 #ifdef ESP32
   #include <WiFi.h>
@@ -27,7 +27,7 @@
   #include <ESP8266httpUpdate.h>
 #endif
 
-#include "2_CoreSystem/Time/mTime.h"
+#include "2_CoreSystem/02_Time/mTime.h"
 
 enum ButtonStates { 
   BUTTON_PRESSED_ID, 

@@ -1,7 +1,7 @@
 #ifndef _USE_MODULE_DRIVERS_SHELLY_DIMMER_H
 #define _USE_MODULE_DRIVERS_SHELLY_DIMMER_H
 
-#define D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID ((4*100015)+15)
+#define D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID ((4*1000)+15)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -231,7 +231,7 @@ class mShellyDimmer :
       uint8_t active = false;
     }timer_decounter;     
     void SubTask_Power_Time_To_Remain_On_Seconds();
-    void SetBrightness(uint8_t brightness = 255);
+    void SetBrightness(uint16_t brightness = 0);
     void CommandSet_Timer_Decounter(uint16_t time_secs);
     uint16_t CommandGet_SecondsToRemainOn();
 

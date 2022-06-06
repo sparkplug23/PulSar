@@ -7,11 +7,11 @@
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
 
-#include "2_CoreSystem/Settings/mSettings.h"
+#include "2_CoreSystem/01_Settings/mSettings.h"
 
 #include "3_Network/MQTT/mMQTT.h"
 
-#include "2_CoreSystem/Time/mTime.h"
+#include "2_CoreSystem/02_Time/mTime.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR) "scheduled";
 
