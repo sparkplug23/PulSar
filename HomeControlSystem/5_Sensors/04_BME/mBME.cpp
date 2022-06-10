@@ -564,7 +564,14 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level){
 
   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
     if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
-      JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
+
+
+      // JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(EM_MODULE_SENSORS_BME_ID,sensor_id,buffer,sizeof(buffer)));   
+
+
+      JsonBuilderI->Level_Start_P( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id,buffer,sizeof(buffer)));   
+
+       
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);

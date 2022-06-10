@@ -274,6 +274,9 @@
   #define D_MODULE_SENSORS_REMOTE_DEVICE_CTR "mRemoteDevice"
   #define D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "remotedevice"
 
+  #define D_MODULE_SENSORS_ROTARY_ENCODER_CTR "mRotaryEncoder"
+  #define D_MODULE_SENSORS_ROTARY_ENCODER_FRIENDLY_CTR "rotary_encoder"
+
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_BLINDS
   #define D_MODULE_CONTROLLER_BLINDS_CTR              "mBlinds"
@@ -1071,6 +1074,8 @@
 #define D_GPIO_FUNCTION_SDS0X1_TX_CTR      "SDS0X1 Tx"
 #define D_GPIO_FUNCTION_SR04_ECHO_CTR      "SR04 Ech"
 #define D_GPIO_FUNCTION_SR04_TRIG_CTR      "SR04 Trig"
+#define D_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR      "REnc A"
+#define D_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR      "REnc B"
 #define D_GPIO_FUNCTION_NEXTION_RX_CTR     "Nextion Rx"
 #define D_GPIO_FUNCTION_NEXTION_TX_CTR     "Nextion Tx"
 #define D_GPIO_FUNCTION_KEY1_CTR        "Key1"

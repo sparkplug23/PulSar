@@ -36,7 +36,7 @@
  * 
  */
 // #define DEVICE_RGBDESK
-#define DEVICE_DESKSENSOR
+// #define DEVICE_DESKSENSOR
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 
 
@@ -113,7 +113,7 @@
 
 /**
  * @brief 
- * DEVICE_DESKSENSOR
+ * 
  * - This will be the test device, full of as many sensors as possible, and also use 4 LEDs to emulate relay outputs
  * - This will be used as a rapid/testbed device for improving as many sensors as possible (at minimum, the "...sensor" devices)
  * 
@@ -163,6 +163,7 @@
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_LDR_BASIC
+  // #define USE_MODULE_SENSORS_ROTARY_ENCODER
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
     #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
@@ -202,8 +203,15 @@
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
       "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","
+      "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
       #endif
+
+
+
+      // "\"19\":\"" D_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR "\","
+      // "\"18\":\"" D_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR "\","
+      
+
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
@@ -301,9 +309,8 @@
         D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
         D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
       "]"  
-    "}"    
-    // "},"    
-    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
   

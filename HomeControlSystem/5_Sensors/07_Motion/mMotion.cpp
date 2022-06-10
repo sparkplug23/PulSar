@@ -28,6 +28,17 @@ int8_t mMotion::Tasker(uint8_t function, JsonParserObject obj){
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
+    // case FUNC_EVERY_SECOND:{
+
+    //   // char buffer[100] = {0};
+
+    //   // uint32_t detected_time = pCONT_time->GetTimeShortNowU32();
+
+    //   //   mTime::ConvertU32TimetoCtr(&detected_time, buffer, sizeof(buffer));
+
+    //   //   ALOG_INF( PSTR("buffer=\"%s\""), buffer );
+
+    // }break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -293,23 +304,11 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
       // JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceNameWithEnumNumber(e m_module_id, device_name_device_id, buffer, sizeof(buffer)));
 
       JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( device_name_module_id, device_name_device_id, buffer, sizeof(buffer))); 
-
       JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
       JsonBuilderI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
-      // #else
-      // //Phase out
-      // JsonBuilderI->Add(D_JSON_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
-      // JsonBuilderI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-      // JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
-      // #endif
-
-
-  //     JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_MOTION_ID, sensor_id, buffer, sizeof(buffer)));
-  //       JBI->Add(D_JSON_TIME, mTime::ConvertShortTime_HHMMSS(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer)));
-  //       JBI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
-  //     JBI->Level_End();
+      JsonBuilderI->Add("Index", sensor_id);
 
   //     //if another is yet to send, then reset the mqtt_handler to fire immeditely again!
   //     //if any mtion flag remains, then set mqtt again

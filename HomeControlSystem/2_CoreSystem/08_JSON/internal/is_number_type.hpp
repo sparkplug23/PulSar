@@ -11,6 +11,7 @@ struct is_number_type {
       std::is_same<T, int8_t>::value  || std::is_same<T, uint8_t>::value ||
       std::is_same<T, int16_t>::value || std::is_same<T, uint16_t>::value ||
       std::is_same<T, int32_t>::value || std::is_same<T, uint32_t>::value ||
+      std::is_same<T, int64_t>::value || std::is_same<T, uint64_t>::value ||
       std::is_same<T, bool>::value;      
 };
 

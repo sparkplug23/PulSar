@@ -32,7 +32,6 @@
  * 
  */
 // #define DEVICE_RGBDESK
-// #define DEVICE_DESKSENSOR
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 
 

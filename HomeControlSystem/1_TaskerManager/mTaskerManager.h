@@ -351,6 +351,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_MPU9250
     EM_MODULE_SENSORS_MPU9250_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
+    EM_MODULE_SENSORS_ROTARY_ENCODER_ID,
+  #endif
   // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -695,10 +698,6 @@ enum MODULE_IDS{
   #include "5_Sensors/RemoteDevice/mRemoteDevice.h"
   #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-  #include "5_Sensors/ADCInternal_ESP32/mADCInternal.h"
-  #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
-#endif
 #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
   #include "5_Sensors/I2S_Sampler_ADC/mADC_I2S_Sampler.h"
   #define pCONT_adc_internal       static_cast<mADC_I2S_Sampler*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_I2S_INTERNAL_ID])
@@ -715,6 +714,15 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_SENSORS_MPU9250
   #include "5_Sensors/MPU9250/mSensorsMPU9250.h"
   #define pCONT_MPU9250                      static_cast<mSensorsMPU9250*>(pCONT->pModule[EM_MODULE_SENSORS_MPU9250_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
+  #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
+  #define pCONT_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
+#endif
+
+#ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+  #include "5_Sensors/31_ADCInternal_ESP32/mADCInternal.h"
+  #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"

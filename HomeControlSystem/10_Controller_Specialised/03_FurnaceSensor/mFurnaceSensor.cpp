@@ -144,7 +144,8 @@ void mFurnaceSensor::Init(void)
 
   // }
 
-  pinMode(14, INPUT_PULLUP); //furnace on?
+  // pinMode(pCONT_pins->GetPin(GPIO_), INPUT_PULLUP); //furnace on?
+  pinMode(35, INPUT_PULLUP); //furnace on?
 
 }
 
@@ -281,7 +282,7 @@ uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level)
 
   JBI->Level_Start("ManualData");
     // Lockout
-    JBI->Add("AIO", analogRead(0));
+    JBI->Add("AIO", analogRead(35));
     // JBI->Add("DIO", digitalRead(12));//D6));
     // Powered
     // JBI->Add("furnace_on", digitalRead(14));//D5));

@@ -430,6 +430,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_MPU9250
     pModule[EM_MODULE_SENSORS_MPU9250_ID] = new mSensorsMPU9250();
   #endif
+  #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
+    pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID] = new mRotaryEncoder();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();

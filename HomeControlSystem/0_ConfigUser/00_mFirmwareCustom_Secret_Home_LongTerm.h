@@ -185,12 +185,12 @@ Bathroom
  - rgbbedroomclock
  - candlewarmer
  **/
-// #define DEVICE_BEDROOMSENSOR
+#define DEVICE_BEDROOMSENSOR
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 // #define DEVICE_BLACK_STAND_LIGHT
 // #define DEVICE_RGBCLOCK_BEDROOM_WALL                             // Make this into an alarm? flashing effect and buzzer/speaker with esp32
-// #define DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
+// #define DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
 // #define DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE
 
 
@@ -1181,7 +1181,7 @@ Bathroom
  * This will become the final version of a panel, but requires animation fixing first
  * */
 #ifdef DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
-  #define DEVICENAME_CTR            "heating_kitchen_display"
+  #define DEVICENAME_CTR            "kitchenpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
 
@@ -2629,7 +2629,7 @@ Bathroom
 #ifdef DEVICE_SIDEDOORLIGHT
   #define DEVICENAME_CTR          "sidedoorlight"
   #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Light"
-#define DEVICENAME_ROOMHINT_CTR   "Outdoor|Driveway"
+  #define DEVICENAME_ROOMHINT_CTR   "Outdoor|Driveway"
 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
@@ -2678,7 +2678,7 @@ Bathroom
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\""
@@ -2883,6 +2883,9 @@ Bathroom
       "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"  
     "},"
     "\"" D_JSON_ENERGY "\":{"
@@ -2981,11 +2984,11 @@ Bathroom
   #define USE_MODULE_SENSORS_DS18X
   
   #define USE_MODULE_SENSORS_SR04
-  // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
-  // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
-  #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
-  #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
-  #define ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+    // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+    // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    #define ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
   
   #define USE_MODULE_CONTROLLER_TANKVOLUME
 
@@ -2995,10 +2998,6 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"      
-      #ifdef USE_MODULE_SENSORS_ULTRASONICS
-      "\"18\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"19\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
-      #endif 
       #ifdef USE_MODULE_SENSORS_SR04
       "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
       "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
@@ -3053,41 +3052,43 @@ Bathroom
    */
 
   #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
+  #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_BH1750
   // #define USE_MODULE_SENSORS_MOTION // add this       == motion added with esp32 upgrade
   
-
   #define USE_MODULE_CONTROLLER_FURNACE_SENSOR
-
+ 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{" 
+    "\"" D_JSON_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," //26
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //27?
+      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
+      // #ifdef USE_MODULE_SENSORS_MOTION
+      // "\"5\":\""  D_GPIO_FUNCTION_SWT3_CTR "\","
+      // #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"D5\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT2_CTR  "\","
-      #endif      
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D0\":\"" D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
+      "\"18\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR  "\","
+      #endif  
+      #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+      "\"35\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
-      "\"A0\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
+      #ifdef USE_MODULE_SENSORS_DS18X
+      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #endif
-      "\"D7\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR  "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
-
   
   #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
   #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG  "FurnaceOutflow"
@@ -3132,7 +3133,8 @@ Bathroom
         "[40,199,255,149,240,1,60,249],"
         "[40,246,153,149,240,1,60,174]"
       "]"  
-    "}"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
   
@@ -4421,13 +4423,13 @@ Bathroom
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"RGBW\","
-    "\"ColourPalette\":\"RGBCCTColour 00\","
+    "\"ColourOrder\": \"GRBW\","
+    "\"ColourPalette\":10,"
     "\"Effects\": {"
       "\"Function\":\"Solid RGBCCT\""
     "},"
-    "\"Hue\":120," 
-    "\"Sat\":0," 
+    "\"Hue\":20," 
+    "\"Sat\":90," 
     "\"BrightnessRGB\":100,"
     "\"BrightnessCCT\":100,"
     "\"CCT_TempPercentage\": 100,"
@@ -4639,6 +4641,8 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
 
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
@@ -4656,7 +4660,6 @@ Bathroom
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -4830,8 +4833,8 @@ Bathroom
 
 #endif
 
-#ifdef DEVICE_7SEGMENT_WHITE_DOUBLE_OUTDOOR_TEMPERATURE
-  #define DEVICENAME_CTR          "seven_segment_white_double"
+#ifdef DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
+  #define DEVICENAME_CTR          "rgbdisplay_bedroom_outsidetemp"
   #define DEVICENAME_FRIENDLY_CTR "7-Segment White Display"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
 

@@ -347,11 +347,11 @@ void mSR04::SubTask_UpdateAmbientTemperature()
 
   float temperature = 0;
 
-  uint16_t module_id = 127;//D_UNIQUE_MODULE_SENSORS_DB18_ID;
+  uint16_t module_id_unique = D_UNIQUE_MODULE_SENSORS_DB18_ID;
   uint8_t  device_id = 0;
 
   sensors_reading_t reading;
-  pCONT->GetModuleObjectbyUniqueID(module_id)->GetSensorReading(&reading, device_id);
+  pCONT->GetModuleObjectbyUniqueID(module_id_unique)->GetSensorReading(&reading, device_id);
   temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
 
   Serial.printf("temperature=%f\n\r", temperature);

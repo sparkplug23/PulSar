@@ -23,12 +23,14 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     
     case FUNC_LOOP: {
 
-      // Temp fix for ticker not working
-      #ifdef ESP32
-      if(mTime::TimeReached(&tSavedTicker_ESP32, 1000)){
-        RtcSecond();
-      }
-      #endif //ESP32
+      // // Temp fix for ticker not working
+      // #ifdef ESP32
+      // #ifndef ENABLE_DEVFEATURE_ESP32_TICKER_LIBRARY
+      // if(mTime::TimeReached(&tSavedTicker_ESP32, 1000)){
+      //   RtcSecond();
+      // }
+      // #endif // ENABLE_DEVFEATURE_ESP32_TICKER_LIBRARY
+      // #endif //ESP32
 
       uint8_t show_time_rate = 60; // default
       if(uptime.seconds_nonreset<2*60){ show_time_rate = 1; } // first 2 minutes
@@ -2100,7 +2102,6 @@ void mTime::RtcSetTime(uint32_t epoch)
 
 // #endif
 
-
 void mTime::RtcInit(void)
 {
 
@@ -2108,14 +2109,26 @@ void mTime::RtcInit(void)
   BreakTime(Rtc.utc_time, RtcTime);
   
   #ifdef ESP8266
-  TickerRtc = new Ticker();
+    TickerRtc = new Ticker();
 
-  TickerRtc->attach(1, 
-    [this](void){
-      this->RtcSecond();
-    }
-  );
+    TickerRtc->attach(1, 
+      [this](void){
+        this->RtcSecond();
+      }
+    );
+  #else
+  
+    TickerRtc = new Ticker();
+
+    TickerRtc->attach_ms(1000, 
+      +[](mTime* instance){ instance->RtcSecond(); }, this
+    );
+
   #endif // ESP8266
+
+
+
+
 
 
 }

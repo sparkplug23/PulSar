@@ -628,8 +628,11 @@ uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level){
    
   //  JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
    
-   JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor_id,buffer,sizeof(buffer)));         
+   JsonBuilderI->Level_Start( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));         
    
+
+
+
     JBI->Level_Start("Mag");
       // #ifdef ENABLE_SENSOR_LSM303D_READING_AVERAGING
       // JBI->Level_Start("Average");

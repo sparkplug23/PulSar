@@ -72,6 +72,8 @@ uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
+    JBI->Add("ColourPaletteID", pCONT_lAni->_segments[0].palette.id);
+
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
