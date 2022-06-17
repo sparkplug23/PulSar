@@ -331,8 +331,14 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID] = new mRCSwitch();
   #endif
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID] = new mRCSwitch();
+  #endif
   #ifdef USE_MODULE_DRIVERS_IRREMOTE
     pModule[EM_MODULE_DRIVERS_IRREMOTE_ID] = new mIRRemote();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
+    pModule[EM_MODULE_DRIVERS_FONA_CELLULAR_ID] = new mFona_Cellular();
   #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -495,6 +501,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
     pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID] = new mHeatingStripColour_Understairs();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+    pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID] = new mLouvoliteHub();
   #endif
 };
 

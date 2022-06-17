@@ -49,8 +49,6 @@
 // #define DEVICE_SOCKET_NUMBERED
 // #define DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON
 
-
-
 /**
 Kitchen/Dining
   - kitchensensor = pir, bme
@@ -185,7 +183,7 @@ Bathroom
  - rgbbedroomclock
  - candlewarmer
  **/
-#define DEVICE_BEDROOMSENSOR
+// #define DEVICE_BEDROOMSENSOR
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 // #define DEVICE_BLACK_STAND_LIGHT
@@ -221,9 +219,10 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 1
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 2
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP1
   #define DEVICE_SOCKET_NUMBERED
@@ -980,7 +979,7 @@ Bathroom
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Switch4_Virtual"
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Virtual"
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -1013,7 +1012,7 @@ Bathroom
         "\"State\":0,"
         // Even though I will use sonoff basics for cupboard lights (or else buy shelly 2.5), the command will be set as kitchenlight#
         // "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchen_cupboard/set\\\",\\\"Payload\\\":\\\"{~PowerName~:~Downlight~,~PowerState~:2}\\\"}}\""
-        "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchen_cupboard/set\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
+        "\"JsonCommands\":\"{\\\"MQTTSend\\\":{\\\"Topic\\\":\\\"kitchenlight4/set/fromvirtual\\\",\\\"Payload\\\":\\\"{~PowerName~:0,~PowerState~:2}\\\"}}\""
       "}"
     "}"
   "}";
@@ -1021,46 +1020,8 @@ Bathroom
 #endif
 
 
-#ifdef DEVICE_KITCHENLIGHT4                                        
+#ifdef DEVICE_KITCHENLIGHT4
   #define DEVICENAME_CTR          "kitchenlight4"
-  #define DEVICENAME_FRIENDLY_CTR "Kitchen Cupboard Lights"
-  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-  
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
-    #define MAX_RELAYS 1
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Cupboard"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
-
-
-#ifdef DEVICE_KITCHEN_CUPBOARD_LIGHT
-  #define DEVICENAME_CTR          "kitchenlight_cupboard"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light Cupboard [Under|Downlight]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
     
@@ -1097,10 +1058,10 @@ Bathroom
   "}";
 
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG  "Window"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG  "Dining Room"
-  #define D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "Dining Room"
-  #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Window"
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG  "Cupboard"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG  "Sink"
+  #define D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "Switch1"
+  #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Switch2"
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)

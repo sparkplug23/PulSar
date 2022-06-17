@@ -66,6 +66,20 @@
 // #define DEVICE_TESTBED_RJ45_ESP8266_STANDARD_GPIO_CONFIG_TOGGLE_ALL_PINS
 // #define DEVICE_TESTBED_PIXEL_HEART
 
+// #define DEVICE_TESTBED_FONA_800L_BASIC
+// #define DEVICE_TESTBED_RCSWITCH_NORMAL
+// #define DEVICE_TESTBED_RCSWITCH_EXT
+// #define DEVICE_TESTBED_LOUVOLITE_HUB
+// #define DEVICE_TESTBED_H801_LONGTERM_DESK
+
+/**
+ * @brief Note: By getting the rows = animation, the achievement can clearly be shown by simply setting "percent animation from wled" or similar
+ * 
+ */
+// #define DEFINE_LED_MATRIX_EXERCISE_ACHIEVEMENT_DAILY // each row, will show minutes of "active movement" per day. Alternate could be miles walked per day.
+#define DEVICE_LED_MATRIX_SEGMENTS // Future idea: ie 8x32 can be 8 segments with 32 leds in animation (or 32 segments of 8)
+
+
 
 // #define DEVICE_ESP32_DEVKIT_BASIC
 // #define DEVICE_ESP32_WEBCAM1
@@ -7002,6 +7016,309 @@
 
 #endif
 
+
+/**
+ * esp32 version -- SIM800L
+ * */
+#ifdef DEVICE_TESTBED_FONA_800L_BASIC
+  #define DEVICENAME_CTR          "testbed_fona"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+
+  #define USE_MODULE_DRIVERS_FONA_CELLULAR
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
+      "\"23\":\"" D_GPIO_FUNCTION__FONA_POWER_KEY__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__FONA_POWER_STATUS__CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION__FONA_NETWORK_STATUS__CTR   "\","
+      "\"4\":\"" D_GPIO_FUNCTION__FONA_RESET__CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION__FONA_UART_TX__CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION__FONA_UART_RX__CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "SpeedOfSound_Ambient"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "BackUpTank"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "GarageOutside"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
+        "[40,255,100,29,205,201,168,203],"                                             
+        "[40,255,100,29,205,248,248,249]"  
+      "]"  
+    "}"
+  "}";
+
+#endif
+
+
+/**
+ * esp32 version -- SIM800L
+ * */
+#ifdef DEVICE_TESTBED_RCSWITCH_NORMAL
+  #define DEVICENAME_CTR          "testbed_rcswitch_normal"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+#ifdef DEVICE_TESTBED_RCSWITCH_EXT
+  #define DEVICENAME_CTR          "testbed_rcswitch_ext"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+
+  // #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+#ifdef DEVICE_TESTBED_LOUVOLITE_HUB
+  #define DEVICENAME_CTR          "testbed_louvolite_hub"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+
+  // #define USE_MODULE_DRIVERS_INTERFACE
+
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  //   #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+
+  //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
+
+  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+/**
+ * @brief Device will largely remain active, as the primary test device for H801 code considered for deployment
+ * 
+ */
+#ifdef DEVICE_TESTBED_H801_LONGTERM_DESK
+  #define DEVICENAME_CTR          "testbed_h801_desk"
+  #define DEVICENAME_FRIENDLY_CTR "H801 Primary Testbed"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+
+  #define USE_SERIAL_ALTERNATE_TX
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+
+  #define DISABLE_WEBSERVER
+    
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_PWM  
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
+    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
+    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
+    #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define STRIP_SIZE_MAX 1
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":1,"
+    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
+    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
+    "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
+    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS     "\":100"
+  "}";
+
+#endif
+
+
+#ifdef DEVICE_LED_MATRIX_SEGMENTS //WHERE_EACH_ROW_IS_ANIMATION_SEGMENT
+  #define DEVICENAME_CTR          "testbed_led_matrix"
+  #define DEVICENAME_FRIENDLY_CTR "LED Matrix"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  
+  #define DISABLE_WEBSERVER
+
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+    #define STRIP_SIZE_MAX 100
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  // #ifdef USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"AnimationMode\": \"Effects\","
+  //   "\"ColourOrder\": \"grb\","
+  //   "\"ColourPalette\":\"Single Flame 01\","
+  //   "\"Effects\":{"
+  //     "\"Function\":\"Slow Glow\","
+  //     "\"Intensity\":255,"
+  //     "\"Speed\":10"
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":0,"
+  //     "\"RateMs\":23"
+  //   "},"    
+  //   "\"BrightnessRGB\":1,"
+  //   "\"TimeOn\":3600"
+  // "}";
+  // #endif // USE_MODULE_LIGHTS_INTERFACE
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"Segment0\":{"
+      "\"PixelRange\":[0,7],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Static\""
+      "},"
+      "\"ColourPalette\":\"Christmas 09\","
+      "\"Transition\":{"
+        "\"TimeMs\":3000,"
+        "\"RateMs\":10000"
+      "},"    
+      "\"BrightnessRGB\":1"
+    "},"
+    "\"Segment1\":{"
+      "\"PixelRange\":[8,10],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+      "\"Effects\":{"
+        "\"Function\":\"Solid RGBCCT\""
+      "},"
+      "\"ColourPalette\":\"Solid Rgbcct 01\","
+      "\"Hue\":240"
+      "\"Sat\":100"
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":1"
+    "},"
+    "\"Segment2\":{"
+      "\"PixelRange\":[10,13],"
+      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+      "\"Effects\":{"
+        "\"Function\":\"Slow Glow\""
+      "},"
+      "\"ColourPalette\":\"Christmas 01\","
+      "\"Transition\":{"
+        "\"TimeMs\":500,"
+        "\"RateMs\":1000"
+      "},"    
+      "\"BrightnessRGB\":1"
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"BrightnessRGB\":100"
+  "}";
+
+
+
+#endif
 
 
 #ifdef DEVICE_FORCED_TO_BE_TESTER

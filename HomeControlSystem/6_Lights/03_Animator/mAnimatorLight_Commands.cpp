@@ -65,7 +65,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
   JsonParserToken jtok = 0; 
   JsonParserToken jtok_sub = 0; 
-  int8_t tmp_id = 0;
+  int16_t tmp_id = 0;
   char buffer[50];
 
   /**

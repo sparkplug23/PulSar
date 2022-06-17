@@ -141,6 +141,9 @@
   #define D_MODULE_DRIVERS_IRREMOTE_CTR "irremote"
   #define D_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR "irremote"
 
+  #define D_MODULE_DRIVERS_FONA_CELLULAR_CTR "mFona_Cellular"
+  #define D_MODULE_DRIVERS_FONA_CELLULAR_FRIENDLY_CTR "fona"
+
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
@@ -353,6 +356,10 @@
 
 #define D_MODULE_CONTROLLER_FURNACE_SENSOR_CTR "furnace_sensor"
 #define D_MODULE_CONTROLLER_FURNACE_SENSOR_FRIENDLY_CTR "furnace_sensor"
+
+
+#define D_MODULE_CONTROLLER_LOUVOLITE_HUB_CTR "louvolite"
+#define D_MODULE_CONTROLLER_LOUVOLITE_HUB_FRIENDLY_CTR "louvolite"
 
 
 
@@ -1034,6 +1041,18 @@
 #define D_GPIO_FUNCTION_GPS_SERIAL2_TX_CTR "GPS Serial2 TX"
 #define D_GPIO_FUNCTION_GPS_SERIAL2_RX_CTR "GPS Serial2 RX"
 
+
+#define D_GPIO_FUNCTION__FONA_POWER_KEY__CTR       "Fona Key"
+#define D_GPIO_FUNCTION__FONA_POWER_STATUS__CTR    "Fona PS"
+#define D_GPIO_FUNCTION__FONA_NETWORK_STATUS__CTR  "Fona NS"
+#define D_GPIO_FUNCTION__FONA_RESET__CTR           "Fona Rst"
+#define D_GPIO_FUNCTION__FONA_UART_TX__CTR         "Fona TX"
+#define D_GPIO_FUNCTION__FONA_UART_RX__CTR         "Fona RX"
+#define D_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR  "Fona RI"
+
+
+
+
 #define D_GPIO_FUNCTION_BUILTIN_LED1_CTR              "Builtin LED 1" // only enabled if available and not being used by another pin
 
 
@@ -1096,6 +1115,8 @@
 #define D_GPIO_FUNCTION_KEY8_CTR        "Key8"
 #define D_GPIO_FUNCTION_KEY8_INV_CTR        "Key8 Inv"
 
+#define D_GPIO_FUNCTION__RF_433MHZ_RX__CTR "RF 433 RX"
+#define D_GPIO_FUNCTION__RF_433MHZ_TX__CTR "RF 433 TX"
 
 #define D_GPIO_FUNCTION_KEY1_NP_CTR        "Key1 NP"
 
@@ -1315,6 +1336,7 @@
 #define D_LOG_SWITCHES "SWH: "
 #define D_LOG_RULES "RUL: "
 #define D_LOG_SR04 "SR4: "
+#define D_LOG_FONA "FON: "
 
 //SDM220
 #define D_PHASE_ANGLE     "Phase Angle"

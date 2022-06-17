@@ -255,8 +255,14 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     EM_MODULE_DRIVERS_RF433_RCSWITCH_ID,
   #endif
+  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID,
+  #endif
   #ifdef USE_MODULE_DRIVERS_IRREMOTE
     EM_MODULE_DRIVERS_IRREMOTE_ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
+    EM_MODULE_DRIVERS_FONA_CELLULAR_ID,
   #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -413,6 +419,12 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
     EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+    EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID,
+  #endif
+
+
+  
 
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
@@ -522,11 +534,19 @@ enum MODULE_IDS{
   #include "4_Drivers/09_RCSwitch/mRCSwitch.h"
   #define pCONT_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
 #endif
+#ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  #include "4_Drivers/10_RCSwitch_Extended/mRCSwitch_Extended.h"
+  #define pCONT_rcswitch                            static_cast<mRCSwitch*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID])
+#endif
 
 
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
   #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
+  #include "4_Drivers/16_Fona_Cellular/mFona_Cellular.h"
+  #define pCONT_fona                                static_cast<mFona_Cellular*>(pCONT->pModule[EM_MODULE_DRIVERS_FONA_CELLULAR_ID])
 #endif
 
 
@@ -811,6 +831,11 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
   #include "10_Controller_Specialised/03_FurnaceSensor/mFurnaceSensor.h"
   #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
+#endif
+
+#ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+  #include "10_Controller_Specialised/04_LouvoliteHub/mLouvoliteHub.h"
+  #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
 
 

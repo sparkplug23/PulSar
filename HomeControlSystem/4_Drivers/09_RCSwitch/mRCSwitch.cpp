@@ -109,7 +109,7 @@ void mRCSwitch::Init(void)
     mySwitch->enableReceive(pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID));
     // if (!pCONT_set->Settings.rf_protocol_mask) {
       // pCONT_set->Settings.rf_protocol_mask = (1ULL << mySwitch->getNumProtos()) -1;
-// Correctly only permits protocol 1 through
+      // Correctly only permits protocol 1 through
       pCONT_set->Settings.rf_protocol_mask = (1ULL << 1) -1; //only want number 2?
     // }
     mySwitch->setReceiveProtocolMask(pCONT_set->Settings.rf_protocol_mask);
@@ -119,8 +119,11 @@ void mRCSwitch::Init(void)
 }
 
 
-void mRCSwitch::ReceiveCheck(void) {
-  if (mySwitch->available()) {
+void mRCSwitch::ReceiveCheck(void) 
+{
+
+  if (mySwitch->available())
+  {
 
     unsigned long data = mySwitch->getReceivedValue();
     unsigned int bits = mySwitch->getReceivedBitlength();

@@ -1470,6 +1470,12 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   char buffer[50];
   int8_t index_found = -1;
 
+  /**
+   * @brief Search 1: For dynamic names by user in DeviceNameList
+   * 
+   * This currently assumes they start from 0 index, which should be the case for INSIDE this class, but may not be inside the DeviceNameList
+   * 
+   */
   // Check for matches with variables names  
   // if ((index_found = pCONT_sup->GetDListIDbyNameCtr(buffer, sizeof(buffer), c, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr)) >= 0) {
   //   // index_found = STATE_NUMBER_OFF__ID;    
@@ -1479,47 +1485,58 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 
   // ALOG_INF( PSTR("GetPaletteIDbyName = \"%s\""), c );
 
+  /**
+   * @brief Search 2: For progmem names for static palettes
+   * 
+   */
+
   // Check against stored progmem static names
   for(uint8_t ii=0;ii<PALETTELIST_STATIC_LENGTH__ID;ii++){
     ptr = GetPalettePointerByID(ii);
     // AddLog(LOG_LEVEL_ERROR, PSTR("ptr->id %d"),ptr->id);
     // AddLog(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr %s"),ptr->friendly_name_ctr);
 
-    if(ptr->friendly_name_ctr == nullptr){ 
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_DBM( PSTR("ptr->friendly_name_ctr == nullptr %d %s"),ii,c);     //skipping names not set, including variables names which dont use pointer to name (unless I point to its place later, and include its name length?) Store variable name in dlist 
-      // move variable name to join standard devicename and just include as indexed? ie 0-20 is their names?
-      #endif // ENABLE_LOG_LEVEL_COMMANDS
+    if(ptr->friendly_name_ctr == nullptr)
+    {
+      ALOG_DBM( PSTR("ptr->friendly_name_ctr == nullptr %d %s"), ii, c );
     }
-    if(ptr->friendly_name_ctr != nullptr){ 
-      if(ii>PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-        // if(strcmp_P(c,ptr->friendly_name_ctr)==0){
-        //   ALOG_DBM( PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
-        //   return ii;
-        // }
 
-        if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr)){ 
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-          ALOG_DBM( PSTR("strcmp(c,ptr->friendly_name_ctr)=>%d"),ii);
-    #endif // ENABLE_LOG_LEVEL_INFO
+    if(ptr->friendly_name_ctr != nullptr)
+    { 
+      if(ii>PALETTELIST_VARIABLE_HSBID_LENGTH__ID)
+      { 
+        if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr))
+        {
+          ALOG_INF( PSTR("MATCH \"%c\" %d"), c, ii ); 
           return ii;            
-           
-          }
-  
-
-
-
-
+        }
       }
     }
+
   }
+
+  /**
+   * @brief Search 3: Fallback, search for default names for the dynamic palettes
+   * 
+   * 
+   */
+
+  /**
+   * @brief Currently, these are being searched for manually (ie not using the device list)
+   * I will keep this code later, but as fallback options. IE if a user renames them, then these (below) will be the default names
+   * 
+   */
+
+  ALOG_WRN( PSTR("GetPaletteIDbyName: Not searching DeviceNameList") );
+
 
   // Check for default user names 
   char name_ctr[20];
   for(uint8_t ii=0;ii<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID-PALETTELIST_VARIABLE_HSBID_01__ID);ii++){
     memset(name_ctr,0,sizeof(name_ctr));
-    sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_HSBID_NAME_CTR,ii);
+    sprintf_P(name_ctr, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR), ii);
+    
+    ALOG_DBG( PSTR("s> \"%c\""), name_ctr ); 
     // Default names
     if(strcmp(c,name_ctr)==0){
       return PALETTELIST_VARIABLE_HSBID_01__ID+ii;
@@ -1529,8 +1546,9 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   // Check for default user names 
   for(uint8_t ii=0;ii<(PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);ii++){
     memset(name_ctr,0,sizeof(name_ctr));
-    sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
+    // sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
     // Default names
+    sprintf_P(name_ctr, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), ii);
 
 // DEBUG_LINE_HERE;
 //     ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Searching with \"%s\" for \"%s\""),name_ctr,c );
@@ -1541,6 +1559,11 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
     }
   }
 
+/**
+ * @brief Search 4: Check if the name is the index in string format 
+ * 
+ * 
+ */
   // Finally, check if palette name was simply its index as string
   uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
   if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH__ID)){
@@ -1548,7 +1571,7 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   }
 
 // DEBUG_LINE_HERE;
-  return -1;
+  return -1; // This may need to be "0" so at least a stable/valid palette is chosen
 
 }
 
