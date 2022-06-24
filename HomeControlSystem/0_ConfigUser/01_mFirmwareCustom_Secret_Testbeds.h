@@ -85,6 +85,7 @@
 // #define DEVICE_ESP32_WEBCAM1
 // #define DEVICE_ESP32_WEBCAM2
 // #define DEVICE_ESP32_WEBCAM3
+// #define DEVICE_ESP32_WEBCAM4
 
 // #define DEVICE_TESTBED_BME_ESP32
 
@@ -6664,6 +6665,7 @@
   // #define DISABLE_NETWORK
 
   #define USE_MODULE_DRIVERS_CAMERA_WEBCAM
+  break
 
   // #define USE_DEVFEATURE_DISABLE_FOR_CAMERA
 
@@ -6681,6 +6683,42 @@
     // "},"
   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_CAM_AITHINKER_CTR "\""
     // "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+#endif // DEVICE_ESP32_DEVKIT_BASIC
+
+
+#ifdef DEVICE_ESP32_WEBCAM4   //based on arduino core example : June 2022
+  #define DEVICENAME_CTR            "esp32_webcam4a"
+  #define DEVICENAME_FRIENDLY_CTR   "esp32_webcam4"
+
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define DISABLE_SLEEP
+
+  // #define DISABLE_NETWORK
+
+  #define USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
+
+  #define ENABLE_DEVFEATURE_SETDEBUGOUTPUT
+
+  // #define USE_DEVFEATURE_DISABLE_FOR_CAMERA
+
+  // #define USE_DEBUG_DISABLE_GLOBAL_PIN_INIT // new set of debug formatted defines, for development only
+
+  #define ESP32
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    // "\"" D_JSON_GPIOC "\":{"
+    //   "\"LBI\":\""  D_GPIO_FUNCTION_PWM1_CTR "\""
+    // "},"
+  // "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_CAM_AITHINKER_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
 #endif // DEVICE_ESP32_DEVKIT_BASIC
@@ -7220,9 +7258,31 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-    #define STRIP_SIZE_MAX 100
+    #define STRIP_SIZE_MAX 256
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    
+    #define MAX_NUM_SEGMENTS 25
+    // #define ENABLE_DEVFEATURE_PIXEL_MATRIX
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    // #define ENABLE_DEVFEATURE_ENABLE_SEGMENT_PIXEL_INDEX_SHIFT
+    #define ENABLE_DEVFEATURE_SETGETPIXELCOLOUR_V2
+    #define ENABLE_DEVFEATURE_START_PIXEL_INDEX_ADDED_ONLY_INSIDE_SETPIXELCOLOUR_USING_SEGMENT_INDEXING
+    // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXEL_BUS
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
+    // #define ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES //to be joint later
+    #define ENABLE_DEVFEATURE_ANIMATOR_EFFECT_RGBCCT_SOLID_MULTISEGMENT
+    #define ENABLE_DEVFEATURE_SINGLE_GETCOLOURFROMPALETTE_THAT_WORKS_FOR_MINE_AND_WLED //abstraction layer for WLED function would be useful
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_BEGIN_PHASEOUT_OF_MY_COLOURPALETTE_AND_CRGBPALETTE_TO_INTERMEDIATE_FUNCTION
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+
+    #define ENABLE_DEVFEATURE_DYNAMIC_BUFFER_UPDATE_DESIRED_NEW_METHOD_FOR_JOINT_PALETTE
+
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
+    // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -7238,83 +7298,131 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  // #ifdef USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"AnimationMode\": \"Effects\","
-  //   "\"ColourOrder\": \"grb\","
-  //   "\"ColourPalette\":\"Single Flame 01\","
-  //   "\"Effects\":{"
-  //     "\"Function\":\"Slow Glow\","
-  //     "\"Intensity\":255,"
-  //     "\"Speed\":10"
-  //   "},"
-  //   "\"Transition\":{"
-  //     "\"TimeMs\":0,"
-  //     "\"RateMs\":23"
-  //   "},"    
-  //   "\"BrightnessRGB\":1,"
-  //   "\"TimeOn\":3600"
-  // "}";
-  // #endif // USE_MODULE_LIGHTS_INTERFACE
-
-  
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"Segment0\":{"
-      "\"PixelRange\":[0,7],"
-      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-      "\"Effects\":{"
-        "\"Function\":\"Static\""
-      "},"
-      "\"ColourPalette\":\"Christmas 09\","
-      "\"Transition\":{"
-        "\"TimeMs\":3000,"
-        "\"RateMs\":10000"
-      "},"    
-      "\"BrightnessRGB\":1"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"AnimationMode\": \"Effects\","
+    "\"ColourOrder\": \"grb\","
+    "\"ColourPalette\":1,"
+    "\"Effects\":{"
+      "\"Function\":0,"
+      "\"Intensity\":255,"
+      "\"Speed\":255"
     "},"
-    "\"Segment1\":{"
-      "\"PixelRange\":[8,10],"
-      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
-      "\"Effects\":{"
-        "\"Function\":\"Solid RGBCCT\""
-      "},"
-      "\"ColourPalette\":\"Solid Rgbcct 01\","
-      "\"Hue\":240"
-      "\"Sat\":100"
-      "\"Transition\":{"
-        "\"TimeMs\":500,"
-        "\"RateMs\":1000"
-      "},"    
-      "\"BrightnessRGB\":1"
-    "},"
-    "\"Segment2\":{"
-      "\"PixelRange\":[10,13],"
-      "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-      "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-      "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-      "\"Effects\":{"
-        "\"Function\":\"Slow Glow\""
-      "},"
-      "\"ColourPalette\":\"Christmas 01\","
-      "\"Transition\":{"
-        "\"TimeMs\":500,"
-        "\"RateMs\":1000"
-      "},"    
-      "\"BrightnessRGB\":1"
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
-    "\"BrightnessRGB\":100"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":1000"
+    "},"    
+    // "\"WLED\":{\"Colour1\":[0,0,0,0]},"
+    "\"BrightnessRGB\":5"
+    ",\"TimeOn\":10"
   "}";
+
+  // show matrix
+  // "{"
+  //   // "\"Segment0\":{"
+  //   //   "\"PixelRange\":[0,4],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"AnimationMode\": \"Effects\","
+  //     "\"ColourOrder\": \"grb\","
+  //     "\"ColourPalette\":96,"
+  //     "\"Effects\":{"
+  //       "\"Function\":16,"
+  //       "\"Intensity\":255,"
+  //       "\"Speed\":255"
+  //     "},"
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":25,"
+  //       "\"RateMs\":25"
+  //     "},"    
+  //     "\"WLED\":{\"Colour1\":[0,0,0,0]},"
+  //     "\"BrightnessRGB\":10"
+  //     ",\"TimeOn\":10"
+  //   // "}"
+  // "}";
+
+  
+  // "{"
+  //   // "\"Segment0\":{"
+  //   //   "\"PixelRange\":[0,4],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"AnimationMode\": \"Effects\","
+  //     "\"ColourOrder\": \"grb\","
+  //     "\"ColourPalette\":96,"
+  //     "\"Effects\":{"
+  //       "\"Function\":14,"
+  //       "\"Intensity\":255,"
+  //       "\"Speed\":255"
+  //     "},"
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":25,"
+  //       "\"RateMs\":25"
+  //     "},"    
+  //     "\"BrightnessRGB\":100,"
+  //     "\"TimeOn\":30"
+  //   // "}"
+  // "}";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"Segment0\":{"
+  //     "\"PixelRange\":[0,7],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Static\""
+  //     "},"
+  //     "\"ColourPalette\":\"Christmas 09\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":3000,"
+  //       "\"RateMs\":10000"
+  //     "},"    
+  //     "\"BrightnessRGB\":1"
+  //   "},"
+  //   "\"Segment1\":{"
+  //     "\"PixelRange\":[8,10],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","   
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Solid RGBCCT\""
+  //     "},"
+  //     "\"ColourPalette\":\"Solid Rgbcct 01\","
+  //     "\"Hue\":240"
+  //     "\"Sat\":100"
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":500,"
+  //       "\"RateMs\":1000"
+  //     "},"    
+  //     "\"BrightnessRGB\":1"
+  //   "},"
+  //   "\"Segment2\":{"
+  //     "\"PixelRange\":[10,13],"
+  //     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
+  //     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
+  //     "\"Effects\":{"
+  //       "\"Function\":\"Slow Glow\""
+  //     "},"
+  //     "\"ColourPalette\":\"Christmas 01\","
+  //     "\"Transition\":{"
+  //       "\"TimeMs\":500,"
+  //       "\"RateMs\":1000"
+  //     "},"    
+  //     "\"BrightnessRGB\":1"
+  //   "},"
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+  //   "\"BrightnessRGB\":100"
+  // "}";
 
 
 
