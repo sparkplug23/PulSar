@@ -190,7 +190,9 @@ class AVERAGING_DATA{
           // }
 
           
-          mean_value = accumulate( data_v.begin(), data_v.end(), 0.0)/data_v.size();    
+          // mean_value = 
+          // // static_cast<TYPE>
+          // accumulate( data_v.begin(), data_v.end(), 0.0)/data_v.size();    
 
           // std::vector<float> v{8, 4, 2, 7, 5};
           // auto const a = average(v);

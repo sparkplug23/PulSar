@@ -357,7 +357,12 @@ const char* mTime::ConvertTimeOfDay_Seconds_HHMMSS(uint32_t seconds_tod, char* b
 
 // Time elapsed function that updates the time when true
 bool mTime::TimeReached(uint32_t* tSaved, uint32_t ElapsedTime){
-  if(abs(millis()-*tSaved)>=ElapsedTime){ *tSaved=millis();
+
+  unsigned long long elapsed = millis()-*tSaved;
+
+  if(
+    llabs(elapsed)>=ElapsedTime
+  ){ *tSaved=millis();
     return true;
   }
   return false;
@@ -366,7 +371,7 @@ bool mTime::TimeReached(uint32_t* tSaved, uint32_t ElapsedTime){
 
 bool mTime::TimeReached(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime){
   if(
-    (abs(millis()-tSaved->millis)>=ElapsedTime)
+    (ABS_FUNCTION(millis()-tSaved->millis)>=ElapsedTime)
     ||(tSaved->run == true)    
     ){ 
       tSaved->millis=millis();
@@ -379,7 +384,7 @@ bool mTime::TimeReached(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime){
 
 bool mTime::TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime){
   if(
-    (abs(millis()-tSaved->millis)>=ElapsedTime)
+    (ABS_FUNCTION(millis()-tSaved->millis)>=ElapsedTime)
     ||(tSaved->run == true)    
     ){ 
       //tSaved->millis=millis();
@@ -392,7 +397,7 @@ bool mTime::TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTim
 
 // Time elapsed function that updates the time when true
 bool mTime::TimeReachedNonReset(uint32_t* tSaved, uint32_t ElapsedTime){
-  if(abs(millis()-*tSaved)>=ElapsedTime){
+  if(ABS_FUNCTION(millis()-*tSaved)>=ElapsedTime){
     return true;
   }
   return false;
@@ -1663,6 +1668,11 @@ String mTime::GetUptime(void)
   return GetDuration(UpTime());
 }
 
+uint32_t mTime::GetUTCTime()
+{
+  return Rtc.utc_time;
+}
+
 uint32_t mTime::MinutesPastMidnight(void)
 {
   uint32_t minutes = 0;
@@ -2108,29 +2118,25 @@ void mTime::RtcInit(void)
   Rtc.utc_time = 0;
   BreakTime(Rtc.utc_time, RtcTime);
   
+  TickerRtc = new Ticker();
+  
   #ifdef ESP8266
-    TickerRtc = new Ticker();
-
-    TickerRtc->attach(1, 
+      TickerRtc->attach(1, 
       [this](void){
         this->RtcSecond();
       }
     );
   #else
-  
-    TickerRtc = new Ticker();
-
     TickerRtc->attach_ms(1000, 
       +[](mTime* instance){ instance->RtcSecond(); }, this
     );
-
   #endif // ESP8266
 
 
+}
 
-
-
-
+void mTime::RtcPreInit(void) {
+  Rtc.millis = millis();
 }
 
 
@@ -2167,10 +2173,10 @@ void mTime::WifiPollNtp() {
     // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
 
     if (ntp_time > START_VALID_TIME) {
-      pCONT_time->Rtc.utc_time = ntp_time;
-      pCONT_time->Rtc.ntp_time = ntp_time; //me
+      Rtc.utc_time = ntp_time;
+      Rtc.ntp_time = ntp_time; //me
       ntp_sync_minute = 60;             // Sync so block further requests
-      pCONT_time->RtcSync();
+      RtcSync();
     } else {
       ntp_sync_minute++;                // Try again in next minute
     }
@@ -2179,7 +2185,7 @@ void mTime::WifiPollNtp() {
 
 uint32_t mTime::WifiGetNtp(void) {
   static uint8_t ntp_server_id = 0;
-  pCONT_time->Rtc.ntp_last_active = millis();
+  Rtc.ntp_last_active = millis();
 
   IPAddress time_server_ip;
 
@@ -2258,7 +2264,7 @@ uint32_t mTime::WifiGetNtp(void) {
 
   uint32_t begin_wait = millis();
   // while (!TimeReached(begin_wait + 1000)) {         // Wait up to one second
-  while (abs(millis()-begin_wait)<1000) {         // Wait up to one second
+  while (ABS_FUNCTION(millis()-begin_wait)<1000) {         // Wait up to one second
     uint32_t size        = udp.parsePacket();
     uint32_t remote_port = udp.remotePort();
 

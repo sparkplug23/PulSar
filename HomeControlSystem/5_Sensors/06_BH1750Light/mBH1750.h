@@ -11,6 +11,8 @@
 
 // #define USE_MODULE_EXAMPLE_CLASS
 
+#define D_SENSOR_BH1750_MAX_COUNT 2
+
 #define XSNS_10                          10
 #define XI2C_11                          11    // See I2CDEVICES.md
 
@@ -55,6 +57,7 @@ class mBH1750 :
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
+      uint8_t sensor_count = 0;
     }settings;
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -63,7 +66,6 @@ class mBH1750 :
     struct {
       uint8_t addresses[2] = { BH1750_ADDR1, BH1750_ADDR2 };
       uint8_t resolution[3] = { BH1750_CONTINUOUS_HIGH_RES_MODE, BH1750_CONTINUOUS_HIGH_RES_MODE2, BH1750_CONTINUOUS_LOW_RES_MODE };
-      uint8_t count = 0;
       // char types[7] = "BH1750"; // remove this
     } Bh1750;
 
@@ -73,7 +75,27 @@ class mBH1750 :
       uint8_t mtreg = 69;                          // Default Measurement Time
       uint16_t illuminance = 0;
       uint16_t level = 0;
-    } device_data[2];
+    } device_data[D_SENSOR_BH1750_MAX_COUNT];
+
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.sensor_count;
+    }
+    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
+      if(index > D_SENSOR_BH1750_MAX_COUNT-1) {value->type.push_back(0); return ;}
+      value->type.push_back(SENSOR_TYPE_LIGHT_LEVEL_ID);
+      value->type.push_back(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);
+      value->data.push_back(device_data[index].level);
+      value->data.push_back(device_data[index].illuminance);
+      value->sensor_id = index;
+    };
+
+    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
         
     uint8_t Bh1750Resolution(uint32_t sensor_index);
     bool Bh1750SetResolution(uint32_t sensor_index);

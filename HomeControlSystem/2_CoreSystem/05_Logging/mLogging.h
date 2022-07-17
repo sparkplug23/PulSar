@@ -168,6 +168,13 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #define ALOG_COM(...)
 #endif
 
+#ifdef ENABLE_LOG_LEVEL_HIGHLIGHT
+#define ALOG_HGL(...) AddLog(LOG_LEVEL_HIGHLIGHT, __VA_ARGS__)
+#else
+#define ALOG_HGL(...)
+#endif
+
+
 
 #define ALOG_DEBUG_LINE_HERE ALOG_DBG(PSTR("DP:%s|%d"),__FILE__,__LINE__);
 
@@ -431,7 +438,12 @@ void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 template<typename T>
 void AddLog_Array(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, const char* name_ctr, T* arr, T arr_len)//}, uint8_t fWithIndex = 0, uint8_t fVertical = 0)
 {
-  if(abs(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
+  uint32_t time_now = *tSaved; //to allow compile of newer esp32
+  if(abs(
+    
+    static_cast<long long>(millis()-time_now)
+    
+    )>=limit_ms){ *tSaved=millis();
     AddLog_Array(loglevel,name_ctr,arr,arr_len);
   }
 }

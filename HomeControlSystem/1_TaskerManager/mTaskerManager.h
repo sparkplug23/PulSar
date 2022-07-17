@@ -11,6 +11,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef CONFIG_IDF_TARGET_ESP32
+#include "soc/efuse_reg.h"
+#endif
+
 #include <vector>
 
 #include "JsonParser.h"
@@ -32,7 +36,7 @@
  * In order of importance
  * */
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Personal.h"
+#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
 /**
@@ -138,6 +142,8 @@ enum FUNCTION_RESULT_IDS{
 #include "2_CoreSystem/08_JSON/mJSON.h"
 #include "2_CoreSystem/06_Support/mSupport.h"
 
+#include "2_CoreSystem/01b_RtcMemory/mRtcSettings.h"
+
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
   MODULE_SUBTYPE_NETWORK_ID,
@@ -186,7 +192,7 @@ enum MODULE_IDS{
     EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID,
   #endif 
   // Network
-  #ifdef USE_MODULE_NETWORK_WIFI
+  #if defined(USE_MODULE_NETWORK_WIFI) || defined(USE_MODULE_NETWORK_WIFI_V2)
     EM_MODULE_NETWORK_WIFI_ID,
   #endif 
   #ifdef USE_MODULE_NETWORK_MQTT
@@ -237,12 +243,17 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
     EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
   #endif
+
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
     EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
     EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID,
   #endif
+  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4 //from arduino core example
+    EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID,
+  #endif
+
   #ifdef USE_MODULE_DRIVERS_LEDS
     EM_MODULE_DRIVERS_LEDS_ID,
   #endif
@@ -491,6 +502,13 @@ enum MODULE_IDS{
   #include "3_Network/03_WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
+#ifdef USE_MODULE_NETWORK_WIFI_V2
+  #include "3_Network/03_WiFi_v2/mWiFi.h"
+  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
+#endif 
+
+
+
 
 
 // Displays (30-39)
@@ -582,14 +600,21 @@ enum MODULE_IDS{
   #include "4_Drivers/CAM_OV2640/mCamera.h"
   #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
 #endif
+
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
   #include "4_Drivers/Camera_OV2640/mCameraOV2640.h"
   #define pCONT_camera                              static_cast<mCameraOV2640*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
-  #include "4_Drivers/WebCam/mWebCam.h"
+  #include "4_Drivers/51_WebCam/mWebCam.h"
   #define pCONT_camera                              static_cast<mWebCam*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID])
 #endif
+#ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
+  #include "4_Drivers/52_WebCamera/mWebCamera.h"
+  #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
+#endif
+
+
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   #include "4_Drivers/FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
@@ -817,24 +842,24 @@ enum MODULE_IDS{
 
 // 10 Controller (Unique to one use case)
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-  #include "10_Controller_Specialised/00_RadiatorFan/mRadiatorFan.h"
+  #include "10_Controller_Spec/00_RadiatorFan/mRadiatorFan.h"
   #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-  #include "10_Controller_Specialised/01_ImmersionTankColour/mImmersionTankColour.h"
+  #include "10_Controller_Spec/01_ImmersionTankColour/mImmersionTankColour.h"
   #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  #include "10_Controller_Specialised/02_HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
+  #include "10_Controller_Spec/02_HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
   #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
-  #include "10_Controller_Specialised/03_FurnaceSensor/mFurnaceSensor.h"
+  #include "10_Controller_Spec/03_FurnaceSensor/mFurnaceSensor.h"
   #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
 #endif
 
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
-  #include "10_Controller_Specialised/04_LouvoliteHub/mLouvoliteHub.h"
+  #include "10_Controller_Spec/04_LouvoliteHub/mLouvoliteHub.h"
   #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
 
@@ -849,7 +874,7 @@ class mTaskerManager{
 
   public:
   
-    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
+    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID] = {nullptr}; // Set to nullptr so init can be checked
 
   private:
     /* Prevent others from being created */
@@ -883,7 +908,7 @@ class mTaskerManager{
     #endif
 
     uint8_t Instance_Init();
-    uint8_t CheckPointersPass();
+    // uint8_t CheckPointersPass();
     
     int8_t Tasker_Interface(uint16_t function, uint16_t target_tasker = 0);    
     

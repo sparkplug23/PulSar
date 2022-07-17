@@ -1,7 +1,7 @@
 #ifndef _MWEBCAM_WEBCAM_H
 #define _MWEBCAM_WEBCAM_H 0.1
 
-#define D_UNIQUE_MODULE_DRIVERS_CAMERA_WEBCAM_ID 45
+#define D_UNIQUE_MODULE_DRIVERS_CAMERA_WEBCAM_ID ((4*1000)+51)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -9,7 +9,7 @@
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
-#include "3_Network/MQTT/mMQTT.h"
+// #include "3_Network/MQTT/mMQTT.h"
 
 #include "2_CoreSystem/02_Time/mTime.h"
 

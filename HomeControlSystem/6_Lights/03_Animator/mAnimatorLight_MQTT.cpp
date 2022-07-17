@@ -9,7 +9,6 @@ void mAnimatorLight::MQTTHandler_Init()
 
   struct handler<mAnimatorLight>* mqtthandler_ptr;
   
-DEBUG_LINE_HERE;
 
   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
@@ -22,7 +21,6 @@ DEBUG_LINE_HERE;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
 
-DEBUG_LINE_HERE;
   mqtthandler_ptr = &mqtthandler_animation_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -34,7 +32,6 @@ DEBUG_LINE_HERE;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Animation;
 
-DEBUG_LINE_HERE;
   mqtthandler_ptr = &mqtthandler_ambilight_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID;
   mqtthandler_ptr->tSavedLastSent = millis();
@@ -46,7 +43,17 @@ DEBUG_LINE_HERE;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Ambilight;
   
-DEBUG_LINE_HERE;
+  mqtthandler_ptr = &mqtthandler_segments_teleperiod;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS__CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Segments;
+  
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   mqtthandler_ptr = &mqtthandler_notifications_teleperiod;
   mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID;
@@ -81,6 +88,19 @@ DEBUG_LINE_HERE;
   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_EFFECTS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Flasher;
+
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  mqtthandler_ptr = &mqtthandler_debug_palette;
+  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID;
+  mqtthandler_ptr->tSavedLastSent = millis();
+  mqtthandler_ptr->flags.PeriodicEnabled = true;
+  mqtthandler_ptr->flags.SendNow = true;
+  mqtthandler_ptr->tRateSecs = 1; 
+  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
+  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
+  mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
   mqtthandler_ptr = &mqtthandler_mixer_teleperiod;
@@ -120,7 +140,6 @@ DEBUG_LINE_HERE;
   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR;
   mqtthandler_ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Animations_Progress;
   #endif
-DEBUG_LINE_HERE;
 
 } //end "MQTTHandler_Init"
 

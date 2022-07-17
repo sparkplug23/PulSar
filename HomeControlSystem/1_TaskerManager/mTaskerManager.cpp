@@ -263,7 +263,7 @@ uint8_t mTaskerManager::Instance_Init(){
   pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID] = new mSolarLunar();
   #endif
   // Network
-  #ifdef USE_MODULE_NETWORK_WIFI
+  #if defined(USE_MODULE_NETWORK_WIFI) || defined(USE_MODULE_NETWORK_WIFI_V2)
   pModule[EM_MODULE_NETWORK_WIFI_ID] = new mWiFi();
   #endif 
   #ifdef USE_MODULE_NETWORK_MQTT
@@ -316,8 +316,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
     pModule[EM_MODULE_DRIVERS_CAMERA_OV2640_ID] = new mCameraOV2640();
   #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
-    pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_ID] = new mWebCam();
+  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
+    pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID] = new mWebCamera();
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
     pModule[EM_MODULE_DRIVERS_LEDS_ID] = new mLEDs();
@@ -530,7 +530,7 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
 
   ALOG_WRN( PSTR("GetModuleIndexbyFriendlyName, should this be GetModule_UniqueID_byFriendlyName") );
 
-  if(c=='\0'){ return -1; }
+  if(*c == '\0'){ return -1; }
   for(int ii=0;ii<GetClassCount();ii++){
     if(strcasecmp_P(c, pModule[ii]->GetModuleFriendlyName())==0){
       //AddLog(LOG_LEVEL_TEST, PSTR("MATCHED GetModuleIDbyFriendlyName \"%s\" => \"%s\" %d"),c,pModule[ii]->GetModuleFriendlyName(),ii);
@@ -542,7 +542,7 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
 
 uint16_t mTaskerManager::GetModule_UniqueID_byFriendlyName(const char* c)
 {
-  if(c=='\0'){ return -1; }
+  if(*c=='\0'){ return -1; }
   for(int ii=0;ii<GetClassCount();ii++){
     if(strcasecmp_P(c, pModule[ii]->GetModuleFriendlyName())==0){
       //AddLog(LOG_LEVEL_TEST, PSTR("MATCHED GetModuleIDbyFriendlyName \"%s\" => \"%s\" %d"),c,pModule[ii]->GetModuleFriendlyName(),ii);

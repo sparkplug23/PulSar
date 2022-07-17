@@ -361,7 +361,7 @@ void mAnimatorLight::PhysicalController_Convert_IDs_to_Internal_Parameters()
       pCONT_lAni->SetLEDOutAmountByPercentage(map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 1,35));
       pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
     break;
-    case EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID:
+    case EFFECTS_FUNCTION_STEPPING_PALETTE_ID:
       pCONT_iLight->animation.transition.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 23,9000);
       pCONT_iLight->animation.transition.rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 25,10000);
       pCONT_lAni->SetLEDOutAmountByPercentage(100);

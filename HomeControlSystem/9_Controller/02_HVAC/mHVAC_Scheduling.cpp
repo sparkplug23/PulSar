@@ -72,7 +72,7 @@ const char* mHVAC::GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* b
 
 // #ifdef USE_SCHEDULED_HEATING
 int8_t mHVAC::GetScheduleModeIDByCtr(const char* c){
-  if(c=='\0'){ return -1; }
+  if(*c=='\0'){ return -1; }
   if(strcasecmp(c,D_JSON_SCHEDULED_OFF)==0){ return SCHEDULED_OFF_ID; }
   if(strcasecmp(c,D_JSON_SCHEDULED_SET)==0){ return SCHEDULED_SET_ID; }
   if(strcasecmp(c,D_JSON_SCHEDULED_ON)==0){ return SCHEDULED_ON_ID; }

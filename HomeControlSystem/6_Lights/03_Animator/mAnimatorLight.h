@@ -8,6 +8,21 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+// #define ENABLE_WLED_EFFECTS
+
+
+// #define ENABLE_MODULE_DEBUG__ANIMATOR_LIGHT_EFFECTS_HIGH_LEVEL //ie not time sensitive
+// #define ENABLE_MODULE_DEBUG__ANIMATOR_LIGHT_EFFECTS_LOW_LEVEL  // will be detailed, and slow timing down
+
+
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 #include "6_Lights/02_Palette/mPalette.h"
@@ -119,6 +134,10 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_EFFECTS_CTR)               "flasher
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR)                 "mixer";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR)     "setpixel_manually";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR)   "debug/animation_details";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS__CTR)     "segments";
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)     "debug/palette";
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
 
 #define D_EFFECTS_REGION__COLOUR_SELECT__NAME_CTR "Colour Select"
@@ -202,7 +221,12 @@ class mAnimatorLight :
       #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
         typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; 
       #elif defined(USE_SK6812_METHOD_DEFAULT)
-        typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; 
+
+      // #ifdef USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
+        typedef NeoSk6812Method selectedNeoSpeedType;  //NeoEsp32RmtNSk6812Method
+      // #else
+      //   typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; // caused flickering? = I will move away from this
+      //   #endif
       #else          
         typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
       #endif
@@ -227,16 +251,18 @@ class mAnimatorLight :
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
     uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;  // This may not be the right thing I want animation.transition.pixels_to_update_as_number
     
-    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, uint16_t segment_length = 0);
+    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool brightness_needs_applied = false);// uint16_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
 
     /**
      * @brief 
      * Tmp wled conversions
      * 
+     * Segment_length should not be used here, should be segment_index?
+     * 
      */    
-    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint16_t segment_length = 0);  
-    void SetPixelColor(uint16_t indexPixel, uint32_t color, uint16_t segment_length = 0);
+    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool brightness_needs_applied = false);  
+    void SetPixelColor(uint16_t indexPixel, uint32_t color, bool brightness_needs_applied = false);//, uint16_t segment_length = 0);
 
     // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
     // // what is stored for state is specific to the need, in this case, the colors.
@@ -399,6 +425,9 @@ class mAnimatorLight :
     #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
+      #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
+     void Test_Config();
+      #endif
 
   #ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
     struct POWER_RATING{
@@ -429,6 +458,7 @@ class mAnimatorLight :
   uint8_t ConstructJSON_Settings(uint8_t json_level = 0);
   uint8_t ConstructJSON_Animation(uint8_t json_level = 0);
   uint8_t ConstructJSON_Ambilight(uint8_t json_level = 0);
+  uint8_t ConstructJSON_Segments(uint8_t json_level = 0);
   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
   uint8_t ConstructJSON_Notifications(uint8_t json_level = 0);
   #endif
@@ -440,6 +470,9 @@ class mAnimatorLight :
     ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
     mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
   #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
 
   #ifdef USE_MODULE_NETWORK_MQTT
@@ -464,12 +497,16 @@ class mAnimatorLight :
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
         MQTT_HANDLER_MODULE_DEBUG_ANIMATION_PROGRESS_TELEPERIOD_ID,
       #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+        MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID,
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
     struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;
     struct handler<mAnimatorLight> mqtthandler_animation_teleperiod;  
     struct handler<mAnimatorLight> mqtthandler_ambilight_teleperiod;
+    struct handler<mAnimatorLight> mqtthandler_segments_teleperiod;
     #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
     struct handler<mAnimatorLight> mqtthandler_notifications_teleperiod;
     #endif
@@ -482,10 +519,13 @@ class mAnimatorLight :
     #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
     #endif
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+      struct handler<mAnimatorLight> mqtthandler_debug_palette;
+    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
     // Could this be put into a function? to allow me to set things to all in this, or by ID
     struct handler<mAnimatorLight>* mqtthandler_list[
-      4
+      5
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
         +1
       #endif
@@ -498,10 +538,13 @@ class mAnimatorLight :
       #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
         +1
       #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+      +1
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
       +1
       ] = {
-      &mqtthandler_animation_teleperiod, &mqtthandler_ambilight_teleperiod,
-      &mqtthandler_state_teleperiod,
+      &mqtthandler_animation_teleperiod, &mqtthandler_segments_teleperiod,
+      &mqtthandler_ambilight_teleperiod, &mqtthandler_state_teleperiod,
       #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
         &mqtthandler_notifications_teleperiod,
       #endif
@@ -515,6 +558,9 @@ class mAnimatorLight :
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
         &mqtthandler_debug_animations_progress,
       #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+        &mqtthandler_debug_palette,
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
       &mqtthandler_settings_teleperiod
     };
 
@@ -856,7 +902,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
     EFFECTS_FUNCTION_STATIC_PALETTE_ID,
     EFFECTS_FUNCTION_SEQUENTIAL_ID, //sequence after, so it takes the static pallette and moves it
     EFFECTS_FUNCTION_SLOW_GLOW_ID,
-    EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID,
+    EFFECTS_FUNCTION_STEPPING_PALETTE_ID,
   };
 
   /**

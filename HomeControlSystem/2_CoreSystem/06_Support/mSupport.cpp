@@ -5,6 +5,319 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
 const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPORT_FRIENDLY_CTR;
 
 
+#ifdef ESP32
+  #include "rom/rtc.h"
+#endif
+
+
+uint32_t ResetReason_g(void)
+{
+//   /*
+//     user_interface.h
+//     REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
+//     REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
+//     REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
+//     REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
+//     REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
+//     REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
+//     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+//   */
+ 
+// #ifdef ESP8266
+//   return resetInfo.reason;
+// #else
+//   return 0;
+
+// #endif// ESP8266
+
+
+  /*
+    user_interface.h
+    REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
+    REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
+    REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
+    REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
+    REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
+    REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
+    REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+  */
+
+#ifdef ESP32
+
+ RESET_REASON reason = rtc_get_reset_reason(0);
+  if (1  == reason) { return REASON_DEFAULT_RST; }       // POWERON_RESET
+  if (12 == reason) { return REASON_SOFT_RESTART; }      // SW_CPU_RESET / RTC_SW_CPU_RESET
+  if (5  == reason) { return REASON_DEEP_SLEEP_AWAKE; }  // DEEPSLEEP_RESET
+  if (3  == reason) { return REASON_EXT_SYS_RST; }       // SW_RESET / RTC_SW_SYS_RESET
+  return -1; //no "official error code", but should work with the current code base
+
+  
+  // #ifdef DEBUG_FASTBOOT
+  // Serial.printf("ResetReason() = %d\n\r", ResetReason_g()); 
+  // #endif
+  
+
+#endif 
+
+#ifdef ESP8266
+ return resetInfo.reason;
+
+#endif
+
+
+  // return ESP_ResetInfoReason();
+}
+
+#ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+#ifdef ESP32
+#include <WiFi.h>
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+#endif
+#ifdef ESP8266
+// #include <ESP8266HTTPClient.h>
+// #include <ESP8266httpUpdate.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>                   // Arduino OTA
+#endif
+
+#endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+#if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+const char* host = "recovery";
+const char* ssid = "HACS2400";
+const char* password = "af4d8bc9ab";
+
+#endif //  defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+
+#ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+#ifdef ESP32
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <Update.h>
+#endif
+#ifdef ESP8266
+
+  #include <ESP8266HTTPClient.h>
+  #include <ESP8266httpUpdate.h> 
+  #include <ESP8266WiFi.h> 
+
+  #error "Need to figure out webserver replacement for esp8266"
+
+
+#endif
+
+/**
+ * @brief Using pointer to reduce memory footprint
+ **/
+WebServer* http_safemode_server = nullptr;// server(80);
+
+/*
+ * Server Index Page
+ */
+
+const char* serverIndex =
+"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
+"<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
+   "<input type='file' name='update'>"
+        "<input type='submit' value='Update'>"
+    "</form>"
+ "<div id='prg'>progress: 0%</div>"
+ "<script>"
+  "$('form').submit(function(e){"
+  "e.preventDefault();"
+  "var form = $('#upload_form')[0];"
+  "var data = new FormData(form);"
+  " $.ajax({"
+  "url: '/update',"
+  "type: 'POST',"
+  "data: data,"
+  "contentType: false,"
+  "processData:false,"
+  "xhr: function() {"
+  "var xhr = new window.XMLHttpRequest();"
+  "xhr.upload.addEventListener('progress', function(evt) {"
+  "if (evt.lengthComputable) {"
+  "var per = evt.loaded / evt.total;"
+  "$('#prg').html('progress: ' + Math.round(per*100) + '%');"
+  "}"
+  "}, false);"
+  "return xhr;"
+  "},"
+  "success:function(d, s) {"
+  "console.log('success!')"
+ "},"
+ "error: function (a, b, c) {"
+ "}"
+ "});"
+ "});"
+ "</script>";
+#endif // ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+
+#if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+/**
+ * @brief Single function that a fastboot'ing device will call to await for new code to be uploaded
+ **/
+void SafeMode_StartAndAwaitOTA()
+{
+  Serial.begin(115200);
+
+  Serial.println("SafeMode_StartAndAwaitOTA");
+  
+  uint32_t tSaved_heartbeat = millis();
+  #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  bool http_triggered = false;
+  #endif
+
+  // Connect to WiFi network
+  WiFi.begin(ssid, password);
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  /*use mdns for host name resolution*/
+  if (!MDNS.begin(host)) { //http://esp32.local           
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  
+  Serial.println("mDNS responder started");
+
+  #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  http_safemode_server = new WebServer(80);
+
+  /*return index page which is stored in serverIndex */
+  http_safemode_server->on("/", HTTP_GET, []() {
+    http_safemode_server->sendHeader("Connection", "close");
+    http_safemode_server->send(200, "text/html", serverIndex);
+  });
+  /*handling uploading firmware file */
+  http_safemode_server->on("/update", HTTP_POST, []() {
+    http_safemode_server->sendHeader("Connection", "close");
+    http_safemode_server->send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+    ESP.restart();
+  }, []() {
+    HTTPUpload& upload = http_safemode_server->upload();
+    if (upload.status == UPLOAD_FILE_START) {
+      Serial.printf("Update: %s\n", upload.filename.c_str());
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+        Update.printError(Serial);
+      }
+      // http_triggered = true;
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+      /* flashing firmware to ESP*/
+      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_END) {
+      if (Update.end(true)) { //true to set the size to the current progress
+        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+
+        /**
+         * @brief Reset RTC so device can reboot out of safemode
+         **/
+        RtcFastboot_Reset();
+      } else {
+        Update.printError(Serial);
+      }
+    }
+  });
+  http_safemode_server->begin();
+  #endif // ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // bool ota_triggered = false;
+  ArduinoOTA.onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      // ota_triggered = true;
+      Serial.println("Start updating " + type);
+    });
+    ArduinoOTA.onEnd([]() {
+      Serial.println("\nEnd");
+      
+      RtcFastboot_Reset();
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
+  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  Serial.println("SafeMode: Just waiting for HTTP upload");
+
+
+  while(1){ 
+    // Serial.println("SafeMode: Just waiting for OTA"); delay(1000);
+    
+    #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+    // while (ota_triggered){  
+      ArduinoOTA.handle(); 
+      // }
+    #endif 
+    #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+    // while (http_triggered){
+       http_safemode_server->handleClient(); 
+      //  }
+    #endif
+    delay(1);
+
+    if(llabs(millis()-tSaved_heartbeat)>1000)
+    {
+      tSaved_heartbeat = millis();
+      Serial.println("Waiting for Recovery");
+      Serial.print("Connected to ");
+      Serial.println(ssid);
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+    }
+
+   }
+
+
+}
+
+
+#endif // if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+
+
 
 
 int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
@@ -86,19 +399,21 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_ON_BOOT_SUCCESSFUL:
 
 
+// #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
+// //move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
+//   // if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//     AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
+//     #endif // ENABLE_LOG_LEVEL_INFO
+//     pCONT_set->RtcReboot.fast_reboot_count = 0;
+//     pCONT_set->RtcRebootSave();
+//     // pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
 
-//move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
-  // if (BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset) { //might need cast to be the same
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("mSupport::BOOT_LOOP_TIME == pCONT_time->uptime.seconds_nonreset"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-    pCONT_set->RtcReboot.fast_reboot_count = 0;
-    pCONT_set->RtcRebootSave();
-    // pCONT_set->Settings.bootcount++;              // Moved to here to stop flash writes during start-up
-
-    // delay(5000);
+//     // delay(5000);
     
-  // }
+//   // }
+// #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
+
 
     break;
 
@@ -289,6 +604,7 @@ void mSupport::ArduinoOTAInit(void)
 
 void mSupport::ArduinoOtaLoop(void)
 {
+  // MDNS.update(); // THIS NEEDS ADDED!
   ArduinoOTA.handle();
   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
   // Note async stuff can still occur, so I need to disable them
@@ -989,8 +1305,8 @@ uint32_t mSupport::ResetReason(void)
   return resetInfo.reason;
 #else
   return 0;
-
 #endif// ESP8266
+
 }
 
 void mSupport::SetPulseTimer(uint32_t index, uint32_t time)
@@ -2141,7 +2457,10 @@ void mSupport::SleepDelay(uint32_t mseconds) {
   if (mseconds) {
     for (uint32_t wait = 0; wait < mseconds; wait++) {
       delay(1);
-      if (Serial.available()) { break; }  // We need to service serial buffer ASAP as otherwise we get uart buffer overrun
+      /**
+       * @brief Check Serial inputs before before overrun
+       **/
+      if (Serial.available()) { break; }
     }
   } else {
     delay(0);
@@ -2158,6 +2477,9 @@ void mSupport::PerformEverySecond(void)
   // pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
   // pCONT_sup->activity.loop_counter=0;
   // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("LOOPSEC = %d"), pCONT_sup->activity.loop_counter);
+
+
+
 
   ResetGlobalValues();
 
@@ -2277,6 +2599,8 @@ void mSupport::Handle_Check_Power_Saving()
       }
     }*/
   }
+
+
 void mSupport::Handle_OTA_URLS()
 {
 

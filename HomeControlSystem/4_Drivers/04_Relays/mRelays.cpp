@@ -365,7 +365,7 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
 
 
 int8_t mRelays::GetRelayIDbyName(const char* c){
-  if(c=='\0'){ return -1; }  
+  if(*c=='\0'){ return -1; }  
 
   // int8_t device_id; // not needed, to be phased out
   int16_t class_id = GetModuleUniqueID();//E M_MODULE_DRIVERS_RELAY_ID;

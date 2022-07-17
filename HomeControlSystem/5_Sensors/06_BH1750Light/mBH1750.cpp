@@ -120,12 +120,12 @@ void mBH1750::Init(void)
 
     if (pCONT_sup->I2cActive(Bh1750.addresses[i])) { continue; }
 
-    device_data[Bh1750.count].address = Bh1750.addresses[i];
-    AddLog(LOG_LEVEL_INFO, PSTR("Bh1750.count=%d"),Bh1750.count);
+    device_data[settings.sensor_count].address = Bh1750.addresses[i];
+    AddLog(LOG_LEVEL_INFO, PSTR("settings.sensor_count=%d"),settings.sensor_count);
 
-    if (Bh1750SetMTreg(Bh1750.count)) {
-      // pCONT_sup->I2cSetActiveFound(device_data[Bh1750.count].address, Bh1750.types);
-      Bh1750.count++;
+    if (Bh1750SetMTreg(settings.sensor_count)) {
+      // pCONT_sup->I2cSetActiveFound(device_data[settings.sensor_count].address, Bh1750.types);
+      settings.sensor_count++;
     settings.fEnableSensor = true;
     }
   }
@@ -196,7 +196,7 @@ bool mBH1750::Bh1750Read(uint32_t sensor_index) {
 /********************************************************************************************/
 
 void mBH1750::Bh1750EverySecond(void) {
-  for (uint32_t i = 0; i < Bh1750.count; i++) {
+  for (uint32_t i = 0; i < settings.sensor_count; i++) {
     // 1mS
     if (!Bh1750Read(i)) {
 //      AddLogMissed(Bh1750.types, Bh1750.valid);
@@ -210,8 +210,8 @@ uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_method)
 {
 
   JsonBuilderI->Start();
-  JsonBuilderI->Add(D_JSON_COUNT, Bh1750.count);    
-  for (uint32_t ii = 0; ii < Bh1750.count; ii++)
+  JsonBuilderI->Add(D_JSON_COUNT, settings.sensor_count);    
+  for (uint32_t ii = 0; ii < settings.sensor_count; ii++)
   {
     JsonBuilderI->Add(D_JSON_ADDRESS, device_data[ii].address);
   }
@@ -225,7 +225,7 @@ uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_method){
   JsonBuilderI->Start();
 
     
-  for (uint32_t sensor_index = 0; sensor_index < Bh1750.count; sensor_index++) {
+  for (uint32_t sensor_index = 0; sensor_index < settings.sensor_count; sensor_index++) {
     if (device_data[sensor_index].valid) {
 
     JsonBuilderI->Add("Illuminance", device_data[sensor_index].illuminance);
@@ -233,7 +233,7 @@ uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_method){
 
       // char sensor_name[10];
       // strlcpy(sensor_name, Bh1750.types, sizeof(sensor_name));
-      // if (Bh1750.count > 1) {
+      // if (settings.sensor_count > 1) {
       //   snprintf_P(sensor_name, sizeof(sensor_name), PSTR("%s%c%02X"), sensor_name, IndexSeparator(), device_data[sensor_index].address);  // BH1750-23
       // }
 
@@ -276,7 +276,7 @@ void mBH1750::parse_JSONCommand(JsonParserObject obj)
 \*********************************************************************************************/
 
 // void CmndBh1750Resolution(void) {
-//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= Bh1750.count)) {
+//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= settings.sensor_count)) {
 //     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 2)) {
 //       if (1 == XdrvMailbox.index) {
 //         Settings.SensorBits1.bh1750_1_resolution = XdrvMailbox.payload;
@@ -290,7 +290,7 @@ void mBH1750::parse_JSONCommand(JsonParserObject obj)
 // }
 
 // void CmndBh1750MTime(void) {
-//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= Bh1750.count)) {
+//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= settings.sensor_count)) {
 //     if ((XdrvMailbox.payload > 30) && (XdrvMailbox.payload < 255)) {
 //       device_data[XdrvMailbox.index -1].mtreg = XdrvMailbox.payload;
 //       Bh1750SetMTreg(XdrvMailbox.index -1);

@@ -4,6 +4,16 @@
 
 // /********************************************************************************************/
 
+void mSettings::SettingsInit(void)
+{
+  #ifdef ENABLE_DEVFEATURE_SETTINGS_JULY2022
+  if (SETTINGS_LOCATION > 0xFA) {
+    SETTINGS_LOCATION = 0xFD;       // Skip empty partition part and keep in first 1M
+  }
+  #endif
+}
+
+
 void mSettings::SettingsDefault(void)
 {
 

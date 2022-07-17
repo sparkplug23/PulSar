@@ -214,7 +214,7 @@ void mBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
         float read_pressure    = sensor[sensor_id].bme->readPressure();
         float read_altitude    = sensor[sensor_id].bme->readAltitude(pCONT_iSensors->settings.sealevel_pressure);
 
-        if(read_temperature == 141.0f) // Invalid reading
+        if(read_temperature == NAN) // Invalid reading
         {
           ALOG_ERR( PSTR(D_LOG_BME "Invalid Reading") );
           sensor[sensor_id].isvalid = false;

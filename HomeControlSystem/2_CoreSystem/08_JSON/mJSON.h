@@ -205,38 +205,38 @@ char* GetPtr();
       ){ 
         *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
 
-      #ifdef DEBUG_JSON_BUILDER
-      char buffer_id[50];
-      uint8_t id = getIdentifierID4(value);
-      GetIndentifierNameByID(id, buffer_id);
-      DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
-      #endif
-      
-        // float f = reinterpret_cast<float>(value);
-      if(is_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%d",key,value);
-      }else
-      if(is_string_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
-      }else
-      if(is_char_type<T>::value){   
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
-      }else
-      if (is_float_type<T>::value){ 
-        float f = 0;     memcpy(&f,&value,sizeof(f));
-        char fvalue[20]; dtostrfd2(f,3,fvalue);
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
-      }
+        #ifdef DEBUG_JSON_BUILDER
+        char buffer_id[50];
+        uint8_t id = getIdentifierID4(value);
+        GetIndentifierNameByID(id, buffer_id);
+        DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
+        #endif
+        
+          // float f = reinterpret_cast<float>(value);
+        if(is_number_type<T>::value){ 
+          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%d",key,value);
+        }else
+        if(is_string_type<T>::value){ 
+          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+        }else
+        if(is_char_type<T>::value){   
+          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
+        }else
+        if (is_float_type<T>::value){ 
+          float f = 0;     memcpy(&f,&value,sizeof(f));
+          char fvalue[20]; dtostrfd2(f,3,fvalue);
+          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+        }
 
-      /**
-       * @brief debug size
-       **/
-      if(*writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
-      {
-        //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), *writer.length);
-      }
+        /**
+         * @brief debug size
+         **/
+        if(*writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
+        {
+          //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), *writer.length);
+        }
 
-    }
+      }
 
 
 

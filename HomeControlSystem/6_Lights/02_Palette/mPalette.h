@@ -48,14 +48,14 @@ enum fMapIDs_Type__IDS{
   MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID=0,
   MAPIDS_TYPE_HSBCOLOUR_NOINDEX__ID,
   MAPIDS_TYPE_HSBCOLOUR_WITHINDEX__ID,
-  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out
+  // MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out    // Do I really need this?
   
   MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID,
   MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID,
   
   MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID,
   MAPIDS_TYPE_RGBCOLOUR_WITHINDEX__ID,
-  MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out, assume max index IS set all
+  // MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out, assume max index IS set all
 
   // I need a RGBW channel
 
@@ -78,35 +78,8 @@ enum fIndexs_Type__IDS{
   INDEX_TYPE_SCALED_100 
 };
 
-// #define ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
 
 class mPalette 
-
-// #ifdef ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
-// // :
-// //   public mTaskerInterface
-// {
-//   // private:
-//     /* Prevent others from being created */
-//     // mPalette(mPalette const& other) = delete;
-//     // mPalette(mPalette&& other) = delete;
-//     /* Private constructor to prevent instancing. */
-//   public:
-//     // // External function to get instance
-//     // static mPalette* GetInstance();
-//     // /* Here will be the instance stored. */
-//     // static mPalette* instance;
-
-//     mPalette(){};
-
-
-
-
-
-
-//     #else
-
- 
 {
   private:
     /* Prevent others from being created */
@@ -270,6 +243,7 @@ class mPalette
   };
   enum PALETTELIST_STATIC__IDS{
     // Shelf Lights ie has some static leds
+    // This shall be changed later be done via mapping 
     PALETTELIST_STATIC_SHELF_HEARTS__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,//PALETTELIST_VARIABLE_HSBID_LENGTH__ID,
     
     // to be moved to top of list later
@@ -620,8 +594,16 @@ class mPalette
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
 
-    RgbcctColor GetColourFromPalette(uint16_t palette_id,       uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
-    RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr);
+    RgbcctColor GetColourFromPalette(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr); //pixel position should be uint8_t only
+    RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
+
+    /**
+     * @brief Intermediate functions as I phase out old palette methods
+     **/
+    RgbcctColor GetColourFromPalette_Intermediate(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
+    RgbcctColor GetColourFromPalette_Intermediate(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
+    uint32_t color_from_palette_Intermediate(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
+
 
     /**
      * @brief Next method to merge fastled and my methods together
@@ -633,13 +615,23 @@ class mPalette
     RgbcctColor GetColourFromPalette_Gradient(uint16_t palette_id, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr, /*uint16_t i, is pixel_id*/ bool mapping = false, bool wrap = true, uint8_t mcol = 0, uint8_t pbri = 255, TBlendType blendType=NOBLEND, uint16_t palette_spread_length__virtualSegmentLength = 50);
     #endif //ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
 
+    
+    RgbcctColor GetColourFromPaletteAdvanced(
+      uint16_t palette_id = 0,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
+      uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      uint8_t* discrete_colours_in_palette = nullptr
+    );
 
-    // #ifdef ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
 
-    void UpdatePalette_FastLED_TargetPalette(void);
+    void UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette = nullptr);
     void load_gradient_palette(uint8_t index);
 
-    // #endif // ENABLE_DEVFEATURE_MOVE_ALL_PALETTE_FASTLED_WLED_INTO_PALETTE_CLASS
+
 
 
     PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
@@ -683,12 +675,7 @@ class mPalette
 
 };
 
-
-// #ifndef ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
 #define mPaletteI mPalette::GetInstance()
-// #endif  // ENABLE_DEVFEATURE_CHANGE_MPALETTE_TO_NON_STATIC
-
-
 
 #endif
 

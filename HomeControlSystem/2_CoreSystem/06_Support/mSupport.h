@@ -119,6 +119,7 @@ extern "C" {
 extern struct rst_info resetInfo;
 }
 
+
 const char D_CSTRING_ERROR_MESSAGE_CTR[] = "Error";
 const char PM_CSTRING_ERROR_MESSAGE_CTR[] PROGMEM = "Error";
 
@@ -300,6 +301,12 @@ extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack
 //   // va_end(arg);
 //   // return;
 // }
+
+extern uint32_t ResetReason_g(void);
+
+extern void SafeMode_StartAndAwaitOTA();
+
+
 
     const uint32_t crash_magic = 0x53415400;   // Stack trace magic number (TASx)
     const uint32_t crash_rtc_offset = 32;      // Offset in RTC memory skipping OTA used block

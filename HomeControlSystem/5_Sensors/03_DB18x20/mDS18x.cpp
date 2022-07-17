@@ -312,6 +312,9 @@ void mDS18X::Init(void){
 
           sensor_group[sensor_group_id].dallas->setResolution(sensor[sensor_count].address, TEMPERATURE_PRECISION);
 
+          // Add delay to enable setresolution to work better
+          delay(50);
+
 
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin Group %d, count %d, sensor count %d"),sensor_group_id,sensor_id,sensor_count);
           // WDT_FEED();

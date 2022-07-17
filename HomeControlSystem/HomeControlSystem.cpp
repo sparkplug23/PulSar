@@ -42,9 +42,40 @@
   void hw_wdt_enable(){ 
     *((volatile uint32_t*) 0x60000900) |= 1; // Hardware WDT ON 
   }
-#endif
-
+  #endif
 #endif // ESP32
+
+#ifdef USE_EMERGENCY_RESET
+/*********************************************************************************************\
+ * Emergency reset if Rx and Tx are tied together
+\*********************************************************************************************/
+
+void EmergencySerial_SettingsReset(void) {
+  Serial.begin(115200);
+  Serial.write(0xA5);
+  Serial.write(0x5A);
+  delay(1);
+  if (Serial.available() == 2) {
+    if ((Serial.read() == 0xA5) && (Serial.read() == 0x5A)) {
+      SettingsErase(3);       // Reset all settings including QuickPowerCycle flag
+
+      do {                    // Wait for user to remove Rx Tx jumper and power cycle
+        Serial.write(0xA5);
+        delay(1000);          // Satisfy SDK
+      } while (Serial.read() == 0xA5);  // Poll for removal of jumper
+
+      ESP_Restart();          // Restart to init default settings
+    }
+  }
+  Serial.println();
+  Serial.flush();
+#ifdef ESP32
+  delay(10);                  // Allow time to cleanup queues - if not used hangs ESP32
+  Serial.end();
+  delay(10);                  // Allow time to cleanup queues - if not used hangs ESP32
+#endif  // ESP32
+}
+#endif  // USE_EMERGENCY_RESET
 
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
@@ -59,10 +90,11 @@ void setup(void)
  
   #ifdef ESP32
   #ifdef DISABLE_ESP32_BROWNOUT
-    DisableBrownout();
-  #endif
+    DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
+  #endif  // DISABLE_ESP32_BROWNOUT
+
   #ifdef CONFIG_IDF_TARGET_ESP32
-    // // restore GPIO16/17 if no PSRAM is found
+    // restore GPIO16/17 if no PSRAM is found
     // if (!FoundPSRAM()) {
     //   // test if the CPU is not pico
     //   uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
@@ -75,12 +107,93 @@ void setup(void)
   #endif  // CONFIG_IDF_TARGET_ESP32
   #endif  // ESP32
 
+
+  /********************************************************************************************
+   ** Fastboot: >> Base Setup Recovery <<  
+   *     - If Settings, TaskerManager etc is corrupt
+   *     - Minimal code must run above this (Serial start, RTC check)
+   * @note AddLog can not be used
+  ********************************************************************************************/
+
+  /**
+   * @brief Only enable serial first if fastboot debugging
+   **/
+  #ifdef DEBUG_FASTBOOT
+  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
+  Serial.println(F("\n\rSerial Enabled Early for FastBoot Debug" DEBUG_INSERT_PAGE_BREAK));
+  #endif
+
+  #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+
+  RtcFastboot_Load();
+
+  if (!RtcFastboot_Valid())
+  {
+    RtcFastboot.fast_reboot_count = 0;
+  }
+  
+  /**
+   * @brief Good Boot: Waking from sleep, keep reseting the counter
+   **/
+  if (ResetReason_g() == REASON_DEEP_SLEEP_AWAKE) 
+  {
+    RtcFastboot.fast_reboot_count = 0;  // Disable fast reboot and quick power cycle detection
+  } 
+  /**
+   * @brief Bad Boot: Increment count
+   **/
+  else
+  {
+    RtcFastboot.fast_reboot_count++;
+    #ifdef DEBUG_FASTBOOT
+    Serial.printf("FastBoot: Count %d\n\r", RtcFastboot.fast_reboot_count); 
+    #endif
+  }
+  
+  RtcFastboot_Save(); // Save reboot
+
+
+  /**
+   * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
+   * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
+   **/
+  #if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+  if(RtcFastboot.fast_reboot_count > 10)
+  {
+    SafeMode_StartAndAwaitOTA();
+  }
+  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+
+#ifdef ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+Serial.flush();
+delay(1000);
+pCONT_sup->CmndCrash();
+#endif  // ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+
+/********************************************************************************************
+ ** RTC Settings ********************************************************************************
+ ********************************************************************************************/
+  
+  // Load the baudrate from RTC into temp value, and after FlashSettings are loaded, move its value into flash settings
+  uint32_t baudrate_tmp = 115200;
+
+  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
+  if (RtcSettingsLoad(0)) {
+    uint32_t baudrate = (RtcSettings.baudrate / 300) * 300;  // Make it a valid baudrate
+    if (baudrate) { baudrate_tmp = baudrate; } // Only modify if valid
+  }
+  #endif // ENABLE_DEVFEATURE_RTC_SETTINGS
+
 /********************************************************************************************
  ** Serial **********************************************************************************
  ********************************************************************************************/
  
   #ifndef DISABLE_SERIAL0_CORE
-  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
+  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
   #endif // DISABLE_SERIAL0_CORE
   #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
@@ -92,6 +205,12 @@ void setup(void)
   #endif
   #endif
 
+  Serial.printf("baudrate_tmp = %d\n\r", baudrate_tmp);
+
+  #ifdef ENABLE_DEVFEATURE_SETDEBUGOUTPUT
+  Serial.setDebugOutput(true);
+  #endif 
+  
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
@@ -104,6 +223,12 @@ void setup(void)
    * @brief Start the Tasker_Interface module
    **/
   pCONT->Instance_Init();
+  
+/********************************************************************************************
+ ** Init Pointers ***************************************************************************
+ ********************************************************************************************/
+ 
+  ALOG_INF(PSTR("AddLog Started"));
 
 /********************************************************************************************
  ** Set boottime values *********************************************************************
@@ -114,53 +239,6 @@ void setup(void)
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
   
   RESET_BOOT_STATUS();
-
-/********************************************************************************************
- ** RTC and Fastboot ************************************************************************
- ********************************************************************************************/
-
-  #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
-  // fastboot is currently contained within settings class, but this requires a stable class config.
-  // I should consider not using cpp classes for the RTC, perhaps just header code, so truly basic and simple/safe code will always work
-  // For now, get working as tas did (for v2) and use the header only method as version 3
-  pCONT_set->RtcPreInit();
-
-  pCONT_set->RtcRebootLoad();
-  if (!pCONT_set->RtcRebootValid()) {
-    pCONT_set->RtcReboot.fast_reboot_count = 0;
-  }
-#ifdef FIRMWARE_MINIMAL
-  pCONT_set->RtcReboot.fast_reboot_count = 0;    // Disable fast reboot and quick power cycle detection
-#else
-  if (ResetReason() == REASON_DEEP_SLEEP_AWAKE) {
-    pCONT_set->RtcReboot.fast_reboot_count = 0;  // Disable fast reboot and quick power cycle detection
-  } else {
-    pCONT_set->RtcReboot.fast_reboot_count++;
-  }
-#endif
-  RtcRebootSave();
-
-  if (RtcSettingsLoad(0)) {
-    uint32_t baudrate = (RtcSettings.baudrate / 300) * 300;  // Make it a valid baudrate
-    if (baudrate) { TasmotaGlobal.baudrate = baudrate; }
-  }
-  Serial.begin(TasmotaGlobal.baudrate);
-  Serial.println();
-#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
-
-
-                      /**
-                       * @brief TO BE DELETED
-                       * 
-                       */
-                        #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
-                        pCONT_set->RtcRebootLoad();
-                        if(!pCONT_set->RtcRebootValid()) { 
-                          pCONT_set->RtcReboot.fast_reboot_count = 0; 
-                        }
-                        pCONT_set->RtcReboot.fast_reboot_count++;
-                        pCONT_set->RtcRebootSave();
-                        #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
 /********************************************************************************************
  ** Show PSRAM Present **********************************************************************
@@ -181,6 +259,12 @@ void setup(void)
 // #endif // ESP32
 
 /********************************************************************************************
+ ** Internal RTC Time PreInit ***************************************************************
+ ********************************************************************************************/
+
+  pCONT_time->RtcPreInit();
+
+/********************************************************************************************
  ** File System *****************************************************************************
  ********************************************************************************************/
 
@@ -191,11 +275,43 @@ void setup(void)
   // pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
   // #endif
 
+
+//  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
+// #ifdef ESP32
+//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
+//             FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+//   AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
+//   #if !defined(HAS_PSRAM_FIX)
+//   if (FoundPSRAM() && !CanUsePSRAM()) {
+//     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+//   }
+//   #endif
+// #else // ESP32
+//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str()); // This function GetDeviceHardware needs added and supporting functions
+// #endif // ESP32
+
+#ifdef USE_UFILESYS
+  UfsInit();  // xdrv_50_filesystem.ino
+#endif
+
 /********************************************************************************************
  ** Settings ********************************************************************************
  ********************************************************************************************/
 
+  pCONT_set->SettingsInit();
+
+  #ifdef USE_EMERGENCY_RESET
+    EmergencySerial_SettingsReset();
+  #endif  // USE_EMERGENCY_RESET
+
   pCONT_sup->init_FirmwareVersion();
+
+  /**
+   * @brief Before getting settings to work, I need to first get UFS working and understand it, as its the future of settings saving. 
+   * Both methods need to be working.
+   * 
+   * File system saving will become useful when I create an esp32 gps data logger as part of future LTE monitor.
+   */
 
   // pCONT_set->TestSettingsLoad();
   // pCONT_set->TestSettings_ShowLocal_Header();
@@ -223,13 +339,100 @@ void setup(void)
 
   // pCONT_set->TestSettingsLoad();
 
+//   if (ResetReason() != REASON_DEEP_SLEEP_AWAKE) {
+// #ifdef ESP8266
+//     Settings->flag4.network_wifi = 1;           // Make sure we're in control
+// #endif
+// #ifdef ESP32
+//     if (!Settings->flag4.network_ethernet) {
+//       Settings->flag4.network_wifi = 1;         // Make sure we're in control
+//     }
+// #endif
+//   }
+
+
+
 /********************************************************************************************
- ** Load Templates **************************************************************************
+ ** OsWatch ********************************************************************************
+ ********************************************************************************************/
+
+  // OsWatchInit();
+
+/********************************************************************************************
+ ** Fastboot ********************************************************************************
+ ********************************************************************************************/
+
+  /********************************************************************************************
+   ** Fastboot: >> Configuration Recovery <<  
+   *     - Loaded settings to determine how fastboot is configured
+   *     - This code must run before drivers/sensors are initiated, so they may be disabled if recovery is required
+  ********************************************************************************************/
+  #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  
+    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
+
+    if (pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) // SetOption36
+    {         
+      // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
+      if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
+        
+        // Settings->flag3.user_esp8285_enable = 0;       // SetOption51 - Enable ESP8285 user GPIO's - Disable ESP8285 Generic GPIOs interfering with flash SPI
+        if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
+          // for (
+            uint32_t i = 0; //i < MAX_RULE_SETS; i++) {
+          //   if (bitRead(Settings->rule_stop, i)) {
+          //     bitWrite(Settings->rule_enabled, i, 0);  // Disable rules causing boot loop
+          ALOG_INF( PSTR("Fastboot: Disable Rule %d"), i );
+          //   }
+          // }
+        }
+        if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
+          // Settings->rule_enabled = 0;                  // Disable all rules
+          // TasmotaGlobal.no_autoexec = true;
+          ALOG_INF( PSTR("Fastboot: Disable All Rules") );
+        }
+        if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
+          // for (uint32_t i = 0; i < nitems(Settings->my_gp.io); i++) {
+          //   Settings->my_gp.io[i] = GPIO_NONE;         // Reset user defined GPIO disabling sensors
+          // }
+          ALOG_INF( PSTR("Fastboot: Disable GPIO Functions") );
+        }
+        if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
+          // Settings->module = Settings->fallback_module;  // Reset module to fallback module
+          // Settings->last_module = Settings->fallback_module;
+          ALOG_INF( PSTR("Fastboot: Reset Module") );
+        }
+        AddLog(LOG_LEVEL_INFO, PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
+      }
+    }
+
+#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+
+/********************************************************************************************
+ ** Reconfigure baud rate if SettingsLoad changed it ****************************************
+ ********************************************************************************************/
+
+  // TasmotaGlobal.seriallog_level = Settings->seriallog_level;
+  // TasmotaGlobal.syslog_level = Settings->syslog_level;
+
+  // TasmotaGlobal.module_changed = (Settings->module != Settings->last_module);
+  // if (TasmotaGlobal.module_changed) {
+  //   Settings->baudrate = APP_BAUDRATE / 300;
+  //   Settings->serial_config = TS_SERIAL_8N1;
+  // }
+  // SetSerialBaudrate(Settings->baudrate * 300);  // Reset serial interface if current baudrate is different from requested baudrate
+
+/********************************************************************************************
+ ** Quick Power Cycle ***********************************************************************
  ********************************************************************************************/
 
   // if (1 == RtcReboot.fast_reboot_count) {      // Allow setting override only when all is well
   //   UpdateQuickPowerCycle(true);
   // }
+
+/********************************************************************************************
+ ** Load Templates **************************************************************************
+ ********************************************************************************************/
    
   pCONT->Tasker_Interface(FUNC_POINTER_INIT); // confirgure any memory address needed as part of module init or templates
   
@@ -301,6 +504,7 @@ void setup(void)
 
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
 
+
 }
 
 void LoopTasker()
@@ -308,13 +512,12 @@ void LoopTasker()
   
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
-  #endif  // USE_ARDUINO_OTA
+  #endif
    
   pCONT->Tasker_Interface(FUNC_LOOP); DEBUG_LINE;
-  
+ 
   if(pCONT_time->uptime.seconds_nonreset > 30){ pCONT->Tasker_Interface(FUNC_FUNCTION_LAMBDA_LOOP); } // Only run after stable boot
  
-  //move into support, or into time, to align with every_minute, hour, etc
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
@@ -340,10 +543,12 @@ void SmartLoopDelay()
         pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_var.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
       } else {
 
-        // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect
+        // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect 
+        // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
         if (pCONT_set->global_state.wifi_down) {
-          pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2); // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
+          pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2);
         }
+
       }
     }
   }
@@ -355,6 +560,7 @@ void loop(void)
 {
   pCONT_sup->activity.loop_counter++;
   pCONT_sup->loop_start_millis = millis();
+  
   WDT_RESET();
   
   LoopTasker();
@@ -370,7 +576,7 @@ void loop(void)
   SmartLoopDelay();
 
   DEBUG_LINE;
-  if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; }            // We cannot divide by 0
+  if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; } // We cannot divide by 0
   pCONT_sup->loop_delay_temp = pCONT_set->runtime_var.sleep; 
   if (!pCONT_sup->loop_delay_temp) { pCONT_sup->loop_delay_temp++; }              // We cannot divide by 0
   pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)

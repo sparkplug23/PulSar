@@ -1552,6 +1552,7 @@
 #define D_JSON_VERSION "Version"
 #define D_JSON_VERSIONNAME "VersionName"
 #define D_JSON_VERSIONNUMBER "VersionNumber"
+#define D_JSON_VERSIONNUMBER_MINIMUM "VersionNumberMininum"
 #define D_JSON_VOLTAGE "Voltage"
 #define D_JSON_WEIGHT "Weight"
 #define D_JSON_WEB "Web"
@@ -1591,6 +1592,8 @@
 
 #define D_JSON_SCENE "Scene"
 #define D_JSON_COLOUR "Colour"
+
+#define D_JSON_SENSOR_TYPE "SensorType"
 
 
 
@@ -1667,6 +1670,8 @@
 #define D_JSON_MODULEID "ModuleID"
 #define D_JSON_MINUTES_ON "minutes_on"
 #define D_JSON_NAME "Name"
+
+#define D_JSON_MEMORY_INSUFFICIENT "Memory Insufficient"
 
 #define D_JSON_SCENENAME "SceneName"
 #define D_JSON_ANIMATIONMODE "AnimationMode"

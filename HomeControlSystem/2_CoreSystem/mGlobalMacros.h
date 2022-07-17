@@ -19,6 +19,12 @@
 #define DEFINE_PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
 
+// fixing "abs" on esp32 later platform API
+
+// #define ABS_FUNCTION(x) static_cast<long long int>abs(x)
+
+#define ABS_FUNCTION(x) llabs(x)
+
 // enable additional debug output
 // Need to add disables here! 
 #define DEBUG_PRINT Serial.print

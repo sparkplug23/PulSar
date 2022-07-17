@@ -54,7 +54,7 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
   #endif
 
   uint16_t desired_pixel = 0; // always first
-  int16_t start_pixel_position = -1;
+  uint8_t start_pixel_position = 0;
   RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, desired_pixel, &start_pixel_position);
 
   return colour;
@@ -141,9 +141,9 @@ bool mInterfaceLight::Pre_Init(void)
 
 void mInterfaceLight::Template_Load(){
 
-  #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-  AddLog(LOG_LEVEL_DEBUG, PSTR("mInterfaceLight::Template_Load()"));
-  #endif
+  // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("mInterfaceLight::Template_Load()"));
+  // #endif
 
   #ifdef USE_LIGHTING_TEMPLATE
   // load from progmem into local
@@ -704,13 +704,17 @@ void mInterfaceLight::RulesEvent_Set_Power()
  * This function, is the entry point for the output that is hardware dependent 
  * colour_hardware will already have colour_order mapped
  * */
-void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index, bool flag_replicate_for_total_pixel_length){
+void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16_t index, bool flag_replicate_for_total_pixel_length){
+
+  #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+   ALOG_INF( PSTR("SetPixelColor: %d\t(%d,%d,%d,%d,%d) pal%d"), index, colour.R, colour.G, colour.B, colour.W1, colour.W2, pCONT_lAni->_segments[pCONT_lAni->segment_active_index].palette.id );
+  #endif
 
   switch(pCONT_set->Settings.light_settings.type){
     case LT_ADDRESSABLE_WS281X:
     case LT_ADDRESSABLE_SK6812:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      pCONT_ladd->SetPixelColorHardware(index, colour_hardware, flag_replicate_for_total_pixel_length);
+      pCONT_ladd->SetPixelColorHardware(index, colour, flag_replicate_for_total_pixel_length);
       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
     break;
     case LT_PWM1:
@@ -719,7 +723,7 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour_hardwar
     case LT_PWM4:
     case LT_PWM5:
       #ifdef USE_MODULE_LIGHTS_PWM
-      pCONT_lPWM->SetPixelColorHardware(index,colour_hardware);
+      pCONT_lPWM->SetPixelColorHardware(index, colour);
       #endif // USE_MODULE_LIGHTS_PWM
     break;
   }

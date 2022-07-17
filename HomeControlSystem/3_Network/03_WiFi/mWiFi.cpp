@@ -1,6 +1,5 @@
 #include "mWiFi.h"
 
-
 #ifdef USE_MODULE_NETWORK_WIFI
 
 #ifdef ESP8266

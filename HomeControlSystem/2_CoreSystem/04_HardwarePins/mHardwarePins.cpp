@@ -793,7 +793,7 @@ void mHardwarePins::TemplateJson()
 
 
 int16_t mHardwarePins::GetModuleIDbyName(const char* c){
-  if(c=='\0'){ return -1; }
+  if(*c=='\0'){ return -1; }
   if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC_ID; }
   if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)==0){    return MODULE_SONOFF_BASIC_EXTERNAL_ID; }
   else if(strcmp_P(c,PM_MODULE_NAME_H801_CTR)==0){            return MODULE_H801_ID; }
@@ -853,7 +853,7 @@ const char* mHardwarePins::GetModuleNameByID(uint8_t id, char* buffer){
 // Notes: "else" not included in if structure as return is used 
 //
 int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
-  if(c=='\0'){ return -1; }
+  if(*c=='\0'){ return -1; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_NONE_CTR)==0){       return GPIO_NONE_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA1_CTR)==0){   return GPIO_RGB_DATA1_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_RGB_DATA_CTR)==0){   return GPIO_RGB_DATA_ID; }

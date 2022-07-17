@@ -274,7 +274,9 @@ uint32_t i = 0;
   settings_crc32 = GetSettingsCrc32();
 #endif  // FIRMWARE_MINIMAL
 
-  // RtcSettingsLoad();
+  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
+  RtcSettingsLoad(1);
+  #endif
 
       // DEBUG_LINE_HERE;
   #endif //  ESP8266
@@ -467,7 +469,12 @@ void mSettings::SettingsSave(uint8_t rotate)
 
 
 // #endif  // FIRMWARE_MINIMAL
+
+  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
   RtcSettingsSave();
+  #endif
+
+  
   #endif //  ESP8266
 }
 

@@ -5,17 +5,6 @@
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-/*
-go with a singleton if you really need one global instance, better and safer than extern
-struct singleton
-{
-static singleton& get()
-{
-static singleton potato;
-return potato;
-}
-};
-*/
 
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 
@@ -23,14 +12,10 @@ return potato;
   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
   #endif
-
 #else
-
   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3000
   #endif
-
-
 #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
@@ -722,39 +707,27 @@ uint32_t settings_location = SETTINGS_LOCATION;
 // uint32_t settings_crc = 0;
 uint32_t settings_crc32 = 0;
 uint8_t *settings_buffer = nullptr;
-uint32_t rtc_reboot_crc = 0;
 #endif // ESP8266
 
 int16_t GetFunctionIDbyFriendlyName(const char* c);
 
 void SettingsLoad_CheckSuccessful();
 
-#ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+void SettingsInit();
 
-bool RtcSettingsLoad(uint32_t update);
 
-  void RtcRebootReset(void);
-  uint32_t GetRtcSettingsCrc(void);
-  void RtcSettingsSave(void);
-  void RtcSettingsLoad(void);
-  bool RtcSettingsValid(void);
-  uint32_t GetRtcRebootCrc(void);
-  void RtcRebootSave(void);
-  void RtcRebootLoad(void);
-  bool RtcRebootValid(void);
+// #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2 // old
+//   void RtcRebootReset(void);
+//   uint32_t GetRtcSettingsCrc(void);
+//   void RtcSettingsSave(void);
+//   void RtcSettingsLoad(void);
+//   bool RtcSettingsValid(void);
+//   uint32_t GetRtcFastbootCrc(void);
+//   void RtcRebootSave(void);
+//   void RtcRebootLoad(void);
+//   bool RtcRebootValid(void);
+// #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
-#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
-#ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2 // old
-  void RtcRebootReset(void);
-  uint32_t GetRtcSettingsCrc(void);
-  void RtcSettingsSave(void);
-  void RtcSettingsLoad(void);
-  bool RtcSettingsValid(void);
-  uint32_t GetRtcRebootCrc(void);
-  void RtcRebootSave(void);
-  void RtcRebootLoad(void);
-  bool RtcRebootValid(void);
-#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
 
 
   void SetFlashModeDout(void);
@@ -828,14 +801,6 @@ typedef union {
 } StateBitfield;
 
 
-
-// /*********************************************************************************************\
-//  * RTC memory
-// \*********************************************************************************************/
-
-const uint16_t RTC_MEM_VALID = 0xA55A;
-
-uint32_t rtc_settings_crc = 0;
 
 #define PARAM8_SIZE 18            // Number of param bytes (SetOption)
 
@@ -1456,7 +1421,7 @@ struct SYSCFG {
   int16_t       save_data;                 // 014
   myio          module_pins;                     // 484     
   // char          ota_url[101];              // 017
-  uint8_t       baudrate;                  // 09D
+  uint8_t       baudrate;                  // 09D  // saved as (/300) value. ie 9600/300 => 32, 115200=>384?? I want to change this to full uint32_t for higher speed bauds
   uint8_t       rule_stop;                 // 1A7
   //LoggingSettings logging;
   uint8_t       seriallog_level;           // 09E

@@ -287,6 +287,8 @@ void RtcSync(void);
 
     void RtcSecond();
     
+    uint32_t GetUTCTime();
+    
 uint32_t RuleToTime(TimeRule r, int yr);
 
 // void BreakTime(uint32_t time_input, struct TIME_T &tm);
@@ -358,6 +360,7 @@ struct RTC {
 
 
     void RtcInit(void);
+    void RtcPreInit(void);
 
 
     datetime_t GetTimefromCtr(const char* c);

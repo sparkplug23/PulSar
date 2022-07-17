@@ -137,12 +137,12 @@ enum LightTypes_IDS{
 
 // Arrays to hold palettes, called via pointer
 // Variable user maps need to be variable  
-#ifndef D_PALETTE_HSBID_NAME_CTR
-#define D_PALETTE_HSBID_NAME_CTR        "User"   
-#endif
-#ifndef D_PALETTE_RGBCCT_COLOURS_NAME_CTR
-#define D_PALETTE_RGBCCT_COLOURS_NAME_CTR        "RGBCCTColour"   
-#endif
+// #ifndef D_PALETTE_HSBID_NAME_CTR
+// #define D_PALETTE_HSBID_NAME_CTR        "User"   
+// #endif
+// #ifndef D_PALETTE_RGBCCT_COLOURS_NAME_CTR
+// #define D_PALETTE_RGBCCT_COLOURS_NAME_CTR        "RGBCCTColour"   THESE ARE WRONG
+// #endif
 #define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
 
 

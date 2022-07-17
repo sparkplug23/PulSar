@@ -3,17 +3,293 @@
 
 struct DATA_BUFFER data_buffer;
 
-// struct TIME_T RtcTime;
-// struct TIMERULES TimeRules;
-// union TimeRule TimeRuleTest;
-
-
 const char* mSettings::PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
 const char* mSettings::PM_MODULE_CORE_SETTINGS_FRIENDLY_CTR = D_MODULE_CORE_SETTINGS_FRIENDLY_CTR;
 
 
 
-    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+// Settings will contain all jsoncommands for "CoreSystem"
+
+//overload fix when only one parameter is called
+int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t param1){  
+//   JsonObjectConst dummy; return Tasker(function, dummy);
+// }
+// template<typename T>
+// int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj), T param1){ 
+
+  // DEBUG_PRINT_FUNCTION_NAME_TEST;
+  switch(function){
+    case FUNC_INIT:
+    
+
+    break;
+    case FUNC_LOOP:
+
+      // if(mTime::TimeReached(&tSavedSavingTest,10000)){
+      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
+      //   // SettingsSave(1);
+      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
+      //   // SettingsLoad();
+      //   //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1before"));
+      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT);
+      //   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1after"));
+
+      // }
+
+    break;
+    case FUNC_EVERY_SECOND:{
+
+    // Function_Template_Load();
+
+
+    // 
+    // TestSettingsLoad();
+
+    /**
+     * Decounter until saving.
+     * This is used when I want to force save data after an update has happened, but want the storage event to be delayed so it doesn't slow the event (eg relay set, mqtt response)
+     * */
+    if(settings_save_decounter_seconds_delayed_save)
+    {
+      settings_save_decounter_seconds_delayed_save--;
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_TEST, PSTR("settings_save_decounter_seconds_delayed_save = %d"), settings_save_decounter_seconds_delayed_save);
+    #endif // ENABLE_LOG_LEVEL_INFO
+      if(settings_save_decounter_seconds_delayed_save==0)
+      {
+        pCONT_set->SettingsSaveAll();
+      }
+    }
+
+/**
+ * @brief I will implement this, but its another receovery option not related the RTC Fastboot
+ * 
+ */
+  // if (POWER_CYCLE_TIME == TasmotaGlobal.uptime) {
+  //   UpdateQuickPowerCycle(false);
+  // }
+
+// I think this is in time module, check it (the bootcount is I think, not sure about boot_loop_time, this should be moved into settings)
+
+// Save stable start
+  if (BOOT_LOOP_TIME == pCONT_time-> uptime.seconds_nonreset) {
+
+    #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+    RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
+    #endif
+
+#ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
+flag_rtc_reboot_reset_on_success = true;
+ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
+#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
+
+
+    //Settings->last_module = Settings->module;
+
+#ifdef USE_DEEPSLEEP
+    if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
+      // SetOption76  - (Deepsleep) Enable incrementing bootcount (1) when deepsleep is enabled
+#endif
+      // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
+#ifdef USE_DEEPSLEEP
+    }
+#endif
+  }
+    
+  // AddLog(LOG_LEVEL_DEBUG,PSTR( "TaskerTest SUCCESS!!"));
+
+
+  // AddLog(LOG_LEVEL_DEBUG,PSTR( "GetNameBuffer_Length=%d"),DeviceNameListI->GetNameBuffer_Length());
+
+
+
+// SystemSettings_DefaultBody_Network();
+
+       // AddLog(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
+
+
+       
+     } break;
+    case FUNC_EVERY_FIVE_SECOND:{
+
+
+      // #ifdef ENABLE_LOG_LEVEL_INFO
+      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
+      // #endif// ENABLE_LOG_LEVEL_INFO
+    // Function_Template_Load();
+
+#ifdef ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
+
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(LOG_LEVEL_TEST, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  #endif // ENABLE_LOG_LEVEL_INFO
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  
+
+  D_DATA_BUFFER_CLEAR();
+
+  // char buffer_unescaped[100];
+  
+  // pCONT_sup->GetTextIndexed(
+  //   buffer_unescaped, 
+  //   sizeof(buffer_unescaped), 
+  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
+  //   pCONT_rules->jsonbuffer.data
+  // ); 
+
+  // for(int i=0;i<strlen(buffer_unescaped);i++){
+  //   // if(buffer_unescaped[i] == '\"'){
+  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
+  //   // }else{    
+  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
+  //   // }
+  // }
+  
+  // char buffer_unescaped[100];
+  
+  pCONT_sup->GetTextIndexed(
+    data_buffer.payload.ctr, 
+    sizeof(data_buffer.payload.ctr), 
+    pCONT_rules->rules[0].command.json_commands_dlist_id, 
+    pCONT_rules->jsonbuffer.data
+  ); 
+  data_buffer.payload.len += strlen(data_buffer.payload.ctr);
+
+  // for(int i=0;i<strlen(buffer_unescaped);i++){
+  //   // if(buffer_unescaped[i] == '\"'){
+  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
+  //   // }else{    
+  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
+  //   // }
+  // }
+  
+
+  // sprintf(data_buffer.payload.ctr,"\"");
+  
+  // pCONT_sup->GetTextIndexed(
+  //   data_buffer.payload.ctr+strlen(data_buffer.payload.ctr), 
+  //   sizeof(data_buffer.payload.ctr), 
+  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
+  //   pCONT_rules->jsonbuffer.data
+  // ); 
+  // sprintf(data_buffer.payload.ctr+strlen(data_buffer.payload.ctr),"\"");
+
+  AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID1=%s"),data_buffer.payload.ctr);
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+  
+  // snprintf(data_buffer.payload.ctr,pCONT_rules->rules[0].command.);
+  // // memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
+  // data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+#endif // ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
+
+
+
+      // int8_t device_id;
+      // int8_t class_id = E M_MODULE_DRIVERS_RELAY_ID;
+      // AddLog(LOG_LEVEL_INFO,PSTR("FUNC_EVERY_FIVE_SECOND\n\r\n\r"));
+
+      // int16_t device_id_found = GetDeviceIDbyName("Socket",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
+      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+
+      // device_id_found = GetDeviceIDbyName("Plug",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
+      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+
+      // device_id_found = GetDeviceIDbyName("Plug2",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
+      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+
+      // device_id_found = GetDeviceIDbyName("Plug3",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
+      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
+
+    }break;
+
+    case FUNC_EVERY_MINUTE:
+    // Change to saving using counter later, Settings.save_data
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
+    #endif // ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+      // Update Settings with local module values that need saving
+      pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
+
+      // pCONT_set->SettingsSave(1);
+      pCONT_set->SettingsSaveAll();
+
+      #else 
+      
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      DEBUG_PRINTLN("SettingsSave dis");
+      
+    #endif // ifdef ENABLE_LOG_LEVEL_INFO
+      #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+
+      // Serial.println("FUNC_EVERY_MINUTE");
+      
+// #ifdef DISABLE_SETTINGS_SAVING_BUG
+      // pCONT_set->SettingsSave(1);
+    // #endif
+    break;
+    case FUNC_ON_BOOT_SUCCESSFUL:
+      Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
+      #endif// ENABLE_LOG_LEVEL_INFO
+
+          
+      // #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
+      //   #ifdef DEBUG_SERIAL_TESTING
+      //     Settings.seriallog_level = LOG_LEVEL_COMMANDS;
+      //   #else
+      //     Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
+      //   #endif
+      //   Settings.weblog_level = LOG_LEVEL_INFO;
+      //   //Settings.telnetlog_level = LOG_LEVEL_INFO;
+      //   Settings.seriallog_level = LOG_LEVEL_DEBUG;
+      //   #ifdef ENABLE_LOG_FILTERING_TEST_ONLY
+      //     enable_serial_logging_filtering = true;
+      //     Settings.seriallog_level = LOG_LEVEL_TEST;
+      //   #endif
+      //   //enable_web_logging_filtering = true;
+      //   //Settings.flog_time_short = true;
+      //   #ifdef DEBUG_FOR_FAULT
+      //     Settings.seriallog_level = LOG_LEVEL_ALL;
+      //   #endif
+      // #endif
+
+
+
+    break;
+    
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+
+    /************
+     * xx SECTION * 
+    *******************/
+
+    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+      Function_Template_Load();
+    break;
+  }
+
+} 
+
+
+#ifdef ENABLE_DEBUG_FUNCTION_NAMES
 // Switch case should be faster than getext progmem
 // Use progmem WITHOUT buffer for speed improvements, should be read as expected progmem and handled that way
 const char* mSettings::GetTaskName(uint8_t task, char* buffer){
@@ -163,7 +439,7 @@ void mSettings::Function_Template_Load(){
 
 int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
 
-  if(c=='\0'){
+  if(*c=='\0'){
     return -1;
   }
   if(strcasecmp_P(c,PM_FUNC_EVENT_INPUT_STATE_CHANGED_CTR)==0){ return FUNC_EVENT_INPUT_STATE_CHANGED_ID; }
@@ -209,7 +485,7 @@ int16_t mSettings::SwitchMode_GetID_by_Name(const char* c)
 // D_DATE_TIME_SEPARATOR
 // RuleCommand? I need to be able to react to trigger, or simply directly set, so needs both switchmode and getstate range, create new LIST
 {
-  if(c=='\0'){    return -1; }
+  if(*c=='\0'){    return -1; }
   if(strcasecmp_P(c,PM_SWITCHMODE_TOGGLE_CTR)==0){ return SWITCHMODE_TOGGLE_ID; }
   if(strcasecmp_P(c,PM_SWITCHMODE_FOLLOW_CTR)==0){ return SWITCHMODE_FOLLOW_ID; }
   if(strcasecmp_P(c,PM_SWITCHMODE_FOLLOW_INV_CTR)==0){ return SWITCHMODE_FOLLOW_INV_ID; }
@@ -241,251 +517,6 @@ const char* mSettings::SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_
 
 
 
-// Settings will contain all jsoncommands for "CoreSystem"
-
-//overload fix when only one parameter is called
-int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t param1){  
-//   JsonObjectConst dummy; return Tasker(function, dummy);
-// }
-// template<typename T>
-// int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj), T param1){ 
-
-  // DEBUG_PRINT_FUNCTION_NAME_TEST;
-  switch(function){
-    case FUNC_INIT:
-    
-
-    break;
-    case FUNC_LOOP:
-
-      // if(mTime::TimeReached(&tSavedSavingTest,10000)){
-      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
-      //   // SettingsSave(1);
-      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
-      //   // SettingsLoad();
-      //   //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1before"));
-      //   // pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT);
-      //   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " 1after"));
-
-      // }
-
-    break;
-    case FUNC_EVERY_SECOND:{
-
-    // Function_Template_Load();
-
-
-    // 
-    // TestSettingsLoad();
-
-    /**
-     * Decounter until saving.
-     * This is used when I want to force save data after an update has happened, but want the storage event to be delayed so it doesn't slow the event (eg relay set, mqtt response)
-     * */
-    if(settings_save_decounter_seconds_delayed_save)
-    {
-      settings_save_decounter_seconds_delayed_save--;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("settings_save_decounter_seconds_delayed_save = %d"), settings_save_decounter_seconds_delayed_save);
-    #endif // ENABLE_LOG_LEVEL_INFO
-      if(settings_save_decounter_seconds_delayed_save==0)
-      {
-        pCONT_set->SettingsSaveAll();
-      }
-    }
-
-    
-  // AddLog(LOG_LEVEL_DEBUG,PSTR( "TaskerTest SUCCESS!!"));
-
-
-  // AddLog(LOG_LEVEL_DEBUG,PSTR( "GetNameBuffer_Length=%d"),DeviceNameListI->GetNameBuffer_Length());
-
-
-
-// SystemSettings_DefaultBody_Network();
-
-       // AddLog(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
-
-
-       
-     } break;
-    case FUNC_EVERY_FIVE_SECOND:{
-
-
-      // #ifdef ENABLE_LOG_LEVEL_INFO
-      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
-      // #endif// ENABLE_LOG_LEVEL_INFO
-    // Function_Template_Load();
-
-#ifdef ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
-
-  D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  #endif // ENABLE_LOG_LEVEL_INFO
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
-  
-
-  D_DATA_BUFFER_CLEAR();
-
-  // char buffer_unescaped[100];
-  
-  // pCONT_sup->GetTextIndexed(
-  //   buffer_unescaped, 
-  //   sizeof(buffer_unescaped), 
-  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
-  //   pCONT_rules->jsonbuffer.data
-  // ); 
-
-  // for(int i=0;i<strlen(buffer_unescaped);i++){
-  //   // if(buffer_unescaped[i] == '\"'){
-  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
-  //   // }else{    
-  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
-  //   // }
-  // }
-  
-  // char buffer_unescaped[100];
-  
-  pCONT_sup->GetTextIndexed(
-    data_buffer.payload.ctr, 
-    sizeof(data_buffer.payload.ctr), 
-    pCONT_rules->rules[0].command.json_commands_dlist_id, 
-    pCONT_rules->jsonbuffer.data
-  ); 
-  data_buffer.payload.len += strlen(data_buffer.payload.ctr);
-
-  // for(int i=0;i<strlen(buffer_unescaped);i++){
-  //   // if(buffer_unescaped[i] == '\"'){
-  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
-  //   // }else{    
-  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
-  //   // }
-  // }
-  
-
-  // sprintf(data_buffer.payload.ctr,"\"");
-  
-  // pCONT_sup->GetTextIndexed(
-  //   data_buffer.payload.ctr+strlen(data_buffer.payload.ctr), 
-  //   sizeof(data_buffer.payload.ctr), 
-  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
-  //   pCONT_rules->jsonbuffer.data
-  // ); 
-  // sprintf(data_buffer.payload.ctr+strlen(data_buffer.payload.ctr),"\"");
-
-  AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID1=%s"),data_buffer.payload.ctr);
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-  
-  // snprintf(data_buffer.payload.ctr,pCONT_rules->rules[0].command.);
-  // // memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
-  // data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-#endif // ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
-
-
-
-      // int8_t device_id;
-      // int8_t class_id = E M_MODULE_DRIVERS_RELAY_ID;
-      // AddLog(LOG_LEVEL_INFO,PSTR("FUNC_EVERY_FIVE_SECOND\n\r\n\r"));
-
-      // int16_t device_id_found = GetDeviceIDbyName("Socket",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-      // device_id_found = GetDeviceIDbyName("Plug",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-      // device_id_found = GetDeviceIDbyName("Plug2",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-      // device_id_found = GetDeviceIDbyName("Plug3",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-    }break;
-
-    case FUNC_EVERY_MINUTE:
-    // Change to saving using counter later, Settings.save_data
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
-    #endif // ENABLE_LOG_LEVEL_INFO
-      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
-      // Update Settings with local module values that need saving
-      pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
-
-      // pCONT_set->SettingsSave(1);
-      pCONT_set->SettingsSaveAll();
-
-      #else 
-      
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      DEBUG_PRINTLN("SettingsSave dis");
-      
-    #endif // ifdef ENABLE_LOG_LEVEL_INFO
-      #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
-
-      // Serial.println("FUNC_EVERY_MINUTE");
-      
-// #ifdef DISABLE_SETTINGS_SAVING_BUG
-      // pCONT_set->SettingsSave(1);
-    // #endif
-    break;
-    case FUNC_ON_BOOT_SUCCESSFUL:
-      Settings.bootcount++;              // Moved to here to stop flash writes during start-up
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
-      #endif// ENABLE_LOG_LEVEL_INFO
-
-          
-      // #ifdef USE_MICHAEL_DEBUG_OVERRIDE 
-      //   #ifdef DEBUG_SERIAL_TESTING
-      //     Settings.seriallog_level = LOG_LEVEL_COMMANDS;
-      //   #else
-      //     Settings.seriallog_level = SERIAL_LOG_LEVEL_DURING_BOOT;//LOG_LEVEL_INFO;
-      //   #endif
-      //   Settings.weblog_level = LOG_LEVEL_INFO;
-      //   //Settings.telnetlog_level = LOG_LEVEL_INFO;
-      //   Settings.seriallog_level = LOG_LEVEL_DEBUG;
-      //   #ifdef ENABLE_LOG_FILTERING_TEST_ONLY
-      //     enable_serial_logging_filtering = true;
-      //     Settings.seriallog_level = LOG_LEVEL_TEST;
-      //   #endif
-      //   //enable_web_logging_filtering = true;
-      //   //Settings.flog_time_short = true;
-      //   #ifdef DEBUG_FOR_FAULT
-      //     Settings.seriallog_level = LOG_LEVEL_ALL;
-      //   #endif
-      // #endif
-
-
-
-    break;
-    
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-
-    /************
-     * xx SECTION * 
-    *******************/
-
-    case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
-      Function_Template_Load();
-    break;
-  }
-
-} 
-
-
 uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
   uint16_t count = 0;
   for(uint16_t i=0;i<strlen(tosearch);i++){
@@ -510,6 +541,130 @@ const char* mSettings::GetTelePeriodJsonLevelCtr(uint8_t id, char* buffer){
   return buffer;
 }
 
+
+
+// /*********************************************************************************************\
+//  * Quick power cycle monitoring ie The user can power the device On/Off 7 times (With at most 10 second "On periods", and force a reset)
+// \*********************************************************************************************/
+
+// void UpdateQuickPowerCycle(bool update) {
+// // #ifndef FIRMWARE_MINIMAL
+// //   if (Settings->flag3.fast_power_cycle_disable) { return; }  // SetOption65 - Disable fast power cycle detection for device reset
+
+// //   const uint32_t QPC_COUNT = 7;  // Number of Power Cycles before Settings erase
+// //   const uint32_t QPC_SIGNATURE = 0xFFA55AFF;
+// // #ifdef USE_COUNTER
+// //   CounterInterruptDisable(true);
+// // #endif
+// // #ifdef ESP8266
+// //   const uint32_t qpc_sector = SETTINGS_LOCATION - CFG_ROTATES;
+// //   const uint32_t qpc_location = qpc_sector * SPI_FLASH_SEC_SIZE;
+
+// //   uint32_t qpc_buffer[QPC_COUNT +1];
+// //   ESP.flashRead(qpc_location, (uint32*)&qpc_buffer, sizeof(qpc_buffer));
+// //   if (update && (QPC_SIGNATURE == qpc_buffer[0])) {
+// //     uint32_t counter = 1;
+// //     while ((0 == qpc_buffer[counter]) && (counter <= QPC_COUNT)) { counter++; }
+// //     if (QPC_COUNT == counter) {  // 7 power cycles in a row
+// //       SettingsErase(3);          // Quickly reset all settings including QuickPowerCycle flag
+// //       EspRestart();              // And restart
+// //     } else {
+// //       qpc_buffer[0] = 0;
+// //       ESP.flashWrite(qpc_location + (counter * 4), (uint32*)&qpc_buffer, 4);
+// //       AddLog(LOG_LEVEL_INFO, PSTR("QPC: Count %d"), counter);
+// //     }
+// //   }
+// //   else if ((qpc_buffer[0] != QPC_SIGNATURE) || (0 == qpc_buffer[1])) {
+// //     qpc_buffer[0] = QPC_SIGNATURE;
+// //     // Assume flash is default all ones and setting a bit to zero does not need an erase
+// //     if (ESP.flashEraseSector(qpc_sector)) {
+// //       ESP.flashWrite(qpc_location, (uint32*)&qpc_buffer, 4);
+// //       AddLog(LOG_LEVEL_INFO, PSTR("QPC: Reset"));
+// //     }
+// //   }
+// // #endif  // ESP8266
+// // #ifdef ESP32
+// //   uint32_t pc_register;
+// //   QPCRead(&pc_register, sizeof(pc_register));
+// //   if (update && ((pc_register & 0xFFFFFFF0) == 0xFFA55AF0)) {
+// //     uint32_t counter = pc_register & 0xF;  // Allow up to 15 cycles
+// //     if (0xF == counter) { counter = 0; }
+// //     counter++;
+// //     if (QPC_COUNT == counter) {  // 7 power cycles in a row
+// //       SettingsErase(3);          // Quickly reset all settings including QuickPowerCycle flag
+// //       EspRestart();              // And restart
+// //     } else {
+// //       pc_register = 0xFFA55AF0 | counter;
+// //       QPCWrite(&pc_register, sizeof(pc_register));
+// //       AddLog(LOG_LEVEL_INFO, PSTR("QPC: Count %d"), counter);
+// //     }
+// //   }
+// //   else if (pc_register != QPC_SIGNATURE) {
+// //     pc_register = QPC_SIGNATURE;
+// //     QPCWrite(&pc_register, sizeof(pc_register));
+// //     AddLog(LOG_LEVEL_INFO, PSTR("QPC: Reset"));
+// //   }
+// // #endif  // ESP32
+// // #ifdef USE_COUNTER
+// //   CounterInterruptDisable(false);
+// // #endif
+// // #endif  // FIRMWARE_MINIMAL
+// }
+
+//   #include "rom/rtc.h"
+
+// // typedef enum {
+// //     NO_MEAN                =  0,
+// //     POWERON_RESET          =  1,    /**<1, Vbat power on reset*/
+// //     SW_RESET               =  3,    /**<3, Software reset digital core*/
+// //     OWDT_RESET             =  4,    /**<4, Legacy watch dog reset digital core*/
+// //     DEEPSLEEP_RESET        =  5,    /**<3, Deep Sleep reset digital core*/
+// //     SDIO_RESET             =  6,    /**<6, Reset by SLC module, reset digital core*/
+// //     TG0WDT_SYS_RESET       =  7,    /**<7, Timer Group0 Watch dog reset digital core*/
+// //     TG1WDT_SYS_RESET       =  8,    /**<8, Timer Group1 Watch dog reset digital core*/
+// //     RTCWDT_SYS_RESET       =  9,    /**<9, RTC Watch dog Reset digital core*/
+// //     INTRUSION_RESET        = 10,    /**<10, Instrusion tested to reset CPU*/
+// //     TGWDT_CPU_RESET        = 11,    /**<11, Time Group reset CPU*/
+// //     SW_CPU_RESET           = 12,    /**<12, Software reset CPU*/
+// //     RTCWDT_CPU_RESET       = 13,    /**<13, RTC Watch dog Reset CPU*/
+// //     EXT_CPU_RESET          = 14,    /**<14, for APP CPU, reseted by PRO CPU*/
+// //     RTCWDT_BROWN_OUT_RESET = 15,    /**<15, Reset when the vdd voltage is not stable*/
+// //     RTCWDT_RTC_RESET       = 16     /**<16, RTC Watch dog reset digital core and rtc module*/
+// // } RESET_REASON;
+
+// uint32_t ResetReason(void) {
+//   /*
+//     user_interface.h
+//     REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
+//     REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
+//     REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
+//     REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
+//     REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
+//     REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
+//     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+//   */
+
+// // #ifdef ESP32
+
+//  RESET_REASON reason = rtc_get_reset_reason(0);
+//   if (1  == reason) { return REASON_DEFAULT_RST; }       // POWERON_RESET
+//   if (12 == reason) { return REASON_SOFT_RESTART; }      // SW_CPU_RESET / RTC_SW_CPU_RESET
+//   if (5  == reason) { return REASON_DEEP_SLEEP_AWAKE; }  // DEEPSLEEP_RESET
+//   if (3  == reason) { return REASON_EXT_SYS_RST; }       // SW_RESET / RTC_SW_SYS_RESET
+//   return -1; //no "official error code", but should work with the current code base
+
+// // #endif 
+
+// #ifdef ESP8266
+//  return resetInfo.reason;
+
+// #endif
+
+
+//   // return ESP_ResetInfoReason();
+// }
+
+// #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 
 /********************************************************************************************/
 /*

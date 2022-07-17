@@ -11,6 +11,11 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
   int8_t tmp_id = 0;
   char buffer[50];
 
+  /**
+   * @brief Add option to allow mqtt command to output all feedback to serial, response to mqtt, or have no output just parse it (for speed!)
+   * 
+   */
+
   uint8_t segments_found = 0;
 
   uint8_t segment_index = 0;
@@ -20,13 +25,11 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
     snprintf(buffer, sizeof(buffer), "Segment%d", segment_i);
     if(jtok = obj[buffer]){ 
 
-
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Seg: \"%s\""),buffer);
+      #endif// ENABLE_LOG_LEVEL_INFO
 
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
-
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("Seg: \"%s\""),buffer);
-      #endif// ENABLE_LOG_LEVEL_INFO
 
       segments_found++;
 
@@ -36,6 +39,9 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj){
     }
   }
 
+  /**
+   * @brief If no segments have been directly set, then assume default of Segment0
+   **/
   if(segments_found == 0)
   {
     data_buffer.isserviced += subparse_JSONCommand(obj); // Legacy commands
@@ -123,6 +129,11 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
   
   if(jtok = obj["PixelRange"]){ 
+
+ALOG_INF( PSTR("PixelRange") );
+
+    MQTTHandler_Set_RefreshAll();
+
     if(jtok.isArray()){
       uint8_t array[2];
       uint8_t arrlen = 0;
@@ -139,33 +150,36 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         }
 
         array[arrlen++] = v.getInt();
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
-        AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange Segment[%d] = %d -> %d"),
-          segment_index,
-          _segments[segment_index].pixel_range.start,
-          _segments[segment_index].pixel_range.stop
-        );
-        #endif
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "PixelRange" " [i%d:v%d]"),arrlen-1,array[arrlen-1]);
+        
+        // #endif
         
 
 
 
         // #endif// ENABLE_LOG_LEVEL_DEBUG          
       }
+
+      ALOG_INF( PSTR(D_LOG_NEO "Segment[%d]: PixelRange = {%d, %d}"),
+          segment_index,
+          _segments[segment_index].pixel_range.start,
+          _segments[segment_index].pixel_range.stop
+        );
+
       // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
 
       if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
       {
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-        AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
-    #endif // ENABLE_LOG_LEVEL_INFO
+        ALOG_ERR( PSTR("_segments[segment_index].pixel_range.stop exceeds max"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
         _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX;
       }
 
 
       
       data_buffer.isserviced++;
+    }else{
+      ALOG_ERR(PSTR("ARRAY ERROR"));
     }
   }
 
@@ -198,6 +212,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
  * @brief 
  * *WLED added
  * 
+ * 
+ * Intensity in 255 scale, converted into percentage, for my animations on basic_mode, would give ratio of timems/ratemas ie TimeMs = RateMs*IntensityPercentageRatio
+ * 
  */
 if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
   { 
@@ -210,12 +227,66 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
-if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   { 
 
     _segments[segment_index].set_speed(jtok.getInt());
     
     
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Reverse"])
+  { 
+    _segments[segment_index].setOption(SEG_OPTION_REVERSED, jtok.getInt());  
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Mirror"])
+  { 
+    _segments[segment_index].setOption(SEG_OPTION_MIRROR, jtok.getInt());  
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Grouping"])
+  { 
+
+
+    ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
+    _segments[segment_index].grouping = jtok.getInt();  
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  
+/**
+ * @brief Construct a new if object
+ * Reseting segment environments must happen above here where I then fill the options
+ * 
+ */
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Option0"])
+  { 
+
+
+    // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
+    _segment_runtimes[segment_index].aux0 = jtok.getInt();  
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Option1"])
+  { 
+
+
+    // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
+    _segment_runtimes[segment_index].aux1 = jtok.getInt();  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
@@ -336,14 +407,16 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
         }
         // w,r,g,b packed 32 bit colour
         uint32_t colour32_bit = (((uint32_t)array[3] << 24) | ((uint32_t)array[0] << 16) | ((uint32_t)array[1] << 8) | (uint32_t)array[2]);
+
+        ALOG_INF(PSTR("[%d] colour32bit: (%d,%d,%d,%d) %d"), segment_active_index, array[0], array[1], array[2], array[3], colour32_bit);
+
         _segments[segment_index].colors[colour_id] = colour32_bit;      
         data_buffer.isserviced++;
       }
     }
+
   }
   // #endif // NABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
-
-
 
 
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
@@ -373,13 +446,13 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
   }
   
   
-  #ifdef ENABLE_DEVFEATURE_RGB_CLOCK
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MANUAL_NUMBER)), lcd_display_show_number);
   }
-  #endif // ENABLE_DEVFEATURE_RGB_CLOCK
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
 
 // Hue
@@ -808,21 +881,6 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
     #endif
   }
   
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_ORDER]){
-    if(jtok.isStr()){
-      if((tmp_id=GetTransitionOrderIDbyName(jtok.getStr()))>=0){
-        CommandSet_TransitionOrderID(tmp_id, segment_index);
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){
-      CommandSet_TransitionOrderID(jtok.getInt(), segment_index);
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
 
   /******************************
    * Rgbcct controller that will be added into segments (phasing out of interlight?)
@@ -1139,7 +1197,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 //   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR)){  return EFFECTS_FUNCTION_SLOW_GLOW_ID; }
 //   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR)){  return EFFECTS_FUNCTION_STATIC_PALETTE_ID; }
 //   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR)){ return EFFECTS_FUNCTION_FIREPLACE_1D_01_ID; }
-//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID; }
+//   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR)){ return EFFECTS_FUNCTION_STEPPING_PALETTE_ID; }
   
 //   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01_ID; }
 //   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_NAME_CTR)){ return EFFECTS_FUNCTION_SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01_ID; }
@@ -1158,7 +1216,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 //     default:  snprintf_P(buffer, buflen, PM_SEARCH_NOMATCH);  break;
 //     case EFFECTS_FUNCTION_STATIC_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STATIC_PALETTE_NAME_CTR);  break;
 //     case EFFECTS_FUNCTION_SLOW_GLOW_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SLOW_GLOW_NAME_CTR);  break;
-//     case EFFECTS_FUNCTION_SEQUENTIAL_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR);  break;
+//     case EFFECTS_FUNCTION_STEPPING_PALETTE_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_STEP_THROUGH_PALETTE_CTR);  break;
 //     case EFFECTS_FUNCTION_SEQUENTIAL_ID:  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SEQUENTIAL_NAME_CTR); break;
 //     case EFFECTS_FUNCTION_SOLID_COLOUR_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR);  break;
 //     case EFFECTS_FUNCTION_FIREPLACE_1D_01_ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION_FIREPLACE_1D_01_NAME_CTR);  break;
@@ -1180,7 +1238,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Speed"])
 
 
 // int8_t mAnimatorLight::GetFlasherRegionIDbyName(const char* c){
-//   if(c=='\0') return -1;
+//   if(*c=='\0') return -1;
 //   if(     strcmp_P(c,PM_EFFECTS_REGION_COLOUR_SELECT_NAME_CTR)==0){ return EFFECTS_REGION_COLOUR_SELECT_ID; }
 //   else if(strcmp_P(c,PM_EFFECTS_REGION_ANIMATE_NAME_CTR)==0){       return EFFECTS_REGION_ANIMATE_ID; }
 //   return -1;
@@ -1252,11 +1310,12 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
 
   if(!c){ return; }
   if(strlen(c)<=5){
-    // ALOG_DBM( PSTR("Valid Length"));
+    ALOG_DBM( PSTR("Valid Length"));
   }else{
-    // AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
+    AddLog(LOG_LEVEL_ERROR, PSTR("INVALID Length"));
     return;
   }
+  // DEBUG_LINE_HERE_PAUSE;
 
   _segments[segment_index].hardware_element_colour_order.red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
   _segments[segment_index].hardware_element_colour_order.green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
@@ -1346,7 +1405,7 @@ const char* mAnimatorLight::GetColourTypeNameByID(uint8_t id, char* buffer, uint
 }
 int8_t mAnimatorLight::GetColourTypeIDbyName(const char* c)
 {
-  if(c=='\0'){ return -1; }
+  if(*c=='\0'){ return -1; }
   // if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){  return TRANSITION_ORDER__RANDOM__ID;  }
   // if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER__INORDER__ID; }
 
@@ -1667,8 +1726,10 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 
   char buffer[50];
 
+DEBUG_LINE_HERE;
   _segments[segment_index].palette.id = value < mPalette::PALETTELIST_TOTAL_LENGTH ? value : 0;
 
+DEBUG_LINE_HERE;
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)
   &&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID))
@@ -1676,6 +1737,7 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
   }
 
+DEBUG_LINE_HERE;
   // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
   // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
   //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
@@ -1730,57 +1792,6 @@ void mAnimatorLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uin
 }
 
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** TransitionOrder *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_TransitionOrderID(uint8_t value, uint8_t segment_index)
-{
-  _segments[segment_index].transition.order_id = value;
-
-  char buffer[50];
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-}
-
-const char* mAnimatorLight::GetTransitionOrderName(char* buffer, uint8_t buflen, uint8_t segment_index)
-{
-  return GetTransitionOrderNameByID(_segments[segment_index].transition.order_id, buffer, buflen);
-}
-
-const char* mAnimatorLight::GetTransitionOrderNameByID(uint8_t id, char* buffer, uint8_t buflen)
-{
-  switch(id){  default:    
-    case TRANSITION_ORDER__NONE__ID:       memcpy_P(buffer, PM_TRANSITION_ORDER_NONE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_NONE_NAME_CTR)); break;// smooth shift between them
-    case TRANSITION_ORDER__RANDOM__ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_RANDOM_NAME_CTR, sizeof(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)); break;// smooth shift between them
-    case TRANSITION_ORDER__INORDER__ID:    memcpy_P(buffer, PM_TRANSITION_ORDER_INORDER_NAME_CTR, sizeof(PM_TRANSITION_ORDER_INORDER_NAME_CTR)); break;// instant shift
-    // case TRANSITION_ORDER_CENTRE_OUT_ID: memcpy_P(buffer, PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR, sizeof(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)); break;
-    // case TRANSITION_ORDER_ROTATE_ID:     memcpy_P(buffer, PM_TRANSITION_ORDER_ROTATE_NAME_CTR, sizeof(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)); break;
-    // case TRANSITION_ORDER_FIXED_ID:      memcpy_P(buffer, PM_TRANSITION_ORDER_FIXED_NAME_CTR, sizeof(PM_TRANSITION_ORDER_FIXED_NAME_CTR)); break;// blend shift with random twinkles on random number of leds
-    }
-  return buffer;
-}
-int8_t mAnimatorLight::GetTransitionOrderIDbyName(const char* c)
-{
-  if(c=='\0'){ return -1; }
-  if(strstr_P(c,PM_TRANSITION_ORDER_RANDOM_NAME_CTR)){
-    return TRANSITION_ORDER__RANDOM__ID;
-  }else if(strstr_P(c,PM_TRANSITION_ORDER_INORDER_NAME_CTR)){
-    return TRANSITION_ORDER__INORDER__ID;
-  }
-
-  // if(strstr(c,D_TRANSITION_ORDER_RANDOM_NAME_CTR)){ return TRANSITION_ORDER_RANDOM_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR)){ return TRANSITION_ORDER_CENTRE_OUT_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_INORDER_NAME_CTR)){ return TRANSITION_ORDER_INORDER_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_FIXED_NAME_CTR)){ return TRANSITION_ORDER_FIXED_ID; }
-  // if(strstr(c,D_TRANSITION_ORDER_ROTATE_NAME_CTR)){ return TRANSITION_ORDER_ROTATE_ID; }
-  return -1;
-}
-
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1816,13 +1827,7 @@ void mAnimatorLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value, uint
 void mAnimatorLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value, uint8_t segment_index)
 {
   
-  _segments[segment_index].transition.pixels_to_update_as_number 
-    = GetPixelsToUpdateAsPercentageFromNumber(value);
-  // animation.transition.pixels_to_update_as_percentage = value;
-  
-  // TEMP FIX!! - UNTESTED HOW THIS WILL AFFECT CODE
-  // AddLog(LOG_LEVEL_WARN, PSTR("strip_size_requiring_update = animation.transition.pixels_to_update_as_number COULD CAUSE ERROR "));
-  // strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
+  _segments[segment_index].transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
 
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -1837,7 +1842,17 @@ uint16_t mAnimatorLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percent
 }
 uint8_t mAnimatorLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number, uint8_t segment_index)
 {
+Serial.println(_segments[segment_index].length());
+// Serial.println(mapvalue(number ,0,_segments[segment_index].length(), 0,100));
+
+if(_segments[segment_index].length()==0) // crash when length==0 ie not active
+{
+ return 0;
+}else{
+DEBUG_LINE_HERE;
   return mapvalue(number ,0,_segments[segment_index].length(), 0,100);
+}
+  
 }
 
 
@@ -1872,10 +1887,11 @@ uint8_t mAnimatorLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number,
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
+//rename these in the future, enable more than 5 options for rgbcct colours 
 void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index)
 {
 
-  uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;  
+  uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;  
   
   // mPaletteI->active_scene_palette_id = palette_id; // not used?
 
@@ -1892,7 +1908,7 @@ void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t p
 _segment_runtimes[segment_index].active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
   
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"),palette_id,palette_id_adjusted_to_array_index);
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
     #endif // ENABLE_LOG_LEVEL_INFO
 }
 

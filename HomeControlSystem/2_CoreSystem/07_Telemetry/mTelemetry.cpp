@@ -238,7 +238,6 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level){
     JsonBuilderI->Add(PM_JSON_SAVECOUNT,      pCONT_set->Settings.save_flag);
     JsonBuilderI->Add(PM_JSON_STARTUPUTC,     "2019-12-10T21:35:44");
 
-
   return JsonBuilderI->End();
 }
 
@@ -256,12 +255,19 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_BUILDDATETIME,   pCONT_time->GetBuildDateAndTime(buffer, sizeof(buffer)));
     JsonBuilderI->Add(PM_JSON_BUILDTIME,       __TIME__);
     // JsonBuilderI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
-    JsonBuilderI->Add(PM_JSON_VERSIONNUMBER,   PROJECT_VERSION);
+    JsonBuilderI->Add(PM_JSON_VERSIONNUMBER,   (uint32_t)PROJECT_VERSION);
+    JsonBuilderI->Add(PM_JSON_VERSIONNUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
+
+    // JBI->Level_Start("VersionNumbers");
+    //   JBI->Add("Current",   (uint32_t)PROJECT_VERSION);
+    //   JBI->Add("Minimum",   (uint32_t)PROJECT_VERSION_MINIMAL);
+    // JBI->Level_End();
+
     JsonBuilderI->Add(PM_JSON_COREVERSION,     ARDUINO_ESP8266_RELEASE); 
     
-#ifdef ESP8266
+    #ifdef ESP8266
     JsonBuilderI->Add(PM_JSON_BOOTVERSION,     ESP.getBootVersion());
-  #endif // ESP8266
+    #endif // ESP8266
     JsonBuilderI->Add(PM_JSON_SDKVERSION,      ESP.getSdkVersion());    
     // JsonBuilderI->Add(PM_JSON_DRIVERS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
     // JsonBuilderI->Add(PM_JSON_SENSORS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
@@ -270,6 +276,20 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_FREESKETCHSPACE,      ESP.getFreeSketchSpace());
     JsonBuilderI->Add(PM_JSON_TEMPLATE_USED,   pCONT_set->boot_status.module_template_used);  
     JsonBuilderI->Add(PM_JSON_TEMPLATE_PARSE_SUCCESS, pCONT_set->boot_status.module_template_parse_success); 
+
+    
+    JBI->Array_Start("FastBoot_Recovery");
+    #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+    JsonBuilderI->Add("OTA");
+    #endif
+    #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+    JsonBuilderI->Add("HTTP");
+    #endif
+    #if !defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) && !defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+    JsonBuilderI->Add("None");
+    #endif
+    JBI->Array_End();
+
   return JsonBuilderI->End();
 }
 

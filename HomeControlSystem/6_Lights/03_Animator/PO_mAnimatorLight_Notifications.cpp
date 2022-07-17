@@ -5,6 +5,9 @@
 /**
  * @brief 
  * 
+ * DELETING THIS FILE when notifications are merged as effects only
+ * 
+ * 
  * 
  *  Create segment effects:
  * 
@@ -783,7 +786,7 @@ void mAnimatorLight::parsesub_Notifications(JsonParserObject obj){
 //   return WARNING_NOTHANDLED_CTR;
 // }
 // int8_t mAnimatorLight::GetNotificationModeIDbyName(const char* c){
-//   if(c=='\0'){ 
+//   if(*c=='\0'){ 
 //     return -1;
 //   }
 //   // if(strstr(c,D_NOTIF_MODE_OFF_NAME_CTR)){

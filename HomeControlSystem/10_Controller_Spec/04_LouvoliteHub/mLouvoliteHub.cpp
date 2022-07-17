@@ -156,7 +156,7 @@ void mLouvoliteHub::Init(void)
 
 int16_t mLouvoliteHub::CommandMode_GetID_by_Name(const char* c)
 {
-  if(c=='\0'){    return -1; }
+  if(*c=='\0'){    return -1; }
   if(strcasecmp_P(c,PM_LOUVOLITE_COMMAND__STOP__CTR)==0){ return COMMAND__STOP__ID; }
   if(strcasecmp_P(c,PM_LOUVOLITE_COMMAND__UP_STEP__CTR)==0){ return COMMAND__UP_STEP__ID; }
   if(strcasecmp_P(c,PM_LOUVOLITE_COMMAND__DOWN_STEP__CTR)==0){ return COMMAND__DOWN_STEP__ID; }

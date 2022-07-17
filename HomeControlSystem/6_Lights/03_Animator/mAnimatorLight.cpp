@@ -66,6 +66,8 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
 
 
+// ALOG_INF( PSTR("brt = %d"), pCONT_iLight->getBriRGB_Global() );
+
 
 
     }break;
@@ -77,6 +79,11 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_JSON_COMMAND_ID:
      parse_JSONCommand(obj);
+    break;
+    case FUNC_WIFI_CONNECTED:
+      #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
+      Test_Config();
+      #endif
     break;
     /************
      * TRIGGERS SECTION * 
@@ -437,7 +444,6 @@ void mAnimatorLight::Settings_Save(){
 
   pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
   pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  pCONT_set->Settings.animation_settings.animation_transition_order   = _segments[0].transition.order_id;
   pCONT_set->Settings.animation_settings.animation_transition_method  = _segments[0].transition.method_id;
   pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
   pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
@@ -680,311 +686,6 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
     // return "Paused";
   }
   return D_CSTRING_ERROR_MESSAGE_CTR;
-}
-
-
-/**
- * Alternate SetPixelColor to make WLED conversion easier, but to be phased out later
- */
-
-void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, uint16_t segment_length)
-{
-  SetPixelColor(indexPixel, RgbColor(red,green,blue));
-}
-  
-void mAnimatorLight::SetPixelColor(uint16_t indexPixel, uint32_t color, uint16_t segment_length)
-{
-  RgbcctColor col = RgbcctColor(0);
-  col.red =   (color >> 16 & 0xFF);
-  col.green = (color >> 8  & 0xFF);
-  col.blue =  (color       & 0xFF);
-
-  col.W1 =   (color >> 24 & 0xFF);
-
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("color=%d\t%X"),indexPixel,color);
-
-  SetPixelColor(indexPixel, col);
-}
-
-
-void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, uint16_t segment_length)
-{
-
-  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-if(indexPixel<10)
-{
-    AddLog(LOG_LEVEL_DEBUG, PSTR("RGB(%d)=%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B);
-}
-  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-
-
-  // #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-  // switch(indexPixel)
-  // {
-  //   default:
-  //   case 0: color_internal = RgbcctColor(0,255,0,0,0); break;
-  // //   case 1: color_internal = RgbcctColor(255,0,0,0,0); break;
-  // //   case 2: color_internal = RgbcctColor(0,0,255,0,0); break;
-  // //   case 3: color_internal = RgbcctColor(255,255,0,0,0); break;
-  //   case 4: color_internal = RgbcctColor(0,255,255,0,0); break;
-  // }
-  // #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-
-  RgbcctColor color_hardware = color_internal;
-
-  HARDWARE_ELEMENT_COLOUR_ORDER order = _segments[segment_length].hardware_element_colour_order;
-
-  if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_hardware[order.r] = color_internal.R;
-  }
-  if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_hardware[order.g] = color_internal.G;
-  }
-  if(order.b != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_hardware[order.b] = color_internal.B;
-  }
-  if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_hardware[order.w] = color_internal.WW;
-  }
-  if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_hardware[order.c] = color_internal.WC;
-  }
-
-// DEBUG_LINE_HERE;
-  //AddLog(LOG_LEVEL_DEBUG,PSTR("pixel[%d] = %d,%d,%d"),indexPixel,color_hardware.R,color_hardware.G,color_hardware.B);//,color_hardware.W);
-
-  // Output methods here
-  // Single: Direct pixel indexing, the default method (i.e., pixel index is exact)
-  // Repeated: X pixels repeated after each other (i.e., the same repeated amount, given by a single multiplier red for 10, green for 10) (will require count index)
-  // Index Ranges: Using a preset index where pixel_index is shown between ranges (i.e., red for 10 pixels, green for 1 pixel) (passed with a pointer to array, enabling different array for different bit mapping)
-  // Using percentage linear blend between "Index Ranges" to allow not only horizontal tree lines, but gradients on each line
-
-  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-
-    if(indexPixel == 0){
-      setpixel_variable_index_counter = 0; // reset
-      pixel_group.mapped_array_data.index = 0;
-    }
-
-    if(setpixel_variable_index_counter>50){ return; } // @note: The "50" is the largest repeated pixel
-
-    if(pixel_group.flags.fEnabled)
-    {
-
-      uint8_t pixel_multiplier_count = 0;
-      switch(pixel_group.flags.multiplier_mode_id){
-        case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID:
-          pixel_multiplier_count = pixel_group.multiplier;
-            // AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID %d"),pixel_multiplier_count);
-          break;
-        //case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
-          //pixel_multiplier_count = random(1,pixel_group.multiplier);
-          //break;
-        case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
-          if(pixel_group.mapped_array_data.values != nullptr)
-          {
-            // if any match, then jump index of lights forward
-            uint8_t check_index = pixel_group.mapped_array_data.index;
-            pixel_multiplier_count = pixel_group.mapped_array_data.values[check_index];
-            
-            AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d"),pixel_multiplier_count);
-            pixel_group.mapped_array_data.index++;
-            if(pixel_group.mapped_array_data.index >= 15){//pixel_group.mapped_array_data.length){
-              pixel_group.mapped_array_data.index = 0;
-            }
-
-          }else{
-            pixel_multiplier_count = pixel_group.multiplier;
-          }
-          break;
-      }
-
-      for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
-        if(setpixel_variable_index_counter>50){ return; }
-        pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,setpixel_variable_index_counter++);  
-      }
-
-    }else{
-      pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,indexPixel);
-    } // pixel_group.flags.fEnabled
-
-    ALOG_DBM( PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
-
-  #else
-
-    // pCONT_iLight->SetPixelColourHardwareInterface(indexPixel,color_hardware);
-    pCONT_iLight->SetPixelColourHardwareInterface(color_hardware, indexPixel);
-
-    //refer back to lighting interface which will pass to the right hardware
-
-  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-
-}
-
-RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
-{
-  DEBUG_LINE;
-  if(stripbus == nullptr){    
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_DBM( PSTR(D_LOG_NEO "stripbus == nullptr"));
-    #endif
-  }
-
-  // Temp fix for WLED animations
-  if(indexPixel > STRIP_SIZE_MAX)
-  {
-    return RgbcctColor(0);
-  }
-
-  
-  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-
-  RgbcctColor color_hardware;
-
-  // THIS IS ALL WRONG, ITS SETTING, NOT GETTING.
-
-  /**
-   * Depending on the mode, get must search differently, or, is get a simple "get?"
-   * */
-
-    // #ifdef USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER
-    // indexPixel *= USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER;
-    // #endif
-  //   if(indexPixel == 0){
-  //     setpixel_variable_index_counter = 0; // reset
-  //     pixel_group.mapped_array_data.index = 0;
-  //   }
-
-  //   if(setpixel_variable_index_counter>50){ return RgbcctColor(0); }
-
-    if(pixel_group.flags.fEnabled)
-    {
-
-      uint8_t pixel_multiplier_count = 0;
-      switch(pixel_group.flags.multiplier_mode_id){
-        case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID:
-          // pixel_multiplier_count = pixel_group.multiplier;
-
-          /***
-           * Since the pixels are multipled out
-           * 
-           * **/
-
-
-/**
- * probably too slow, but should work
- * */
-// int converted_index = 0;
-// for(int count=0;count<indexPixel; count++)
-// {
-//   if((count%pixel_group.multiplier)==0) // if remainder is 0, increment the pixel converted
-//   {
-
-//     converted_index++;
-
-//   }wrong
-
-// }
-
-
-
-// AddLog(LOG_LEVEL_DEBUG, PSTR("indexPixel=%d -> %d"),indexPixel,converted_index);
-
-
-// indexPixel /= pixel_group.multiplier; // Read the multipled region
-color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
-
-          break;
-  //       case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
-  //         pixel_multiplier_count = random(1,pixel_group.multiplier);
-  //         break;
-  //       case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
-  //         if(pixel_group.mapped_array_data.values != nullptr){
-  //           // if any match, then jump index of lights forward
-  //           uint8_t check_index = pixel_group.mapped_array_data.index;
-  //           pixel_multiplier_count = pixel_group.mapped_array_data.values[check_index];
-            
-  //           //AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d"),pixel_multiplier_count);
-  //           pixel_group.mapped_array_data.index++;
-  //           if(pixel_group.mapped_array_data.index >= 15){//pixel_group.mapped_array_data.length){
-  //             pixel_group.mapped_array_data.index = 0;
-  //           }
-
-          // }else{
-          //   pixel_multiplier_count = pixel_group.multiplier;
-          // }
-          // break;
-      }
-
-  //     for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
-  //       if(setpixel_variable_index_counter>50){ return RgbcctColor(0); }
-
-  //       pCONT_iLight->SetPixelColourHardwareInterface(color_hardware,setpixel_variable_index_counter++);  
-  //     }
-
-    }else{
-      color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
-    } // pixel_group.flags.fEnabled
-
-  //   ALOG_DBM( PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d"),indexPixel,setpixel_variable_index_counter);
-
-    // RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
-
-  #else
-
-    RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(indexPixel);
-
-  #endif
-
-  RgbcctColor color_internal = color_hardware; // To catch white element if present
-  DEBUG_LINE;
-
-  // switch (pCONT_iLight->settings.pixel_hardware_color_order_id){
-  //   case  PIXEL_HARDWARE_COLOR_ORDER_GRB_ID:  //0 = GRB, default
-  //     color_internal.G = color_hardware.G; 
-  //     color_internal.R = color_hardware.R; 
-  //     color_internal.B = color_hardware.B; 
-  //   break;
-  //   case  PIXEL_HARDWARE_COLOR_ORDER_RGB_ID:  //1 = RGB, common for WS2811
-  //     color_internal.R = color_hardware.G; 
-  //     color_internal.G = color_hardware.R; 
-  //     color_internal.B = color_hardware.B; 
-  //   break;
-  //   case  2: color_internal.B = color_hardware.G; color_hardware.R = color_hardware.R; color_internal.G = color_hardware.B; break; //2 = BRG
-  //   case  3: color_internal.R = color_hardware.G; color_internal.B = color_hardware.R; color_internal.G = color_hardware.B; break; //3 = RBG
-  //   case  4: color_internal.B = color_hardware.G; color_internal.G = color_hardware.R; color_internal.R = color_hardware.B; break; //4 = BGR
-  //   default: color_internal.G = color_hardware.G; color_internal.B = color_hardware.R; color_internal.R = color_hardware.B; break; //5 = GBR
-  // }
-  // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER order = pCONT_iLight->hardware_element_colour_order;
-
-  HARDWARE_ELEMENT_COLOUR_ORDER order = _segments[0].hardware_element_colour_order;
-
-  // if(indexPixel<100){
-    // order = pCONT_iLight->hardware_element_colour_order;
-  // }else{
-  //   order = pCONT_iLight->hardware_element_colour_order[1];
-  // }
-
-  if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_internal[order.r] = color_hardware.R;
-  }
-  if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_internal[order.g] = color_hardware.G;
-  }
-  if(order.b != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_internal[order.b] = color_hardware.B;
-  }
-  if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_internal[order.w] = color_hardware.WW;
-  }
-  if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){
-    color_internal[order.c] = color_hardware.WC;
-  }
-
-
-
-
-  return color_internal;
 }
 
 
@@ -1350,48 +1051,6 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
 
 
-
-
-
-
-void mAnimatorLight::SetPixelColor_All(RgbcctColor colour){
-  //stripbus->ClearTo(0);
-  for(uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-    SetPixelColor(pixel, colour);
-  }
-  pCONT_iLight->ShowInterface();
-}
-
-
-
-
-
-
-/***
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- *    WEBPAGE
- * 
- * 
- * 
- * 
- * 
- * 
- */
-
-
-// enum CTypes { CT_HTML, CT_PLAIN, CT_XML, CT_JSON, CT_STREAM };
-// const char kContentTypes[] PROGMEM = "text/html|text/plain|text/xml|application/json|application/octet-stream";
-  
-
-
 void mAnimatorLight::SetRefreshLEDs(){
 
   
@@ -1405,17 +1064,6 @@ void mAnimatorLight::SetRefreshLEDs(){
 
 
 
-
-
-
-
-
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************MQTT**************************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
 
 
 
@@ -1693,8 +1341,73 @@ uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level){
 
 
 
+uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level)
+{
+  // Awaiting total redesign
+
+  char buffer[30];
+  
+  // #ifdef ENABLE_LOG_LEVEL_DEBUG
+  // ALOG_DBM( PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
+  // #endif
+
+  JBI->Start();
+
+    // JBI->Add("SegmentCount", )
+
+    JBI->Array_Start("PixelRange");
+    for(int i=0;i<MAX_NUM_SEGMENTS;i++)
+    {
+      JBI->Add(_segments[i].pixel_range.start);
+      JBI->Add(_segments[i].pixel_range.stop);
+    }
+    JBI->Array_End();
 
 
+    JBI->Array_Start("SegmentActive");
+    for(int i=0;i<MAX_NUM_SEGMENTS;i++)
+    {
+      JBI->Add(_segments[i].isActive());
+    }
+    JBI->Array_End();
+
+    JBI->Array_Start("PaletteID");
+    for(int i=0;i<MAX_NUM_SEGMENTS;i++)
+    {
+      JBI->Add(_segments[i].palette.id);
+    }
+    JBI->Array_End();
+
+
+    // JBI->Array_Start("HardwareOrder");
+    //   for(int i=0;i<MAX_NUM_SEGMENTS;i++)
+    //   {
+    //     // sprintf(buffer, "%d", i);
+    //     JBI->Array_Start();
+    //       JBI->Add(_segments[i].hardware_element_colour_order.r);
+    //       JBI->Add(_segments[i].hardware_element_colour_order.g);
+    //       JBI->Add(_segments[i].hardware_element_colour_order.b);
+    //       JBI->Add(_segments[i].hardware_element_colour_order.w1);
+    //       JBI->Add(_segments[i].hardware_element_colour_order.w2);
+    //     JBI->Array_End();
+    //   }
+    // JBI->Array_End();
+
+    // JBI->Add("light_power_state", pCONT_iLight->light_power_state ? "ON" : "OFF");
+    // JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
+
+  return JBI->End();
+}
+
+
+
+
+/**
+ * @brief Fix this first, what is running all in here for now until I clean the others up (and remove topics not needed?)
+ * 
+ * @param json_level 
+ * @return uint8_t 
+ */
 uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level)
 {
 
@@ -2002,13 +1715,13 @@ uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level)
 ******************************************************************************************************************************************************************************/
 
 
-// mAnimatorLight& mAnimatorLight::setAnimFunctionCallback_Segments(ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED) {
+// mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallbacks(ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED) {
 //   // this->_segment_runtimes[segment_index].anim_function_callback = anim_function_callback;
 //   // return *this;
 // }
 
 // // tmp method
-// mAnimatorLight& mAnimatorLight::setAnimFunctionCallback_Segments_0(ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED) {
+// mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallbacks_0(ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED) {
 //   uint8_t segment_index = 0;
 //   // this->_segment_runtimes[segment_index].anim_function_callback_indexed = anim_function_callback;
 //   return *this;

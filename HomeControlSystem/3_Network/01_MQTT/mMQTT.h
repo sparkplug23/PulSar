@@ -316,7 +316,7 @@ const char* state_ctr(void);
       // Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
 
       if(handler_ptr->flags.PeriodicEnabled){
-        if(abs(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
+        if(ABS_FUNCTION(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
           handler_ptr->tSavedLastSent=millis();
           handler_ptr->flags.SendNow = true;
           //handler_ptr->flags.FrequencyRedunctionLevel = 1;

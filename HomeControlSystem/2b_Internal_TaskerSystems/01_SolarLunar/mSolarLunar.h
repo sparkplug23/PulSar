@@ -58,6 +58,9 @@ public:
     void parse_JSONCommand(JsonParserObject obj);
 
     void Update_Solar_Tracking_Data();
+
+    
+
     
 		/**
 		 * @brief 
@@ -104,6 +107,22 @@ public:
   void SolarAzEl(time_t utc_time_point, double Lat, double Lon, double Alt, double* Az, double* El);
 
   double julian_day(time_t utc_time_point);
+
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return 1;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      value->type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
+      value->data.push_back(solar_position.azimuth);
+      value->type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
+      value->data.push_back(solar_position.elevation);
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
 
   
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);

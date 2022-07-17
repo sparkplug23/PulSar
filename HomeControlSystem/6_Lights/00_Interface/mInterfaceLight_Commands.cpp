@@ -256,7 +256,7 @@ void mInterfaceLight::CommandSet_PixelHardwareTypeID(uint8_t value){
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 } 
 int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
-  if(c=='\0') return -1;
+  if(*c=='\0') return -1;
   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
   else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE_WS281X; }
   else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)==0){       return LT_ADDRESSABLE_SK6812; }
@@ -622,7 +622,7 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
     #endif   
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT DEBUG_INSERT_PAGE_BREAK "f::CommandSet_LightPowerState %d"), state);
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "f::CommandSet_LightPowerState %d"), state);
   #endif
 
 
@@ -638,12 +638,10 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
 
   if(state == 0) // turn off
   {
-
     pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
     pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
     pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
     CommandSet_Brt_255(0);
-
   }
   else
   if(state == 1) // turn on
@@ -652,10 +650,12 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
     pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
     pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
     pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    
     CommandSet_Brt_255(255);
-
+    
     pCONT_lAni->CommandSet_PaletteID(10, 0);
-    pCONT_lAni->CommandSet_Flasher_FunctionID(pCONT_lAni->EFFECTS_FUNCTION__SOLID_COLOUR__ID);
+    
+    pCONT_lAni->CommandSet_Flasher_FunctionID(0 /**Add define later for "DEFAULT_EFFECT" */);//pCONT_lAni->EFFECTS_FUNCTION__SOLID_COLOUR__ID);
 
 
 
@@ -1180,7 +1180,7 @@ void mInterfaceLight::CommandSet_EnabledAnimation_Flag(uint8_t value){
 //   return buffer;
 // }
 // int8_t mInterfaceLight::GetTransitionMethodIDbyName(const char* c){
-//   if(c=='\0'){
+//   if(*c=='\0'){
 //     return -1;
 //   }
 //   // if(strstr(c,D_TRANSITION_METHOD_BLEND_NAME_CTR)){
@@ -1518,7 +1518,7 @@ const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, 
 } 
 int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
 
-  if(c=='\0'){
+  if(*c=='\0'){
     return -1;
   }
   if(strcmp_P(c,PM_ANIMATION_MODE_NONE_NAME_CTR)==0){ return ANIMATION_MODE_NONE_ID; }

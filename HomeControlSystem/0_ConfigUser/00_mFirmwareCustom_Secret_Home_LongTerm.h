@@ -97,6 +97,12 @@ LivingRoom
 // #define DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP1
 // #define DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP2
 
+
+/**
+ * @brief Attic
+ **/
+// #define DEVICE_ATTIC_SENSOR
+
 /**
  * 
 Hallway + Understairs
@@ -135,8 +141,8 @@ Outside + Garage
 TV Room (prev. spareroom)
   - CeilingLight
 **/
-// #define DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
-// #define DEVICE_SPAREROOM_H801_WARDROBE_UPLIGHTS
+// #define DEVICE_SHELLYDIMMER_TVROOM_CEILING
+// #define DEVICE_TVROOM_H801_UPLIGHTS
 // #define DEVICE_AMBILIGHT_SAMSUNG_SPAREROOM
 
 /**
@@ -186,11 +192,9 @@ Bathroom
 // #define DEVICE_BEDROOMSENSOR
 // #define DEVICE_BEDROOM_CEILINGFAN
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
-// #define DEVICE_BLACK_STAND_LIGHT
-// #define DEVICE_RGBCLOCK_BEDROOM_WALL                             // Make this into an alarm? flashing effect and buzzer/speaker with esp32
-// #define DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
-// #define DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE
 
+// #define DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE
+// #define DEVICE_BEDROOM_LOUVOLITE_HUB
 
 /**
  * Roaming
@@ -200,7 +204,6 @@ Bathroom
  * - Floor fan 1
  * 
  * */
-// #define DEVICE_HVAC_HAIRDRYER
 // #define DEVICE_AIRPURIFIER
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_FLOORFAN2
@@ -217,42 +220,47 @@ Bathroom
  **/
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 1
+  #define DEVICENAME_SOCKET_NUMBER_CTR 01
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 2
+  #define DEVICENAME_SOCKET_NUMBER_CTR 02
   #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP1
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 3
+  #define DEVICENAME_SOCKET_NUMBER_CTR 03
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP2
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 4
+  #define DEVICENAME_SOCKET_NUMBER_CTR 04
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 5
+  #define DEVICENAME_SOCKET_NUMBER_CTR 05
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC__DESK_ACOUSTIC_ENERGY_SPEAKERS_POWER
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__06
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 6
-#endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
-  #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 7
+  #define DEVICENAME_SOCKET_NUMBER_CTR 06
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 8
+  #define DEVICENAME_SOCKET_NUMBER_CTR 07
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
-  #define DEVICENAME_SOCKET_NUMBER_CTR 9
+  #define DEVICENAME_SOCKET_NUMBER_CTR 08
+#endif
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+  #define DEVICE_SOCKET_NUMBERED
+  #define DEVICENAME_SOCKET_NUMBER_CTR 09
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
@@ -261,6 +269,8 @@ Bathroom
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__BEDRROM_DESK_5V_PSU
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 12
+  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"  // "|" is for multinames for rooms while "Temporary_" is devices that will leave with me 
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__E2NSUITE_CEILING_FAN
   #define DEVICE_SOCKET_NUMBERED
@@ -277,6 +287,8 @@ Bathroom
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__CANDLE_WARMER   // not sure what candle warmer is, I need to check with button testing
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 16
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
@@ -290,25 +302,35 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 19
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC__DESK_DISPLAY_POWER
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__20
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 20
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__21
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 21
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__22
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 22
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__23
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 23
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__24
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 24
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 
 /**
@@ -319,12 +341,14 @@ Bathroom
   #define DEVICENAME_CTR          "cooker_extractor_fan"
   #define DEVICENAME_FRIENDLY_CTR "Cooker Extractor Fan"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__ENSUITE_EXTRACTOR_FAN  
   #define SUB_DEVICE_SONOFF_BASIC__DEFAULT_CONFIG_NAMED
   #define DEVICENAME_CTR          "ensuite_extractor_fan"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Extractor Fan"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 
 
@@ -578,6 +602,7 @@ Bathroom
   #define DEVICENAME_CTR          "dimmer_hallway_lamp"
   #define DEVICENAME_FRIENDLY_CTR "Dimmer Hallway Lamp"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SHELLY_DIMMER__LIVINGROOM_LAMP1
   #define DEVICE_SOCKET_NUMBERED
@@ -729,6 +754,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight1"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 1 [Main Kitchen]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_MODULE_CORE_RULES
 
@@ -829,6 +855,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight2"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 2 [Table/Window]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
     
   /*
     Method should only activate if boot loop happens 10 times
@@ -951,6 +978,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight3"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen 3 VirtualSwt"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   //#define FORCE_TEMPLATE_LOADING
   #define USE_MODULE_CORE_RULES
@@ -1024,6 +1052,7 @@ Bathroom
   #define DEVICENAME_CTR          "kitchenlight4"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light Cupboard [Under|Downlight]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
     
   /*
     Method should only activate if boot loop happens 10 times
@@ -1058,8 +1087,8 @@ Bathroom
   "}";
 
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG  "Cupboard"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG  "Sink"
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG  "Sink"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG  "Cupboard"
   #define D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "Switch1"
   #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Switch2"
 
@@ -1145,6 +1174,7 @@ Bathroom
   #define DEVICENAME_CTR            "kitchenpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -1174,6 +1204,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbshelf"
   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -1182,6 +1213,13 @@ Bathroom
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     #define STRIP_SIZE_MAX 50
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1219,9 +1257,10 @@ Bathroom
 #endif
 
 #ifdef DEVICE_RGBLIGHTS_GLASSBOX
-  #define DEVICENAME_CTR          "rgbcrystal3"
+  #define DEVICENAME_CTR          "rgbglassbox"//"rgbcrystal3"
   #define DEVICENAME_FRIENDLY_CTR "Glass Box Lights"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -1269,6 +1308,7 @@ Bathroom
   #define DEVICENAME_CTR          "rgbcooker"
   #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -1284,7 +1324,12 @@ Bathroom
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-    #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1301,17 +1346,34 @@ Bathroom
   
   #define STRIP_SIZE_MAX 1
   #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+  //   "\"" D_JSON_STRIP_SIZE       "\":1,"
+  //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
+  //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
+  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
+  //   "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
+  //   "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
+  //   "\"" D_JSON_BRIGHTNESS     "\":100"
+  // "}";
+
+  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
     "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
+    "\"Hue\":345,\"Sat\":100,"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
+    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
   "}";
+
+
 
 #endif
 
@@ -1335,10 +1397,17 @@ Bathroom
   #define DEVICENAME_CTR          "kitchensensor"
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  // #define ENABLE_DEVFEATURE_RTC_SETTINGS
+
 
   #define USE_MODULE_CORE_RULES
        
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
@@ -1349,12 +1418,11 @@ Bathroom
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_JSON_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"19\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
-      "\"27\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
       #endif
@@ -1377,6 +1445,9 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
     "},"    
@@ -1409,7 +1480,8 @@ Bathroom
   #define DEVICENAME_CTR          "rgbfridge"
   #define DEVICENAME_FRIENDLY_CTR "RGB Fridge H801"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+      
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -1424,7 +1496,12 @@ Bathroom
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-    #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1440,17 +1517,19 @@ Bathroom
   "}";
   
   #define STRIP_SIZE_MAX 1
-  #define USE_LIGHTING_TEMPLATE
+  #define USE_LIGHTING_TEMPLATE  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
     "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
+    "\"Hue\":345,\"Sat\":100,"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
+    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
   "}";
 
 #endif
@@ -1469,7 +1548,8 @@ Bathroom
   #define DEVICENAME_CTR          "rgbutility"
   #define DEVICENAME_FRIENDLY_CTR "RGB Utility H801"
   #define DEVICENAME_ROOMHINT_CTR "Utility"
-
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+      
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
@@ -1484,7 +1564,12 @@ Bathroom
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-    #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1500,19 +1585,19 @@ Bathroom
   "}";
   
   #define STRIP_SIZE_MAX 1
-  #define USE_LIGHTING_TEMPLATE
+  #define USE_LIGHTING_TEMPLATE  
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
     "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
-    "\"" D_JSON_CCT_PERCENTAGE "\":100," 
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid\"},"
-    "\"" D_JSON_BRIGHTNESS_RGB     "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT     "\":100"
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
+    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
+    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
+    "\"Hue\":345,\"Sat\":100,"
+    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
+    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
+    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
+    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
   "}";
 
 #endif
@@ -1548,10 +1633,12 @@ Bathroom
   #define DEVICENAME_CTR          "utilitysensor"
   #define DEVICENAME_FRIENDLY_CTR "Utility Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Utility"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   // #define USE_MODULE_DRIVERS_LEDS
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
   #define USE_MODULE_SENSORS_BH1750
@@ -1600,7 +1687,10 @@ Bathroom
       "],"  
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
         "\"" "Sidedoor" "\""
-      "]"  
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "]"
     "}"
   "}";
 
@@ -1634,6 +1724,7 @@ Bathroom
   #define DEVICENAME_CTR            "rgblamp_cylinder"
   #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder Utility"
   #define DEVICENAME_ROOMHINT_CTR   "Utility"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define DISABLE_WEBSERVER
 
@@ -1696,6 +1787,7 @@ Bathroom
   #define DEVICENAME_CTR          "consumerunit"
   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
   #define DEVICENAME_ROOMHINT_CTR "Downstairs Toilet"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
     
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
   #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1 // temporary force the value, should be handled by command
@@ -1718,6 +1810,12 @@ Bathroom
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1896,6 +1994,88 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
+****** Attic ****************************************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+
+/**
+ * 
+ * 
+ * 
+ * 
+ * */
+#ifdef DEVICE_ATTIC_SENSOR
+  #define DEVICENAME_CTR          "atticsensor"
+  #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Attic"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define USE_MODULE_CORE_RULES
+     
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_DS18X
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR    "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DS18X
+      "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      #endif
+      "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Attic"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Attic"
+  #define D_DEVICE_TEMP_0_FRIENDLY_NAME_LONG "Cold Water Tank"
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "Attic Top"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "Attic Bottom"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_TEMP_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["    
+        "[40,50,199,3,0,0,0,102],"
+        "[40,255,100,30,7,142,92,154],"
+        "[40,255,100,30,7,143,73,252]"
+      "]"  
+    "}"
+  "}";
+
+#endif
+
+
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
 ****** Livingroom ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
@@ -1904,6 +2084,7 @@ Bathroom
   #define DEVICENAME_CTR          "livingroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Living Room Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_CORE_RULES
      
@@ -1977,6 +2158,7 @@ Bathroom
   #define DEVICENAME_CTR            "rgbfireplace"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Fire Place"
   #define DEVICENAME_ROOMHINT_CTR   "Livingroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define DISABLE_WEBSERVER
 
@@ -1986,6 +2168,12 @@ Bathroom
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
     #define STRIP_SIZE_MAX 300
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2086,8 +2274,10 @@ Bathroom
   #define DEVICENAME_CTR          "radiatorfan"
   #define DEVICENAME_FRIENDLY_CTR "Radiator Fan"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
   #define USE_MODULE_SENSORS_SWITCHES
@@ -2263,6 +2453,13 @@ Bathroom
   #define DEVICENAME_CTR          "heating"
   #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating"
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
   /**
    * @brief Put macbook air under stairs for arduino wiping with bad code (use old macbook?)
@@ -2591,6 +2788,7 @@ Bathroom
   #define DEVICENAME_CTR          "sidedoorlight"
   #define DEVICENAME_FRIENDLY_CTR "Side Door Motion Light"
   #define DEVICENAME_ROOMHINT_CTR   "Outdoor|Driveway"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 2
@@ -2649,81 +2847,26 @@ Bathroom
   "}";
 
 
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 Toggle = Relay0 Power Toggle
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2"
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-      "}"
-    "}"
-  "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-
-  /**
-   * Motion needs to change, to instead be a rule. ie.
-   * 
-   * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
-   * One rule will be required for direction, ie motion started (button low) and motion over (button high)
   
-   * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
-   * Example
-   * Rule0
-   * - Switch 0 = Low, Motion0 started
-   * Rule1
-   * - Switch 0 = low, Relay0 on for X minutes   (time of day on relay operation will be controlled via relay_commands, to set operation time ranges)
-   * Rule2
-   * - Switch 1 = Low, Motion1 started
-   * Rule3
-   * - Switch 1 = low, Relay1 on for X minutes
-   * */
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 HIGH = Relay0 Power ON for Timed seconds
+  "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
         "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
-        "\"State\":1"
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-      "}"
-    "},"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+        "\"State\":\"On\""
       "},"
       "\"Command\":{"
         "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
         "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
       "}"
     "}"
   "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  
 
 #endif
 
@@ -2732,6 +2875,7 @@ Bathroom
   #define DEVICENAME_CTR          "gazebo_sonoff_4chpro"
   #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
   #define DEVICENAME_ROOMHINT_CTR  "Gazebo"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_MODULE_CORE_RULES
   
@@ -2768,6 +2912,7 @@ Bathroom
   #define DEVICENAME_CTR          "gazebosensor"
   #define DEVICENAME_FRIENDLY_CTR "Gazebo Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Gazebo"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BME
@@ -2887,6 +3032,7 @@ Bathroom
   #define DEVICENAME_CTR          "h801_rgbgazebo"
   #define DEVICENAME_FRIENDLY_CTR "H801 RGB Gazebo RGBCCT Strip"
   #define DEVICENAME_ROOMHINT_CTR "Gazebo"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_SERIAL_ALTERNATE_TX
   
@@ -2921,7 +3067,7 @@ Bathroom
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBCW\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
     "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
     "\"" D_JSON_BRIGHTNESS     "\":100"
@@ -2940,6 +3086,7 @@ Bathroom
   #define DEVICENAME_CTR          "oiltank"
   #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_DS18X
@@ -3001,6 +3148,7 @@ Bathroom
   #define DEVICENAME_CTR          "oilfurnace"
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_CORE_RULES
 
@@ -3127,6 +3275,7 @@ Bathroom
   #define DEVICENAME_CTR          "garagelight"
   #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_SSIDS_OUTSIDE_HOUSE
   
@@ -3182,10 +3331,6 @@ Bathroom
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "],"
@@ -3370,10 +3515,11 @@ Bathroom
 *******************************************************************************************************************************************/
 
 
-#ifdef DEVICE_SHELLYDIMMER_SPAREROOM_CEILING
-  #define DEVICENAME_CTR          "shellydimmer_spareroom"
-  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
+#ifdef DEVICE_SHELLYDIMMER_TVROOM_CEILING
+  #define DEVICENAME_CTR          "shellydimmer_tvroom"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer TV Room"
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,70
   
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -3450,10 +3596,11 @@ Bathroom
 
 
 
-#ifdef DEVICE_SPAREROOM_H801_WARDROBE_UPLIGHTS
-  #define DEVICENAME_CTR          "h801_spareroom_wardrobe"
+#ifdef DEVICE_TVROOM_H801_UPLIGHTS
+  #define DEVICENAME_CTR          "h801_tvroom_uplights"//"h801_spareroom_wardrobe"
   #define DEVICENAME_FRIENDLY_CTR "H801 Spareroom Wardrobe"
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -3469,7 +3616,14 @@ Bathroom
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
     #define DEBUG_TARGET_ANIMATOR_SEGMENTS
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-    #define ENABLE_EXTRA_EFFECTS_SUNPOSITIONS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+    
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3492,7 +3646,7 @@ Bathroom
     "\"" D_JSON_STRIP_SIZE       "\":1,"
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
     "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
     "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
     "\"" D_JSON_BRIGHTNESS     "\":100"
@@ -3506,6 +3660,7 @@ Bathroom
   #define DEVICENAME_CTR          "ambilight_spareroom"
   #define DEVICENAME_FRIENDLY_CTR "Ambilight Spareroom"
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -3517,6 +3672,12 @@ Bathroom
     #define USE_SK6812_METHOD_DEFAULT
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -3558,11 +3719,11 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-
 #ifdef DEVICE_SHELLYDIMMER_MASTERBEDROOM_CEILING
-  #define DEVICENAME_CTR          "shellydimmer_masterbedroom"
+  #define DEVICENAME_CTR          "ceiling_masterbedroom_light"//"shellydimmer_masterbedroom"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer MBed Room"
   #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -3639,6 +3800,87 @@ Bathroom
 
 #endif
 
+#ifdef DEVICE_DIMMER_MASTERBEDROOM_LAMP1
+  #define DEVICENAME_CTR          "dimmer_masterbedroom_lamp1"
+  #define DEVICENAME_FRIENDLY_CTR "Dimmer Masterbedroom Lamp1"
+  #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define DISABLE_SERIAL_LOGGING
+  #define USE_MODULE_CORE_RULES
+    
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Input1"
+  #define D_DEVICE_SWITCH_2_FRIENDLY_NAME_LONG "Input2"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH_2_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\"," 
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":100"
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":50"
+      "}"
+    "}"    
+  "}";
+
+
+#endif
+
 /**
  * Potentionally to be merged with landingpanel controller
  * BME, RGB
@@ -3649,6 +3891,7 @@ Bathroom
 #ifdef DEVICE_MASTERBEDROOMSENSOR
   #define DEVICENAME_CTR          "masterbedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Master Bedroom Sensor"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   //#define FORCE_TEMPLATE_LOADING
      
@@ -3697,7 +3940,7 @@ Bathroom
     "\"" D_JSON_CCT_TEMP "\":300,"
     "\"" D_JSON_HUE "\":350,"
     "\"" D_JSON_SAT "\":100,"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\","
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
     "\"" D_JSON_BRIGHTNESS_RGB "\":100"
   "}";
@@ -3721,6 +3964,7 @@ Bathroom
   #define DEVICENAME_CTR          "dresser_lights"                                      // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
   #define DEVICENAME_FRIENDLY_CTR "Dresser Lights"                                   // Change: You may change this, but it is not important to do so (more important when webui is functioning)
   #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define STRIP_SIZE_MAX 50                                                                           // Change: Set *total* length of string, segment0 will default to this length
   #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
@@ -3735,6 +3979,14 @@ Bathroom
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
+    
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3794,6 +4046,7 @@ Bathroom
 #ifdef DEVICE_ENSUITESENSOR
   #define DEVICENAME_CTR          "ensuitesensor"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
      
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_BME
@@ -3848,7 +4101,7 @@ Bathroom
     "\"" D_JSON_CCT_TEMP "\":300,"
     "\"" D_JSON_HUE "\":25,"
     "\"" D_JSON_SAT "\":100,"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 01\"," //ie 10
+    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\"," //ie 10
     "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
     "\"" D_JSON_BRIGHTNESS_RGB "\":1"
   "}";
@@ -3874,9 +4127,10 @@ Bathroom
 
 
 #ifdef DEVICE_SHELLYDIMMER_ENSUITE_CEILING
-  #define DEVICENAME_CTR          "shellydimmer_ensuite"
+  #define DEVICENAME_CTR          "ceiling_ensuite_light"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Ensuite"
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
       
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -3968,9 +4222,10 @@ Bathroom
 *******************************************************************************************************************************************/
 
 #ifdef DEVICE_SHELLYDIMMER_LANDING_CEILING
-  #define DEVICENAME_CTR          "shellydimmer_landing"
+  #define DEVICENAME_CTR          "ceiling_landing_light"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
@@ -4077,6 +4332,7 @@ Bathroom
   #define DEVICENAME_CTR          "immersionsensor"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Sensor ESP32"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_CORE_RULES
   
@@ -4301,29 +4557,39 @@ Bathroom
   #define DEVICENAME_CTR            "landingpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Landing Panel"
   #define DEVICENAME_ROOMHINT_CTR   "Landing"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define DISABLE_WEBSERVER
   
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES  
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define STRIP_SIZE_MAX 14                                                                        // Change: Set *total* length of string, segment0 will default to this length
-    #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-    #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   #define STRIP_SIZE_MAX 14                                                                        // Change: Set *total* length of string, segment0 will default to this length
+  //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  //   #define USE_SK6812_METHOD_DEFAULT
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+    
+  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    
+
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -4372,8 +4638,9 @@ Bathroom
         "\"" D_DEVICE_SENSOR_BME_MASTERBEDROOM_NAME "\"," //76
         "\"" D_DEVICE_SENSOR_BME_LANDING_NAME  "\"" //77
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "}"
+    // "},"
+    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
 
@@ -4435,6 +4702,7 @@ Bathroom
 #ifdef DEVICE_ATTICSENSOR
   #define DEVICENAME_CTR          "atticsensor"
   #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
@@ -4494,6 +4762,7 @@ Bathroom
   #define DEVICENAME_CTR          "bedroom_ceilingfan"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Ceiling Fan"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_MODULE_CORE_RULES
   
@@ -4521,20 +4790,16 @@ Bathroom
 #ifdef DEVICE_SHELLYDIMMER_BEDROOM_CEILING
   #define DEVICENAME_CTR          "dimmer_bedroom_ceiling"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,70
   
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-
-  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
-  
+  #define DISABLE_SERIAL_LOGGING
+  #define USE_MODULE_CORE_RULES
+    
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
 
-  #define USE_MODULE_CORE_RULES
-  #define USE_HARDWARE_DEFAULT_RULES_1
-
-  #define DISABLE_SERIAL_LOGGING //temp measure
-  // #define DISABLE_SERIAL0_CORE //dont think its needed
-
+  #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_SHELLY_DIMMER
 
   #define USE_MODULE_TEMPLATE
@@ -4542,25 +4807,61 @@ Bathroom
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
-  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
-  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
-  
+  #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "Switch_Bright"
+  #define D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "Switch_Dim"
+
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
+  "}";
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\"," 
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":50"
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":100"
+      "}"
+    "}"   
   "}";
 
 #endif
@@ -4601,16 +4902,22 @@ Bathroom
   #define DEVICENAME_CTR          "bedroomsensor"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
   #define USE_MODULE_SENSORS_DOOR
+
+  //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
+
+  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -4621,19 +4928,27 @@ Bathroom
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    
+    
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBW\","    
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
     "\"" D_JSON_ANIMATIONMODE    "\":\"" "Effects" "\"," 
-    "\"ColourPalette\":\"Solid Rgbcct 01\"," 
+    "\"ColourPalette\":10," 
     "\"Hue\":120," 
     "\"Sat\":100," 
     "\"Effects\":{"
-      "\"Function\":\"Solid RGBCCT\""
+      "\"Function\":\"Solid\""
     "},"
     "\"Transition\":{"
       "\"TimeMs\":900,"
@@ -4662,6 +4977,10 @@ Bathroom
       "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
       "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
       #endif
+      #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
@@ -4738,18 +5057,30 @@ Bathroom
   #define DEVICENAME_CTR          "rgbclock_bedroom_wall"
   #define DEVICENAME_FRIENDLY_CTR "RGB Clock 01"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 93  
+  #define STRIP_SIZE_MAX 94//93  
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
+
+  // #define USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
   
-  #define ENABLE_DEVFEATURE_RGB_CLOCK
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
+
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    
+
 
   #define DISABLE_WEBSERVER
 
@@ -4760,7 +5091,7 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       #endif 
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
@@ -4771,7 +5102,7 @@ Bathroom
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
     "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
@@ -4794,22 +5125,25 @@ Bathroom
 
 #endif
 
-#ifdef DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
-  #define DEVICENAME_CTR          "rgbdisplay_bedroom_outsidetemp"
-  #define DEVICENAME_FRIENDLY_CTR "7-Segment White Display"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
 
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 93  
-  
-  #define ENABLE_DEVFEATURE_RGB_CLOCK
-  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  
-  #define DISABLE_WEBSERVER
+/**
+ * @brief Currently its own device, but try integrate into bedroomsensor in attic 
+ * 
+ */
+#ifdef DEVICE_BEDROOM_LOUVOLITE_HUB
+  #define DEVICENAME_CTR          "bedroom_louvolite_hub"
+  #define DEVICENAME_FRIENDLY_CTR "Bedroom Louvolite Blind Hub"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define USE_MODULE_DRIVERS_INTERFACE
+
+  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  //   #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+
+  //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
+
+  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -4817,39 +5151,18 @@ Bathroom
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
-
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_EFFECTS "\"," 
-    "\"ColourPalette\":10," 
-    "\"Effects\":{"
-      "\"Function\":\"Seven-Segment Manual\""
-    "},"
-    "\"Hue\":10,\"Sat\":100,"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":1"
-  "}";
-
-
-
+  
 #endif
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -4871,6 +5184,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "airpurifier"
   #define DEVICENAME_FRIENDLY_CTR "Air Purifier 1"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   //#define FORCE_TEMPLATE_LOADING
   #define SETTINGS_HOLDER 1
@@ -4901,6 +5215,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan1"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 1"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,70
   
   #define USE_MODULE_CORE_RULES
   
@@ -4931,6 +5246,7 @@ HVAC controllers here
   #define DEVICENAME_CTR          "floorfan2"
   #define DEVICENAME_FRIENDLY_CTR "IFan Floor Fan 2"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,70
   
   #define USE_MODULE_CORE_RULES
   
@@ -4953,121 +5269,6 @@ HVAC controllers here
 
 #endif
 
-
-#ifdef DEVICE_TESTBED_SHELLY_2P5
-  #define DEVICENAME_CTR          "testbed_shelly_2p5"
-  #define DEVICENAME_FRIENDLY_CTR "Kitchen Light Cupboard [Under|Downlight]"
-  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-    
-  /*
-    Method should only activate if boot loop happens 10 times
-    Method A: Switch to Wifi.begin hardcoded ssid/pw, start OTA and wait, rebooting every 10 minutes if wifi does not connect
-    Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
-  */
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  //#define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
-
-  #define USE_MODULE_NETWORKS_MQTT
-  #define USE_MODULE_CORE_RULES
-
-  #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
-    #define ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
-    #define MAX_RELAYS 2
-  
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_ADE7953
-      
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY2P5_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG  "Window"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG  "Dining Room"
-  #define D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "Dining Room"
-  #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Window"
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
-      "],"
-        "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-          "\"" D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "\","
-          "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\""
-        "]"
-    "}"
-  "}";
-
-  /**
-   * NOTE: indexes swapped
-   * */
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 Toggle = Relay0 Power Toggle
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2"
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-      "}"
-    "},"
-    // Switch1 Toggle = Relay1 Power Toggle
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":2"      // 2 meaning either low or high, 1 would be high only
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-      "}"
-    "},"
-    // Button0 Single Press = Relay0 Power On for 10 seconds tester
-    "\"Rule2\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2" // 
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-      "}"
-    "}"
-  "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-
-#endif
 
 
 #endif // MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H

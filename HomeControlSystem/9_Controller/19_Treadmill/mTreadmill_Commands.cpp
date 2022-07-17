@@ -166,7 +166,7 @@ AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 } 
 // int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
-//   if(c=='\0') return -1;
+//   if(*c=='\0') return -1;
 //   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
 //   else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE_WS281X; }
 //   return -1;

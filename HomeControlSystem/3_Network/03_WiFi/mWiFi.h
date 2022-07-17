@@ -4,7 +4,8 @@
 #define D_UNIQUE_MODULE_NETWORK_WIFI_ID 20
 
 #include "1_TaskerManager/mTaskerManager.h"
-  #ifdef USE_MODULE_NETWORK_WIFI
+
+#ifdef USE_MODULE_NETWORK_WIFI
 
 // #define ENABLE_WIFI_DEVELOPMENT
 

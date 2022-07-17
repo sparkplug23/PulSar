@@ -1,4 +1,4 @@
-#include "mHeatingStripColour_Understairs.h" 
+#include "mHeatingStripColour.h" 
 
 #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
 

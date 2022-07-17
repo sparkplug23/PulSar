@@ -51,9 +51,14 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
 
 #ifndef DISABLE_NETWORK
-#define USE_MODULE_NETWORK_WIFI
+// #define USE_MODULE_NETWORK_WIFI
 #define USE_MODULE_NETWORK_MQTT
 #endif // DISABLE_NETWORK
+
+#if !defined(USE_MODULE_NETWORK_WIFI_V2) && !defined(DISABLE_NETWORK)
+#warning "==========================================================FirmwareDefault: Enable Wifi v1
+#define USE_MODULE_NETWORK_WIFI
+#endif
 
 #ifndef USE_MODULE_NETWORK_WIFI
   #warning "USE_MODULE_NETWORK_WIFI" has not been defined -- NO WIFI!

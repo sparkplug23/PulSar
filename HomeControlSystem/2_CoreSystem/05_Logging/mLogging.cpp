@@ -68,7 +68,7 @@ void mLogging::parse_JSONCommand(JsonParserObject obj){};
 // for quick prototyping, set to test level
 
 void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...){
-  if(abs(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
+  if(ABS_FUNCTION(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
     va_list arg;
     //AddLog(loglevel,formatP,arg);
   }
@@ -826,7 +826,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer){ //"Name" as
   return buffer;        
 }
 int8_t mLogging::SetLogLevelIDbyName(const char* c){
-  if(c=='\0'){
+  if(*c=='\0'){
     return LOG_LEVEL_DEBUG; //default
   }
   if(strstr(c,PSTR("NONE"))){

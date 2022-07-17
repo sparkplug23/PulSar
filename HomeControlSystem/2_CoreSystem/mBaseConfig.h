@@ -136,10 +136,16 @@
  * FUTURE MQTT will use desktop mdns name, falling back to static IP
  * */
 
-
+#ifdef MQTT_HOST
+#warning "CAUTION: Using MQTT_HOST defined in templates, likely to be new MQTT broker"
+#endif
+#ifndef MQTT_HOST
 #define MQTT_HOST                     "192.168.1.65"    // [MqttHost] Defined as either "X.X.X.X" for IP, or "NAME" for MDNS. 
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
+#endif
+
+// #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
 #define MQTT_HOST_DISCOVERY
+
 #ifdef USE_NETWORK_MDNS
 #define MDNS_MQTT_HOSTNAME1   "TOWER.local" 
 #define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
