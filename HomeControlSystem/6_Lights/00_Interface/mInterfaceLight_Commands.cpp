@@ -6,9 +6,9 @@
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 {
 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
-  #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
+  // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   char buffer[50];
   JsonParserToken jtok = 0; 
@@ -98,13 +98,31 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+
+/**
+ * @brief Construct a new if object
+ * TimeOn is not unique here, so light prefix needs to be added
+ * Maybe "LightTimeOn" or "Light:{TimeOn:x}"
+ * 
+ */
   if(jtok = obj[PM_JSON_TIME_ON]){ // default to secs
+    CommandSet_Auto_Time_Off_Secs(jtok.getInt());
+    ALOG_WRN(PSTR("ToBePhasedOut: \"TimeOn\"->\"Light:{\"TimeOn\":x}"));
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),auto_off_settings.time_decounter_secs);  
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  // New unique version to phase in
+  if(jtok = obj["Light"].getObject()[PM_JSON_TIME_ON]){ // default to secs
     CommandSet_Auto_Time_Off_Secs(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)),auto_off_settings.time_decounter_secs);  
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+
+
 
   if(jtok = obj[PM_JSON_LIGHTPOWER]){
     int8_t state = 0;
@@ -226,12 +244,13 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI)
   {
-    pCONT_lAni->segment_animation_override.time_ms = 100;
+    // pCONT_lAni->segment_animation_override.time_ms = 100;
   }
 
 #ifdef USE_MODULE_NETWORK_MQTT
-  mqtthandler_debug_teleperiod.flags.SendNow = true;
-  mqtthandler_scene_teleperiod.flags.SendNow = true;
+  // mqtthandler_debug_teleperiod.flags.SendNow = true;
+  // mqtthandler_scene_teleperiod.flags.SendNow = true;
+  MQTTHandler_Set_RefreshAll();
 #endif //ifdef USE_MODULE_NETWORK_MQTT
   
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
@@ -617,45 +636,46 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 *******************************************************************************************************************************/
 
 void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
- #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
-    #endif   
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "f::CommandSet_LightPowerState %d"), state);
-  #endif
-
-
-
-  /**
-   * @brief 
-   * Temporary fix 
-   * 
-   * Force light on as default solid colour for now
-   * 
-   * **** proper fix: should enable temporary blend, so the animation can be returned to later (or, simply blend output off and suppress furrther animations so they can easily be turned on again)
-   */
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
+  #endif   
 
   if(state == 0) // turn off
   {
-    pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
-    pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
+
+    // Do not use these, it should be temporary functions!!!
+    // pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
+
+
+
+    // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(10000);
     pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    
+    pCONT_lAni->_segments[0].single_animation_override.time_ms = 1000; // slow turn on
+    pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+
     CommandSet_Brt_255(0);
   }
   else
   if(state == 1) // turn on
   {
 
-    pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
-    pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
-    pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    // pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
+
+    pCONT_lAni->_segments[0].single_animation_override.time_ms = 1000; // slow turn on
+    pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+
+
+
+    // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
+    // pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
     
     CommandSet_Brt_255(255);
     
-    pCONT_lAni->CommandSet_PaletteID(10, 0);
+    // pCONT_lAni->CommandSet_PaletteID(10, 0);
     
-    pCONT_lAni->CommandSet_Flasher_FunctionID(0 /**Add define later for "DEFAULT_EFFECT" */);//pCONT_lAni->EFFECTS_FUNCTION__SOLID_COLOUR__ID);
+    // pCONT_lAni->CommandSet_Flasher_FunctionID(0 /**Add define later for "DEFAULT_EFFECT" */);//pCONT_lAni->EFFECTS_FUNCTION__SOLID_COLOUR__ID);
 
 
 
@@ -663,112 +683,6 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
 
 
 
-          
-  // switch(state){
-  //   case LIGHT_POWER_STATE_ON_ID:
-  //     // SetAnimationProfile(ANIMATION_PROFILE_TURN_ON_ID);
-
-  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-  //     memcpy(&animation,&animation_stored,sizeof(animation));// RESTORE copy of state
-  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation loading previous state"));
-  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-
-  //     // Handle depending on hardware type
-      
-  //     switch(animation.mode_id){
-  //       default:
-  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
-  //       #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  //       case ANIMATION_MODE_EFFECTS_ID:
-  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
-          
-  //     #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  //         #ifndef DISABLE_PIXEL_FUNCTION_EFFECTS
-  //         pCONT_lAni->flashersettings.function = pCONT_lAni->EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  //         #endif
-  //     #endif// USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-          
-
-  //       break;
-  //       #endif // 
-  //       // case ANIMATION_MODE_SCENE_ID:
-  //       //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "scene"));
-  //       //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-  //       //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
-  //       // break;
-  //     }
-
-  //     animation_override.time_ms = 1000; //force fast rate to turn on
-  //     rgbcct_controller.setBrightness255(255);
-  //     animation.flags.fForceUpdate = true;
-  //     //pCONT_ladd->first_set = 1;//set all
-
-  //     light_power_state = true;
-
-  //   break;
-  //   case LIGHT_POWER_STATE_OFF_ID:
-  //     // SetAnimationProfile(ANIMATION_PROFILE_TURN_OFF_ID);
-
-
-  //     // Remember previous state for returning to later  
-  //       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-  //     memcpy(&animation_stored,&animation,sizeof(animation)); // STORE copy of state
-  //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation SAVING state to return to"));
-  //     // If I use overrides, is this neccesary?
-  //       AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT "animation.mode_id=%d"), animation.mode_id);
-  //     light_power_state = false;
-
-  //     //if palette, set colour to black and update all
-  //     switch(animation.mode_id){
-  //       default:
-  //         // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "default"));
-  //         // #endif
-  //       case ANIMATION_MODE_EFFECTS_ID://PRESETS_ID:
-  //         // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //         AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_EFFECTS_ID"));
-  //         // #endif
-  //         animation_override.time_ms = 1000; //force fast rate to turn on
-  //         // flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  //         // animation.flags.fForceUpdate = true;
-  //         // animation.brightness = 0;
-  //         // first_set = 1;//set all
-
-  //         animation.transition.time_ms = 1000;
-  //         animation.flags.fForceUpdate = true;
-  //         animation_override.time_ms = 1000; //force fast rate to turn on
-
-  //         rgbcct_controller.setBrightness255(0);
-
-          
-
-  //       break;
-  //       // case ANIMATION_MODE_SCENE_ID:
-  //       //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //       //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "f::SetAnimationProfile" "ANIMATION_MODE_SCENE_ID"));
-  //       //   // #endif
-  //       //   // setBriRGB(0);
-  //       //   // animation.brightness = 0;
-  //       //   animation.transition.time_ms = 1000;
-  //       //   animation.flags.fForceUpdate = true;
-  //       //   animation_override.time_ms = 1000; //force fast rate to turn on
-
-  //       //   rgbcct_controller.setBrightness255(0);
-
-  //       //   // mode_singlecolour.name_id = MODE_SINGLECOLOUR_COLOURSCENE_ID;
-  //       //   // animation.mode_id = ANIMATION_MODE_SCENE_ID;
-          
-  //       //   // first_set = 1;//set all
-  //       // break;
-  //     }
-  //     animation.flags.fEndUpdatesWhenAnimationCompletes = true; //once turned off, stop animations
-
-
-
-
-
-  //   break;
-  // } // END switch
 }
 
 
@@ -1497,10 +1411,10 @@ const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, 
     case ANIMATION_MODE_NONE_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_NONE_NAME_CTR , sizeof(PM_ANIMATION_MODE_NONE_NAME_CTR)); break;
     // case ANIMATION_MODE_TURN_ON_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_ON_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_ON_NAME_CTR)); break;
     // case ANIMATION_MODE_TURN_OFF_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_OFF_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR)); break;
-    #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
     case ANIMATION_MODE_AMBILIGHT_ID:     memcpy_P(buffer, PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR, sizeof(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)); break;
-    #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+    #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
       case ANIMATION_MODE_NOTIFICATIONS_ID: memcpy_P(buffer, PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR,sizeof(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)); break;
     #endif
     case ANIMATION_MODE_EFFECTS_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_EFFECTS_NAME_CTR, sizeof(PM_ANIMATION_MODE_EFFECTS_NAME_CTR)); break;
@@ -1510,9 +1424,9 @@ const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, 
     case ANIMATION_MODE_WLED_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_WLED_NAME_CTR, sizeof(PM_ANIMATION_MODE_WLED_NAME_CTR)); break;
     #endif
     
-    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     case ANIMATION_MODE_MANUAL_SETPIXEL_ID:         memcpy_P(buffer, PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR , sizeof(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR)); break;
-    #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+    #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   }
   return buffer;
 } 
@@ -1522,12 +1436,12 @@ int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
     return -1;
   }
   if(strcmp_P(c,PM_ANIMATION_MODE_NONE_NAME_CTR)==0){ return ANIMATION_MODE_NONE_ID; }
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
   if(strcmp_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)==0){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
   #endif
-  #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_AMBILIGHT_ID; }
-  #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
+  #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_EFFECTS_ID; }
   // #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
   // if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }

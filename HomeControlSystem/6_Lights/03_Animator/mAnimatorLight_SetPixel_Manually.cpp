@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+#ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
 
 void mAnimatorLight::SubTask_Manual_SetPixel(){
@@ -205,7 +205,7 @@ uint8_t mAnimatorLight::ConstructJSON_Manual_SetPixel(uint8_t json_level){
 }
 
 
-#endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+#endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

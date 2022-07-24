@@ -758,27 +758,27 @@ void mADCInternal::MQTTHandler_Sender(uint8_t id)
 
 // void mSensorsAnalog::MQTTHandler_Init(){
 
-//   struct handler<mSensorsAnalog>* mqtthandler_ptr;
+//   struct handler<mSensorsAnalog>* ptr;
 
-//   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = SEC_IN_HOUR; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Settings;
+//   ptr = &mqtthandler_settings_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = SEC_IN_HOUR; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+//   ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Settings;
 
-//   mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Sensor;
+//   ptr = &mqtthandler_sensor_ifchanged;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = 60; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+//   ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Sensor;
   
 // } //end "MQTTHandler_Init"
 

@@ -257,6 +257,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     // JsonBuilderI->Add(PM_JSON_VERSION,         pCONT_set->my_version);
     JsonBuilderI->Add(PM_JSON_VERSIONNUMBER,   (uint32_t)PROJECT_VERSION);
     JsonBuilderI->Add(PM_JSON_VERSIONNUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
+    JsonBuilderI->Add("VersionNumberNoType",   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
 
     // JBI->Level_Start("VersionNumbers");
     //   JBI->Add("Current",   (uint32_t)PROJECT_VERSION);

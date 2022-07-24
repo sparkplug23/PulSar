@@ -409,55 +409,55 @@ return 0;
 
 void mExerciseBike::MQTTHandler_Init(){
 
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_Settings;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_Settings;
 
-  mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_Sensor;
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_Sensor;
 
-  mqtthandler_ptr = &mqtthandler_sensor_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_Sensor;
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_Sensor;
 
-  mqtthandler_ptr = &mqtthandler_lightstate_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_lightstate;
-  mqtthandler_ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_LightStates;
+  ptr = &mqtthandler_lightstate_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = postfix_topic_lightstate;
+  ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_LightStates;
 
-  mqtthandler_ptr = &mqtthandler_lightstate_ifchanged;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 60; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = postfix_topic_lightstate;
-  mqtthandler_ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_LightStates;
+  ptr = &mqtthandler_lightstate_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = postfix_topic_lightstate;
+  ptr->ConstructJSON_function = &mExerciseBike::ConstructJSON_LightStates;
 
 } //end "MQTTHandler_Init"
 
@@ -508,16 +508,16 @@ void mExerciseBike::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   do{
 
     switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; mqtthandler_ptr=&mqtthandler_settings_teleperiod; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_sensor_teleperiod; break;
-      case MQTT_HANDLER_MODULE_LIGHTSTATE_IFCHANGED_ID:               handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_ifchanged; break;
-      case MQTT_HANDLER_MODULE_LIGHTSTATE_TELEPERIOD_ID:              handler_found=true; mqtthandler_ptr=&mqtthandler_lightstate_teleperiod; break;
+      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; ptr=&mqtthandler_settings_teleperiod; break;
+      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; ptr=&mqtthandler_sensor_ifchanged; break;
+      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; ptr=&mqtthandler_sensor_teleperiod; break;
+      case MQTT_HANDLER_MODULE_LIGHTSTATE_IFCHANGED_ID:               handler_found=true; ptr=&mqtthandler_lightstate_ifchanged; break;
+      case MQTT_HANDLER_MODULE_LIGHTSTATE_TELEPERIOD_ID:              handler_found=true; ptr=&mqtthandler_lightstate_teleperiod; break;
       default: handler_found=false; break; // nothing 
     } // switch
 
     // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CONTROLLER_EXERCISEBIKE_ID,mqtthandler_ptr); }
+    if(handler_found){ pCONT->mqt->MQTTHandler_Command(*this,D_MODULE_CONTROLLER_EXERCISEBIKE_ID,ptr); }
 
     // stop searching
     if(mqtt_handler_id++>MQTT_HANDLER_MODULE_LENGTH_ID){flag_handle_all = false; return;}

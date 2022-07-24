@@ -127,18 +127,25 @@
 //   {0,5,10,15,20,30,40,50,60,70,80,90,100};
 
 
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_AMBILIGHT_CTR)     "ambilight";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATION_CTR)     "animation";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_NOTIFICATIONS_CTR) "notifications";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_EFFECTS_CTR)               "flasher";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MIXER_CTR)                 "mixer";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETPIXEL_MANUALLY_CTR)     "setpixel_manually";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ANIMATIONS_PROGRESS_CTR)   "debug/animation_details";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS__CTR)     "segments";
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)     "debug/palette";
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATION_ACTIVE_CTR)       "animation";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR)              "playlists";
 
+#ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR)        "mode_ambilight";
+#endif
+#ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR)   "mode_setpixel";
+#endif
+
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)         "debug/palette";
+#endif
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug/segments";
+#endif 
+#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
+#endif 
 
 #define D_EFFECTS_REGION__COLOUR_SELECT__NAME_CTR "Colour Select"
 #define D_EFFECTS_REGION__ANIMATE__NAME_CTR "Animate"
@@ -450,118 +457,157 @@ class mAnimatorLight :
     timereached_t tSavedCalculatePowerUsage;
   #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
-  #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   void SubTask_Manual_SetPixel();
   uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
-  #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
+  /**
+   * @brief 
+   * ConstructJSON_Settings
+   * ConstructJSON_AnimationActive (replacing animation/segments) = show information about what is running now, main info point
+   * ConstructJSON_ModeAmbilight
+   * ConstructJSON_Playlist (aka Playlist/Mixer)
+   * ConstructJSON_Debug_Palette
+   * ConstructJSON_Debug_Segments
+   * */
+  
   uint8_t ConstructJSON_Settings(uint8_t json_level = 0);
-  uint8_t ConstructJSON_Animation(uint8_t json_level = 0);
-  uint8_t ConstructJSON_Ambilight(uint8_t json_level = 0);
-  uint8_t ConstructJSON_Segments(uint8_t json_level = 0);
-  #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  uint8_t ConstructJSON_Notifications(uint8_t json_level = 0);
+  uint8_t ConstructJSON_Animation_Active(uint8_t json_level = 0);
+  uint8_t ConstructJSON_Playlist(uint8_t json_level = 0);
+  /**
+   * @brief Each mode
+   */
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+  uint8_t ConstructJSON_Mode_Ambilight(uint8_t json_level = 0);
   #endif
-  uint8_t ConstructJSON_State(uint8_t json_level = 0);
-  uint8_t ConstructJSON_Flasher(uint8_t json_level = 0);
-  uint8_t ConstructJSON_Mixer(uint8_t json_level = 0);
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+  uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0); // probably falls into the E131 type, but here set my mqtt
+  #endif
+  /**
+   * @brief Debug 
+   */
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
     uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0);  
     ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
     mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
   #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-
-
+  
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();  
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
   
+    // Are these really needed?? now I am use auto for loops
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MODULE_ANIMATION_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_AMBILIGHT_TELEPERIOD_ID,
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-      MQTT_HANDLER_MODULE_NOTIFICATION_TELEPERIOD_ID,
-      #endif
-      MQTT_HANDLER_MODULE_STATE_TELEPERIOD_ID,
-      MQTT_HANDLER_MODULE_EFFECTS_TELEPERIOD_ID,
-      MQTT_HANDLER_MODULE_MIXER_TELEPERIOD_ID,
-      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-        MQTT_HANDLER_MODULE_MANUAL_SETPIXEL_TELEPERIOD_ID,
-      #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-        MQTT_HANDLER_MODULE_DEBUG_ANIMATION_PROGRESS_TELEPERIOD_ID,
-      #endif
+      MQTT_HANDLER_MODULE__ANIMATION_ACTIVE_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
+      MQTT_HANDLER_MODULE__PLAYLISTS_TELEPERIOD_ID,
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+      MQTT_HANDLER_MODULE__MODE_AMBILIGHT_TELEPERIOD_ID,
+      #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+      MQTT_HANDLER_MODULE__MODE_MANUAL_SETPIXEL_TELEPERIOD_ID,
+      #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+      /**
+       * @brief Debug
+       **/
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-        MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID,
+      MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID,
       #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+      MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_TELEPERIOD_ID,
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      MQTT_HANDLER_MODULE__DEBUG_ANIMATOR_ANIMATION_PROGRESS_TELEPERIOD_ID,
+      #endif
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;
-    struct handler<mAnimatorLight> mqtthandler_animation_teleperiod;  
-    struct handler<mAnimatorLight> mqtthandler_ambilight_teleperiod;
-    struct handler<mAnimatorLight> mqtthandler_segments_teleperiod;
-    #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
-    struct handler<mAnimatorLight> mqtthandler_notifications_teleperiod;
-    #endif
-    struct handler<mAnimatorLight> mqtthandler_state_teleperiod;
-    struct handler<mAnimatorLight> mqtthandler_flasher_teleperiod;
-    struct handler<mAnimatorLight> mqtthandler_mixer_teleperiod;
-    #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-      struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
-    #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-      struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
-    #endif
+    struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;    
+    struct handler<mAnimatorLight> mqtthandler_animation_active_teleperiod;  
+    struct handler<mAnimatorLight> mqtthandler_playlists_teleperiod;
+    /**
+     * @brief Each mode
+     **/
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    struct handler<mAnimatorLight> mqtthandler_mode_ambilight_teleperiod;
+    #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
+    #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    /**
+     * @brief Debug
+     **/
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
       struct handler<mAnimatorLight> mqtthandler_debug_palette;
     #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+      struct handler<mAnimatorLight> mqtthandler_debug_segments;
+    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
+    #endif
 
     // Could this be put into a function? to allow me to set things to all in this, or by ID
     struct handler<mAnimatorLight>* mqtthandler_list[
-      5
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
+      2
+      /**
+       * @brief Each mode
+       **/
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+      +1
+      #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+      +1
+      #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+      /**
+       * @brief Debug
+       **/
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
         +1
-      #endif
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+        +1
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
         +1
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-        +1
-      #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
-        +1
-      #endif
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      +1
-      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      +1
+      +1 // settings at the end
       ] = {
-      &mqtthandler_animation_teleperiod, &mqtthandler_segments_teleperiod,
-      &mqtthandler_ambilight_teleperiod, &mqtthandler_state_teleperiod,
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS 
-        &mqtthandler_notifications_teleperiod,
-      #endif
-      &mqtthandler_flasher_teleperiod, 
-      #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-        &mqtthandler_mixer_teleperiod,
-      #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+        
+        &mqtthandler_animation_active_teleperiod,
+        &mqtthandler_playlists_teleperiod,
+        /**
+         * @brief Each mode
+         **/
+        #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+        &mqtthandler_mode_ambilight_teleperiod,
+        #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+        #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
         &mqtthandler_manual_setpixel,
-      #endif
-      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-        &mqtthandler_debug_animations_progress,
-      #endif
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+        #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+        /**
+         * @brief Debug
+         **/
+        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
         &mqtthandler_debug_palette,
-      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      &mqtthandler_settings_teleperiod
+        #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+        &mqtthandler_debug_segments,
+        #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+        #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+        &mqtthandler_debug_animations_progress,
+        #endif
+        &mqtthandler_settings_teleperiod
+        
     };
 
   #endif // USE_MODULE_NETWORK_MQTT
@@ -612,7 +658,7 @@ To be phased into normal segment effects
 **********************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
-#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+#ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 
 // create subsub_json_parse_command that is triggered and passes to special commands with "Notifications" as json level 1 that then passes the json object level 2
    
@@ -716,7 +762,7 @@ To be phased into normal segment effects
     }pixel[STRIP_NOTIFICATION_SIZE];
   }notif;
 
-#endif // USE_TASK_RGBLIGHTING_NOTIFICATIONS
+#endif // ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 
 
 /*****************************************************************************************************************************************************************************
@@ -735,7 +781,7 @@ To be phased into normal segment effects
 **********************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
-#ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+#ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
 // Move completely into its own class, with its own tasker
 /**************
  * Ambilight is light patterns around screens or pictures

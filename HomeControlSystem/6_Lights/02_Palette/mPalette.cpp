@@ -1287,7 +1287,7 @@ const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8
     const char* name_p = DLI->GetDeviceName_WithModuleUniqueID( pCONT_iLight->GetModuleUniqueID(), id, buffer, buflen); 
 
     
-    ALOG_INF( PSTR(" %d = \"%S\""),id,name_p);
+    // ALOG_INF( PSTR(" %d = \"%S\""),id,name_p);
 
     if(name_p==nullptr)
     {

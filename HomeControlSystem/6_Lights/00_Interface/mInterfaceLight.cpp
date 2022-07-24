@@ -64,34 +64,6 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
 
 
 
-uint8_t mInterfaceLight::ConstructJSON_Scene(uint8_t json_method){
-
-  // Active rgbcct palette used as scene
-
-  char buffer[30];
-  
-  JsonBuilderI->Start();  
-
-    JBI->Add("ColourPaletteID", pCONT_lAni->_segments[0].palette.id);
-
-  // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
-  // active_id, plus the values below
-  // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
-  //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
-  
-    JsonBuilderI->Add_P(PM_JSON_HUE, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getHue360());
-    JsonBuilderI->Add_P(PM_JSON_SAT, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
-    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
-
-    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->_segments[0].transition.time_ms/1000));
-    JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->_segments[0].transition.time_ms);
-
-
-  return JsonBuilderI->End();
-
-}
-
 
 bool mInterfaceLight::Pre_Init(void)
 {
@@ -823,7 +795,7 @@ void mInterfaceLight::EveryLoop(){
       /**
        * Notifications: Single pixel basic animations (pulse, flash, on/off)
        * */
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
       case ANIMATION_MODE_NOTIFICATIONS_ID:
         pCONT_lAni->SubTask_Notifications();   // Convert this into its own segment effect, effect will need to be set first
       break;
@@ -831,7 +803,7 @@ void mInterfaceLight::EveryLoop(){
       /**
        * Ambilight: Light strips for behind monitors, either static, sunelevation animations, getting TCP/HTTP/Serial data for the pixels from a computer (Eg wallpapers with putty or movies)
        * */
-      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
       case ANIMATION_MODE_AMBILIGHT__ID:
         pCONT_lAni->SubTask_Ambilight_Main();
       break;
@@ -839,7 +811,7 @@ void mInterfaceLight::EveryLoop(){
       /**
        * Set Pixel: Manual method via mqtt json
        * */
-      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL // serial, wifi udp connection
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL // serial, wifi udp connection
       case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
         // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS__ID"));
         pCONT_lAni-> SubTask_Manual_SetPixel();
@@ -869,7 +841,7 @@ void mInterfaceLight::EverySecond_AutoOff(){
   if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
     // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "animation.auto_off_settings.time_decounter_secs==1 and disable"));
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
     #endif       
     CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
     //#ifdef ENABLE_LOG_LEVEL_INFO
@@ -934,174 +906,6 @@ RgbcctColor mInterfaceLight::GetRandomColour(RgbcctColor colour1, RgbcctColor co
 }
 
 
-
-uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
-
-  char buffer[30];
-  
-  JsonBuilderI->Start();
-
-  JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
-  
-  JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getHue360());
-  JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
-
-  
-  // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_colour_order);
-  // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_c12olour_order);
-
-
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessCCT255());
-
-
-  // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->_segments[0].transition.pixels_to_update_as_number);
-  #endif // USE_MODULE_LIGHTS_ANIMATOR
-
-  return JsonBuilderI->End();
-
-}
-
-uint8_t mInterfaceLight::ConstructJSON_Debug(uint8_t json_method){
-
-  char buffer[30];
-  
-  JsonBuilderI->Start();
-
-  JsonBuilderI->Level_Start("RgbcctController");
-  
-    // JsonBuilderI->Level_Start("raw");
-    //   JsonBuilderI->Add("R", rgbcct_controller.R); 
-    //   JsonBuilderI->Add("G", rgbcct_controller.G); 
-    //   JsonBuilderI->Add("B", rgbcct_controller.B); 
-    //   JsonBuilderI->Add("WW", rgbcct_controller.WW); 
-    //   JsonBuilderI->Add("WC", rgbcct_controller.WC); 
-    // JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start("type");
-    
-    JsonBuilderI->Add("R", pCONT_lAni->_segments[0].hardware_element_colour_order.r); 
-    JsonBuilderI->Add("G", pCONT_lAni->_segments[0].hardware_element_colour_order.g); 
-    JsonBuilderI->Add("B", pCONT_lAni->_segments[0].hardware_element_colour_order.b); 
-    JsonBuilderI->Add("WW", pCONT_lAni->_segments[0].hardware_element_colour_order.w); 
-    JsonBuilderI->Add("WC", pCONT_lAni->_segments[0].hardware_element_colour_order.c); 
-
-
-    JsonBuilderI->Level_End();
-
-    // JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
-
-  JsonBuilderI->Level_End();
-
-
-  if(pCONT_lAni->_segments[0].palette.id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
-  {
-
-    JBI->Array_AddArray("encoded", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, ARRAY_SIZE(pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map));
-
-  }
-
-
-  // JsonBuilderI->Level_Start("singlecolour");
-  //   JsonBuilderI->Add_P(PM_R", mode_singlecolour.colour.R);
-  //   JsonBuilderI->Add_P(PM_G", mode_singlecolour.colour.G);
-  //   JsonBuilderI->Add_P(PM_B", mode_singlecolour.colour.B);
-  //   JsonBuilderI->Add_P(PM_WW", mode_singlecolour.colour.WW);
-  //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
-  //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
-  // JsonBuilderI->Level_End();
-  // JsonBuilderI->Level_Start("active_rgbcct_colour_p");
-  //   JsonBuilderI->Add_P(PM_R", active_rgbcct_colour_p->R);
-  //   JsonBuilderI->Add_P(PM_G", active_rgbcct_colour_p->G);
-  //   JsonBuilderI->Add_P(PM_B", active_rgbcct_colour_p->B);
-  //   JsonBuilderI->Add_P(PM_WW", active_rgbcct_colour_p->WW);
-  //   JsonBuilderI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
-  //   JsonBuilderI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
-  // JsonBuilderI->Level_End();
-
-  // JsonBuilderI->Array_AddArray("singlecolour", current_color, 5);   
-
-  // JsonBuilderI->Level_Start("fade");
-  //   JsonBuilderI->Add("running", fade.running);
-  // JsonBuilderI->Level_End();
-
-  return JsonBuilderI->End();
-
-}
-
-
-
-
-
-#ifdef USE_MODULE_NETWORK_MQTT
-
-void mInterfaceLight::MQTTHandler_Init(){
-
-  struct handler<mInterfaceLight>* mqtthandler_ptr;
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Settings;
-
-  
-  mqtthandler_ptr = &mqtthandler_scene_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Scene;
-
-  mqtthandler_ptr = &mqtthandler_debug_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug;
-
-} //end "MQTTHandler_Init"
-
-
-void mInterfaceLight::MQTTHandler_Set_RefreshAll(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  // mqtthandler_animation_teleperiod.flags.SendNow = true;
-  // mqtthandler_ambilight_teleperiod.flags.SendNow = true;
-  mqtthandler_scene_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mInterfaceLight::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mInterfaceLight::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_LIGHTS_INTERFACE_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]), mqtt_handler_id
-  );
-
-}
-
-#endif // USE_MODULE_NETWORK_MQTT
 
 
 void mInterfaceLight::BootMessage(){

@@ -122,7 +122,6 @@
      * Desc: Same colour across all pixels.
      * Param: palette (will always use index 0 colour regardless of palette length)
      * 
-     * no transition pair, draw directly (or maybe optional flag to use dynamic transition if memory allows, otherwise conserve memory for other segments)
      * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__SOLID_COLOUR__ID,
@@ -132,7 +131,6 @@
      *       Each sequential pixel will repeat the palette if type is list, if gradient, then palette is linear blended across output
      * Parameters: Palette, time to blend, rate of new colours, percentage of new colours changed
      * 
-     * no transition pair, draw directly (or maybe optional flag to use dynamic transition if memory allows, otherwise conserve memory for other segments)
      * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__STATIC_PALETTE__ID,
@@ -889,6 +887,30 @@
 // bool flag_run_animation_now = false;
 
     /**
+     * Transition settings
+     * */
+    struct TRANSITION_SETTINGS{
+      /**
+       * Change method (eg Blend, Instant)
+       * */
+      uint8_t method_id = 2;  // Is this still needed?
+      /**
+       * Pixels to change up to maximum of segment
+       * */
+      uint16_t pixels_to_update_as_number  = 1;
+      /**
+       * Refresh rate, calculate new colours
+       * */
+      uint16_t rate_ms = 2000;
+      /**
+       * Time to new colours
+       * */
+      uint16_t time_ms = 1000;  
+    
+    };
+
+
+    /**
      * @brief To be set with JSON, as the exact index location for the physical pixel indexing
      * 
      */
@@ -902,7 +924,7 @@
     { // 24 bytes
       struct PIXEL_INDEX_RANGE{
           uint16_t start = 0;
-          uint16_t stop  = 0; // if equal, range is not active
+          uint16_t stop  = 0; // means length?
       }pixel_range;
 
       uint8_t options = NO_OPTIONS; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
@@ -912,6 +934,7 @@
 
       uint8_t effect_id = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
 
+      // phase out? or move it to become a "private" style that is never set directly but calculated variable
       uint16_t pixels_to_update_this_cycle = 0;
 
       HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
@@ -959,28 +982,20 @@
        * and will therefore have no effect 
        **/
       uint8_t brightness_optional = 255;
-      /**
-       * Transition settings
-       * */
-      struct TRANSITION_SETTINGS{
+
+      TRANSITION_SETTINGS transition;
+
+      // Flags and states that are used during one transition and reset when completed
+      struct ANIMATION_SINGLE_USE_OVERRIDES
+      {
+        // uint8_t fRefreshAllPixels = false;
         /**
-         * Change method (eg Blend, Instant)
+         * Can't be zero, as that means not active
          * */
-        uint8_t method_id = 2;  // Is this still needed?
-        /**
-         * Pixels to change up to maximum of segment
-         * */
-        uint16_t pixels_to_update_as_number  = 1;
-        /**
-         * Refresh rate, calculate new colours
-         * */
-        uint16_t rate_ms = 2000;
-        /**
-         * Time to new colours
-         * */
-        uint16_t time_ms = 1000;  
-      
-      }transition;
+        uint16_t time_ms = 1000; //on boot
+        // uint16_t rate_ms = 1000;
+      }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
+
 
 
       /**
@@ -1085,8 +1100,9 @@
     }segment_settings;
     segment_settings _segments[MAX_NUM_SEGMENTS];
     
+
     // Flags and states that are used during one transition and reset when completed
-    struct SEGMENT_ANIMATION_OVERRIDES
+    struct SEGMENT_ANIMATION_OVERRIDES_TO_BE_DELETED
     {
       uint8_t fRefreshAllPixels = false;
       /**
@@ -1095,6 +1111,7 @@
       uint16_t time_ms = 1000; //on boot
       uint16_t rate_ms = 1000;
     }segment_animation_override; // ie "oneshot" variables that get checked and executed one time only
+
 
     /**
      * values that are used as global iters rather than passing between each function

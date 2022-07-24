@@ -66,6 +66,7 @@ Kitchen/Dining
 // #define DEVICE_RGBCOOKER
 // #define DEVICE_KITCHENSENSOR
 // #define DEVICE_RGBFRIDGE
+// #define DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN
 
 /**
 Utility
@@ -525,6 +526,8 @@ Bathroom
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
     #define MAX_RELAYS 1
+    #define ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+    #define ENABLE_DEVFEATURE_RELAY_RULEEVENT_USES_COMMANDSET
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1178,6 +1181,7 @@ Bathroom
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
+  #define NEXTION_DEFAULT_PAGE_NUMBER 1
 
   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   
@@ -2499,6 +2503,23 @@ Bathroom
   // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
   // #define USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
   
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   #define STRIP_SIZE_MAX 5
+  //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  //   #define USE_SK6812_METHOD_DEFAULT
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+  
+  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
   
@@ -2724,38 +2745,20 @@ Bathroom
     "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"rgbw\","
+    "\"ColourOrder\": \"grbw\","
     "\"ColourPalette\":\"Christmas 01\","
     "\"Effects\": {"
       "\"Function\": \"Static\""
     "},"
-    "\"BrightnessRGB\":100,"
+    "\"CCT_TempPercentage\":100,"
+    "\"BrightnessRGB\":10,"
+    "\"BrightnessCCT\":10,"
     "\"Transition\": {"
       "\"Time\":0,"
       "\"RateMs\":1000"
     "}"
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
-
-  
-/**
- * 
- * LDRs onto input only 30 gpios
- * */
-
-// {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function":1
-//   },
-//   "ColourPalette":77,
-//   "ColourOrder":"grb",
-//   "BrightnessRGB": 10,
-//   "Transition": {
-//     "Time": 1
-//   },
-//   "RGBClock":{"ManualNumber":74}
-// }
 
   
 #endif
@@ -3088,6 +3091,8 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Outside"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
+
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_DS18X
   
@@ -3161,6 +3166,7 @@ Bathroom
    */
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_DS18X
@@ -3233,6 +3239,9 @@ Bathroom
         "\"" D_DEVICE_SENSORS_SWITCH_1_CTR "\","
         "\"" D_DEVICE_SENSORS_SWITCH_2_CTR "\","
         "\"" D_DEVICE_SENSORS_SWITCH_3_CTR "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -4041,6 +4050,12 @@ Bathroom
 /**
  * @brief Above the door light downstairs toilet with google mini
  * 
+ * wires needed
+ * 
+ * 8 core to 3d printed box
+ * 4 core to led strip
+ * mini wires up 
+ * 
  */
 
 #ifdef DEVICE_ENSUITESENSOR
@@ -4563,6 +4578,12 @@ Bathroom
   
   #define USE_MODULE_CORE_RULES
 
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
+
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
@@ -4570,26 +4591,29 @@ Bathroom
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
 
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #define STRIP_SIZE_MAX 14                                                                        // Change: Set *total* length of string, segment0 will default to this length
-  //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  //   #define USE_SK6812_METHOD_DEFAULT
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define STRIP_SIZE_MAX 14                                                                        // Change: Set *total* length of string, segment0 will default to this length
+    #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+    #define USE_SK6812_METHOD_DEFAULT
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    // #define ENABLE_ CRASH DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK  // CRASH!!
 
     
-  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
     
 
   // #define USE_MODULE_DISPLAYS_NEXTION
   // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  #define USE_MODULE_DISPLAYS_NEXTION
+  #define NEXTION_DEFAULT_PAGE_NUMBER 1
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -4654,17 +4678,18 @@ Bathroom
     "\"ColourOrder\": \"GRBW\","
     "\"ColourPalette\":10,"
     "\"Effects\": {"
-      "\"Function\":\"Solid RGBCCT\""
+      "\"Function\":\"Solid\""
     "},"
-    "\"Hue\":20," 
-    "\"Sat\":90," 
-    "\"BrightnessRGB\":100,"
+    "\"Hue\":120," 
+    "\"Sat\":100," 
+    "\"BrightnessRGB\":0,"
     "\"BrightnessCCT\":100,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"
       "\"TimeMs\":400,"
       "\"RateMs\":1000"
-    "}"
+    "},"
+    "\"Light\":{\"TimeOn\":60}"
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
@@ -4996,6 +5021,9 @@ Bathroom
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?

@@ -6,37 +6,6 @@
 
 #include "stdint.h"
 
-
-// #ifndef _MNEXTIONPANEL2_H
-// #define _MNEXTIONPANEL2_H 0.2
-
-// #include "2_CoreSystem/mBaseConfig.h"
-// */
-
-// typedef enum
-// {
-//   SENSOR_TYPE_NONE_ID=0,
-//   SENSOR_TYPE_TEMPERATURE_ID,
-//   SENSOR_TYPE_RELATIVE_HUMIDITY_ID,
-//   SENSOR_TYPE_ACCELEROMETER_ROLL_ID,         /**< Gravity + linear acceleration */
-//   SENSOR_TYPE_ACCELEROMETER_PITCH_ID,        /**< Gravity + linear acceleration */
-//   SENSOR_TYPE_ACCELEROMETER_HEADING_ID,      /**< Gravity + linear acceleration */
-//   SENSOR_TYPE_MAGNETIC_FIELD_ID, 
-//   SENSOR_TYPE_ORIENTATION_ID, 
-//   SENSOR_TYPE_GYROSCOPE_ID, 
-//   SENSOR_TYPE_LIGHT_ID, 
-//   SENSOR_TYPE_PRESSURE_ID,
-//   SENSOR_TYPE_PROXIMITY_ID,
-//   SENSOR_TYPE_GRAVITY_ID,
-//   SENSOR_TYPE_LINEAR_ACCELERATION_ID,   /**< Acceleration not including gravity */
-//   SENSOR_TYPE_ROTATION_VECTOR_ID,
-//   SENSOR_TYPE_VOLTAGE_ID,
-//   SENSOR_TYPE_CURRENT_ID,
-//   SENSOR_TYPE_COLOR_ID,
-//   SENSOR_TYPE_LENGTH_ID
-// } sensors_type_t2;
-//like how sensors have a type
-
 // what the driver does, not how it does it (ie measures light, not what measured it)
 enum drivers_type_t{
     DRIVER_TYPE_NONE_ID=0,
@@ -433,7 +402,7 @@ enum drivers_type_t{
 //     void MQTTHandler_Set_RefreshAll();
 //     void MQTTHandler_Set_TelePeriod();
     
-//     struct handler<mNextionPanel>* mqtthandler_ptr;
+//     struct handler<mNextionPanel>* ptr;
 //     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
 //     const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

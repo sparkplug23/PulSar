@@ -1,4 +1,4 @@
-#ifndef MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_TEMPORARY_H
+ #ifndef MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_TEMPORARY_H
 #define MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_TEMPORARY_H
 
 
@@ -395,6 +395,12 @@
  * 
  * development branch only
  * 
+ * Use one pixel to show segment1 effect paired with sun elevation, where sunrise to midday, then midday to sunset is different colours
+ * another pixel to show segment2 effect paired with sun azimuth, where sunrise point to sunset point is full colour wheel
+ * 
+ * add solar value I can poll to get time of day (day/dusk/twilight/) and direction of sun movement (rising/falling)
+ * 
+ * 
  **/
 #ifdef DEVICE_DESKSENSOR
   #define DEVICENAME_CTR          "desksensor"
@@ -402,57 +408,98 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
   // #define DISABLE_WEBSERVER  // phase out to only USE_MODULE_NETWORK_WEBSERVER
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+
+//   {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": "Static"
+//   },
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 1000
+//   },
+//   "ColourPalette": 15,
+//   "PaletteEdit": {
+//     "ColourPalette": 15,
+//     "Data": [
+//       4,6,0,0,0,
+//       255,      0,      0,
+//       0,      255,      0,
+//       0,      0,      255,
+//       255,      255,      0
+//     ]
+//   },
+//   "BrightnessRGB": 100,
+//   "BrightnessCCT": 100
+// }
+
+// {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": "Solid"
+//   },
+//   "ColourPalette": 10,
+//   "BrightnessRGB": 10,
+//   "Hue": 120,
+//   "Sat": 100,
+//   "CCT_TempPercentage": 100,
+//   "BrightnessCCT": 0,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 5000
+//   },
+//   "Light":{"TimeOn":10}
+// }
+
 
   // #define USE_MODULE_DRIVERS_LEDS
 
   // #define USE_MODULE_DRIVERS_IRREMOTE
   // #define USE_IR_RECEIVE
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
 
-  #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    #define ENABLE_DEVFEATURE_CONSTRUCTJSON_VERSION2
-  #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_LDR_BASIC
-  // #define USE_MODULE_SENSORS_ROTARY_ENCODER
+  // #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_BME
+  //   #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
+  // #define USE_MODULE_SENSORS_BH1750
+  // #define USE_MODULE_SENSORS_SWITCHES
+  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_LDR_BASIC
 
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC
-    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  #endif // USE_MODULE_SENSORS_LDR_BASIC
+  // #ifdef USE_MODULE_SENSORS_LDR_BASIC
+  //   #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+  //   #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+  // #endif // USE_MODULE_SENSORS_LDR_BASIC
   
   #define USE_MODULE_LIGHTS_INTERFACE
+    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define STRIP_SIZE_MAX 10
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  #define STRIP_SIZE_MAX 12
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-
-  // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
-  
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  // #define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -460,9 +507,9 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"   
-    /**
-     * @brief Right side
-     **/
+      /**
+       * @brief Right side
+       **/
       #ifdef USE_MODULE_SENSORS_DS18X   
       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
@@ -614,17 +661,17 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     // "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
     // "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    // "\"ColourPalette\":15," 
-    // "\"PaletteEdit\": {"
-    //   "\"ColourPalette\": 15,"
-    //   "\"Data\": ["
-    //     "4,6,0,0,0,"
-    //     "252, 3, 45,"
-    //     "252, 40, 3,"
-    //     "252, 3, 177,"
-    //     "128, 1, 122"
-    //   "]"
-    // "},"
+    "\"ColourPalette\":15," 
+    "\"PaletteEdit\": {"
+      "\"ColourPalette\": 15,"
+      "\"Data\": ["
+        "4,5,0,0,0,"
+        "255, 0, 0,"
+        "0, 2550, 0,"
+        "0, 0, 255,"
+        "255, 0, 255"
+      "]"
+    "},"
     // "\"Effects\":{"
     //   "\"Function\":\"Static\""
     // "},"
@@ -634,20 +681,38 @@
     // "},"    
     // "\"BrightnessRGB\":1"
 
+    // "\"AnimationMode\": \"Effects\","
+    // "\"ColourOrder\": \"grbw\","
+    // "\"ColourPalette\": 10,"
+    // "\"Effects\": {"
+    //   "\"Function\": \"Solid\""
+    // "},"
+    // "\"Hue\": 15,"
+    // "\"Sat\": 100,"
+    // "\"BrightnessRGB\": 100,"
+    // "\"BrightnessCCT\": 0,"
+    // "\"CCT_TempPercentage\": 100,"
+    // "\"Transition\": {"
+    //   "\"Time\": 1"
+    // "}"
+
+
     "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"rgbw\","
-    "\"ColourPalette\": 10,"
+    "\"ColourOrder\": \"grbw\","
+    // "\"ColourPalette\": 0,"
     "\"Effects\": {"
-      "\"Function\": \"Solid RGBCCT\""
+      "\"Function\": \"Static\""
     "},"
-    "\"Hue\": 20,"
+    "\"Hue\": 120,"
     "\"Sat\": 100,"
     "\"BrightnessRGB\": 1,"
-    "\"BrightnessCCT\": 0,"
+    "\"BrightnessCCT\": 1,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"
-      "\"Time\": 1"
-    "}"
+      "\"Time\": 0,"
+      "\"Rate\": 1"
+    "},"
+    "\"Light\":{\"TimeOn\":10}"
 
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
@@ -778,7 +843,7 @@
   
   
 //   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-//   // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+//   // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 //   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
 //   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
 //   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -1566,7 +1631,7 @@
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
   
 
-  //#define ENABLE_PIXEL_FUNCTION_AMBILIGHT
+  //#define ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1654,7 +1719,7 @@
   // #define USE_SK6812_METHOD_DEFAULT
   
 
-  // #define ENABLE_PIXEL_FUNCTION_AMBILIGHT
+  // #define ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
 
   #define USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX // set with commands later
   #define USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION

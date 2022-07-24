@@ -63,7 +63,7 @@ void setup_cam();
     void MQTTHandler_Set_TelePeriod();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    struct handler<mCameraOV2640>* mqtthandler_ptr;
+    struct handler<mCameraOV2640>* ptr;
     struct handler<mCameraOV2640>  mqtthandler_settings_teleperiod;
     struct handler<mCameraOV2640>  mqtthandler_state_ifchanged;
     struct handler<mCameraOV2640>  mqtthandler_state_teleperiod;

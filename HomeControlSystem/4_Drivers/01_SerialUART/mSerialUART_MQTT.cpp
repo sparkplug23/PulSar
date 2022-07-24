@@ -60,29 +60,29 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_method){
  * */
 void mSerialUART::MQTTHandler_Init(){
 
-  struct handler<mSerialUART>* mqtthandler_ptr;
+  struct handler<mSerialUART>* ptr;
 
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1;
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSerialUART::ConstructJSON_Settings;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mSerialUART::ConstructJSON_Settings;
 
-  mqtthandler_ptr = &mqtthandler_uartinfo_teleperiod;
-  mqtthandler_ptr->handler_id = MQTT_HANDLER_MODULE_UARTINFO_IFCHANGED_ID;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mSerialUART::ConstructJSON_UARTInfo;
+  ptr = &mqtthandler_uartinfo_teleperiod;
+  ptr->handler_id = MQTT_HANDLER_MODULE_UARTINFO_IFCHANGED_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR;
+  ptr->ConstructJSON_function = &mSerialUART::ConstructJSON_UARTInfo;
 
 } 
 

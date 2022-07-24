@@ -132,7 +132,7 @@ uint8_t Change_Detected(uint8_t sensor_id);
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mPulseCounter>* mqtthandler_ptr;
+    struct handler<mPulseCounter>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mPulseCounter> mqtthandler_settings_teleperiod;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";

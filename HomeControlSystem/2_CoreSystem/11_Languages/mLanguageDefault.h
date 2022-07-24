@@ -1337,6 +1337,7 @@
 #define D_LOG_RULES "RUL: "
 #define D_LOG_SR04 "SR4: "
 #define D_LOG_FONA "FON: "
+#define D_LOG_BH1750 "BH1: "
 
 //SDM220
 #define D_PHASE_ANGLE     "Phase Angle"
@@ -1447,6 +1448,8 @@
 #define D_JSON_LOOPDELAY "LoopDelay"
 #define D_JSON_LOOPSSEC "LoopsSec"
 #define D_JSON_LOOPRATIO "LoopRatio"
+#define D_JSON_LIGHT_LEVEL "Light Level"
+#define D_JSON_LIGHT_LUMINANCE_LUX "Lux"
 #define D_JSON_LOW "Low"
 #define D_JSON_MAC "Mac"
 #define D_JSON_MASK "Mask"
@@ -1525,6 +1528,8 @@
 #define D_JSON_SYNC "Sync"
 #define D_JSON_SYSTEM "System"
 #define D_JSON_SYSTEM_RESTART "SystemRestart"
+#define D_JSON_SUN_AZIMUTH "Sun Azimuth"
+#define D_JSON_SUN_ELEVATION "Sun Elevation"
 #define D_JSON_TEMPERATURE "Temperature"
 #define D_JSON_TEMPERATURE_UNIT "TempUnit"
 #define D_JSON_TEMPLATE_USED "TemplateUsed"

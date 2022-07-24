@@ -418,7 +418,7 @@ enum LightColorModes {
       if (0 == _briCCT) { _briCCT = maxbri; }
     }
     // #ifdef ENABLE_RGBCCT_DEBUG
-    Serial.printf("prev_cm (%d) req_cm (%d) new_cm (%d)\n\r", prev_cm, cm, _color_mode);
+    // Serial.printf("prev_cm (%d) req_cm (%d) new_cm (%d)\n\r", prev_cm, cm, _color_mode);
     // #endif // ENABLE_RGBCCT_DEBUG
 
     return prev_cm;

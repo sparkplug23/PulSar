@@ -104,12 +104,18 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
         }
     }
   
-
+/**
+ * @brief Construct a new if object
+ * I need to add check, if failed (ie due to wrong screen) then stop attempting to update the rest of the messages to stop overflow of UART
+ * 
+ */
     if(jtok = obj["commands_formatted"]){
         JsonParserArray array = jtok;
         for(auto val : array) {
             ALOG_DBM( PSTR("F::%s %s"),__FUNCTION__,val.getStr());
+            // need to add bool for bad response
             nextionSendCmd_ContainingFormattedText(val.getStr());
+            data_buffer.isserviced++;
         }
     }
 
@@ -125,6 +131,9 @@ void mNextionPanel::parse_JSONCommand(JsonParserObject obj){
     }
 
 
+    if(jtok = obj["Display"].getObject()["SetPageIfChanged"]){
+      Command_SetPageIfChanged(jtok.getInt());
+    }
 
 
     

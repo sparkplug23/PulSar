@@ -108,7 +108,7 @@ void mAnimatorLight::resetSegments()
   }
 
   _segments[0].pixel_range.start = 0;
-  _segments[0].pixel_range.stop = STRIP_SIZE_MAX;
+  _segments[0].pixel_range.stop = STRIP_SIZE_MAX-1;
 
 }
 
@@ -191,6 +191,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
         }
         
         // This maybe cant be global and needs placed inside each effect?
+        // Not valid for long term, needs to be changed
         Set_Segment_ColourType(segment_active_index, pCONT_set->Settings.light_settings.type);
         
         /**
@@ -214,7 +215,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
         }
         #endif // ENABLE_WLED_EFFECTS
 
-        ALOG_DBM( PSTR("_segments[%d].effect_id=%d"),segment_active_index, _segments[segment_active_index].effect_id); 
+        ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
 
         switch(_segments[segment_active_index].effect_id){
           default:
@@ -780,6 +781,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
          */
         if(!_segment_runtimes[segment_active_index].animation_has_anim_callback)
         {
+          Serial.print("=");
           StripUpdate();         
           SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
         }
@@ -849,9 +851,7 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
 
   if(SEGENV.data == nullptr)
   { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("_segment_runtimes[%d].Data() == nullptr = %d"),segment_active_index);
-    #endif // ENABLE_LOG_LEVEL_INFO
+    ALOG_ERR( PSTR("_segment_runtimes[%d].Data() == nullptr = %d"), segment_active_index);
     return;
   }
 
@@ -860,7 +860,9 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
   GetTransitionColourBuffer(SEGENV.Data(), SEGENV.DataLength(), 0, SEGMENT.colour_type, &colour_pairs);
   
   updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
-    
+  
+  ALOG_DBM( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
+
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
     
@@ -1394,21 +1396,19 @@ void mAnimatorLight::EveryLoop(){
 
       segment_active_index = ii; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
 
-
-      if(_segments[segment_active_index].isActive())
+      if(_segments[ii].isActive())
       {
 
-        if (_segment_runtimes[segment_active_index].animator->IsAnimating())
+        if (_segment_runtimes[ii].animator->IsAnimating())
         {
-          // for now, a global segment_index needs set before each animation update
+        
+          // ALOG_INF(PSTR("_segments[%d].IsAnimating()=%d\tAD%d"), ii, _segments[ii].isActive(), _segments[ii].transition.time_ms);
 
-          // DEBUG_LINE_HERE;
-          _segment_runtimes[segment_active_index].animator->UpdateAnimations(segment_active_index);
-          // DEBUG_LINE_HERE;
+          _segment_runtimes[ii].animator->UpdateAnimations(ii);
           flag_animations_needing_updated++; // channels needing updated
-
           SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all my methods
 
+          // Serial.print("@");
 
           //TBA: flags per segment
 
@@ -1423,13 +1423,24 @@ void mAnimatorLight::EveryLoop(){
 
     } //loop segments
 
+// if(flag_animations_needing_updated>0)
+//     ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
+
     if(flag_animations_needing_updated)
     {
+
+      #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
       if(stripbus->IsDirty()){
         if(stripbus->CanShow()){ 
-          StripUpdate();
+          // ALOG_INF(PSTR("CanShow"));
+      #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
+      
+          // Serial.print("!");
+          StripUpdate();          
+      #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
         }
       }
+      #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
       
       /**
        * THESE ALL NEED PUT INTO SEGMENTS
@@ -1479,6 +1490,8 @@ void mAnimatorLight::EveryLoop(){
         blocking_force_animate_to_complete = false;
       }
     }
+
+
   } //enabeled
 
 
@@ -1586,23 +1599,30 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
   uint16_t time_tmp = 0;    
   time_tmp = _segments[segment_index].transition.time_ms; 
 
-  // // Overwriting single _segments[0] methods, set, then clear
-  // if(_segments[0]_override.time_ms){
-  //   time_tmp = _segments[0]_override.time_ms;
-  //   _segments[0]_override.time_ms = 0;//reset overwrite
-  // }
-  // //clear forced once only flags
-  // if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){
-  //   _segments[0].flags.NewAnimationRequiringCompleteRefresh = false;    
-  // }
-  
-  //   // Serial.printf("TRANSITION_METHOD_INSTANT_ID = %d\n\r",time_tmp);
+  /**
+   * @brief Before starting animation, check the override states to see if they are active
+   * 
+   */
+  // Overwriting single _segments[0] methods, set, then clear
+  if(_segments[segment_index].single_animation_override.time_ms>0)
+  {
+    time_tmp = _segments[segment_index].single_animation_override.time_ms;
+    _segments[segment_index].single_animation_override.time_ms = 0; // reset overwrite
+    ALOG_INF(PSTR("Override: TimeMs: %d"), time_tmp);
+  }
 
-  // if(time_tmp>0){
-  //   if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
-  //     time_tmp /= 1000;// ms to seconds
-  //   }
-  // }
+  //clear forced once only flags
+  if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){
+    _segments[0].flags.NewAnimationRequiringCompleteRefresh = false;    
+  }
+  
+    // Serial.printf("TRANSITION_METHOD_INSTANT_ID = %d\n\r",time_tmp);
+
+  if(time_tmp>0){
+    if(NEO_ANIMATION_TIMEBASE == NEO_CENTISECONDS){
+      time_tmp /= 1000;// ms to seconds
+    }
+  }
 
   if(_segment_runtimes[segment_index].animation_has_anim_callback == true)
   {
@@ -2085,120 +2105,6 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
   // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
 
 }
-
-
-// // Update struct that shows overview, always sends
-uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level)
-{
-
-  char buffer[100];
-
-  JsonBuilderI->Start();
-
-  
-    JsonBuilderI->Add_P(PM_JSON_HUE, _segment_runtimes[0].rgbcct_controller->getHue360());
-    JsonBuilderI->Add_P(PM_JSON_SAT, _segment_runtimes[0].rgbcct_controller->getSat255());
-    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, _segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
-
-    JBI->Add("colour_type", (uint8_t)_segments[0].colour_type);
-
-
-  //   JBI->Level_Start("Segments");
-
-  //   // limit the size of array
-  //   uint16_t length = _segment_runtimes[0].DataLength();
-
-  //   length = length < 100 ? length : 100;
-
-  //   JBI->Array_Start("data0");
-  //     for(int i=0;i<length;i++)
-  //     {
-  //       if(_segment_runtimes[0].Data() != nullptr)
-  //       {
-  //         JBI->Add(_segment_runtimes[0].Data()[i]);
-  //       }
-  //     }
-  //   JBI->Array_End();
-
-  //   length = _segment_runtimes[1].DataLength();
-  //   length = length < 100 ? length : 100;
-
-  //   JBI->Array_Start("data1");
-  //   for(int i=0;i<length;i++)
-  //   {
-  //     if(_segment_runtimes[1].Data() != nullptr)
-  //     {
-  //       JBI->Add(_segment_runtimes[1].Data()[i]);
-  //     }
-  //   }
-  //   JBI->Array_End();
-
-  // JBI->Level_End();
-
-  JBI->Add("segment_settings_size", sizeof(segment_settings));
-  JBI->Add("segment_runtime_size", sizeof(segment_runtime));
-
-//   JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
-
-// root[D_JSON_ONOFF] = pCONT_iLight->light_power_state ? "ON" : "OFF";
-// JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-// JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
-// root["region"] = GetFlasherRegionName();
-// root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-// root[D_JSON_BRIGHTNESS_PERCENTAGE] = _segments[0].brightness*100;
-// root[D_JSON_BRIGHTNESS] = _segments[0].brightness;
-
-//   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
-//   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-//   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(_segments[0].transition.time_ms,1000);
-//   //   transitionobj[D_JSON_TIME_MS] = _segments[0].transition.time_ms;
-//   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(_segments[0].transition.rate_ms,1000);
-//   //   transitionobj[D_JSON_RATE_MS] = _segments[0].transition.rate_ms;
-//   //   transitionobj[D_JSON_FUNCTION] = GetFlasherFunctionName();
-
-//   JsonObject seq_obj = root.createNestedObject("sequential");
-//     seq_obj["rate_index"] = flashersettings.function_seq.rate_index;
-
-// JsonBuilderI->Level_Start("slow_glow");
-//   JsonBuilderI->Add("rate_index", flashersettings.function_slo_glo.rate_index);
-// JsonBuilderI->Level_End();
-
-  return JsonBuilderI->End();
-}
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level)
-{
-
-  char buffer[100];
-
-  JsonBuilderI->Start();
-
-    JBI->Add("AvailablePalettes", (uint16_t)mPaletteI->PALETTELIST_TOTAL_LENGTH );
-
-
-    uint16_t id = 0;
-    uint16_t pixel = 0;
-    uint8_t encoded_value = 0;
-    // uint16_t count   = mPaletteI->GetLengthFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
-    RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
-
-    JBI->Array_Start("Palette");
-    for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-    {
-      JBI->Add(encoded_value);
-      JBI->Add(colour.R);
-      JBI->Add(colour.G);
-      JBI->Add(colour.B);
-      JBI->Add(colour.W1);
-      JBI->Add(colour.W2);
-    }
-    JBI->Array_End();
-  
-  return JsonBuilderI->End();
-}
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
 
 

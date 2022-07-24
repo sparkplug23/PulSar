@@ -293,17 +293,17 @@ uint8_t mOLED_SSD1306::ConstructJSON_Settings(uint8_t json_method){
   #ifdef USE_MODULE_NETWORK_MQTT
 void mOLED_SSD1306::MQTTHandler_Init(){
 
-  struct handler<mOLED_SSD1306>* mqtthandler_ptr;
+  struct handler<mOLED_SSD1306>* ptr;
 
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 1; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Settings;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Settings;
   
 } //end "MQTTHandler_Init"
 

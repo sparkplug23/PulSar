@@ -39,7 +39,15 @@ class mHeatingStripColour_Understairs :
     
     void SubTasker_MQTTSender();
 
-    RgbcctColor colour[4];
+
+    struct PIXEL_INFO{
+      RgbcctColor colour;
+      bool flag_enable_blinking = false;
+      bool flag_blink_state = false;
+
+
+    }pixel_info[4];
+
 
     void parse_JSONCommand(JsonParserObject obj);
     

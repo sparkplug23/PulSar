@@ -39,8 +39,6 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  // if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-
   switch(function){
     /************
      * PERIODIC SECTION * 
@@ -138,7 +136,7 @@ void mSensorsInterface::Pre_Init(void)
 
 void mSensorsInterface::Init(void)
 {
-  settings.sealevel_pressure = 1013.25;//SENSORS_PRESSURE_SEALEVELHPA;
+  settings.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
   settings.fEnableSensor = true;
 }
 
@@ -147,6 +145,29 @@ void mSensorsInterface::EveryLoop()
 {
 
 }
+
+
+const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
+{
+  
+  switch(id){
+    default: 
+    case SENSOR_TYPE_TEMPERATURE_ID:            return PM_JSON_TEMPERATURE;
+    case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:      return PM_JSON_HUMIDITY;
+    case SENSOR_TYPE_PRESSURE_ID:               return PM_JSON_PRESSURE;
+    case SENSOR_TYPE_LIGHT_LEVEL_ID:            return PM_JSON_LIGHT_LEVEL;
+    case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return PM_JSON_LIGHT_LUMINANCE_LUX;
+    case SENSOR_TYPE_SUN_AZIMUTH_ID:            return PM_JSON_SUN_AZIMUTH;
+    case SENSOR_TYPE_SUN_ELEVATION_ID:          return PM_JSON_SUN_ELEVATION;
+    
+  }
+  return PM_SEARCH_NOMATCH;      
+
+}
+
+
+
+
 
 
 void mSensorsInterface::CommandEvent_Motion(uint8_t event_type)

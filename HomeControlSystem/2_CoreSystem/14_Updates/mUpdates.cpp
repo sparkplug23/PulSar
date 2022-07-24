@@ -155,37 +155,37 @@ uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_method){
 
 void mUpdates::MQTTHandler_Init(){
 
-  struct handler<mUpdates>* mqtthandler_ptr;
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = 3600;//pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mUpdates::ConstructJSON_Settings;
+  struct handler<mUpdates>* ptr;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 3600;//pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mUpdates::ConstructJSON_Settings;
 
   
-//   mqtthandler_ptr = &mqtthandler_sensor_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mUpdates::ConstructJSON_Scene;
+//   ptr = &mqtthandler_sensor_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR;
+//   ptr->ConstructJSON_function = &mUpdates::ConstructJSON_Scene;
 
-//   mqtthandler_ptr = &mqtthandler_sensdebug_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mUpdates::ConstructJSON_Debug;
+//   ptr = &mqtthandler_sensdebug_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
+//   ptr->ConstructJSON_function = &mUpdates::ConstructJSON_Debug;
 
 } //end "MQTTHandler_Init"
 

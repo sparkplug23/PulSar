@@ -218,6 +218,7 @@ const char* state_ctr(void);
     void publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
     void publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag);
     boolean ppublish(const char* topic, const char* payload, boolean retained = false);
+    boolean ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained = false);
 
     void setprefixtopic(const char* _prefixtopic);
 

@@ -201,6 +201,13 @@ void mRelays::CommandSet_Relay_Power(uint8_t state, uint8_t num){
     ,"CommandSet_Relay_Power","num",num,"state",state);  
 
 	// Check state if it needs to toggle result
+
+  /**
+   * @brief Construct a new Modify State Number If Toggled object
+   * 
+   * Is this wrong, as ExecutePower toggles, so I might be double toggling
+   * 
+   */
   ModifyStateNumberIfToggled(&state, CommandGet_Relay_Power(num));
   
   //error patch  within vaible range

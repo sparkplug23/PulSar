@@ -588,11 +588,21 @@ void mNextionPanel::nextionSendCmd_ContainingFormattedText(const char* c_str)
  **********************************************************************************************************************************************************************************/
  
 
+/**
+ * @brief This function going forward should only send the command if the page is not already set, so will need a way to poll this
+ * 
+ * @param page 
+ */
 void mNextionPanel::Command_SetPage(uint8_t page){
   settings.page = page;
   char ctr[10];
   sprintf(ctr,"page %d",page);
   nextionSendCmd(ctr);
+}
+
+void mNextionPanel::Command_SetPageIfChanged(uint8_t page){
+  if(settings.page == page) {return;}
+  Command_SetPage(page);
 }
 
 void mNextionPanel::Command_SetBrightness(uint8_t brightness_percentage){

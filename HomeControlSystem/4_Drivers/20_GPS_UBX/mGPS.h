@@ -421,7 +421,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mGPS>* mqtthandler_ptr;
+    struct handler<mGPS>* ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     struct handler<mGPS> mqtthandler_gpspacket_minimal_teleperiod;

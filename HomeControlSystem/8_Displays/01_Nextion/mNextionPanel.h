@@ -417,6 +417,7 @@ void WebCommand_Parse(void);
 
 
     void Command_SetPage(uint8_t page);
+    void Command_SetPageIfChanged(uint8_t page);
 
     // set or toggled via mqtt activity, maybe set true inside parse in tasker, with unset after 1 minute timeout
     #define OPENHAB_DATA_STREAM_ACTIVITY_TIMEOUT_SECS 150
@@ -446,7 +447,7 @@ void WebCommand_Parse(void);
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mNextionPanel>* mqtthandler_ptr;
+    struct handler<mNextionPanel>* ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
-#ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+#ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
 
 
 
@@ -718,7 +718,7 @@ animation_colours[i].DesiredColour = ApplyBrightnesstoRgbcctColour(animation_col
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-#endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
+#endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
 
 
 

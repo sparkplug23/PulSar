@@ -49,7 +49,11 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj){
   /**
    *  @note Timer Commands
    * */
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  if(jtok = obj["HVAC"].getObject()[D_JSON_TIME_ON]){ 
+  #else
   if(jtok = obj[D_JSON_TIME_ON]){ 
+  #endif
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG

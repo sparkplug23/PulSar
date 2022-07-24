@@ -16,6 +16,8 @@
 #include "internal/is_char_type.hpp"
 #include "internal/is_string_type.hpp"
 #include "internal/is_number_type.hpp"
+#include "internal/is_signed_number_type.hpp"
+#include "internal/is_unsigned_number_type.hpp"
 #include "internal/is_float_type.hpp"
 
 #include "2_CoreSystem/06_Support/mSupport.h"
@@ -146,8 +148,15 @@ char* GetPtr();
       DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
       #endif
       
-      if(is_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value);
+      /**
+       * @brief String first
+       * 
+       */
+      if(is_unsigned_number_type<T>::value){ 
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%lu",value);
+      }else
+      if(is_signed_number_type<T>::value){ 
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%",value);
       }else
       if(is_string_type<T>::value){ 
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value);
@@ -213,8 +222,16 @@ char* GetPtr();
         #endif
         
           // float f = reinterpret_cast<float>(value);
-        if(is_number_type<T>::value){ 
-          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%d",key,value);
+        
+        /**
+         * @brief Order is important
+         * - pointer of strings needs to be found first
+         */
+        if(is_unsigned_number_type<T>::value){ 
+          *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%lu",key,value);
+        }else
+        if(is_signed_number_type<T>::value){ 
+          *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%d",key,value);
         }else
         if(is_string_type<T>::value){ 
           *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
@@ -265,7 +282,10 @@ char* GetPtr();
   DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
   #endif
   
-  if(is_number_type<T>::value){ 
+  if(is_unsigned_number_type<T>::value){ 
+    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%lu",key,value);
+  }else
+  if(is_signed_number_type<T>::value){ 
     *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%d",key,value);
   }else
   if(is_string_type<T>::value){ 
@@ -288,46 +308,6 @@ char* GetPtr();
 
 }
 
-  // template <typename T, typename U>
-  // void Array_AddValue(T* value_arr, U value_arr_len){
-  
-  //   if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0)){ return; }
-
-  //   for(uint16_t index=0;index<value_arr_len;index++){
-
-  //     // Add comma for any value after first
-  //     if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }
-
-  //     if(is_number_type<T>::value){ 
-  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value_arr[index]);
-  //     }else
-  //     if(is_char_type<T>::value){   
-  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value_arr[index]);
-  //     }else
-  //     if(is_string_type<T>::value){ 
-  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
-  //     }else
-  //     if(is_float_type<T>::value){ 
-  //       float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
-  //       char ctr[10]; dtostrfd2(f,3,ctr);
-  //       *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%f",12.34);  
-
-  //   // float f = static_cast<float>(value_arr[index]);
-  //   // char fvalue[20]; dtostrfd2(f,3,fvalue);
-  //   // // *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
-  //   //     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);  
-
-
-  //       // float f = reinterpret_cast<float>(value_arr[index*4]);
-  //       // // float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
-  //       // char ctr[10]; dtostrfd2(f,3,ctr);
-  //       // *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
-  //     }
-  //   }
-
-  // }
-
-
 
 
   template <typename T, typename U>
@@ -340,15 +320,20 @@ char* GetPtr();
       // Add comma for any value after first
       if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }
 
-      if(is_number_type<T>::value){ 
+      if(is_string_type<T>::value){ 
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
+      }else
+      if(is_signed_number_type<T>::value){ 
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value_arr[index]);
+      }else
+      if(is_unsigned_number_type<T>::value){ 
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%lu",value_arr[index]);
       }else
       if(is_char_type<T>::value){   
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value_arr[index]);
-      }else
-      if(is_string_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
       }
+
+
     //   else
     //   if(is_float_type<T>::value){ 
     //     float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));

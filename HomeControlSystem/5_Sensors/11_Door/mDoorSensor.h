@@ -99,7 +99,7 @@ void WebAppend_Root_Status_Table_Data();
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mDoorSensor>* mqtthandler_ptr;
+    struct handler<mDoorSensor>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mDoorSensor> mqtthandler_settings_teleperiod;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";

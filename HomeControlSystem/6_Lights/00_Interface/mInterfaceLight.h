@@ -131,7 +131,10 @@ enum LightTypes_IDS{
 
 #define LST_MAX 5
 
-// DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PARAMETERS_CTR) "values/parameters";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";
+  
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
+
 
 #define WEB_CLASS_RGB_LIVE "rgb_live"
 
@@ -230,9 +233,6 @@ const gamma_table_t gamma_table_fast[] = {
 // 458,480,496,518,534,557,579,595,617,635,657,673,695,713,743,
 // 773,793,823,843,873,893,923,943,973,993,1023
 
-  
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCENE_CTR) "scene";
-
 
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_CHANGE_POWER_NAME_CTR )   "Change Power"     ;    
@@ -241,12 +241,12 @@ DEFINE_PGM_CTR(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR   )      "Ambilight"  ;
 // DEFINE_PGM_CTR(PM_ANIMATION_MODE_SCENE_NAME_CTR   )          "Scene"      ;             
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_EFFECTS_NAME_CTR  )         D_JSON_EFFECTS;
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_WLED_NAME_CTR) "WLED";
-#ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS       
+#ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION       
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;      
 #endif   
-#ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+#ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
-#endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+#endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
 #define WEB_HANDLE_LIVEPIXELS_SHARED_JSON "/shared/rgb_livepixels.json"
 
@@ -343,15 +343,15 @@ class mInterfaceLight :
        * @brief Segments effects
        **/
       ANIMATION_MODE_EFFECTS_ID,
-      #ifdef ENABLE_PIXEL_FUNCTION_AMBILIGHT
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
       ANIMATION_MODE_AMBILIGHT_ID,
-      #endif // ENABLE_PIXEL_FUNCTION_AMBILIGHT
-      #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+      #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
       ANIMATION_MODE_NOTIFICATIONS_ID,
       #endif
-      #ifdef ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
       ANIMATION_MODE_MANUAL_SETPIXEL_ID,
-      #endif // ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+      #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
       /**
        * @brief WLED is only included so debugging WLED effects insitu can be performed, no release build will include this option
        * **/
@@ -541,14 +541,15 @@ void RulesEvent_Set_Power();
     void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
 
     
-    RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+    RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
 RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
 
     
-    uint8_t ConstructJSON_Scene(uint8_t json_level = 0);
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Debug(uint8_t json_method = 0);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0);
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+    uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_method = 0);
+    #endif
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
@@ -557,29 +558,32 @@ RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style
     void MQTTHandler_Set_TelePeriod();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    struct handler<mInterfaceLight> mqtthandler_settings_teleperiod;
-    struct handler<mInterfaceLight> mqtthandler_sensor_ifchanged;
-    struct handler<mInterfaceLight> mqtthandler_sensor_teleperiod;
-    struct handler<mInterfaceLight> mqtthandler_debug_teleperiod;
-    struct handler<mInterfaceLight> mqtthandler_scene_teleperiod;
+    struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;
+    struct handler<mInterfaceLight> mqtthandler__state__ifchanged;
+    struct handler<mInterfaceLight> mqtthandler__debug_module_config__teleperiod;
         
     enum MQTT_HANDLER_MODULE_IDS{
-      MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID,
+      MQTT_HANDLER_MODULE__STATE__TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
+      MQTT_HANDLER_MODULE__DEBUG_MODULE_CONFIG__TELEPERIOD_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID,
     };
     
-    uint8_t mqtthandler_list_ids[3] = {
-      MQTT_HANDLER_SETTINGS_ID, 
-      MQTT_HANDLER_MODULE_SCENE_TELEPERIOD_ID, 
-      MQTT_HANDLER_MODULE_DEBUG_PARAMETERS_TELEPERIOD_ID
+    // Could this be put into a function? to allow me to set things to all in this, or by ID
+    struct handler<mInterfaceLight>* mqtthandler_list[
+      1
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+        +1
+      #endif
+      +1 // settings at the end
+      ] = {        
+        &mqtthandler__state__ifchanged,
+        #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+        &mqtthandler__debug_module_config__teleperiod,
+        #endif
+        &mqtthandler__settings__teleperiod        
     };
-  
-    struct handler<mInterfaceLight>* mqtthandler_list_ptr[3] = {
-      &mqtthandler_settings_teleperiod, 
-      &mqtthandler_scene_teleperiod, 
-      &mqtthandler_debug_teleperiod
-    };
+
+
     #endif
 
   

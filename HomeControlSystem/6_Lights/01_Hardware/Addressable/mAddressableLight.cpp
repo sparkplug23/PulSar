@@ -46,6 +46,10 @@ RgbcctColor mAddressableLight::GetPixelColorHardware(uint16_t index){
 
 void mAddressableLight::ShowHardware(){
 
+  // ALOG_INF( PSTR("mAddressableLight::ShowHardware") );
+
+  // Serial.print(".");
+
   pCONT_lAni->stripbus->Show();
 
 

@@ -220,10 +220,13 @@ void mRelays::RulesEvent_Set_Power(){
   uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
 
 
+  #ifdef ENABLE_DEVFEATURE_RELAY_RULEEVENT_USES_COMMANDSET
+  CommandSet_Relay_Power(relay_state, relay_index);
+  #else
   ExecuteCommandPower(relay_index, relay_state, SRC_IGNORE);
-  
-  // MQTTHandler_Set_RefreshAll();
+  #endif // ENABLE_DEVFEATURE_RELAY_RULEEVENT_USES_COMMANDSET
 
+    
 }
 #endif // USE_MODULE_CORE_RULES
 
@@ -783,10 +786,25 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
     mqtthandler_state_ifchanged.flags.SendNow = true;
   }
 
+  #ifdef ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+
+  /**
+   * @brief If command is to turn off, then force reset the decounter for on time
+   * 
+   */
+  if(CommandGet_Relay_Power(device)==0)
+  {
+    ALOG_INF(PSTR("Resetting Decounter"));
+    CommandSet_Timer_Decounter(0, device);
+  }
+  #endif // ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+
 //AddLog(LOG_LEVEL_TEST, PSTR("mqtthandler_state_teleperiod.flags.SendNow=%d"),mqtthandler_state_teleperiod.flags.SendNow);
 
 
 }
+
+
 
 
 uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){

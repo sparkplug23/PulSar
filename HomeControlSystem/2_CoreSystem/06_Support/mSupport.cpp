@@ -378,9 +378,26 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
         // ALOG_INF( PSTR("0x77 = %d"), I2cDevice_IsConnected(0x77));
 
+      //   JBI->Start();
+      //     JBI->Add("PROJECT_VERSION", (uint32_t)PROJECT_VERSION);
+      //   JBI->End();
+
+      // Serial.printf("PROJECT_VERSION=%s\n\r", JBI->GetBufferPtr());
+
+
       #ifdef INSERT_CODE_EVERY_SECOND
       INSERT_CODE_EVERY_SECOND;
       #endif // INSERT_CODE_EVERY_SECOND
+
+      #ifdef ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
+      if(pCONT_time->UpTime()>60)
+      {
+        if(pCONT_mqtt->pubsub->connected())
+        {
+          pCONT_mqtt->ppublish_device_name_prefix_P("debug/template_lighting", LIGHTING_TEMPLATE, false);
+        }
+      }
+      #endif // ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
 
 
     // char mqtt_data[300];

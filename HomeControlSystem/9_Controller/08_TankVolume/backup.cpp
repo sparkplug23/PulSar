@@ -498,7 +498,7 @@
 
 // //   // char colour_button[8];
 // //   // char button_ids[] = {ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
-// //   // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+// //   // #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 // //   // ANIMATION_MODE_NOTIFICATIONS_ID, 
 // //   // #endif
 // //   // ANIMATION_MODE_NONE_ID};
@@ -528,7 +528,7 @@
 
 // //   // uint8_t animation_mode_list_ids[] = {
 // //   //   ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
-// //   //   #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+// //   //   #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 // //   //   ANIMATION_MODE_NOTIFICATIONS_ID,
 // //   //   #endif    
 // //   //   ANIMATION_MODE_NONE_ID
@@ -840,55 +840,55 @@
 
 // void mTankVolumeUltrasonic::MQTTHandler_Init(){
 
-//   mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Settings;
+//   ptr = &mqtthandler_settings_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = 60; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+//   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Settings;
   
-//   mqtthandler_ptr = &mqtthandler_litres_ifchanged;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
+//   ptr = &mqtthandler_litres_ifchanged;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = 60; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
+//   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
   
-//   mqtthandler_ptr = &mqtthandler_litres_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60*60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
+//   ptr = &mqtthandler_litres_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = 60*60; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
+//   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
 
-//   mqtthandler_ptr = &mqtthandler_furnace_ifchanged;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
+//   ptr = &mqtthandler_furnace_ifchanged;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = 60; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
+//   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
   
-//   mqtthandler_ptr = &mqtthandler_furnace_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = 60*60; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
+//   ptr = &mqtthandler_furnace_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = 60*60; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
+//   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
 
 // } //end "MQTTHandler_Init"
 

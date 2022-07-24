@@ -93,7 +93,7 @@ class mImmersionTankColour :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_TelePeriod();
     
-    struct handler<mImmersionTankColour>* mqtthandler_ptr;
+    struct handler<mImmersionTankColour>* ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";

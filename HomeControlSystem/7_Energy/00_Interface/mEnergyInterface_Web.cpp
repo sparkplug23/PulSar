@@ -70,7 +70,7 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
 
   // char colour_button[8];
   // char button_ids[] = {ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
-  // #ifdef USE_TASK_RGBLIGHTING_NOTIFICATIONS
+  // #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
   // ANIMATION_MODE_NOTIFICATIONS_ID, 
   // #endif
   // ANIMATION_MODE_NONE_ID};

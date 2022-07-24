@@ -232,7 +232,7 @@ class mUltraSonicSensor :
     void MQTTHandler_Set_TelePeriod();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
-    struct handler<mUltraSonicSensor>* mqtthandler_ptr = nullptr;
+    struct handler<mUltraSonicSensor>* ptr = nullptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
     struct handler<mUltraSonicSensor> mqtthandler_settings_teleperiod;
     // const char* postfix_topic_sensors = "sensors";

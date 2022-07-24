@@ -1103,36 +1103,36 @@ uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_method){
 
 void mCameraOV2640::MQTTHandler_Init(){
 
-  mqtthandler_ptr = &mqtthandler_settings_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = SEC_IN_HOUR;//pCONT_set->pCONT_set->Settings.sensors.configperiod_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_Settings;
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = SEC_IN_HOUR;//pCONT_set->pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_Settings;
 
   
-  mqtthandler_ptr = &mqtthandler_state_teleperiod;
-  mqtthandler_ptr->tSavedLastSent = millis();
-  mqtthandler_ptr->flags.PeriodicEnabled = true;
-  mqtthandler_ptr->flags.SendNow = true;
-  mqtthandler_ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-  mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
-  mqtthandler_ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_State;
+  ptr = &mqtthandler_state_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_State;
 
-//   mqtthandler_ptr = &mqtthandler_sensdebug_teleperiod;
-//   mqtthandler_ptr->tSavedLastSent = millis();
-//   mqtthandler_ptr->flags.PeriodicEnabled = true;
-//   mqtthandler_ptr->flags.SendNow = true;
-//   mqtthandler_ptr->tRateSecs = pCONT_set->pCONT_set->Settings.sensors.ifchanged_secs; 
-//   mqtthandler_ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   mqtthandler_ptr->json_level = JSON_LEVEL_DETAILED;
-//   mqtthandler_ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
-//   mqtthandler_ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_Debug;
+//   ptr = &mqtthandler_sensdebug_teleperiod;
+//   ptr->tSavedLastSent = millis();
+//   ptr->flags.PeriodicEnabled = true;
+//   ptr->flags.SendNow = true;
+//   ptr->tRateSecs = pCONT_set->pCONT_set->Settings.sensors.ifchanged_secs; 
+//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+//   ptr->json_level = JSON_LEVEL_DETAILED;
+//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_CTR;
+//   ptr->ConstructJSON_function = &mCameraOV2640::ConstructJSON_Debug;
 
 } //end "MQTTHandler_Init"
 

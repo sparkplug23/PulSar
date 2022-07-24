@@ -18,6 +18,7 @@ class mTaskerInterface
     virtual PGM_P GetModuleName();
     virtual PGM_P GetModuleFriendlyName();
     virtual uint16_t GetModuleUniqueID();
+    
     #ifdef USE_DEBUG_CLASS_SIZE
     virtual uint16_t GetClassSize();
     #endif    
@@ -31,9 +32,5 @@ class mTaskerInterface
      * Push 0 if none are used, maybe internalise
      * */
     virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->type.push_back(0); }
-    // Device Version?
-    
-    
-    // virtual void parse_JSONCommand(JsonParserObject obj);
-
+  
 };

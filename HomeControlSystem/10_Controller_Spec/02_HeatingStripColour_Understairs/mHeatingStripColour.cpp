@@ -94,42 +94,96 @@ void mHeatingStripColour_Understairs::EveryLoop()
 void mHeatingStripColour_Understairs::Every_Second()
 {
 
-    uint8_t colour_array[50];
-    memset(colour_array,0,sizeof(colour_array));
+  uint8_t colour_array[50];
+  memset(colour_array,0,sizeof(colour_array));
 
-    // Format
-    colour_array[0] = 4;
-    colour_array[1] = 9;
-    colour_array[2] = 0;
-    colour_array[3] = 0;
-    colour_array[4] = 0;
-    // Colour0
-    colour_array[5] = 255;
-    colour_array[6] = 0;
-    colour_array[7] = 0;
-    colour_array[8] = 0;
-    colour_array[9] = 0;
-    // Colour0
-    colour_array[10] = 0;
-    colour_array[11] = 255;
-    colour_array[12] = 0;
-    colour_array[13] = 0;
-    colour_array[14] = 0;
-    // Colour0
-    colour_array[15] = 0;
-    colour_array[16] = 0;
-    colour_array[17] = 255;
-    colour_array[18] = 0;
-    colour_array[19] = 0;
-    // Colour0
-    colour_array[20] = 0;
-    colour_array[21] = 0;
-    colour_array[22] = 0;
-    colour_array[23] = 255;
-    colour_array[24] = 255;
+  // Format
+  colour_array[0] = 4;
+  colour_array[1] = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID;
+  colour_array[2] = 0;
+  colour_array[3] = 0;
+  colour_array[4] = 0;
+  // // Colour0
+  // colour_array[5] = 255;
+  // colour_array[6] = 0;
+  // colour_array[7] = 0;
+  // colour_array[8] = 0;
+  // colour_array[9] = 0;
+  // // Colour0
+  // colour_array[10] = 0;
+  // colour_array[11] = 255;
+  // colour_array[12] = 0;
+  // colour_array[13] = 0;
+  // colour_array[14] = 0;
+  // // Colour0
+  // colour_array[15] = 0;
+  // colour_array[16] = 0;
+  // colour_array[17] = 255;
+  // colour_array[18] = 0;
+  // colour_array[19] = 0;
+  // // Colour0
+  // colour_array[20] = 255;
+  // colour_array[21] = 255;
+  // colour_array[22] = 255;
+  // colour_array[23] = 255;
+  // colour_array[24] = 255;
 
 
-   pCONT_iLight->CommandSet_PaletteColour_RGBCCT_Raw_By_ID(15, colour_array, sizeof(colour_array));
+  /**
+   * @brief Upstairs
+   * Blink if time_on > 0, or else just show colour
+   * Calling this function faster, blinking at 250ms
+   */
+
+  for(uint8_t i=0;i<4;i++)
+  {
+
+    if(pixel_info[i].flag_blink_state){
+      pixel_info[i].colour = pCONT_iLight->GetColourValueUsingMaps(0);//pCONT_heating2->zone[i].sensor.temperature);
+    }else{
+      pixel_info[i].colour = RgbcctColor(0,0,0,50,50);
+    }
+
+    if(pCONT_heating2->zone[i].program_timer_method->GetTimer_Seconds())
+    {
+      pixel_info[i].flag_blink_state ^= 1;
+    }else{
+      pixel_info[i].flag_blink_state = true; // disable
+    }
+    
+  }
+
+  // Colour0
+  colour_array[5] = pixel_info[0].colour.R;
+  colour_array[6] = pixel_info[0].colour.G;
+  colour_array[7] = pixel_info[0].colour.B;
+  colour_array[8] = pixel_info[0].colour.W1;
+  colour_array[9] = pixel_info[0].colour.W2;
+  // Colour1
+  colour_array[10] = pixel_info[1].colour.R;
+  colour_array[11] = pixel_info[1].colour.G;
+  colour_array[12] = pixel_info[1].colour.B;
+  colour_array[13] = pixel_info[1].colour.W1;
+  colour_array[14] = pixel_info[1].colour.W2;
+  // Colour2
+  colour_array[15] = pixel_info[1].colour.R;
+  colour_array[16] = pixel_info[1].colour.G;
+  colour_array[17] = pixel_info[1].colour.B;
+  colour_array[18] = pixel_info[1].colour.W1;
+  colour_array[19] = pixel_info[1].colour.W2;
+  // Colour3
+  colour_array[20] = pixel_info[1].colour.R;
+  colour_array[21] = pixel_info[1].colour.G;
+  colour_array[22] = pixel_info[1].colour.B;
+  colour_array[23] = pixel_info[1].colour.W1;
+  colour_array[24] = pixel_info[1].colour.W2;
+
+
+  pCONT_iLight->CommandSet_PaletteColour_RGBCCT_Raw_By_ID(15, colour_array, sizeof(colour_array));
+  pCONT_lAni->CommandSet_BrtRGB_255(255);
+  pCONT_lAni->CommandSet_BrtCT_255(255);
+  pCONT_lAni->CommandSet_PaletteID(15);
+
 
 }
 

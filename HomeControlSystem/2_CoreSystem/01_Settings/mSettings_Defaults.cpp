@@ -422,7 +422,8 @@ void mSettings::SystemSettings_DefaultBody_Sensors(){
 }
 
 
-void mSettings::SystemSettings_DefaultBody_Power(){
+void mSettings::SystemSettings_DefaultBody_Power()
+{
   // Settings.power = APP_POWER;
   #ifdef SET_POWERONSTATE_AS_ON
     Settings.poweronstate = POWER_ALL_ON; //temporary fix for poweronstate

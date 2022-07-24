@@ -308,6 +308,27 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
       JsonBuilderI->Add("Week" D_JSON_TIME, mTime::ConvertU32TimetoCtr(&pir_detect[sensor_id].detected_time, buffer, sizeof(buffer), true));
       JsonBuilderI->Add(D_JSON_EVENT, pir_detect[sensor_id].isactive ? "detected": "over");
 
+      #ifdef ENABLE_DEVFEATURE_REPORT_MOTION_TIMES_WITH_EPOCH_AND_ISO8601_STANDARD_TIME
+      JBI->Level_Start("TriggerTime");
+        JBI->Add("Epoch",0);
+        JBI->Add("ISO8601","2022-07-24T15:18:25+00:00"); //16 with +01:00 for DST?
+      JBI->End();
+      #endif // ENABLE_DEVFEATURE_REPORT_MOTION_TIMES_WITH_EPOCH_AND_ISO8601_STANDARD_TIME
+
+
+
+// https://www.jamesridgway.co.uk/why-storing-datetimes-as-utc-isnt-enough/
+//       As well as representing a datetime:
+
+// 2021-01-24T07:28:37-05:00
+// 2021-01-24T12:28:37Z
+
+
+
+// Where TimeNow may be different types selected by user, but standard is ISO8601
+
+
+
       JsonBuilderI->Add("Index", sensor_id);
 
   //     //if another is yet to send, then reset the mqtt_handler to fire immeditely again!

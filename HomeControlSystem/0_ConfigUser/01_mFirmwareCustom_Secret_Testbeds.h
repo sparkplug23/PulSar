@@ -114,6 +114,383 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+/**
+ * @brief 
+ * 
+ * Complete replica of Whitehall heating, with leds in place of relays. Full board of sensors, nextion panel, rgb leds.
+ * 
+ * 
+ * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
+ * "*" pin = confirmed soldering
+ * Ethernet      Function       ESP32         Note        
+ * 
+ * ** Blue (Upstairs Link) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           R_IH           21*           Immersion relay (5v IO)
+ * bl/w          I2D            12*           DHT22?     
+ * w/bl          I2C            13*           UNUSED   
+ * g/w           3V3            3V3           
+ * w/br                      
+ * br/w          DSX            14*           ds18b20 water, 4k7 pulled high        (comes from blue by connector)   
+ * ** Green (Downstairs Sensors) **************************************************************************
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           1Wire          4*            DS18B20 water pipe sensors
+ * bl/w          I2D            22*           BME in Dinning Room (Alternatively, DHT22 data pin)
+ * w/bl          I2C            23*           BME in Dinning Room
+ * g/w           3V3            3V3           White
+ * w/br                                       NC
+ * br/w          DHT22          25*           DHT22 (until BME is working)
+ * ** Red (Relay Board) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g                          5*             
+ * bl/w          R_DS           18*                   
+ * w/bl                         19*            
+ * g/w           R_WB           3V3           
+ * w/br           -                           
+ * br/w          R_US                         
+ * ** Orange (Nextion Display) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           NEO            27*             SK6812 4 pixels of rgbW
+ * bl/w                                      
+ * w/bl                                      
+ * g/w           3V3            3V3           
+ * w/br          RX2            17*              Nextion TX
+ * br/w          TX2            16*              Nextion RX   -- "SERIAL TX" of Serial will always be dominant colour (brown) as its important to know the output pin
+ * Twin          Switch
+ * Twin          Switch
+ * ** Power Screw Jacks **************************************************************************
+ * 4 (Top)       12V
+ * 3             5V
+ * 2
+ * 1 (Bottom)    GND
+ * ** ADC Input **************************************************************************
+ * 4 (Top)       LDR_US         33
+ *               LDR_DS         32 
+ *               LDR_WB         35
+ * Extra Ethernet for LDRs hot glued onto the red led of the servos?
+ * 
+ * Upstairs Connectors
+ * 3pin (DHT22)    - gnd,5v,dht_data 
+ * 3pin (relay US) - gnd,5v,relay_ih
+ * 3pin (water sensors) - gnd,3v3,ds18b20
+ * 
+ **/
+#ifdef DEVICE_TESTBED_HVAC_HEATING_DUPLICATE
+  #define DEVICENAME_CTR          "testbed_heating"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating"
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
+  
+  /**
+   * @brief Put macbook air under stairs for arduino wiping with bad code (use old macbook?)
+   **/
+
+  /**
+   * @brief Increasing buffers for the larger controller than default minimums
+   * 
+   */
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
+  #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
+  #define DB18_SENSOR_MAX                     15
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
+  #define MQTT_MAX_PACKET_SIZE                3000
+
+  #define DISABLE_WEBSERVER
+
+  #define USE_MODULE_CONTROLLER_HVAC
+    // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+    #define ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
+  #define USE_MODULE_SENSORS_DHT
+
+  //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on)) 30+ pins == use this to know what has been turned on manually.
+  //Also need to add a mains detector for the furnace trigger (orange wire from servos)
+  
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  // #define STRIP_SIZE_MAX 4
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  // #define USE_SK6812_METHOD_DEFAULT
+  // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  // #define USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
+  
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   #define STRIP_SIZE_MAX 5
+  //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  //   #define USE_SK6812_METHOD_DEFAULT
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+  
+  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY_V2
+  
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+
+  // Actual
+  #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_INV_CTR
+  #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
+
+  // Test GPIO
+  // #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
+  // #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
+  // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_CTR
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"5\":\""  GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
+      "\"19\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
+      "\"21\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
+      "\"18\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT 
+      // "\"12\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
+      #endif
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DS18X
+      "\"14\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // US_DB - 3 pin
+      "\"4\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\"," // DS_DB - 3 pin
+      #endif    
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  /**
+   * @brief Drivers and Sensors for HVAC zones
+   **/
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Upstairs"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "Immersion"
+  #define D_DEVICE_DRIVER_RELAY_3_NAME "Boiler"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
+  #define D_DEVICE_SENSOR_DHT_1_NAME "Downstairs_DHT"
+
+  /**
+   * @brief HVAC zones
+   **/
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Upstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
+
+  /**
+   * @brief Pin_US 
+   */
+  #define D_DEVICE_SENSOR_DB18S20_00_NAME        "Immersion_Heater"
+  #define D_DEVICE_SENSOR_DB18S20_00_ADDRESS     "[40,255,136,105,53,22,4,114]"
+
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "Tank_Top"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,255,50,176,193,23,4,197]"
+
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "Tank_Middle"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,255,216,108,53,22,4,102]"
+
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "Tank_Bottom"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,255,162,167,53,22,4,27]"
+
+  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "Tank_Out"
+  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,255,219,93,53,22,4,239]"
+
+  /** 
+   * Pin_DS
+   * */
+  #define D_DEVICE_SENSOR_DB18S20_21_NAME        "Water21-Upstairs"
+  #define D_DEVICE_SENSOR_DB18S20_21_ADDRESS     "[40,208,174,149,240,1,60,127]"
+
+  #define D_DEVICE_SENSOR_DB18S20_22_NAME        "Water22-HotCross"
+  #define D_DEVICE_SENSOR_DB18S20_22_ADDRESS     "[40,168,253,149,240,1,60,157]"
+
+  #define D_DEVICE_SENSOR_DB18S20_23_NAME        "Water23-R/C"
+  #define D_DEVICE_SENSOR_DB18S20_23_ADDRESS     "[40,12,164,2,0,0,0,72]"
+
+  #define D_DEVICE_SENSOR_DB18S20_24_NAME        "Water24-Mains"
+  #define D_DEVICE_SENSOR_DB18S20_24_ADDRESS     "[40,9,77,4,0,0,0,131]"
+
+  #define D_DEVICE_SENSOR_DB18S20_25_NAME        "Water25-HotFromBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_25_ADDRESS     "[40,121,172,3,0,0,0,138]"
+
+  #define D_DEVICE_SENSOR_DB18S20_26_NAME        "Water26-Downstairs"
+  #define D_DEVICE_SENSOR_DB18S20_26_ADDRESS     "[40,205,241,149,240,1,60,148]"
+
+  #define D_DEVICE_SENSOR_DB18S20_27_NAME        "Water27-R/H"
+  #define D_DEVICE_SENSOR_DB18S20_27_ADDRESS     "[40,195,112,2,0,0,0,178]"
+
+  #define D_DEVICE_SENSOR_DB18S20_28_NAME        "Water28-HotFromFurnace"
+  #define D_DEVICE_SENSOR_DB18S20_28_ADDRESS     "[40,103,49,3,0,0,0,153]"
+
+  #define D_DEVICE_SENSOR_DB18S20_29_NAME        "Water29-WaterBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_29_ADDRESS     "[40,183,162,149,240,1,60,24]"
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        // Upstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_00_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\","
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_21_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_22_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_23_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_24_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_25_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_26_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_27_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_28_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_29_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+        // Upstairs
+        D_DEVICE_SENSOR_DB18S20_00_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_04_ADDRESS ","
+        // Downstairs
+        D_DEVICE_SENSOR_DB18S20_21_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_22_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_23_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_24_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_25_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_26_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_27_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_28_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_29_ADDRESS ""
+      "]"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        // "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        // "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\"," //debug fix
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\"," //debig fix
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_3_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "}";
+
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"AnimationMode\": \"Effects\","
+    "\"ColourOrder\": \"grbw\","
+    "\"ColourPalette\":\"Christmas 01\","
+    "\"Effects\": {"
+      "\"Function\": \"Static\""
+    "},"
+    "\"CCT_TempPercentage\":100,"
+    "\"BrightnessRGB\":10,"
+    "\"BrightnessCCT\":10,"
+    "\"Transition\": {"
+      "\"Time\":0,"
+      "\"RateMs\":1000"
+    "}"
+  "}";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+  
+#endif
+
+
+
 #ifdef DEVICE_TESTBED_SONOFF_4CHPRO
   #define DEVICENAME_CTR          "testbed_4chpro"
   #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
@@ -534,7 +911,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -1075,7 +1452,7 @@
    **/
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
@@ -1360,7 +1737,7 @@
    * @brief defines to be tested and incorporated fully
    **/
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -1749,7 +2126,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -2060,7 +2437,7 @@
 
 //   // {a,b,c,d,e,f,g}
 
-//   // #define USE_TASK_RGBLIGHTING_NOTIFICATIONS
+//   // #define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 
 //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
@@ -2300,7 +2677,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -2917,7 +3294,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -3468,7 +3845,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -4014,7 +4391,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -4556,7 +4933,7 @@
   
   
   // #define ENABLE_DEVFEATURE_MULTIPLE_NEOPIXELBUS_OUTPUTS
-  // #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // #define ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   // #define ENABLE_DEVFEATURE_GET_COLOUR_PALETTE_JOINT_METHOD
   // #define ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2 // ie the new way of merging fastled to mine
@@ -5795,7 +6172,7 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  //#define USE_TASK_RGBLIGHTING_NOTIFICATIONS  // BREAKS
+  //#define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION  // BREAKS
   #define USE_SK6812_METHOD_DEFAULT
 
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
@@ -5806,7 +6183,7 @@
 
   // // #define ENABLE_BUG_TRACING
   // // #define DEBUG_PRINT_FUNCTION_NAME
-  // //  #define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // //  #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   // //#define ENABLE_LOG_FILTERING_TEST_ONLY
   // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
   // // #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
@@ -5814,7 +6191,7 @@
   
   // #define ENABLE_PIXEL_FUNCTION_MIXER
   
-  // //#define ENABLE_PIXEL_FUNCTION_MANUAL_SETPIXEL
+  // //#define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
   #define STRIP_SIZE_MAX 93// 750   *15 //changing gazebo to be 12v
 

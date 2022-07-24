@@ -874,6 +874,97 @@ if(pubsub!=nullptr){
   //TRACE();
 }
 
+/**
+ * @brief progmem payload version 
+ * 
+ * @param topic 
+ * @param payload 
+ * @param retained 
+ * @return boolean 
+ */
+// My function for adding prefix by device name
+boolean mMQTT::ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained){
+
+  //// AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
+    if (!pubsub->connected()) {
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
+      #endif// ENABLE_LOG_LEVEL_INFO
+      connection_maintainer.flag_require_reconnection = true;
+      return false;
+    }
+
+    if(strlen_P(payload)<1){
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "strlen(payload)<1"));
+    #endif// ENABLE_LOG_LEVEL_INFO
+    }
+
+// Serial.println(WiFi.localIP());
+// Serial.println(static_cast<uint32_t>(WiFi.localIP())); 
+
+    if (!pCONT_wif->WifiCheckIpConnected()) {
+    #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early pp"));
+    #endif// ENABLE_LOG_LEVEL_INFO
+        return false;
+    }else{
+        //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "WiFi.status()=%d"),WiFi.status());
+    }
+
+    //if(prefixtopic[0]!=0){}
+//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Exiting early?"));
+//     // delay(2500); ESP.wdtFeed();
+// Serial.print("HERE1");
+// Serial.flush();
+    // delay(2500); ESP.wdtFeed();
+DEBUG_LINE;
+
+if(WiFi.status() != WL_CONNECTED){ 
+    #ifdef ENABLE_LOG_LEVEL_INFO
+  AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early"));
+    #endif// ENABLE_LOG_LEVEL_INFO
+  return false;
+}
+
+DEBUG_LINE;
+
+//return 0;//
+
+    char convctr[100]; memset(convctr,0,sizeof(convctr));
+    //Serial.println(pCONT_set->Settings.mqtt.prefixtopic); Serial.flush();
+    // Serial.println(topic); Serial.flush();
+    snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+    
+    // Serial.println(convctr); Serial.flush();
+DEBUG_LINE;
+//TRACE();
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
+    // ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
+    // #endif// ENABLE_LOG_LEVEL_INFO
+
+DEBUG_LINE;
+// //TRACE();
+//     #ifdef SERIAL_DEBUG_LOW_LEVEL
+//     if(strstr(payload,"{}")){
+//         ALOG_DBM( PSTR(D_LOG_PUBSUB D_ERROR "> {}"));
+//     }
+//     #endif
+
+DEBUG_LINE;
+if(pubsub!=nullptr){
+  DEBUG_LINE;
+    return pubsub->publish_P(convctr, payload, retained);
+    
+    
+    // (const uint8_t*)payload,strlen(payload),retained);
+  }
+  DEBUG_LINE;
+  return 0;
+  //TRACE();
+}
+
 
 boolean mMQTT::psubscribe(const char* topic) {
   char ttopic[70];

@@ -222,7 +222,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     EM_MODULE_DRIVERS_IRTRANSCEIVER_ID,
   #endif
-  #ifdef USE_MODULE_DRIVERS_RELAY
+  #if defined(USE_MODULE_DRIVERS_RELAY) || defined(USE_MODULE_DRIVERS_RELAY_V2)
     EM_MODULE_DRIVERS_RELAY_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_PWM
@@ -544,6 +544,10 @@ enum MODULE_IDS{
   #include "4_Drivers/04_Relays/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
+#ifdef USE_MODULE_DRIVERS_RELAY_V2
+  #include "4_Drivers/04_Relays_v2/mRelays.h"
+  #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
+#endif
 #ifdef USE_MODULE_DRIVERS_BUZZER
   #include "4_Drivers/05_Buzzer/mBuzzer.h"
   #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
@@ -850,7 +854,7 @@ enum MODULE_IDS{
   #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  #include "10_Controller_Spec/02_HeatingStripColour_Understairs/mHeatingStripColour_Understairs.h"
+  #include "10_Controller_Spec/02_HeatingStripColour_Understairs/mHeatingStripColour.h"
   #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR

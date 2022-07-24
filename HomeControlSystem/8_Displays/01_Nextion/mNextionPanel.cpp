@@ -39,7 +39,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
       break;
   }
 
-  if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
+  // if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
 
   switch(function){
     /************
@@ -549,6 +549,7 @@ uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add("test", 1);
+    JBI->Add("lcdConnected", lcdConnected);
   JsonBuilderI->End();
 
 }
