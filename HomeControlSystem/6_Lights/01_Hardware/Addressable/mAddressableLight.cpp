@@ -50,8 +50,15 @@ void mAddressableLight::ShowHardware(){
 
   // Serial.print(".");
 
-  pCONT_lAni->stripbus->Show();
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
+
+
+  #else
+  if(pCONT_lAni->stripbus->CanShow()){ 
+    pCONT_lAni->stripbus->Show();
+  }
+  #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 }

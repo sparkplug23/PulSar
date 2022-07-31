@@ -1056,10 +1056,8 @@
         return pixel_range.stop - pixel_range.start;
       }
       uint16_t length_wled()
-      {   
-        
+      {           
         return pixel_range.stop - pixel_range.start;
-
       }
       #endif // USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
       
@@ -1086,14 +1084,10 @@
       }
       uint16_t virtualLength()
       {
-        // DEBUG_LINE_HERE2;
         uint16_t groupLen = groupLength();
-        // Serial.println(groupLen);
         uint16_t vLength = (length() + groupLen - 1) / groupLen;
-        // DEBUG_LINE_HERE2;
         if (options & MIRROR)
           vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
-        // DEBUG_LINE_HERE2;
         return vLength;
       }
       
@@ -1106,10 +1100,10 @@
     {
       uint8_t fRefreshAllPixels = false;
       /**
-       * Can't be zero, as that means not active
-       * */
-      uint16_t time_ms = 1000; //on boot
-      uint16_t rate_ms = 1000;
+    //    * Can't be zero, as that means not active
+    //    * */
+    //   uint16_t time_ms = 1000; //on boot
+    //   uint16_t rate_ms = 1000;
     }segment_animation_override; // ie "oneshot" variables that get checked and executed one time only
 
 
@@ -1203,32 +1197,6 @@
        * Using "index" inside animator as segment index
        * */
       ANIM_FUNCTION_SIGNATURE;
-
-//       void reset(){
-//         //next_time = 0; 
-//         step = 0; 
-//         call = 0; 
-//         aux0 = 0; 
-//         aux1 = 0; 
-//         animator = new NeoPixelAnimator(1, NEO_MILLISECONDS);
-
-
-// // Serial.printf("DEBUG HERE: ");\
-// //                         Serial.print(__FILE__);\
-// //                         Serial.println(__LINE__);\
-// //                         Serial.flush();\
-// //                         delay(5000);
-
-//         // palette.id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_03_ID;
-//         // transition.rate_ms = 100;
-//         // transition.time_ms = 80;
-//         // transition.order_id = TRANSITION_ORDER_INORDER_ID;
-//         // effect_id = EFFECTS_FUNCTION__STATIC_PALETTE_ID;
-//         // aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
-
-//         deallocateData();
-                
-//       }
       
       /** 
        * If reset of this segment was request, clears runtime
@@ -1242,12 +1210,6 @@
           // next_time = 0; 
           tSaved_AnimateRunTime = millis()-120000; // to ensure it skips forward
           // _segments[segment_active_index].tSaved_AnimateRunTime = millis() + 10000; // set ahead so it will fire, but this needs changed to another method
-
-          // _segments[0].flags.fForceUpdate = true;
-
-          // _segments[0].flags.fForceUpdate
-          
-
 
           step = 0; call = 0; aux0 = 0; aux1 = 0; 
           animator = new NeoPixelAnimator(1, NEO_MILLISECONDS);

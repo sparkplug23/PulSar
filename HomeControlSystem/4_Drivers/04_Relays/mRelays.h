@@ -199,13 +199,13 @@ class mRelays :
 
     }relay_status[MAX_RELAYS];
     
-bool IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id=255);
+    bool IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id=255);
 
-void SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_index = 0);
+    void SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_index = 0);
 
-void SubTask_Every_Minute();
+    void SubTask_Every_Minute();
 
-void SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
+    void SubTask_Relay_Time_To_Briefly_Turn_Off_Then_On_Seconds();
 
 
     /**

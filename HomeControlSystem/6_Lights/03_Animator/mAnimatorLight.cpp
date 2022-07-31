@@ -45,6 +45,19 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case FUNC_EVERY_SECOND:{
+
+      #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+
+      // RgbcctColor updatedColor = pCONT_lAni->stripbus->GetPixelColor(0);
+
+      // ALOG_INF( PSTR("colour_type=%d, desired_colour1=%d,%d,%d,%d,%d AR=%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW, analogRead(4));
+      // ALOG_INF( PSTR("colour_type=%d, desired_colour1=%d,%d,%d,%d,%d AR=%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
+
+      // StripUpdate();
+
+
+
+      #endif
     
       //EverySecond();
 
@@ -1001,7 +1014,7 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
  * 
  */
 
-
+// Serial.print("i");
   pCONT_iLight->ShowInterface();
 
   // for (auto copies = 0; copies < 3; copies++) {

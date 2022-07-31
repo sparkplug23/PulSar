@@ -21,6 +21,9 @@ uint8_t mAnimatorLight::ConstructJSON_Animation_Active(uint8_t json_level)
 
     JBI->Add("millis", millis());
 
+    JBI->Add("Start", _segments[0].pixel_range.start);
+    JBI->Add("Stop", _segments[0].pixel_range.stop);
+
   return JBI->End();
 
 }
@@ -110,6 +113,30 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level)
 JBI->Start();
 
   JBI->Add("millis", millis());
+
+  JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
+  JBI->Add("isActive", _segments[0].isActive());
+  JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
+  JBI->Add("isActive", _segments[0].isActive());
+  JBI->Add("_segments[0].flags.IsDirty", stripbus->IsDirty());
+  JBI->Add("CanShow",stripbus->CanShow());
+
+
+for(uint8_t seg_i = 0; seg_i<2; seg_i++)
+{
+  JBI->Level_Start_F("Segment%d",seg_i);
+
+    JBI->Level_Start("Transition");
+      JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
+      JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
+    JBI->Level_End();
+  
+  
+  JBI->Level_End();
+
+
+}
+
 
 return JBI->End();
 

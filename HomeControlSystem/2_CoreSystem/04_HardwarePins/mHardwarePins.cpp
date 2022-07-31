@@ -380,19 +380,37 @@ int8_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
 {
   uint16_t real_gpio = gpio + index;
 
+// DEBUG_LINE_HERE;
+
   if(real_gpio == GPIO_NONE_ID)
+  {
+    
+// DEBUG_LINE_HERE;
     return -1;
+  }
 
   // Get any pins with gpio attached
   for(uint16_t index_pin=0; index_pin<ARRAY_SIZE(pin_attached_gpio_functions); index_pin++)
   {
+    
+// Serial.printf("pin_attached_gpio_functions[index_pin] == real_gpio %d %d %d\n\r",
+// pin_attached_gpio_functions[index_pin],
+// index_pin,
+// real_gpio);
+
+    // Function (ie func_gpio) that is attached to pin (saved in array), search for the func_gpio
     if(pin_attached_gpio_functions[index_pin] == real_gpio) // gpio has been used for a pin
     {
-      return gpio_pin_by_index[index_pin]; // real_pin
+
+// Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
+
+// DEBUG_LINE_HERE;
+      return (int8_t)gpio_pin_by_index[index_pin]; // real_pin
       // AddLog(LOG_LEVEL_TEST, PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d"),gpio,index,real_pin);
     }
   }
 
+// DEBUG_LINE_HERE;
   return -1; // No pin was assigned with GPIO  
 }
 

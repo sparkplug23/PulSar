@@ -110,6 +110,11 @@ void mAnimatorLight::resetSegments()
   _segments[0].pixel_range.start = 0;
   _segments[0].pixel_range.stop = STRIP_SIZE_MAX-1;
 
+  #ifdef USE_MODULE_LIGHTS_PWM
+  _segments[0].pixel_range.stop = 2; 
+  ALOG_WRN(PSTR("Force fix the stop pixel size"));
+  #endif // USE_MODULE_LIGHTS_PWM
+
 }
 
 
@@ -179,6 +184,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
     // reset the segment runtime data if needed, called before isActive to ensure deleted
     // segment's buffers are cleared
     SEGENV.resetIfRequired();
+    
+      // AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].isActive() %d"),_segments[segment_active_index].isActive());
 
     if(_segments[segment_active_index].isActive())// || (pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END))
     {     
@@ -215,7 +222,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
         }
         #endif // ENABLE_WLED_EFFECTS
 
-        ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
+        ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
 
         switch(_segments[segment_active_index].effect_id){
           default:
@@ -781,7 +788,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
          */
         if(!_segment_runtimes[segment_active_index].animation_has_anim_callback)
         {
-          Serial.print("=");
+          // Serial.print("=");
           StripUpdate();         
           SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
         }
@@ -819,8 +826,15 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
 
   RgbcctColor updatedColor = RgbcctColor(0);
   TransitionColourPairs colour_pairs;
-  uint16_t pixel_within_data_iter = 0;
 
+// uint8_t randomv = random(0,10)*25;
+
+// for(int ii=0;ii<2;ii++){
+// pCONT_lAni->stripbus->SetPixelColor(ii,RgbColor(randomv,0,0));
+// }
+// for(int ii=9;ii<10;ii++){
+// pCONT_lAni->stripbus->SetPixelColor(ii,RgbColor(0,0,randomv));
+// }
 
   for (uint16_t pixel = 0; 
                 pixel < SEGMENT.length(); 
@@ -830,12 +844,17 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
 
     updatedColor = RgbTypeColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);  
 
+
     // AddLog(LOG_LEVEL_TEST, PSTR("SEGMENT.length_m() %d %d"),segment_active_index,SEGMENT.length_m());
 
     SetPixelColor(pixel, updatedColor);
 
   }
-  
+
+  // #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+  //   SetPixelColor(0, RgbColor(0));
+  // #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+
 }
 
 
@@ -1370,6 +1389,22 @@ uint16_t pixel_start_i = 0;
 void mAnimatorLight::EveryLoop(){
 
   
+#ifdef ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
+
+// uint8_t randomv = random(0,10)*25;
+
+// for(int ii=0;ii<2;ii++){
+// pCONT_lAni->stripbus->SetPixelColor(ii,RgbColor(randomv,0,0));
+// }
+// for(int ii=9;ii<10;ii++){
+// pCONT_lAni->stripbus->SetPixelColor(ii,RgbColor(0,randomv,0));
+// }
+// pCONT_lAni->stripbus->Show();
+//           StripUpdate();      
+
+// return;
+#endif // ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
+
 // _segments[0].effect_id = EFFECTS_FUNCTION__SEQUENTIAL_ID;
 // _segments[1].effect_id = EFFECTS_FUNCTION__STEPPING_PALETTE_ID;
 // _segments[2].effect_id = EFFECTS_FUNCTION__STATIC_PALETTE_ID;
@@ -1429,18 +1464,25 @@ void mAnimatorLight::EveryLoop(){
     if(flag_animations_needing_updated)
     {
 
-      #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-      if(stripbus->IsDirty()){
-        if(stripbus->CanShow()){ 
+      // #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
+      // if(stripbus->IsDirty()){
+        // if(stripbus->CanShow()){ 
           // ALOG_INF(PSTR("CanShow"));
-      #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
+      // #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
       
           // Serial.print("!");
           StripUpdate();          
-      #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-        }
-      }
-      #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
+      // #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
+        // }
+      //   else{
+
+      //     // Serial.print("?");
+      //   }
+      // }else{
+
+      //     // Serial.print("~2");
+      // }
+      // #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
       
       /**
        * THESE ALL NEED PUT INTO SEGMENTS
@@ -1460,19 +1502,22 @@ void mAnimatorLight::EveryLoop(){
     }
     else // none need animating
     {
+      
+        #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+        // Serial.print("E");
+        #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+
+
       if(_segments[0].flags.fRunning)
       { // Was running
         #ifdef ENABLE_LOG_LEVEL_DEBUG
         ALOG_DBM( PSTR(D_LOG_NEO "Animation Finished")); 
         #endif
+
+
         fAnyLEDsOnOffCount = 0;
+
 /*****
- * 
- * 
- * 
- * 
- * 
- * 
  *  DISABLING THE ABILITY TO KNOW WHEN IT IS ON OR OFF, NEEDS ADDED BACK IN AGAIN WITH CHECKING ALL SEGMENTS        
    ***
    
@@ -1480,6 +1525,7 @@ void mAnimatorLight::EveryLoop(){
        for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){ 
           if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
         }          
+
       }
       _segments[0].flags.fRunning = false;
       pCONT_set->Settings.enable_sleep = true;

@@ -230,12 +230,25 @@ class mAnimatorLight :
       #elif defined(USE_SK6812_METHOD_DEFAULT)
 
       // #ifdef USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
-        typedef NeoSk6812Method selectedNeoSpeedType;  //NeoEsp32RmtNSk6812Method
+        // typedef NeoSk6812Method selectedNeoSpeedType;  // freezing
       // #else
-      //   typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; // caused flickering? = I will move away from this
+        // typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; // flickering on the off pixels
       //   #endif
+      // typedef NeoEsp32Rmt1Sk6812Method selectedNeoSpeedType;
+      // typedef NeoEsp32I2s0Sk6812Method selectedNeoSpeedType;
+      // typedef Neo800KbpsMethod selectedNeoSpeedType;
+      
+        // typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; // flickering on off pixels
+        typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; // flickering
+        // typedef NeoEsp32I2s0Sk6812Method selectedNeoSpeedType;  // hangs
+        // typedef NeoEsp32I2s0800KbpsMethod selectedNeoSpeedType;
+        // typedef NeoSk6812Method selectedNeoSpeedType;
+        // typedef NeoEsp32I2s1Sk6812Method  selectedNeoSpeedType; //recommended by Makuna
+        
+      
       #else          
-        typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+        // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+        typedef Neo800KbpsMethod selectedNeoSpeedType;
       #endif
     #endif   
 
@@ -299,31 +312,31 @@ class mAnimatorLight :
     void StartAnimation_AsAnimUpdateMemberFunction();
     
     
-    void Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
-                                      RgbcctColor colour_circumference, 
-                                      uint16_t radius_pixel,
-                                      uint16_t radius_size,
-                                      uint8_t center_repeat_size = 0,
-                                      bool colour_is_additive = false,
-                                      bool values_are_percentage_of_strip_size = false
-    );
-    void Remove_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
-                                      RgbcctColor colour_circumference, 
-                                      uint16_t radius_pixel,
-                                      uint16_t radius_size,
-                                      uint8_t center_repeat_size = 0,
-                                      bool colour_is_additive = false,
-                                      bool values_are_percentage_of_strip_size = false
-    );
+    // void Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
+    //                                   RgbcctColor colour_circumference, 
+    //                                   uint16_t radius_pixel,
+    //                                   uint16_t radius_size,
+    //                                   uint8_t center_repeat_size = 0,
+    //                                   bool colour_is_additive = false,
+    //                                   bool values_are_percentage_of_strip_size = false
+    // );
+    // void Remove_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
+    //                                   RgbcctColor colour_circumference, 
+    //                                   uint16_t radius_pixel,
+    //                                   uint16_t radius_size,
+    //                                   uint8_t center_repeat_size = 0,
+    //                                   bool colour_is_additive = false,
+    //                                   bool values_are_percentage_of_strip_size = false
+    // );
     
-    void Draw_DesiredColour_LinearGradientMirrored2(RgbcctColor colour_center, 
-                                      RgbcctColor colour_circumference, 
-                                      uint16_t radius_pixel,
-                                      uint16_t radius_size,
-                                      uint8_t center_repeat_size = 0,
-                                      bool colour_is_additive = false,
-                                      bool values_are_percentage_of_strip_size = false
-    );
+    // void Draw_DesiredColour_LinearGradientMirrored2(RgbcctColor colour_center, 
+    //                                   RgbcctColor colour_circumference, 
+    //                                   uint16_t radius_pixel,
+    //                                   uint16_t radius_size,
+    //                                   uint8_t center_repeat_size = 0,
+    //                                   bool colour_is_additive = false,
+    //                                   bool values_are_percentage_of_strip_size = false
+    // );
     
     const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
 

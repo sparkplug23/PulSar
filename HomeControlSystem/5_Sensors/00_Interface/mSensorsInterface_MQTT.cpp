@@ -25,7 +25,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_ifchanged;
@@ -35,7 +35,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
 
   ptr = &mqtthandler_sensor_temperature_colours;
@@ -48,7 +48,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   #endif
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_TEMPERATURE_COLOURS_CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
 
   //motion events

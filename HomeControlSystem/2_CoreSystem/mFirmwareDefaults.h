@@ -52,7 +52,9 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 #ifndef DISABLE_NETWORK
 // #define USE_MODULE_NETWORK_WIFI
+      // #ifndef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 #define USE_MODULE_NETWORK_MQTT
+      // #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 #endif // DISABLE_NETWORK
 
 #if !defined(USE_MODULE_NETWORK_WIFI_V2) && !defined(DISABLE_NETWORK)

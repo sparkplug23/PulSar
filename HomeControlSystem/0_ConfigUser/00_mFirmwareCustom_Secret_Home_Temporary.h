@@ -34,7 +34,7 @@
 // #define DEVICE_H801_BEDROOM_UNDERDESK
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_HVAC_HAIRDRYER
-#define DEVICE_DESKSENSOR
+// #define DEVICE_DESKSENSOR
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
@@ -60,6 +60,12 @@
   #define DEVICENAME_FRIENDLY_CTR "H801 UnderDesk"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+
+  // #define ENABLE_DEBUG_MESSAGE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+
+
+  #define ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
 
 
   #define USE_SERIAL_ALTERNATE_TX
@@ -159,7 +165,7 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
-  #define STRIP_SIZE_MAX 1
+  #define STRIP_SIZE_MAX 2 // temporary fix!
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
@@ -408,6 +414,13 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  // #define analogRead(x) error
+
+  // #define DISABLE_NETWORK
+
+
+
+
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
   // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
@@ -458,36 +471,82 @@
 // }
 
 
+// {
+//   "Segment0":{
+//   "PixelRange":[0,3],
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": 2
+//   },
+//   "ColourPalette": 0,
+//   "BrightnessRGB": 10,
+//   "BrightnessCCT": 10,
+//   "Hue":0,"Sat":100,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 1000
+//   }
+//   },
+//   "Segment1":{
+//   "PixelRange":[5,8],
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": 2
+//   },
+//   "ColourPalette": 16,
+//   "BrightnessRGB": 100,
+//   "BrightnessCCT": 10,
+//   "Hue":0,"Sat":100,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 10000
+//   }
+//   }
+// }
+// {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": 0
+//   },
+//   "ColourPalette": 10,
+//   "BrightnessRGB": 10,
+//   "BrightnessCCT": 10,
+//   "Hue":0,"Sat":100,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 1000
+//   }
+// }
   // #define USE_MODULE_DRIVERS_LEDS
 
   // #define USE_MODULE_DRIVERS_IRREMOTE
   // #define USE_IR_RECEIVE
 
-  // #define USE_MODULE_DISPLAYS_NEXTION
-  // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  #define USE_MODULE_DISPLAYS_NEXTION
+  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
 
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // #define USE_MODULE_SENSORS_DS18X
-  // #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_BME
-  //   #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
-  // #define USE_MODULE_SENSORS_BH1750
-  // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define USE_MODULE_SENSORS_LDR_BASIC
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_DHT
+  #define USE_MODULE_SENSORS_BME
+    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
+  #define USE_MODULE_SENSORS_BH1750
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_LDR_BASIC
 
-  // #ifdef USE_MODULE_SENSORS_LDR_BASIC
-  //   #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-  //   #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  // #endif // USE_MODULE_SENSORS_LDR_BASIC
+  #ifdef USE_MODULE_SENSORS_LDR_BASIC
+    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+  #endif // USE_MODULE_SENSORS_LDR_BASIC
   
   #define USE_MODULE_LIGHTS_INTERFACE
     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define STRIP_SIZE_MAX 12
+  #define STRIP_SIZE_MAX 13
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -497,6 +556,15 @@
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
+// #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+// https://github.com/drzony/FastLED-tests/blob/master/src/main.cpp
+
+
+  //   #define ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
+
+  //   #define ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
   // #define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
@@ -661,17 +729,17 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     // "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
     // "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    "\"ColourPalette\":15," 
-    "\"PaletteEdit\": {"
-      "\"ColourPalette\": 15,"
-      "\"Data\": ["
-        "4,5,0,0,0,"
-        "255, 0, 0,"
-        "0, 2550, 0,"
-        "0, 0, 255,"
-        "255, 0, 255"
-      "]"
-    "},"
+    // "\"ColourPalette\":15," 
+    // "\"PaletteEdit\": {"
+    //   "\"ColourPalette\": 15,"
+    //   "\"Data\": ["
+    //     "4,5,0,0,0,"
+    //     "255, 0, 0,"
+    //     "0, 2550, 0,"
+    //     "0, 0, 255,"
+    //     "255, 0, 255"
+    //   "]"
+    // "},"
     // "\"Effects\":{"
     //   "\"Function\":\"Static\""
     // "},"
@@ -696,23 +764,23 @@
     //   "\"Time\": 1"
     // "}"
 
-
+    // "\"PixelRange\":[0,6],"
     "\"AnimationMode\": \"Effects\","
     "\"ColourOrder\": \"grbw\","
-    // "\"ColourPalette\": 0,"
+    "\"ColourPalette\": 0,"
     "\"Effects\": {"
-      "\"Function\": \"Static\""
+      "\"Function\": \"Slow Glow\""
     "},"
     "\"Hue\": 120,"
     "\"Sat\": 100,"
     "\"BrightnessRGB\": 1,"
-    "\"BrightnessCCT\": 1,"
+    "\"BrightnessCCT\": 0,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"
-      "\"Time\": 0,"
-      "\"Rate\": 1"
-    "},"
-    "\"Light\":{\"TimeOn\":10}"
+      "\"TimeMs\": 9000,"
+      "\"RateMs\": 10000"
+    "}"
+    // "\"Light\":{\"TimeOn\":10}"
 
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE

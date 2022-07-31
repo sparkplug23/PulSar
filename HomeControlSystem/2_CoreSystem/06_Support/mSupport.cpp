@@ -334,6 +334,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
         randomSeed(analogRead(0));  // also check adc module is not active AND pin not in use
       #else
         // randomSeed(analogRead(34)); //esp32
+        // Do not use analogRead
       #endif
 
       // pinMode(22, OUTPUT);

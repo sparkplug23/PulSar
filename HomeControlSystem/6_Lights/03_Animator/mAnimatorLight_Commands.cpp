@@ -131,9 +131,9 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   if(jtok = obj["PixelRange"]){ 
 
 ALOG_INF( PSTR("PixelRange") );
-
+#ifdef USE_MODULE_NETWORK_MQTT
     MQTTHandler_Set_RefreshAll();
-
+#endif // USE_MODULE_NETWORK_MQTT
     if(jtok.isArray()){
       uint8_t array[2];
       uint8_t arrlen = 0;

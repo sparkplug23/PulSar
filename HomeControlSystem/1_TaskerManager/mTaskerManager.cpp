@@ -505,6 +505,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
     pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID] = new mLouvoliteHub();
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
+    pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID] = new mSideDoorLight();
+  #endif
 };
 
 

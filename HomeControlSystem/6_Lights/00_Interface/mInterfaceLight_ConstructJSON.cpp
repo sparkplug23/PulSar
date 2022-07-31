@@ -48,6 +48,8 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_method){
 
     JBI->Add("ColourPaletteID", pCONT_lAni->_segments[0].palette.id);
 
+    JBI->Add("Type", pCONT_set->Settings.light_settings.type);
+
   // Got to ConstructJson_Scene out, or rename all the parameters as something else, or rgbcctactivepalette, or show them all? though that would need to run through, can only show
   // active_id, plus the values below
   // #ifndef ENABLE_DEVFEATURE_PHASING_SCENE_OUT
@@ -60,6 +62,19 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_method){
 
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->_segments[0].transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->_segments[0].transition.time_ms);
+
+
+    #ifdef ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
+    mqtthandler__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
+    JBI->Array_Start("PWM_Channels_Read");
+    for (uint8_t i = 0; i < 5; i++) {
+      if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) 
+      {
+        JBI->Add(analogRead(pCONT_pins->GetPin(GPIO_PWM1_ID, i)));
+      }
+    }
+    JBI->Array_End();
+    #endif  // ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
 
 
   return JsonBuilderI->End();

@@ -433,6 +433,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
     EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
+    EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID,
+  #endif
 
 
   
@@ -865,6 +868,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
   #include "10_Controller_Spec/04_LouvoliteHub/mLouvoliteHub.h"
   #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
+  #include "10_Controller_Spec/05_SideDoorLight/mSideDoorLight.h"
+  #define pCONT_sdlight                static_cast<mSideDoorLight*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID])
 #endif
 
 

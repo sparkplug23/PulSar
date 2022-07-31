@@ -596,6 +596,8 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level)
 uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level)
 {
 
+  // return 0;
+
   char buffer[30];
   JsonBuilderI->Start();
   JBI->Add("flag_serial_set_tx_set",pCONT_pins-> flag_serial_set_tx_set);
@@ -649,7 +651,15 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level)
 
     JBI->Array_Start("getpin");
     for(int i=0; i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++)
-      JBI->Add(pCONT_pins->GetPinWithGPIO(pCONT_pins->pin_attached_gpio_functions[i]));
+    {
+// DEBUG_LINE_HERE;
+      JBI->Add(
+        pCONT_pins->GetPinWithGPIO(pCONT_pins->pin_attached_gpio_functions[i])
+        
+        
+        );
+// DEBUG_LINE_HERE;
+    }
     JBI->Array_End();
 
 

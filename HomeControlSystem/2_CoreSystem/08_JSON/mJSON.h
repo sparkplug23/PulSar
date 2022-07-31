@@ -82,6 +82,7 @@ char* GetPtr();
 
     void Level_Start(const char* key);
     void Level_Start_P(const char* keyP, ...);
+    void Level_Start_F(const char* keyP, ...);
     void Level_End();
 
     void Start_NoMemClear();
@@ -156,7 +157,7 @@ char* GetPtr();
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%lu",value);
       }else
       if(is_signed_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%",value);
+        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value);
       }else
       if(is_string_type<T>::value){ 
         *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value);
