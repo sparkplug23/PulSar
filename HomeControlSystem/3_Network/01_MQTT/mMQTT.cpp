@@ -797,6 +797,13 @@ void mMQTT::publish_status_module(const char* module_name, const char* topic_pos
 // My function for adding prefix by device name
 boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained){
 
+
+  if(pubsub == nullptr)
+  {
+    ALOG_ERR(PSTR("pubsub == nullptr"));
+    return false;
+  }
+
   //// AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
     if (!pubsub->connected()) {
       #ifdef ENABLE_LOG_LEVEL_INFO
@@ -805,6 +812,8 @@ boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained
       connection_maintainer.flag_require_reconnection = true;
       return false;
     }
+
+    // DEBUG_LINE_HERE;
 
     if(strlen(payload)<1){
     #ifdef ENABLE_LOG_LEVEL_INFO
