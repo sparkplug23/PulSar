@@ -1210,6 +1210,9 @@
           // next_time = 0; 
           tSaved_AnimateRunTime = millis()-120000; // to ensure it skips forward
           // _segments[segment_active_index].tSaved_AnimateRunTime = millis() + 10000; // set ahead so it will fire, but this needs changed to another method
+          #ifdef ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
+          Serial.println("resetIfRequired TRIGGERED");
+          #endif
 
           step = 0; call = 0; aux0 = 0; aux1 = 0; 
           animator = new NeoPixelAnimator(1, NEO_MILLISECONDS);

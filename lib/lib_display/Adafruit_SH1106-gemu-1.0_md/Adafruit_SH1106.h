@@ -28,10 +28,10 @@ However, SH1106 driver don't provide several functions such as scroll commands.
 
 #if ARDUINO >= 100
  #include "Arduino.h"
- #define WIRE_WRITE Wire.write
+ #define WIRE_WRITE wire->write
 #else
  #include "WProgram.h"
-  #define WIRE_WRITE Wire.send
+  #define WIRE_WRITE wire->send
 #endif
 
 #include <renderer.h>
@@ -132,6 +132,9 @@ However, SH1106 driver don't provide several functions such as scroll commands.
 class Adafruit_SH1106 : public Renderer  {
  public:
   Adafruit_SH1106(int16_t width, int16_t height);
+  Adafruit_SH1106(int16_t width, int16_t height, TwoWire *twi=&Wire);
+  
+  TwoWire     *wire;
 
   boolean begin(uint8_t switchvcc = SH1106_SWITCHCAPVCC, uint8_t i2caddr = SH1106_I2C_ADDRESS, bool reset=true);
   void SH1106_command(uint8_t c);

@@ -1,6 +1,15 @@
 #ifndef MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H
 #define MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H
 
+/***
+ * - CrashDump needs to be saved and transmitted over mqtt on request in a json message, that can copy and pasted into decoder
+ * - Figure out how to have the binary saved into another directory for each device, so it may be used later as the "latest version" to reflash another device with the same code if needed (ie broken device that worked on older code)
+ * 
+ * 
+ * 
+ * 
+ * **/
+
 
 /*********************************************************************************************\
  * Personal configs for installed home devices as of 2022 -- getting ready for leaving home
@@ -170,11 +179,6 @@ Masterbedroom
 // #define DEVICE_ENSUITESENSOR
 // #define DEVICE_SHELLYDIMMER_ENSUITE_CEILING
 // #define DEVICE_DEFAULT_SONOFF_BASIC_ENSUITE_CEILING_FAN
-
-/**
- * Attic
- */
-// #define DEVICE_ATTICSENSOR
 
 /**
 Bathroom
@@ -2035,6 +2039,8 @@ Bathroom
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_DS18X
+  
+  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2 //both rooms
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2049,6 +2055,9 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_DS18X
       "\"D6\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #endif
+      #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
+      "\"D7\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
       "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2477,6 +2486,8 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
@@ -2484,26 +2495,20 @@ Bathroom
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
   /**
-   * @brief Put macbook air under stairs for arduino wiping with bad code (use old macbook?)
-   **/
-
-  /**
    * @brief Increasing buffers for the larger controller than default minimums
-   * 
-   */
+   **/
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
   #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
   #define DB18_SENSOR_MAX                     15
   #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
   #define MQTT_MAX_PACKET_SIZE                3000
 
-  #define DISABLE_WEBSERVER
-
   #define USE_MODULE_CONTROLLER_HVAC
     // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
     #define ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_DS18X
   #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
   #define USE_MODULE_SENSORS_DHT
@@ -2550,11 +2555,6 @@ Bathroom
   #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
   #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
 
-  // Test GPIO
-  // #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
-  // #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
-  // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
-  // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_CTR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3176,6 +3176,7 @@ Bathroom
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
@@ -3193,8 +3194,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS  
     
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -4650,12 +4650,33 @@ Bathroom
 
   #define USE_MODULE_CORE_RULES
   
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+
+    
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define STRIP_SIZE_MAX 88                                                                        // Change: Set *total* length of string, segment0 will default to this length
+    // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+    // #define USE_SK6812_METHOD_DEFAULT
+      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
+
   
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_DS18X
@@ -4872,8 +4893,6 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR   "Landing Panel"
   #define DEVICENAME_ROOMHINT_CTR   "Landing"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define DISABLE_WEBSERVER
   
   #define USE_MODULE_CORE_RULES
 
@@ -4881,7 +4900,8 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  // #define ENABLE_DEVFEATURE_DEBUG_TEMPLATE_LIGHTING_MQTT_SEND
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ESP32
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -4889,30 +4909,27 @@ Bathroom
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES  
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
-
+    
   // #define USE_BUILD_TYPE_LIGHTING
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_ANIMATOR
   // #define USE_MODULE_LIGHTS_ADDRESSABLE
   //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #define STRIP_SIZE_MAX 14                                                                        // Change: Set *total* length of string, segment0 will default to this length
+  //   #define STRIP_SIZE_MAX 15 //14 installed                                                                        // Change: Set *total* length of string, segment0 will default to this length
   //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   //   #define USE_SK6812_METHOD_DEFAULT
+  //     #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
   //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-  //   // #define ENABLE_ CRASH DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK  // CRASH!!
-
     
   //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
   //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
   //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
   //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
   //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    
 
   // #define USE_MODULE_DISPLAYS_NEXTION
-  // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 1
+  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  //   #define NEXTION_DEFAULT_PAGE_NUMBER 1
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -4967,30 +4984,30 @@ Bathroom
   "}";
 
 
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"GRBW\","
-    "\"ColourPalette\":10,"
-    "\"Effects\": {"
-      "\"Function\":\"Solid\""
-    "},"
-    "\"Hue\":120," 
-    "\"Sat\":100," 
-    "\"BrightnessRGB\":0,"
-    "\"BrightnessCCT\":100,"
-    "\"CCT_TempPercentage\": 100,"
-    "\"Transition\": {"
-      "\"TimeMs\":400,"
-      "\"RateMs\":1000"
-    "},"
-    "\"Light\":{\"TimeOn\":60}"
-  "}";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
+  // #ifdef USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"AnimationMode\": \"Effects\","
+  //   "\"ColourOrder\": \"GRBW\","
+  //   "\"ColourPalette\":10,"
+  //   "\"Effects\": {"
+  //     "\"Function\":\"Solid\""
+  //   "},"
+  //   "\"Hue\":120," 
+  //   "\"Sat\":100," 
+  //   "\"BrightnessRGB\":0,"
+  //   "\"BrightnessCCT\":100,"
+  //   "\"CCT_TempPercentage\": 100,"
+  //   "\"Transition\": {"
+  //     "\"TimeMs\":400,"
+  //     "\"RateMs\":1000"
+  //   "},"
+  //   "\"Light\":{\"TimeOn\":60}"
+  // "}";
+  // #endif // USE_MODULE_LIGHTS_INTERFACE
 
   
   #define USE_RULES_TEMPLATE
@@ -5016,64 +5033,6 @@ Bathroom
 #endif
 
 
-/**************************************************************************************************************************************************
-***************************************************************************************************************************************************
-****** Attic ****************************************************************************************************************************************************
-****************************************************************************************************************************************************
-*******************************************************************************************************************************************/
-
-// use same as kitchen now on esp8266
-#ifdef DEVICE_ATTICSENSOR
-  #define DEVICENAME_CTR          "atticsensor"
-  #define DEVICENAME_FRIENDLY_CTR "Attic Sensor"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-  
-  // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"D1\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_BME
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_DS18X
-      "\"D3\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      #endif
-      "\"D0\":\"" D_GPIO_FUNCTION_LED1_INV_CTR   "\","    
-      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" "Attic" "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" "Attic" "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" "Cold Water Tank" "\""
-      "]"
-    "}"
-  "}";
-
-#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -5228,20 +5187,27 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
-  #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_DOOR
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+
+  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define USE_MODULE_SENSORS_BME
+  //   #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
+  // #define USE_MODULE_SENSORS_BH1750
+  // #define USE_MODULE_SENSORS_SWITCHES
+  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_DOOR
 
   //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
 
-  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+  // #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB // my room only
+  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2 //both rooms
     
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -5251,15 +5217,14 @@ Bathroom
     #define STRIP_SIZE_MAX 88                                                                        // Change: Set *total* length of string, segment0 will default to this length
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
+      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-    
     
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -5278,9 +5243,9 @@ Bathroom
       "\"TimeMs\":900,"
       "\"RateMs\":1000"
     "},"    
-    "\"CCT_TempPercentage\":100,"
+    "\"CCT_TempPercentage\":50,"
     "\"BrightnessCCT\":100,"
-    "\"BrightnessRGB\":100,"
+    "\"BrightnessRGB\":0,"
     "\"TimeOn\":10"
   "}";
 
@@ -5301,7 +5266,7 @@ Bathroom
       "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
       "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
       #endif
-      #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+      #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
       // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  
@@ -5398,7 +5363,7 @@ Bathroom
   // #define USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
   
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE

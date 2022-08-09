@@ -1,21 +1,13 @@
-/*
-  xdrv_13_display.ino - Display support for Tasmota
-
-  Copyright (C) 2021  Theo Arends
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+/**
+ * @file mDisplaysInterface.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-09
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "mDisplaysInterface.h"
 
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
@@ -27,7 +19,6 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
 
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
@@ -69,12 +60,6 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
     break;
-    // case FUNC_MQTT_SUBSCRIBE:
-    //   DisplayMqttSubscribe();
-    // break;
-    // case FUNC_MQTT_DATA:
-    //   result = DisplayMqttData();
-    // break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
      * OTHER SECTION * 
@@ -92,14 +77,6 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
       #endif // USE_DT_VARS
       SetPower();
     break;
-    // case FUNC_AFTER_TELEPERIOD:
-    //   #ifdef USE_DT_VARS
-    //   DisplayDTVarsTeleperiod();
-    //   #endif // USE_DT_VARS
-    // break;
-    // case FUNC_SHOW_SENSOR:
-    //   DisplayLocalSensor();
-    // break; 
   }
   
   return function_result;
@@ -125,10 +102,6 @@ void mDisplaysInterface::EveryLoop()
 
 }
 
-
-
-
-// /*********************************************************************************************/
 
 void mDisplaysInterface::Init(uint8_t mode)
 {
@@ -161,22 +134,22 @@ void mDisplaysInterface::DisplayOnOff(uint8_t on)
 //   ExecuteCommandPower(disp_device, on, SRC_DISPLAY);
 }
 
-// /*-------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------*/
 
-// // get asci float number
-// uint8_t fatoiv(char *cp,float *res) {
-//   uint8_t index=0;
-//   *res=CharToFloat(cp);
-//   while (*cp) {
-//     if ((*cp>='0' && *cp<='9') || (*cp=='-') || (*cp=='.')) {
-//       cp++;
-//       index++;
-//     } else {
-//       break;
-//     }
-//   }
-//   return index;
-// }
+// get asci float number
+uint8_t mDisplaysInterface::fatoiv(char *cp,float *res) {
+  uint8_t index=0;
+  *res= pCONT_sup->CharToFloat(cp);
+  while (*cp) {
+    if ((*cp>='0' && *cp<='9') || (*cp=='-') || (*cp=='.')) {
+      cp++;
+      index++;
+    } else {
+      break;
+    }
+  }
+  return index;
+}
 
 // get asci number until delimiter and return asci number lenght and value
 uint8_t mDisplaysInterface::atoiv(char *cp, int16_t *res)
@@ -300,9 +273,12 @@ void mDisplaysInterface::InitDriver(void)
     Set_display(0);
   #endif // USE_MULTI_DISPLAY
 
+
   if (renderer) {
+    
     renderer->setTextFont(pCONT_set->Settings.display.font);
     renderer->setTextSize(pCONT_set->Settings.display.size);
+    
     // force opaque mode
     renderer->setDrawMode(0);
 
@@ -310,7 +286,7 @@ void mDisplaysInterface::InitDriver(void)
       index_colors[cnt] = 0;
     }
   }
-
+  
   #ifdef USE_DT_VARS
     free_dt_vars();
   #endif
@@ -344,9 +320,10 @@ void mDisplaysInterface::InitDriver(void)
   
   }
 
-    // pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW;
+  // pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW;
     
 }
+
 
 void mDisplaysInterface::SetPower(void)
 {
@@ -405,116 +382,5 @@ void mDisplaysInterface::SetDisplayMode(uint8_t mode)
   pCONT_set->Settings.display.mode = mode;
 }
 
-
-
-
-
-
-
-uint8_t mDisplaysInterface::ConstructJSON_Settings(uint8_t json_method){
-
-  JsonBuilderI->Start();
-
-    JsonBuilderI->Add("model", pCONT_set->Settings.display.model);
-    JsonBuilderI->Add("mode", pCONT_set->Settings.display.mode);
-    JsonBuilderI->Add("refresh", pCONT_set->Settings.display.refresh);
-    JsonBuilderI->Add("rows", pCONT_set->Settings.display.rows);
-    JsonBuilderI->Add("cols0", pCONT_set->Settings.display.cols[0]);
-    JsonBuilderI->Add("cols1", pCONT_set->Settings.display.cols[1]);
-    JsonBuilderI->Add("address0", pCONT_set->Settings.display.address[0]);
-    JsonBuilderI->Add("dimmer", pCONT_set->Settings.display.dimmer);
-    JsonBuilderI->Add("size", pCONT_set->Settings.display.size);
-    JsonBuilderI->Add("font", pCONT_set->Settings.display.font);
-    JsonBuilderI->Add("rotate", pCONT_set->Settings.display.rotate);
-
-    JsonBuilderI->Add("width", pCONT_set->Settings.display.width);
-    JsonBuilderI->Add("height", pCONT_set->Settings.display.height);
-
-  return JsonBuilderI->End();
-
-}
-
-
-uint8_t mDisplaysInterface::ConstructJSON_Sensor(uint8_t json_method){
-
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
-  return JsonBuilderI->End();
-    
-}
-
-
-
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
-
-  #ifdef USE_MODULE_NETWORK_MQTT
-  
-void mDisplaysInterface::MQTTHandler_Init(){
-
-  struct handler<mDisplaysInterface>* ptr;
-
-  ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_Settings;
-
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_Sensor;
-
-  ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-void mDisplaysInterface::MQTTHandler_Set_RefreshAll(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} //end "MQTTHandler_Init"
-
-
-void mDisplaysInterface::MQTTHandler_Set_TelePeriod(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_TelePeriod"
-
-
-void mDisplaysInterface::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, 
-    EM_MODULE_DISPLAYS_INTERFACE_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id
-  );
-
-}
-
-#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

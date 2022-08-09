@@ -223,28 +223,32 @@ class mAnimatorLight :
         typedef Neo800KbpsMethod selectedNeoSpeedType; // default
       #endif  
     #elif defined(ESP32)
+    
       #if defined(USE_WS28XX_METHOD_I2S1_800KBPS_ESP32)
         typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
       #elif defined(USE_WS28XX_METHOD_RMT0_800KBPS_ESP32)
         typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; 
       #elif defined(USE_SK6812_METHOD_DEFAULT)
 
-      // #ifdef USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
+        // #ifdef USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
         // typedef NeoSk6812Method selectedNeoSpeedType;  // freezing
-      // #else
+        // #else
         // typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; // flickering on the off pixels
-      //   #endif
-      // typedef NeoEsp32Rmt1Sk6812Method selectedNeoSpeedType;
-      // typedef NeoEsp32I2s0Sk6812Method selectedNeoSpeedType;
-      // typedef Neo800KbpsMethod selectedNeoSpeedType;
-      
+        //   #endif
+        // typedef NeoEsp32Rmt1Sk6812Method selectedNeoSpeedType;
+        // typedef NeoEsp32I2s0Sk6812Method selectedNeoSpeedType;
+        // typedef Neo800KbpsMethod selectedNeoSpeedType;
+
+        #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+        typedef NeoEsp32I2s0Sk6812Method selectedNeoSpeedType;  // hangs
+        #else      
         // typedef NeoEsp32Rmt0800KbpsMethod selectedNeoSpeedType; // flickering on off pixels
         typedef NeoEsp32Rmt0Sk6812Method selectedNeoSpeedType; // flickering
         // typedef NeoEsp32I2s0Sk6812Method selectedNeoSpeedType;  // hangs
         // typedef NeoEsp32I2s0800KbpsMethod selectedNeoSpeedType;
         // typedef NeoSk6812Method selectedNeoSpeedType;
         // typedef NeoEsp32I2s1Sk6812Method  selectedNeoSpeedType; //recommended by Makuna
-        
+        #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
       
       #else          
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;

@@ -68,9 +68,15 @@
 
 // #define DEVICE_TESTBED_FONA_800L_BASIC
 // #define DEVICE_TESTBED_RCSWITCH_NORMAL
-// #define DEVICE_TESTBED_RCSWITCH_EXT
+// #define DEVICE_testbed_rcs_ext
 // #define DEVICE_TESTBED_H801_LONGTERM_DESK
 // #define DEVICE_TESTBED_FASTBOOT_ESP8266
+
+// #define DEVICE_TESTBED_CRASHREPORT
+// #define DEVICE_TESTBED_ESP32_OPTIMISED_NEOPIXEL
+// #define DEVICE_TESTBED_LILYGO_SIM7000G
+// #define DEVICE_TESTBED_OLED_SH1106
+// #define DEVICE_TESTBED_LILYGO_SIM7000G_WITH_OLED
 
 /**
  * @brief Note: By getting the rows = animation, the achievement can clearly be shown by simply setting "percent animation from wled" or similar
@@ -87,6 +93,8 @@
 // #define DEVICE_ESP32_WEBCAM4
 
 // #define DEVICE_TESTBED_BME_ESP32
+
+
 
 
 // Include the home devices, which should ONLY contain final hardware
@@ -112,6 +120,47 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+/**
+ * Basic version of measurement system
+ * GPS will be recorded at 10Hz, and logged to SD card in json format for matlab parsing
+ * */
+#ifdef DEVICE_TESTBED_OLED_SH1106
+  #define DEVICENAME_CTR            "testbed_oled_sh1106"
+  #define DEVICENAME_FRIENDLY_CTR   "TestBed SH1106"
+  #define DEVICENAME_ROOMHINT_CTR   "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+    #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      /** 
+       * OLED
+       * */
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      /** 
+       * BUILTIN LED
+       * */
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+#endif // DEVICE_TESTBED_OLED_SH1106
+
 
 
 /**
@@ -7465,9 +7514,10 @@
   
 #endif
 
-#ifdef DEVICE_TESTBED_RCSWITCH_EXT
-  #define DEVICENAME_CTR          "testbed_rcswitch_ext"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+#ifdef DEVICE_testbed_rcs_ext
+  #define DEVICENAME_CTR          "testbed_rcs_ext"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   // #define USE_MODULE_DRIVERS_INTERFACE
 
@@ -7488,6 +7538,387 @@
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
   
+#endif
+
+
+#ifdef DEVICE_TESTBED_ESP32_OPTIMISED_NEOPIXEL
+  #define DEVICENAME_CTR          "testbed_neopixel_rtos"
+  #define DEVICENAME_FRIENDLY_CTR "Neopixel RTOS Show"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+    
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define STRIP_SIZE_MAX 1500                                                                        // Change: Set *total* length of string, segment0 will default to this length
+    #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+    #define USE_SK6812_METHOD_DEFAULT
+      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
+  //   "\"" D_JSON_ANIMATIONMODE    "\":\"" "Effects" "\"," 
+  //   "\"ColourPalette\":10," 
+  //   "\"Hue\":120," 
+  //   "\"Sat\":100," 
+  //   "\"Effects\":{"
+  //     "\"Function\":\"Solid\""
+  //   "},"
+  //   "\"Transition\":{"
+  //     "\"TimeMs\":900,"
+  //     "\"RateMs\":1000"
+  //   "},"    
+  //   "\"CCT_TempPercentage\":100,"
+  //   "\"BrightnessCCT\":100,"
+  //   "\"BrightnessRGB\":100"
+  //   // "\"TimeOn\":10"
+  // "}";
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
+    "\"" D_JSON_ANIMATIONMODE    "\":\"" "Effects" "\"," 
+    "\"ColourPalette\":0," 
+    "\"Hue\":120," 
+    "\"Sat\":100," 
+    "\"Effects\":{"
+      "\"Function\":\"Slow Glow\""
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"CCT_TempPercentage\":100,"
+    "\"BrightnessCCT\":100,"
+    "\"BrightnessRGB\":5"
+    // "\"TimeOn\":10"
+  "}";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DOOR
+      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      #endif
+      #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Bedroom"
+  #define D_DEVICE_SENSOR_CLIMATE "Bedroom"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "_Door" "\""
+      "]"  
+    "}"
+  "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // MOTION
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    // "},"
+    // // Door Opening
+    // "\"Rule1\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":0,"
+    //     "\"State\":\"On\""
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":1," 
+    //     "\"State\":\"Follow\""
+    //   "}"
+    "}"
+  "}";
+
+
+#endif
+
+
+#ifdef DEVICE_TESTBED_LILYGO_SIM7000G
+  #define DEVICENAME_CTR          "testbed_sim7000g"
+  #define DEVICENAME_FRIENDLY_CTR "Neopixel RTOS Show"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define USE_MODULE_DRIVERS__CELLULAR_SIM7000
+    // #define ENABLE_DEBUG_FEATURE_MQTT__CELLULAR_SIM__DEBUG_POLL_LATEST
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DOOR
+      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      #endif
+      #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Bedroom"
+  #define D_DEVICE_SENSOR_CLIMATE "Bedroom"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "_Door" "\""
+      "]"  
+    "}"
+  "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // MOTION
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    // "},"
+    // // Door Opening
+    // "\"Rule1\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":0,"
+    //     "\"State\":\"On\""
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":1," 
+    //     "\"State\":\"Follow\""
+    //   "}"
+    "}"
+  "}";
+
+
+#endif
+
+
+
+#ifdef DEVICE_TESTBED_LILYGO_SIM7000G_WITH_OLED
+  #define DEVICENAME_CTR          "testbed_sim7000g_oled"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed SIM7000G with OLED"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define USE_MODULE_DRIVERS__CELLULAR_SIM7000
+    // #define ENABLE_DEBUG_FEATURE_MQTT__CELLULAR_SIM__DEBUG_POLL_LATEST
+    
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+    #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      /** 
+       * OLED
+       * */
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DOOR
+      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      #endif
+      #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Bedroom"
+  #define D_DEVICE_SENSOR_CLIMATE "Bedroom"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
+      "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "_Door" "\""
+      "]"  
+    "}"
+  "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // MOTION
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    // "},"
+    // // Door Opening
+    // "\"Rule1\":{"
+    //   "\"Trigger\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+    //     "\"DeviceName\":0,"
+    //     "\"State\":\"On\""
+    //   "},"
+    //   "\"Command\":{"
+    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+    //     "\"DeviceName\":1," 
+    //     "\"State\":\"Follow\""
+    //   "}"
+    "}"
+  "}";
+
+
 #endif
 
 /**
@@ -7656,6 +8087,40 @@
 #endif
 
 
+/**
+ * @brief Getting crashreports to work so I can now start tracking crashes.
+ * Start saving the mqtt json response with openhab string item, therefore I can easily go back and track issues.
+ * A rule to request item string info from persistance will allow me to recall the data (print into logs?)
+ * 
+ */
+#ifdef DEVICE_TESTBED_CRASHREPORT
+  #define DEVICENAME_CTR          "testbed_crashreport" APPEND_ESP_TYPE_MQTT_STRING
+  #define DEVICENAME_FRIENDLY_CTR "Testbed CrashReport" APPEND_ESP_TYPE_NAME_STRING
+
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  // // #define DEBUG_FASTBOOT
+  // // #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
 
 
 

@@ -292,17 +292,15 @@ void mSupport::I2cSetActive(uint32_t addr, uint32_t count)
     i2c_active[addr / 32] |= (1 << (addr % 32));
     addr++;
   }
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3]);
-    #endif // ENABLE_LOG_LEVEL_INFO
+  ALOG_DBG( PSTR("I2C: Active %08X,%08X,%08X,%08X"), i2c_active[0], i2c_active[1], i2c_active[2], i2c_active[3] );
 }
 
 void mSupport::I2cSetActiveFound(uint32_t addr, const char *types)
 {
   I2cSetActive(addr);
-    #ifdef ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_INFO, S_LOG_I2C_FOUND_AT, types, addr);
-    #endif // ENABLE_LOG_LEVEL_INFO
+  #endif // ENABLE_LOG_LEVEL_INFO
 }
 
 bool mSupport::I2cActive(uint32_t addr)

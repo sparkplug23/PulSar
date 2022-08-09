@@ -1,5 +1,201 @@
 #include "2_CoreSystem/06_Support/mSupport.h"
 
+
+void mSupport::parse_JSONCommand(JsonParserObject obj){
+
+
+  char buffer[50];
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+/**
+ * @brief Debugging hardware
+ * 
+ */
+  
+  if(jtok = obj["DebugSupport"].getObject()["Command"])
+  {
+    
+    if(strcmp(jtok.getStr(),"TriggerWDT")==0)
+    {
+      ALOG_COM( PSTR("Causing WDT Reboot: Delay(60s)") );
+      delay(60000);
+    }
+
+
+
+  }
+
+
+
+
+
+
+  // StaticJsonDocument<300> doc;
+  // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
+  // JsonObject obj = doc.as<JsonObject>();
+
+  // if(obj.containsKey("resetcounter")){
+  //   uint8_t val = obj["resetcounter"];
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"resetcounter\":[%d]"),val);
+  //   pCONT_time->ResetRebootCounter();
+  //   data_buffer.isserviced++;
+  // }else
+  // if(obj.containsKey("loglevel")){
+  //   const char* name = obj["loglevel"];
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
+  //   pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
+  //   // Add save log here
+  //   data_buffer.isserviced++;
+  // }
+  // else{
+  //    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_PARSING_NOMATCH));
+  // }
+  
+
+  //USeful tasmota stuff
+  // else if (CMND_STATUS == command_code) {
+  //     if ((payload < 0) || (payload > MAX_STATUS)) payload = 99;
+  //     PublishStatus(payload);
+  //     fallback_topic_flag = false;
+  //     return;
+  //   }
+  //   else if (CMND_STATE == command_code) {
+  //     data_buffer.payload.ctr[0] = '\0';
+  //     MqttShowState();
+  //     if (Settings.flag_network.hass_tele_on_power) {
+  //       MqttPublishPrefixTopic_P(TELE, PSTR(D_RSLT_STATE), MQTT_TELE_RETAIN);
+  //     }
+  //   }
+  //   else if (CMND_SLEEP == command_code) {
+  //     if ((payload >= 0) && (payload < 251)) {
+  //       Settings.sleep = payload;
+  //       sleep = payload;
+  //       WiFiSetSleepMode();
+  //     }
+  //     snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_NVALUE_UNIT_NVALUE_UNIT, command, sleep, (Settings.flag_system.value_units) ? " " D_UNIT_MILLISECOND : "", Settings.sleep, (Settings.flag_system.value_units) ? " " D_UNIT_MILLISECOND : "");
+  //   }
+
+  // else if (CMND_RESTART == command_code) {
+  //     switch (payload) {
+  //     case 1:
+  //       restart_flag = 2;
+  //       snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_SVALUE, command, D_JSON_RESTARTING);
+  //       break;
+  //     case 99:
+  //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
+  //       EspRestart();
+  //       break;
+  //     default:
+  //       snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_SVALUE, command, D_JSON_ONE_TO_RESTART);
+  //     }
+  //   }
+
+  //  else if ((CMND_POWERONSTATE == command_code) && (Settings.module != MOTOR)) {
+  //     /* 0 = Keep relays off after power on
+  //      * 1 = Turn relays on after power on, if PulseTime set wait for PulseTime seconds, and turn relays off
+  //      * 2 = Toggle relays after power on
+  //      * 3 = Set relays to last saved state after power on
+  //      * 4 = Turn relays on and disable any relay control (used for Sonoff Pow to always measure power)
+  //      * 5 = Keep relays off after power on, if PulseTime set wait for PulseTime seconds, and turn relays on
+  //      */
+  //     if ((payload >= POWER_ALL_OFF) && (payload <= POWER_ALL_OFF_PULSETIME_ON)) {
+  //       Settings.poweronstate = payload;
+  //       if (POWER_ALL_ALWAYS_ON == Settings.poweronstate) {
+  //         for (uint8_t i = 1; i <= devices_present; i++) {
+  //           ExecuteCommandPower(i, POWER_ON, SRC_IGNORE);
+  //         }
+  //       }
+  //     }
+  //     snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_NVALUE, command, Settings.poweronstate);
+  //   }
+  
+  // else if (CMND_SYSLOG == command_code) {
+  //     if ((payload >= LOG_LEVEL_NONE) && (payload <= LOG_LEVEL_ALL)) {
+  //       Settings.syslog_level = payload;
+  //       syslog_level = payload;
+  //       syslog_timer = 0;
+  //     }
+  //     snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE, command, Settings.syslog_level, syslog_level);
+  //   }
+  //   else if (CMND_LOGHOST == command_code) {
+  //     if ((data_len > 0) && (data_len < sizeof(Settings.syslog_host))) {
+  //       strlcpy(Settings.syslog_host, (SC_DEFAULT == Shortcut(dataBuf)) ? SYS_LOG_HOST : dataBuf, sizeof(Settings.syslog_host));
+  //     }
+  //     snprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), S_JSON_COMMAND_SVALUE, command, Settings.syslog_host);
+  //   }
+
+
+// void mSupport::parse_SyncRefresh(){
+//   //DISABLED UNTIL NEW SYNC METHOD/FLAG SYSTEM IS ESTABLISHED
+//       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_MQTT D_ERROR_UNSUPPORTED));
+//   // if((mSupport::memsearch(data_buffer.payload.ctr, data_buffer.payload.len,"refresh",sizeof("refresh")-1))>=0){ pCONT->mso->MessagePrint("MATCHED refresh");
+//   //   //fSendAllData = true;
+//   // }
+// } // END function
+
+
+
+
+  //else if(root["reset_wifi_counter"]){ pCONT->mso->MessagePrintln("root[reset_wifi_counter]");
+  //   // wifi_reconnects_counter = 0;
+  //   data_buffer.payload.isserviced++;
+  // }else if(root["reboot"].as<const char*>()){ pCONT->mso->MessagePrintln("root[reboot]");
+  // //make non json
+  // data_buffer.payload.isserviced++;
+  // }else if(root["command"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   if(strstr(root["command"],"resetcounter")){
+  //     pCONT_time->ResetRebootCounter();
+  //   }else if(strstr(root["command"],"reset_wificounter")){
+  //     //pCONT_time->ResetRebootCounter();
+  //   }
+  //   data_buffer.payload.isserviced++;
+  // }else if(root["rss_scanner"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   //RssScannerRate = root["rss_scanner"];
+  //   data_buffer.payload.isserviced++;
+  // }
+  
+  // else{
+  //   pCONT->mso->MessagePrintln("NO MATCH");
+  // }
+
+  
+
+  // if(root["resetcounter"]){ pCONT->mso->MessagePrintln("root[resetcounter]");
+  //   pCONT_time->ResetRebootCounter();
+  //   data_buffer.payload.isserviced++;
+  // }else if(root["healthsecnormal"]){ pCONT->mso->MessagePrintln("root[healthsecnormal]");
+  //   healthsecnormal = root["healthsecnormal"];
+  //   data_buffer.payload.isserviced++;
+  // }else if(root["reset_wifi_counter"]){ pCONT->mso->MessagePrintln("root[reset_wifi_counter]");
+  //   // wifi_reconnects_counter = 0;
+  //   data_buffer.payload.isserviced++;
+  // }else if(root["reboot"].as<const char*>()){ pCONT->mso->MessagePrintln("root[reboot]");
+  // //make non json
+  // data_buffer.payload.isserviced++;
+  // }else if(root["command"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   if(strstr(root["command"],"resetcounter")){
+  //     pCONT_time->ResetRebootCounter();
+  //   }else if(strstr(root["command"],"reset_wificounter")){
+  //     //pCONT_time->ResetRebootCounter();
+  //   }
+  //   data_buffer.payload.isserviced++;
+  // }else if(root["rss_scanner"].as<const char*>()){ pCONT->mso->MessagePrintln("root[command]");
+  //   //RssScannerRate = root["rss_scanner"];
+
+  //   data_buffer.payload.isserviced++;
+  // }else{
+  //   pCONT->mso->MessagePrintln("NO MATCH");
+  // }
+
+  //fHardwareInfoSent = false; // resend since its updated
+
+}
+
+
+
+
+
 /**
  * 
  * System level commands to sort through

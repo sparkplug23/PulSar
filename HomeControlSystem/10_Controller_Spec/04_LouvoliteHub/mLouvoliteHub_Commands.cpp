@@ -10,6 +10,20 @@ void mLouvoliteHub::parse_JSONCommand(JsonParserObject obj)
   int8_t tmp_id = 0;
   char buffer[100];
 
+  int8_t device_id = -1;
+
+  if(jtok = obj["Louvolite"].getObject()["DeviceName"])
+  {
+    if(jtok.isStr()){
+      if(strcasecmp(jtok.isStr(),"MasterBedroom")==0){ device_id = 0; }
+      else if(strcasecmp(jtok.isStr(),"Bedroom")==0){ device_id = 1; }
+      data_buffer.isserviced++;
+    }
+  }
+
+
+
+
   if(jtok = obj["Louvolite"].getObject()["Position"])
   {
     if(jtok.isStr()){

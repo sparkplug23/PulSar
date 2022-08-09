@@ -44,6 +44,9 @@ uint8_t *dbuff;
 Adafruit_SH1106::Adafruit_SH1106(int16_t width, int16_t height) :
 Renderer(width,height) {
 }
+Adafruit_SH1106::Adafruit_SH1106(int16_t width, int16_t height, TwoWire *twi) :
+Renderer(width,height), wire(twi ? twi : &Wire) {
+}
 
 void Adafruit_SH1106::DisplayOnff(int8_t on) {
   if (on) {
@@ -88,7 +91,7 @@ boolean Adafruit_SH1106::begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   if (!framebuffer)  return false;
 
     // I2C Init
-    Wire.begin();
+    wire->begin();
 
    #if defined SH1106_128_32
     // Init sequence for 128x32 OLED module
@@ -218,10 +221,10 @@ void Adafruit_SH1106::SH1106_command(uint8_t c) {
 
     // I2C
     uint8_t control = 0x00;   // Co = 0, D/C = 0
-    Wire.beginTransmission(_i2caddr);
+    wire->beginTransmission(_i2caddr);
     WIRE_WRITE(control);
     WIRE_WRITE(c);
-    Wire.endTransmission();
+    wire->endTransmission();
 
 }
 
@@ -249,10 +252,10 @@ void Adafruit_SH1106::dim(uint8_t dim) {
 void Adafruit_SH1106::SH1106_data(uint8_t c) {
     // I2C
     uint8_t control = 0x40;   // Co = 0, D/C = 1
-    Wire.beginTransmission(_i2caddr);
+    wire->beginTransmission(_i2caddr);
     WIRE_WRITE(control);
     WIRE_WRITE(c);
-    Wire.endTransmission();
+    wire->endTransmission();
 }
 
 void Adafruit_SH1106::display(void) {
@@ -284,12 +287,12 @@ void Adafruit_SH1106::display(void) {
         SH1106_command(0x10 | (m_col >> 4));//set higher column address
 
         for( j = 0; j < 8; j++){
-          Wire.beginTransmission(_i2caddr);
-          Wire.write(0x40);
+          wire->beginTransmission(_i2caddr);
+          wire->write(0x40);
           for ( k = 0; k < width; k++, p++) {
-		        Wire.write(framebuffer[p]);
+		        wire->write(framebuffer[p]);
           }
-          Wire.endTransmission();
+          wire->endTransmission();
         }
 	}
 

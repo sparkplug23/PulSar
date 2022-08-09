@@ -47,21 +47,73 @@ RgbcctColor mAddressableLight::GetPixelColorHardware(uint16_t index){
 void mAddressableLight::ShowHardware(){
 
   // ALOG_INF( PSTR("mAddressableLight::ShowHardware") );
-
   // Serial.print(".");
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-
-
-
+    neopixel_runner->execute();
   #else
-  if(pCONT_lAni->stripbus->CanShow()){ 
-    pCONT_lAni->stripbus->Show();
-  }
+    if(pCONT_lAni->stripbus->CanShow()){ 
+      pCONT_lAni->stripbus->Show();
+    }
   #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
-
 }
+
+
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+namespace
+{
+  void commitTaskProcedure(void *arg)
+  {
+    CommitParams *params = (CommitParams *)arg;
+
+    while (true)
+    {
+      while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != 1);
+      params->handler();
+      xSemaphoreGive(params->semaphore);
+    }
+  }
+} // namespace
+
+void NeoPixelShowTask::begin(CommitHandler handler, uint8_t core_id)
+{
+  _commit_params.handler = handler;
+
+  if (core_id < 2)
+  {
+    _commit_params.semaphore = xSemaphoreCreateBinary();
+
+    xTaskCreatePinnedToCore(commitTaskProcedure, /* Task function. */
+                            "NeoPixelShow",      /* name of task. */
+                            10000,               /* Stack size of task */
+                            &_commit_params,     /* parameter of the task */
+                            4,                   /* priority of the task */
+                            &_commit_task,       /* Task handle to keep track of created task */
+                            core_id);            /* pin task to core core_id */
+  }
+}
+
+void NeoPixelShowTask::execute()
+{
+  if (_commit_task)
+  {
+    xTaskNotifyGive(_commit_task);
+    while (xSemaphoreTake(_commit_params.semaphore, portMAX_DELAY) != pdTRUE);
+  }
+  else
+  {
+    _commit_params.handler();
+  }
+}
+
+#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+
+
 
 
 int8_t mAddressableLight::Tasker(uint8_t function, JsonParserObject obj){}

@@ -7,12 +7,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 {
 
   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
+  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
   // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   char buffer[50];
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
+
+  uint16_t isserviced_start_count = data_buffer.isserviced;
   
   /***
    * As order of importance, others that rely on previous commands must come after
@@ -253,8 +255,10 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   MQTTHandler_Set_RefreshAll();
 #endif //ifdef USE_MODULE_NETWORK_MQTT
   
-  pCONT_lAni->_segments[0].flags.fForceUpdate = true;
-  
+  if(isserviced_start_count != data_buffer.isserviced) //ie something was parsed inside this function
+  {
+    pCONT_lAni->_segments[0].flags.fForceUpdate = true;
+  }
 }
 
 
@@ -672,6 +676,10 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
     // pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
     
     CommandSet_Brt_255(255);
+
+    //make sure both are set
+    // CommandSet_BrtRGB_255(255);
+    // CommandSet_BrtCT_255(255);
     
     // pCONT_lAni->CommandSet_PaletteID(10, 0);
     
@@ -821,6 +829,8 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
   pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setBrightness255(brt_new);
   pCONT_lAni->_segments[0].flags.fForceUpdate = true;
   setBriRGB_Global(brt_new);
+  // probably needs to check if they are linked here, or internally
+  setBriCT_Global(brt_new);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightness255());

@@ -725,6 +725,8 @@ RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 
 void mInterfaceLight::ShowInterface(){
 
+  // ALOG_INF(PSTR("t=%d"),pCONT_set->Settings.light_settings.type);
+
   switch(pCONT_set->Settings.light_settings.type){
     case LT_ADDRESSABLE_WS281X:  
     case LT_ADDRESSABLE_SK6812:

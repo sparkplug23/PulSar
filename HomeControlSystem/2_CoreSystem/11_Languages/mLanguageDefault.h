@@ -83,6 +83,10 @@
   #define D_MODULE_DISPLAYS_OLED_SSD1306_FRIENDLY_CTR              "display_1306"
 
 
+  #define D_MODULE_DISPLAYS_OLED_SH1106_CTR      "display_sh1106"
+  #define D_MODULE_DISPLAYS_OLED_SH1106_FRIENDLY_CTR              "display_sh1106"
+
+
 // Drivers (Range 40-129
 //#ifdef USE_MODULE_DRIVERS_INTERFACE
   // #define D_MODULE_DRIVERS_HBRIDGE_CTR              "mHBridge"
@@ -143,6 +147,9 @@
 
   #define D_MODULE_DRIVERS_FONA_CELLULAR_CTR "mFona_Cellular"
   #define D_MODULE_DRIVERS_FONA_CELLULAR_FRIENDLY_CTR "fona"
+
+  #define D_MODULE_DRIVERS__CELLULAR_SIM7000__CTR          "CellularSIM7000"
+  #define D_MODULE_DRIVERS__CELLULAR_SIM7000__FRIENDLY_CTR "CellularSIM7000"
 
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
@@ -1360,6 +1367,7 @@
 #define D_JSON_ACTIVE "Active"
 #define D_JSON_ACCURACY "Accuracy"
 #define D_JSON_ADDRESS "Address"
+#define D_JSON_ADDLOG "AddLog"
 #define D_JSON_AIRQUALITY "AirQuality"
 #define D_JSON_ANALOG_INPUT "Analog"
 #define D_JSON_AP "AP"                   // Access Point
@@ -1379,6 +1387,7 @@
 #define D_JSON_CHANNEL "Channel"
 #define D_JSON_CO2 "CarbonDioxide"
 #define D_JSON_COMMAND "Command"
+#define D_JSON_CLEARLOG "ClearLog"
 #define D_JSON_SETTINGS_HOLDER "SettingsHolder"
 #define D_JSON_CONNECT_FAILED "Connect failed"
 #define D_JSON_CONNECTCOUNT "ConnectCount"
@@ -1390,7 +1399,10 @@
 // #define D_JSON_DATA "Data"
 #define D_JSON_DISTANCE "Distance"
 
+#define D_JSON_DISPLAY "Display"
 #define D_JSON_DISPLAY_MODE "DisplayMode"
+
+
 
 #define D_JSON_DNSSERVER "DNSServer"
 #define D_JSON_DONE "Done"

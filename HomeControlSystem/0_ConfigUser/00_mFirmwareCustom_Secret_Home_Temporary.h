@@ -34,13 +34,15 @@
 // #define DEVICE_H801_BEDROOM_UNDERDESK
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_HVAC_HAIRDRYER
-// #define DEVICE_DESKSENSOR
+#define DEVICE_DESKSENSOR
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
 // #define DEVICE_RGBCLOCK_BEDROOM_WALL                             // Make this into an alarm? flashing effect and buzzer/speaker with esp32
 // #define DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
 // #define DEVICE_BLACK_STAND_LIGHT
+// #define DEVICE_RGBCLOCK_TVROOM
+// #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 
 
 
@@ -414,10 +416,14 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+
+
   // #define analogRead(x) error
 
   // #define DISABLE_NETWORK
 
+  #define DISABLE_SLEEP
 
 
 
@@ -522,41 +528,53 @@
   // #define USE_MODULE_DRIVERS_IRREMOTE
   // #define USE_IR_RECEIVE
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  // #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define USE_MODULE_SENSORS_DS18X
+  // #define USE_MODULE_SENSORS_DHT
+  // #define USE_MODULE_SENSORS_BME
+  //   #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
+  // #define USE_MODULE_SENSORS_BH1750
+  // #define USE_MODULE_SENSORS_SWITCHES
+  // #define USE_MODULE_SENSORS_MOTION
+  // #define USE_MODULE_SENSORS_LDR_BASIC
 
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
-  #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_LDR_BASIC
-
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC
-    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  #endif // USE_MODULE_SENSORS_LDR_BASIC
+  // #ifdef USE_MODULE_SENSORS_LDR_BASIC
+  //   #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+  //   #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+  // #endif // USE_MODULE_SENSORS_LDR_BASIC
   
-  #define USE_MODULE_LIGHTS_INTERFACE
-    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define STRIP_SIZE_MAX 13
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  //   #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  // #define STRIP_SIZE_MAX 1000 //stress test
+  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  // #define USE_SK6812_METHOD_DEFAULT
+  //   #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  //   #define ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
 
+  #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+  //#define USE_MODULE_DISPLAYS_NEXTION
+  //#define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+
+  #define USE_MODULE_DISPLAYS_NEXTION_V2
+  //#define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+
+    #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
 
 // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 // https://github.com/drzony/FastLED-tests/blob/master/src/main.cpp
@@ -1259,18 +1277,23 @@
   "}";
  
 
-  #define STRIP_SIZE_MAX 1
+  #define STRIP_SIZE_MAX 2
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   "{"
     "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
     "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBcw\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20\"},"
+    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":0,\"" D_JSON_RATE "\":1\"},"
     "\"" D_JSON_COLOUR_PALETTE "\":10,"
+    "\"Hue\":120,\"Sat\":100\","
     "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
-    "\"" D_JSON_BRIGHTNESS     "\":100"
+    "\"Effects\":{\"Function\":\"Solid\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
+    "\"BrightnessRGB\": 100,"
+    "\"CCT_TempPercentage\":0,"
+    "\"BrightnessCCT\":100,"
+    "\"Light\":{\"TimeOn\":60}"
   "}";
+
 
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
@@ -1283,7 +1306,7 @@
         "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
       "\"Command\":{"
-        "\"Module\":\"light\","
+        "\"Module\":\"" D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR "\","
         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," //number, name, or all
         "\"State\":\"Toggle\"" // toggle
@@ -1383,6 +1406,9 @@
   #define DEVICENAME_FRIENDLY_CTR "Stand Light"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
     
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
 
@@ -1397,7 +1423,7 @@
   
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   #define USE_SK6812_METHOD_DEFAULT
-
+      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
   
   // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
@@ -1509,7 +1535,7 @@
       "\"TimeMs\":900,"
       "\"RateMs\":1000"
     "},"    
-    "\"BrightnessRGB\":100,"
+    "\"BrightnessRGB\":0,"
     "\"BrightnessCCT\":0"
   "}";
   #endif // LIGHTING_TEMPLATE_DEFAULT_STAND_ORANGE_WHITE_BLUE
@@ -2012,5 +2038,81 @@
   "}";
 
 #endif
+
+
+//rgbmicro2/set/light///Scene
+//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+#ifdef DEVICE_RGBCLOCK_TVROOM
+  #define DEVICENAME_CTR          "rgbclock_tvroom"
+  #define DEVICENAME_FRIENDLY_CTR "RGBW Clock 01"
+  #define DEVICENAME_ROOMHINT_CTR "TVRoom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  #define STRIP_SIZE_MAX 94//93  
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+     #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+  
+      #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+      #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
+      #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+      #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+      #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+      #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+      #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
+
+  #define DISABLE_WEBSERVER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":950,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"Clock Basic 01\""
+    "},"
+    "\"" D_JSON_COLOUR_PALETTE "\":34,"
+    "\"BrightnessCCT\":0,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+
+  "}";
+
+
+#endif
+
+
+
 
 #endif // MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H

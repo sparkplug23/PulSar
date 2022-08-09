@@ -83,6 +83,11 @@
 #define SAVE_STATE                    1                 // [SetOption0] Save changed power state to Flash (0 = disable, 1 = enable)
 #define BOOT_LOOP_OFFSET              1                 // [SetOption36] Number of boot loops before starting restoring defaults (0 = disable, 1..200 = boot loops offset)
 
+// Forcing this to disable until all devices are optimised so nothing is starved of CPU 
+  #define DISABLE_SLEEP
+
+
+
 /*********************************************************************************************\
  *  Wifi
 \*********************************************************************************************/
@@ -293,6 +298,9 @@
 
 // -- OTA -----------------------------------------
 #define USE_ARDUINO_OTA                          // Add optional support for Arduino OTA (+13k code)
+
+// ----- WDT timer
+// #define ENABLE_FEATURE_WATCHDOG_TIMER
 
 // -- mDNS ----------------------------------------
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)

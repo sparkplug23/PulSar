@@ -183,6 +183,18 @@ void mAnimatorLight::Pre_Init(void){
   #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    pCONT_ladd->neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
+    // constexpr
+    // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
+    uint8_t kTaskRunnerCore = xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+    pCONT_ladd->neopixel_runner->begin(
+        [this]() {
+            stripbus->Show();
+        },
+        kTaskRunnerCore
+    );
+    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 }
@@ -628,24 +640,6 @@ DEBUG_LINE;
 
 
 
-
-
-#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
-{
-
-  if(anim_progress_mqtt_function_callback)
-  {
-    JsonBuilderI->Start();
-    anim_progress_mqtt_function_callback(); // Call the function
-    return JsonBuilderI->End();
-  }
-  return false;
-
-}
-
-#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
 

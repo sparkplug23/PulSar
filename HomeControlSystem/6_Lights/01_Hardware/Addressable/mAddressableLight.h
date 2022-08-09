@@ -9,8 +9,42 @@
 
 #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+#include <freertos/task.h>
+#include <Arduino.h>
+#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+
 #include "1_TaskerManager/mTaskerManager.h"
 // #include "6_Lights/Hardware/Addressable/"
+
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+typedef std::function<void(void)> CommitHandler;
+
+struct CommitParams
+{
+  CommitHandler handler;
+  xSemaphoreHandle semaphore = NULL;
+};
+
+class NeoPixelShowTask
+{
+private:
+  CommitParams _commit_params;
+  TaskHandle_t _commit_task;
+
+public:
+  NeoPixelShowTask() : _commit_task(NULL){}
+  void begin(CommitHandler handler, uint8_t core_id);
+  void execute();
+};
+
+#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 class mAddressableLight :
@@ -32,12 +66,15 @@ class mAddressableLight :
     };
     #endif
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    NeoPixelShowTask* neopixel_runner = nullptr;
+    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
     void LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10);
 
-#ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+    #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
     void FadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0));
-#endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+    #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
                 
     void parse_JSONCommand(JsonParserObject obj);
 

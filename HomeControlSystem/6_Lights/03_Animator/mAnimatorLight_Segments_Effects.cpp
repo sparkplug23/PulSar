@@ -131,6 +131,12 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
 void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 {
 
+  /**
+   * @brief Add new palette option
+   * If RGB only palette, then also allow brightnessCCT to add white component across all colours
+   * 
+   */
+
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
   //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);

@@ -1,4 +1,4 @@
-#include "mSDLoggerIMURadiationPattern.h"
+#include "mSDLogger.h"
 
 #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
 

@@ -41,6 +41,11 @@ enum EM_DISPLAY_MODE_IDS{
 };
 
 
+DEFINE_PGM_CTR(PM_JSON_ADDLOG)   D_JSON_ADDLOG;
+DEFINE_PGM_CTR(PM_JSON_CLEARLOG) D_JSON_CLEARLOG;
+DEFINE_PGM_CTR(PM_JSON_DISPLAY) D_JSON_DISPLAY;
+DEFINE_PGM_CTR(PM_JSON_MODEL)   D_JSON_MODEL;
+
 
 class mDisplaysInterface :
   public mTaskerInterface
@@ -70,7 +75,9 @@ class mDisplaysInterface :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
 
-    Renderer *renderer;
+    Renderer *renderer = nullptr;
+
+    uint32_t tSaved_RefreshDisplay = millis();
 
     enum ColorType { COLOR_BW, COLOR_COLOR };
 
@@ -219,8 +226,7 @@ class mDisplaysInterface :
       uint8_t rows = 0;
     }screen_buffer;
 
-#define DISPLAY_BUFFER_COLS    128          // Max number of characters in linebuf
-
+    #define DISPLAY_BUFFER_COLS    128          // Max number of characters in linebuf
 
     bool disp_subscribed = false;
 
@@ -258,7 +264,8 @@ class mDisplaysInterface :
     void CmndDisplayText(const char* buffer) ;
         
     void CommandSet_DisplayText_Advanced_JSON(JsonParserObject jobj) ;
-        
+
+    uint8_t fatoiv(char *cp,float *res);
     uint8_t atoiv(char *cp, int16_t *res);
     uint8_t atoiV(char *cp, uint16_t *res);
 
@@ -305,7 +312,7 @@ class mDisplaysInterface :
       MQTT_HANDLER_SENSOR_TELEPERIOD_ID
     };
     
-    struct handler<mDisplaysInterface>* list_ptr[3] = {
+    struct handler<mDisplaysInterface>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod

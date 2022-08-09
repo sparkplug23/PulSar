@@ -207,7 +207,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
   // RGB Gradient with 255 indexes
   uint8_t index = 0;
   encoded_gradient_temp_array[index++] = sensor_count;
-  encoded_gradient_temp_array[index++] = 5;
+  encoded_gradient_temp_array[index++] = MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID;
   encoded_gradient_temp_array[index++] = 0;
   encoded_gradient_temp_array[index++] = 0;
   encoded_gradient_temp_array[index++] = 0;

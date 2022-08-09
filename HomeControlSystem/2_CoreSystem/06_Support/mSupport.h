@@ -5,6 +5,28 @@
 #define D_UNIQUE_MODULE_CORE_SUPPORT_ID 2
 
 
+
+
+/*********************************************************************************************
+ * Watchdog related
+\*********************************************************************************************/
+#ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+#ifdef ESP8266
+  extern void WDT_Init();
+  extern void WDT_Reset();
+#endif // ESP8266
+#ifdef ESP32
+  #include "esp_system.h"
+  #ifndef ARDUINO_ISR_ATTR
+  #define ARDUINO_ISR_ATTR IRAM_ATTR 
+  #endif
+  extern void ARDUINO_ISR_ATTR resetModule();
+  extern void WDT_Init();
+  extern void WDT_Reset();
+#endif // ESP32
+#endif // WATCHDOG_TIMER_SECTION_GUARD_H
+
+
 //using class, to save known sun position, maybe in support? azimuth, elevation, isvalid, age
 
 
@@ -530,6 +552,7 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
     bool OsWatchBlockedLoop(void);
     size_t strchrspn(const char *str1, int character);
     char* subStr(char* dest, char* str, const char *delim, int index);
+    float CharToFloat(const char *str);
     double CharToDouble(const char *str);
     int TextToInt(char *str);
     // char* ulltoa(unsigned long long value, char *str, int radix);

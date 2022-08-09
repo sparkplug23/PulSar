@@ -193,6 +193,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
       if((mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
       {
 
+        ALOG_HGL(PSTR("seg=%d,rate=%d,%d"),segment_active_index ,_segments[segment_active_index].transition.rate_ms, _segments[0].flags.fForceUpdate);
+
         if(SEGMENT.flags.fForceUpdate){ SEGMENT.flags.fForceUpdate=false;
           SEGENV.tSaved_AnimateRunTime = millis();
         }

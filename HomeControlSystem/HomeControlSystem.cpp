@@ -23,6 +23,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+
 /*********************************************************************************************
  * Hardware related
 \*********************************************************************************************/
@@ -42,7 +43,7 @@
   void hw_wdt_enable(){ 
     *((volatile uint32_t*) 0x60000900) |= 1; // Hardware WDT ON 
   }
-  #endif
+  #endif  
 #endif // ESP32
 
 #ifdef USE_EMERGENCY_RESET
@@ -107,11 +108,19 @@ void setup(void)
   #endif  // CONFIG_IDF_TARGET_ESP32
   #endif  // ESP32
 
+  /**
+   * @brief WatchDog timer
+   * Code priority: Highest (Before Fastboot, Primary Recovery)
+   **/
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Init();
+  #endif
 
   /********************************************************************************************
    ** Fastboot: >> Base Setup Recovery <<  
    *     - If Settings, TaskerManager etc is corrupt
    *     - Minimal code must run above this (Serial start, RTC check)
+   * Code priority: High (Secondary Recovery)
    * @note AddLog can not be used
   ********************************************************************************************/
 
@@ -229,6 +238,12 @@ pCONT_sup->CmndCrash();
  ********************************************************************************************/
  
   ALOG_INF(PSTR("AddLog Started"));
+
+/********************************************************************************************
+ ** Splash boot reason ***************************************************************************
+ ********************************************************************************************/
+
+ALOG_HGL(PSTR("ResetReason=%d"), ResetReason_g());
 
 /********************************************************************************************
  ** Set boottime values *********************************************************************
@@ -561,8 +576,10 @@ void loop(void)
   pCONT_sup->activity.loop_counter++;
   pCONT_sup->loop_start_millis = millis();
   
-  WDT_RESET();
-  
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
+  #endif
+
   LoopTasker();
       
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
@@ -573,7 +590,9 @@ void loop(void)
     pCONT_sup->activity.loop_counter=0;
   }
 
+  #ifndef USE_MODULE_LIGHTS_INTERFACE // Temporarily remove delay, long term enable pausing delays while animations are running
   SmartLoopDelay();
+  #endif // USE_MODULE_LIGHTS_INTERFACE
 
   DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; } // We cannot divide by 0

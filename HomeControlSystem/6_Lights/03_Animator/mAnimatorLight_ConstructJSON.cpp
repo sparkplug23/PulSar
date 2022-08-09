@@ -144,19 +144,37 @@ return JBI->End();
 
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
-  {
+//   uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
+//   {
 
-JBI->Start();
+// JBI->Start();
 
-  JBI->Add("millis", millis());
+//   JBI->Add("millis", millis());
 
-return JBI->End();
+// return JBI->End();
 
-}
+// }
 
   ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
   mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
+#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
+
+#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+
+uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
+{
+
+  if(anim_progress_mqtt_function_callback)
+  {
+    JsonBuilderI->Start();
+    anim_progress_mqtt_function_callback(); // Call the function
+    return JsonBuilderI->End();
+  }
+  return false;
+
+}
+
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 

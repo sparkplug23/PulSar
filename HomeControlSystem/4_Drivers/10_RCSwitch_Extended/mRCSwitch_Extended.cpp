@@ -55,11 +55,11 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
       // AddLog(LOG_LEVEL_INFO,PSTR("pCONT_set->Settings.rf_protocol_mask=%d"), pCONT_set->Settings.rf_protocol_mask);
 
       
-    mySwitch->disableReceive();
+    // mySwitch->disableReceive();
 
-      SubTask_SendCommand_Up();
-      SubTask_SendCommand_Up();
-      SubTask_SendCommand_Up();
+    //   SubTask_SendCommand_Up();
+    //   SubTask_SendCommand_Up();
+    //   SubTask_SendCommand_Up();
 
       
 // // low, 8 high then low, held high 5000ms... code
@@ -728,8 +728,8 @@ void mRCSwitch::Init(void)
     settings.fEnableSensor = true;
   }
 
-  pinMode(22, OUTPUT);
-digitalWrite(22, LOW); // set low first, header will toggle high again
+//   pinMode(22, OUTPUT);
+// digitalWrite(22, LOW); // set low first, header will toggle high again
 
 }
 

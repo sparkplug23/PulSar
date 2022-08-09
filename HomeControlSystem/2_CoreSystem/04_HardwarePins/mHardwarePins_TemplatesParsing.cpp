@@ -641,7 +641,11 @@ void mHardwarePins::GpioInit(void)
       pCONT_sup->wire = new TwoWire(0);
       // pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
       AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Trying to start i2c 2-wire"));
+      #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+      if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))//, 100000))
+      #else
       if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID), 100000))
+      #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
         AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire sda%d scl%d"),GetPin(GPIO_I2C_SDA_ID),GetPin(GPIO_I2C_SCL_ID));
       }
@@ -650,6 +654,8 @@ void mHardwarePins::GpioInit(void)
         AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
       }
       #endif
+
+
     }
 
 // crap, deleted the begin?

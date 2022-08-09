@@ -35,7 +35,11 @@ void mTelemetry::MQTTHandler_Init()
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
+  #ifdef ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
+  p->tRateSecs = 1; 
+  #else
   p->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  #endif // ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
   p->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
   p->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   p->json_level = JSON_LEVEL_DETAILED;

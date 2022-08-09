@@ -8,83 +8,102 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
   char buffer[50];
   JsonParserToken jtok = 0; 
+  JsonParserToken jtok_level = 0; 
+  JsonParserObject obj_sub = 0;
   int8_t tmp_id = 0;
-  
-  if(jtok = obj["DisplayModel"]){
-    pCONT_set->Settings.display.model = jtok.getInt();
-  }
-  if(jtok = obj["DisplayMode"]){
-    pCONT_set->Settings.display.mode = jtok.getInt();
-  }
-  if(jtok = obj["DisplayRefresh"]){
-    pCONT_set->Settings.display.refresh = jtok.getInt();
-  }
-  if(jtok = obj["DisplayRows"]){
-    pCONT_set->Settings.display.rows = jtok.getInt();
-  }
-  if(jtok = obj["DisplayCols"])
+
+  /**
+   * @brief New method
+   * How to check for a json level that is repeated 
+   */
+  if(obj_sub = obj[PM_JSON_DISPLAY])
   {
-    JsonParserArray arr_pos = jtok;
-    if(arr_pos.size() == 2)
+
+    if(jtok = obj_sub[PM_JSON_MODEL])
     {
-      pCONT_set->Settings.display.cols[0] = arr_pos[0].getInt();
-      pCONT_set->Settings.display.cols[1] = arr_pos[1].getInt();
+      pCONT_set->Settings.display.model = jtok.getInt();
+      ALOG_COM( PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_MODEL, pCONT_set->Settings.display.model );
     }
-  }
-  if(jtok = obj["DisplayDimmer"]){
-    pCONT_set->Settings.display.dimmer = jtok.getInt();
-  }
-  if(jtok = obj["DisplaySize"]){
-    pCONT_set->Settings.display.size = jtok.getInt();
-  }
-  if(jtok = obj["DisplayFont"]){
-    pCONT_set->Settings.display.font = jtok.getInt();
-  }
-  if(jtok = obj["DisplayRotate"]){
-    pCONT_set->Settings.display.rotate = jtok.getInt();
-  }
 
-
-  if(jtok = obj["DisplayText"]){
-    CmndDisplayText(jtok.getStr());
-  //   if(jtok.isStr()){
-  //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-  //       CommandSet_PaletteID(tmp_id);
-  //       data_buffer.isserviced++;
-  //     }
-  //   }else
-  //   if(jtok.isNum()){
-  //     CommandSet_PaletteID(jtok.getInt());
-  //     data_buffer.isserviced++;
-  //   }
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  /**
-   * @brief DisplayAddLog
-   * */
-  if(jtok = obj["DisplayAddLog"]){
-    if(jtok.isStr()){
-      CommandSet_DisplayAddLog(jtok.getStr());
+    if(jtok = obj_sub[PM_JSON_MODE])
+    {
+      pCONT_set->Settings.display.mode = jtok.getInt();
+      ALOG_COM( PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_MODE, pCONT_set->Settings.display.mode );
     }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-    #endif
+
+    // if(jtok = obj["DisplayRefresh"]){
+    //   pCONT_set->Settings.display.refresh = jtok.getInt();
+    // }
+    // if(jtok = obj["DisplayRows"]){
+    //   pCONT_set->Settings.display.rows = jtok.getInt();
+    // }
+    // if(jtok = obj["DisplayCols"])
+    // {
+    //   JsonParserArray arr_pos = jtok;
+    //   if(arr_pos.size() == 2)
+    //   {
+    //     pCONT_set->Settings.display.cols[0] = arr_pos[0].getInt();
+    //     pCONT_set->Settings.display.cols[1] = arr_pos[1].getInt();
+    //   }
+    // }
+    // if(jtok = obj["DisplayDimmer"]){
+    //   pCONT_set->Settings.display.dimmer = jtok.getInt();
+    // }
+    // if(jtok = obj["DisplaySize"]){
+    //   pCONT_set->Settings.display.size = jtok.getInt();
+    // }
+    // if(jtok = obj["DisplayFont"]){
+    //   pCONT_set->Settings.display.font = jtok.getInt();
+    // }
+    // if(jtok = obj["DisplayRotate"]){
+    //   pCONT_set->Settings.display.rotate = jtok.getInt();
+    // }
+
+
+    if(jtok = obj["DisplayText"]){
+      CmndDisplayText(jtok.getStr());
+    //   if(jtok.isStr()){
+    //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+    //       CommandSet_PaletteID(tmp_id);
+    //       data_buffer.isserviced++;
+    //     }
+    //   }else
+    //   if(jtok.isNum()){
+    //     CommandSet_PaletteID(jtok.getInt());
+    //     data_buffer.isserviced++;
+    //   }
+    //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayText"));//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
+    //   #endif // ENABLE_LOG_LEVEL_DEBUG
+    }
+
+    /**
+     * @brief Display:AddLog
+     * */
+    if(jtok = obj_sub[PM_JSON_ADDLOG])
+    {
+      if(jtok.isStr()){
+        CommandSet_DisplayAddLog(jtok.getStr());
+      }
+      ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_SVALUE, PM_JSON_DISPLAY, PM_JSON_ADDLOG, jtok.getStr());
+    }
+
+    /**
+     * @brief Display:ClearLog
+     * */
+    if(jtok = obj_sub[PM_JSON_CLEARLOG])
+    {
+      if(jtok.isInt()){
+        CommandSet_DisplayClearLog(jtok.getInt());
+      }
+      ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_CLEARLOG, jtok.getInt());
+    }
+
+
+
   }
 
-  /**
-   * @brief DisplayClearLog
-   * */
-  if(jtok = obj["DisplayClearLog"]){
-    if(jtok.isInt()){
-      CommandSet_DisplayClearLog(jtok.getInt());
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayClearLog %d"),jtok.getInt());//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
-    #endif
-  }
+
 
 
 
@@ -170,6 +189,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     SetDisplayMode(jtok.getInt());
   }
 
+
   // mqtthandler_debug_teleperiod.flags.SendNow = true;
 
 }
@@ -187,6 +207,10 @@ void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
 {  
   SetDisplayMode(EM_DISPLAY_MODE_LOCAL1_ID);
   LogBuffer_Add((char*)c);
+
+  // Change to flag method later, so this function will not be called for every command
+  pCONT->Tasker_Interface(FUNC_DISPLAY_REFRESH_SHOW_ID);
+
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
   #endif

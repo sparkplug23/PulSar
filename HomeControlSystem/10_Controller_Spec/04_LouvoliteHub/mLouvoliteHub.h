@@ -89,6 +89,21 @@ class mLouvoliteHub :
     #define D_LOUVOLITE_COMMAND__STOP__BINARY_CTR  "1010110010100000111100101111011100111111000000000010001111101011"
     #define D_LOUVOLITE_COMMAND__STOP__HEX         (uint64_t)0xACA0F2F73F0023EB
 
+
+/**
+ * @brief 
+ * 
+ * My Bedroom is using remote with 2 pin soldered, channel 1
+ * MasterBedroom is using new remote on channel 6
+ * 
+ * 
+ */
+    struct PAIRED_BLINDS_CODES{
+      uint64_t up = 0;
+      uint64_t down = 0;
+      uint64_t stop = 0;
+    }paired_codes[2];
+
     enum COMMAND_IDS{
       COMMAND__STOP__ID,
       COMMAND__UP_STEP__ID,

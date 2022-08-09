@@ -15,6 +15,9 @@
 #include "soc/efuse_reg.h"
 #endif
 
+
+
+
 #include <vector>
 
 #include "JsonParser.h"
@@ -118,10 +121,6 @@ enum FUNCTION_RESULT_IDS{
   #include "esp_system.h"
   #include "soc/soc.h"
   #include "soc/rtc_cntl_reg.h"
-  const int wdtTimeout = 60000;  //time in ms to trigger the watchdog
-  // hw_timer_t *timerwdt = NULL;
-  // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
-  #define WDT_RESET() //timerWrite(timerwdt, 0) //reset timerwdt (feed watchdog)
 #endif
 #ifdef ESP8266
   #include <ESP8266HTTPClient.h>
@@ -131,7 +130,6 @@ enum FUNCTION_RESULT_IDS{
   #endif  // USE_DISCOVERY
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
-  #define WDT_RESET() ESP.wdtFeed()
   #include <ESP8266WiFi.h>
   #ifdef USE_MODULE_NETWORK_WEBSERVER
     // #include <ESPAsyncTCP.h>
@@ -205,11 +203,14 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
     EM_MODULE_DISPLAYS_INTERFACE_ID,
   #endif
-  #ifdef USE_MODULE_DISPLAYS_NEXTION
+  #if defined(USE_MODULE_DISPLAYS_NEXTION) || defined(USE_MODULE_DISPLAYS_NEXTION_V2)
     EM_MODULE_DISPLAYS_NEXTION_ID,
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
     EM_MODULE_DISPLAYS_OLED_SSD1306_ID,
+  #endif
+  #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+    EM_MODULE_DISPLAYS_OLED_SH1106_ID,
   #endif
   // Drivers (Range 40-129) == INTERFACES should be moved to the bottom, so all modules are called first.
   // Or, new array method should skip all interfaces and call them last? hmm, this does not make sence when interface needs to configure modules first, so prob keep the same
@@ -274,6 +275,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
     EM_MODULE_DRIVERS_FONA_CELLULAR_ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
+    EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID,
   #endif
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -430,7 +434,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
     EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID,
   #endif
-  #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+  #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
     EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
@@ -523,9 +527,17 @@ enum MODULE_IDS{
   #include "8_Displays/01_Nextion/mNextionPanel.h"
   #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
 #endif
+#ifdef USE_MODULE_DISPLAYS_NEXTION_V2
+  #include "8_Displays/01v2_Nextion/mNextionPanel.h"
+  #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
+#endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
   #include "8_Displays/OLED_SSD1606/mOLED_SSD1306.h"
   #define pCONT_oled1306                            static_cast<mOLED_SSD1306*>(pCONT->pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID])
+#endif
+#ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+  #include "8_Displays/03_OLED_SH1106/mOLED_SH1106.h"
+  #define pCONT_oled1306                            static_cast<mOLED_SH1106*>(pCONT->pModule[EM_MODULE_DISPLAYS_OLED_SH1106_ID])
 #endif
 
 
@@ -572,6 +584,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
   #include "4_Drivers/16_Fona_Cellular/mFona_Cellular.h"
   #define pCONT_fona                                static_cast<mFona_Cellular*>(pCONT->pModule[EM_MODULE_DRIVERS_FONA_CELLULAR_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
+  #include "4_Drivers/17_Cellular_SIM/mCellular_SIM.h"
+  #define pCONT_sim                                static_cast<mCellular_SIM7000*>(pCONT->pModule[EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID])
 #endif
 
 
@@ -835,7 +851,7 @@ enum MODULE_IDS{
   #define pCONT_serial_pos_log  pCONT_gps_sd_log
 #endif
 #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
-  #include "9_Controller/SDLoggerIMURadiationPattern/mSDLoggerIMURadiationPattern.h"
+  #include "9_Controller/SDLoggerIMURadiationPattern/mSDLogger.h"
   #define pCONT_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
@@ -857,7 +873,7 @@ enum MODULE_IDS{
   #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  #include "10_Controller_Spec/02_HeatingStripColour_Understairs/mHeatingStripColour.h"
+  #include "10_Controller_Spec/02_HeatingStripColour_Understairs/mStripColour.h"
   #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
@@ -869,6 +885,11 @@ enum MODULE_IDS{
   #include "10_Controller_Spec/04_LouvoliteHub/mLouvoliteHub.h"
   #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
+#ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2
+  #include "10_Controller_Spec/04v2_LouvoliteHub/mLouvoliteHub.h"
+  #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
+#endif
+
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
   #include "10_Controller_Spec/05_SideDoorLight/mSideDoorLight.h"
   #define pCONT_sdlight                static_cast<mSideDoorLight*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID])

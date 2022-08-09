@@ -259,10 +259,22 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add(PM_JSON_VERSIONNUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
     JsonBuilderI->Add("VersionNumberNoType",   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
 
-    // JBI->Level_Start("VersionNumbers");
-    //   JBI->Add("Current",   (uint32_t)PROJECT_VERSION);
-    //   JBI->Add("Minimum",   (uint32_t)PROJECT_VERSION_MINIMAL);
-    // JBI->Level_End();
+    JBI->Level_Start("VersionParts");
+      JBI->Level_Start("Current");
+        JBI->Add("Type",   (uint8_t)FIRMWARE_VERSION_TYPE);
+        JBI->Add("Major",   (uint8_t)FIRMWARE_VERSION_MAJOR);
+        JBI->Add("Minor",   (uint8_t)FIRMWARE_VERSION_MINOR);
+        JBI->Add("Core",   (uint8_t)FIRMWARE_VERSION_CORE);
+        JBI->Add("Module",   (uint8_t)FIRMWARE_VERSION_MODULE);
+      JBI->Level_End();
+      JBI->Level_Start("Minimal");
+        JBI->Add("Type",   (uint8_t)FIRMWARE_VERSION_TYPE_MINIMAL);
+        JBI->Add("Major",   (uint8_t)FIRMWARE_VERSION_MAJOR_MINIMAL);
+        JBI->Add("Minor",   (uint8_t)FIRMWARE_VERSION_MINOR_MINIMAL);
+        JBI->Add("Core",   (uint8_t)FIRMWARE_VERSION_CORE_MINIMAL);
+        JBI->Add("Module",   (uint8_t)FIRMWARE_VERSION_MODULE_MINIMAL);
+      JBI->Level_End();
+    JBI->Level_End();
 
     JsonBuilderI->Add(PM_JSON_COREVERSION,     ARDUINO_ESP8266_RELEASE); 
     
@@ -290,6 +302,12 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JsonBuilderI->Add("None");
     #endif
     JBI->Array_End();
+
+    #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+    JBI->Add("WatchDog", "Enabled");
+    #else
+    JBI->Add("WatchDog", "Disabled");
+    #endif
 
   return JsonBuilderI->End();
 }

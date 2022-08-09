@@ -79,6 +79,8 @@ void mPWMLight::LightSetPWMOutputsRgbcctColor(RgbcctColor colour){
   tmp_colour[3] = pCONT_iLight->change8to10(colour.WC);
   tmp_colour[4] = pCONT_iLight->change8to10(colour.WW); 
 
+  // ALOG_INF(PSTR("LightSetPWMOutputsRgbcctColor"));
+
   // AddLog_Array(LOG_LEVEL_TEST,PSTR("tmp_colour"),tmp_colour,(uint16_t)5);
 
   LightSetPWMOutputsArray10bit(tmp_colour);

@@ -451,6 +451,16 @@ const char S_JSON_COMMAND_SVALUE_SVALUE[] PROGMEM =           "{\"%s\":{\"%s\":\
 #define    D_JSON_COMMAND_SVALUE_SVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":\"%s\"}}"
 
 const char S_JSON_COMMAND_SVALUE_NVALUE[] PROGMEM =           "{\"%s\":{\"%s\":%d}}";
+const char PM_KEYS_JSON_COMMAND_SVALUE_NVALUE[] PROGMEM =           "{\"%S\":{\"%S\":%d}}";
+
+const char PM_JSON_COMMAND_PM_SVALUE_NVALUE[] PROGMEM =           "{\"%S\":%d}";
+const char PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE[] PROGMEM =    "{\"%S\":{\"%S\":%d}}";
+const char PM_JSON_COMMAND_PM_SVALUE_SVALUE_SVALUE[] PROGMEM =    "{\"%S\":{\"%S\":\"%S\"}}";
+const char PM_JSON_COMMAND_SVALUE_NVALUE[] PROGMEM =           "{\"%s\":%d}";
+const char PM_JSON_COMMAND_SVALUE_SVALUE_NVALUE[] PROGMEM =    "{\"%s\":{\"%s\":%d}}";
+const char PM_JSON_COMMAND_SVALUE_SVALUE_SVALUE[] PROGMEM =    "{\"%s\":{\"%s\":\"%s\"}}";
+
+
 #define    D_JSON_COMMAND_SVALUE_NVALUE                       "{\"%s\":{\"%s\":%d}}"
 #define    D_JSON_COMMAND_SVALUE_NVALUE_K(KEY1, KEY2)         "{\"" KEY1 "\":{\"" KEY2 "\":%d}}"
 
