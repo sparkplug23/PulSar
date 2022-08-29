@@ -84,9 +84,15 @@
 #define BOOT_LOOP_OFFSET              1                 // [SetOption36] Number of boot loops before starting restoring defaults (0 = disable, 1..200 = boot loops offset)
 
 // Forcing this to disable until all devices are optimised so nothing is starved of CPU 
-  #define DISABLE_SLEEP
+#define DISABLE_SLEEP
 
-
+// #ifdef ESP32
+// #define ENABLE_FEATURE_WATCHDOG_TIMER
+// #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+// #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+// #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+// #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+// #endif
 
 /*********************************************************************************************\
  *  Wifi
@@ -126,7 +132,7 @@
 /*********************************************************************************************\
  *  OTA
 \*********************************************************************************************/
-#define OTA_URL                       "http://minimal.bin"  // [OtaUrl]
+#define D_OTA_URL                       "http://minimal.bin"  // [OtaUrl]
 
 /*********************************************************************************************\
  *  MQTT

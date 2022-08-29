@@ -85,8 +85,6 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
         (uptime.seconds_nonreset>60)
       ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
-      //I need another for stable boot
-      if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
 
       if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
 
@@ -95,6 +93,27 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       if(uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
       if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
       if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+
+
+      /**
+       * @brief Boot is only successful if mqtt+network has been active for 1 minute, then reset fastboot
+       **/
+      #ifdef ENABLE_DEVFEATURE_BOOT_SUCCESS_WHEN_NETWORK_STABLE
+
+      // For now, just enable this to happen 
+
+      if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+
+
+      #else
+
+      //I need another for stable boot
+      // Stable time set to 2 minutes, as easy way to ensure mqtt/network has been stable
+      if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+
+      #endif
+
+
 
       
       #ifndef DISABLE_SERIAL0_CORE

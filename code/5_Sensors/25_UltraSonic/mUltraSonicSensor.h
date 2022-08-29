@@ -83,6 +83,8 @@ class mUltraSonicSensor :
     }object_detected_static;   
     void SubTask_DetectMotion();
     
+
+    
     void MQQTSendObjectDetected(void);
     void MQQTDataBuilder_ObjectDetected();
     
@@ -220,6 +222,25 @@ class mUltraSonicSensor :
       // struct SENSOR smooth_1hr_from_1m;
       struct SENSOR* ptr;
     }averaged;
+
+    
+    
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.fSensorCount;
+    }
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
+      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      value->data.push_back(ultrasonic.duration);
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
+
 
     uint8_t ConstructJSON_Settings(uint8_t json_level);
     uint8_t ConstructJSON_Sensors(uint8_t json_level);

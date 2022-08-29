@@ -9,12 +9,15 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
 \*********************************************************************************************/
 #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
 #ifdef ESP8266
-  void WDT_Init(){}
+  void WDT_Init(){ ESP.wdtEnable(0);}
   void WDT_Reset(){ESP.wdtFeed();}
 #endif // ESP8266
 #ifdef ESP32
   #include "esp_system.h"
-  const int wdtTimeout = 30000;  //time in ms to trigger the watchdog
+  #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
+  #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+  #endif
+  const int wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
   hw_timer_t *timerwdt = NULL;
   #ifndef ARDUINO_ISR_ATTR
   #define ARDUINO_ISR_ATTR IRAM_ATTR 
@@ -33,6 +36,7 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
   }
   void WDT_Reset(){
     timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
+    // Serial.println("WDT_Reset");
   }
 #endif // ESP32
 #endif // WATCHDOG_TIMER_SECTION_GUARD_H
@@ -458,9 +462,6 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
       // #endif
       PerformEverySecond();
     }break;
-    case FUNC_EVERY_FIVE_MINUTE:
-      //CmndCrash();
-    break;
     case FUNC_ON_BOOT_SUCCESSFUL:
 
 
@@ -595,6 +596,11 @@ void mSupport::ArduinoOTAInit(void)
     // #endif
     arduino_ota_triggered = true;
     arduino_ota_progress_dot_count = 0;
+
+    /**
+     * @brief Disable parts (e.g. RF receive interrupts) before starting update
+     **/
+    pCONT->Tasker_Interface(FUNC_UPDATE_OTA_BEFORE_ON_START);
     
     // #ifdef ESP32
     //   pinMode(2,OUTPUT);
@@ -610,16 +616,16 @@ void mSupport::ArduinoOTAInit(void)
   ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
   {
     if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
-
       uint8_t progress_now = (progress/(total/100));
       if(arduino_ota_progress_dot_count != progress_now){
         Serial.println(progress_now);
         arduino_ota_progress_dot_count = progress_now;
       }
-      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-      WDT_Reset();
-      #endif
     }
+
+    #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+    WDT_Reset();
+    #endif
     
   });
 

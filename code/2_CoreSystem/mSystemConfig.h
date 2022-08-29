@@ -17,8 +17,20 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 #define FIRMWARE_VERSION_MINOR    110 // Update "ChangeLogManual.md" when incrementing
-#define FIRMWARE_VERSION_CORE     23
-#define FIRMWARE_VERSION_MODULE   26
+/**@@@@@ Test to be copied into changlog on new major update
+ * #28 : Stable boot only happens after 120 seconds now, as work around for not checking for mqtt/network valid. ie, currently if mqtt connects and some bad pointer exists then the mqtt will try to send it before it works. This will catch that and cause fastboot recovery. Recovery period will be (120 seconds * recovery counter)
+ * #28 : Added multiple methods to trigger crashes on mqtt command
+ * #27 : Fixed WDT to work inside OTA
+ *       Set WDT to 60 seconds on esp32
+ * #26 : Enabled fastboot detection, OTA fallback and WDT on ESP32 devices as default
+ */
+#define FIRMWARE_VERSION_CORE     28
+/**@@@@@ Test to be copied into changlog on new major update
+ * #30 : 
+ * #30 : Added ultrasonic to unified sensor
+ * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
+ */
+#define FIRMWARE_VERSION_MODULE   29
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           1//                (random(1,1000))

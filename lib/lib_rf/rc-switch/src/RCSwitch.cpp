@@ -896,7 +896,7 @@ void RECEIVE_ATTR RCSwitch::handleInterrupt() {
 
   // detect overflow
   if (changeCount >= RCSWITCH_MAX_CHANGES) {
-    Serial.println("RCSWITCH_MAX_CHANGES exceeded");
+    // Serial.println("RCSWITCH_MAX_CHANGES exceeded"); //crash??
     changeCount = 0;
     repeatCount = 0;
   }

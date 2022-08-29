@@ -168,7 +168,9 @@ const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return PM_JSON_LIGHT_LUMINANCE_LUX;
     case SENSOR_TYPE_SUN_AZIMUTH_ID:            return PM_JSON_SUN_AZIMUTH;
     case SENSOR_TYPE_SUN_ELEVATION_ID:          return PM_JSON_SUN_ELEVATION;
-    
+    case SENSOR_TYPE_DOOR_POSITION_ID:          return PM_JSON_DOOR_POSITION;
+    case SENSOR_TYPE_DOOR_LOCKED_ID:            return PM_JSON_DOOR_LOCKED;    
+    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;    
   }
   return PM_SEARCH_NOMATCH;      
 

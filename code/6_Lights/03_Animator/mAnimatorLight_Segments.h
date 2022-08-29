@@ -117,6 +117,12 @@
    * */
   enum EFFECTS_FUNCTION__IDS
   {
+
+
+// need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
+// This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
+
+
     /**
      * Default
      * Desc: Same colour across all pixels.
@@ -169,6 +175,14 @@
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
     #endif
+    /**
+     * Desc: Spread palette across segment
+     * If gradient value exists, then use it to spread colour across segment
+     * If no index in palette, then spread palette equal distant across palette
+     * */
+    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    // EFFECTS_FUNCTION__STATIC_PALETTE_GRADIENT__ID,
+    // #endif
     
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************

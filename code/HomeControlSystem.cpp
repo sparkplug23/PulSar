@@ -21,6 +21,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 
@@ -243,7 +244,7 @@ pCONT_sup->CmndCrash();
  ** Splash boot reason ***************************************************************************
  ********************************************************************************************/
 
-ALOG_HGL(PSTR("ResetReason=%d"), ResetReason_g());
+  ALOG_HGL(PSTR("ResetReason=%d"), ResetReason_g());
 
 /********************************************************************************************
  ** Set boottime values *********************************************************************
@@ -590,9 +591,13 @@ void loop(void)
     pCONT_sup->activity.loop_counter=0;
   }
 
-  #ifndef USE_MODULE_LIGHTS_INTERFACE // Temporarily remove delay, long term enable pausing delays while animations are running
-  SmartLoopDelay();
-  #endif // USE_MODULE_LIGHTS_INTERFACE
+  /**
+   * @brief Until code has been stress tested, removing all delays to stop starving resources. This will need to be introduced later one device at a time.
+   * 
+   */
+  // #ifndef USE_MODULE_LIGHTS_INTERFACE // Temporarily remove delay, long term enable pausing delays while animations are running
+  // SmartLoopDelay();
+  // #endif // USE_MODULE_LIGHTS_INTERFACE
 
   DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; } // We cannot divide by 0

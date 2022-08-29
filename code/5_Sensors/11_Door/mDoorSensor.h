@@ -38,11 +38,14 @@ class mDoorSensor :
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
+      uint8_t fSensorCount = 0;
     }settings;
 
     uint8_t     IsDoorOpen();
     const char* IsDoorOpen_Ctr(char* buffer, uint8_t buflen);
     
+    void ShowSensor_AddLog();
+
     struct DOOR_DETECT{
       uint8_t state = false;
       uint8_t isactive = false;
@@ -58,21 +61,25 @@ class mDoorSensor :
       uint32_t tEndedTime;
     }door_detect;
 
+
     void EveryLoop();
 
-    #ifdef DOORLOCK_SWITCH_PIN
-      #define LOCKOPEN() digitalRead(DOORLOCK_SWITCH_PIN) //opened when high
-      #define DOORLOCK_SWITCH_INIT() pinMode(DOORLOCK_SWITCH_PIN,INPUT_PULLUP)
-      #define LOCKOPENCTR LOCKOPEN() ? "Unlocked" : "Locked"
+    // #ifdef DOORLOCK_SWITCH_PIN
+    //   #define LOCKOPEN() digitalRead(DOORLOCK_SWITCH_PIN) //opened when high
+    //   #define DOORLOCK_SWITCH_INIT() pinMode(DOORLOCK_SWITCH_PIN,INPUT_PULLUP)
+    //   #define LOCKOPENCTR LOCKOPEN() ? "Unlocked" : "Locked"
       struct LOCK_DETECT{
         uint8_t state = false;
         uint8_t isactive = false;
         uint8_t ischanged = false;
         struct datetime changedtime; //time_Short
         uint32_t tSaved;
+        uint32_t tDetectTimeforDebounce;
+        time_short_t detected_time;
       }lock_detect;
       void MQTTSendDoorLockIfChanged();
-    #endif
+    // #endif
+    uint8_t IsLock_Locked();
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
@@ -84,6 +91,25 @@ class mDoorSensor :
       uint8_t fUpdateSendDoorSensor;
     //#endif
     
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.fSensorCount;
+    }
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > 1) {value->type.push_back(0); return ;}
+      value->type.push_back(SENSOR_TYPE_DOOR_POSITION_ID);
+      value->data.push_back(door_detect.isactive);
+      // #ifdef DOORLOCK_SWITCH_PIN
+      value->type.push_back(SENSOR_TYPE_DOOR_LOCKED_ID);
+      value->data.push_back(lock_detect.isactive);
+      // #endif // DOORLOCK_SWITCH_PIN
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+        
+
 
 void WebAppend_Root_Status_Table_Draw();
 void WebAppend_Root_Status_Table_Data();

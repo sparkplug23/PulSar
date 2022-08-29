@@ -13,14 +13,25 @@ void mSupport::parse_JSONCommand(JsonParserObject obj){
  * 
  */
   
-  if(jtok = obj["DebugSupport"].getObject()["Command"])
+  // if(jtok = obj["DebugSupport"].getObject()["Command"])
+  // {
+    
+  //   if(strcmp(jtok.getStr(),"TriggerWDT")==0)
+  //   {
+  //     ALOG_COM( PSTR("Causing WDT Reboot: Delay(60s)") );
+  //     delay(60000);
+  //   }
+
+
+
+  // }
+
+  if(jtok = obj["Restart"])
   {
     
-    if(strcmp(jtok.getStr(),"TriggerWDT")==0)
-    {
-      ALOG_COM( PSTR("Causing WDT Reboot: Delay(60s)") );
-      delay(60000);
-    }
+    ALOG_COM( PSTR("Restart %d"), jtok.getInt() );
+    CommandSet_Restart(jtok.getInt());
+      
 
 
 
@@ -233,7 +244,7 @@ void mSupport::parse_JSONCommand(JsonParserObject obj){
 
 // void (* const TasmotaCommand[])(void) PROGMEM = {
 //   &CmndBacklog, &CmndDelay, &CmndPower, &CmndStatus, &CmndState, &CmndSleep, &CmndUpgrade, &CmndUpgrade, &CmndOtaUrl,
-//   &CmndSeriallog, &CmndRestart, &CmndPowerOnState, &CmndPulsetime, &CmndBlinktime, &CmndBlinkcount, &CmndSavedata,
+//   &CmndSeriallog, &CommandSet_Restart, &CmndPowerOnState, &CmndPulsetime, &CmndBlinktime, &CmndBlinkcount, &CmndSavedata,
 //   &CmndSetoption, &CmndSetoption, &CmndTemperatureResolution, &CmndHumidityResolution, &CmndPressureResolution, &CmndPowerResolution,
 //   &CmndVoltageResolution, &CmndFrequencyResolution, &CmndCurrentResolution, &CmndEnergyResolution, &CmndWeightResolution,
 //   &CmndModule, &CmndModules, &CmndGpio, &CmndGpios, &CmndTemplate, &CmndPwm, &CmndPwmfrequency, &CmndPwmrange,
@@ -876,33 +887,34 @@ void mSupport::parse_JSONCommand(JsonParserObject obj){
 //   Response_P(S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE, XdrvMailbox.command, Settings.seriallog_level, seriallog_level);
 // }
 
-void mSupport::CmndRestart(void)
+void mSupport::CommandSet_Restart(int8_t command)
 {
 
-
-
-
-  // switch (XdrvMailbox.payload) {
+  switch(command) 
+  {
   // case 1:
   //   restart_flag = 2;
   //   ResponseCmndChar(D_JSON_RESTARTING);
   //   break;
-  // case -1:
-  //   CmndCrash();    // force a crash
-  //   break;
-  // case -2:
-  //   CmndWDT();
-  //   break;
-  // case -3:
-  //   CmndBlockedLoop();
-  //   break;
+    case -1:
+      CmndCrash();    // force a crash
+    break;
+    case -2:
+      CmndWDT();
+    break;
+    // case -3:
+    // // OSWATCH_RESET_TIME
+    //   CmndBlockedLoop();
+    // break;
   // case 99:
   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_RESTARTING));
   //   EspRestart();
   //   break;
-  // default:
-  //   ResponseCmndChar_P(PSTR(D_JSON_ONE_TO_RESTART));
-  // }
+    default:
+      ALOG_INF(PSTR(D_JSON_ONE_TO_RESTART));
+    break;
+  }
+
 }
 
 // void CmndPowerOnState(void)

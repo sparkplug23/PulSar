@@ -50,6 +50,10 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_50_MSECOND:
       ReceiveCheck();
     break;
+    case FUNC_UPDATE_OTA_BEFORE_ON_START:
+      ALOG_INF(PSTR("disableReceive"));
+      mySwitch->disableReceive();
+    break;
     case FUNC_EVERY_FIVE_SECOND:{
       
       // AddLog(LOG_LEVEL_INFO,PSTR("pCONT_set->Settings.rf_protocol_mask=%d"), pCONT_set->Settings.rf_protocol_mask);

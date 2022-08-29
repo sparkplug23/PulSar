@@ -1392,7 +1392,7 @@
 #define D_JSON_CONNECT_FAILED "Connect failed"
 #define D_JSON_CONNECTCOUNT "ConnectCount"
 #define D_JSON_CONNECTS "Connects"
-#define D_JSON_COREVERSION "Core"
+#define D_JSON_CORE "Core"
 #define D_JSON_COUNT "Count"
 #define D_JSON_COUNTER "Counter"
 #define D_JSON_CHANNELCOUNT "ChannelCount"
@@ -1573,6 +1573,7 @@
 #define D_JSON_VERSIONNUMBER "VersionNumber"
 #define D_JSON_VERSIONNUMBER_MINIMUM "VersionNumberMininum"
 #define D_JSON_VOLTAGE "Voltage"
+#define D_JSON_WATCHDOG "WatchDog"
 #define D_JSON_WEIGHT "Weight"
 #define D_JSON_WEB "Web"
 #define D_JSON_WIFI "Wifi"
@@ -1589,6 +1590,8 @@
 #define D_JSON_ACTIVE_POWER "ActivePower"
 #define D_JSON_CCT_PERCENTAGE "CCT_TempPercentage"
 #define D_JSON_CCT_TEMP "CCT_Temp"
+
+#define D_JSON_ULTRASONIC_DISTANCE_CM "UltrasonicDistanceCM"
 
 #define D_JSON_RGBCCT_LINKED "rgbcct_linked"
 
@@ -1957,6 +1960,9 @@
 #define D_JSON_POWERRETAIN "PowerRetain"
 #define D_JSON_SENSORRETAIN "SensorRetain"
 #define D_JSON_PUBLISH "Publish"
+
+#define D_JSON_DOOR_POSITION "DoorPosition"
+#define D_JSON_DOOR_LOCKED "DoorLocked"
 
 // Commands xdrv_02_webserver.ino
 #define D_JSON_WEBSERVER "Webserver"

@@ -36,11 +36,14 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case FUNC_EVERY_SECOND:
 
-      if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
-      {
-        AddLog(LOG_LEVEL_TEST, PSTR("DoorLockPin=%d"), digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
-      }
+      // if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+      // {
+      //   AddLog(LOG_LEVEL_TEST, PSTR("DoorLockPin=%d"), digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+      // }
 
+    break;
+    case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
+      ShowSensor_AddLog();
     break;
     /************
      * MQTT SECTION * 
@@ -85,6 +88,7 @@ void mDoorSensor::Pre_Init(void){
     // pin_open = pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID);
     pinMode(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
     settings.fEnableSensor = true;
+    settings.fSensorCount = 1;
   }else{
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
     //disable pir code
@@ -94,6 +98,8 @@ void mDoorSensor::Pre_Init(void){
   if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
   {
     pinMode(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID), INPUT_PULLUP);
+    settings.fEnableSensor = true;
+    settings.fSensorCount = 1;
   }else{
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID));
     //disable pir code
@@ -101,15 +107,23 @@ void mDoorSensor::Pre_Init(void){
 
 }
 
-
+/**
+ * @brief "LOW" is closed, HIGH is open
+ * 
+ * @return uint8_t 
+ */
 uint8_t mDoorSensor::IsDoorOpen(){
-  return digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID));
+  return (digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID))==HIGH);
+}
+uint8_t mDoorSensor::IsLock_Locked(){
+  return (digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID))==LOW);
 }
 
 
 void mDoorSensor::init(void){
 
   door_detect.state = IsDoorOpen();
+  lock_detect.state = IsLock_Locked();
 
 }
 
@@ -117,6 +131,9 @@ void mDoorSensor::init(void){
 
 void mDoorSensor::EveryLoop(){
 
+  /**
+   * @brief Reed Switch Door Position
+   **/
   if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
 
     AddLog(LOG_LEVEL_TEST, PSTR("IsDoorOpen()"));
@@ -135,75 +152,34 @@ void mDoorSensor::EveryLoop(){
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
     mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-   
   }
 
-}
+  /**
+   * @brief Door lock  
+   **/
+  if((IsLock_Locked()!=lock_detect.state)&&mTime::TimeReachedNonReset(&lock_detect.tDetectTimeforDebounce,100)){
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
+    AddLog(LOG_LEVEL_TEST, PSTR("IsLock_Locked()"));
 
-  char buffer[10];
-    
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>Door Position</td>"));
-    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_door", IsDoorOpen_Ctr(buffer, sizeof(buffer)));   
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  
-}
+    lock_detect.state = IsLock_Locked();
+    lock_detect.tDetectTimeforDebounce = millis();
+    if(lock_detect.state){ 
+      lock_detect.isactive = true;
+      lock_detect.detected_time = pCONT_time->GetTimeShortNow();
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_STARTED_ID, 1, lock_detect.isactive);
+    }else{ 
+      lock_detect.isactive = false;
+      pCONT_rules->NewEventRun( GetModuleUniqueID(), FUNC_EVENT_MOTION_ENDED_ID, 1, lock_detect.isactive);
+    }
+    lock_detect.ischanged = true;
+    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
-
-//append to internal buffer if any root messages table
-void mDoorSensor::WebAppend_Root_Status_Table_Data(){
-  
-  uint8_t sensor_counter = 0;
-  char value_ctr[8];
-  char colour_ctr[10];
-  char inner_html[100];
-  char door_pos_ctr[20];
-  char time_ctr[20];
-
-  JsonBuilderI->Array_Start("tab_door");// Class name
-  
-  for(int sensor_id=0;sensor_id<1;sensor_id++){
-    
-    JsonBuilderI->Level_Start();
-      JsonBuilderI->Add("id",sensor_id);
-
-      char colour_ctr[8];
-      uint32_t millis_elapsed = mTime::MillisElapsed(&door_detect.tEndedTime);
-      // Motion in progress
-      if(door_detect.isactive){
-        sprintf_P(colour_ctr,PSTR("#00ff00"));
-      }else
-      // If movement event has just finished
-      if(millis_elapsed<(1000*60)){
-        // Show colour as fading back to white over X seconds SINCE EVENT OVER
-        uint8_t colour_G = constrain(
-                              map(millis_elapsed,0,(1000*60),0,255)
-                              ,0,255 //increases with time
-                            );
-        pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
-      }
-      // no event show, just white
-      else{
-        sprintf(colour_ctr,"#ffffff");
-      }
-
-      // sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
-      //   mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
-    
-      JsonBuilderI->Add("ih",inner_html);
-      JsonBuilderI->Add("fc",colour_ctr);
-    
-    JsonBuilderI->Level_End();
   }
 
-  JsonBuilderI->Array_End();
+
 
 }
-
-#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
@@ -214,6 +190,17 @@ const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
   }
   return buffer;
 }
+
+
+void mDoorSensor::ShowSensor_AddLog()
+{
+  
+  ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+  ALOG_INF(PSTR(D_LOG_BME "\"%s\""),JBI->GetBufferPtr());
+
+}
+
+
 
 
 uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_method){
@@ -240,11 +227,16 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
 
   JBI->Add("DoorOpenPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_OPEN_ID)));
 
+    
+  JBI->Add("IsDoorOpen", IsDoorOpen());
+
 
   if(pCONT_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
   {
-  JBI->Add("DoorLockPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+    JBI->Add("DoorLockPin", digitalRead(pCONT_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+    JBI->Add("IsLock_Locked", IsLock_Locked());
   }
+
   return JsonBuilderI->End();
 
 }

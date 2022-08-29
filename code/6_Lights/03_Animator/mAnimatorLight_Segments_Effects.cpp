@@ -1290,11 +1290,13 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
     }
   );
 
+  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
     [this](void){
       this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
     }
   );
+  #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 }
 
@@ -1423,11 +1425,13 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
     }
   );
 
+  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
     [this](void){
       this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
     }
   );
+  #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
 //   // LCDDisplay_displayTime(pCONT_time->Rtc.utc_time,tempcol,0);

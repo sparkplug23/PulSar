@@ -719,6 +719,8 @@ void SettingsLoad_CheckSuccessful();
 void SettingsInit();
 
 
+// bool flag_boot_success_set
+
 // #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_V2 // old
 //   void RtcRebootReset(void);
 //   uint32_t GetRtcSettingsCrc(void);

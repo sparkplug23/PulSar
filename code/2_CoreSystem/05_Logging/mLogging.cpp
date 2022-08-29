@@ -177,10 +177,11 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   memset(mxtime,0,sizeof(mxtime));
   if(pCONT_set->Settings.log_time_isshort){
     if(pCONT_time->uptime.hour<1){
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d "),
+      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d F%d "),
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
         pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
-        pCONT_time->uptime.minute,pCONT_time->uptime.second);
+        pCONT_time->uptime.minute,pCONT_time->uptime.second,
+        RtcFastboot.fast_reboot_count);
     }else{
       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %02d:%02d:%02d "), //add hour
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),

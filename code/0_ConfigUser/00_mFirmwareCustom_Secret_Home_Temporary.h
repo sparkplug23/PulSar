@@ -743,7 +743,7 @@
     "},"
     "\"Hue\": 120,"
     "\"Sat\": 100,"
-    "\"BrightnessRGB\": 20,"
+    "\"BrightnessRGB\": 0,"
     "\"BrightnessCCT\": 0,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"
@@ -2081,8 +2081,6 @@
 #endif
 
 
-//rgbmicro2/set/light///Scene
-//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
 #ifdef DEVICE_RGBCLOCK_TVROOM
   #define DEVICENAME_CTR          "rgbclock_tvroom"
   #define DEVICENAME_FRIENDLY_CTR "RGBW Clock 01"
@@ -2152,6 +2150,84 @@
 
 
 #endif
+
+
+
+//rgbmicro2/set/light///Scene
+//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
+#ifdef DEVICE_RGBCLOCK_BEDROOM_WALL
+  #define DEVICENAME_CTR          "rgbclock_bedroom_wall"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Clock 01"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  #define STRIP_SIZE_MAX 94//93  
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  #define USE_SK6812_METHOD_DEFAULT
+
+    // #define USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
+    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+  #define DISABLE_WEBSERVER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
+    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
+    "\"" D_JSON_TRANSITION       "\":{"
+      "\"" D_JSON_TIME_MS "\":950,"
+      "\"" D_JSON_RATE_MS "\":1000,"
+      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
+      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
+    "},"
+    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
+    "\"" D_JSON_EFFECTS "\":{" 
+      "\"" D_JSON_FUNCTION "\":\"Clock Basic 01\""
+    "},"
+    "\"" D_JSON_COLOUR_PALETTE "\":34,"
+    "\"BrightnessCCT\":0,"
+    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
+
+  "}";
+
+
+#endif
+
 
 
 

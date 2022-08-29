@@ -150,6 +150,25 @@ void mLouvoliteHub::CommandSet_BlindTransmit_Down_Step(int8_t device_id)
 
 void mLouvoliteHub::CommandSet_BlindTransmit_Up_Full(int8_t device_id)
 {
+  #ifdef ENABLE_DEVFEATURE_BLINDS_OPEN_COMMANDS_REPEATED_AND_DUPLICATED
+  transceive->setProtocol(36);
+  transceive->setRepeatTransmit(20);
+  
+  // for(int i=0;i<3;i++)
+  // {
+  //   transceive->send(paired_codes[device_id].up, 64); //short down
+  //   if(i<2){ delay(400); } // dont repeat on last loop
+  // }
+  
+  // transceive->setProtocol(36);
+  // transceive->setRepeatTransmit(10);
+  transceive->send(paired_codes[device_id].up, 64); //short down
+  delay(300);
+  // transceive->setProtocol(36);
+  // transceive->setRepeatTransmit(10);
+  transceive->send(paired_codes[device_id].up, 64); //short down
+
+  #else
   transceive->setProtocol(36);
   transceive->setRepeatTransmit(10);
   transceive->send(paired_codes[device_id].up, 64); //short down
@@ -157,11 +176,32 @@ void mLouvoliteHub::CommandSet_BlindTransmit_Up_Full(int8_t device_id)
   transceive->setProtocol(36);
   transceive->setRepeatTransmit(10);
   transceive->send(paired_codes[device_id].up, 64); //short down
+  #endif // ENABLE_DEVFEATURE_BLINDS_OPEN_COMMANDS_REPEATED_AND_DUPLICATED
 }
 
 
 void mLouvoliteHub::CommandSet_BlindTransmit_Down_Full(int8_t device_id)
 {
+  #ifdef ENABLE_DEVFEATURE_BLINDS_OPEN_COMMANDS_REPEATED_AND_DUPLICATED
+  transceive->setProtocol(36);
+  transceive->setRepeatTransmit(20);
+
+  // for(int i=0;i<3;i++)
+  // {
+  //   transceive->send(paired_codes[device_id].down, 64); //short down
+  //   if(i<2){ delay(400); } // dont repeat on last loop // Need to change these to non blocking commands later!!
+  // }
+
+  
+  // transceive->setProtocol(36);
+  // transceive->setRepeatTransmit(10);
+  transceive->send(paired_codes[device_id].down, 64); //short down
+  delay(300);
+  // transceive->setProtocol(36);
+  // transceive->setRepeatTransmit(10);
+  transceive->send(paired_codes[device_id].down, 64); //short down
+
+  #else
   transceive->setProtocol(36);
   transceive->setRepeatTransmit(10);
   transceive->send(paired_codes[device_id].down, 64); //short down
@@ -169,6 +209,9 @@ void mLouvoliteHub::CommandSet_BlindTransmit_Down_Full(int8_t device_id)
   transceive->setProtocol(36);
   transceive->setRepeatTransmit(10);
   transceive->send(paired_codes[device_id].down, 64); //short down
+
+
+  #endif // ENABLE_DEVFEATURE_BLINDS_OPEN_COMMANDS_REPEATED_AND_DUPLICATED
 }
 
 

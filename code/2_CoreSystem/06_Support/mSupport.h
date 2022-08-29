@@ -386,6 +386,7 @@ class mSupport :
     // #endif // ENABLE_DEVFEATURE_OTA_METHOD
 
 
+
     /****
      * "class-less" Pointer Member function that takes the struct handler which contains if/when a mqtt payload should
      * be sent. If a payload should sent, the formatted publish function is called.
@@ -614,7 +615,7 @@ static int8_t GetCommandID_P(const char* needle, const char* haystack, char* des
 
 
 
-    void CmndRestart(void);
+    void CommandSet_Restart(int8_t command);
 
 
 

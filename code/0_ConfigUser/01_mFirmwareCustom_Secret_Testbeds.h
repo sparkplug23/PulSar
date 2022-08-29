@@ -16,6 +16,9 @@
 #include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
 #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
+// TESTBED_PRODUCTION ie bought sonoff/shelly as is, without modifications
+// TESTBED_CUSTOM ie esp32 handmade boards
+
 /**
  *  TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- TESTBEDS   -- 
  * Special hardware, shelly, sonoff
@@ -94,6 +97,8 @@
 
 // #define DEVICE_TESTBED_BME_ESP32
 
+// #define DEVICE_TESTBED_PRODUCTION__SONOFF_4CHPRO
+
 
 
 
@@ -120,6 +125,37 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#ifdef DEVICE_TESTBED_PRODUCTION__SONOFF_4CHPRO
+  #define DEVICENAME_CTR          "testbed_sonoff_4chpro"
+  #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
+  #define DEVICENAME_ROOMHINT_CTR  "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define USE_MODULE_DRIVERS_RELAY
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+
+  // default key# = relay#
+  // RF Key433 using rules to match patterns then need limit to how often RF matches 
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SONOFF_4CHPRO_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  // {"RfReceived":{"Data":11071155,"Bits":24,"Protocol":1,"Pulse":191,"millis":83687314,"Time":"18:48:02"}} // black doorbell
+
+#endif
+
 
 
 /**
@@ -5058,6 +5094,13 @@
 #ifdef DEVICE_TESTBED_SHELLY2P5_01
   #define DEVICENAME_CTR          "testbed_shelly25_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly 2.5 #01"
+  #define DEVICENAME_ROOMHINT_CTR   "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   /*
     Method should only activate if boot loop happens 10 times
@@ -5065,9 +5108,11 @@
     Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
   */
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  // #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_C_SWITCHES_ARE_MOTION_DETECTION_REPORTING_ONLY_OUTPUTS_ARE_REMOTE_CONTROLLED //sidedoor and garage new method
 
-  #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
+  // #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
+    // #define ENABLE_DRIVERS_RELAYS_TIME_LOCKS
 
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_ADE7953
@@ -5083,7 +5128,7 @@
 
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
-  #define MAX_RELAYS 2
+    #define MAX_RELAYS 2
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -5095,6 +5140,8 @@
 
   #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Power0"
   #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Power1"
+  #define D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "Switch0"
+  #define D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "Switch1"
   #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Motion0"
   #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Motion1"  
   
@@ -5108,8 +5155,8 @@
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
@@ -5119,9 +5166,12 @@
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
-    "},"
+    "}"   
+    #ifdef ENABLE_DRIVERS_RELAYS_TIME_LOCKS
+    ","
     "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"},"
     "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D20:01:00\",\"OffTime\":\"00D05:00:00\"}"
+    #endif // ENABLE_DRIVERS_RELAYS_TIME_LOCKS
   "}";
 
 
@@ -5272,6 +5322,66 @@
       "},"
       "\"Command\":{"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "}"
+  "}";
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  
+  /**
+   * New option: No local control, but rule for converting switch into motion event on mqtt
+   * 
+   * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
+   * One rule will be required for direction, ie motion started (button low) and motion over (button high)
+   * 
+   * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
+   * 
+   * Example
+   * 
+   * Rule0
+   * - Switch 0 = Low, Motion0 started
+   * 
+   * Rule1
+   * - Switch 0 = low, Relay0 on for X minutes   (time of day on relay operation will be controlled via relay_commands, to set operation time ranges)
+   * 
+   * Rule2
+   * - Switch 1 = Low, Motion1 started
+   * 
+   * Rule3
+   * - Switch 1 = low, Relay1 on for X minutes
+   * 
+   * */
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_C_SWITCHES_ARE_MOTION_DETECTION_REPORTING_ONLY_OUTPUTS_ARE_REMOTE_CONTROLLED
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Motion Event = Switch0
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "},"
+    // Motion Event = Switch1
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1," 
+        "\"State\":\"Follow\""
       "}"
     "}"
   "}";

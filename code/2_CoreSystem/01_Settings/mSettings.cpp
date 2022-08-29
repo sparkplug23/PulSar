@@ -69,33 +69,6 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
   //   UpdateQuickPowerCycle(false);
   // }
 
-// I think this is in time module, check it (the bootcount is I think, not sure about boot_loop_time, this should be moved into settings)
-
-// Save stable start
-  if (BOOT_LOOP_TIME == pCONT_time-> uptime.seconds_nonreset) {
-
-    #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-    RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
-    #endif
-
-#ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
-flag_rtc_reboot_reset_on_success = true;
-ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
-#endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
-
-
-    //Settings->last_module = Settings->module;
-
-#ifdef USE_DEEPSLEEP
-    if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
-      // SetOption76  - (Deepsleep) Enable incrementing bootcount (1) when deepsleep is enabled
-#endif
-      // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
-      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
-#ifdef USE_DEEPSLEEP
-    }
-#endif
-  }
     
   // AddLog(LOG_LEVEL_DEBUG,PSTR( "TaskerTest SUCCESS!!"));
 
@@ -242,7 +215,7 @@ ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
 
       #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
       #endif// ENABLE_LOG_LEVEL_INFO
 
           
@@ -265,6 +238,41 @@ ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
       //     Settings.seriallog_level = LOG_LEVEL_ALL;
       //   #endif
       // #endif
+
+      
+      // I think this is in time module, check it (the bootcount is I think, not sure about boot_loop_time, this should be moved into settings)
+
+
+      // Save stable start
+      // Dont use a bootloop time, instead have other "stable qualifiers", probably from a function I can call that can be diffferent by device ie (if mqtt, then require it..... if network, then require it...... )
+        // if (BOOT_LOOP_TIME == pCONT_time-> uptime.seconds_nonreset) {
+
+          #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+          RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
+          #endif
+
+      #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
+      flag_rtc_reboot_reset_on_success = true;
+      ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
+      #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
+
+
+          //Settings->last_module = Settings->module;
+
+      #ifdef USE_DEEPSLEEP
+          if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
+            // SetOption76  - (Deepsleep) Enable incrementing bootcount (1) when deepsleep is enabled
+      #endif
+            // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
+            // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
+      #ifdef USE_DEEPSLEEP
+          }
+      #endif
+
+        // }
+
+
+
 
 
 

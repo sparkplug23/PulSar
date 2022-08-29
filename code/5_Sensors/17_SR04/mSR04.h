@@ -45,6 +45,8 @@ class mSR04 :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_SR04_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SR04_ID; }
 
+    #define MAX_SENSORS_SR04_COUNT 1
+
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
       return sizeof(mSR04);
@@ -72,6 +74,7 @@ class mSR04 :
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
+      uint8_t fSensorCount = 0;
     }settings;
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -120,6 +123,26 @@ class mSR04 :
     #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
     void SubTask_UpdateAmbientTemperature();
     #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+
+    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.fSensorCount;
+    }
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > MAX_SENSORS_SR04_COUNT-1) {value->type.push_back(0); return ;}
+      value->type.push_back(SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID);
+      #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+      value->data.push_back((float)readings.average_EMA.distance_cm);
+      #else
+      value->data.push_back((float)readings.raw.distance_cm);
+      #endif
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
 
     // int getMeasure();
 

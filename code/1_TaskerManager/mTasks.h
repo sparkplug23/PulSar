@@ -84,6 +84,8 @@ enum XsnsFunctions {
   // New method that based on time, will only show the sensor at this period to "AddLog" reducing large serial prints
   FUNC_SENSOR_SHOW_LATEST_LOGGED_ID,
 
+  FUNC_UPDATE_OTA_BEFORE_ON_START,
+
   /**
    * @brief Special FUNC_X that should be used in testing, and will run with delayed start to enable OTA to be possible when boot loop would occur
    **/

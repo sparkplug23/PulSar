@@ -72,6 +72,7 @@ void mSR04::Pre_Init(void)
   if (pCONT_pins->PinUsed(GPIO_SR04_TRIG_ID) && pCONT_pins->PinUsed(GPIO_SR04_ECHO_ID))
   {
     settings.fEnableSensor = true;
+    settings.fSensorCount++;
   }
 }
 

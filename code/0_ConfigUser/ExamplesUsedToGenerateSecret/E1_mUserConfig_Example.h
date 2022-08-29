@@ -48,9 +48,9 @@
 
 // MQTT
 #undef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED //TO BE REPLACED WITH FOLLOWING METHOD
-#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED 192,168,1,65
+#define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED 192,168,1,70
 #undef MQTT_HOST
-#define MQTT_HOST  "192.168.1.65" //Parsing the IP String will be the new method
+#define MQTT_HOST  "192.168.1.70" //Parsing the IP String will be the new method
 
 
 // Belfast
