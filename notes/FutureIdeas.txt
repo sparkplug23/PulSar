@@ -443,3 +443,9 @@ Add sunelevation palette that is actually left on overnight, and is black when i
 #Idea 127
     Use "intensity" parameter as global option for all animations, with flag to set on/off
     The should enable a basic/advanced user to have basic or granular control of effects
+
+#Idea 128 FI-128 ie FI, feature idea
+    Keep detailed RTC memory inside settings, but also add a basic version to read as part of fastboot.
+    Main "Setup" will have a threadsafe RTC read/write of fastboot times, and if something is wrong, use this to switch into optional boot code that
+        1) Connects to default SSID "DEBUG_SSID_AP", connect to my wifi, and wait for OTA
+        2) Create its own wifi, so desktop etc can connect directly (if no AP connection) so OTA can be recovered directly

@@ -7,6 +7,9 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License
  ****************************************************/
 
+// from github, to do later,cliff
+// boxcar filters use a circular buffer of old values, and derive the filter output using some polynomial on all the items. If the coefficients are all the same, it's simple: keep an accumulator, and before you add a new reading into the buffer, subtract what you were about to overwrite and add the new reading to the accumulator. The filter output is then just accumulator/N (for N samples). This creates an accurate moving average of only the last N readings.
+
 #ifndef _DoubleEMAFilterLib_h
 #define _DoubleEMAFilterLib_h
 

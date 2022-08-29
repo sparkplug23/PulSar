@@ -511,7 +511,7 @@ void json_unescape(char* string) {
     #ifdef USE_DEBUG_JSMN
     Serial.printf("Add null\n\r");
     #endif// USE_DEBUG_JSMN
-    uint8_t difference = abs(strlen(string)-outlength);
+    // uint8_t difference = ABS_FUNCTION(strlen(string)-outlength);
 		string[outlength] = 0;
   }
 
