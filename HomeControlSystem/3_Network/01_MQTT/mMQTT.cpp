@@ -564,9 +564,9 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
 void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR("MqttDataHandler"));
-  #endif// ENABLE_LOG_LEVEL_INFO
+  // #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(LOG_LEVEL_TEST, PSTR("MqttDataHandler"));
+  // #endif// ENABLE_LOG_LEVEL_INFO
 
   // Do not allow more data than would be feasable within stack space
   if (data_len >= MQTT_MAX_PACKET_SIZE) { return; }
@@ -599,9 +599,8 @@ void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int d
 
     pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
     
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_MQTT "isserviced %d"),data_buffer.isserviced);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    ALOG_COM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"),data_buffer.isserviced);
+    
   }
 
 }

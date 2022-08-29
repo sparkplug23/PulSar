@@ -155,8 +155,8 @@ void mMotion::RulesEvent_Motion_Change(){
 //   MAX_SWITCH_OPTION
 // };
 
-pCONT_rules->ShowRuleAddLogByIndex();
-pCONT_rules->ShowRuleEvent_AddLog();
+// pCONT_rules->ShowRuleAddLogByIndex();
+// pCONT_rules->ShowRuleEvent_AddLog();
 
 //     if(command_state_in == SWITCHMODE_FOLLOW_ID)
 //     {
@@ -167,12 +167,12 @@ pCONT_rules->ShowRuleEvent_AddLog();
 
 // }
 
-AddLog(LOG_LEVEL_TEST, PSTR("trigger_state=%d"),trigger_state);
-AddLog(LOG_LEVEL_TEST, PSTR("command_state_in=%d"),command_state_in);
-AddLog(LOG_LEVEL_TEST, PSTR("newevent_command_state_in=%d"),newevent_command_state_in);
-AddLog(LOG_LEVEL_TEST, PSTR("command_state_out=%d"), command_state_out);
+// AddLog(LOG_LEVEL_TEST, PSTR("trigger_state=%d"),trigger_state);
+// AddLog(LOG_LEVEL_TEST, PSTR("command_state_in=%d"),command_state_in);
+// AddLog(LOG_LEVEL_TEST, PSTR("newevent_command_state_in=%d"),newevent_command_state_in);
+// AddLog(LOG_LEVEL_TEST, PSTR("command_state_out=%d"), command_state_out);
 
-ALOG_INF( PSTR("\t\t\t\t\t current_module_id=%d"), current_module_id );
+// ALOG_INF( PSTR("\t\t\t\t\t current_module_id=%d"), current_module_id );
 
 
 switch(command_state_in)
@@ -196,11 +196,11 @@ switch(command_state_in)
 }
 
 
-AddLog(LOG_LEVEL_TEST, PSTR("Bommand_state_out=%d"), command_state_out);
+// AddLog(LOG_LEVEL_TEST, PSTR("Bommand_state_out=%d"), command_state_out);
 
 char buffer[100];
 
-AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, command_state_out, pCONT_sup->GetState_Name_by_ID(command_state_out, buffer, sizeof(buffer)));
+// AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, command_state_out, pCONT_sup->GetState_Name_by_ID(command_state_out, buffer, sizeof(buffer)));
 
 
     // sensor_id<settings.sensors_active;sensor_id++)
@@ -224,10 +224,10 @@ AddLog(LOG_LEVEL_TEST, PSTR("state=[%d->%d]\"%s\""), newevent_command_state_in, 
         pir_detect[sensor_id].detected_time = pCONT_time->GetTimeShortNowU32();
         pir_detect[sensor_id].isactive = true;
 
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
-        #endif
-        AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].detected_time=%d"),pir_detect[sensor_id].detected_time);
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        // AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].state=%d"),pir_detect[sensor_id].state);
+        // #endif
+        // AddLog(LOG_LEVEL_DEBUG,PSTR("pir_detect[sensor_id].detected_time=%d"),pir_detect[sensor_id].detected_time);
         
         // #ifdef USE_MODULE_CORE_RULES
         // pCONT_rules->New_Event(E M_MODULE_SENSORS_MOTION_ID, sensor_id);

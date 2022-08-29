@@ -99,6 +99,7 @@ class mBME :
 
     #define MAX_SENSORS 2
     void EveryLoop();
+    void ShowSensor_AddLog();
 
     struct SENSORDATA{
       float temperature = 0;

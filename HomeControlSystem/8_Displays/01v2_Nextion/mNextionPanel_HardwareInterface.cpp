@@ -161,9 +161,9 @@ bool mNextionPanel::nextionConnect()
 
   SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
 
- nextionSendCmd("connect");
- // S:comok 1,30601-0,NX3224T024_011R,163,61488,DE6064B7E70C6521,4194304ÿÿÿ // response from connect
- 
+  nextionSendCmd("connect"); // 
+  // S:comok 1,30601-0,NX3224T024_011R,163,61488,DE6064B7E70C6521,4194304ÿÿÿ // response from connect
+
 
   if (!lcdConnected)
   { // Check for some traffic from our LCD

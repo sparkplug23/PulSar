@@ -40,6 +40,9 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_LOOP:
       EveryLoop();
     break;
+    case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
+      ShowSensor_AddLog();
+    break;
     /************
      * WEBPAGE SECTION * 
     *******************/
@@ -211,7 +214,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
           sensor[sensor_id].instant.dewPoint = sensor[sensor_id].dht->computeDewPoint(newValues.temperature, newValues.humidity);
           sensor[sensor_id].instant.cr = sensor[sensor_id].dht->getComfortRatio(cf, newValues.temperature, newValues.humidity);
 
-          AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
+          ALOG_DBM( PSTR(D_LOG_DHT "temperature %d"),(int)sensor[sensor_id].instant.temperature);
       
           sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_DONE_ID;
         }
@@ -267,6 +270,14 @@ void mSensorsDHT::EveryLoop(){
 
 }
 
+void mSensorsDHT::ShowSensor_AddLog()
+{
+  
+  ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+  ALOG_INF(PSTR(D_LOG_DHT "\"%s\""),JBI->GetBufferPtr());
+
+}
+
 
 /*********************************************************************************************************************************************
 ******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
@@ -295,107 +306,30 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
 
   JsonBuilderI->Start();
   for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
-    if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))
-      //  &&(sensor[sensor_id].instant.isvalid)
-      ){
+    if(
+      sensor[sensor_id].instant.ischanged || 
+      (json_level >  JSON_LEVEL_IFCHANGED) || 
+      (json_level == JSON_LEVEL_SHORT)
+    ){
 
       JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
-        JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
-          JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-          JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
-        JsonBuilderI->Level_End();   
+        if(json_level >=  JSON_LEVEL_DETAILED)
+        {     
+          JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+            JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+            JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+          JsonBuilderI->Level_End();   
+        }
       JsonBuilderI->Level_End(); 
     }
 
   }
-  //   for(int dht_id=0;dht_id<2;dht_id++){
-  //   JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
-  //     JBI->Add(D_JSON_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
-  //     JBI->Add(D_JSON_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
-  //     JBI->Add(D_JSON_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
-  //     JBI->Add(D_JSON_ISCHANGED, pCONT_dht->sensor[dht_id].instant.ischanged);
-  //     // json1["iserrored"] = pCONT->mhs->climate.ptr->iserrored;
-  //     // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
-  //     // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE
-  //     // json1["dewpoint"] = pCONT->mhs->climate.ptr->raw.dewPoint;
-  //   JBI->Level_End();
-  // }
-  
+    
   return JsonBuilderI->End();
 
 }
 
-
-void mSensorsDHT::MQTTHandler_Init(){
-
-  struct handler<mSensorsDHT>* ptr;
-  
-  ptr = &mqtthandler_settings_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Settings;
-
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Sensor;
-
-  ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 10;//pCONT_set->Settings.sensors.ifchanged_secs;
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mSensorsDHT::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSensorsDHT::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSensorsDHT::MQTTHandler_Set_TelePeriod()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSensorsDHT::MQTTHandler_Sender(uint8_t id)
-{
-  for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_DHT_ID, handle, id);
-  }
-}
 
 #endif

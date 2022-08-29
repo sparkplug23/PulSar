@@ -52,6 +52,15 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       // Serial.println(pCONT_dht->GetSensorReading());
       // Serial.println(pCONT_msdb18->test123());
       // Serial.println(pCONT_dht->test123());
+
+      // Make nicer later with json command to enable and time period to show
+      if(settings.tTicker_Splash_Sensors_To_Logs-- == 1)
+      {
+        // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
+        ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
+        pCONT->Tasker_Interface(FUNC_SENSOR_SHOW_LATEST_LOGGED_ID);
+        settings.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
+      }
       
   
 

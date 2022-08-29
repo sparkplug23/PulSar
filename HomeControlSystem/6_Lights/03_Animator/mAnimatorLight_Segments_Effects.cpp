@@ -136,7 +136,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
    * If RGB only palette, then also allow brightnessCCT to add white component across all colours
    * 
    */
-
+  
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
 
   //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
@@ -152,6 +152,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   
   /**
    * @brief Intensity describes the amount of pixels to update
+   * 
+   * This does not need to be calculate each call, this should be calculated when set then saved, memory speed
    **/
   uint8_t percentage = 20; // forced 20, but there is a command for this
   #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
@@ -171,10 +173,21 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   // if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){
   //   pixels_to_update_as_number = SEGMENT.length();
   // }
-
   // uint8_t pixel_position = 0;
+
+  uint16_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+
+  /**
+   * @brief Future plan
+   * Instead of getting the colour each time (looping by index out), instead get the colour once and then write it to the output? this should be faster
+   * 
+   */
   uint16_t pixel_index = 0;
   RgbTypeColor colour = RgbcctColor(0);
+
+// 22.6us with GetPixelsInMap inside for loop
+// 21.3 without getpixelsinmap
+
   for (uint16_t iter = 0; iter < pixels_to_update_as_number; iter++)
   {
     /**
@@ -192,9 +205,14 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
 
     // For random, desired pixel from map will also be random
-    desired_pixel = random(0, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
     
+    // 3.5us
+    desired_pixel = random(0, pixels_in_map);
+  
+
+// 10.5us per call
     colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+
 
       // DEBUG_LINE_HERE_PAUSE;
     #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
@@ -202,9 +220,11 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
     if(SEGMENT.flags.brightness_applied_during_colour_generation){
+      // 6us
       colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
     }
 
+    // 2us
     SetTransitionColourBuffer_DesiredColour(SEGENV.Data(), SEGENV.DataLength(), pixel_index, SEGMENT.colour_type, colour);
 
   }
@@ -224,6 +244,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
   );
+
 
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -5461,6 +5482,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
   // return delay;
 
   SEGENV.animation_has_anim_callback = false; // When no animation callback is needed
+          Serial.print("@4");
   StripUpdate();
 
 }
@@ -8612,6 +8634,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
   /**
    * Direct update, disable neopixel callback 
    **/
+          Serial.print("@3");
   StripUpdate();
   SEGENV.anim_function_callback = nullptr; // When no animation callback is needed
 
@@ -8893,6 +8916,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette()
   /**
    * Direct update, disable neopixel callback 
    **/
+  #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+          Serial.print("@2");
+          #endif
   StripUpdate();
   SEGENV.anim_function_callback = nullptr; // When no animation callback is needed
 
@@ -11216,7 +11242,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
 
 
 // DEBUG_LINE_HERE;
-
+#ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+          Serial.print("@1");
+          #endif 
 StripUpdate();
 
 

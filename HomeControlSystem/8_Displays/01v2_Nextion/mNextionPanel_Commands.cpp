@@ -496,13 +496,6 @@ std::string& replace(std::string& s, const std::string& from, const std::string&
 //       sprintf(command_ctr,"statusupdate %d",statusupdate);
 //       mqtthandler_settings_teleperiod.flags.SendNow = true;
 //     }else
-//     if(!obj["brightness"].isNull()){ 
-//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
-//       uint8_t brightness = obj["brightness"];
-//       //nextionSetAttr("dim", String(brightness));
-//       //sprintf(command_ctr,"dims=%d",brightness);
-//       nextionSendCmd("dims=dim");
-//     }else
 //     if(!obj["lcdreboot"].isNull()){ 
 //       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "lcdreboot"));    
 //       uint8_t lcdreboot = obj["lcdreboot"];

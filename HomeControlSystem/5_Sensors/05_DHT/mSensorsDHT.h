@@ -83,6 +83,7 @@ class mSensorsDHT :
     RHT03    // Equivalent to DHT22
   };
 
+    void ShowSensor_AddLog();
 
     //#define D_MODULE_TOPIC_NAME "dht"
 

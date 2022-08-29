@@ -99,6 +99,27 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_CLEARLOG, jtok.getInt());
     }
 
+    if(jtok = obj_sub[PM_JSON_BRIGHTNESS])
+    {
+      // if(jtok.isInt()){
+      //   CommandSet_DisplayClearLog(jtok.getInt());
+      // }
+
+// I need to introduce how tasmota has a received/mailbox so I can store the brightness to then call sub displays to set them by hardware
+
+      ALOG_COM(PM_JSON_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_CLEARLOG, jtok.getInt());
+    }
+
+
+    
+//     if(!obj["brightness"].isNull()){ 
+//       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION D_PARSING_MATCHED "brightness"));    
+//       uint8_t brightness = obj["brightness"];
+//       //nextionSetAttr("dim", String(brightness));
+//       //sprintf(command_ctr,"dims=%d",brightness);
+//       nextionSendCmd("dims=dim");
+//     }else
+
 
 
   }

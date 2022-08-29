@@ -333,13 +333,13 @@ void mSwitches::SwitchHandler(uint8_t mode)
       {
         switches[i].ischanged = true;
 
-        AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
+        ALOG_DBM( PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
                               i, 
                               state,
                               state==active_state?"ACTIVE":"Not Active"
         );
       
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("state%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),state,i,switches[i].lastwallswitch);
+        ALOG_DBM( PSTR("state%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),state,i,switches[i].lastwallswitch);
         
         switchflag = 3;
         switch (pCONT_set->Settings.switchmode[i]) {
@@ -397,7 +397,7 @@ void mSwitches::SwitchHandler(uint8_t mode)
             // Active high means start of motion always, so check for inversion
             uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
             
-            AddLog(LOG_LEVEL_INFO, PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
+            ALOG_DBM( PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
 
 
             // #ifdef ENABLE_RULES_TRIGGER_METHOD_V2

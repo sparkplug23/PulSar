@@ -34,7 +34,7 @@
 // #define DEVICE_H801_BEDROOM_UNDERDESK
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_HVAC_HAIRDRYER
-#define DEVICE_DESKSENSOR
+// #define DEVICE_DESKSENSOR
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
@@ -418,14 +418,11 @@
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
 
-
   // #define analogRead(x) error
 
   // #define DISABLE_NETWORK
 
   #define DISABLE_SLEEP
-
-
 
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
@@ -434,133 +431,52 @@
 
   // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
-//   {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": "Static"
-//   },
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 1000
-//   },
-//   "ColourPalette": 15,
-//   "PaletteEdit": {
-//     "ColourPalette": 15,
-//     "Data": [
-//       4,6,0,0,0,
-//       255,      0,      0,
-//       0,      255,      0,
-//       0,      0,      255,
-//       255,      255,      0
-//     ]
-//   },
-//   "BrightnessRGB": 100,
-//   "BrightnessCCT": 100
-// }
-
-// {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": "Solid"
-//   },
-//   "ColourPalette": 10,
-//   "BrightnessRGB": 10,
-//   "Hue": 120,
-//   "Sat": 100,
-//   "CCT_TempPercentage": 100,
-//   "BrightnessCCT": 0,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 5000
-//   },
-//   "Light":{"TimeOn":10}
-// }
-
-
-// {
-//   "Segment0":{
-//   "PixelRange":[0,3],
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": 2
-//   },
-//   "ColourPalette": 0,
-//   "BrightnessRGB": 10,
-//   "BrightnessCCT": 10,
-//   "Hue":0,"Sat":100,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 1000
-//   }
-//   },
-//   "Segment1":{
-//   "PixelRange":[5,8],
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": 2
-//   },
-//   "ColourPalette": 16,
-//   "BrightnessRGB": 100,
-//   "BrightnessCCT": 10,
-//   "Hue":0,"Sat":100,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 10000
-//   }
-//   }
-// }
-// {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": 0
-//   },
-//   "ColourPalette": 10,
-//   "BrightnessRGB": 10,
-//   "BrightnessCCT": 10,
-//   "Hue":0,"Sat":100,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 1000
-//   }
-// }
   // #define USE_MODULE_DRIVERS_LEDS
 
   // #define USE_MODULE_DRIVERS_IRREMOTE
   // #define USE_IR_RECEIVE
 
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // #define USE_MODULE_SENSORS_DS18X
-  // #define USE_MODULE_SENSORS_DHT
-  // #define USE_MODULE_SENSORS_BME
-  //   #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
-  // #define USE_MODULE_SENSORS_BH1750
-  // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define USE_MODULE_SENSORS_LDR_BASIC
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS_DHT
+  #define USE_MODULE_SENSORS_BME
+    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
+  #define USE_MODULE_SENSORS_BH1750
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_LDR_BASIC
 
-  // #ifdef USE_MODULE_SENSORS_LDR_BASIC
-  //   #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-  //   #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  // #endif // USE_MODULE_SENSORS_LDR_BASIC
+  #ifdef USE_MODULE_SENSORS_LDR_BASIC
+    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
+    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
+  #endif // USE_MODULE_SENSORS_LDR_BASIC
   
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  //   #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  // #define STRIP_SIZE_MAX 1000 //stress test
+  #define USE_MODULE_LIGHTS_INTERFACE
+    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  // #define STRIP_SIZE_MAX 1500 // 10hz with no network
+  #define STRIP_SIZE_MAX 100 // 17hz == I need to use GPIO digital pins to work on speeding up my code. Likely how I convert colours is too slow, need to speed optimise it? (reduce methods, remove HSB colour codes?)
   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
   // #define USE_SK6812_METHOD_DEFAULT
-  //   #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  //   #define ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
+    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    #define ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
+
+    // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+
+    // #define ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
+
+
+    // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
   #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
 
@@ -568,13 +484,10 @@
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define SHOW_SPLASH
 
-  //#define USE_MODULE_DISPLAYS_NEXTION
-  //#define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
-
   #define USE_MODULE_DISPLAYS_NEXTION_V2
-  //#define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
 
-    #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+  //   #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
 
 // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 // https://github.com/drzony/FastLED-tests/blob/master/src/main.cpp
@@ -586,6 +499,51 @@
 
   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
   // #define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
+
+
+  /**
+   * @brief USe Logic analyser to find out where the delays in lighting code are
+   * - around drawing new palette
+   * - time to update each blend function
+   * - time to output "Show"
+   * Add header that breaks out multiple pins into a nice female header for easy logic analyzer connection
+   * 
+   */
+
+  /**
+   * Debug pins
+   * */
+  // #define ENABLE_FEATURE_DEBUG_PINS
+
+  // #define DEBUG_PIN1_GPIO     32
+  // #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  // #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  // #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+
+  // #define DEBUG_PIN2_GPIO     33
+  // #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  // #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  // #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+
+  // #define DEBUG_PIN3_GPIO     25
+  // #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  // #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
+  // #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+
+  // #define DEBUG_PIN4_GPIO     14
+  // #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  // #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
+  // #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+
+  // #define DEBUG_PIN5_GPIO     12
+  // #define DEBUG_PIN5_INIT()   pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
+  // #define DEBUG_PIN5_SET(X)   digitalWrite(DEBUG_PIN5_GPIO, X);
+  // #define DEBUG_PIN5_TOGGLE()   digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
+
+  // #define DEBUG_PIN6_GPIO     13
+  // #define DEBUG_PIN6_INIT()   pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
+  // #define DEBUG_PIN6_SET(X)   digitalWrite(DEBUG_PIN6_GPIO, X);
+  // #define DEBUG_PIN6_TOGGLE()   digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -600,8 +558,8 @@
       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
       #endif // USE_MODULE_SENSORS_DS18X
-      // TX0 - Debug Serial TX
-      // RX0 - Debug Serial RX
+      // GPIO1 - TX0 - Debug Serial TX
+      // GPIO3 - RX0 - Debug Serial RX
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
       "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
       #endif
@@ -609,13 +567,6 @@
       "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
       "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
       #endif
-
-
-
-      // "\"19\":\"" D_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR "\","
-      // "\"18\":\"" D_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR "\","
-      
-
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
@@ -632,26 +583,27 @@
       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
       "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
       #endif
+      // GPIO0 - ADC2 CH1
       /**
        * @brief Left side
        **/
       // EN
-      // VP
-      // VN
+      // 36 - INPUT ONLY - VP
+      // 39 - INPUT ONLY - VN
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6
+      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
       #endif
-      // 35 - adc1_7
-      // 32 - Touch9
-      // 33 - Touch8
-      // 25 - DAC1 = LM386 Amplifier Module
+      // 35 - INPUT ONLY - adc1_7
+      // 32 - Touch9 (Debug Header 1)
+      // 33 - Touch8 (Debug Header 2)
+      // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
-      // 14
-      // 12
-      // 13
+      // 14 (Debug Header 4)
+      // 12 (Debug Header 5)
+      // 13 (Debug Header 6)
       // Can I introduce a way that a comma at the end, does not make a broken json?
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -785,18 +737,18 @@
     // "\"PixelRange\":[0,6],"
     "\"AnimationMode\": \"Effects\","
     "\"ColourOrder\": \"grbw\","
-    "\"ColourPalette\": 0,"
-    "\"Effects\": {"
+    "\"ColourPalette\":31," //31.5 for "0", 31 is xmas01 is 26.7us
+    "\"Effects\": {" 
       "\"Function\": \"Slow Glow\""
     "},"
     "\"Hue\": 120,"
     "\"Sat\": 100,"
-    "\"BrightnessRGB\": 1,"
+    "\"BrightnessRGB\": 20,"
     "\"BrightnessCCT\": 0,"
     "\"CCT_TempPercentage\": 100,"
     "\"Transition\": {"
-      "\"TimeMs\": 9000,"
-      "\"RateMs\": 10000"
+      "\"TimeMs\": 0,"
+      "\"RateMs\": 1000"
     "}"
     // "\"Light\":{\"TimeOn\":10}"
 
@@ -804,6 +756,95 @@
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
 
+//   {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": "Static"
+//   },
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 1000
+//   },
+//   "ColourPalette": 15,
+//   "PaletteEdit": {
+//     "ColourPalette": 15,
+//     "Data": [
+//       4,6,0,0,0,
+//       255,      0,      0,
+//       0,      255,      0,
+//       0,      0,      255,
+//       255,      255,      0
+//     ]
+//   },
+//   "BrightnessRGB": 100,
+//   "BrightnessCCT": 100
+// }
+
+// {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": "Solid"
+//   },
+//   "ColourPalette": 10,
+//   "BrightnessRGB": 10,
+//   "Hue": 120,
+//   "Sat": 100,
+//   "CCT_TempPercentage": 100,
+//   "BrightnessCCT": 0,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 5000
+//   },
+//   "Light":{"TimeOn":10}
+// }
+
+
+// {
+//   "Segment0":{
+//   "PixelRange":[0,3],
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": 2
+//   },
+//   "ColourPalette": 0,
+//   "BrightnessRGB": 10,
+//   "BrightnessCCT": 10,
+//   "Hue":0,"Sat":100,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 1000
+//   }
+//   },
+//   "Segment1":{
+//   "PixelRange":[5,8],
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": 2
+//   },
+//   "ColourPalette": 16,
+//   "BrightnessRGB": 100,
+//   "BrightnessCCT": 10,
+//   "Hue":0,"Sat":100,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 10000
+//   }
+//   }
+// }
+// {
+//   "AnimationMode": "Effects",
+//   "Effects": {
+//     "Function": 0
+//   },
+//   "ColourPalette": 10,
+//   "BrightnessRGB": 10,
+//   "BrightnessCCT": 10,
+//   "Hue":0,"Sat":100,
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 1000
+//   }
+// }                
 
 #endif
 

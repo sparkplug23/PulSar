@@ -23,6 +23,42 @@
 
   #include "jsmn.h"
 
+
+#ifndef ENABLE_FEATURE_DEBUG_PINS // Nicely set them to nothing so they can be used inline without worring about ifdef gaurds each time
+
+  // #define DEBUG_PIN1_GPIO     32
+  #define DEBUG_PIN1_INIT()   //pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  #define DEBUG_PIN1_SET(X)   //digitalWrite(DEBUG_PIN1_GPIO, X);
+  #define DEBUG_PIN1_TOGGLE()   //digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+
+  // #define DEBUG_PIN2_GPIO     33
+  #define DEBUG_PIN2_INIT()   //pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  #define DEBUG_PIN2_SET(X)   //digitalWrite(DEBUG_PIN2_GPIO, X);
+  #define DEBUG_PIN2_TOGGLE()   //digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+
+  // #define DEBUG_PIN3_GPIO     25
+  #define DEBUG_PIN3_INIT()   //pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  #define DEBUG_PIN3_SET(X)   //digitalWrite(DEBUG_PIN3_GPIO, X);
+  #define DEBUG_PIN3_TOGGLE()   //digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+
+  // #define DEBUG_PIN4_GPIO     14
+  #define DEBUG_PIN4_INIT()   //pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  #define DEBUG_PIN4_SET(X)   //digitalWrite(DEBUG_PIN4_GPIO, X);
+  #define DEBUG_PIN4_TOGGLE()   //digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+
+  // #define DEBUG_PIN5_GPIO     12
+  #define DEBUG_PIN5_INIT()   //pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
+  #define DEBUG_PIN5_SET(X)   //digitalWrite(DEBUG_PIN5_GPIO, X);
+  #define DEBUG_PIN5_TOGGLE()   //digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
+
+  // #define DEBUG_PIN6_GPIO     13
+  #define DEBUG_PIN6_INIT()   //pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
+  #define DEBUG_PIN6_SET(X)   //digitalWrite(DEBUG_PIN6_GPIO, X);
+  #define DEBUG_PIN6_TOGGLE()   //digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
+
+#endif // ENABLE_FEATURE_DEBUG_PINS
+
+
 class mHardwarePins :
   public mTaskerInterface
 {

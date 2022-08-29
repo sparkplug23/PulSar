@@ -58,6 +58,9 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
 
 
     break;
+    case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
+      ShowSensor_AddLog();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -245,7 +248,7 @@ void mBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
         sensor[sensor_id].pressure =    read_pressure / 100.0f;
         sensor[sensor_id].altitude =    read_altitude;
 
-        ALOG_INF( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
+        ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_JSON_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
@@ -274,6 +277,14 @@ void mBME::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
 
 }//end function
 
+void mBME::ShowSensor_AddLog()
+{
+  
+  ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+  ALOG_INF(PSTR(D_LOG_BME "\"%s\""),JBI->GetBufferPtr());
+
+}
+
 
 
 uint8_t mBME::ConstructJSON_Settings(uint8_t json_method){
@@ -291,16 +302,23 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level){
   char buffer[50];
 
   for(uint8_t sensor_id = 0;sensor_id<settings.fSensorCount;sensor_id++){
-    if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
+    if(
+      sensor[sensor_id].ischanged_over_threshold || 
+      (json_level >  JSON_LEVEL_IFCHANGED) || 
+      (json_level == JSON_LEVEL_SHORT)
+    ){
       JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
         JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].temperature);
         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
         JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
-        JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
-          JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-          JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
-        JsonBuilderI->Level_End();  
+        if(json_level >=  JSON_LEVEL_DETAILED)
+        {          
+          JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+            JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+            JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
+          JsonBuilderI->Level_End();  
+        }
       JsonBuilderI->Level_End();
     }
   }

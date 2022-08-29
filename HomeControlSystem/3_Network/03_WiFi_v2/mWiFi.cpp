@@ -687,7 +687,7 @@ void mWiFi::WifiCheckIp(void)
 // #endif  // LWIP_IPV6=1
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
+    AddLog(LOG_LEVEL_DEBUG, PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "Connected to IP:%s (%s) WiFi.status() = WL_CONNECTED")); //ip, ssid, connected uptime, connected total downtime
     #endif// ENABLE_LOG_LEVEL_INFO
 

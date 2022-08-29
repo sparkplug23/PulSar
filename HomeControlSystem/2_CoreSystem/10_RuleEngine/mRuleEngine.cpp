@@ -231,9 +231,9 @@ void mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_even
   event_triggered.device_id = _index;
   
   va_list arg;
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
 
-  ALOG_INF( PSTR("module_id, function_id, device_id = %d,%d,%d"), event_triggered.module_id, event_triggered.function_id, event_triggered.device_id);
+  ALOG_DBM( PSTR("module_id, function_id, device_id = %d,%d,%d"), event_triggered.module_id, event_triggered.function_id, event_triggered.device_id);
   
   va_start(arg, _data_length);
   for(int i = 0; i < _data_length; i++) {
@@ -248,7 +248,7 @@ DEBUG_LINE_HERE;
   }
   va_end(arg);
 
-  AddLog_Array_Int(LOG_LEVEL_HIGHLIGHT, "data", event_triggered.value.data, ARRAY_SIZE(event_triggered.value.data));
+  // AddLog_Array_Int(LOG_LEVEL_HIGHLIGHT, "data", event_triggered.value.data, ARRAY_SIZE(event_triggered.value.data));
 
   // DEBUG_LINE_HERE; ALOG_INF(PSTR("event_triggered.module_id = %d"), event_triggered.module_id);
 
@@ -297,9 +297,9 @@ uint8_t mRuleEngine::GetEnabledCount()
 void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
-  #endif // ENABLE_LOG_LEVEL_INFO
+  // #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(LOG_LEVEL_TEST, PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
+  // #endif // ENABLE_LOG_LEVEL_INFO
 
   //maybe need to return rule(s) handled then leave taasker_interface
 
@@ -333,9 +333,9 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
     // Check this rule must act of the function
     if(rules[rule_index].trigger.function_id == function_input){
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED function_input[%d] to rule[%d]"),function_input,rule_index);
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED function_input[%d] to rule[%d]"),function_input,rule_index);
+    // #endif // ENABLE_LOG_LEVEL_INFO
 
       rules_active_index = rule_index;
 
@@ -348,9 +348,9 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
       if(rules[rule_index].trigger.device_id == event_triggered.device_id)
       {
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.device_id[%d] to rule[%d]"),rules[rule_index].trigger.device_id,rule_index);
+    // #endif// ENABLE_LOG_LEVEL_INFO
 
         // char message[50];
         // memset(message,0,sizeof(message));
@@ -363,20 +363,20 @@ void mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
         if(rules[rule_index].trigger.module_id == event_triggered.module_id)
         {
         
-    #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.module_id[%d] to rule[%d]"),rules[rule_index].trigger.module_id,rule_index);         
-          AddLog(LOG_LEVEL_TEST, PSTR("Rule %d Triggered"),rule_index);
-          AddLog(LOG_LEVEL_TEST, PSTR("Trying to target module %d \"%s\""),rules[rule_index].command.module_id, pCONT->GetModuleFriendlyName_WithUniqueID(rules[rule_index].command.module_id));
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//           AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_RULES "MATCHED trigger.module_id[%d] to rule[%d]"),rules[rule_index].trigger.module_id,rule_index);         
+          ALOG_INF(PSTR(D_LOG_RULES "Rule %d Triggered"), rule_index);
+//           AddLog(LOG_LEVEL_TEST, PSTR("Trying to target module %d \"%s\""),rules[rule_index].command.module_id, pCONT->GetModuleFriendlyName_WithUniqueID(rules[rule_index].command.module_id));
         
-    #endif// ENABLE_LOG_LEVEL_INFO
+//     #endif// ENABLE_LOG_LEVEL_INFO
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
 
           // Populate any jsoncommands to be executed, this takes precident over "State" controls
           if(rules[rule_index].command.json_commands_dlist_id>0)
           {
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
             D_DATA_BUFFER_CLEAR();
             pCONT_sup->GetTextIndexed(
               data_buffer.payload.ctr, 
@@ -386,20 +386,20 @@ DEBUG_LINE_HERE;
             ); 
             data_buffer.payload.len += strlen(data_buffer.payload.ctr);
 
-DEBUG_LINE_HERE;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
+// DEBUG_LINE_HERE;
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//             AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID mrules=%s"),data_buffer.payload.ctr);
 
-    #endif // ENABLE_LOG_LEVEL_INFO
+//     #endif // ENABLE_LOG_LEVEL_INFO
     
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
             pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
           }
           else // Execute normal state/value method if no jsoncommand was used
           {
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
             /**
              * If destination.state is "2", then "NewEvent" needs to be inverted from trigger
              * */
@@ -421,16 +421,16 @@ DEBUG_LINE_HERE;
             // );
             // #endif // ENABLE_RULES_TRIGGER_METHOD_V2
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
 
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-            AddLog(LOG_LEVEL_TEST, PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
-              rules[rule_index].command.function_id, // function the previous trigger is linked to
-              rules[rule_index].command.module_id, //target module
-              true  // runnig a rule, so don't call this loop back into this function
-            );
+//     #ifdef ENABLE_LOG_LEVEL_ERROR
+//             AddLog(LOG_LEVEL_TEST, PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
+//               rules[rule_index].command.function_id, // function the previous trigger is linked to
+//               rules[rule_index].command.module_id, //target module
+//               true  // runnig a rule, so don't call this loop back into this function
+//             );
 
-    #endif // ENABLE_LOG_LEVEL_INFO
+//     #endif // ENABLE_LOG_LEVEL_INFO
           }
 
         } // trigger.module_id
@@ -450,7 +450,7 @@ DEBUG_LINE_HERE;
     } // configured and enabled
 
   } // for loop
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
  
 }
 

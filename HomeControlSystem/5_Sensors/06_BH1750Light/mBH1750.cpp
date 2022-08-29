@@ -180,7 +180,7 @@ bool mBH1750::Get_SensorReading(uint32_t sensor_index)
   device_data[sensor_index].level = level;
   device_data[sensor_index].illuminance = illuminance;
 
-  ALOG_INF( PSTR(D_LOG_BH1750 "level=%d"), device_data[sensor_index].level);
+  ALOG_DBM( PSTR(D_LOG_BH1750 "level=%d"), device_data[sensor_index].level);
 
   device_data[sensor_index].valid = SENSOR_MAX_MISS;
 
@@ -251,7 +251,7 @@ uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_method)
 void mBH1750::parse_JSONCommand(JsonParserObject obj)
 {
 
-  ALOG_DBM( PSTR(D_LOG_BH1750 "parse_JSONCommand") );
+  // ALOG_DBM( PSTR(D_LOG_BH1750 "parse_JSONCommand") );
   
   char buffer[50];
   JsonParserToken jtok = 0; 

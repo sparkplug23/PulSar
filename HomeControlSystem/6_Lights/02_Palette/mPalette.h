@@ -486,7 +486,9 @@ class mPalette
         // Map IDs
         uint8_t* colour_map_id; 
         // Active pixels
-        uint8_t colour_map_size = 0;
+        uint8_t colour_map_size = 0; //total bytes in palette (not pixel count)
+
+        //perhaps add pixel_count instead of computing it. Or, with new "Load palette" have this calculated and saved in "loaded palette info"
       };
       // Can be edited
       PALETTE hsbid_users[10]; //reduce to 10, as "hsb_colour_ids"
@@ -565,6 +567,8 @@ class mPalette
       PALETTE *ptr = &rainbow;
     }palettelist;
 
+    // struct PALETTE_LOADING
+
     // One of the variable rgbcct is used as the function colour manipulators
     // uint8_t active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 
@@ -590,6 +594,11 @@ class mPalette
     uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
 
     uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
+    
+#ifdef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
+void LoadPalette(uint16_t palette_id);
+#endif // ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
+
 
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
@@ -616,7 +625,7 @@ class mPalette
     #endif //ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
 
     
-    RgbcctColor GetColourFromPaletteAdvanced(
+    RgbcctColor IRAM_ATTR GetColourFromPaletteAdvanced(
       uint16_t palette_id = 0,
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,

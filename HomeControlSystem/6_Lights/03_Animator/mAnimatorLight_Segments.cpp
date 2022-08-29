@@ -192,8 +192,16 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
       if((mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
       {
+        DEBUG_PIN1_SET(LOW);
 
-        ALOG_HGL(PSTR("seg=%d,rate=%d,%d"),segment_active_index ,_segments[segment_active_index].transition.rate_ms, _segments[0].flags.fForceUpdate);
+        ALOG_DBM(PSTR("seg=%d,rate=%d,%d"),segment_active_index ,_segments[segment_active_index].transition.rate_ms, _segments[0].flags.fForceUpdate);
+
+/**
+ * @brief Add flag that checks if animation is still running from previous call before we start another, 
+ * hence, detect when frame_rate is not being met (time_ms not finishing before rate_ms)
+ * 
+ */
+
 
         if(SEGMENT.flags.fForceUpdate){ SEGMENT.flags.fForceUpdate=false;
           SEGENV.tSaved_AnimateRunTime = millis();
@@ -224,7 +232,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
         }
         #endif // ENABLE_WLED_EFFECTS
 
-        ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
+        ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
 
         switch(_segments[segment_active_index].effect_id){
           default:
@@ -790,7 +798,9 @@ void mAnimatorLight::SubTask_Segments_Animation()
          */
         if(!_segment_runtimes[segment_active_index].animation_has_anim_callback)
         {
-          // Serial.print("=");
+          #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+          Serial.print("@6");
+          #endif
           StripUpdate();         
           SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
         }
@@ -800,6 +810,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
         }
                 
         _segment_runtimes[segment_active_index].call++; // Used as progress counter for animations eg rainbow across all hues
+
+        DEBUG_PIN1_SET(HIGH);
                  
       }//end if update reached
 
@@ -856,6 +868,7 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
   // #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
   //   SetPixelColor(0, RgbColor(0));
   // #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+
 
 }
 
@@ -1390,7 +1403,6 @@ uint16_t pixel_start_i = 0;
  * */
 void mAnimatorLight::EveryLoop(){
 
-  
 #ifdef ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
 
 // uint8_t randomv = random(0,10)*25;
@@ -1449,9 +1461,11 @@ void mAnimatorLight::EveryLoop(){
 
           //TBA: flags per segment
 
+  // DEBUG_LINE_HERE;
         }
         else // not animating
         { 
+  // DEBUG_LINE_HERE;
           //TBA: flags per segment
       
         }
@@ -1461,18 +1475,20 @@ void mAnimatorLight::EveryLoop(){
     } //loop segments
 
 // if(flag_animations_needing_updated>0)
-//     ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
 
     if(flag_animations_needing_updated)
     {
-
+      #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+    ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
+#endif
       // #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
       // if(stripbus->IsDirty()){
         // if(stripbus->CanShow()){ 
           // ALOG_INF(PSTR("CanShow"));
       // #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-      
-          // Serial.print("!");
+          #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+          Serial.print("@5");
+          #endif
           StripUpdate();          
       // #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
         // }

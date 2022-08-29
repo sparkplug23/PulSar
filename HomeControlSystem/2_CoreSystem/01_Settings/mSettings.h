@@ -205,7 +205,10 @@ typedef union {
 
 enum DATABUILDER_JSON_LEVEL{ //in order of importance
   JSON_LEVEL_NONE=0,
+  // Only show what has changed over mqtt
   JSON_LEVEL_IFCHANGED,
+  // Used to show in serial the most basic stuff anytime it is called (ie above IFCHANGED) but not as detailed as short would be 
+  // Basic and short may be the same, so remove base
   JSON_LEVEL_SHORT,
   JSON_LEVEL_DETAILED,
   JSON_LEVEL_ALL,

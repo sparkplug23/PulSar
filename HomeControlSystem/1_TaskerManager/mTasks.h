@@ -81,6 +81,9 @@ enum XsnsFunctions {
   // Welcome message to show on boot after X seconds with config
   // FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
 
+  // New method that based on time, will only show the sensor at this period to "AddLog" reducing large serial prints
+  FUNC_SENSOR_SHOW_LATEST_LOGGED_ID,
+
   /**
    * @brief Special FUNC_X that should be used in testing, and will run with delayed start to enable OTA to be possible when boot loop would occur
    **/

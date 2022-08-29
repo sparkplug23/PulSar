@@ -1,4 +1,17 @@
-
+/**
+ * @file mNextionPanel.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-09
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * @note Initially based on oneHASP but should become its own code in due time
+ *       Latest code revision with oneHASP is version 1.03 on 9Aug22
+ * 
+ * @desc To enable control of Nextion panels using mqtt, allowing pass through commands and improved automation (eg dimmer, regexp of colours)
+ */
 #include "mNextionPanel.h"
 
 /**
@@ -43,19 +56,6 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     /************
-     * SETTINGS SECTION * 
-    *******************/
-    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-    //   Settings_Load();
-    // break;
-    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-    //   Settings_Save();
-    // break;
-    // case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-    //   Settings_Default();
-    // break;
-    /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
@@ -64,22 +64,13 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_SECOND:
       // EverySecond_SendScreenInfo();
       // EverySecond_FlashScreen();
-
-      
-  // Command_SetPage(1);
-
       EverySecond_ActivityCheck();
-
     break;
-    case FUNC_EVERY_FIVE_SECOND:
-    
-  // Command_SetPage(2);
-  break;
     case FUNC_EVERY_MINUTE:
       // EverySecond_SendScreenInfo();
     break;
     case FUNC_EVERY_HOUR:
-      Command_SetPage(settings.page);   //temp fix
+      // Command_SetPage(settings.page);   //temp fix
     break;
     /************
      * Network SECTION * 

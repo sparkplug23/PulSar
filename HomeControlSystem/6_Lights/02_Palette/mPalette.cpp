@@ -1642,6 +1642,24 @@ RgbcctColor mPalette::GetColourFromPalette(uint16_t palette_id, uint16_t pixel_n
   return GetColourFromPalette(GetPalettePointerByID(palette_id), pixel_num, pixel_position);
 }
 
+#ifdef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
+/**
+ * @brief To optimise speed, when the palette is changed its variables where possible will be loaded into memory
+ * This will require things like arrays to be make dynamic so it can expand depending on the desired palette
+ * 
+ * @param palette_id 
+ */
+void mPalette::LoadPalette(uint16_t palette_id)
+{
+
+
+
+}
+
+
+
+
+#endif // ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
 
 
 
@@ -1672,8 +1690,12 @@ RgbcctColor mPalette::GetColourFromPalette(uint16_t palette_id, uint16_t pixel_n
  * @param encoded_index*      If format of palette includes encoded data (ie sun_value,R,G,B) then return by inserting into pointer position
  * 
  * @returns RgbCCTColour      Single color from palette in RgbCCT format. Use intermediate function to convert to UINT32_T if WRGB is needed for WLED effect
+ 
+ without IRAM_ATTR, function takes 10.5 per call
+ with IRAM_ATTR, STILL 10.5 per call
+ 
  */
-RgbcctColor mPalette::GetColourFromPaletteAdvanced(
+RgbcctColor IRAM_ATTR mPalette::GetColourFromPaletteAdvanced(
   uint16_t palette_id,
   uint16_t pixel_position,//desired_index_from_palette,  
   uint8_t* encoded_value,
@@ -1684,8 +1706,10 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
   uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
+DEBUG_PIN6_SET(LOW);
   RgbcctColor colour = RgbcctColor(0);
 
+DEBUG_PIN5_SET(LOW);
   /**
    * @brief My palettes
    **/
@@ -1697,6 +1721,8 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
 
       // ALOG_INF(PSTR("MINE %d"), palette_id);
 
+// checking valid palette should not be needed assuming preloading is succesful
+// Add new "palette_id" that is "loaded palette" and check this each time, or else just assume its correct, best for speed
       PALETTELIST::PALETTE *ptr = GetPalettePointerByID(palette_id);
 
       if(ptr == nullptr)
@@ -1704,10 +1730,17 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
         ptr = palettelist.ptr;
       }
 
+      // this will not work, since each segment will need its preloaded. 
+      // Need a drastic rethink on this, perhaps another subpalette class that stores the "runtime palette"
+      //probably best to worry about speed optimising until after WLED palettes are merged fully
+#ifndef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
 
-      
+
+#endif
+
+
       // AddLog(LOG_LEVEL_TEST, PSTR("ptr->colour_map_size=%d"),ptr->colour_map_size );
-      uint8_t palette_elements[ptr->colour_map_size];
+      uint8_t palette_elements[ptr->colour_map_size]; // if this was defined (optional define?) it would not need to be created each time, but "loading_palette" would enable all this to be changed too
       uint16_t index_relative = 0; // get expected pixel position
       uint16_t expected_pixel_count = 1; // get expected pixel position
 
@@ -1774,7 +1807,9 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
       // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "colour_map_size[%d]=%d"),ptr->id,ptr->colour_map_size);
       // #endif
 
-      switch(ptr->flags.fMapIDs_Type)
+DEBUG_PIN5_SET(HIGH);
+      
+      switch(ptr->flags.fMapIDs_Type) //Switch is half (5us/10us) of parent function
       {
         default:
         case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID:{
@@ -1825,9 +1860,13 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
         }
         break;
         case MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID:{
+  DEBUG_PIN3_SET(LOW);
           // Get expected pixel position
           index_relative = pixel_position*3;
           expected_pixel_count = ptr->colour_map_size/3; // get expected pixel position
+
+//moving expected pixel count into struct would have performance improvements
+
           // Get colour
           colour = RgbcctColor(
             palette_elements[index_relative  ],
@@ -1839,6 +1878,7 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
 
           ALOG_DBM(PSTR("expected_pixel_count = %d"), expected_pixel_count);
 
+  DEBUG_PIN3_SET(HIGH);
         }
         break;
         case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID:{
@@ -1882,6 +1922,7 @@ RgbcctColor mPalette::GetColourFromPaletteAdvanced(
 
   } // end of my palettes
 
+   DEBUG_PIN6_SET(HIGH);
 
   /**
    * @brief mEffects

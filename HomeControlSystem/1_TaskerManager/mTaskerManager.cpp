@@ -69,12 +69,12 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   #ifdef  ENABLE_DEBUG_FUNCTION_NAMES
     char buffer_taskname[50];
   #endif
-  #ifdef DEBUG_PIN3_GPIO
-    for(int i=0;i<1;i++){
-    DEBUG_PIN3_SET(0); //green
-    DEBUG_PIN3_SET(1);
-    }
-  #endif // DEBUG_PIN3_GPIO
+  // #ifdef DEBUG_PIN3_GPIO
+  //   for(int i=0;i<1;i++){
+  //   DEBUG_PIN3_SET(0); //green
+  //   DEBUG_PIN3_SET(1);
+  //   }
+  // #endif // DEBUG_PIN3_GPIO
 
   for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
 
@@ -114,6 +114,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
 // DEBUG_LINE_HERE;
 
+// DEBUG_PIN6_SET(LOW);
     switch(function)
     {
       // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
@@ -149,6 +150,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
       break;
     }
+// DEBUG_PIN6_SET(HIGH);
 
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t end_millis = millis(); // Remember start millis

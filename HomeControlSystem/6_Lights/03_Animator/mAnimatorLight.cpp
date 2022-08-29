@@ -715,7 +715,7 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 
 RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness){
 
-  RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
+  RgbcctColor colour_adjusted_with_brightness; // No init for speed// = RgbcctColor();//0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightness);
   colour_adjusted_with_brightness.G  = mapvalue(full_range_colour.G,  0,255, 0,brightness);
   colour_adjusted_with_brightness.B  = mapvalue(full_range_colour.B,  0,255, 0,brightness);
@@ -892,6 +892,7 @@ ALOG_ERR(PSTR("This function should never be called going forward"));
 // Final output, but check for power limit
 void mAnimatorLight::StripUpdate(){
 
+  DEBUG_PIN2_SET(LOW);
   // Serial.print("-");
 
   // STRIP_SIZE_REPEAT_MAX
@@ -1045,6 +1046,7 @@ if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
   // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
   // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
 
+  DEBUG_PIN2_SET(HIGH);
 
 }
 

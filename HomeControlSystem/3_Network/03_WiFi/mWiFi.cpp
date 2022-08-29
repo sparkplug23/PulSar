@@ -403,9 +403,9 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
   }
   // Scan done
   if (5 == connection.scan_state) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(5 == scan_state) Scan done"));
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "(5 == scan_state) Scan done"));
+    // #endif// ENABLE_LOG_LEVEL_INFO
     int32_t channel = 0;                            // No scan result
     int8_t ap = 3;                                  // AP default if not found
     uint8_t last_bssid[6];                          // Save last bssid
@@ -442,8 +442,10 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
 // DEBUG_LINE_HERE;
 // delay(2000);
         bool known = false;
-        uint8_t j;DEBUG_LINE_HERE;
-        for (j = 0; j < D_MAX_SSIDS; j++) {DEBUG_LINE_HERE;
+        uint8_t j;
+        // DEBUG_LINE_HERE;
+        for (j = 0; j < D_MAX_SSIDS; j++) {
+          // DEBUG_LINE_HERE;
           if (ssid_scan == pCONT_set->Settings.sta_ssid[j]) {  // SSID match
           // DEBUG_LINE_HERE;
           // #ifdef 
@@ -663,7 +665,7 @@ void mWiFi::WifiCheckIp(void)
 // #endif  // LWIP_IPV6=1
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_DEBUG "WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
+    AddLog(LOG_LEVEL_DEBUG, PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
     // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "Connected to IP:%s (%s) WiFi.status() = WL_CONNECTED")); //ip, ssid, connected uptime, connected total downtime
     #endif// ENABLE_LOG_LEVEL_INFO
 

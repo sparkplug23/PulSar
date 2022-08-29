@@ -55,6 +55,7 @@ class mSensorsInterface :
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       // move this into settings so all devices can share it
+      uint8_t tTicker_Splash_Sensors_To_Logs = 30;
       float sealevel_pressure; 
     }settings;
 

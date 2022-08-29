@@ -5,6 +5,7 @@
  * @brief Special tasker that will be used to develop code, so I can remove it from other builds to move closer to a release version
  * 
  * 1) A way to print DEFINES that are being phased out
+ * 2) Idea, configure another laptop (surface book) and make duplicate of project, run on HVAC and try get crash errors
  * 
  * @version 0.1
  * @date 2022-03-02
@@ -40,6 +41,11 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
       // DEBUG_LINE_HERE;
       
       // Serial.printf("time_start1=%d\n\r",millis());
+
+      #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
+        ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
+        ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_FREEHEAP, ESP.getFreeHeap());
+      #endif // ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
     }break;
     case FUNC_EVERY_FIVE_SECOND:

@@ -6,9 +6,7 @@
 void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 {
 
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
-  // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  ALOG_DBM( PSTR(D_LOG_LIGHT D_TOPIC "mInterfaceLight Checking all commands %d"),obj.isNull());
 
   char buffer[50];
   JsonParserToken jtok = 0; 

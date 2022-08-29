@@ -1,3 +1,44 @@
+/**
+ * @file mBME.cpp
+ * 
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-10
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * 
+ * 
+ * 
+ * 
+
+ * Version 2
+
+ Like tasmota, figure out how to implement all different BMx types
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ */
+
+
 // /**
 //  * @file mBME.cpp
 //  * @author Michael Doone (michaeldoonehub@gmail.com)

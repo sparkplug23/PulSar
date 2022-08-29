@@ -24,6 +24,7 @@ So I will need to create a nextion class (HASPone) and then another for direct d
 const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_CTR = D_MODULE_DISPLAYS_NEXTION_CTR;
 const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR = D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR;
 
+#warning "Old code to be deleted, build with version 2"
 
 int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj){
 

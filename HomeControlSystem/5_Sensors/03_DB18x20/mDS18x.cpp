@@ -128,6 +128,28 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
 
     }
     break;   
+    case FUNC_EVERY_MINUTE:
+
+// Pre_Init();
+      #ifdef ENABLE_DEVFEATURE_DS18X_RETRY_IF_NOT_EXPECTED_SENSOR_COUNT
+        // #define D_DS18X_EXPECTED_SENSOR_COUNT 12
+
+        if(settings.nSensorsFound != D_DS18X_EXPECTED_SENSOR_COUNT)
+        {
+
+          
+
+
+
+        }
+
+
+
+      #endif // ENABLE_DEVFEATURE_DS18X_RETRY_IF_NOT_EXPECTED_SENSOR_COUNT
+
+
+
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -176,36 +198,23 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
  * forcing only one this time
  * 
  */
-void mDS18X::Pre_Init(){
-
-
+void mDS18X::Pre_Init()
+{
 
   uint8_t sensor_count = 0;
   uint8_t sensor_group_count = 0;
   settings.nSensorsFound = 0;
 
-  if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)) {  // not set when 255
+  if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)) 
+  {  // not set when 255
   
-
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_1OF2_ID);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB_1OF2_ID 1 Valid %d"), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
 
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "pCONT_pins->GetPin(GPIO_DSB_1OF2_ID) 1 Valid %d"), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID));
-    // sensor_group[sensor_group_count].pin);
-    
-    //sensor_group[0].onewire = new OneWire(15); 
-     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
-
-     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
-    //sensor_group[0].dallas  = new DallasTemperature(sensor_group[0].onewire);   
-
-     
-    // sensor_group[sensor_group_count].dallas->begin();
-
-    // AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 1 Valid %d"),sensor_group[sensor_group_count].pin);
+    sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
+    sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
     sensor_group[sensor_group_count].dallas->begin();
 
-// AddLog(LOG_LEVEL_INFO, PSTR("GPIO_DSB_1OF2_ID\t\t\tcount=%d"), sensor_group[sensor_group_count].dallas->getDeviceCount());
-    // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
     #ifdef ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT
     sensor_group[sensor_group_count].sensor_count = ENABLE_DEVFEATURE_ESP32_FORCED_DB18S20_GPIO1_SENSOR_COUNT;
@@ -225,9 +234,10 @@ void mDS18X::Pre_Init(){
 
   if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
+    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB_2OF2_ID Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
+    
     sensor_group[sensor_group_count].onewire = new OneWire(sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas = new DallasTemperature(sensor_group[sensor_group_count].onewire);
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
     sensor_group[sensor_group_count].dallas->begin();
     // Get sensors connected to this pin
     sensor_group[sensor_group_count].sensor_count = sensor_group[sensor_group_count].dallas->getDeviceCount();
@@ -455,6 +465,9 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
 
           if(sensor[sensor_id].sensor_group_id == sensor_group_id)
           {
+            #ifdef ENABLE_DEVFEATURE_ADDLOG_FAILED_SENSOR_WAIT_TIME
+              uint32_t wait_time = millis();
+            #endif 
 
             if((tmp_float = sensor_group[sensor_group_id].dallas->getTempC(sensor[sensor_id].address))!=DEVICE_DISCONNECTED_C)
             {
@@ -475,7 +488,12 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
               sensor[sensor_id].reading.isvalid = false;
               
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
-              ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)));
+            
+            
+              ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED " WaitTime:%d"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)), millis()-wait_time);
+            
+            
+            
             }
           
           } // end if

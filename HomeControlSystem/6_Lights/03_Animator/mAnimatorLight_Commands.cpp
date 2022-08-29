@@ -80,7 +80,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    */
   if(segment_index == 255)
   {
-    ALOG_COM( PSTR("Segment Index assumed \"0\"") );
+    // ALOG_COM( PSTR("Segment Index assumed \"0\"") );
     segment_index = 0;
 
     /**

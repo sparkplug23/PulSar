@@ -58,6 +58,12 @@ void mHardwarePins::Pre_Init(){
   #ifdef DEBUG_PIN4_GPIO
     DEBUG_PIN4_INIT();
   #endif
+  #ifdef DEBUG_PIN5_GPIO
+    DEBUG_PIN5_INIT();
+  #endif
+  #ifdef DEBUG_PIN6_GPIO
+    DEBUG_PIN6_INIT();
+  #endif
 
 }
 
