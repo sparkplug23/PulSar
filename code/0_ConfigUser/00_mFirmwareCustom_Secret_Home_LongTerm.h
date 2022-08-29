@@ -361,6 +361,11 @@ Bathroom
   #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_CORE_RULES
   
   #define USE_MODULE_SENSORS_INTERFACE
@@ -976,6 +981,11 @@ Bathroom
 
 
 /**
+ * @brief 
+ *
+ * REMOVED -- Now "KitchenShellyI4" 
+ * 
+ *
  * @brief Virtual Switch, installed in kitchen 4gang (left most switch)
  * Shelly 1, switch input only, relay not enabled
  * Sends command to cupboard lights directly with mqtt (downlights)
@@ -1180,8 +1190,13 @@ Bathroom
 #ifdef DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
   #define DEVICENAME_CTR            "kitchenpanel"
   #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
-  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define DEVICENAME_ROOMHINT_CTR   "Kitchen"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -1214,6 +1229,11 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -1264,12 +1284,18 @@ Bathroom
 
 #endif
 
+
 #ifdef DEVICE_RGBLIGHTS_GLASSBOX
   #define DEVICENAME_CTR          "rgbglassbox"//"rgbcrystal3"
   #define DEVICENAME_FRIENDLY_CTR "Glass Box Lights"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
@@ -1413,11 +1439,12 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-  
+    
+  #define ESP32
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-  // #define ENABLE_DEVFEATURE_RTC_SETTINGS
-
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_CORE_RULES
        
@@ -1673,7 +1700,10 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Utility"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  // #define USE_MODULE_DRIVERS_LEDS
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -1834,10 +1864,17 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Downstairs Toilet"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
     
+  #define ESP32
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
   #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1 // temporary force the value, should be handled by command
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
@@ -1851,13 +1888,14 @@ Bathroom
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define STRIP_SIZE_MAX 55
+    #define STRIP_SIZE_MAX 56 //+1
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
+      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
     
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
@@ -2064,6 +2102,7 @@ Bathroom
   #define USE_MODULE_SENSORS_DS18X
   
   #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2 //both rooms
+    #define ENABLE_DEVFEATURE_BLINDS_OPEN_COMMANDS_REPEATED_AND_DUPLICATED
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2330,6 +2369,11 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Hallway"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
@@ -2501,6 +2545,8 @@ Bathroom
  * 3pin (DHT22)    - gnd,5v,dht_data 
  * 3pin (relay US) - gnd,5v,relay_ih
  * 3pin (water sensors) - gnd,3v3,ds18b20
+ * 
+ * Create seond device dad can swap in, only have basic relay control, no sensors, so it should be the most stable.
  * 
  **/
 #ifdef DEVICE_HEATING
@@ -2845,7 +2891,10 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR   "Outdoor|Driveway"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   /*
     Method should only activate if boot loop happens 10 times
@@ -2857,9 +2906,9 @@ Bathroom
 
   #define USE_MODULE_NETWORKS_MQTT
 
-  #define USE_MODULE_CORE_RULES
+  #define USE_MODULE_CORE_RULES // I still need the rule to report motion!!
 
-  #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
+  // #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
   // #define USE_MODULE_ENERGY_INTERFACE
   // #define USE_MODULE_ENERGY_ADE7953
@@ -2886,15 +2935,14 @@ Bathroom
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Driveway"
-  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "Garden"
-  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Driveway Top"
-  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Back Garden"  
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Sidedoor"
+  #define D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "DrivewayEnd"
+  #define D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "Sidedoor"
+  #define D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "Disconnected"  
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
@@ -2908,171 +2956,191 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
-    "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"},"
-    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"}"
-  "}";
-
-
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  // #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 Toggle = Relay0 Power Toggle
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2"
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
-        "\"DeviceName\":0,"
-        "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-      "}"
-    "},"
-    // Switch1 Toggle = Relay1 Power Toggle
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":2"      // 2 meaning either low or high, 1 would be high only
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
-        "\"DeviceName\":1,"
-        "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-      "}"
-    "},"
-    // Button0 Single Press = Relay0 Power On for 10 seconds tester
-    "\"Rule2\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2" // 
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-      "}"
     "}"
   "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
 
-  /**
-   * Motion needs to change, to instead be a rule. ie.
-   * 
-   * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
-   * One rule will be required for direction, ie motion started (button low) and motion over (button high)
-   * 
-   * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
-   * 
-   * Example
-   * 
-   * Rule0
-   * - Switch 0 = Low, Motion0 started
-   * 
-   * Rule1
-   * - Switch 0 = low, Relay0 on for X minutes   (time of day on relay operation will be controlled via relay_commands, to set operation time ranges)
-   * 
-   * Rule2
-   * - Switch 1 = Low, Motion1 started
-   * 
-   * Rule3
-   * - Switch 1 = low, Relay1 on for X minutes
-   * 
-   * */
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
-  // #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 HIGH = Relay0 Power ON for Timed seconds
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":1"
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
-        "\"DeviceName\":0,"
-        // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
-      "}"
-    "},"
-    // Switch1 HIGH = Relay1 Power ON for Timed seconds
-    "\"Rule1\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"Switches\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":1"      // 2 meaning either low or high, 1 would be high only
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"SetPower\","
-        "\"DeviceName\":1,"
-        // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
-        "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":120}}\""
-      "}"
-    "},"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule2\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started
-      "}"
-    "},"
-    // Switch1 HIGH = Motion1 Event Started, ie report as motion with motion name
-    "\"Rule3\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":1,"
-        "\"State\":1" // 
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":1" // Started        
-        // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
-      "}"
-    "},"
-    // Button0 Single Press = Relay0 Power On for 10 seconds tester
-    "\"Rule4\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":2" // 
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"Relays\","
-        "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
-        "\"DeviceName\":0,"
-        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
-      "}"
-    "}"
-  "}";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   //device_names:{"module_name":["relay1","relay2"]}
+  //   "\"" D_JSON_DEVICENAME "\":{"
+  //     "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
+  //       "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
+  //     "],"
+  //     "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+  //       "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+  //     "],"
+  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+  //       "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
+  //       "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
+  //     "]"    
+  //   "},"
+  //   "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"},"
+  //   "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"}"
+  // "}";
+
+
+  // #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+  // // #define USE_RULES_TEMPLATE
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // "{"
+  //   // Switch0 Toggle = Relay0 Power Toggle
+  //   "\"Rule0\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"Switches\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":2"
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"Relays\","
+  //       "\"Function\":\"SetPower\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+  //     "}"
+  //   "},"
+  //   // Switch1 Toggle = Relay1 Power Toggle
+  //   "\"Rule1\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"Switches\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":1,"
+  //       "\"State\":2"      // 2 meaning either low or high, 1 would be high only
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"Relays\","
+  //       "\"Function\":\"SetPower\","
+  //       "\"DeviceName\":1,"
+  //       "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+  //     "}"
+  //   "},"
+  //   // Button0 Single Press = Relay0 Power On for 10 seconds tester
+  //   "\"Rule2\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":2" // 
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"Relays\","
+  //       "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //     "}"
+  //   "}"
+  // "}";
+  // #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
+
+  // /**
+  //  * Motion needs to change, to instead be a rule. ie.
+  //  * 
+  //  * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
+  //  * One rule will be required for direction, ie motion started (button low) and motion over (button high)
+  //  * 
+  //  * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
+  //  * 
+  //  * Example
+  //  * 
+  //  * Rule0
+  //  * - Switch 0 = Low, Motion0 started
+  //  * 
+  //  * Rule1
+  //  * - Switch 0 = low, Relay0 on for X minutes   (time of day on relay operation will be controlled via relay_commands, to set operation time ranges)
+  //  * 
+  //  * Rule2
+  //  * - Switch 1 = Low, Motion1 started
+  //  * 
+  //  * Rule3
+  //  * - Switch 1 = low, Relay1 on for X minutes
+  //  * 
+  //  * */
+  // #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  // // #define USE_RULES_TEMPLATE
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // "{"
+  //   // Switch0 HIGH = Relay0 Power ON for Timed seconds
+  //   "\"Rule0\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"Switches\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":1"
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"Relays\","
+  //       "\"Function\":\"SetPower\","
+  //       "\"DeviceName\":0,"
+  //       // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":300}}\""
+  //     "}"
+  //   "},"
+  //   // Switch1 HIGH = Relay1 Power ON for Timed seconds
+  //   "\"Rule1\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"Switches\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":1,"
+  //       "\"State\":1"      // 2 meaning either low or high, 1 would be high only
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"Relays\","
+  //       "\"Function\":\"SetPower\","
+  //       "\"DeviceName\":1,"
+  //       // "\"State\":2" // 3 (or other) means follow, so copy input from trigger
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":120}}\""
+  //     "}"
+  //   "},"
+  //   // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
+  //   "\"Rule2\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+  //       "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+  //       "\"State\":1" // Started
+  //     "}"
+  //   "},"
+  //   // Switch1 HIGH = Motion1 Event Started, ie report as motion with motion name
+  //   "\"Rule3\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":1,"
+  //       "\"State\":1" // 
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+  //       "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
+  //       "\"State\":1" // Started        
+  //       // "\"JsonCommands\":\"{\\\"PowerName\\\":1,\\\"Relay\\\":{\\\"TimeOn\\\":30}}\""
+  //     "}"
+  //   "},"
+  //   // Button0 Single Press = Relay0 Power On for 10 seconds tester
+  //   "\"Rule4\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":2" // 
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"Relays\","
+  //       "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //     "}"
+  //   "}"
+  // "}";
+  // #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
 
 
 
@@ -3437,6 +3505,7 @@ Bathroom
 
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
@@ -3472,6 +3541,7 @@ Bathroom
   
   #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "AmbientTank"
   #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "OutsideGarage"
+  #define D_DEVICE_SR04_FRIENDLY_NAME_LONG "LevelSensor"
   
   #define D_DEVICE_BUTTON_1_CTR "FurnaceActive"
 
@@ -3482,6 +3552,9 @@ Bathroom
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SR04_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SR04_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -3628,25 +3701,28 @@ Bathroom
 
 #ifdef DEVICE_GARAGELIGHT
   #define DEVICENAME_CTR          "garagelight"
-  #define DEVICENAME_FRIENDLY_CTR "Garage Security Lights 2"
+  #define DEVICENAME_FRIENDLY_CTR "Garage Garden Lights"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  #define USE_SSIDS_OUTSIDE_HOUSE
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   
-  /*
-    Method should only activate if boot loop happens 10 times
-    Method A: Switch to Wifi.begin hardcoded ssid/pw, start OTA and wait, rebooting every 10 minutes if wifi does not connect
-    Method B: Begin wifi.ap as host, so I can directly connect to it via x.x.x.x
-  */
+  
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  // #define DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_C_SWITCHES_ARE_MOTION_DETECTION_REPORTING_ONLY_OUTPUTS_ARE_REMOTE_CONTROLLED //sidedoor and garage new method
+
+  // #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
+    // #define ENABLE_DRIVERS_RELAYS_TIME_LOCKS
 
   #define USE_MODULE_NETWORKS_MQTT
 
   #define USE_MODULE_CORE_RULES
 
-  #define ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
 
   #define USE_MODULE_ENERGY_INTERFACE
   #define USE_MODULE_ENERGY_ADE7953
@@ -3659,8 +3735,6 @@ Bathroom
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
     #define MAX_RELAYS 2
-
-  // #define ENABLE_DEVFEATURE_OTA_FALLBACK_ON_BOOT_LOOPING
     
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3693,9 +3767,12 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
-    "},"
-    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"},"
-    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D16:00:00\",\"OffTime\":\"00D09:00:00\"}"
+    "}"   
+    #ifdef ENABLE_DRIVERS_RELAYS_TIME_LOCKS
+    ","
+    "\"RelayEnabled0\":{\"Enabled\":1,\"OnTime\":\"00D20:00:00\",\"OffTime\":\"00D05:00:00\"},"
+    "\"RelayEnabled1\":{\"Enabled\":1,\"OnTime\":\"00D20:01:00\",\"OffTime\":\"00D05:00:00\"}"
+    #endif // ENABLE_DRIVERS_RELAYS_TIME_LOCKS
   "}";
 
 
@@ -3854,6 +3931,66 @@ Bathroom
         "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+      "}"
+    "}"
+  "}";
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_B_SWITCHES_ARE_MOTION_DETECTION_TRIGGERING_TIMED_OUTPUTS
+
+  /**
+   * New option: No local control, but rule for converting switch into motion event on mqtt
+   * 
+   * Switch, button, distance etc changes will trigger a rule which fires the motion detection class. This will then respond via mqtt that event/sensor input "X" occured, and what time etc.
+   * One rule will be required for direction, ie motion started (button low) and motion over (button high)
+   * 
+   * Similarly, switch change rule will also need to set the relays to be commanded based on how long I want
+   * 
+   * Example
+   * 
+   * Rule0
+   * - Switch 0 = Low, Motion0 started
+   * 
+   * Rule1
+   * - Switch 0 = low, Relay0 on for X minutes   (time of day on relay operation will be controlled via relay_commands, to set operation time ranges)
+   * 
+   * Rule2
+   * - Switch 1 = Low, Motion1 started
+   * 
+   * Rule3
+   * - Switch 1 = low, Relay1 on for X minutes
+   * 
+   * */
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_C_SWITCHES_ARE_MOTION_DETECTION_REPORTING_ONLY_OUTPUTS_ARE_REMOTE_CONTROLLED
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Motion Event = Switch0
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "},"
+    // Motion Event = Switch1
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1," 
+        "\"State\":\"Follow\""
       "}"
     "}"
   "}";
@@ -4695,6 +4832,11 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Landing"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_CORE_RULES
   
   // #define USE_BUILD_TYPE_LIGHTING
@@ -4941,6 +5083,11 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR   "Landing"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_CORE_RULES
 
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -5234,11 +5381,10 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
 
   // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
@@ -5344,7 +5490,8 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "_Door" "\""
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"  
     "}"
   "}";
@@ -5388,81 +5535,6 @@ Bathroom
 
 #endif
 
-
-
-//rgbmicro2/set/light///Scene
-//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
-#ifdef DEVICE_RGBCLOCK_BEDROOM_WALL
-  #define DEVICENAME_CTR          "rgbclock_bedroom_wall"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Clock 01"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 94//93  
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-
-  // #define USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
-  
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    
-
-
-  #define DISABLE_WEBSERVER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":950,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"Clock Basic 01\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":34,"
-    "\"BrightnessCCT\":0,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-
-  "}";
-
-
-#endif
 
 
 /**
