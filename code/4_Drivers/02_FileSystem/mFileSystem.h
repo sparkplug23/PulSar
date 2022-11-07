@@ -1,5 +1,5 @@
 #ifndef _USE_MODULE_DRIVERS_FILESYSTEM_H
-#define _USE_MODULE_DRIVERS_FILESYSTEM_H 0.3
+#define _USE_MODULE_DRIVERS_FILESYSTEM_H
 
 #define D_UNIQUE_MODULE_DRIVERS_FILESYSTEM_ID ((4*1000)+02)
 
@@ -21,7 +21,7 @@
   #endif  // USE_SDCARD
 #endif  // ESP8266
 #ifdef ESP32
-  #include <LITTLEFS.h>
+  #include <LittleFS.h>
   #ifdef USE_SDCARD
     #include <SD.h>
   #endif  // USE_SDCARD

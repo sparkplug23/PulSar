@@ -374,8 +374,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
 
   desired_pixel=0;
 
-  switch(*region_p){
-    case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
+  // switch(*region_p){
+  //   case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
 
       // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_COLOUR_SELECT_ID"));
      
@@ -456,13 +456,13 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
         *indexes_active_p=0;
       }
       
-      *region_p = EFFECTS_REGION_ANIMATE_ID;
+    //   *region_p = EFFECTS_REGION_ANIMATE_ID;
   
-    }break;
-    case EFFECTS_REGION_ANIMATE_ID: //shift along
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_ANIMATE_ID"));
-    #endif //  ENABLE_LOG_LEVEL_INFO
+    // }break;
+    // case EFFECTS_REGION_ANIMATE_ID: //shift along
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_ANIMATE_ID"));
+    // #endif //  ENABLE_LOG_LEVEL_INFO
 
       // Check if output multiplying has been set, if so, change desiredcolour array
       // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();  // THIS SHOULD PROBABLY JUST BE MOVED INTO THE SETPIXEL AND RAN BEFORE STRIPUPDATE
@@ -479,8 +479,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
       *region_p = EFFECTS_REGION_COLOUR_SELECT_ID;
       // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "part2 region = %d"), SEGENV.aux0);
 
-      break;
-  }
+  //     break;
+  // }
 
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED

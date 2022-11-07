@@ -181,7 +181,7 @@ void mWebServer::WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_c
 
 void mWebServer::WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...)
 {
-  char* buff = BufferWriterI->GetPtr();
+  char* buff = BufferWriterI->GetBufferPtr();
   uint16_t* len = BufferWriterI->GetLengthPtr();
   uint16_t size = BufferWriterI->GetBufferSize();
 

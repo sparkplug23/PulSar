@@ -181,7 +181,13 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
         pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
         pCONT_time->uptime.minute,pCONT_time->uptime.second,
-        RtcFastboot.fast_reboot_count);
+        
+        #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+        RtcFastboot.fast_reboot_count        
+        #else // Not active
+        -1
+        #endif
+        );
     }else{
       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %02d:%02d:%02d "), //add hour
       // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),

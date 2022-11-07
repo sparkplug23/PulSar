@@ -68,7 +68,13 @@ class AsyncCallbackWebHandler: public AsyncWebHandler {
     ArUploadHandlerFunction _onUpload;
     ArBodyHandlerFunction _onBody;
   public:
+
+  //tmp fix
+    #ifdef ESP32
+    AsyncCallbackWebHandler() : _uri(), _method(255), _onRequest(NULL), _onUpload(NULL), _onBody(NULL){}
+    #else
     AsyncCallbackWebHandler() : _uri(), _method(HTTP_ANY), _onRequest(NULL), _onUpload(NULL), _onBody(NULL){}
+    #endif
     void setUri(const String& uri){ _uri = uri; }
     void setMethod(WebRequestMethodComposite method){ _method = method; }
     void onRequest(ArRequestHandlerFunction fn){ _onRequest = fn; }

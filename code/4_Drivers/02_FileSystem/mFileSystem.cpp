@@ -1,9 +1,6 @@
 #include "mFileSystem.h"
 
-//  xdrv_22_sonoff_ifan.ino - sonoff iFan02 and iFan03 support for Tasmota
-
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-
 
 const char* mFileSystem::PM_MODULE_DRIVERS_FILESYSTEM_CTR = D_MODULE_DRIVERS_FILESYSTEM_CTR;
 const char* mFileSystem::PM_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR = D_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR;
@@ -27,6 +24,15 @@ ufs       fs info
 ufstype   get filesytem type 0=none 1=SD  2=Flashfile
 ufssize   total size in kB
 ufsfree   free size in kB
+
+First test usage will be LIPO battery powered GPS logger (get dad to bring to work?)
+Need to work out a file structure this is best suited to
+ - At first, likely use matlab to parse the files, but long term, python script will be used to convert from the json file I make into kmz gps files
+
+Second test
+  - christmas light controller, storage of the playlist will be inside the sdcard and loaded ONCE on boot into memory
+
+
 \*********************************************************************************************/
 
 #define XDRV_50           50
@@ -39,26 +45,6 @@ ufsfree   free size in kB
 #define UFS_TSDC          1
 #define UFS_TFAT          2
 #define UFS_TLFS          3
-
-/*
-// In tasmota.ino
-#ifdef ESP8266
-#include <LittleFS.h>
-#include <SPI.h>
-#ifdef USE_SDCARD
-#include <SD.h>
-#include <SDFAT.h>
-#endif  // USE_SDCARD
-#endif  // ESP8266
-#ifdef ESP32
-#include <LITTLEFS.h>
-#ifdef USE_SDCARD
-#include <SD.h>
-#endif  // USE_SDCARD
-#include "FFat.h"
-#include "FS.h"
-#endif  // ESP32
-*/
 
 // Global file system pointer
 FS *ufsp;
@@ -100,22 +86,23 @@ void mFileSystem::UfsInitOnce(void) {
   AddLog(LOG_LEVEL_INFO, PSTR("UFS: LittleFS.begin()"));
 #endif  // ESP8266
 
-// #ifdef ESP32
-//   // try lfs first
-//   ffsp = &LITTLEFS;
-//   if (!LITTLEFS.begin(true)) {
-//     // ffat is second
-//     ffsp = &FFat;
-//     if (!FFat.begin(true)) {
-//       return;
-//     }
-//     ffs_type = UFS_TFAT;
-//     ufs_type = ffs_type;
-//     ufsp = ffsp;
-//     dfsp = ffsp;
-//     return;
-//   }
-// #endif // ESP32
+#ifdef ESP32
+  // try lfs first
+  ffsp = &LittleFS;
+  if (!LittleFS.begin(true)) {
+    // ffat is second
+    ffsp = &FFat;
+    if (!FFat.begin(true)) {
+      return;
+    }
+    ffs_type = UFS_TFAT;
+    ufs_type = ffs_type;
+    ufsp = ffsp;
+    dfsp = ffsp;
+    return;
+  }
+#endif // ESP32
+
   ffs_type = UFS_TLFS;
   ufs_type = ffs_type;
   ufsp = ffsp;

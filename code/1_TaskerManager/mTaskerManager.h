@@ -41,6 +41,7 @@
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret_Christmas.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
 /**
  * Temporary files
@@ -639,7 +640,7 @@ enum MODULE_IDS{
 
 
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  #include "4_Drivers/FileSystem/mFileSystem.h"
+  #include "4_Drivers/02_FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
