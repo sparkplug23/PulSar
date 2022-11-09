@@ -55,6 +55,8 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
 
       SubTask_Show_Defines_Ready_To_Phase_Out();
 
+      SubTask_Splash_Debug_Info();
+
     break;
     case FUNC_EVERY_MIDNIGHT:
     
@@ -62,6 +64,15 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
   }
 
 }//end
+
+void mDevelopmentDebugging::SubTask_Splash_Debug_Info()
+{
+
+  ALOG_DBG(PSTR("reboot_count_since_poweron=%d"), RtcFastboot.reboot_count_since_poweron);
+  
+
+
+}
 
 
 void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()

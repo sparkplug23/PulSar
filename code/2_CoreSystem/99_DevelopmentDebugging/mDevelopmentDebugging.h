@@ -31,6 +31,8 @@ class mDevelopmentDebugging :
     };
     #endif
 
+    void SubTask_Splash_Debug_Info();
+
     void SubTask_Show_Defines_Ready_To_Phase_Out();
 
 };

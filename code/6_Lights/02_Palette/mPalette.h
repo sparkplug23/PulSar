@@ -484,9 +484,10 @@ class mPalette
         // Pointer to name
         char* friendly_name_ctr = nullptr;
         // Map IDs
-        uint8_t* colour_map_id; 
+        uint8_t* colour_map_id; //original pointer to saved memory (possible progmem)
         // Active pixels
         uint8_t colour_map_size = 0; //total bytes in palette (not pixel count)
+
 
         //perhaps add pixel_count instead of computing it. Or, with new "Load palette" have this calculated and saved in "loaded palette info"
       };
@@ -567,6 +568,39 @@ class mPalette
       PALETTE *ptr = &rainbow;
     }palettelist;
 
+
+    /**
+     * @brief I need a method to add/delete palettes loaded into RAM
+     * ie, segment 1 and 2 may use the same palette, so it doesnt need to be loaded twice, or else, I should just to keep it simple
+     * ie, segment X using palette Y, which is loaded into here. Use a pointer array,
+     *    double pointer, pointer to list of pointers
+     * 
+     * Stores active palette
+     * ** need to store on the heap, so new/delete[]
+     * 
+     * temporarily storing in the segment info to make it easier to convert
+     * 
+     */
+    struct PALETTE_RUNTIME{
+
+
+// maybe not here, I need a way to "load" the active ones, so probably another struct as "runtime" palette (like segment runtime)
+        #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+        // uint8_t* colour_map_dynamic_buffer = nullptr;
+        // uint16_t colour_map_dynamic_buflen = 0;
+// 
+        struct LOADED{
+          // uint8_t* buffer = nullptr;
+          uint16_t buflen = 0;
+          uint8_t buffer_static[200]; //tmp fixed buffer
+        }loaded;
+
+
+
+        #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
+    }palette_runtime;
+
     // struct PALETTE_LOADING
 
     // One of the variable rgbcct is used as the function colour manipulators
@@ -603,14 +637,14 @@ void LoadPalette(uint16_t palette_id);
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
 
-    RgbcctColor GetColourFromPalette(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr); //pixel position should be uint8_t only
-    RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
+    // RgbcctColor GetColourFromPalette(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr); //pixel position should be uint8_t only
+    // RgbcctColor GetColourFromPalette(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
 
     /**
      * @brief Intermediate functions as I phase out old palette methods
      **/
     RgbcctColor GetColourFromPalette_Intermediate(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
-    RgbcctColor GetColourFromPalette_Intermediate(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
+    // RgbcctColor GetColourFromPalette_Intermediate(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
     uint32_t color_from_palette_Intermediate(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
 
 
@@ -625,7 +659,13 @@ void LoadPalette(uint16_t palette_id);
     #endif //ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
 
     
-    RgbcctColor IRAM_ATTR GetColourFromPaletteAdvanced(
+#ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromPaletteAdvanced(
       uint16_t palette_id = 0,
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,
@@ -635,6 +675,35 @@ void LoadPalette(uint16_t palette_id);
       uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
       uint8_t* discrete_colours_in_palette = nullptr
     );
+
+
+#endif // ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+
+
+
+#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    
+
+  RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromPreloadedPalette(
+      uint16_t palette_id = 0,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
+      uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      uint8_t* discrete_colours_in_palette = nullptr
+    );
+
+
+
+
+
+#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 
     void UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette = nullptr);

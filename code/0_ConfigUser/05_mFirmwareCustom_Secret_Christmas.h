@@ -65,9 +65,13 @@
   #define DEVICENAME_CTR          "devboard_string_segment_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,50,206
 
-  #define DISABLE_NETWORK
+  #define ENABLE_DEVFEATURE_SHOW_UPTIME_SECONDS
+
+  //#define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+  // #define DISABLE_NETWORK
 
   // #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
   //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
@@ -151,8 +155,16 @@
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
     
+    // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS    
+    #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
+    //#define ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+
+// get code stable before worrying about "flickering"
+    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -176,18 +188,18 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"AnimationMode\": \"Effects\","
     "\"ColourOrder\": \"GRB\","
-    "\"ColourPalette\":\"Christmas 01\","
+    "\"ColourPalette\":0,"
     "\"Effects\":{"
-      "\"Function\":4,"
-      "\"Intensity\":255,"
-      "\"Grouping\":4,"
-      "\"Speed\":10"
+      "\"Function\":2"
+      // "\"Intensity\":255,"
+      // "\"Grouping\":4,"
+      // "\"Speed\":10"
     "},"
     "\"Transition\":{"
-      "\"TimeMs\":1500,"
+      "\"TimeMs\":1000,"
       "\"RateMs\":2000"
     "},"    
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRGB\":1"
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 

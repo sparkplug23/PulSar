@@ -10,8 +10,8 @@
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
@@ -478,6 +478,24 @@ class mAnimatorLight :
   void SubTask_Manual_SetPixel();
   uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
   #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+
+
+#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+// void mPalette::load_gradient_palette(uint8_t index)
+// {
+//   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
+//   byte tcp[72]; //support gradient palettes with up to 18 entries
+//   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
+//   targetPalette.loadDynamicGradientPalette(tcp);
+// }
+// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+
+void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
+
+#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
+
 
   /**
    * @brief 

@@ -11,7 +11,7 @@
 typedef struct {
   uint16_t      valid;                     // 280  (RTC memory offset 100 - sizeof(RTCRBT))
   uint8_t       fast_reboot_count;         // 282
-  uint8_t       free_003[1];               // 283
+  uint8_t       reboot_count_since_poweron;               // 283
 } TRtcFastboot;
 extern TRtcFastboot RtcFastboot;
 #ifdef ESP32

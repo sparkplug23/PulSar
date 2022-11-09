@@ -155,6 +155,7 @@ void setup(void)
   else
   {
     RtcFastboot.fast_reboot_count++;
+    RtcFastboot.reboot_count_since_poweron++;
     #ifdef DEBUG_FASTBOOT
     Serial.printf("FastBoot: Count %d\n\r", RtcFastboot.fast_reboot_count); 
     #endif

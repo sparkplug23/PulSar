@@ -12,6 +12,13 @@ void mAnimatorLight::Init_Segments()
 
   Init_Segments_RgbcctControllers();
 
+  
+#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+uint8_t segment_index = 0;
+  // loadPalette_Michael(_segments[segment_index].palette.id, segment_index);
+  loadPalette_Michael(0, segment_index); //defualt to 0 for now
+#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
 }
 
 void mAnimatorLight::Init_Segments_RgbcctControllers()
@@ -119,7 +126,7 @@ void mAnimatorLight::resetSegments()
 
 
 
-void mAnimatorLight::SubTask_Segments_Animation()
+void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
 {
 
 // char buffer[100];
@@ -162,13 +169,13 @@ void mAnimatorLight::SubTask_Segments_Animation()
   /**
    * Subtask to handle by each segment ie "flasher" function for each segment
    * */
-  for(
-    int ii = 0; 
-    ii<MAX_NUM_SEGMENTS; 
-    ii++
-  ){
+  // for( 
+  //   int ii = 0; 
+  //   ii<MAX_NUM_SEGMENTS; 
+  //   ii++
+  // ){
 
-    segment_active_index = ii; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
+    segment_active_index = segment_index; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
 
     /**
      * @brief 
@@ -185,26 +192,27 @@ void mAnimatorLight::SubTask_Segments_Animation()
     // segment's buffers are cleared
     SEGENV.resetIfRequired();
     
-      // AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].isActive() %d"),_segments[segment_active_index].isActive());
+    // AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].isActive() %d"),_segments[segment_active_index].isActive());
 
     if(_segments[segment_active_index].isActive())// || (pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END))
     {     
 
-      if((mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
-      {
+      if(
+        (mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||
+        (_segments[0].flags.fForceUpdate)
+      ){
         DEBUG_PIN1_SET(LOW);
 
         ALOG_DBM(PSTR("seg=%d,rate=%d,%d"),segment_active_index ,_segments[segment_active_index].transition.rate_ms, _segments[0].flags.fForceUpdate);
 
-/**
- * @brief Add flag that checks if animation is still running from previous call before we start another, 
- * hence, detect when frame_rate is not being met (time_ms not finishing before rate_ms)
- * 
- */
+        /**
+         * @brief Add flag that checks if animation is still running from previous call before we start another, 
+         * hence, detect when frame_rate is not being met (time_ms not finishing before rate_ms)
+         * */
 
-
-        if(SEGMENT.flags.fForceUpdate){ SEGMENT.flags.fForceUpdate=false;
-          SEGENV.tSaved_AnimateRunTime = millis();
+        if(SEGMENT.flags.fForceUpdate){ 
+          SEGMENT.flags.fForceUpdate=false;
+          SEGENV.tSaved_AnimateRunTime = millis(); // Not reset inside TimeReached
         }
         
         // This maybe cant be global and needs placed inside each effect?
@@ -824,7 +832,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
     // }
 
   
-  }
+  // }
 
 } // SubTask_Effects_PhaseOut
 
@@ -1401,33 +1409,11 @@ uint16_t pixel_start_i = 0;
 /**
  * Cleaned version for segments
  * */
-void mAnimatorLight::EveryLoop(){
+void mAnimatorLight::EveryLoop()
+{
 
-#ifdef ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
-
-// uint8_t randomv = random(0,10)*25;
-
-// for(int ii=0;ii<2;ii++){
-// pCONT_lAni->stripbus->SetPixelColor(ii,RgbColor(randomv,0,0));
-// }
-// for(int ii=9;ii<10;ii++){
-// pCONT_lAni->stripbus->SetPixelColor(ii,RgbColor(0,randomv,0));
-// }
-// pCONT_lAni->stripbus->Show();
-//           StripUpdate();      
-
-// return;
-#endif // ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
-
-// _segments[0].effect_id = EFFECTS_FUNCTION__SEQUENTIAL_ID;
-// _segments[1].effect_id = EFFECTS_FUNCTION__STEPPING_PALETTE_ID;
-// _segments[2].effect_id = EFFECTS_FUNCTION__STATIC_PALETTE_ID;
-// _segments[3].effect_id = EFFECTS_FUNCTION__STEPPING_PALETTE_ID;
-// _segments[4].effect_id = EFFECTS_FUNCTION__STATIC_PALETTE_ID;
-
-
-  if(_segments[0].flags.fEnable_Animation)
-  {
+  // if(_segments[0].flags.fEnable_Animation)
+  // {
 
     uint8_t flag_animations_needing_updated = 0;
 
@@ -1556,7 +1542,7 @@ void mAnimatorLight::EveryLoop(){
     }
 
 
-  } //enabeled
+  // } //enabeled
 
 
   // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
@@ -1848,7 +1834,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
             // For random, desired pixel from map will also be random
             desired_pixel = random(0, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
             
-            RgbTypeColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+            RgbTypeColor colour = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel,&pixel_position);
 
             #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
             AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
@@ -1961,7 +1947,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelect
       uint8_t pixel_position = -2;
       for(uint16_t desired_pixel=0;desired_pixel<active_pixels_in_map;desired_pixel++){
 
-        RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+        RgbcctColor colour = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel,&pixel_position);
         
         #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
         //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "dp%d, pp%d, %d,%d %d"),desired_pixel, pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
@@ -2047,8 +2033,8 @@ ALOG_INF(PSTR("This should become an animation in its own right using mappings")
       for(uint8_t grad_pair_index=0;grad_pair_index<pixels_in_map;grad_pair_index++)
       {
         
-        start_colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,  &start_pixel_position);
-        end_colour   = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel+1,&end_pixel_position);
+        start_colour = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel,  &start_pixel_position);
+        end_colour   = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel+1,&end_pixel_position);
 
         AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
         AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);

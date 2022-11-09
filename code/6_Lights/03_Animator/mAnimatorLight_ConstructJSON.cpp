@@ -86,6 +86,8 @@ JBI->Start();
     uint16_t id = 0;
     uint16_t pixel = 0;
     uint8_t encoded_value = 0;
+    
+    #ifndef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     // uint16_t count   = mPaletteI->GetLengthFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
     RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
 
@@ -100,6 +102,24 @@ JBI->Start();
       JBI->Add(colour.W2);
     }
     JBI->Array_End();
+    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
+    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    /**
+     * @brief Moving towards preloading palettes from memory into ram/heap for speed (then iram will work)
+     * 
+     */
+    JBI->Level_Start("LoadPalette");
+
+      uint8_t segment_index = 0;
+
+      JBI->Array_AddArray("buffer", mPaletteI->palette_runtime.loaded.buffer_static, ARRAY_SIZE(mPaletteI->palette_runtime.loaded.buffer_static));
+
+
+    JBI->Level_End();
+    
+    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
 
 return JBI->End();
 

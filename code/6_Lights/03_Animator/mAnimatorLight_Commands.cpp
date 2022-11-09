@@ -1728,6 +1728,10 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 
   _segments[segment_index].palette.id = value < mPalette::PALETTELIST_TOTAL_LENGTH ? value : 0;
 
+#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+  loadPalette_Michael(_segments[segment_index].palette.id, segment_index);
+#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)
   &&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID))

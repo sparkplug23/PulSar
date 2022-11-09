@@ -125,6 +125,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
  *******************************************************************************************************************************************************************************************************************
  * @name : Slow Glow
  * @note : Randomly changes colours of pixels, and blends to the new one
+ * @note : Intensity 0-255 is how many should randomly update converted to percentage
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -154,6 +155,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
    * @brief Intensity describes the amount of pixels to update
    * 
    * This does not need to be calculate each call, this should be calculated when set then saved, memory speed
+   * ie intensity when set, needs IntensityScaledToLEDCount
    **/
   uint8_t percentage = 20; // forced 20, but there is a command for this
   #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
@@ -8576,7 +8578,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
     RgbcctColor colour_blended = RgbcctColor(0);
     if(mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr) == 1)
     {
-      colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
+      colour1 = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, 0);
       colour2 = RgbcctColor(0);
       colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
 
@@ -8592,8 +8594,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
       //   colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
       //   colour_blended = ApplyBrightnesstoRgbcctColour(colour_blended, s);
       // }else{        
-        colour1 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 0);
-        colour2 = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, 1);
+        colour1 = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, 0);
+        colour2 = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, 1);
         colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
       // }
     }
@@ -8835,7 +8837,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette()
     //              p++
     //   ){
 
-        colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+        colour1 = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel_palette_counter);
 
         /**
          * @brief 
@@ -8881,7 +8883,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette()
                  p <= stop_pixel;
                  p++
       ){
-        colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+        // colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
+        colour1 = mPaletteI->GetColourFromPalette_Intermediate(0, pixel_palette_counter);
         
         /**
          * @brief 
@@ -11168,6 +11171,9 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
 void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
 {
 
+
+    #ifndef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
   ALOG_INF( PSTR("SubTask_Flasher_Animate_Function_Tester_02") );
 
 
@@ -11284,6 +11290,7 @@ StripUpdate();
   // );
 
 
+    #endif// ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 }
 

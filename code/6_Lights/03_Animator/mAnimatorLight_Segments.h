@@ -727,7 +727,7 @@
  * *//////
 
 
-    void SubTask_Segments_Animation();
+    void SubTask_Segments_Animation(uint8_t segment_index);
     void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     /**
      * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
@@ -990,6 +990,19 @@
          * */
         uint8_t index_range_max_limit = 0; 
         uint8_t index_range_as_percentage = 0;
+
+        /**
+         * @brief Temporary solution to store palette info "loaded" here
+         * 
+         */
+        // struct LOADED{
+        //   uint8_t* buffer = nullptr;
+        //   uint16_t buflen = 0;
+        //   uint8_t buffer_static[200]; //tmp fixed buffer
+        // }loaded;
+
+
+
       }palette;
       /**
        * This allows the segment to have optional brightness per segment, by default is set to maximum
