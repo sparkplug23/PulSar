@@ -806,15 +806,13 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
          */
         if(!_segment_runtimes[segment_active_index].animation_has_anim_callback)
         {
-          #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-          Serial.print("@6");
-          #endif
           StripUpdate();         
           SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
         }
         else
         { // Configure animator to show output
-          StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_active_index);    
+          StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_active_index);   
+          // First run must be reset after StartAnimation is first called 
         }
                 
         _segment_runtimes[segment_active_index].call++; // Used as progress counter for animations eg rainbow across all hues
@@ -1404,151 +1402,133 @@ uint16_t pixel_start_i = 0;
 } // end function
 
 
-
-
 /**
  * Cleaned version for segments
  * */
 void mAnimatorLight::EveryLoop()
 {
 
-  // if(_segments[0].flags.fEnable_Animation)
-  // {
+  uint8_t flag_animations_needing_updated = 0;
+    
+  for(
+    int ii = 0; 
+    ii<MAX_NUM_SEGMENTS; 
+    ii++
+  ){
 
-    uint8_t flag_animations_needing_updated = 0;
+    segment_active_index = ii; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
 
-    /**
-     * Each ACTIVE segment will have its own animator to run
-     * */
-    // for (segment_active_index =0;segment_active_index<MAX_NUM_SEGMENTS;segment_active_index++)
-    // { 
-      
-    for(
-      int ii = 0; 
-      ii<MAX_NUM_SEGMENTS; 
-      ii++
-    ){
+    if(_segments[ii].isActive())
+    {
 
-      segment_active_index = ii; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
+      /**
+       * @brief I might want to add a minimal backoff to stop checking this
+       * So know when each animation/segment was last called
+       * 
+       */
 
-      if(_segments[ii].isActive())
+      if (_segment_runtimes[ii].animator->IsAnimating())
       {
 
-        if (_segment_runtimes[ii].animator->IsAnimating())
+        /**
+         * @brief A Backoff time is needed per animation so the DMA is not overloaded
+         * 
+        **/
+        if(mTime::TimeReached(&_segment_runtimes[ii].tSaved_AnimateRunTime, 10))
         {
-        
-          // ALOG_INF(PSTR("_segments[%d].IsAnimating()=%d\tAD%d"), ii, _segments[ii].isActive(), _segments[ii].transition.time_ms);
-
           _segment_runtimes[ii].animator->UpdateAnimations(ii);
           flag_animations_needing_updated++; // channels needing updated
-          SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all my methods
-
-          // Serial.print("@");
-
-          //TBA: flags per segment
-
-  // DEBUG_LINE_HERE;
-        }
-        else // not animating
-        { 
-  // DEBUG_LINE_HERE;
-          //TBA: flags per segment
-      
-        }
-
-      }//isactive
-
-    } //loop segments
-
-// if(flag_animations_needing_updated>0)
-
-    if(flag_animations_needing_updated)
-    {
-      #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-    ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
-#endif
-      // #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-      // if(stripbus->IsDirty()){
-        // if(stripbus->CanShow()){ 
-          // ALOG_INF(PSTR("CanShow"));
-      // #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-          #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-          Serial.print("@5");
-          #endif
-          StripUpdate();          
-      // #ifndef ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-        // }
-      //   else{
-
-      //     // Serial.print("?");
-      //   }
-      // }else{
-
-      //     // Serial.print("~2");
-      // }
-      // #endif // ENABLE_DEVFEATURE_REMOVE_STRIPBUS_ISDIRTY_CHECK
-      
-      /**
-       * THESE ALL NEED PUT INTO SEGMENTS
-       * THESE ARE COMMANDS IF ANY IS ANIMATING
-       * checking if animation state has changed from before (maybe check via animation state?)
-       * */
-      if(!_segments[0].flags.fRunning)
-      {   
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        ALOG_DBM( PSTR(D_LOG_NEO "Animation Started"));
-        #endif
+        } //end TimeReached
+  
+        #ifdef ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+        // first run needs moved into runtime
+        SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all my methods
+        #endif // ENABLE_DEVFEATURE_FORCED_REMOVE_091122
       }
-      _segments[0].flags.fRunning = true; 
-      fPixelsUpdated = true;
-      pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
-      //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
+      else // not animating
+      { 
+        //TBA: flags per segment
+      }
+
+    }//isactive
+
+  } //loop segments
+
+  /**
+   * @brief If any change has happened, update!?
+   * IsDirty checks to only update if needed
+   */
+  if(flag_animations_needing_updated)
+  {
+    #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+    ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
+    #endif
+
+    if(stripbus->IsDirty()){    // Only update if LEDs have changed
+      if(stripbus->CanShow()){  
+        StripUpdate();
+      }
     }
-    else // none need animating
-    {
-      
-        #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-        // Serial.print("E");
-        #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+    
+    #ifndef ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+    /**
+     * THESE ALL NEED PUT INTO SEGMENTS
+     * THESE ARE COMMANDS IF ANY IS ANIMATING
+     * checking if animation state has changed from before (maybe check via animation state?)
+     * */
+    if(!_segments[0].flags.fRunning)
+    {   
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
+      ALOG_DBM( PSTR(D_LOG_NEO "Animation Started"));
+      #endif
+    }
+    _segments[0].flags.fRunning = true; 
+    fPixelsUpdated = true;
+    pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
+    //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
+  }
+  else // none need animating
+  {
+    
+      #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+      // Serial.print("E");
+      #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 
 
-      if(_segments[0].flags.fRunning)
-      { // Was running
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        ALOG_DBM( PSTR(D_LOG_NEO "Animation Finished")); 
-        #endif
+    if(_segments[0].flags.fRunning)
+    { // Was running
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
+      ALOG_DBM( PSTR(D_LOG_NEO "Animation Finished")); 
+      #endif
 
 
-        fAnyLEDsOnOffCount = 0;
+      fAnyLEDsOnOffCount = 0;
 
 /*****
  *  DISABLING THE ABILITY TO KNOW WHEN IT IS ON OR OFF, NEEDS ADDED BACK IN AGAIN WITH CHECKING ALL SEGMENTS        
-   ***
-   
-   */
-       for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){ 
-          if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
-        }          
+ ***
+  
+  */
+      for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){ 
+        if(GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
+      }          
 
-      }
-      _segments[0].flags.fRunning = false;
-      pCONT_set->Settings.enable_sleep = true;
-      if(blocking_force_animate_to_complete){ //if it was running
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        ALOG_DBM( PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
-        #endif
-        blocking_force_animate_to_complete = false;
-      }
     }
+    _segments[0].flags.fRunning = false;
+    pCONT_set->Settings.enable_sleep = true;
+    if(blocking_force_animate_to_complete){ //if it was running
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
+      ALOG_DBM( PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
+      #endif
+      blocking_force_animate_to_complete = false;
+    }
+#endif // ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+  } // flag_animations_needing_updated
 
 
-  // } //enabeled
+// } //enabeled
 
 
-  // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-  // // scene.colour.B = _segments[0].brightness; // _segments[0].brightness is master
-  // // move to have tasmota way to update brightness stored
-  // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
 
   /**
    *  control relay power
@@ -1589,6 +1569,10 @@ void mAnimatorLight::EveryLoop()
 // 
 
 }
+
+
+
+
 
 
 mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE)
