@@ -82,16 +82,11 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   // So colour region does not need to change each loop to prevent colour crushing
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
-  // new transition, so force full update of all segment pixels
-  if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh){
-    SEGMENT.pixels_to_update_this_cycle = SEGMENT.length();
-  }
-
-  ALOG_DBM( PSTR("Segment[%d] \t(%d,%d)\t(%d)"), segment_active_index, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, SEGMENT.palette.id);
-
   RgbcctColor colour = RgbcctColor(0);
-  for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
-  {
+  for(uint16_t pixel = 0; 
+                pixel < SEGLEN; 
+                pixel++
+  ){
 
     colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
     
@@ -125,21 +120,14 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
  *******************************************************************************************************************************************************************************************************************
  * @name : Slow Glow
  * @note : Randomly changes colours of pixels, and blends to the new one
- * @note : Intensity 0-255 is how many should randomly update converted to percentage
+ * @note : Intensity 0-255 is how many should pixels should randomly change (0-255 scaled to 0-pixel_count)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 {
 
-  /**
-   * @brief Add new palette option
-   * If RGB only palette, then also allow brightnessCCT to add white component across all colours
-   * 
-   */
-  
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-
   //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
 
   if (!SEGENV.allocateData(dataSize)){    
@@ -153,70 +141,48 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   
   /**
    * @brief Intensity describes the amount of pixels to update
-   * 
-   * This does not need to be calculate each call, this should be calculated when set then saved, memory speed
-   * ie intensity when set, needs IntensityScaledToLEDCount
+   *  Intensity 0-255 ==> LED length 1 to length (since we cant have zero)
    **/
-  uint8_t percentage = 20; // forced 20, but there is a command for this
-  #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  percentage = constrain(SEGMENT.intensity(),0,100); // limit to be "percentage"
-  #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  
-  /**
-   * @brief Pixels in segment 
-   **/
-  uint16_t pixels_in_segment = SEGMENT.length();
-  uint16_t pixels_to_update_as_number = mapvalue(percentage, 0,100, 0,pixels_in_segment);
-
-  #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  //ALOG_INF( PSTR("percentage{%d},intensity{%d},pixels_in_segment{%d},pixels_to_update_as_number{%d}"), percentage, _segments[segment_index].intensity(), pixels_in_segment, pixels_to_update_as_number);
-  #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-
-  // if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){
-  //   pixels_to_update_as_number = SEGMENT.length();
-  // }
-  // uint8_t pixel_position = 0;
+  uint16_t pixels_to_update = mapvalue(
+                                        SEGMENT.intensity(), 
+                                        0,255, 
+                                        0,SEGMENT.length()
+                                      );
 
   uint16_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
 
-  /**
-   * @brief Future plan
-   * Instead of getting the colour each time (looping by index out), instead get the colour once and then write it to the output? this should be faster
-   * 
-   */
   uint16_t pixel_index = 0;
   RgbTypeColor colour = RgbcctColor(0);
 
-// 22.6us with GetPixelsInMap inside for loop
-// 21.3 without getpixelsinmap
+  /**
+   * @brief On first run, all leds need set once
+   * 
+   */
+  if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
+    pixels_to_update = SEGMENT.length();
+  }
 
-  for (uint16_t iter = 0; iter < pixels_to_update_as_number; iter++)
-  {
+
+  for(uint16_t iter = 0; 
+                iter < pixels_to_update; 
+                iter++
+  ){
     /**
      * @brief 
      * min: lower bound of the random value, inclusive (optional).
      * max: upper bound of the random value, exclusive.
     **/
-    pixel_index = random(0, pixels_in_segment+1); //indexing must be relative to buffer
-    // if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
-    //   pixel_index = iter;
-    // }
-    
-    #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    //ALOG_INF( PSTR("[%d] pixel_index{%d} = random( start_pixel{%d}, end_pixel{%d})"), iter, pixel_index, start_pixel, end_pixel );
-    #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    pixel_index = random(0, SEGMENT.length()+1); // Indexing must be relative to buffer
 
-    // For random, desired pixel from map will also be random
+    // On first run, I need a new way to set them all.
+    if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
+      pixel_index = iter;
+    }
     
-    // 3.5us
     desired_pixel = random(0, pixels_in_map);
   
-
-// 10.5us per call
     colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
 
-
-      // DEBUG_LINE_HERE_PAUSE;
     #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
     AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
     #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
@@ -230,12 +196,6 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     SetTransitionColourBuffer_DesiredColour(SEGENV.Data(), SEGENV.DataLength(), pixel_index, SEGMENT.colour_type, colour);
 
   }
-
-  if(SEGMENT.flags.animator_first_run)
-  {
-    DEBUG_LINE_HERE;
-  }
-
 
   // Get starting positions already on show
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();

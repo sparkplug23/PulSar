@@ -71,7 +71,7 @@
 
   //#define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
-  // #define DISABLE_NETWORK
+  #define DISABLE_NETWORK
 
   // #define USE_DEVFEATURE_METHOD_SEGMENTS_BUILD
   //#define USE_DEVFEATURE_METHOD_HACS_LEGACY_BUILD
@@ -108,6 +108,18 @@
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+
+  #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
+
+  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+
+  #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+
+  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+
+  // #define ENABLE_DEVFEATURE_DEBUG_TRACE_LIGHTING_CHRISTMAS
+  // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+
     
 //     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
 //     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
@@ -115,7 +127,7 @@
 //     #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
 //     #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
-//       #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+  // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 //     // #define USE_BUILD_TYPE_LIGHTING
 //     // #define USE_MODULE_LIGHTS_INTERFACE
@@ -148,7 +160,8 @@
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-    #define STRIP_SIZE_MAX 16+1 //still needs extra +1
+    // #define STRIP_SIZE_MAX 16+1 //still needs extra +1
+    #define STRIP_SIZE_MAX 2000 //still needs extra +1
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
@@ -163,6 +176,24 @@
 
 // get code stable before worrying about "flickering"
     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+    /**
+     * @brief Preset
+     * 
+     * Each preset will allow to configure an animation with various changes (best to use json string? that way its future proof??)
+     * Also, setting the value max (255/65535 etc) will mean this mode will not overwrite an aspect of the previous, that way they are additive
+     * For 2022, just hard code them in a function
+     * 
+     *
+     */
+
+    /**
+     * @brief Playlist
+     * 
+     * must include actives times, blocked times
+     * 
+     */
 
 
   #define USE_MODULE_TEMPLATE
@@ -190,8 +221,8 @@
     "\"ColourOrder\": \"GRB\","
     "\"ColourPalette\":0,"
     "\"Effects\":{"
-      "\"Function\":2"
-      // "\"Intensity\":255,"
+      "\"Function\":2,"
+      "\"Intensity\":255"
       // "\"Grouping\":4,"
       // "\"Speed\":10"
     "},"
@@ -199,7 +230,7 @@
       "\"TimeMs\":1000,"
       "\"RateMs\":2000"
     "},"    
-    "\"BrightnessRGB\":1"
+    "\"BrightnessRGB\":10"
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 

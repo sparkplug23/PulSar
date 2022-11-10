@@ -1220,6 +1220,11 @@
       RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
       RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
     
+
+      uint32_t tSaved_LastUpdated = millis();
+      uint32_t tTick_maximum_call_ms = 10;
+
+
       /**
        * Using "index" inside animator as segment index
        * */

@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 
-#include "5_Sensors/00_Interface/mSensorType.h"
+
+//LIGHTING_BRANCH
+// #include "5_Sensors/00_Interface/mSensorType.h"
 
 /**
  * @brief 
@@ -31,6 +33,7 @@ class mTaskerInterface
     /**
      * Push 0 if none are used, maybe internalise
      * */
-    virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->type.push_back(0); }
+    // LIGHTING_BRANCH
+    // virtual void GetSensorReading(sensors_reading_t* value, uint8_t index = 0){ value->type.push_back(0); }
   
 };

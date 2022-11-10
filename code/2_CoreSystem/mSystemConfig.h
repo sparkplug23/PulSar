@@ -18,7 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes
- * #111 : Trying to get esp devices ready for christmas -- removing constant flash calls 
+ * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
 #define FIRMWARE_VERSION_MINOR    111 // Update "ChangeLogManual.md" when incrementing

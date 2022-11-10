@@ -589,6 +589,12 @@ class mPalette
         // uint8_t* colour_map_dynamic_buffer = nullptr;
         // uint16_t colour_map_dynamic_buflen = 0;
 // 
+
+/**
+ * @brief For now, only 1 palette can be used at a time
+ * New dynamic memory methods needs to be added to allow varying palette types
+ * 
+ */
         struct LOADED{
           // uint8_t* buffer = nullptr;
           uint16_t buflen = 0;

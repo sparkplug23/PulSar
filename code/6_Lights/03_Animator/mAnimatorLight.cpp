@@ -5,13 +5,17 @@
 const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
 const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
 
+/**
+ * @brief 
+ * Animator should NOT have its own Tasker, but isntead should be called from light interface
+ * 
+ * @param function 
+ * @param obj 
+ * @return int8_t 
+ */
 
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
-
-  #ifdef ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
-  Tasker_Override_Forcing_Variables_Testing();
-  #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
 
   /************
    * INIT SECTION * 
@@ -46,19 +50,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_EVERY_SECOND:{
 
-      #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-
-      // RgbcctColor updatedColor = pCONT_lAni->stripbus->GetPixelColor(0);
-
-      // ALOG_INF( PSTR("colour_type=%d, desired_colour1=%d,%d,%d,%d,%d AR=%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW, analogRead(4));
-      // ALOG_INF( PSTR("colour_type=%d, desired_colour1=%d,%d,%d,%d,%d AR=%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
-
-      // StripUpdate();
-
-
-
-      #endif
-    
       //EverySecond();
 
       #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
@@ -191,7 +182,7 @@ void mAnimatorLight::Pre_Init(void){
     pCONT_ladd->neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
     // constexpr
     // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
-    uint8_t kTaskRunnerCore = xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+    uint8_t kTaskRunnerCore = 1;//ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
     pCONT_ladd->neopixel_runner->begin(
         [this]() {
             stripbus->Show();
@@ -881,172 +872,21 @@ void mAnimatorLight::SetRefreshLEDs(){
 
 
 
-
-
-
-
-
-
-
-
-// Final output, but check for power limit
-void mAnimatorLight::StripUpdate(){
-
-  DEBUG_PIN2_SET(LOW);
-  // Serial.print("-");
-
-  // STRIP_SIZE_REPEAT_MAX
-
-  // if(settings.strip_size_repeat_animation)
-
-  // Calculate output pixel size
-  // uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
-  // if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
-  //   pixel_output_length = STRIP_SIZE_MAX;
-  // }
-  // // Replicate SetPixel for repeated output
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // pixel_output_length = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;  
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-
-
-// AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
-  // // Replicate SetPixel for repeated output
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // int pixels_existing_index = 0;
-  // for(int i=0;i<ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;i++){
-  //   SetPixelColor(i,GetPixelColor(pixels_existing_index++));
-  //   if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
-  // }
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-
-
-  
-#ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
-if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
-// #ifdef USE_SPEED_TESTING
-  uint8_t channel_count = 3;
-
-//ADD TO ONLY Check power level every 1 second to improve speed
-
-  RgbTypeColor c;
-  // float estimated_power_new_mA = 0;
-  // uint32_t last_power = 0;
-  // float pixel_units = 0;
-  // float this_power = 0;
-  // for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
-  //   // colour_tmp = desired_colour[ledout.index];
-  //   // estimated_power_new +=  WebColorFromColourType(desired_colour[ledout.index]) * channel_count * 20;
-  //   c = desired_colour[ledout.index];
-  //   pixel_units = c.R + c.G + c.B;
-  //   this_power = (pixel_units * power_rating.Average_mA_Per_Pixel_Step;
-  //   estimated_power_new_mA +=  this_power;
-  //   //last_power = (c.R + c.G + c.B) * power_rating.Average_mA_Per_Pixel_Step;
-  //   // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-  //   //   c.R,c.G,c.B,
-  //   //   (int)pixel_units,
-  //   //   (int)this_power,
-  //   //   (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-  //   //   (int)estimated_power_new_mA
-  //   // );
-  
-  //   // estimated_power_new +=  colour_tmp.W * channel_count * 20;
-  // }
-  // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-  //     c.R,c.G,c.B,
-  //     (int)pixel_units,
-  //     (int)this_power,
-  //     (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-  //     (int)estimated_power_new_mA
-  //   );
-
-  float estimated_power_new_mA = 0;
-  uint32_t power = 0;
-  float pixel_units = 0;
-  float this_power = 0;
-  for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
-    // colour_tmp = desired_colour[ledout.index];
-    // estimated_power_new +=  WebColorFromColourType(desired_colour[ledout.index]) * channel_count * 20;
-    c = desired_colour[ledout.index];, 19
-    power += c.R + c.G + c.B;
-    // this_power = (pixel_units * power_rating.Average_mA_Per_Pixel_Step;
-    // estimated_power_new_mA +=  this_power;
-    //last_power = (c.R + c.G + c.B) * power_rating.Average_mA_Per_Pixel_Step;
-    // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-    //   c.R,c.G,c.B,
-    //   (int)pixel_units,
-    //   (int)this_power,
-    //   (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-    //   (int)estimated_power_new_mA
-    // );
-  
-    // estimated_power_new +=  colour_tmp.W * channel_count * 20;
-  }
-  // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-  //     c.R,c.G,c.B,
-  //     (int)pixel_units,
-  //     (int)this_power,
-  //     (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-  //     (int)estimated_power_new_mA
-  //   );
-  // Store current power usage
-  power_rating.current_mA = (float)(power);// * power_rating.Average_mA_Per_Pixel_Step);//estimated_power_new_mA;
-  power_rating.power = (power_rating.current_mA/1000)*5;  // /1000*5
-
-  // AddLog(LOG_LEVEL_TEST,PSTR("Estimated Power Consumption = %d (mA) p%d"),(int)estimated_power_new_mA,(int)last_power);
-  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("Estimated Power Consumption = %d (mA)"),(int)estimated_power_new_mA);
-    #endif
-}
-#endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
-
-
 /**
- * @brief Before showing, duplicate the output by taking the 0-X pixels and replicating it... though this might not work since setpixellength is not long enough anymore? (or should I make a library edit to do this same feature)
+ * @brief Optional calculate power limit here before commiting?
+ * Actually, this is string dependent and should be moved into "hardware" type (pwm/ws2812)
  * 
  */
+void mAnimatorLight::StripUpdate(){
 
-// Serial.print("i");
+  // DEBUG_PIN2_SET(LOW);
+  // #ifdef ENABLE_DEVFEATURE_DEBUG_TRACE_LIGHTING_CHRISTMAS
+  // Serial.print("-");
+  // #endif 
+  
   pCONT_iLight->ShowInterface();
 
-  // for (auto copies = 0; copies < 3; copies++) {
-  //   image.Blt(stripbus, copies * image.PixelCount());
-  // }
-  
-  /**
-   * Replicate output if enabled
-   * Notice this has been moved the the function above, so needs to be called there
-   * It sould be changed to a runtime variable/flag option for mqtt command
-   * */
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // uint16_t internal_length = pCONT_iLight->settings.light_size_count;
-  // uint16_t external_length = STRIP_OUTPUT_REPEATED_LENGTH;
-
-  // uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
-  // if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
-  //   pixel_output_length = STRIP_SIZE_MAX;
-  // }
-  // // Replicate SetPixel for repeated output
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // pixel_output_length = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;  
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-  // // AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
-  // // Replicate SetPixel for repeated output
-  // // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // int pixels_existing_index = 0;
-  // for(int i=0;i<ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;i++){
-  //   SetPixelColor(i,GetPixelColor(pixels_existing_index++));
-  //   if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
-  // }
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-  DEBUG_PIN2_SET(HIGH);
+  // DEBUG_PIN2_SET(HIGH);
 
 }
 
