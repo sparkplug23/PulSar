@@ -238,7 +238,7 @@
 
 
     #define D_RGB255_BLUE            0, 0, 255,
-    #define D_RGB255_BLUE_FADED      0, 0, 200,
+    #define D_RGB255_BLUE_FADED1      0, 0, 200,
     #define D_RGB255_BLUE_FADED2     0, 0, 150,
     #define D_RGB255_BLUE_FADED3     0, 0, 100,
 
@@ -745,9 +745,10 @@
      * @note: Traditional lights with orange
      * */
     #ifndef D_PALETTE_CHRISTMAS_01_NAME_CTR
-    #define D_PALETTE_CHRISTMAS_01_NAME_CTR        "Christmas Traditional - RGPBO|Christmas 01"   
+    #define D_PALETTE_CHRISTMAS_01_NAME_CTR                     "Christmas Traditional - RGPBO|Christmas 01"   
     #endif    
-    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_01_NAME_CTR)        D_PALETTE_CHRISTMAS_01_NAME_CTR;
+    // #define       D_PALETTE_CHRISTMAS_01_DESRIPTION_NAME_CTR    ""
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_01_NAME_CTR)             D_PALETTE_CHRISTMAS_01_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_01_COLOUR_MAP__IDS)
     { // R,G,B
       D_RGB255_RED
@@ -877,7 +878,7 @@
 
 
     #ifndef D_PALETTE_CHRISTMAS_07_NAME_CTR
-    #define D_PALETTE_CHRISTMAS_07_NAME_CTR        "Solid Warm White|Christmas Warm White|Christmas 07"   
+    #define D_PALETTE_CHRISTMAS_07_NAME_CTR        "Christmas Warm White|Christmas 07"   
     #endif
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_07_NAME_CTR)        D_PALETTE_CHRISTMAS_07_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_07_COLOUR_MAP__IDS)
@@ -923,13 +924,6 @@
       0, 0, 200,
       255, 67, 10     //COLOUR_FLOAT_HUE_ORANGE 
 
-      
-      
-
-
-
-
-//use my phone, take pictures of real christmas lights, then use colour picker in photo shop to get rgb!
       
     };
 
@@ -1023,7 +1017,7 @@
       D_RGB255_RED
       D_RGB255_GREEN_FADED
       D_RGB255_PINK_WARM
-      D_RGB255_BLUE_FADED
+      D_RGB255_BLUE_FADED1
       D_RGB255_ORANGE_LIGHT   
       D_RGB255_GREEN_PASTEL
       D_RGB255_CYAN_FADED2
@@ -1034,9 +1028,9 @@
     };
 
 
-
+    // Use 2022
     #ifndef D_PALETTE_CHRISTMAS_13_NAME_CTR
-    #define D_PALETTE_CHRISTMAS_13_NAME_CTR        "Christmas Outside Tree Step through|Christmas 13"   
+    #define D_PALETTE_CHRISTMAS_13_NAME_CTR        "Christmas Outside Tree Stepping Palette 01|Christmas 13"   
     #endif
     DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_13_NAME_CTR)        D_PALETTE_CHRISTMAS_13_NAME_CTR;
     DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_13_COLOUR_MAP__IDS)
@@ -1046,16 +1040,13 @@
       D_RGB255_PINK_WARM   // Pink
       D_RGB255_BLUE_FADED2
       D_RGB255_ORANGE_LIGHT    // Orange
-      // 25, 112, 25, //pastel green 
       0, 255,180,     // green-Cyan  **
       D_RGB255_BLUE
-
       D_RGB255_RED
       D_RGB255_GREEN_FADED
       D_RGB255_PINK_WARM   // Pink
       D_RGB255_BLUE_FADED2
       D_RGB255_ORANGE_LIGHT    // Orange
-      // 25, 112, 25, //pastel green
       0, 255,0,     // green-Cyan      ** 
       D_RGB255_BLUE
     };
@@ -1230,6 +1221,7 @@
       D_RGB255_PINK_HOT
       D_RGB255_RED_PASTEL
       D_RGB255_ORANGE_DEEP
+      D_RGB255_PURPLE_DEEP
       D_RGB255_YELLOW_WARM
       // Repeated with tweaks
       D_RGB255_RED_ALT
@@ -1243,7 +1235,7 @@
       D_RGB255_ORANGE_DEEP
       D_RGB255_PURPLE_DEEP
       D_RGB255_PINK_HOT3
-      D_RGB255_CYAN_FADED3      
+      D_RGB255_CYAN_FADED3
     };
 
 
@@ -1266,6 +1258,109 @@
     };
 
 
+
+    #ifndef D_PALETTE_CHRISTMAS_22_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_22_NAME_CTR        "Christmas 2021 - DiningRoom Tree|Christmas 22"   
+    #endif
+    // #define PM_PALETTE_CHRISTMAS_22_DESCRIPTION_CTR   "Mostly white white with some cold white" // new optional (for memory) descriptions
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_22_NAME_CTR)        D_PALETTE_CHRISTMAS_22_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_22_COLOUR_MAP__IDS)
+    { // R,G,B      
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_PINK_HOT2
+      D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_PURPLE_DEEP
+      D_RGB255_PINK_HOT3
+      D_RGB255_CYAN_FADED3
+    };
+
+
+    #ifndef D_PALETTE_CHRISTMAS_23_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_23_NAME_CTR        "Christmas 2022 - Outside Tree|Christmas 23"   
+    #endif
+    // #define PM_PALETTE_CHRISTMAS_22_DESCRIPTION_CTR   "Mostly white white with some cold white" // new optional (for memory) descriptions
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_23_NAME_CTR)        D_PALETTE_CHRISTMAS_23_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_23_COLOUR_MAP__IDS)
+    { // R,G,B      
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_YELLOW_WARM
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_PINK_HOT2
+      D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_PURPLE_DEEP
+      D_RGB255_PINK_HOT3
+      D_RGB255_CYAN_FADED3
+    };
+
+
+    // New 2022 smaller microled transparant wire, looks more blue than 2021 version
+    #ifndef D_PALETTE_CHRISTMAS_24_NAME_CTR
+    #define D_PALETTE_CHRISTMAS_24_NAME_CTR        "Christmas 2022 - DiningRoom Tree|Christmas 24"   
+    #endif
+    // #define PM_PALETTE_CHRISTMAS_24_DESCRIPTION_CTR   "Mostly white white with some cold white" // new optional (for memory) descriptions
+    DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_24_NAME_CTR)        D_PALETTE_CHRISTMAS_24_NAME_CTR;
+    DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_24_COLOUR_MAP__IDS)
+    { // R,G,B      
+          
+      D_RGB255_RED
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      D_RGB255_BLUE_FADED3
+      D_RGB255_ORANGE_LIGHT       
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_CYAN_FADED3
+      D_RGB255_PINK_HOT
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_PURPLE_DEEP
+      D_RGB255_YELLOW_WARM
+      // Repeated with tweaks
+      D_RGB255_RED_ALT
+      D_RGB255_GREEN_FADED2
+      D_RGB255_PINK_WARM
+      // D_RGB255_BLUE_FADED3
+      D_RGB255_GREEN_PASTEL_FADED
+      D_RGB255_PINK_HOT2
+      // D_RGB255_CYAN_FADED3
+      D_RGB255_RED_PASTEL
+      D_RGB255_ORANGE_DEEP
+      D_RGB255_PURPLE_DEEP
+      D_RGB255_PINK_HOT3
+      D_RGB255_CYAN_FADED3
+   
+    };
 
 
     #ifndef D_PALETTE_CUSTOM_USER_01_NAME_CTR

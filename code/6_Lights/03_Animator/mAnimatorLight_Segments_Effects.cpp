@@ -325,7 +325,13 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
 {
 
-  uint8_t segment_index = segment_active_index;
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
+
+  if (!SEGENV.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+    return;
+  }
 
   uint16_t* region_p          = &SEGENV.aux0;
   uint16_t* indexes_active_p  = &SEGENV.aux1; // shared_flasher_parameters_segments.indexes.active
@@ -336,140 +342,259 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
 
   desired_pixel=0;
 
-  // switch(*region_p){
-  //   case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
-
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_COLOUR_SELECT_ID"));
-     
-      uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-
-        //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
-
-      if (!SEGENV.allocateData(dataSize)){    
-        ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
-        SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-        return;
-      }
-
-
-      SEGMENT.flags.brightness_applied_during_colour_generation = true;
-      mPaletteI->SetPaletteListPtrFromID(SEGMENT.palette.id);
-        
-      uint8_t pixel_position = 0;
-      uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+  SEGMENT.flags.brightness_applied_during_colour_generation = true;
     
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+  uint8_t pixel_position = 0;
+  uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(SEGMENT.palette.id);
+
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+  
+  desired_pixel = *indexes_active_p;
+  uint8_t pixels_map_upper_limit = *indexes_active_p+1;
+  uint8_t pixels_map_lower_limit = *indexes_active_p;
+
+  uint8_t index_1, index_2;
+  uint8_t counter = 0;
       
-      desired_pixel = *indexes_active_p;
-      uint8_t pixels_map_upper_limit = *indexes_active_p+1;
-      uint8_t pixels_map_lower_limit = *indexes_active_p;
+  //if last pixel, then include it and the first, else include it and the next
+  if(*indexes_active_p == pixels_in_map-1){ //wrap wround
+    index_1 = 0;
+    index_2 = *indexes_active_p;
+    counter = 0;
+  }else{
+    index_1 = *indexes_active_p;
+    index_2 = *indexes_active_p+1;
+    counter = 1;
 
-      uint8_t index_1, index_2;
-      uint8_t counter = 0;
-          
-      //if last pixel, then include it and the first, else include it and the next
-      if(*indexes_active_p == pixels_in_map-1){ //wrap wround
-        index_1 = 0;
-        index_2 = *indexes_active_p;
-        counter = 0;
-      }else{
-        index_1 = *indexes_active_p;
-        index_2 = *indexes_active_p+1;
-        counter = 1;
+  }
 
-      }
+  *indexes_counter_p ^= 1;
 
-      *indexes_counter_p ^= 1;
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"), shared_flasher_parameters_segments.indexes.active,index_1,index_2);
 
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"), shared_flasher_parameters_segments.indexes.active,index_1,index_2);
+  RgbTypeColor colour;
 
-      RgbTypeColor colour;
+  for(uint16_t index=SEGMENT.pixel_range.start;
+                index<=SEGMENT.pixel_range.stop;
+                index++
+  ){
 
-      for(uint16_t index=SEGMENT.pixel_range.start;
-                   index<=SEGMENT.pixel_range.stop;
-                   index++
-      ){
+    if(counter^=1){
+      desired_pixel = *indexes_counter_p ? index_2 : index_1;
+    }else{
+      desired_pixel = *indexes_counter_p ? index_1 : index_2;
+    }
+    
+    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel, &pixel_position);
+    
+    if(SEGMENT.flags.brightness_applied_during_colour_generation){
+      colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
+    }
 
-        if(counter^=1){
-          desired_pixel = *indexes_counter_p ? index_2 : index_1;
-        }else{
-          desired_pixel = *indexes_counter_p ? index_1 : index_2;
-        }
+    SetTransitionColourBuffer_DesiredColour(SEGENV.data, SEGENV.DataLength(), index, SEGMENT.colour_type, colour);
         
-        colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
-        if(SEGMENT.flags.brightness_applied_during_colour_generation){
-          colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
-        }
+  } 
 
-        SetTransitionColourBuffer_DesiredColour(SEGENV.data, SEGENV.DataLength(), index, SEGMENT.colour_type, colour);
-           
-        //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "desired_pixel= %d/%d/%d"),pixels_map_lower_limit,desired_pixel,pixels_map_upper_limit);
+//messy
+  if(++*indexes_active_p>pixels_in_map-1){
+    *indexes_active_p=0;
+  }
   
-        // if(++desired_pixel>pixels_map_upper_limit){
-        //   desired_pixel = pixels_map_lower_limit;
-        // }
-
-      } 
-
-      //progress active index by 1 or reset
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters_segments.indexes.active=%d"), shared_flasher_parameters_segments.indexes.active);
-      
-      if(++*indexes_active_p>pixels_in_map-1){
-        *indexes_active_p=0;
-      }
-      
-    //   *region_p = EFFECTS_REGION_ANIMATE_ID;
   
-    // }break;
-    // case EFFECTS_REGION_ANIMATE_ID: //shift along
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-    //   //AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "EFFECTS_REGION_ANIMATE_ID"));
-    // #endif //  ENABLE_LOG_LEVEL_INFO
-
-      // Check if output multiplying has been set, if so, change desiredcolour array
-      // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();  // THIS SHOULD PROBABLY JUST BE MOVED INTO THE SETPIXEL AND RAN BEFORE STRIPUPDATE
-      // Get starting positions already on show
-      DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
-      // Call the animator to blend from previous to new
-     
-      SetSegment_AnimFunctionCallback(  segment_active_index, 
-        [this](const AnimationParam& param){ 
-          this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
-        }
-      );
-
-      *region_p = EFFECTS_REGION_COLOUR_SELECT_ID;
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO DEBUG_INSERT_PAGE_BREAK "part2 region = %d"), SEGENV.aux0);
-
-  //     break;
-  // }
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  
+  SetSegment_AnimFunctionCallback(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
 
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : Fireplace light effect using matrix of rgb
- * @note : Custom to whitehall, but should be used elsewhere
- *  
+ * @name : Blend Palette to White
+ * @note : Using a static palette (in order), the effect will change from static_palette (100% saturation) to cold_white (0% saturation)
+ *         The "0%", ie least saturated, will be set by the intensity value scaled from 255 to 100 range
  * 
+ * @param  "Intensity" :: 0-255 value is mapped into 0-100 and controls the minimum saturation. 100% Intensity means it can fade to complete white
+ * @param  "Time"      :: If unset (ie set to 0), then the speed will assume the DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD as 10 seconds
+ *         "Speed"     :: If the time is set to zero, then the Speed will scale from sweep of saturation time between DEFAULT_MINIMUM_ANIMATION_SPEED_PERIOD (1 second) and DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD (10 second)
+ *          
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::SubTask_Segment_Animate__Fireplace_1D_01()
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
 {
-  // P_PHASE_OUT, or, leave this as forced?
-  SubTask_Segment_Animate_Function__Slow_Glow();
+
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length();
+
+  if (!SEGRUN.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+    return;
+  }
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  SEGMENT.flags.brightness_applied_during_colour_generation = true;
 
   /**
-   * @brief Probably phase this out in favour of just fast random palette?
+   * @brief Using 
    * 
    */
 
+  // if(aux0 < 1000)
+  // {
+
+  // }
+  
+
+  uint8_t saturation_255 = 200;
+  float   saturation     = saturation_255/255.0f;
+  HsbColor colour_hsb = HsbColor(RgbcctColor(0));
+  
+  RgbcctColor colour = RgbcctColor(0);
+  for(uint16_t pixel = 0; 
+               pixel < SEGLEN; 
+               pixel++
+  ){
+
+    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+
+    colour_hsb = RgbColor(colour); // to HSB
+    colour_hsb.S = saturation;
+    colour = colour_hsb;
+    
+    if(SEGMENT.flags.brightness_applied_during_colour_generation){
+      colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    }
+
+    SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), pixel, SEGMENT.colour_type, colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    #endif
+
+  }
+  
+    //SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), 0, SEGMENT.colour_type, RgbColor(255));
+
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
 
 }
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Blend Palette Between Another Palette
+ * @note : Using a static palette (in order), the effect will change from static_palette (palette.id) to a different palette (palette_id saved as aux0)
+ *         The "0%", ie least saturated, will be set by the intensity value scaled from 255 to 100 range
+ * 
+ * @param  "Intensity" :: 0-255 value is mapped into 0-100 and controls the amount to blend into the second one. ie 0%=palette_id and 100%=aux0_palette
+ * @param  "Time"      :: If unset (ie set to 0), then the speed will assume the DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD as 10 seconds
+ *         "Speed"     :: If the time is set to zero, then the Speed will scale from sweep of saturation time between DEFAULT_MINIMUM_ANIMATION_SPEED_PERIOD (1 second) and DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD (10 second)
+ *          
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette()
+{
+
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
+  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!SEGENV.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+    return;
+  }
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  
+  /**
+   * @brief Intensity describes the amount of pixels to update
+   *  Intensity 0-255 ==> LED length 1 to length (since we cant have zero)
+   **/
+  uint16_t pixels_to_update = mapvalue(
+                                        SEGMENT.intensity(), 
+                                        0,255, 
+                                        0,SEGMENT.length()
+                                      );
+
+  uint16_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+
+  uint16_t pixel_index = 0;
+  RgbTypeColor colour = RgbcctColor(0);
+
+  /**
+   * @brief On first run, all leds need set once
+   * 
+   */
+  if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
+    pixels_to_update = SEGMENT.length();
+  }
+
+
+  for(uint16_t iter = 0; 
+                iter < pixels_to_update; 
+                iter++
+  ){
+    /**
+     * @brief 
+     * min: lower bound of the random value, inclusive (optional).
+     * max: upper bound of the random value, exclusive.
+    **/
+    pixel_index = random(0, SEGMENT.length()+1); // Indexing must be relative to buffer
+
+    // On first run, I need a new way to set them all.
+    if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
+      pixel_index = iter;
+    }
+    
+    desired_pixel = random(0, pixels_in_map);
+  
+    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+
+    #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
+    AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
+    #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
+
+    if(SEGMENT.flags.brightness_applied_during_colour_generation){
+      // 6us
+      colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    }
+
+    // 2us
+    SetTransitionColourBuffer_DesiredColour(SEGENV.Data(), SEGENV.DataLength(), pixel_index, SEGMENT.colour_type, colour);
+
+  }
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
 
@@ -4950,6 +5075,10 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
            if (bool rev == true) then LEDs are turned off in reverse order
    @note   Rate: FRAME_RATE
 
+          aux0: is a 8bit (255) value that stores where in the colour wheel the (old) draw colour is coming from
+          aux1: saves the 2nd colour (new) to be drawn
+          step: saves what part of the animation is happening (e.g. create, move, rotate etc)
+
    @param rev             Reversed
    @param useRandomColors 
 *******************************************************************************************************************************************************************************************************************
@@ -4958,10 +5087,24 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, bool useRandomColors)
 {
 
+  /// Use this animation to work out how I can use the aux0 stuff for my animations
+  // ALOG_INF(PSTR("Learing cycletime"));
+
+
+//speed of 128, cycletime = 19800
   uint32_t cycleTime = 750 + (255 - SEGMENT.speed())*150;
+  // millis() % total_cycle_time ==> gives remainder, and therefore process of animation from 0->cycleTime is 0->100%
   uint32_t perc = millis() % cycleTime;
+  // prog gets the process from 0->65535 again
   uint16_t prog = (perc * 65535) / cycleTime;
-  bool back = (prog > 32767);
+   
+  // ALOG_INF(PSTR(" SEGMENT.speed() = %d"),  SEGMENT.speed());
+  // ALOG_INF(PSTR("cycleTime = %d"), cycleTime);
+  // ALOG_INF(PSTR("perc = %d"), perc);
+  // ALOG_INF(PSTR("prog = %d"), prog);
+
+
+  bool back = (prog > 32767); // if in second half of 16 bit, then take away the first half to scale the 2nd into the first as positive counter
   if (back) {
     prog -= 32767;
     if (SEGENV.step == 0) SEGENV.step = 1;
@@ -4970,6 +5113,7 @@ void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, b
   }
   
   if (useRandomColors) {
+    // First call ie create colours to later be animated
     if (SEGENV.call == 0) {
       SEGENV.aux0 = random8();
       SEGENV.step = 3;

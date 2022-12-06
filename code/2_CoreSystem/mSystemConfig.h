@@ -18,10 +18,11 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes
+ * #112 : After Colorado, still the lighting only branch
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    111 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    112 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #28 : Stable boot only happens after 120 seconds now, as work around for not checking for mqtt/network valid. ie, currently if mqtt connects and some bad pointer exists then the mqtt will try to send it before it works. This will catch that and cause fastboot recovery. Recovery period will be (120 seconds * recovery counter)
@@ -38,6 +39,10 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
  */
 #define FIRMWARE_VERSION_MODULE   29
+
+
+#define FIRMWARE_BRANCH_NAME_STRING "surface_laptop_lighting"
+
 
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER           1//                (random(1,1000))

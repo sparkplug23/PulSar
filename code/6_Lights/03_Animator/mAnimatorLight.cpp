@@ -301,8 +301,11 @@ void mAnimatorLight::Init(void){
 
   _segments[0].flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
   _segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+  
+  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
   _segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
-    
+  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+
   // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   //   flashersettings.brightness_max = 255;
   //   flashersettings.brightness_min = 0;
@@ -376,7 +379,7 @@ void mAnimatorLight::Init(void){
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
   #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
   init_mixer_defaults();
   #endif
 
@@ -740,7 +743,8 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 // Create new function of ApplyBrightnesstoDesiredColour to do this if statement generically
 // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
 
-
+#ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+  // Remove this, as it will just be inside effects that need it
   if(_segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice)
   {
 
@@ -763,8 +767,11 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   }
   // Default: apply global brightness
   else{
+  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
     new_brightness_255 = brightness;
+  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
   }
+  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
   // AddLog(LOG_LEVEL_TEST, PSTR("ledGamma=new_brightness_255=%d - >%d"), 
   //   new_brightness_255, pCONT_iLight->ledGamma(new_brightness_255)
@@ -920,330 +927,39 @@ void mAnimatorLight::StripUpdate(){
 void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
 {
 
-ALOG_INF(PSTR("loadPalette_Michael"));
-
-  /**
-   * @brief Test 1, lets just force palette 0 into here
-   * 
-   */
-
-  //clear
+  // Clear = Worth while since loading palette will not be called everytime
   memset(&mPaletteI->palette_runtime.loaded.buffer_static, 0, sizeof(mPaletteI->palette_runtime.loaded.buffer_static));
-
-  // for(int i=0;i<20;i++)
-  // {
-  //   _segments[segment_index].palette.loaded.buffer_static[i] = i;
-  // }
 
   uint8_t* palette_buffer_p = mPaletteI->palette_runtime.loaded.buffer_static;
 
-
-// DEBUG_PIN6_SET(LOW);
-//   RgbcctColor colour = RgbcctColor(0);
-
-// DEBUG_PIN5_SET(LOW);
   /**
    * @brief My palettes
    **/
-
   if(
       (palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) &&
       (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
-    ){  
+  ){  
 
-      // ALOG_INF(PSTR("MINE %d"), palette_id);
+    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
 
-// checking valid palette should not be needed assuming preloading is succesful
-// Add new "palette_id" that is "loaded palette" and check this each time, or else just assume its correct, best for speed
-      mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
-
-      if(ptr == nullptr)
-      {
-        ptr = mPaletteI->palettelist.ptr;
-      }
-
-      // this will not work, since each segment will need its preloaded. 
-      // Need a drastic rethink on this, perhaps another subpalette class that stores the "runtime palette"
-      //probably best to worry about speed optimising until after WLED palettes are merged fully
-// #ifndef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
-
-
-// #endif
-
-
-/**
- * @brief The problem is speed of flash reading, 
- * as here, progmem IS LOADED into ram before using, but its happening EACH time
- * 
- */
-
-      // AddLog(LOG_LEVEL_TEST, PSTR("ptr->colour_map_size=%d"),ptr->colour_map_size );
-      // uint8_t palette_elements[ptr->colour_map_size]; // if this was defined (optional define?) it would not need to be created each time, but "loading_palette" would enable all this to be changed too
-      uint16_t index_relative = 0; // get expected pixel position
-      uint16_t expected_pixel_count = 1; // get expected pixel position
-
-      // if(*encoded_value == nullptr){
-      //   // if none passed, create dummy one to write in to
-      //   uint16_t dummy_value;
-      //   encoded_value = &dummy_value;
-      // }
-
-      
-      // ALOG_INF(PSTR("ptr->id %d"), ptr->id);
-      // ALOG_INF(PSTR("ptr->colour_map_size %d"), ptr->colour_map_size);
-      
-      if(ptr->id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-        
-      // ALOG_INF(PSTR("IF mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID"));
-        memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
-      }else
-      if(ptr->id < mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID){
-        memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
-      }else
-      if(ptr->id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
-        memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
-      }else{ // progmem
-        memcpy_P(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
-      }
-      
-      /**
-       * @brief Added extra code to make my effects work with WLED effects
-       **/
-      // if(flag_convert_pixel_index_to_get_exact_crgb_colour)
-      // {
-
-      //   uint8_t pixel_position_original = pixel_position;
-
-      //   // default should always wrap around
-        
-      //   // uint8_t pixels_in_segment = GetColourMapSizeByPaletteID(palette_id);  
-
-
-      //   uint8_t pixels_in_segment = GetPixelsInMap(ptr);  
-      // // Serial.println(pixels_in_segment);
-      // //   DEBUG_LINE_HERE;
-      //   uint8_t remainder = pixel_position%pixels_in_segment;
-      //   // uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255);
-      //   uint16_t pixel_position = remainder;
-        
-        // Serial.printf("pixel = %d|%d \t %d||%d\n\r", pixel_position, pixel_position_adjust , remainder, remainder_scaled255);
-
-        // Serial.printf("pixel = %d|%d \t %d\n\r", pixel_position_original, pixel_position, pixels_in_segment);
-
-      // }
-
-      // Serial.println(pixels_in_segment);
-      // Serial.println(remainder);
-      // DEBUG_LINE_HERE;
-
-
-
-
-/**
- * @brief Do move this part into its own function as "SubGet_Read_MyPaletteData"
- * 
- */
-
-
-
-      //#ifdef ENABLE_LOG_LEVEL_DEBUG
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "fMapIDs_Type[%d]=%d"),ptr->id,ptr->flags.fMapIDs_Type);
-      // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "colour_map_size[%d]=%d"),ptr->id,ptr->colour_map_size);
-      // #endif
-
-DEBUG_PIN5_SET(HIGH);
-      
-//       switch(ptr->flags.fMapIDs_Type) //Switch is half (5us/10us) of parent function
-//       {
-//         default:
-//         case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID:{
-          
-          
-//           colour = RgbcctColor(
-//             GetHsbColour(palette_elements[pixel_position])
-//           );
-          
-//           expected_pixel_count = ptr->colour_map_size/1; // get expected pixel position
-          
-//           if(encoded_value != nullptr){ *encoded_value = 1; }
-
-//         }
-//         break;
-//         case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID:{
-
-//           index_relative = pixel_position*4; // get expected pixel position
-//           expected_pixel_count = ptr->colour_map_size/4; // get expected pixel position
-          
-//           // Get colour
-//           colour = RgbcctColor(
-//             palette_elements[index_relative+1],
-//             palette_elements[index_relative+2],
-//             palette_elements[index_relative+3],
-//             0,
-//             0
-//           );
-
-//           if(encoded_value != nullptr){ *encoded_value = palette_elements[index_relative]; }
-
-//         }break;
-//         case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID:
-//         // case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID: //0,h,s,b (only if uint16 is allowed for hue>255)
-//         case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX__ID:{
-          
-//           index_relative = pixel_position*2; // get expected pixel position
-//           expected_pixel_count = ptr->colour_map_size/2; // get expected pixel position
-          
-//           if(encoded_value != nullptr){ *encoded_value = palette_elements[index_relative]; }
-
-//           Serial.printf("encoded_value=%d\n\r", *encoded_value);
-
-//           colour = RgbcctColor(
-//             GetHsbColour(palette_elements[index_relative+1])
-//           );
-          
-//         }
-//         break;
-//         case MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID:{
-//   DEBUG_PIN3_SET(LOW);
-//           // Get expected pixel position
-//           index_relative = pixel_position*3;
-//           expected_pixel_count = ptr->colour_map_size/3; // get expected pixel position
-
-// //moving expected pixel count into struct would have performance improvements
-
-//           // Get colour
-//           colour = RgbcctColor(
-//             palette_elements[index_relative  ],
-//             palette_elements[index_relative+1],
-//             palette_elements[index_relative+2],
-//             0,
-//             0
-//           );
-
-//           ALOG_DBM(PSTR("expected_pixel_count = %d"), expected_pixel_count);
-
-//   DEBUG_PIN3_SET(HIGH);
-//         }
-//         break;
-//         case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID:{
-//           // Get expected pixel position
-//           index_relative = pixel_position*5;
-          
-//           expected_pixel_count = ptr->colour_map_size/5; // get expected pixel position
-//           // Get colour
-//           colour = RgbcctColor(
-//             palette_elements[index_relative  ],
-//             palette_elements[index_relative+1],
-//             palette_elements[index_relative+2],
-//             palette_elements[index_relative+3],
-//             palette_elements[index_relative+4]
-//           );
-//           // Serial.printf("MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID %d\n\r", index_relative); 
-//           //AddLog_Array(LOG_LEVEL_COMMANDS, "palette_elements all", palette_elements, 5);
-//         }
-//         break;
-//         case MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID:{
-
-//           index_relative = pixel_position*6; // get expected pixel position
-          
-//           expected_pixel_count = ptr->colour_map_size/6; // get expected pixel position
-          
-//           if(encoded_value != nullptr){ *encoded_value = palette_elements[index_relative]; }
-//           // Get colour
-//           colour = RgbcctColor(
-//             palette_elements[index_relative+1],
-//             palette_elements[index_relative+2],
-//             palette_elements[index_relative+3],
-//             palette_elements[index_relative+4],
-//             palette_elements[index_relative+5]
-//           );
-//           // Serial.println(colour.R);
-
-//         }break;
-//       } //END switch
+    // ALOG_INF(PSTR("ptr->id %d"), ptr->id);
+    // ALOG_INF(PSTR("ptr->colour_map_size %d"), ptr->colour_map_size);
     
-//       if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = expected_pixel_count; }
-
-//   } // end of my palettes
-
-   DEBUG_PIN6_SET(HIGH);
-
-  // /**
-  //  * @brief mEffects
-  //  **/
-  // if(
-  //     (palette_id >= PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID) &&
-  //     (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
-  // ){  
-
-  //   // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
-
-  //   // Assumes other function has already set and loaded it? into "currentPalette", which is part of "loading" palette
-
-  //   uint8_t colours_in_palette = 0;
-
-  //   /**
-  //    * @brief This should be moved out of this, and only ran when the palette changes (note, this wont happen for the time varying, so leave here for now)
-  //    **/
-  //   mPaletteI->UpdatePalette_FastLED_TargetPalette(&colours_in_palette);
-
-  //   //palette_id will not matter here, as its set/loaded "UpdatePalette_FastLED_TargetPalette"
-
-  //   CRGB fastled_col;
-
-  //   uint16_t palette_id_adjusted = palette_id-PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID;
-
+    if(ptr->id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
+      memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+    }else
+    if(ptr->id < mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID){
+      memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+    }else
+    if(ptr->id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
+      memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+    }else{ // progmem
+      memcpy_P(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+    }
     
-  //   // ALOG_INF(PSTR("WS2812FX palette_id_adjusted %d  \tpixel_position%d colours_in_palette{%d}"), palette_id_adjusted, pixel_position, colours_in_palette);
-
-  //   uint8_t pixel_position_adjust = pixel_position;
-
-    
-  //   if(flag_convert_pixel_index_to_get_exact_crgb_colour)
-  //   {
-  //     uint8_t pixels_in_segment = colours_in_palette;
-  //     uint8_t remainder = pixel_position%pixels_in_segment;
-  //     uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255);
-  //     pixel_position_adjust = remainder_scaled255;
-      
-  //     // Serial.printf("pixel = %d|%d \t %d||%d\n\r", pixel_position, pixel_position_adjust , remainder, remainder_scaled255);
-
-  //   }
-  //   else //standard WLED method
-  //   {
-      
-  //     // if (SEGMENT.palette.id == 0 && mcol < 3) return SEGCOLOR(mcol); //WS2812FX default
-  //     if(palette_id == mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && pixel_position < 3)
-  //     {
-  //       return RgbcctColor::GetRgbcctFromU32Colour(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[pixel_position]);
-  //     }
-      
-  //     if (flag_map_scaling) pixel_position_adjust = (pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
-  //     // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
-  //     if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
-
-  //   }
-
-  //   fastled_col = ColorFromPalette( mPaletteI->currentPalette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
-  
-  //   uint32_t fastled_col32 = 0;
-  //   fastled_col32 = fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
-    
-  //   if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = colours_in_palette; }
-
-  //   colour = RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
-
-  } // END of CRGBPalette's
+    } // END of CRGBPalette's
     
 
-
-
-
-
-
-
-
-// palette.loaded.buffer;
 }
 
 #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM

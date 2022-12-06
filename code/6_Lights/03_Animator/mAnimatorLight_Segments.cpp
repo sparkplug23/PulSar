@@ -260,51 +260,45 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
             SubTask_Segment_Animate_Function__Slow_Glow();
           break;
           #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+          case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
+            SubTask_Segment_Animation__Candle_Single();
+          break;     
+          case EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID:
+            SubTask_Segment_Animation__Candle_Multi();
+          break;     
+          case EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID:
+            SubTask_Segment_Animation__Fire_Flicker();
+          break;   
+          case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
+            SubTask_Segment_Animation__Shimmering_Palette();
+          break;   
+          #endif
           #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
           case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:
             SubTask_Segment_Animation__Rotating_Palette();
           break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
           case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:
             SubTask_Segment_Animation__Stepping_Palette();
           break;
           #endif
           #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          case EFFECTS_FUNCTION__FIREPLACE_1D_01__ID:
-            SubTask_Segment_Animate__Fireplace_1D_01();
+          case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:
+            SubTask_Segment_Animation__Blend_Palette_To_White();
           break;
           #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+          case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
+            SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
+          break;
+          #endif
+
           #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
           case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
             SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
           break; 
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-          case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
-            SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-          case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
-            SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
-          case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
-            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-          case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
-            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-          case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
-            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-          break;   
-          #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+          #endif        
+
           /**
            * Static
            **/
@@ -346,6 +340,21 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           break;
           case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
             SubTask_Segment_Animation__Colour_Sweep_Random();
+          break;
+          /**
+           * Fireworks
+           **/
+          case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
+            SubTask_Segment_Animation__Fireworks();
+          break;
+          case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
+            SubTask_Segment_Animation__Exploding_Fireworks();
+          break;
+          case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
+            SubTask_Segment_Animation__Fireworks_Starburst();
+          break;
+          case EFFECTS_FUNCTION__WLED_RAIN__ID:
+            SubTask_Segment_Animation__Rain();
           break;
           #ifdef ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
@@ -488,21 +497,6 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           break;
           #endif // ENABLE_EXTRA_WLED_EFFECTS
           /**
-           * Fireworks
-           **/
-          case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
-            SubTask_Segment_Animation__Fireworks();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
-            SubTask_Segment_Animation__Exploding_Fireworks();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
-            SubTask_Segment_Animation__Fireworks_Starburst();
-          break;
-          case EFFECTS_FUNCTION__WLED_RAIN__ID:
-            SubTask_Segment_Animation__Rain();
-          break;
-          /**
            * Sparkle/Twinkle
            **/
           #ifdef ENABLE_EXTRA_WLED_EFFECTS
@@ -557,19 +551,7 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
             SubTask_Segment_Animation__Traffic_Light();
           break;
-          #endif // ENABLE_EXTRA_WLED_EFFECTS
-          case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
-            SubTask_Segment_Animation__Candle_Single();
-          break;     
-          case EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID:
-            SubTask_Segment_Animation__Candle_Multi();
-          break;     
-          case EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID:
-            SubTask_Segment_Animation__Fire_Flicker();
-          break;
-          case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
-            SubTask_Segment_Animation__Shimmering_Palette();
-          break;             
+          #endif // ENABLE_EXTRA_WLED_EFFECTS      
           #ifdef ENABLE_EXTRA_WLED_EFFECTS
           /**
            * Blink/Strobe
@@ -678,6 +660,56 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           break;
           #endif // ENABLE_EXTRA_WLED_EFFECTS
           #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+          case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
+            SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();
+          break;
+          #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+          case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
+            SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();
+          break;
+          #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
+          case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
+            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+          break;
+          #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+          case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
+            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+          break;
+          #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+          case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
+            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+          break;   
+          #endif 
+          // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
+          //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+          //  break;
+          //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
+          //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+          //  break;
           /**
            * Development effects without full code 
            **/          
@@ -715,30 +747,7 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
           //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
           //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
-          //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-          //  break;
+          
           #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
           case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
             SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
@@ -791,14 +800,14 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
         /**
          * If effect is from WLED, then disable animator and write output
          **/
-        #ifdef ENABLE_WLED_EFFECTS
+        // #ifdef ENABLE_WLED_EFFECTS
         if(
           (_segments[segment_active_index].effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID) &&
           (_segments[segment_active_index].effect_id <= EFFECTS_FUNCTION__WLED_LENGTH__ID)
         ){          
           _segment_runtimes[segment_active_index].animation_has_anim_callback = false; // When no animation callback is needed 
         }
-        #endif // ENABLE_WLED_EFFECTS
+        // #endif // ENABLE_WLED_EFFECTS
 
         /**
          * @brief If callback is not active, then assume its StipUpdate needs to be called
@@ -2041,18 +2050,9 @@ ALOG_INF(PSTR("This should become an animation in its own right using mappings")
         uint16_t start_pixel = 0;//_segments[segment_active_index].pixel_range.start;
         uint16_t stop_pixel = SEGLEN;//_segments[segment_active_index].pixel_range.stop;
 
-        // switch(mPaletteI->palettelist.ptr->flags.fIndexs_Type){
-        //   case INDEX_TYPE_DIRECT: break; //remains the same
-        //   case INDEX_TYPE_SCALED_255: 
-            start_pixel_position = map(start_pixel_position,0,255,start_pixel,stop_pixel);
-            end_pixel_position   = map(end_pixel_position,0,255,start_pixel,stop_pixel);
-        //     // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "255 %d %d"),start_pixel_position,end_pixel_position);
-        //   break;
-        //   case INDEX_TYPE_SCALED_100: 
-        //     start_pixel_position = map(start_pixel_position,0,100,start_pixel,stop_pixel);
-        //     end_pixel_position   = map(end_pixel_position,0,100,start_pixel,stop_pixel);          
-        //   break;
-        // }
+        start_pixel_position = map(start_pixel_position,0,255,start_pixel,stop_pixel);
+        end_pixel_position   = map(end_pixel_position,0,255,start_pixel,stop_pixel);
+      
 
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
         // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);

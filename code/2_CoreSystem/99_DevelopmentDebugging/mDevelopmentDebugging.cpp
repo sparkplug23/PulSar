@@ -95,6 +95,23 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   //   #warning "ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS"
   // #endif 
 
+  /**
+   * @brief Warnings only
+   * 
+   */
+  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+  #warning "ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS"
+  #endif
+  
+
+
+
+
+  /**
+   * @brief Error to block compiling
+   * 
+   */
+
 
   
 
@@ -136,6 +153,8 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME
   #error "USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME - Needs to be removed"
   #endif
+
+
 
 
 

@@ -69,6 +69,32 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
   #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     
+  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  ptr = &mqtthandler_automation_presets;
+  ptr->handler_id = MQTT_HANDLER_MODULE__AUTOMATION_PRESETS__ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
+  #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    
+  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+  ptr = &mqtthandler_manual_setpixel;
+  ptr->handler_id = MQTT_HANDLER_MODULE__NOTIFICATION_TELEPERIOD_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
+  #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+    
     
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE

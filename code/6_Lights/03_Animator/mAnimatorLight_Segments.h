@@ -183,7 +183,61 @@
     // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     // EFFECTS_FUNCTION__STATIC_PALETTE_GRADIENT__ID,
     // #endif
-    
+    /**
+     * Desc: Animation, that fades from selected palette to white,
+     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID,
+    #endif
+    /**
+     * Desc: Animation, that fades from selected palette to anothor palette,
+     *       The intensity of fade (closer to palette B) will depend on intensity value
+     *       ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
+     * 
+     *       New method to set options
+     *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
+     *        option16 for 65000 value range
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
+    #endif
+    /**
+     * Desc: Draws palette_primary in order, then randomly takes from a second palette (saved by aux0)
+     *       This will allow white palettes to work, or else applying coloured twinkles over a white palette too
+     * 
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
+    #endif
+    /**
+     * Desc: Picks colours from palette and randomly adds them as full brightness
+     *       With each call of the animation (as new colours are added), all pixels will
+     *       decay in brightness (easiest by half each time until 0).
+     *       Note: The decay must happen first, so the new draws are still at full brightness
+     *       This will require saving the total output in the buffer.
+     * 
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
+    #endif
+
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -191,6 +245,13 @@
     **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
+    
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
+    EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
+    EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID,
+    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     // Static
     EFFECTS_FUNCTION__WLED_STATIC__ID,
@@ -282,11 +343,7 @@
     EFFECTS_FUNCTION__WLED_COLORFUL__ID,
     EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,
     #endif // ENABLE_EXTRA_WLED_EFFECTS    
-    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
-    EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
-    EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID,
-    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
-    
+        
     #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Blink/Strobe
     EFFECTS_FUNCTION__WLED_BLINK__ID,
@@ -400,7 +457,7 @@
     //  * */
 
     // this will likely just use candle effect, maybe forced colour palette?/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
      EFFECTS_FUNCTION__FIREPLACE_1D_01__ID, // Custom to using matrix for fireplace light effect
     #endif 
 
@@ -871,9 +928,11 @@
         uint16_t brightness_applied_during_colour_generation : 1;
         // This emulates aging of traditional lights, making them less uniform
         uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
-
+        
+        #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
         uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
         uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
+        #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
         uint16_t Limit_Upper_Brightness_With_BrightnessRGB : 1;
 
@@ -982,7 +1041,10 @@
        * Palette (Options on getting from palette)
        * */
       struct PALETTE{
-        uint8_t id = 0; 
+
+        // ID needs changed to uint16_t
+        uint16_t id = 0; 
+
         uint8_t pattern = 0; //Single, Gradient 
         /**
          * Index range, ie with 50%, for palette with 10 colours will only use first 5 colours
@@ -1391,7 +1453,6 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animation__Stepping_Palette();
   void SubTask_Segment_Animation__Rotating_Palette();
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
-  void SubTask_Segment_Animate__Fireplace_1D_01();
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   
@@ -1402,6 +1463,14 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Flasher_Animate_Function_Tester_01();
   void SubTask_Flasher_Animate_Function_Tester_02();
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
+
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void SubTask_Segment_Animation__Blend_Palette_To_White();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
+  #endif
 
   
   // Static

@@ -65,19 +65,6 @@ enum fMapIDs_Type__IDS{
   MAPIDS_TYPE_RGBCOLOUR_LENGTH__ID
 };
 
-/**
- * @brief 
- * Likely phase out, as any effect that knows to treat the userdefined palette as "direct" (eg shelf hearts) will just know that the gradient positions are simply positions, and does not need a type to say this
- * This will reduce memory waste
- * 
- */
-enum fIndexs_Type__IDS{
-  // INDEX_TYPE_NONE = 0,
-  INDEX_TYPE_SCALED_255 = 0, //default option (to be used elsewhere, as preset is cleared to 0, these will be defaults)
-  INDEX_TYPE_DIRECT,
-  INDEX_TYPE_SCALED_100 
-};
-
 
 class mPalette 
 {
@@ -148,6 +135,9 @@ class mPalette
     void init_ColourPalettes_Christmas_19();
     void init_ColourPalettes_Christmas_20();
     void init_ColourPalettes_Christmas_21();
+    void init_ColourPalettes_Christmas_22();
+    void init_ColourPalettes_Christmas_23();
+    void init_ColourPalettes_Christmas_24();
     void init_ColourPalettes_Sky_Glow_01();
     void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
@@ -284,6 +274,9 @@ class mPalette
     PALETTELIST_STATIC_CHRISTMAS_19__ID,
     PALETTELIST_STATIC_CHRISTMAS_20__ID,
     PALETTELIST_STATIC_CHRISTMAS_21__ID,
+    PALETTELIST_STATIC_CHRISTMAS_22__ID,
+    PALETTELIST_STATIC_CHRISTMAS_23__ID,
+    PALETTELIST_STATIC_CHRISTMAS_24__ID,
     PALETTELIST_STATIC_SUNRISE_01__ID,
     PALETTELIST_STATIC_SUNRISE_02__ID,
     PALETTELIST_STATIC_SUNRISE_03__ID,
@@ -464,12 +457,6 @@ class mPalette
           // 8- 
           // 9 - MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID
           // phase down to be only RGB, HSB?  
-        //uint16_t fIndexs_Type : 2; // these shall be removed and assumed ALWAYS to be 255, unless the effect knows to treat them as indexes (eg shelf hearts)
-        // 0 - exact
-        // 1 - gradient range 0-255
-        // 2 - gradient range 0-100%
-        // 3 - reserved
-        // Reserved
         uint16_t reserved : 6;
       };
     } PALETTE_FLAGS;
@@ -563,6 +550,9 @@ class mPalette
       PALETTE christmas_19;
       PALETTE christmas_20;
       PALETTE christmas_21;
+      PALETTE christmas_22;
+      PALETTE christmas_23;
+      PALETTE christmas_24;
       // Created for other people
       PALETTE custom_user_01;
       PALETTE *ptr = &rainbow;
@@ -631,6 +621,7 @@ class mPalette
 
     
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
+    uint16_t GetPixelsInMap(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0);
     uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
 
     uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);

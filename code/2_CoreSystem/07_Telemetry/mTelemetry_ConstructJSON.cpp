@@ -146,6 +146,9 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
     JBI->Add(PM_JSON_TEMPLATE_PARSE_SUCCESS, pCONT_set->boot_status.module_template_parse_success); 
 
     
+    JBI->Add(PM_JSON_BRANCH_NAME,     FIRMWARE_BRANCH_NAME_STRING);
+
+    
     JBI->Array_Start(PM_JSON_FASTBOOT_RECOVERY);
     #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
     JBI->Add("OTA");

@@ -10,8 +10,8 @@
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
@@ -136,6 +136,13 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR)        "mode_
 #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR)   "mode_setpixel";
 #endif
+#ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR)   "presets";
+#endif
+#ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PLAYLISTS_CTR)   "playlists";
+#endif
+
 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)         "debug/palette";
@@ -526,6 +533,15 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0); // probably falls into the E131 type, but here set my mqtt
   #endif
+  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0);
+  #endif
+
+  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+  uint8_t ConstructJSON_Auto_Playlists(uint8_t json_level = 0);
+  #endif
+
+  
   /**
    * @brief Debug 
    */
@@ -558,6 +574,14 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
       #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
       MQTT_HANDLER_MODULE__MODE_MANUAL_SETPIXEL_TELEPERIOD_ID,
       #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+      
+      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+      MQTT_HANDLER_MODULE__AUTOMATION_PRESETS__ID,
+      #endif
+      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+      MQTT_HANDLER_MODULE__AUTOMATION_PLAYLSITS__ID,
+      #endif
+
       /**
        * @brief Debug
        **/
@@ -585,6 +609,13 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
     #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    struct handler<mAnimatorLight> mqtthandler_automation_presets;
+    #endif
+    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+    struct handler<mAnimatorLight> mqtthandler_automation_playlists;
+    #endif
+    
     /**
      * @brief Debug
      **/
@@ -609,7 +640,10 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
       #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
       #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
       +1
-      #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+      #endif
+      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+        +1
+      #endif
       /**
        * @brief Debug
        **/
@@ -618,7 +652,7 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
       #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
         +1
-      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+      #endif
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
         +1
       #endif
@@ -636,6 +670,12 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
         #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
         &mqtthandler_manual_setpixel,
         #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+        #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+        &mqtthandler_automation_presets,
+        #endif
+        #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+        &mqtthandler_automation_playlists,
+        #endif
         /**
          * @brief Debug
          **/
@@ -644,7 +684,7 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
         #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
         #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
         &mqtthandler_debug_segments,
-        #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+        #endif
         #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
         &mqtthandler_debug_animations_progress,
         #endif
@@ -671,8 +711,11 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
 *****************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
-#ifdef ENABLE_PIXEL_FUNCTION_MIXER
-#include "mAnimatorLight_Mixer.h"
+#ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
+#include "mAnimatorLight_Auto_Playlists.h"
+#endif
+#ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+#include "mAnimatorLight_Auto_Presets.h"
 #endif
 
 /*********************************************************************************************************************************************************************************

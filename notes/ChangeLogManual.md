@@ -5,6 +5,11 @@
 
 
 
+### 0.112.x.x : Moving back for December 2022
+ - 112 is working with lighting branch only
+ - All christmas lights should be built on this 112 version
+
+
 ### 0.110.x.x : Moving to MQTT:Crackle
  - Moving LongTerm devices over to new mqtt/OH starting with consumer unit
  - Also new "openhab_whitehall" database

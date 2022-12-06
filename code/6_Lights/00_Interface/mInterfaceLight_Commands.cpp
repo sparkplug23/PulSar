@@ -1269,7 +1269,7 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 //     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
 //   }
 
-//   // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+//   // #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
 //   // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
 //   //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
 //   // }
@@ -1315,7 +1315,6 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   uint8_t* palette_buffer = nullptr;
 
   if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-    // AddLog(LOG_LEVEL_TEST, PSTR("STARTa fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     palette_id_adjusted_to_array_index = palette_id;
     palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
     // Clear the entire new colour to the "unset" values
@@ -1329,8 +1328,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID)){
-    // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
-// palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
+   //palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
 
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;    
@@ -1345,7 +1343,6 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)){
-    // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
@@ -1386,9 +1383,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   // Serial.flush();
   // delay(3000);
 
-  
-      // AddLog(LOG_LEVEL_TEST, PSTR("END fIndexs_Type=%d"),palettelist.rgbcct_users[0].flags.fIndexs_Type);
-
+ 
 
 }
 

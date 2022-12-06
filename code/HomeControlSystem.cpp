@@ -209,7 +209,9 @@ pCONT_sup->CmndCrash();
   #ifdef USE_SERIAL_ALTERNATE_TX
     Serial.set_tx(2);
   #endif // USE_SERIAL_ALTERNATE_TX
+  #ifndef DISABLE_SERIAL
   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
+  #endif // DISABLE_SERIAL
   #ifndef DISABLE_SERIAL_LOGGING
   #ifdef ENABLE_BUG_TRACING
   Serial.println(F("DELAYED BOOT for 5 seconds...")); Serial.flush(); delay(5000);
