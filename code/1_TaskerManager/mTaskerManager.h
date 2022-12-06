@@ -327,7 +327,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_BME
     EM_MODULE_SENSORS_BME_ID,
   #endif
-  #ifdef USE_MODULE_SENSORS_DS18X
+  #if defined(USE_MODULE_SENSORS_DS18X) || defined(USE_MODULE_SENSORS_DS18X_V2) || defined(USE_MODULE_SENSORS_DS18X_V3) || defined(USE_MODULE_SENSORS_DS18X_V4)
     EM_MODULE_SENSORS_DB18S20_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
@@ -699,10 +699,25 @@ enum MODULE_IDS{
   #include "5_Sensors/02_Buttons/mButtons.h"
   #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
+
 #ifdef USE_MODULE_SENSORS_DS18X
   #include "5_Sensors/03_DB18x20/mDS18X.h"
   #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
 #endif
+#ifdef USE_MODULE_SENSORS_DS18X_V2
+  #include "5_Sensors/03b_DB18x20/mDS18X.h"
+  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_DS18X_V3
+  #include "5_Sensors/03c_DB18x20/mDS18X.h"
+  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
+#endif
+#ifdef USE_MODULE_SENSORS_DS18X_V4
+  #include "5_Sensors/03d_DB18x20/mDS18X.h"
+  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
+#endif
+
+
 #ifdef USE_MODULE_SENSORS_BME
   #include "5_Sensors/04_BME/mBME.h"
   #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])

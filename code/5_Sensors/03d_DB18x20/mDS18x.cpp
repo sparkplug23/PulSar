@@ -1,10 +1,12 @@
 /*
-  Version A - Final desired version 
-            - Not working reliably with dual onewire
+  Version D - My version that only permits single OneWire until library is redone to allow two
+            - Still write as if it will used for two pins, as this will be built upon later using dual onewire
 */
+
+
 #include "mDS18X.h"
 
-#ifdef USE_MODULE_SENSORS_DS18X
+#ifdef USE_MODULE_SENSORS_DS18X_V4
 
 const char* mDS18X::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
 const char* mDS18X::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
@@ -102,8 +104,8 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
   // for(int i=0;i<DB18_SENSOR_MAX;i++){
   //     printAddress(sensor[i].address);
   //   }
-    // Init();
-      // Pre_Init();
+    // // Init();
+    //   Pre_Init();
       // char buffer[100];
       // uint8_t ii = 5;
       // AddLog(LOG_LEVEL_TEST,PSTR("\n\r\n\rdb18 device name %d \"%s\""),ii,DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DB18S20_ID, ii, buffer, sizeof(buffer)));
@@ -114,6 +116,10 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
 
     }
     break;   
+    case FUNC_EVERY_FIVE_SECOND:
+
+      // Pre_Init();
+    break;
     case FUNC_EVERY_MINUTE:
 
 // Pre_Init();

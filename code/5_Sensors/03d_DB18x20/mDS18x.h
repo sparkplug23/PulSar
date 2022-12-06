@@ -1,11 +1,11 @@
-#ifndef MSENSORSDB_H_V1
-#define MSENSORSDB_H_V1 0.3
+#ifndef MSENSORSDB_H_V4
+#define MSENSORSDB_H_V4 0.3
 
 #define D_UNIQUE_MODULE_SENSORS_DB18_ID ((5*1000)+03)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_DS18X
+#ifdef USE_MODULE_SENSORS_DS18X_V4
 
 #define REQUIRESALARMS false //turn off
 

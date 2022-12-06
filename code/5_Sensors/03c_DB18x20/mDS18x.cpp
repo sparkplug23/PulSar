@@ -1,15 +1,34 @@
 /*
-  Version A - Final desired version 
-            - Not working reliably with dual onewire
+  Version C - My version, but making sure each pin just saves in the struct index and not worrying about always have pin1/pin2 in index 0 if only one is used
 */
+
+
+/**
+ * @file mDS18x.cpp
+ * 
+ * 
+ * V3 = my new method improved
+ *  - making struct index linked to pin, ie struct_index_zero can not be used and only 1 when pin2 is used (And not pin1)
+ * 
+ * 
+ * 
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-29
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "mDS18X.h"
 
-#ifdef USE_MODULE_SENSORS_DS18X
+#ifdef USE_MODULE_SENSORS_DS18X_V3
 
 const char* mDS18X::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
 const char* mDS18X::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
 
-int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   int8_t function_result = 0;
   
@@ -22,7 +41,8 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
       Pre_Init();
     break;
     case FUNC_INIT:
-      Init();
+      // Init();
+      Init_Static();
     break;
   }
   
@@ -114,6 +134,12 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
 
     }
     break;   
+    case FUNC_EVERY_FIVE_SECOND:
+
+// Pre_Init();
+      // Init_Static();
+
+    break;
     case FUNC_EVERY_MINUTE:
 
 // Pre_Init();
@@ -136,41 +162,41 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
 
 
     break;
-    /************
-     * COMMANDS SECTION * 
-    *******************/
-    case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
-    break;
-    case FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID:
-      Scan_ReportAsJsonBuilder();
-    break;
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Status_Table_Draw();
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table_Data();
-    break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
-    /************
-     * MQTT SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init(); 
-    break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
-    break;
-    case FUNC_MQTT_SENDER:
-      MQTTHandler_Sender();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    // /************
+    //  * COMMANDS SECTION * 
+    // *******************/
+    // case FUNC_JSON_COMMAND_ID:
+    //   parse_JSONCommand(obj);
+    // break;
+    // case FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID:
+    //   Scan_ReportAsJsonBuilder();
+    // break;
+    // /************
+    //  * WEBPAGE SECTION * 
+    // *******************/
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
+    //   WebAppend_Root_Status_Table_Draw();
+    // break;
+    // case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+    //   WebAppend_Root_Status_Table_Data();
+    // break;
+    // #endif //USE_MODULE_NETWORK_WEBSERVER
+    // /************
+    //  * MQTT SECTION * 
+    // *******************/
+    // #ifdef USE_MODULE_NETWORK_MQTT
+    // case FUNC_MQTT_HANDLERS_INIT:
+    // case FUNC_MQTT_HANDLERS_RESET:
+    //   MQTTHandler_Init(); 
+    // break;
+    // case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    //   MQTTHandler_Set_TelePeriod();
+    // break;
+    // case FUNC_MQTT_SENDER:
+    //   MQTTHandler_Sender();
+    // break;
+    // #endif //USE_MODULE_NETWORK_MQTT
   }
   
   return function_result;
@@ -193,6 +219,7 @@ void mDS18X::Pre_Init()
   uint8_t sensor_group_count = 0;
   settings.nSensorsFound = 0;
 
+  sensor_group_count = 0;
   if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID)) 
   {  // not set when 255
   
@@ -211,7 +238,8 @@ void mDS18X::Pre_Init()
     if(sensor_group[sensor_group_count].sensor_count){
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB1 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
       settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
-      sensor_group_count++;
+      // sensor_group_count++;
+      sensor_group[sensor_group_count].fSensorFound = true;
     }else{
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
       // delay(5000);
@@ -220,6 +248,8 @@ void mDS18X::Pre_Init()
 
   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "sensor_group_count=%d"),sensor_group_count);
 
+  
+  sensor_group_count = 1;
   if (pCONT_pins->PinUsed(GPIO_DSB_2OF2_ID)) {  // not set when 255
     sensor_group[sensor_group_count].pin = pCONT_pins->GetPin(GPIO_DSB_2OF2_ID);
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB_2OF2_ID Pin 2 Valid %d"),sensor_group[sensor_group_count].pin);
@@ -236,7 +266,8 @@ void mDS18X::Pre_Init()
     if(sensor_group[sensor_group_count].sensor_count){
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "GPIO_DSB2 sensor_group[%d].sensor_count=%d"),sensor_group_count,sensor_group[sensor_group_count].sensor_count);
       settings.nSensorsFound += sensor_group[sensor_group_count].sensor_count;
-      sensor_group_count++;
+      // sensor_group_count++;
+      sensor_group[sensor_group_count].fSensorFound = true;
     }else{
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "NO SENSORS FOUND"));
     }
@@ -258,6 +289,94 @@ void mDS18X::Pre_Init()
 
 }
 
+
+// My init, but pins are fixed. Just check the first pin, then the second
+void mDS18X::Init_Static()
+{
+  // sensor group 1 exists
+  uint8_t sensor_group_count = 0;
+  uint8_t sensor_count = 0;
+  uint8_t sensors_attached = 0;
+
+  // sensors_attached +=  sensor_group[sensor_group_count].sensor_count;
+  // if(sensors_attached>=DB18_SENSOR_MAX){
+  //   sensor_group[sensor_group_count].sensor_count = DB18_SENSOR_MAX; // set limit
+    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DSB "DB18_SENSOR_MAX limit reached"));
+  // }
+
+  // load sensor data into their own sensor struct GROUP
+  for(uint8_t sensor_group_id=0;
+              sensor_group_id<SENSOR_GROUP_MAX_COUNT;
+              sensor_group_id++
+      ){
+    // load each single sensor
+    uint8_t group_sensor_found = sensor_group[sensor_group_id].sensor_count;
+
+    if(group_sensor_found){
+    
+      AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "group_sensor_found=%d %d"),sensor_group_id,group_sensor_found);
+
+      //if sensor limit, exit
+      for(uint8_t sensor_id=0;
+                  sensor_id<group_sensor_found;
+                  sensor_id++
+          ){
+          
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "FOR sensor_id=%d, group_sensor_found=%d"),sensor_id,group_sensor_found);
+        // get sensor and add to list 
+        
+        if(sensor_group[sensor_group_id].dallas->getAddress(sensor[sensor_count].address,sensor_id))
+        {  //what is this then, already stored?
+          // Remember group this sensor came from 
+          
+          AddLog_Array(LOG_LEVEL_INFO, "AFTER getAddress", sensor[sensor_count].address, (uint8_t)sizeof(sensor[sensor_count].address));
+
+          sensor[sensor_count].sensor_group_id = sensor_group_id;
+          // sensor[sensor_count].address_stored = ;
+
+          // Set sensor precision      
+
+          sensor_group[sensor_group_id].dallas->setResolution(sensor[sensor_count].address, TEMPERATURE_PRECISION);
+
+          // Add delay to enable setresolution to work better
+          delay(50);
+
+
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "Pin Group %d, count %d, sensor count %d"),sensor_group_id,sensor_id,sensor_count);
+          // WDT_FEED();
+          // WDT_RESET();
+          sensor_count++; // increment how many is found
+          //limit if number of sensors is reached
+          if(sensor_count>DB18_SENSOR_MAX){ break; }
+        }else{
+          AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed"));        
+        }
+      }//end for
+    }
+  }
+
+
+  if(!sensor_count){    
+    db18_sensors_active = 0; // reset to none found so backoff will correctly happen
+    tSavedMeasureSensor = millis() + 10000; // 10 second backoff
+    ALOG_DBG(PSTR(D_LOG_DSB "None Found: Backoff 10s"));
+    return;
+  }
+
+  // Print everything stored to test
+  #ifdef SPLASH_ADDRESS_ON_INIT
+    for(int i=0;i<DB18_SENSOR_MAX;i++){
+      printAddress(sensor[i].address);
+    }
+  #endif
+
+  db18_sensors_active = sensor_count;
+
+
+
+
+
+}
 
 
 
@@ -478,11 +597,8 @@ void mDS18X::SplitTask_UpdateSensors(uint8_t sensor_group_id, uint8_t require_co
               // pCONT_sup->GetTextIndexed_P(name_tmp, sizeof(name_tmp), sensor_id, name_buffer);
             
             
-            #ifdef ENABLE_DEVFEATURE_ADDLOG_FAILED_SENSOR_WAIT_TIME
               ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED " WaitTime:%d"), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)), millis()-wait_time);
-            #else
-            ALOG_ERR( PSTR(D_LOG_DB18 D_MEASURE "[%d|%d] %02X \"%s\" = " D_FAILED ), sensor_group_id, sensor_id, sensor[sensor_id].address[7], DLI->GetDeviceName_WithModuleUniqueID(  GetModuleUniqueID(), sensor[sensor_id].address_id, buffer, sizeof(buffer)) );
-            #endif
+            
             
             
             }
