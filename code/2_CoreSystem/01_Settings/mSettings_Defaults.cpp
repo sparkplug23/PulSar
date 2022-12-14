@@ -305,7 +305,6 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   Settings.animation_settings.animation_mode = 2;
   Settings.animation_settings.animation_palette = 0;
   Settings.animation_settings.animation_transition_order = 2;
-  Settings.animation_settings.animation_transition_method = 0;
   Settings.animation_settings.animation_transition_time_ms = 10000; //TBD save as seconds
   Settings.animation_settings.animation_transition_rate_ms = 10000; //TBD save as seconds
   // Settings.animation_settings.animation_transition_pixels_to_update_as_number = 1;

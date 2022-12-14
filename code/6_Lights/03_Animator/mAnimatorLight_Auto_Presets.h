@@ -10,6 +10,7 @@
   void SubTask_Flasher_Animate_Mixer();
   void LoadPreset_ManualTesting_ByID(uint8_t id = 0);
   void LoadPreset_OutsideFrontTree_ByID(uint8_t id = 0);
+  void LoadPreset_ManualUserCustom_ByID(uint8_t id = 0);
 
   
   enum EFFECTS_FUNCTION_MIXER{

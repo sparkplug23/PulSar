@@ -806,24 +806,6 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
   }else
   /**
    * @brief
-   * Effect: Static Palette
-   * Palette: Christmas Colourful for Outside Tree (New, Extreme Colours, With Warm Tone)
-   * 
-   */
-  if(
-    (id == 1) &&
-    (true) // Time Allowed, true for always
-  ){
-    
-    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
-    CommandSet_Animation_Transition_Time_Ms(0);
-    CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
-
-  }else
-  /**
-   * @brief
    * Effect: Random Palette
    * Palette: Outside 1 (Many)
    * 

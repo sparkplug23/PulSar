@@ -21,11 +21,12 @@
 /**
  *  Christmas 2022 Installed Devices
  * */  
+// #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
 // #define DEVICE_RGBBEDLIGHT 
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_DININGROOM_XMAS2022
-// #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_TESTER_01_BLENDING_XMAS2022
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_PRIMATY_WIFI_ENABLED_XMAS2022
-#define DEVICE_RGBSTRING_CHRISTMAS_ESP32_LANDING_TEST_FOR_OUTSIDE_TREE_XMAS2022
+// #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022
+#define DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
 
 //--------------------------------[Device Templates]-------------------------------------
 
@@ -924,11 +925,15 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   //#define DISABLE_NETWORK
-  #define DISABLE_SERIAL
 
+  #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
+
+  #define DISABLE_SERIAL
   #define DISABLE_SERIAL0_CORE
   #define DISABLE_SERIAL_LOGGING
 
+
+  #define ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -956,7 +961,19 @@
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
-  //#define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
+
+    #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
+
+    // make my own for this
+
+    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+
+  #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -973,7 +990,7 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 1202 //still needs extra +1
+  #define STRIP_SIZE_MAX 1201 //still needs extra +1
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -984,15 +1001,16 @@
     "\"ColourOrder\":\"RGB\","
     "\"ColourPalette\":\"Christmas 24\","
     "\"Effects\":{"
-      "\"Function\":12," //shimmering palette
+      "\"Function\":2," //shimmering palette
       "\"Speed\":127,"
-      "\"Intensity\":127"
+      "\"Intensity\":20,"
+      "\"Grouping\":1"
     "},"
     "\"Transition\":{"
       "\"TimeMs\":0,"
-      "\"RateMs\":23"
+      "\"RateMs\":50"
     "},"    
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRGB\":1" // incase uncontrolled reboots
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
@@ -1004,17 +1022,26 @@
  * Basic Fallback that creates the desired static colours
  * For installing, it will show blending
  */
-#ifdef DEVICE_RGBSTRING_CHRISTMAS_ESP32_LANDING_TEST_FOR_OUTSIDE_TREE_XMAS2022
-  #define DEVICENAME_CTR          "xmas_outsidetree_tester_blending"
-  #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree Tester Blending"
-  #define DEVICENAME_ROOMHINT_CTR "Outside"
+#ifdef DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+  #define DEVICENAME_CTR          "xmas_test_tree_01"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Test Tree"
+  #define DEVICENAME_ROOMHINT_CTR "xmas"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   //#define DISABLE_NETWORK
-  #define DISABLE_SERIAL
 
+  #define DISABLE_SERIAL
   #define DISABLE_SERIAL0_CORE
   #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+  // #define ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
+
+  // GROUPING NOT OPERATIONAL
+
+  #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_TESTTREE
+
+  #define ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -1043,7 +1070,16 @@
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
-  //#define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
+
+    #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
+    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+
+    #define ENABLE_EXTRA_WLED_EFFECTS
+
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1060,7 +1096,215 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 1202 //still needs extra +1
+  #define STRIP_SIZE_MAX 100 //still needs extra +1
+  // the stop count is the length of segment and is NOT included in segment
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"AnimationMode\":\"Effects\","
+    "\"ColourOrder\":\"RGB\","
+    "\"ColourPalette\":\"Christmas 01\","
+    "\"Effects\":{"
+      "\"Function\":1," //shimmering palette
+      "\"Speed\":255,"
+      "\"Intensity\":255,"
+      "\"Grouping\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+#endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+
+
+/**
+ * @brief 
+ * No WIFI
+ * Basic Fallback that creates the desired static colours
+ * For installing, it will show blending
+ */
+#ifdef DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
+  #define DEVICENAME_CTR          "xmas_bedroom_string"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Bedroom String"
+  #define DEVICENAME_ROOMHINT_CTR "xmas"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  //#define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
+  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+    #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+
+    #define ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
+    #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
+    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+    #define ENABLE_EXTRA_WLED_EFFECTS
+    #define ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
+
+    #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
+    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
+    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+    // #define ENABLE_DEVFEATURE_REMOVE_OLD_PALETTE_ENCODING       // This will take some time, slow merge to new method
+
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 100 //still needs extra +1, // the stop count is the length of segment and is NOT included in segment
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  "{"
+    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
+    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
+    "\"AnimationMode\":\"Effects\","
+    "\"ColourOrder\":\"RGB\","
+    "\"ColourPalette\":0,"
+    "\"Effects\":{"
+      "\"Function\":1," //shimmering palette
+      "\"Speed\":255,"
+      "\"Intensity\":255,"
+      "\"Grouping\":1"
+    "},"
+    "\"Transition\":{"
+      "\"TimeMs\":0,"
+      "\"RateMs\":1000"
+    "},"    
+    "\"BrightnessRGB\":100"
+  "}";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+#endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+
+
+
+/**
+ * @brief 
+ * No WIFI
+ * Basic Fallback that creates the desired static colours
+ * For installing, it will show blending
+ */
+#ifdef DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022
+  #define DEVICENAME_CTR          "xmas_hallwaytree"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Hallway Tree"
+  #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  //#define DISABLE_NETWORK
+
+  #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+
+  #define ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
+  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
+  
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+    #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+
+    #define ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
+
+    #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
+
+    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+
+  #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define STRIP_SIZE_MAX 1201 //still needs extra +1
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1071,19 +1315,20 @@
     "\"ColourOrder\":\"RGB\","
     "\"ColourPalette\":\"Christmas 24\","
     "\"Effects\":{"
-      "\"Function\":12," //shimmering palette
+      "\"Function\":1," //shimmering palette
       "\"Speed\":127,"
-      "\"Intensity\":127"
+      "\"Intensity\":20,"
+      "\"Grouping\":1"
     "},"
     "\"Transition\":{"
-      "\"TimeMs\":0,"
-      "\"RateMs\":23"
+      "\"TimeMs\":900,"
+      "\"RateMs\":1000"
     "},"    
-    "\"BrightnessRGB\":100"
+    "\"BrightnessRGB\":100" // incase uncontrolled reboots
   "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
-#endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_LANDING_TEST_FOR_OUTSIDE_TREE_XMAS2022
+#endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022
 
 
 

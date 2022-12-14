@@ -1268,7 +1268,6 @@ struct AnimationSettings{
   uint8_t animation_palette;
   //struct transition
   uint8_t animation_transition_order; 
-  uint8_t animation_transition_method;
   uint16_t animation_transition_time_ms; //TBD save as seconds
   uint32_t animation_transition_rate_ms; //TBD save as seconds
   uint8_t transition_pixels_to_update_as_number;

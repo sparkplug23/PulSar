@@ -78,9 +78,44 @@ return JBI->End();
 uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level)
 {
 
+char buffer[100];
+
 JBI->Start();
 
     JBI->Add("AvailablePalettes", (uint16_t)mPaletteI->PALETTELIST_TOTAL_LENGTH );
+
+    #ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+
+    JBI->Level_Start("Encoding");
+
+
+      // JBI->Add("encoding",mPaletteI->palettelist.christmas_01.encoding_type);
+
+
+      for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_10__ID;palette_id++)
+      {
+
+        // JBI->Array_Start_P("%s", mPaletteI->GetPaletteNameByID( palette_id, buffer, sizeof(buffer) ));
+        JBI->Array_Start_P("P_%d", palette_id );
+        
+          mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+          uint16_t value = ptr->encoding.data;
+          char buffer[33] = {0}; //null terminated
+          for(uint8_t i=0;i<16;i++)
+          {
+            buffer[15-i] = bitRead(value,i) ? '1' : '0';
+          }
+          JBI->Add(buffer);
+
+        JBI->Array_End();
+
+      }
+
+    JBI->Level_End();
+
+
+
+    #endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
 
 
     uint16_t id = 0;
@@ -135,22 +170,24 @@ JBI->Start();
   JBI->Add("millis", millis());
 
   JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
-  JBI->Add("isActive", _segments[0].isActive());
   JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
-  JBI->Add("isActive", _segments[0].isActive());
-  JBI->Add("_segments[0].flags.IsDirty", stripbus->IsDirty());
   JBI->Add("CanShow",stripbus->CanShow());
+  JBI->Add("StripSize", STRIP_SIZE_MAX);
 
 
 for(uint8_t seg_i = 0; seg_i<2; seg_i++)
 {
   JBI->Level_Start_F("Segment%d",seg_i);
 
-    JBI->Level_Start("Transition");
-      JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
-      JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
-    JBI->Level_End();
-  
+    JBI->Add("isActive", _segments[seg_i].isActive());
+      JBI->Level_Start("Transition");
+        JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
+        JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
+        JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
+        JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
+      JBI->Level_End();
+    JBI->Add("virtualLength", _segments[seg_i].virtualLength());
+    
   
   JBI->Level_End();
 

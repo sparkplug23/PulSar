@@ -25,6 +25,10 @@
 
 #include "JsonParser.h"
 
+#ifdef ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
+#include "6_Lights/02_Palette/mColourUtils.h"
+#endif // ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
+
 #include "6_Lights/02_Palette/mPalette.h"
 
 //Required as defualt for now

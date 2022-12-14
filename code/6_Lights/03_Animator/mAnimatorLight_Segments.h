@@ -70,7 +70,7 @@
 #define SEG_OPTION_REVERSED       1
 #define SEG_OPTION_ON             2
 #define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
-#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME or needs getPixelColor
+#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
 #define SEG_OPTION_TRANSITIONAL   7
 
 // some common colors
@@ -94,10 +94,10 @@
 #define SEGENV           _segment_runtimes[segment_active_index] //phase out
 #define SEGRUN           _segment_runtimes[segment_active_index]
 #define SEGLEN           _virtualSegmentLength
-#define SEG_STOP_INDEX           _virtualSegmentLength-1
+#define SEG_STOP_INDEX           _virtualSegmentLength-1  //prob wrong now!
 #define SEGACT           SEGMENT.stop
 #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
-#define FRAMETIME 25
+#define FRAMETIME_MS 25
 
 
 
@@ -117,12 +117,6 @@
    * */
   enum EFFECTS_FUNCTION__IDS
   {
-
-
-// need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
-// This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
-
-
     /**
      * Default
      * Desc: Same colour across all pixels.
@@ -165,6 +159,15 @@
     EFFECTS_FUNCTION__ROTATING_PALETTE__ID,
     #endif
     /**
+     * Desc: pixels are rotated
+     * Para: direction of motion, speed, instant or blend change
+     * 
+     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,
+    #endif
+    /**
      * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
      *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
      * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
@@ -193,6 +196,17 @@
      * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID,
+    #endif
+    /**
+     * Desc: Animation, that fades from selected palette to white,
+     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID,
     #endif
     /**
      * Desc: Animation, that fades from selected palette to anothor palette,
@@ -235,7 +249,7 @@
      * Note: allocate_buffer is used as transition data
      * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
+    EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
     #endif
 
     /******************************************************************************************************************************************************************************
@@ -249,7 +263,6 @@
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
     EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
-    EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID,
     EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -265,9 +278,9 @@
     EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,
     // Wipe/Sweep/Runners     
     EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,
-    EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID, // 1 direction only
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
-    EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID, //start to end to start again
 
     
     #ifdef ENABLE_EXTRA_WLED_EFFECTS
@@ -321,7 +334,9 @@
     // Fireworks
     EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,
     EFFECTS_FUNCTION__WLED_RAIN__ID,
     #ifdef ENABLE_EXTRA_WLED_EFFECTS
     // Sparkle/Twinkle
@@ -617,15 +632,19 @@
       7 - Twinkle / Flash
       8 - Steady on (already added)
      * */
-    // EFFECTS_FUNCTION__XMAS_IN_WAVES_ID
-    // EFFECTS_FUNCTION__XMAS_SEQUENTIAL_ID
-    // EFFECTS_FUNCTION__XMAS_SLO_GLO_ID
-    // EFFECTS_FUNCTION__XMAS_CHASING_AND_FLASHING_ID
-    // EFFECTS_FUNCTION__XMAS_SLOW_FADE_ID
-    // EFFECTS_FUNCTION__XMAS_TWINKLE_AND_FLASH_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER_IN_WAVES_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SEQUENTIAL_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLO_GLO_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__CHASING_AND_FLASHING_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLOW_FADE_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__TWINKLE_AND_FLASH_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+
+
+// need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
+// This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
 
     /**
      * Development methods
@@ -966,7 +985,7 @@
       /**
        * Change method (eg Blend, Instant)
        * */
-      uint8_t method_id = 2;  // Is this still needed?
+      // uint8_t method_id = 2;  // Is this still needed?
       /**
        * Pixels to change up to maximum of segment
        * */
@@ -983,6 +1002,7 @@
     };
 
 
+
     /**
      * @brief To be set with JSON, as the exact index location for the physical pixel indexing
      * 
@@ -996,8 +1016,8 @@
     typedef struct Segment 
     { // 24 bytes
       struct PIXEL_INDEX_RANGE{
-          uint16_t start = 0;
-          uint16_t stop  = 0; // means length?
+          uint16_t start = 0; // start means first led index within segment
+          uint16_t stop  = 0; // stop means total leds within the segment (not the index of last pixel)
       }pixel_range;
 
       uint8_t options = NO_OPTIONS; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
@@ -1029,6 +1049,14 @@
     // To be phased out, only for easy conversion
       uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR}; //? really not needed or understood
 
+      void set_colors(uint8_t index, uint8_t r,uint8_t g,uint8_t b,uint8_t w )
+      {
+        // w,r,g,b packed 32 bit colour
+        colors[index] = (((uint32_t)w << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b);
+      }
+
+
+
       /**
        * Flags
        * */
@@ -1036,7 +1064,19 @@
       /**
        * Effects (Scenes & Flasher), Ambilight, Adalight
        * */
-      uint8_t mode_id = 0;
+      uint8_t mode_id = 0; // rename to "effect_id"
+
+      
+      uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
+      {
+        if(mode_id >= EFFECTS_FUNCTION__WLED_STATIC__ID)
+          return FRAMETIME_MS;
+        else
+          return transition.rate_ms;
+      };
+
+
+
       /**
        * Palette (Options on getting from palette)
        * */
@@ -1111,6 +1151,14 @@
         intensity_value = v;
       }
 
+      // uint8_t grouping() //legacy for wled effects, made up from time/rate
+      // {
+      //   return speed_value;
+      // }
+      // void set_grouping(uint8_t v) //legacy for wled effects, made up from time/rate
+      // {
+      //   speed_value = v;
+      // }
 
       void setOption(uint8_t n, bool val)
       {
@@ -1440,6 +1488,7 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
 
 
   void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
@@ -1452,6 +1501,7 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animate_Function__Slow_Glow();
   void SubTask_Segment_Animation__Stepping_Palette();
   void SubTask_Segment_Animation__Rotating_Palette();
+  void SubTask_Segment_Animation__Rotating_Previous_Animation();
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
@@ -1470,6 +1520,9 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
   #endif
 
   
@@ -1551,7 +1604,9 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animation__Fireworks();
   void SubTask_Segment_Animation__Exploding_Fireworks();
   void SubTask_Segment_Animation__Fireworks_Starburst();
+  void SubTask_Segment_Animation__Fireworks_Starburst_Glows();
   void SubTask_Segment_Animation__Rain();
+  void SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
 // Sparkle/Twinkle
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Animation__Solid_Glitter();

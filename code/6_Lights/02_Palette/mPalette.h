@@ -43,25 +43,38 @@ Change option to make all palettes gradient mode or node, or how to use it
 #include "6_Lights/98_FastLED_Modified/FastLED.h"
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
+#include "mPalette_Encoding_Options.h"
+
+
 //Remember to sync with what is in palette_progmem.h
 enum fMapIDs_Type__IDS{
+  /**
+   * @brief Colour ID mappings.
+   * 
+   */
   MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID=0,
   MAPIDS_TYPE_HSBCOLOUR_NOINDEX__ID,
   MAPIDS_TYPE_HSBCOLOUR_WITHINDEX__ID,
-  // MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out    // Do I really need this?
-  
-  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID,
+  MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID,     // WHAT "GRADIENT"-NESS, should be up to the effect and not the palette itself
+  /**
+   * @brief RGB (no white, really this should be called RGB3)
+   * 
+   */
   MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID,
-  
   MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID,
   MAPIDS_TYPE_RGBCOLOUR_WITHINDEX__ID,
-  // MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL__ID, //phase out, assume max index IS set all
-
-  // I need a RGBW channel
-
+  /**
+   * @brief RGBW (RGB4 - include 4th space for white)
+   * 
+   */
+  //
+  /**
+   * @brief RGBCCT (RGBWW5 - include RGB, warm and cold white)
+   * 
+   */
   MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID,
   MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID,
-
+  // Unused - Just gives length for internal calcualtions
   MAPIDS_TYPE_RGBCOLOUR_LENGTH__ID
 };
 
@@ -92,7 +105,7 @@ class mPalette
     void init_PresetColourPalettes(); 
     // First bytes stores length 
     void init_ColourPalettes_Autumn_Red();
-    void init_ColourPalettes_Autumn();
+    void init_ColourPalettes_Autumn_Green();
     void init_ColourPalettes_Winter();
     void init_ColourPalettes_Pastel();
     void init_ColourPalettes_Ocean_01();
@@ -138,6 +151,10 @@ class mPalette
     void init_ColourPalettes_Christmas_22();
     void init_ColourPalettes_Christmas_23();
     void init_ColourPalettes_Christmas_24();
+    void init_ColourPalettes_Christmas_25();
+    void init_ColourPalettes_Christmas_26();
+    void init_ColourPalettes_Christmas_27();
+    void init_ColourPalettes_Christmas_28();
     void init_ColourPalettes_Sky_Glow_01();
     void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
@@ -225,7 +242,7 @@ class mPalette
   // One special buffer, block of memory allows any format of pallete (eg)
   // This will also require encoding of type of palette into the buffer somehow
   // shared, with overlapping memory
-  // first X amounts of the original buffer will be used for encoding type, but colour_map_id pointer will remain the same
+  // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
   enum PALETTELIST_VARIABLE_GENERIC__IDS{
     PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID, // New scene colour, static
     // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
@@ -247,7 +264,7 @@ class mPalette
     PALETTELIST_STATIC_RAINBOW_INVERTED__ID,
     PALETTELIST_STATIC_PASTEL__ID, //PASTEL
     PALETTELIST_STATIC_WINTER__ID,
-    PALETTELIST_STATIC_AUTUMN__ID,
+    PALETTELIST_STATIC_AUTUMN_GREEN__ID,
     PALETTELIST_STATIC_AUTUMN_RED__ID,
     PALETTELIST_STATIC_GRADIENT_01__ID,
     PALETTELIST_STATIC_GRADIENT_02__ID,
@@ -277,6 +294,10 @@ class mPalette
     PALETTELIST_STATIC_CHRISTMAS_22__ID,
     PALETTELIST_STATIC_CHRISTMAS_23__ID,
     PALETTELIST_STATIC_CHRISTMAS_24__ID,
+    PALETTELIST_STATIC_CHRISTMAS_25__ID,
+    PALETTELIST_STATIC_CHRISTMAS_26__ID,
+    PALETTELIST_STATIC_CHRISTMAS_27__ID,
+    PALETTELIST_STATIC_CHRISTMAS_28__ID,
     PALETTELIST_STATIC_SUNRISE_01__ID,
     PALETTELIST_STATIC_SUNRISE_02__ID,
     PALETTELIST_STATIC_SUNRISE_03__ID,
@@ -424,7 +445,11 @@ class mPalette
 
     #define PALETTELIST_COLOUR_AMOUNT_MAX 20//15 new max
 
-    
+    /**
+     * @brief This entire union should be removed from palette information, as its mostly done via effects
+     * Only the encoding should remain
+     * 
+     */
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 
@@ -461,22 +486,57 @@ class mPalette
       };
     } PALETTE_FLAGS;
 
-    // Consider template split
+
+
+    #ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
+
+    typedef union {
+      uint16_t data; // allows full manipulating
+      struct { 
+        uint16_t red_enabled : 1;
+        uint16_t green_enabled : 1;
+        uint16_t blue_enabled : 1;
+        uint16_t white_warm_enabled : 1;
+        uint16_t white_cold_enabled : 1;
+        uint16_t encoded_as_hsb_ids : 1; //move this to other encoded types
+        uint16_t index_byte_width : 3; // 3 bits wide, or 0b000 gives 9 value options
+        uint16_t index_exact : 1;
+        uint16_t index_scaled_to_segment : 1;
+        uint16_t index_is_trigger_value : 1;
+        uint16_t encoded_as_crgb_palette_16 : 1;
+        uint16_t encoded_as_crgb_palette_256 : 1;
+        uint16_t byte3 : 1;
+        uint16_t byte4 : 1;
+      };
+    } PALETTE_ENCODING_DATA;
+
+    // Create mqtt method for reading all these, so the functions "isRGB" isRGBCCT etc can be shown as array of strings
+    // ie mqtt for palette encoded = ["r","g",b,index=1,is_exact] and one for each palette as debug output. Convert from binary to human readable.
+
+    #endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
+
+
+
+    /**
+     * @brief Should this really be its own list, its already inside the palette class?
+     * 
+     */
     struct PALETTELIST{
       struct PALETTE{ //6 bytes per palette
-        // 16 bits
-        PALETTE_FLAGS flags;        
         // enum: Used to call for ctr of friendly name
         uint8_t id = 0;
         // Pointer to name
         char* friendly_name_ctr = nullptr;
         // Map IDs
-        uint8_t* colour_map_id; //original pointer to saved memory (possible progmem)
+        uint8_t* data; //colour_map_id; //original pointer to saved memory (possible progmem)
         // Active pixels
-        uint8_t colour_map_size = 0; //total bytes in palette (not pixel count)
-
-
-        //perhaps add pixel_count instead of computing it. Or, with new "Load palette" have this calculated and saved in "loaded palette info"
+        uint8_t  data_length = 0;// colour_map_size = 0; //total bytes in palette (not pixel count)
+        #ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
+        PALETTE_ENCODING_DATA encoding;
+        #endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
+        #ifndef ENABLE_DEVFEATURE_REMOVE_OLD_PALETTE_ENCODING
+        PALETTE_FLAGS flags;
+        #endif // ENABLE_DEVFEATURE_REMOVE_OLD_PALETTE_ENCODING
       };
       // Can be edited
       PALETTE hsbid_users[10]; //reduce to 10, as "hsb_colour_ids"
@@ -496,7 +556,7 @@ class mPalette
       PALETTE purple_pink_80_20;
       PALETTE microleds_pastel_01;
       PALETTE winter;
-      PALETTE autumn;
+      PALETTE autumn_green;
       PALETTE autumn_red;
       PALETTE rainbow;
       PALETTE rainbow_inverted;
@@ -553,6 +613,10 @@ class mPalette
       PALETTE christmas_22;
       PALETTE christmas_23;
       PALETTE christmas_24;
+      PALETTE christmas_25;
+      PALETTE christmas_26;
+      PALETTE christmas_27;
+      PALETTE christmas_28;
       // Created for other people
       PALETTE custom_user_01;
       PALETTE *ptr = &rainbow;
@@ -624,8 +688,11 @@ class mPalette
     uint16_t GetPixelsInMap(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0);
     uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
 
+    #ifndef ENABLE_DEVFEATURE_REMOVE_OLD_PALETTE_ENCODING
     uint8_t GetPixelsWithByMapIDType(uint8_t fMapIDs_Type);
-    
+    #endif // ENABLE_DEVFEATURE_REMOVE_OLD_PALETTE_ENCODING
+
+
 #ifdef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
 void LoadPalette(uint16_t palette_id);
 #endif // ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
@@ -643,6 +710,9 @@ void LoadPalette(uint16_t palette_id);
     RgbcctColor GetColourFromPalette_Intermediate(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
     // RgbcctColor GetColourFromPalette_Intermediate(PALETTELIST::PALETTE *ptr, uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
     uint32_t color_from_palette_Intermediate(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
+
+
+    uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
 
 
     /**
@@ -745,10 +815,15 @@ void LoadPalette(uint16_t palette_id);
 //     void SetPaletteListPtrFromID(uint8_t id);
 
 
-
-
-
 };
+
+
+
+
+
+
+
+
 
 #define mPaletteI mPalette::GetInstance()
 

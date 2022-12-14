@@ -291,6 +291,12 @@ class mAnimatorLight :
     
     void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool brightness_needs_applied = false);// uint16_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
+    
+    
+    // #ifdef ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
+    // RgbcctColor GetPixelColor_FromBus(uint16_t indexPixel = 0);
+    // #endif // ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
+    
 
     /**
      * @brief 

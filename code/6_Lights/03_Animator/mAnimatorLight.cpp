@@ -66,11 +66,11 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       //   );
       // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap0", mPaletteI->palettelist.rgbcct_users[0].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap1", mPaletteI->palettelist.rgbcct_users[1].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap2", mPaletteI->palettelist.rgbcct_users[2].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap3", mPaletteI->palettelist.rgbcct_users[3].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap4", mPaletteI->palettelist.rgbcct_users[4].colour_map_id, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap0", mPaletteI->palettelist.rgbcct_users[0].data, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap1", mPaletteI->palettelist.rgbcct_users[1].data, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap2", mPaletteI->palettelist.rgbcct_users[2].data, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap3", mPaletteI->palettelist.rgbcct_users[3].data, 5);
+      // AddLog_Array(LOG_LEVEL_WARN, "colourmap4", mPaletteI->palettelist.rgbcct_users[4].data, 5);
 
 
 
@@ -406,7 +406,7 @@ void mAnimatorLight::Settings_Load(){
 
   // uint8_t list = 0;
   // SetPaletteListPtrFromID(list);
-  // AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d amount = %d"),list,palettelist.ptr->colour_map_size);
+  // AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d amount = %d"),list,palettelist.ptr->data_length);
   // for(uint8_t element=0;element<20;element++){
   //   AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d i%d amount = %d"),list,element,pCONT_set->Settings.palette_user_colour_map_ids[list][element]);
   // }
@@ -414,9 +414,9 @@ void mAnimatorLight::Settings_Load(){
   // Save colour map IDS
   // for(uint8_t list=0;list<20;list++){
   //   SetPaletteListPtrFromID(list);
-  //   palettelist.ptr->colour_map_size = pCONT_set->Settings.animation_settings.palette_user_amounts[list]<20?pCONT_set->Settings.animation_settings.palette_user_amounts[list]:20;
+  //   palettelist.ptr->data_length = pCONT_set->Settings.animation_settings.palette_user_amounts[list]<20?pCONT_set->Settings.animation_settings.palette_user_amounts[list]:20;
   //   for(uint8_t element=0;element<20;element++){
-  //     palettelist.ptr->colour_map_id[element] = pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element];
+  //     palettelist.ptr->data[element] = pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element];
   //   }
   // }
   
@@ -455,9 +455,9 @@ void mAnimatorLight::Settings_Save(){
   // Save colour map IDS
   // for(uint8_t list=0;list<20;list++){
   //   SetPaletteListPtrFromID(list);
-  //   pCONT_set->Settings.animation_settings.palette_user_amounts[list] = palettelist.ptr->colour_map_size;
+  //   pCONT_set->Settings.animation_settings.palette_user_amounts[list] = palettelist.ptr->data_length;
   //   for(uint8_t element=0;element<20;element++){
-  //     pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element] = palettelist.ptr->colour_map_id[element];
+  //     pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element] = palettelist.ptr->data[element];
   //   }
   // }
 
@@ -467,7 +467,6 @@ void mAnimatorLight::Settings_Save(){
 
   pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
   pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  pCONT_set->Settings.animation_settings.animation_transition_method  = _segments[0].transition.method_id;
   pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
   pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
 
@@ -943,18 +942,18 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
     mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
 
     // ALOG_INF(PSTR("ptr->id %d"), ptr->id);
-    // ALOG_INF(PSTR("ptr->colour_map_size %d"), ptr->colour_map_size);
+    // ALOG_INF(PSTR("ptr->data_length %d"), ptr->data_length);
     
     if(ptr->id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
     }else
     if(ptr->id < mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
     }else
     if(ptr->id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
     }else{ // progmem
-      memcpy_P(palette_buffer_p,ptr->colour_map_id,sizeof(uint8_t)*ptr->colour_map_size);
+      memcpy_P(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
     }
     
     } // END of CRGBPalette's

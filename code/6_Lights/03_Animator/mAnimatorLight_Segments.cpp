@@ -26,11 +26,11 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
 
   ALOG_WRN(PSTR("This likely needs changed, since rgbcct can be in ANY segment, needs new method"))
   
-  _segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
-  _segment_runtimes[1].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[1].colour_map_id);
-  _segment_runtimes[2].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[2].colour_map_id);
-  _segment_runtimes[3].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[3].colour_map_id);
-  _segment_runtimes[4].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[4].colour_map_id);
+  _segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
+  _segment_runtimes[1].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[1].data);
+  _segment_runtimes[2].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[2].data);
+  _segment_runtimes[3].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[3].data);
+  _segment_runtimes[4].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[4].data);
 
   // DEBUG_LINE_HERE; 
 
@@ -54,7 +54,7 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
     _segment_runtimes[i].rgbcct_controller->setCCT(153);
 
     // Set first colour as default
-    //  _segment_runtimes[i].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+    //  _segment_runtimes[i].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 
 
     _segments[i].flags.brightness_applied_during_colour_generation = true;
@@ -115,7 +115,11 @@ void mAnimatorLight::resetSegments()
   }
 
   _segments[0].pixel_range.start = 0;
-  _segments[0].pixel_range.stop = STRIP_SIZE_MAX-1;
+  #ifdef ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
+  _segments[0].pixel_range.stop = STRIP_SIZE_MAX; //since STRIP_SIZE_MAX is total pixels, the value in "stop" will also be STRIP_SIZE_MAX
+  #else
+  _segments[0].pixel_range.stop = STRIP_SIZE_MAX-1; //not sure why this had -1? prob wled issue
+  #endif // ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
 
   #ifdef USE_MODULE_LIGHTS_PWM
   _segments[0].pixel_range.stop = 2; 
@@ -198,7 +202,11 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
     {     
 
       if(
+        #ifdef ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
+        (mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, SEGMENT.get_transition_rate_ms() ))||
+        #else
         (mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||
+        #endif // ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
         (_segments[0].flags.fForceUpdate)
       ){
         DEBUG_PIN1_SET(LOW);
@@ -237,6 +245,7 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           (_segments[segment_active_index].effect_id <= EFFECTS_FUNCTION__WLED_LENGTH__ID)
         ){          
           mPaletteI->UpdatePalette_FastLED_TargetPalette();
+          // SEGMENT.transition.rate_ms = FRAMETIME_MS; // 
         }
         #endif // ENABLE_WLED_EFFECTS
 
@@ -267,9 +276,6 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           case EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID:
             SubTask_Segment_Animation__Candle_Multi();
           break;     
-          case EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID:
-            SubTask_Segment_Animation__Fire_Flicker();
-          break;   
           case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
             SubTask_Segment_Animation__Shimmering_Palette();
           break;   
@@ -277,6 +283,9 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
           case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:
             SubTask_Segment_Animation__Rotating_Palette();
+          break;
+          case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID:
+            SubTask_Segment_Animation__Rotating_Previous_Animation();
           break;
           case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:
             SubTask_Segment_Animation__Stepping_Palette();
@@ -292,12 +301,18 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
             SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
           break;
           #endif
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+          case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
+            SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
+          break;
+          #endif
 
           #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
           case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
             SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
           break; 
           #endif        
+          
 
           /**
            * Static
@@ -353,8 +368,14 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
             SubTask_Segment_Animation__Fireworks_Starburst();
           break;
+          case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
+            SubTask_Segment_Animation__Fireworks_Starburst_Glows();
+          break;
           case EFFECTS_FUNCTION__WLED_RAIN__ID:
             SubTask_Segment_Animation__Rain();
+          break;
+          case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
+            SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
           break;
           #ifdef ENABLE_EXTRA_WLED_EFFECTS
           case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
@@ -813,10 +834,13 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
          * @brief If callback is not active, then assume its StipUpdate needs to be called
          * 
          */
-        if(!_segment_runtimes[segment_active_index].animation_has_anim_callback)
-        {
+        if(
+          (!_segment_runtimes[segment_active_index].animation_has_anim_callback)||
+          (SEGENV.anim_function_callback == nullptr) // assumes direct update
+        ){
           StripUpdate();         
           SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
+          // ALOG_INF(PSTR("Calling"));
         }
         else
         { // Configure animator to show output
@@ -866,7 +890,11 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
 // }
 
   for (uint16_t pixel = 0; 
+                #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
+                pixel < SEGMENT.virtualLength(); 
+                #else
                 pixel < SEGMENT.length(); 
+                #endif
                 pixel++
   ){  
     GetTransitionColourBuffer(SEGENV.Data(), SEGENV.DataLength(), pixel, SEGMENT.colour_type, &colour_pairs);
@@ -1595,7 +1623,7 @@ mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_
 }
 
 
-
+// #ifdef ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
 /**
  * @note The indexing here relates to the buffer storage, and should NOT be confused with pixel indexing
  * 
@@ -1606,7 +1634,11 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
 {
 // DEBUG_LINE_HERE;
   for(int pixel=0;
-          pixel<SEGMENT.length();
+          // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+          pixel<SEGMENT.virtualLength();
+          // #else
+          // pixel<SEGMENT.length();
+          // #endif
           pixel++
   ){
 
@@ -1625,6 +1657,41 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
   }
 
 }
+// #endif // ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
+
+// #ifdef ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
+/**
+ * @brief New change, ignoring what way the data is formatted, read the data from the neopixel buffer
+ * 
+ */
+// void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus()
+// {
+// // DEBUG_LINE_HERE;
+//   for(int pixel=0;
+//           // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+//           // pixel<SEGMENT.virtualLength();
+//           // #else
+//           pixel<SEGMENT.length();
+//           // #endif
+//           pixel++
+//   ){
+
+//     /**
+//      * @brief Convert segment_pixelindex to neopixel_pixelindex
+//      **/
+// // Serial.printf("pixel=%d\n\r", pixel);
+
+
+//     SetTransitionColourBuffer_StartingColour( SEGENV.Data(), 
+//                                               SEGENV.DataLength(),
+//                                               pixel, 
+//                                               SEGMENT.colour_type, 
+//                                               RgbcctColor(GetPixelColor_FromBus(pixel))
+//                                             );
+//   }
+
+// }
+// #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 
 
 /**
@@ -1675,6 +1742,482 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
 
 } //end function
 
+
+#ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
+/**
+ * This needs redoing, with a flag, to enable how I want the palette presented, and not how its encoded
+ * "palette_pattern"
+ * Gradient (either needs to get from palette, or equally generate it based on palette element count)
+ * Single   (gets each colour in the palette, with ability to ignore indexs if they are present)
+ * 
+ * Dec2022 Palette Rewrite now uses "GetColourFromPalette" which already handles the colour encoding.
+ * This function, will simply check how the colour will be treated (single/gradient/indexed) and forms a interface pair with the GetColourFromPalette
+ * that will require further optimising later together
+ * 
+ * */
+void mAnimatorLight::DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(uint16_t palette_id, uint8_t runtime_segment_index)
+{
+
+  /**
+   * @brief 
+   * Check if segment runtime has allocated buffer of expected size
+   * 
+   */
+  if(_segment_runtimes[runtime_segment_index].Data() == nullptr)
+  {
+    return;
+  }
+
+  // ALOG_INF( PSTR("DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected=%d"), palette_id );
+
+  // Update pointer of struct
+  mPaletteI->SetPaletteListPtrFromID(palette_id);
+  // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),mPaletteI->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
+  // AddLog(LOG_LEVEL_DEBUG_MORE
+
+  uint8_t segment_index = segment_active_index;
+  
+
+//tmp force
+  // _segments[segment_index].transition.order_id = TRANSITION_ORDER_INORDER_ID;
+
+  /**
+   * Handle the retrieval of colours from palettes depending on the palette encoding type
+   * FLIP THESE
+   * If effect comes first, then maptype, then map can be pushed into GetColourPalette and then is doesnt care 
+   * 
+   * */
+
+  // switch(mPaletteI->palettelist.ptr->flags.fMapIDs_Type){
+  //   case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX__ID:
+  //   case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX__ID:
+  //   // case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_AND_SETALL__ID:
+  //   // case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_AND_SETALL__ID:
+  //   {
+    /**
+     * @brief If any form of indexing is used, but for now is limited to the basic version (1 index per colour)
+     * 
+     */
+    if( 
+        (mPaletteI->palettelist.ptr->encoding.index_exact)
+      ){
+
+
+
+      // Get active pixels in map
+      uint16_t active_pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //width 2
+
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "active_pixels_in_map=%d"),active_pixels_in_map);
+    #endif// ENABLE_LOG_LEVEL_INFO
+
+    ALOG_INF(PSTR("Needs phased out, index getting comes from GetColourFromPaletteAdvanced and effects will decide to use the indexes or not. "));
+    
+
+      // Move across map
+      uint8_t pixel_position = -2;
+      for(uint16_t desired_pixel=0;desired_pixel<active_pixels_in_map;desired_pixel++){
+
+        RgbcctColor colour = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel,&pixel_position);
+        
+        #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+        //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "dp%d, pp%d, %d,%d %d"),desired_pixel, pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
+        #endif
+        
+        if(pixel_position>=0){
+          // Set output to this "many" colour
+          if(pixel_position == 255){ 
+
+ALOG_INF(PSTR("This should become an animation in its own right using mappings"));
+
+            for(uint16_t temp=0;temp<_segments[segment_index].length();temp++){//}  ledout.length;temp++){ 
+              // animation_colours[temp].DesiredColour = ApplyBrightnesstoRgbcctColour(colour,pCONT_iLight->getBriRGB_Global());
+              
+            if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+              colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+            }
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), temp,  _segments[segment_index].colour_type, colour);
+  
+            }            
+            #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+            // AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set ALL %d,%d %d"),pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
+            #endif
+          }else{
+            colour.R = 1;colour.R = 2;colour.R = 3;
+            // Serial.println("colour.R = 1;colour.R = 2;colour.R = 3;");
+            // animation_colours[pixel_position].DesiredColour = ApplyBrightnesstoRgbcctColour(colour,pCONT_iLight->getBriRGB_Global());
+            
+            if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+              colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+            }
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_position,  _segments[segment_index].colour_type, colour);
+  
+            #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+            //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "set %d %d,%d %d"), pixel_position,pCONT_iLight->HueF2N(colour.H),pCONT_iLight->SatF2N(colour.S),pCONT_iLight->BrtF2N(colour.B));
+            #endif
+          }
+        }else{          
+          #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+          ALOG_DBM( PSTR(D_LOG_NEO "return; //end early %d"),pixel_position);
+          #endif
+        }
+
+      }
+    #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "return; //end early %d"),pixel_position);
+    #endif// ENABLE_LOG_LEVEL_INFO
+      // break;
+
+      // return;
+    // }break;
+
+      }else
+
+    // case MAPIDS_TYPE_RGBCCTCOLOUR_WITHINDEX_GRADIENT__ID:
+    // case MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID:
+    // case MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT__ID:{
+
+    /**
+     * @brief If any form of indexing is used, but for now is limited to the basic version (1 index per colour)
+     * 
+     */
+    if( 
+        (mPaletteI->palettelist.ptr->encoding.index_scaled_to_segment) // ie my old way to be treated as gradient, but in the future gradient will not be part of the palette info but effect
+      ){
+
+
+      /***
+       * Section needs thought out again to work in segments
+       * Output, needs to be relative to segment only (ie 0..SEGLEN)
+       * 
+       * 0,255 from gradient index needs mapped in 0..SEGLEN
+       * 
+       * **/
+
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "MAPIDS_TYPE_HSBCOLOUR_WITHINDEX_GRADIENT_ID NOT WORKING, needs converted to work inside segments"));
+      #endif
+
+      uint16_t start_pixel = 0;
+      uint16_t end_pixel = 100;
+      RgbcctColor start_colour = RgbcctColor(0);
+      RgbcctColor end_colour = RgbcctColor(0);
+      uint16_t desired_pixel = 0;
+      uint8_t start_pixel_position = -1, end_pixel_position = -1;
+      uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+
+      //#ifdef ENABLE_LOG_LEVEL_DEBUG
+      // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "pixels_in_map %d"),pixels_in_map);
+      //#endif
+
+
+      // Add flag to enable ignoring gradient, and filling as normal palette (here?)
+
+      for(uint8_t grad_pair_index=0;grad_pair_index<pixels_in_map;grad_pair_index++)
+      {
+        
+        start_colour = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel,  &start_pixel_position);
+        end_colour   = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel+1,&end_pixel_position);
+
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
+
+        #ifndef ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
+        start_colour = ApplyBrightnesstoRgbcctColour(start_colour,pCONT_iLight->getBriRGB_Global());
+        end_colour   = ApplyBrightnesstoRgbcctColour(end_colour,pCONT_iLight->getBriRGB_Global());
+        #endif // ENABLE_DEVFEATURE_DISABLE_UNTIL_RGBCCT_CONVERSION_FIXED_FOR_WHITE_CHANNELS
+
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG
+        //  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_NEO "s%d,%d %d %d"),pCONT_iLight->HueF2N(start_colour.H),pCONT_iLight->SatF2N(start_colour.S),pCONT_iLight->BrtF2N(start_colour.B),start_pixel_position);
+        //  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "e%d,%d %d %d"),HueF2N(end_colour.H),SatF2N(end_colour.S),BrtF2N(end_colour.B),end_pixel_position);
+        // #endif
+
+        /**
+         * @brief No start/stop mapping with segments I think
+         * 
+         * 
+         */
+        uint16_t start_pixel = 0;//_segments[segment_active_index].pixel_range.start;
+        uint16_t stop_pixel = SEGLEN;//_segments[segment_active_index].pixel_range.stop;
+
+        start_pixel_position = map(start_pixel_position,0,255,start_pixel,stop_pixel);
+        end_pixel_position   = map(end_pixel_position,0,255,start_pixel,stop_pixel);
+      
+
+        // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
+        // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
+
+        RgbcctColor colour;
+
+        float progress = 0;
+        for(
+          int 
+          index=start_pixel_position;
+          index<=end_pixel_position;
+          index++){
+        // for(
+        //   int 
+        //   index=0;
+        //   index<SEGLEN;
+        //   index++){
+            // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "ledout.index%d %d %d"),ledout.index,start_pixel_position,end_pixel_position);
+
+            // if(start_pixel_position == end_pixel_position)
+            // {
+            //   // preference to the lower pixel directly, no blend
+            //   if(start_pixel_position == start_pixel){ //start, then chose start
+            //     animation_colours[ledout.index].DesiredColour = start_colour;
+            // // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO " _position == start_pix ledout.index%d %d %d"),ledout.index,start_pixel_position,end_pixel_position);
+            //   }else{//end
+              
+            //   animation_colours[ledout.index].DesiredColour = start_colour;
+            // // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO " lse{//end ledout.index%d %d %d"),ledout.index,start_pixel_position,end_pixel_position);
+            //   }
+            // }
+            // else{
+            
+              // progress = mSupport::mapfloat(index,0,SEGLEN,0,1);
+              progress = mSupport::mapfloat(index,start_pixel_position,end_pixel_position,0,1);
+              // animation_colours[ledout.index].DesiredColour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
+              colour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
+
+              if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+                colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+              }
+              
+              SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), index,  _segments[segment_index].colour_type, colour);
+  
+
+
+            // }
+            AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "ledout.index%d %d %d"),index,start_pixel_position,end_pixel_position);
+        }
+
+        desired_pixel++;
+
+      }
+
+    //   // Colour applied to entire DesiredColour, leaving now
+    //   break;
+    //   // return; //succcesfully handled
+
+    // }break;
+
+    
+    // default:
+    //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+      // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "default"));
+    //   #endif
+    // case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID:
+
+    // default:
+    // case MAPIDS_TYPE_RGBCOLOUR_NOINDEX__ID:
+    // case MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID:
+    // case MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID: ///to be tested
+    // {
+
+      
+    /**
+     * @brief If any form of indexing is used, but for now is limited to the basic version (1 index per colour)
+     * 
+     */
+    }
+    else
+    { // ASSUMED NO INDEXING 
+
+
+
+    
+    // if( 
+    //     (mPaletteI->palettelist.ptr->encoding.) // ie my old way to be treated as gradient, but in the future gradient will not be part of the palette info but effect
+    //   ){
+    //get colour above
+
+      //apply to positiion below
+
+     // SetLEDOutAmountByPercentage(_segments[0].transition.pixels_to_update_as_percentage.val);
+
+      //what is this?
+      // does this only run if above did not? ie this is default?
+
+      // AddLog(LOG_LEVEL_TEST, PSTR("strip_size_requiring_update=%d"),strip_size_requiring_update);
+      
+      // Other types with random led patterns, or,
+      
+
+/**
+ * @brief Should INORDER/RANDOMM even be an option anymore, its basically an effect?
+ * This can also be summed up with a passing of variable for if the indexing should be inroder/random
+ * 
+ */
+
+// #ifndef ENABLE_DEVFEATURE_PHASEOUT_TRANSITION_ORDER
+//       switch(_segments[segment_index].transition.order_id)
+//       {
+//         case TRANSITION_ORDER__RANDOM__ID:
+//         {
+// #endif // ENABLE_DEVFEATURE_PHASEOUT_TRANSITION_ORDER
+          // Segments_RefreshLEDIndexPattern(segment_index);
+
+          // new transition, so force full update of all segment pixels
+          if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){ // A GOOD WAY AROUND THIS WOULD BE (IF ANIMATION FIRST RUN) THEN USE INORDER METHOD TO FIRST DRAW ALL PIXELS, then start chaning
+            _segments[segment_index].pixels_to_update_this_cycle = _segments[segment_index].length();
+          }    
+
+          uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+          uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
+
+
+/**
+ * @brief 
+ * Intensity should be "percentage" in the future
+ **/
+
+          uint8_t percentage = 20; // forced 20, but there is a command for this
+
+          #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+          percentage = constrain(_segments[segment_index].intensity(),0,100); // limit to be "percentage"
+          #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+
+          #ifdef ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+          uint16_t pixels_in_segment = _segments[segment_index].length_m(); //7-0 = 7, but this is 8 pixels
+          #else
+          uint16_t pixels_in_segment = _segments[segment_index].length();
+          #endif // ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+          uint16_t pixels_to_update_as_number = mapvalue(percentage, 0,100, 0,pixels_in_segment);
+          // _segments[segment_index].pixels_to_update_this_cycle = ;
+
+          #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+          //ALOG_INF( PSTR("percentage{%d},intensity{%d},pixels_in_segment{%d},pixels_to_update_as_number{%d}"), percentage, _segments[segment_index].intensity(), pixels_in_segment, pixels_to_update_as_number);
+          #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+
+
+          uint8_t pixel_position = 0;
+          uint16_t pixel_index = 0;
+          desired_pixel=0;
+          for (uint16_t iter = 0; iter < pixels_to_update_as_number; iter++)
+          {
+            /**
+             * @brief 
+             * min: lower bound of the random value, inclusive (optional).
+             * max: upper bound of the random value, exclusive.
+            **/
+            #ifdef ENABLE_DEVFEATURE_ENABLE_SEGMENT_PIXEL_INDEX_SHIFT
+            pixel_index = random(start_pixel, end_pixel+1);
+            #else
+            pixel_index = random(0, pixels_in_segment+1); //indexing must be relative to buffer
+            #endif
+
+            #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+            //ALOG_INF( PSTR("[%d] pixel_index{%d} = random( start_pixel{%d}, end_pixel{%d})"), iter, pixel_index, start_pixel, end_pixel );
+            #endif // ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+
+            // For random, desired pixel from map will also be random
+            desired_pixel = random(0, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
+            
+            RgbTypeColor colour = mPaletteI->GetColourFromPalette_Intermediate(palette_id,desired_pixel,&pixel_position);
+
+            #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
+            AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
+            #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
+
+            if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+              colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+            }
+
+            #ifdef ENABLE_DEVFEATURE_ENABLE_SEGMENT_PIXEL_INDEX_SHIFT
+            pixel_index = pixel_index + start_pixel; // The "pixel_index" and "data/dataLen" are indexed inside the buffer, but needs shifting for complete output relative to start_pixel index
+            #endif
+
+            SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_index, _segments[segment_index].colour_type, colour);
+            // SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), 7, _segments[segment_index].colour_type, RgbColor(50));
+   }
+
+//   #ifndef ENABLE_DEVFEATURE_PHASEOUT_TRANSITION_ORDER
+         
+
+//         }break;
+//         default: // testing
+//         // Serial.println("default: // testing");
+//         case TRANSITION_ORDER__INORDER__ID:{
+
+//           /**
+//            * @brief Construct a new Segments_RefreshLEDIndexPattern object
+//            * If this is being done inorder, then simply update ALL pixels, the index is not relevant
+//            * 
+//            */
+                
+//           // Segments_RefreshLEDIndexPattern(segment_index);
+
+//           // new transition, so force full update of all segment pixels
+//           if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){
+//             _segments[segment_index].pixels_to_update_this_cycle = _segments[segment_index].length();
+//           }   
+
+//           // AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_index].pixels_to_update_this_cycle =%d"), _segments[segment_index].pixels_to_update_this_cycle);
+
+//           uint16_t start_pixel = _segments[segment_index].pixel_range.start;
+//           uint16_t end_pixel = _segments[segment_index].pixel_range.stop;
+              
+//           #ifdef ENABLE_DEVFEATURE_PIXEL_MATRIX
+//             ALOG_INF( PSTR("Segment: %d\t(%d,%d),(%d)"),
+//               segment_index,
+//               start_pixel,
+//               end_pixel,
+//               palette_id
+//             );
+//           #endif
+
+//           #ifdef ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+//           uint16_t pixels_in_segment = _segments[segment_index].length_m(); //7-0 = 7, but this is 8 pixels
+//           #endif
+
+
+//           uint8_t pixel_position = 0;
+//           uint16_t pixel_index = 0;
+//           desired_pixel=0;
+//           // for (uint16_t pixel = start_pixel; pixel <= end_pixel; pixel++)
+//           for (uint16_t iter = 0; iter < pixels_in_segment; iter++) // keep internal segment index as iter
+//           {
+
+//             RgbcctColor colour = mPaletteI->GetColourFromPalette_Intermediate(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+            
+//             #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
+//             AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
+//             #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
+            
+//             // animation_colours[ledout.pattern[ledout.index]].DesiredColour = colour;
+
+//             pixel_index  = iter;
+
+//             if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+//               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+//             }
+//             SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_index, _segments[segment_index].colour_type, colour);
+
+//             #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+//             ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+//             #endif
+
+//             if(++desired_pixel>=mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr)){desired_pixel=0;}
+
+//           }
+
+//         }break;
+//       }//end switch
+// #endif // ENABLE_DEVFEATURE_PHASEOUT_TRANSITION_ORDER
+
+    // }break;
+    
+  }
+
+  #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  ALOG_DBM( PSTR(D_LOG_NEO "DONE UpdateDesiredColourFromPaletteSelected fMapIDs_Type "));
+  #endif  // LOG_LEVEL_DEBUG_MORE
+
+} //end function UpdateDesiredColourFromPaletteSelected();
+
+#else
 
 /**
  * This needs redoing, with a flag, to enable how I want the palette presented, and not how its encoded
@@ -2120,7 +2663,7 @@ ALOG_INF(PSTR("This should become an animation in its own right using mappings")
   #endif  // LOG_LEVEL_DEBUG_MORE
 
 } //end function UpdateDesiredColourFromPaletteSelected();
-
+#endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
 
 /**
  * Duplicate parameter, needs merging with above in long term if it is really the same
@@ -2365,7 +2908,7 @@ uint16_t mAnimatorLight::mode_palette()
     
     SetPixelColor(i, color_from_palette(colorIndex, false, true, 255));
   }
-  return FRAMETIME;
+  return FRAMETIME_MS;
 }
 
 
@@ -2406,7 +2949,8 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
 int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 {
 
-  if(f=='\0') return -2;
+  // if(f=='\0') return -2;
+  if(f==0) return -2;
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR)){    return EFFECTS_FUNCTION__SOLID_COLOUR__ID; }
   #endif 

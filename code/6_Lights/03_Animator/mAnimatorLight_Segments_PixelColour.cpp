@@ -56,11 +56,12 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
   // ALOG_INF( PSTR("SetPixelColor=%d"), indexPixel);
   // #endif 
 
-  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-  if(indexPixel<10){
-    AddLog(LOG_LEVEL_DEBUG, PSTR("RGB(%d)=%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B);
-  }
-  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
+  // #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
+  // if(indexPixel<10){
+    // if(pCONT_)
+    // AddLog(LOG_LEVEL_INFO, PSTR("Set virtual RGB(%d)=%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B);
+  // }
+  // #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
   uint16_t segment_length = _segments[segment_active_index].length();
   uint16_t segIdx = segment_active_index;
@@ -69,7 +70,7 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
 
   HARDWARE_ELEMENT_COLOUR_ORDER order = _segments[segment_active_index].hardware_element_colour_order;
   
-  ALOG_DBM( PSTR("RGB(%d)=%d,%d,%d\t %d,%d,%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B, order.r,order.g,order.b,order.w,order.c);
+  // ALOG_INF( PSTR("RGB(%d)=%d,%d,%d\t %d,%d,%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B, order.r,order.g,order.b,order.w,order.c);
 
   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_hardware[order.r] = color_internal.R;  }
   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_hardware[order.g] = color_internal.G;  }
@@ -164,7 +165,12 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
       // ALOG_INF( PSTR("indexSet=%d\t R%dG%dB%d"), indexSet, color_hardware.R, color_hardware.G, color_hardware.B);
   // #endif // ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
 
+        // Serial.println(indexSet);
       // busses.setPixelColor(indexSet, col);
+  //     if(indexPixel<10){
+  //   // if(pCONT_)
+  //   AddLog(LOG_LEVEL_INFO, PSTR("Set iRGB(%d|%d)=%d,%d,%d"),indexPixel,indexSet, color_hardware.R, color_hardware.G, color_hardware.B);
+  // }
       pCONT_iLight->SetPixelColourHardwareInterface(color_hardware, indexSet);
     }
     else
@@ -175,6 +181,8 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
 
 }
 
+
+// #ifndef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 {
   
@@ -188,42 +196,52 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
     ALOG_DBM( PSTR(D_LOG_NEO "stripbus == nullptr"));
     #endif
   }
-  if(indexPixel > STRIP_SIZE_MAX){  // Temp fix for WLED animations
-    ALOG_ERR( PSTR("indexPixel = %d, return 0"), indexPixel );
-    return RgbcctColor(0);
-  }
+  // if(indexPixel > STRIP_SIZE_MAX){  // Temp fix for WLED animations
+  //   ALOG_ERR( PSTR("indexPixel = %d, return 0"), indexPixel );
+  //   return RgbcctColor(0);
+  // }
 
-  uint16_t physical_indexPixel = 0;
+  uint16_t physical_indexPixel = 0;  
   physical_indexPixel = indexPixel;
 
   // get physical pixel
-  physical_indexPixel = physical_indexPixel * _segments[segment_active_index].groupLength();
+  physical_indexPixel = physical_indexPixel * _segments[segment_active_index].groupLength();  // should this be happening???
+
   if (IS_REVERSE) {
     if (IS_MIRROR) physical_indexPixel = (_segments[segment_active_index].length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
     else           physical_indexPixel = (_segments[segment_active_index].length_wled() - 1) - physical_indexPixel;
   }
+
   physical_indexPixel += _segments[segment_active_index].pixel_range.start;
 
+/**
+ * @brief If segment has any length, execute
+ * 
+ */
   if (_segments[segment_active_index].length_wled()) {
     /* offset/phase */
     physical_indexPixel += _segments[segment_active_index].offset;
-    if (physical_indexPixel >= _segments[segment_active_index].pixel_range.stop) physical_indexPixel -= _segments[segment_active_index].length_wled();
+
+    if(physical_indexPixel >= _segments[segment_active_index].pixel_range.stop)
+    {
+      physical_indexPixel -= _segments[segment_active_index].length_wled();
+    }
+
+
   }
 
-// if(physical_indexPixel>100)//STRIP_SIZE_MAX)
-// // {  
-//   AddLog(LOG_LEVEL_INFO, PSTR("HERE {%d|%d}"),  _segments[0].pixel_range.start, _segments[0].pixel_range.stop);
-  // AddLog(LOG_LEVEL_INFO, PSTR("STRIP_SIZE_MAX RGB{%d|%d}"),indexPixel,physical_indexPixel);
-  // if(physical_indexPixel>300)
-  // {
-// DEBUG_LINE_HERE_PAUSE;
-// Serial.printf("CRASH=%s\n\r", 0);
-//     float dmp = 2.0f/0.0f; // crash it!
-  // }
-// } 
   
 // if (i < customMappingSize) i = customMappingTable[i];
-  // if (i >= _length) return 0;
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// // if (i >= _length) return 0; //length here is not the same as the segment length?
+// // if (i >= _segments[segment_active_index].length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
+// #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// //stop overflow
+// if(physical_indexPixel >= STRIP_SIZE_MAX){ physical_indexPixel = 0; }
+// #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
   
   // return busses.getPixelColor(i);
   RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(physical_indexPixel);
@@ -237,13 +255,247 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
   if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.w] = color_hardware.WW; }
   if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.c] = color_hardware.WC; }
 
+
+
+  // Serial.printf("Bi=%d\to=%d\n\r",indexPixel, physical_indexPixel);
+
   // if(indexPixel<10){
-    // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
+    // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||v%d|p%d}=internal{%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel, color_internal.R, color_internal.G, color_internal.B);
   // }
 
   return color_internal;
 
 }
+// #endif // NOT ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+
+
+
+
+
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
+// {
+  
+// // DEBUG_LINE_HERE;
+
+//   /**
+//    * @brief Construct a new if object Assume in the future this must be checked elsewhere so to not slow it down on EACH pixel
+//    * */
+//   if(stripbus == nullptr){    
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     ALOG_DBM( PSTR(D_LOG_NEO "stripbus == nullptr"));
+//     #endif
+//   }
+
+//   if(indexPixel > STRIP_SIZE_MAX){  // Temp fix for WLED animations
+//     ALOG_ERR( PSTR("indexPixel = %d, return 0"), indexPixel );
+
+//     // indexPixel = indexPixel % STRIP_SIZE_MAX;// SEGMENT.virtualLength();
+
+//     return RgbcctColor(0);
+//   }
+
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+//   uint32_t physical_indexPixel = 0;
+//   physical_indexPixel = indexPixel;
+
+//   uint32_t groupLength = _segments[segment_active_index].groupLength();
+//   uint32_t wled_length32 = _segments[segment_active_index].length_wled();
+
+//   // get physical pixel
+//   physical_indexPixel = physical_indexPixel * groupLength;  // should this be happening???
+
+//   Serial.printf("Ai=%d\to=%d\n\r",indexPixel, physical_indexPixel);
+
+// #else
+// uint16_t physical_indexPixel = 0;  
+// physical_indexPixel = indexPixel;
+// #endif
+
+
+
+
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+//   if (IS_REVERSE) {
+//     if (IS_MIRROR) physical_indexPixel = (wled_length32 - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
+//     else           physical_indexPixel = (wled_length32 - 1) - physical_indexPixel;
+//   }
+
+// #else
+//   if (IS_REVERSE) {
+//     if (IS_MIRROR) physical_indexPixel = (_segments[segment_active_index].length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
+//     else           physical_indexPixel = (_segments[segment_active_index].length_wled() - 1) - physical_indexPixel;
+//   }
+// #endif
+
+
+
+
+//   physical_indexPixel += _segments[segment_active_index].pixel_range.start;
+
+// /**
+//  * @brief If segment has any length, execute
+//  * 
+//  */
+//   if (_segments[segment_active_index].length_wled()) {
+//     /* offset/phase */
+//     physical_indexPixel += _segments[segment_active_index].offset;
+
+//     if(physical_indexPixel >= _segments[segment_active_index].pixel_range.stop)
+//     {
+//       physical_indexPixel -= _segments[segment_active_index].length_wled();
+//     }
+
+
+//   }
+
+// // if(physical_indexPixel>100)//STRIP_SIZE_MAX)
+// // // {  
+// //   AddLog(LOG_LEVEL_INFO, PSTR("HERE {%d|%d}"),  _segments[0].pixel_range.start, _segments[0].pixel_range.stop);
+//   // AddLog(LOG_LEVEL_INFO, PSTR("STRIP_SIZE_MAX RGB{%d|%d}"),indexPixel,physical_indexPixel);
+//   // if(physical_indexPixel>300)
+//   // {
+// // DEBUG_LINE_HERE_PAUSE;
+// // Serial.printf("CRASH=%s\n\r", 0);
+// //     float dmp = 2.0f/0.0f; // crash it!
+//   // }
+// // } 
+  
+// // if (i < customMappingSize) i = customMappingTable[i];
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// // if (i >= _length) return 0; //length here is not the same as the segment length?
+// // if (i >= _segments[segment_active_index].length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
+// #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+// #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// //stop overflow
+// if(physical_indexPixel >= STRIP_SIZE_MAX){ physical_indexPixel = 0; }
+// #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+  
+//   // return busses.getPixelColor(i);
+//   RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(physical_indexPixel);
+//   RgbcctColor color_internal = color_hardware; // To catch white element if present
+
+//   HARDWARE_ELEMENT_COLOUR_ORDER order = _segments[segment_active_index].hardware_element_colour_order;
+
+//   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.r] = color_hardware.R;  }
+//   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.g] = color_hardware.G;  }
+//   if(order.b != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.b] = color_hardware.B;  }
+//   if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.w] = color_hardware.WW; }
+//   if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.c] = color_hardware.WC; }
+
+
+
+//   // Serial.printf("Bi=%d\to=%d\n\r",indexPixel, physical_indexPixel);
+
+//   // if(indexPixel<10){
+//     // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
+//   // }
+
+//   return color_internal;
+
+// }
+
+// #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+
+// #ifdef ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
+
+
+
+// RgbcctColor mAnimatorLight::GetPixelColor_FromBus(uint16_t indexPixel)
+// {
+  
+// // DEBUG_LINE_HERE;
+
+//   /**
+//    * @brief Construct a new if object Assume in the future this must be checked elsewhere so to not slow it down on EACH pixel
+//    * */
+//   if(stripbus == nullptr){    
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     ALOG_DBM( PSTR(D_LOG_NEO "stripbus == nullptr"));
+//     #endif
+//   }
+//   if(indexPixel > STRIP_SIZE_MAX){  // Temp fix for WLED animations
+//     ALOG_ERR( PSTR("indexPixel = %d, return 0"), indexPixel );
+//     return RgbcctColor(0);
+//   }
+
+//   uint16_t physical_indexPixel = 0;  
+//   physical_indexPixel = indexPixel;
+
+// //   if (IS_REVERSE) {
+// //     if (IS_MIRROR) physical_indexPixel = (_segments[segment_active_index].length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
+// //     else           physical_indexPixel = (_segments[segment_active_index].length_wled() - 1) - physical_indexPixel;
+// //   }
+
+// //   physical_indexPixel += _segments[segment_active_index].pixel_range.start;
+
+// // /**
+// //  * @brief If segment has any length, execute
+// //  * 
+// //  */
+// //   if (_segments[segment_active_index].length_wled()) {
+// //     /* offset/phase */
+// //     physical_indexPixel += _segments[segment_active_index].offset;
+
+// //     if(physical_indexPixel >= _segments[segment_active_index].pixel_range.stop)
+// //     {
+// //       physical_indexPixel -= _segments[segment_active_index].length_wled();
+// //     }
+
+
+// //   }
+
+//   // Serial.printf("Ai=%d\to=%d\n\r",indexPixel, physical_indexPixel);
+  
+// // if (i < customMappingSize) i = customMappingTable[i];
+
+// // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// // // if (i >= _length) return 0; //length here is not the same as the segment length?
+// // // if (i >= _segments[segment_active_index].length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
+// // #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+
+// // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+// // //stop overflow
+// // if(physical_indexPixel >= STRIP_SIZE_MAX){ physical_indexPixel = 0; }
+// // #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
+  
+//   // return busses.getPixelColor(i);
+//   RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(physical_indexPixel);
+//   RgbcctColor color_internal = color_hardware; // To catch white element if present
+
+//   HARDWARE_ELEMENT_COLOUR_ORDER order = _segments[segment_active_index].hardware_element_colour_order;
+
+//   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.r] = color_hardware.R;  }
+//   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.g] = color_hardware.G;  }
+//   if(order.b != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.b] = color_hardware.B;  }
+//   if(order.w != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.w] = color_hardware.WW; }
+//   if(order.c != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.c] = color_hardware.WC; }
+
+
+
+//   // Serial.printf("Bi=%d\to=%d\n\r",indexPixel, physical_indexPixel);
+
+//   // if(indexPixel<10){
+//     // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
+//   // }
+
+//   return color_internal;
+
+// }
+
+
+// #endif
+
+
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

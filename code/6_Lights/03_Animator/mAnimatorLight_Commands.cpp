@@ -94,13 +94,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     }
     _segments[0].pixel_range.start = 0;
 
-    // #ifdef ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    // _segments[0].pixel_range.stop  = STRIP_SIZE_MAX;
-    // #else
-    _segments[0].pixel_range.stop  = STRIP_SIZE_MAX-1;
-    // #endif
-  
-  
+    _segments[0].pixel_range.stop  = STRIP_SIZE_MAX;
+   
   }
 
   /**
@@ -169,10 +164,10 @@ ALOG_INF( PSTR("PixelRange") );
 
       // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
 
-      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
+      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX+1)
       {
         ALOG_ERR( PSTR("_segments[segment_index].pixel_range.stop exceeds max %d %d"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
-        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX-1;
+        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX+1;
       }
 
 
@@ -326,12 +321,12 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
       }
       // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
 
-      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
+      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX+1)
       {
     #ifdef ENABLE_LOG_LEVEL_ERROR
         AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max %d %d"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
     #endif //ef ENABLE_LOG_LEVEL_INFO
-        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX-1;
+        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX+1;
       }
 
 
@@ -408,7 +403,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
         // w,r,g,b packed 32 bit colour
         uint32_t colour32_bit = (((uint32_t)array[3] << 24) | ((uint32_t)array[0] << 16) | ((uint32_t)array[1] << 8) | (uint32_t)array[2]);
 
-        ALOG_INF(PSTR("[%d] colour32bit: (%d,%d,%d,%d) %d"), segment_active_index, array[0], array[1], array[2], array[3], colour32_bit);
+        ALOG_INF(PSTR("[%d] colour32bit: (%d,%d,%d,%d) %d"), segment_index, array[0], array[1], array[2], array[3], colour32_bit);
 
         _segments[segment_index].colors[colour_id] = colour32_bit;      
         data_buffer.isserviced++;
@@ -1143,18 +1138,16 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
   }
 
-  if(jtok = obj["Presets"].getObject()["SetPreset_OutsideFrontTree"]){  
+  if(jtok = obj["Presets"].getObject()["SetPreset_ManualUserCustom"]){  
     // void mAnimatorLight::
     // CommandSet_Mixer_RunningID(jtok.getInt());
     uint8_t val = jtok.getInt();
     mixer.running_id = val;
-    LoadPreset_OutsideFrontTree_ByID(val);
+    LoadPreset_ManualUserCustom_ByID(val);
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
   }
-
-
 
   
 

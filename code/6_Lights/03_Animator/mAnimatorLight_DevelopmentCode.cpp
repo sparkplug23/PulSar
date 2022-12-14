@@ -344,8 +344,8 @@ void mAnimatorLight::Test_Config()
   _segments[seg_idx].palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
   _segments[seg_idx].effect_id = EFFECTS_FUNCTION__WLED_RAIN__ID;
   _segments[seg_idx].intensity_value = 100;
-  _segments[seg_idx].transition.time_ms = FRAMETIME;
-  _segments[seg_idx].transition.rate_ms = FRAMETIME;
+  _segments[seg_idx].transition.time_ms = FRAMETIME_MS;
+  _segments[seg_idx].transition.rate_ms = FRAMETIME_MS;
   _segments[seg_idx].set_speed(255);
   _segments[seg_idx].colors[0] = RED;
   _segments[seg_idx].colors[1] = GREEN;
@@ -365,8 +365,8 @@ void mAnimatorLight::Test_Config()
   // _segments[seg_idx].palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
   // _segments[seg_idx].effect_id = EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID;
   // _segments[seg_idx].intensity_value = 255;
-  // _segments[seg_idx].transition.time_ms = FRAMETIME;
-  // _segments[seg_idx].transition.rate_ms = FRAMETIME;
+  // _segments[seg_idx].transition.time_ms = FRAMETIME_MS;
+  // _segments[seg_idx].transition.rate_ms = FRAMETIME_MS;
   // _segments[seg_idx].set_speed(255);
   // _segments[seg_idx].colors[0] = RED;
   // _segments[seg_idx].colors[1] = GREEN;
@@ -382,8 +382,8 @@ void mAnimatorLight::Test_Config()
   // _segments[seg_idx].palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
   // _segments[seg_idx].effect_id = EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID;
   // _segments[seg_idx].intensity_value = 255;
-  // _segments[seg_idx].transition.time_ms = FRAMETIME;
-  // _segments[seg_idx].transition.rate_ms = FRAMETIME;
+  // _segments[seg_idx].transition.time_ms = FRAMETIME_MS;
+  // _segments[seg_idx].transition.rate_ms = FRAMETIME_MS;
   // _segments[seg_idx].set_speed(255);
   // _segments[seg_idx].colors[0] = RED;
   // _segments[seg_idx].colors[1] = GREEN;
@@ -399,8 +399,8 @@ void mAnimatorLight::Test_Config()
   // _segments[seg_idx].palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
   // _segments[seg_idx].effect_id = EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID;
   // _segments[seg_idx].intensity_value = 255;
-  // _segments[seg_idx].transition.time_ms = FRAMETIME;
-  // _segments[seg_idx].transition.rate_ms = FRAMETIME;
+  // _segments[seg_idx].transition.time_ms = FRAMETIME_MS;
+  // _segments[seg_idx].transition.rate_ms = FRAMETIME_MS;
   // _segments[seg_idx].set_speed(255);
   // _segments[seg_idx].colors[0] = RED;
   // _segments[seg_idx].colors[1] = GREEN;
@@ -416,8 +416,8 @@ void mAnimatorLight::Test_Config()
   // _segments[seg_idx].palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
   // _segments[seg_idx].effect_id = EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID;
   // _segments[seg_idx].intensity_value = 255;
-  // _segments[seg_idx].transition.time_ms = FRAMETIME;
-  // _segments[seg_idx].transition.rate_ms = FRAMETIME;
+  // _segments[seg_idx].transition.time_ms = FRAMETIME_MS;
+  // _segments[seg_idx].transition.rate_ms = FRAMETIME_MS;
   // _segments[seg_idx].set_speed(255);
   // _segments[seg_idx].colors[0] = RED;
   // _segments[seg_idx].colors[1] = GREEN;
@@ -434,8 +434,8 @@ void mAnimatorLight::Test_Config()
   // _segments[seg_idx].palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
   // _segments[seg_idx].effect_id = EFFECTS_FUNCTION__FIREPLACE_1D_01__ID;
   // _segments[seg_idx].intensity_value = 255;
-  // _segments[seg_idx].transition.time_ms = FRAMETIME;
-  // _segments[seg_idx].transition.rate_ms = FRAMETIME;
+  // _segments[seg_idx].transition.time_ms = FRAMETIME_MS;
+  // _segments[seg_idx].transition.rate_ms = FRAMETIME_MS;
   // _segments[seg_idx].set_speed(255);
   // _segments[seg_idx].colors[0] = RED;
   // _segments[seg_idx].colors[1] = GREEN;

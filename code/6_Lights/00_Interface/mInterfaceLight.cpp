@@ -419,13 +419,13 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 //       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
 //       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
 // #else
 
-//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 //       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
 //       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
@@ -574,12 +574,12 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
 // Serial.println("rgbcct0");
 // for(int i=0;i<5;i++)
 // {
-//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].colour_map_id[i]);
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].data[i]);
 // }
 // Serial.println("rgbcct1");
 // for(int i=0;i<5;i++)
 // {
-//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].colour_map_id[i]);
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].data[i]);
 // }
 // Serial.println("every second");
 

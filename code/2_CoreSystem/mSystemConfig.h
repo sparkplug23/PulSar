@@ -34,11 +34,13 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_CORE     28
 
 /**@@@@@ Module changes
+ * #33 : Fixed incorrect use of virtual/segment length, grouping of up to 200 has been tested for some effects
+ * #32 : Moved lighting branch back to desktop 
  * #31 : Adding a palette step that splits progmem loads to only when a palette is loaded 
  * #30 : Added ultrasonic to unified sensor
  * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
  */
-#define FIRMWARE_VERSION_MODULE   29
+#define FIRMWARE_VERSION_MODULE   33
 
 
 #define FIRMWARE_BRANCH_NAME_STRING "surface_laptop_lighting"

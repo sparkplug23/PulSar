@@ -71,7 +71,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
 {
-  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length();
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 
   if (!SEGRUN.allocateData(dataSize)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
@@ -84,7 +84,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   
   RgbcctColor colour = RgbcctColor(0);
   for(uint16_t pixel = 0; 
-                pixel < SEGLEN; 
+                pixel < SEGMENT.virtualLength(); 
                 pixel++
   ){
 
@@ -124,6 +124,104 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+
+#ifdef ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
+void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
+{
+
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength(); // Only need the virtual size saved
+  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!SEGENV.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+    return;
+  }
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  
+  /**
+   * @brief Intensity describes the amount of pixels to update
+   *  Intensity 0-255 ==> LED length 1 to length (since we cant have zero)
+   **/
+  uint16_t pixels_to_update = mapvalue(
+                                        SEGMENT.intensity(), 
+                                        0,255, 
+                                        0,SEGMENT.virtualLength() // scaled over the virtual length
+                                      );
+
+  uint16_t pixels_in_map = mPaletteI->GetPixelsInMap(SEGMENT.palette.id);
+
+  // ALOG_INF(PSTR("pixels_in_map=%d"),pixels_in_map);
+
+  uint16_t pixel_index = 0;
+  RgbTypeColor colour = RgbcctColor(0);
+
+  /**
+   * @brief On first run, all leds need set once
+   * 
+   */
+  if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
+    pixels_to_update = SEGMENT.virtualLength(); // only the virtual length
+  }
+
+
+  for(uint16_t iter = 0; 
+                iter < pixels_to_update; 
+                iter++
+  ){
+    /**
+     * @brief 
+     * min: lower bound of the random value, inclusive (optional).
+     * max: upper bound of the random value, exclusive.
+    **/
+    pixel_index = random(0, SEGMENT.virtualLength()+1); // Indexing must be relative to buffer, virtual length only
+
+    // On first run, I need a new way to set them all.
+    if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
+      pixel_index = iter;
+    }
+    
+    desired_pixel = random(0, pixels_in_map);
+  
+    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+
+    // #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
+    // AddLog(LOG_LEVEL_TEST, 
+    //   PSTR("New palettePixel=%d, pixel_index=v%d SL%d | SVL%d | DL%d, colour=%d,%d,%dT%d"), 
+    //     desired_pixel, pixel_index, 
+    //     SEGMENT.length(), SEGMENT.virtualLength(), SEGENV.DataLength(),
+    //     colour.R, colour.G, colour.B,
+    //     SEGMENT.colour_type
+    //   ); 
+    // #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
+
+    if(SEGMENT.flags.brightness_applied_during_colour_generation){
+      // 6us
+      colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    }
+
+    // 2us
+    SetTransitionColourBuffer_DesiredColour(SEGENV.Data(), SEGENV.DataLength(), pixel_index, SEGMENT.colour_type, colour);
+
+  }
+
+  // Get starting positions already on show
+  // I need to get the ENTIRE bus data
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+
+}
+#endif // IS ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
+#ifndef ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
 void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 {
 
@@ -209,6 +307,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 
 
 }
+#endif // NOT ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -299,6 +398,63 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
     }
     break;
   }
+
+  // SetAnimatorMode(EM_ANIMATOR_MODE__DIRECT);
+  SEGENV.anim_function_callback = nullptr; // When no animation callback is needed
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Sequential
+ * @note : Should have option to "rotate existing colours" or "draw static palette, then begin to rotate it"
+ * 
+ * @description : Draws "Static Palette" (ie wrap around palette) then moves palette along either direction using rate_ms
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+
+I should change "rate_ms" use to be GetFrameRate and GetTransitionSpeed, then have a way to switch between (advanced/simple) to select whether to manually configure them, or rely on speed/intensity only
+
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
+{
+
+  // ALOG_INF(PSTR("SubTask_Segment_Animation__Rotating_Previous_Animation"));
+
+  uint16_t* movement_direction_p = &SEGENV.aux0;  
+
+  // if(*movement_direction_p==1)
+  // { // direction==1 move right ie AWAY from start
+  //   /**
+  //    * @brief Save first, move pixels towards last, assert last
+  //    **/
+  //   RgbcctColor colourlast = GetPixelColor(SEG_STOP_INDEX); 
+  //   for(int32_t p = SEG_STOP_INDEX-1; p >= 0; p--){ //must be signed
+  //     SetPixelColor(p, GetPixelColor(p-1));
+  //   }
+  //   SetPixelColor(0, colourlast);
+  // }
+  // else
+  // {
+    /**
+     * @brief Save last, move pixels back to first, assert first
+     **/
+    RgbcctColor colourfirst = GetPixelColor(0); 
+    for(uint16_t p = 0; p < SEGLEN-1; p++) //move them all ONCE towards first pixel
+    { 
+      SetPixelColor(p, GetPixelColor(p+1));
+    }
+    SetPixelColor(SEGLEN-1, colourfirst); // Insert saved first pixel into last pixel as "wrap around"
+  // }
 
   // SetAnimatorMode(EM_ANIMATOR_MODE__DIRECT);
   SEGENV.anim_function_callback = nullptr; // When no animation callback is needed
@@ -596,6 +752,118 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
+
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : NOTDONE Blend Palette Between Another Palette
+ * @note : Using a static palette (in order), the effect will change from static_palette (palette.id) to a different palette (palette_id saved as aux0)
+ *         The "0%", ie least saturated, will be set by the intensity value scaled from 255 to 100 range
+ * 
+ * @param  "Intensity" :: 0-255 value is mapped into 0-100 and controls the amount to blend into the second one. ie 0%=palette_id and 100%=aux0_palette
+ * @param  "Time"      :: If unset (ie set to 0), then the speed will assume the DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD as 10 seconds
+ *         "Speed"     :: If the time is set to zero, then the Speed will scale from sweep of saturation time between DEFAULT_MINIMUM_ANIMATION_SPEED_PERIOD (1 second) and DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD (10 second)
+ *          
+ * This effect later needs intensity to define the brightness difference between the base palette and the secondary "flash" palette
+ * The speed must also be made to work like it does for WLED, instead of setting a manual ratems
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
+{
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
+
+  if (!SEGRUN.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+    return;
+  }
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  
+  /**
+   * @brief Step 1: Draw palette 1
+   * 
+   */
+  RgbcctColor colour = RgbcctColor(0);
+  for(uint16_t pixel = 0; 
+                pixel < SEGMENT.virtualLength(); 
+                pixel++
+  ){
+
+    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+    
+    if(SEGMENT.flags.brightness_applied_during_colour_generation){
+      colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    }
+
+    SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), pixel, SEGMENT.colour_type, colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    #endif
+
+  }
+
+  /**
+   * @brief Step 2: Draw over randomly with palette 2
+   * Intensity will pick how many to randomly pick
+   * 
+   * For xmas2022, forced as white
+   */
+  colour = RgbcctColor(255,255,255);
+  uint16_t random_pixel = 0;
+  
+  uint16_t pixels_to_update = mapvalue(
+                                      SEGMENT.intensity(), 
+                                      0,255, 
+                                      0,SEGMENT.length()
+                                    );
+
+  for(uint16_t pixel = 0; 
+                pixel < pixels_to_update; 
+                pixel++
+  ){
+
+    // colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+    
+    // if(SEGMENT.flags.brightness_applied_during_colour_generation){
+    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    // }
+
+    random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
+
+    SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), random_pixel, SEGMENT.colour_type, colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, random_pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    #endif
+
+  }
+
+
+
+  /**
+   * @brief Update outputs
+   * 
+   */
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
 
@@ -2586,7 +2854,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //     Draw_DesiredColour_LinearGradientMirrored2(
 //       RgbcctColor(200,100,0,0,0), //center
 //       RgbcctColor(50, 44, 3,     0,0), //circum
-//       effect_config2->index_circle_center, //D_RGB255_ORANGE_DEEP
+//       effect_config2->index_circle_center, //D_RGB_ORANGE_WARM_1
 //       50,
 //       5, 
 //       true
@@ -2598,7 +2866,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //   //   Remove_DesiredColour_LinearGradientMirrored(
 //   //     RgbcctColor(0,0,  50,       0,0), //center
 //   //     RgbcctColor(0, 0, 10,     0,0), //circum
-//   //     effect_config2->index_circle_center, //D_RGB255_ORANGE_DEEP
+//   //     effect_config2->index_circle_center, //D_RGB_ORANGE_WARM_1
 //   //     50,
 //   //     5, 
 //   //     true
@@ -3301,7 +3569,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //   //   Draw_DesiredColour_LinearGradientMirrored2(
 //   //     RgbcctColor(200,100,0,0,0), //center
 //   //     RgbcctColor(50, 44, 3,     0,0), //circum
-//   //     effect_config2->index_circle_center, //D_RGB255_ORANGE_DEEP
+//   //     effect_config2->index_circle_center, //D_RGB_ORANGE_WARM_1
 //   //     50,
 //   //     5, 
 //   //     true
@@ -3313,7 +3581,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 //   //   Remove_DesiredColour_LinearGradientMirrored(
 //   //     RgbcctColor(0,0,  50,       0,0), //center
 //   //     RgbcctColor(0, 0, 10,     0,0), //circum
-//   //     effect_config2->index_circle_center, //D_RGB255_ORANGE_DEEP
+//   //     effect_config2->index_circle_center, //D_RGB_ORANGE_WARM_1
 //   //     50,
 //   //     5, 
 //   //     true
@@ -5004,7 +5272,7 @@ typedef struct Spark {
 
 //   fill_ranged(SEGCOLOR(0));
 //   // return 
-//   (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500; //update faster if in transition
+//   (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME_MS : 500; //update faster if in transition
 
   
 //   SEGENV.animation_has_anim_callback = false; // When no animation callback is needed
@@ -5061,7 +5329,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -5377,7 +5645,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) + 1);
   uint16_t a = counter * segment_length  >> 16;
 
-  bool chase_random = (SEGMENT.mode_id == EFFECTS_FUNCTION_WLED_CHASE_RANDOM_ID);
+  bool chase_random = (SEGMENT.mode_id == EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID);
   if (chase_random) {
     if (a < SEGENV.step) //we hit the start again, choose new color for Chase random
     {
@@ -5436,7 +5704,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint
       SetPixelColor(i, color3);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -5538,7 +5806,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash()
   } else {
     SEGENV.step = (SEGENV.step + 1) % segment_length;
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -5668,7 +5936,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t colo
       SetPixelColor(i, color2);
     }
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -5736,7 +6004,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t co
     SetPixelColor(segment_length - i -1, color);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -5775,7 +6043,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
 
   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed()));
   uint32_t it = millis() / cycleTime;
-  if (SEGENV.step == it){return;}// return FRAMETIME;
+  if (SEGENV.step == it){return;}// return FRAMETIME_MS;
 
   for(uint16_t i = segment_length -1; i > 0; i--) {
     SetPixelColor(i, GetPixelColor(i-1));
@@ -5788,7 +6056,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
   SetPixelColor(0, r, g, b);
 
   SEGENV.step = it;
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -5843,7 +6111,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Breath()
     SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -5877,7 +6145,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade()
     SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -6201,11 +6469,126 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst()
     }
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
 
+/**
+ * @brief To introduce much slower fade out, have it burst and fade out very slowly
+ * 
+ */
+void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst_Glows()
+{
+ 
+  uint8_t numStars = 1 + (SEGLEN >> 3);
+  if (numStars > 15) numStars = 15;
+  uint16_t dataSize = sizeof(star) * numStars;
+
+  if (!SEGENV.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = DEFAULT_EFFECTS_FUNCTION;
+    return;
+  }
+  
+  uint32_t it = millis();
+  
+  star* stars = reinterpret_cast<star*>(SEGENV.data);
+  
+  float          maxSpeed                = 375.0f;  // Max velocity
+  float          particleIgnition        = 250.0f;  // How long to "flash"
+  float          particleFadeTime        = 1500.0f; // Fade out time
+     
+  for (int j = 0; j < numStars; j++)
+  {
+    // speed() to adjust chance of a burst, max is nearly always.
+    if (random8((144-(SEGMENT.speed() >> 1))) == 0 && stars[j].birth == 0)
+    {
+      // Pick a random color and location.  
+      uint16_t startPos = random16(SEGLEN-1);
+      float multiplier = (float)(random8())/255.0 * 1.0;
+
+      stars[j].color = col_to_crgb(color_wheel(random8()));
+      stars[j].pos = startPos; 
+      stars[j].vel = maxSpeed * (float)(random8())/255.0 * multiplier;
+      stars[j].birth = it;
+      stars[j].last = it;
+      // more fragments means larger burst effect
+      int num = random8(3,6 + (SEGMENT.intensity() >> 5));
+
+      for (int i=0; i < STARBURST_MAX_FRAG; i++) {
+        if (i < num) stars[j].fragment[i] = startPos;
+        else stars[j].fragment[i] = -1;
+      }
+    }
+  }
+  
+  fill(SEGCOLOR(1), SET_BRIGHTNESS);
+  
+  for (int j=0; j<numStars; j++)
+  {
+    if (stars[j].birth != 0) {
+      float dt = (it-stars[j].last)/1000.0;
+
+      for (int i=0; i < STARBURST_MAX_FRAG; i++) {
+        int var = i >> 1;
+        
+        if (stars[j].fragment[i] > 0) {
+          //all fragments travel right, will be mirrored on other side
+          stars[j].fragment[i] += stars[j].vel * dt * (float)var/3.0;
+        }
+      }
+      stars[j].last = it;
+      stars[j].vel -= 3*stars[j].vel*dt;
+    }
+  
+    CRGB c = stars[j].color;
+
+    // If the star is brand new, it flashes white briefly.  
+    // Otherwise it just fades over time.
+    float fade = 0.0f;
+    float age = it-stars[j].birth;
+
+    if (age < particleIgnition) {
+      c = col_to_crgb(color_blend(WHITE, crgb_to_col(c), 254.5f*((age / particleIgnition))));
+    } else {
+      // Figure out how much to fade and shrink the star based on 
+      // its age relative to its lifetime
+      if (age > particleIgnition + particleFadeTime) {
+        fade = 1.0f;                  // Black hole, all faded out
+        stars[j].birth = 0;
+        c = col_to_crgb(SEGCOLOR(1));
+      } else {
+        age -= particleIgnition;
+        fade = (age / particleFadeTime);  // Fading star
+        byte f = 254.5f*fade;
+        c = col_to_crgb(color_blend(crgb_to_col(c), SEGCOLOR(1), f));
+      }
+    }
+    
+    float particleSize = (1.0 - fade) * 2;
+
+    for (uint8_t index=0; index < STARBURST_MAX_FRAG*2; index++) {
+      bool mirrored = index & 0x1;
+      uint8_t i = index >> 1;
+      if (stars[j].fragment[i] > 0) {
+        float loc = stars[j].fragment[i];
+        if (mirrored) loc -= (loc-stars[j].pos)*2;
+        int start = loc - particleSize;
+        int end = loc + particleSize;
+        if (start < 0) start = 0;
+        if (start == end) end++;
+        if (end > SEGLEN) end = SEGLEN;    
+        for (int p = start; p < end; p++) {
+          SetPixelColor(p, c.r, c.g, c.b, SET_BRIGHTNESS);
+        }
+      }
+    }
+  }
+
+  // SEGMENT.transition.rate_ms = FRAMETIME_MS;
+
+}
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6332,11 +6715,150 @@ void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks()
 
   SEGMENT.setOption(SEG_OPTION_REVERSED, actuallyReverse);
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Exploding fireworks effect
+ * @note : Converted from WLED Effects
+ *
+ * Exploding fireworks effect
+ * adapted from: http://www.anirama.com/1000leds/1d-fireworks/
+ * @param aux0 Current center index of firework (which blurs outwards)
+ * @param aux1 Previous location of center index of firework
+ * @param aux2 Iter to wrap palette
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch()
+{
+
+  //allocate segment data
+  uint16_t numSparks = 2 + (SEGLEN >> 1); 
+  if (numSparks > 80) numSparks = 80;
+
+  uint16_t dataSize = sizeof(spark) * numSparks;
+
+  if (!SEGENV.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = DEFAULT_EFFECTS_FUNCTION;
+    return;
+  }
+
+  fill(BLACK, SET_BRIGHTNESS);
+  
+  bool actuallyReverse = SEGMENT.getOption(SEG_OPTION_REVERSED);
+  //have fireworks start in either direction based on intensity()
+  SEGMENT.setOption(SEG_OPTION_REVERSED, SEGENV.step);
+  
+  Spark* sparks = reinterpret_cast<Spark*>(SEGENV.data);
+  Spark* flare = sparks; //first spark is flare data
+
+  float gravity = -0.0004 - (SEGMENT.speed()/800000.0); // m/s/s
+  gravity *= SEGLEN;
+  
+  if (SEGENV.aux0 < 2) { //FLARE
+
+    // if (SEGENV.aux0 == 0) { //init flare
+      flare->pos = 0;
+      uint16_t peakHeight = 75 + random8(180); //0-255
+      peakHeight = (peakHeight * (SEGLEN -1)) >> 8;
+      flare->vel = sqrt(-2.0 * gravity * peakHeight);
+      flare->col = 255; //brightness
+      SEGENV.aux0 = 1; 
+    // }
+    
+    // // launch 
+    // if (flare->vel > 12 * gravity) {
+    //   // flare
+    //   SetPixelColor(int(flare->pos),flare->col,flare->col,flare->col, SET_BRIGHTNESS);
+  
+      flare->pos += flare->vel;
+      flare->pos = constrain(flare->pos, 0, SEGLEN-1);
+      flare->vel += gravity;
+      flare->col -= 2;
+
+      /**
+       * @brief Starts in the middle
+       **/
+      // flare->pos = SEGLEN/2;
+      /**
+       * @brief Starts randomly
+       **/
+      flare->pos = random(0,SEGLEN);
+
+    // } else {
+      SEGENV.aux0 = 2;  // ready to explode
+    // }
+
+  } else if (SEGENV.aux0 < 4) {
+    /*
+     * Explode!
+     * 
+     * Explosion happens where the flare ended.
+     * Size is proportional to the height.
+     */
+    int nSparks = flare->pos;
+    nSparks = constrain(nSparks, 0, numSparks);
+    static float dying_gravity;
+  
+    // initialize sparks
+    if (SEGENV.aux0 == 2) {
+      for (int i = 1; i < nSparks; i++) { 
+        sparks[i].pos = flare->pos; 
+        sparks[i].vel = (float(random16(0, 20000)) / 10000.0) - 0.9; // from -0.9 to 1.1
+        sparks[i].col = 345;//abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright 
+        //sparks[i].col = constrain(sparks[i].col, 0, 345); 
+        sparks[i].colIndex = random8();
+        sparks[i].vel *= flare->pos/SEGLEN; // proportional to height 
+        sparks[i].vel *= -gravity *50;
+      } 
+      //sparks[1].col = 345; // this will be our known spark 
+      dying_gravity = gravity/2; 
+      SEGENV.aux0 = 3;
+    }
+  
+    if (sparks[1].col > 4) {//&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
+      for (int i = 1; i < nSparks; i++) { 
+        sparks[i].pos += sparks[i].vel; 
+        sparks[i].vel += dying_gravity; 
+        if (sparks[i].col > 3) sparks[i].col -= 4; 
+
+        if (sparks[i].pos > 0 && sparks[i].pos < SEGLEN) {
+          uint16_t prog = sparks[i].col;
+          uint32_t spColor = (SEGMENT.palette.id) ? color_wheel(sparks[i].colIndex) : SEGCOLOR(0);
+          // uint32_t spColor = RgbcctColor::GetU32Colour(RgbColor(0,255,10));
+          CRGB c = HTMLColorCode::Black; //HeatColor(sparks[i].col);
+          if (prog > 300) { //fade from white to spark color
+            c = col_to_crgb(color_blend(spColor, WHITE, (prog - 300)*5));
+          } else if (prog > 45) { //fade from spark color to black
+            c = col_to_crgb(color_blend(BLACK, spColor, prog - 45));
+            uint8_t cooling = (300 - prog) >> 5;
+            c.g = qsub8(c.g, cooling);
+            c.b = qsub8(c.b, cooling * 2);
+          }
+          SetPixelColor(int(sparks[i].pos), c.red, c.green, c.blue, SET_BRIGHTNESS);
+        }
+      }
+      dying_gravity *= .99; // as sparks burn out they fall slower
+    } else {
+      SEGENV.aux0 = 6 + random8(10); //wait for this many frames
+    }
+  } else {
+    SEGENV.aux0--;
+    if (SEGENV.aux0 < 4) {
+      SEGENV.aux0 = 0; //back to flare
+      SEGENV.step = (SEGMENT.intensity() > random8()); //decide firing side
+    }
+  }
+
+  SEGMENT.setOption(SEG_OPTION_REVERSED, actuallyReverse);
+  
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
+
+}
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -6355,7 +6877,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks()
 void mAnimatorLight::SubTask_Segment_Animation__Rain()
 {
   
-  SEGENV.step += FRAMETIME;
+  SEGENV.step += FRAMETIME_MS;
   if (SEGENV.step > SPEED_FORMULA_L) 
   {
     SEGENV.step = 0;
@@ -6427,7 +6949,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle() // Firework_Rain
   SetPixelColor(SEGENV.aux0, SEGCOLOR(0));
   
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -6551,7 +7073,7 @@ random16_set_seed(535);                                 // The randomizer needs 
     SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i*20, false, PALETTE_SOLID_WRAP, 0), pixBri));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -6604,7 +7126,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Random_Colour()
 
   fill(color_blend(color_wheel(SEGENV.aux1), color_wheel(SEGENV.aux0), fade), true);
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -6630,7 +7152,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Dynamic()
  * Lights every LED in a random color. Changes all LED at the same time
 // * to new random colors.
  */
-  if (!SEGENV.allocateData(dataSize)){    
+  if (!SEGENV.allocateData(SEGLEN)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
     SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
@@ -6653,7 +7175,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Dynamic()
   for (uint16_t i = 0; i < segment_length; i++) {
     SetPixelColor(i, color_wheel(SEGENV.data[i]));
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -6688,7 +7210,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rainbow_Cycle()
     SetPixelColor(i, color_wheel(index));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -6730,7 +7252,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(bool saw)
     s = sin8(a);
     SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -6806,7 +7328,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle()
     SetPixelColor(j, color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -6864,7 +7386,7 @@ uint8_t _brightness = 255;
     SEGENV.call = 0;
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7028,7 +7550,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourFul()
     }
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7075,7 +7597,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Traffic_Light()
     SEGENV.step = millis();
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7128,7 +7650,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(uint32_t color1, ui
     SEGENV.aux0 = (SEGENV.aux0 +1) % (pxw*2);
     SEGENV.step = it;
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 /*
@@ -7185,7 +7707,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Running_Random()
 
   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed()));
   uint32_t it = millis() / cycleTime;
-  if (SEGENV.aux1 == it){return;}// return FRAMETIME;
+  if (SEGENV.aux1 == it){return;}// return FRAMETIME_MS;
 
   for(uint16_t i=segment_length-1; i > 0; i--) {
     SetPixelColor( i, GetPixelColor( i - 1));
@@ -7203,7 +7725,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Running_Random()
   }
 
   SEGENV.aux1 = it;
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 #endif // ENABLE_EXTRA_WLED_EFFECTS
@@ -7255,7 +7777,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Gradient(bool loading)
     SetPixelColor(i, color_blend(SEGCOLOR(0), color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), val));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7332,7 +7854,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Police(uint32_t color1, uin
     }
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7427,7 +7949,7 @@ void mAnimatorLight::SubTask_Segment_Animation__TriColour()
     }
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7489,7 +8011,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade_TriColour()
     SetPixelColor(i, color);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7520,7 +8042,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Multi_Comet()
   uint32_t cycleTime = 10 + (uint32_t)(255 - SEGMENT.speed());
   uint32_t it = millis() / cycleTime;
   if (SEGENV.step == it){
-    SEGMENT.transition.rate_ms = FRAMETIME;
+    SEGMENT.transition.rate_ms = FRAMETIME_MS;
     return;
   }
   if (!SEGENV.allocateData(sizeof(uint16_t) * 8)){return;}// return mode_static(); //allocation failed
@@ -7548,7 +8070,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Multi_Comet()
   }
 
   SEGENV.step = it;
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7648,7 +8170,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Oscillate()
  
   SEGENV.step = it;
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7712,7 +8234,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Pride_2015()
   }
   SEGENV.step = sPseudotime;
   SEGENV.aux0 = sHue16;
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7746,7 +8268,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Juggle()
     SetPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
     dothue += 32;
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7786,7 +8308,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Palette()
     
     SetPixelColor(i, color_from_palette(colorIndex, false, true, 255));
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7886,7 +8408,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourWaves()
   SEGENV.step = sPseudotime;
   SEGENV.aux0 = sHue16;
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7918,7 +8440,7 @@ void mAnimatorLight::SubTask_Segment_Animation__BPM()
     fastled_col = ColorFromPalette(mPaletteI->currentPalette, stp + (i * 2), beat - stp + (i * 10));
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -7999,7 +8521,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Colour()
       }
     }
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -8036,7 +8558,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Lake()
     fastled_col = ColorFromPalette(mPaletteI->currentPalette, map(index,0,255,0,240), lum, LINEARBLEND);
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -8062,7 +8584,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Meteor()
   uint16_t stop_pixel    = SEGMENT.pixel_range.stop;
   _virtualSegmentLength = segment_length;
 
-  if (!SEGENV.allocateData(dataSize)){    
+  if (!SEGENV.allocateData(SEGLEN)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
     SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return;
@@ -8095,7 +8617,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Meteor()
     SetPixelColor(index, color_from_palette(trail[index], false, true, 255));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -8152,7 +8674,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
 
   SEGENV.step += SEGMENT.speed() +1;
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -8324,7 +8846,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat)
     }
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Fox()
@@ -8382,7 +8904,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
     }
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -8449,7 +8971,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Glitter()
     SetPixelColor(random16(segment_length), ULTRAWHITE);
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -8530,7 +9052,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Popcorn()
     }
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9037,65 +9559,6 @@ void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette()
 
 
 
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Fireworks Starburst
- * @note : Converted from WLED Effects
- * 
-// /*
-// / Fireworks in starburst effect
-// / based on the video: https://www.reddit.com/r/arduino/comments/c3sd46/i_made_this_fireworks_effect_for_my_led_strips/
-// / Speed sets frequency of new starbursts, intensity() is the intensity() of the burst
-// *
- @param aux0 Current center index of firework (which blurs outwards)
- @param aux1 Previous location of center index of firework
- @param aux2 Iter to wrap palette
-
-This appear functionally identical to candle single, and I will likely delete it
-
-
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-
-void mAnimatorLight::SubTask_Segment_Animation__Fire_Flicker()
-{
-  uint8_t segment_index  = segment_active_index;
-  uint16_t segment_length = SEGMENT.length();
-  uint16_t start_pixel   = SEGMENT.pixel_range.start;
-  uint16_t stop_pixel    = SEGMENT.pixel_range.stop;
-  _virtualSegmentLength = segment_length;
-
-
-// /*
-//  * Fire flicker function
-//  */
-// void mAnimatorLight::mode_fire_flicker(void) {
-
-  uint32_t cycleTime = 40 + (255 - SEGMENT.speed());
-  uint32_t it = millis() / cycleTime;
-  if (SEGENV.step == it) return;// FRAMETIME;
-  
-  byte w = (SEGCOLOR(0) >> 24) & 0xFF;
-  byte r = (SEGCOLOR(0) >> 16) & 0xFF;
-  byte g = (SEGCOLOR(0) >>  8) & 0xFF;
-  byte b = (SEGCOLOR(0)        & 0xFF);
-  byte lum = (SEGMENT.palette.id == 0) ? MAX(w, MAX(r, MAX(g, b))) : 255;
-  lum /= (((256-SEGMENT.intensity())/16)+1);
-  for(uint16_t i = 0; i < segment_length; i++) {
-    byte flicker = random8(lum);
-    if (SEGMENT.palette.id == 0) {
-      SetPixelColor(i, MAX(r - flicker, 0), MAX(g - flicker, 0), MAX(b - flicker, 0), MAX(w - flicker, 0));
-    } else {
-      SetPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
-    }
-  }
-
-  SEGENV.step = it;
-  SEGMENT.transition.rate_ms = FRAMETIME;
-
-}
-
 // #ifdef ENABLE_ADVANCED_EFFECTS
 
 
@@ -9187,7 +9650,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Percent()
     if (SEGENV.step < active_leds) SEGENV.step = active_leds;
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9308,7 +9771,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Pacifica()
     SetPixelColor(i, c.red, c.green, c.blue);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9363,7 +9826,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Solid_Glitter()
   {
     SetPixelColor(random16(segment_length), ULTRAWHITE);
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -9432,7 +9895,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sunrise()
     SetPixelColor(segment_length - i - 1, c);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9474,7 +9937,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sinewave()
   }
 
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9531,7 +9994,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Flow()
     }
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9557,7 +10020,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Static()
 {
   
   fill(SEGCOLOR(0), SET_BRIGHTNESS);
-  SEGMENT.transition.time_ms = (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME : 500;
+  SEGMENT.transition.time_ms = (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME_MS : 500;
 
 }
 
@@ -9595,7 +10058,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
     }
   }
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9660,7 +10123,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint
     }
   } else fill(color);
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -9786,7 +10249,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Strobe_Multi()
   SEGENV.step = (SEGENV.step + 1) % (count + 1);
   // return delay;
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -9846,7 +10309,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rainbow()
     fill(color_wheel(counter));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -9910,7 +10373,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Lightning()
 
 
   
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -9964,7 +10427,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fire_2012()
     CRGB color = ColorFromPalette(mPaletteI->currentPalette, MIN(heat[j],240), 255, LINEARBLEND);
     SetPixelColor(j, color.red, color.green, color.blue);
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10014,8 +10477,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Railway()
       SetPixelColor(i + 1, color_from_palette(pos, false, false, 255));
     }
   }
-  SEGENV.step += FRAMETIME;
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGENV.step += FRAMETIME_MS;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10065,7 +10528,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Heartbeat()
     SetPixelColor(i, color_blend(color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255 - (SEGENV.aux1 >> 8)));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10103,7 +10566,7 @@ void mAnimatorLight::SubTask_Segment_Animation__FillNoise8()
   }
   SEGENV.step += beatsin8(SEGMENT.speed(), 1, 6); //10,1,4
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10148,7 +10611,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_1()
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10191,7 +10654,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_2()
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10236,7 +10699,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_3()
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10269,7 +10732,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_4()
     fastled_col = ColorFromPalette(mPaletteI->currentPalette, index);
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10325,7 +10788,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise_Pal()
 
   SEGENV.aux0 += beatsin8(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10372,7 +10835,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Phased(uint8_t moder)
     SetPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(index, false, false, 0), b));
     index += 256 / segment_length;
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10443,7 +10906,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Scan(bool dual)
     SetPixelColor(j, color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10521,7 +10984,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Larson_Scanner(bool dual)
   }
 
   SEGENV.step = index;
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10602,7 +11065,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ICU()
 
 SEGMENT.transition.rate_ms = SPEED_FORMULA_L;
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10706,7 +11169,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Ripple(bool rainbow)
       }
     }
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Ripple(void) {
@@ -10758,7 +11221,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Comet()
   }
   SEGENV.aux0 = index++;
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -10802,7 +11265,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chunchun()
     SetPixelColor(bird, c);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10885,7 +11348,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Bouncing_Balls()
     SetPixelColor(pos, color);
   }
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 }
 
@@ -10938,7 +11401,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rai
     }
     SEGENV.aux0 = pos;
   }
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Sinelon(void) {
@@ -11057,9 +11520,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Drip()
       }
     }
   }
-//   return FRAMETIME;  
+//   return FRAMETIME_MS;  
 
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 }
 
 
@@ -11116,7 +11579,7 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
   
   }
     // pCONT_lAni->SetPixelColor(0, RgbColor(255,0,0));
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 // CRGB colour;
 //  = ColorFromPalette( Test_p, paletteIndex, pbri, NOBLEND);
@@ -11212,7 +11675,7 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
   
   }
     // pCONT_lAni->SetPixelColor(0, RgbColor(255,0,0));
-  SEGMENT.transition.rate_ms = FRAMETIME;
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 // CRGB colour;
 //  = ColorFromPalette( Test_p, paletteIndex, pbri, NOBLEND);
@@ -11348,7 +11811,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
 
 
     // pCONT_lAni->SetPixelColor(0, RgbColor(255,0,0));
-  // SEGMENT.transition.rate_ms = FRAMETIME;
+  // SEGMENT.transition.rate_ms = FRAMETIME_MS;
 
 // CRGB colour;
 //  = ColorFromPalette( Test_p, paletteIndex, pbri, NOBLEND);
