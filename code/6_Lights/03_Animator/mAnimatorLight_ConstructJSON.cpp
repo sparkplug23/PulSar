@@ -92,7 +92,7 @@ JBI->Start();
       // JBI->Add("encoding",mPaletteI->palettelist.christmas_01.encoding_type);
 
 
-      for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_10__ID;palette_id++)
+      for(uint8_t palette_id=mPalette::PALETTELIST_STATIC_HOLLOWEEN_OP__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_01__ID;palette_id++)
       {
 
         // JBI->Array_Start_P("%s", mPaletteI->GetPaletteNameByID( palette_id, buffer, sizeof(buffer) ));
@@ -116,6 +116,27 @@ JBI->Start();
 
 
     #endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+
+
+    #ifdef ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
+
+JBI->Array_Start_P("DataLength" );
+    for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_28__ID;palette_id++)
+    {
+
+      mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+
+
+      JBI->Add(ptr->data_length);
+
+
+
+    }
+
+        JBI->Array_End();
+
+
+    #endif 
 
 
     uint16_t id = 0;

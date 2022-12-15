@@ -286,7 +286,14 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
-  
+
+
+  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  if(jtok = obj["Container"].getObject()["Allocate"])
+  { 
+    ALOG_INF(PSTR("GetDataLength=%d"), _segment_runtimes[0].palette_container->GetDataLength());
+  }
+  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
 
   if(jtok = obj["PixelRange"]){ 

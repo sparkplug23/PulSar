@@ -20,14 +20,11 @@
 
 // Palette as gradient, show active gradient of anytype spread across the palette
 
+
 #define IBN 5100
 
 #define SET_BRIGHTNESS true
 
-  #define DEBUG_LINE_HERE2    Serial.printf("DEBUG HERE: ");\
-                        Serial.print(__FILE__);\
-                        Serial.println(__LINE__);\
-                        Serial.flush();
 // options
 // bit    7: segment is in transition mode
 // bits 4-6: TBD
@@ -250,6 +247,14 @@
      * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
+    #endif
+    /**
+     * Desc: Any set palette, will be set to span (with linearblend) the width of the segment
+     *
+     * 
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,
     #endif
 
     /******************************************************************************************************************************************************************************
@@ -972,6 +977,10 @@
     // };
     uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
 
+
+    
+
+
 /**
  * How to handle multiple neopixelbus, since each segment can share them
  * 
@@ -1374,6 +1383,9 @@
       uint16_t DataLength(){ return _dataLen; };
       byte* Data(){ return data; };
 
+      #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+      mPaletteContainer* palette_container = nullptr;
+      #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
       private:
         uint16_t _dataLen = 0;
@@ -1498,6 +1510,7 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
    * */
   void SubTask_Segment_Animate_Function__Solid_Single_Colour(); 
   void SubTask_Segment_Animate_Function__Static_Palette();
+  void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
   void SubTask_Segment_Animate_Function__Slow_Glow();
   void SubTask_Segment_Animation__Stepping_Palette();
   void SubTask_Segment_Animation__Rotating_Palette();

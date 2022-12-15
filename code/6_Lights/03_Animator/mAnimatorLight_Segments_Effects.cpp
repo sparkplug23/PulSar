@@ -95,7 +95,6 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
     }
 
     SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), pixel, SEGMENT.colour_type, colour);
-
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
     ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
@@ -124,8 +123,6 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-
-#ifdef ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
 void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 {
 
@@ -220,94 +217,6 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 
 
 }
-#endif // IS ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
-#ifndef ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
-void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
-{
-
-  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
-  //AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
-
-  if (!SEGENV.allocateData(dataSize)){    
-    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
-    SEGMENT.mode_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-    return;
-  }
-  
-  // So colour region does not need to change each loop to prevent colour crushing
-  SEGMENT.flags.brightness_applied_during_colour_generation = true;
-  
-  /**
-   * @brief Intensity describes the amount of pixels to update
-   *  Intensity 0-255 ==> LED length 1 to length (since we cant have zero)
-   **/
-  uint16_t pixels_to_update = mapvalue(
-                                        SEGMENT.intensity(), 
-                                        0,255, 
-                                        0,SEGMENT.length()
-                                      );
-
-  uint16_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
-
-  uint16_t pixel_index = 0;
-  RgbTypeColor colour = RgbcctColor(0);
-
-  /**
-   * @brief On first run, all leds need set once
-   * 
-   */
-  if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
-    pixels_to_update = SEGMENT.length();
-  }
-
-
-  for(uint16_t iter = 0; 
-                iter < pixels_to_update; 
-                iter++
-  ){
-    /**
-     * @brief 
-     * min: lower bound of the random value, inclusive (optional).
-     * max: upper bound of the random value, exclusive.
-    **/
-    pixel_index = random(0, SEGMENT.length()+1); // Indexing must be relative to buffer
-
-    // On first run, I need a new way to set them all.
-    if(SEGMENT.flags.NewAnimationRequiringCompleteRefresh || SEGMENT.flags.animator_first_run){ // replace random, so all pixels are placed on first run:: I may also want this as a flag only, as I may want to go from static_Effect to slow_glow with easy/slow transition
-      pixel_index = iter;
-    }
-    
-    desired_pixel = random(0, pixels_in_map);
-  
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
-
-    #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
-    AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
-    #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
-
-    if(SEGMENT.flags.brightness_applied_during_colour_generation){
-      // 6us
-      colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
-    }
-
-    // 2us
-    SetTransitionColourBuffer_DesiredColour(SEGENV.Data(), SEGENV.DataLength(), pixel_index, SEGMENT.colour_type, colour);
-
-  }
-
-  // Get starting positions already on show
-  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
-
-  // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
-    [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
-    }
-  );
-
-
-}
-#endif // NOT ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -405,6 +314,126 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Static Gradient Palette
+ * @note : Palette will be blended across total length of segment
+ *         If Palette contains gradient information, these will be used as inflection points, otherwise, span with equal spacing
+ * 
+ * @param : "rate_ms" : How often it changes
+ * @param : "time_ms" : How often it changes
+ * @param : "pixels to update" : How often it changes
+ * @param : "rate_ms" : How often it changes 
+ * 
+ * line 2583
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
+{
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
+
+  if (!SEGRUN.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.mode_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+    return;
+  }
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+
+  uint16_t start_pixel = 0;
+  uint16_t end_pixel = 100;
+  RgbcctColor start_colour = RgbcctColor(0);
+  RgbcctColor end_colour = RgbcctColor(0);
+  RgbcctColor out_colour = RgbcctColor(0);
+  uint8_t start_pixel_position = 255, end_pixel_position = 255;
+
+  uint16_t pixels_in_map = mPaletteI->GetPixelsInMap(SEGMENT.palette.id);
+
+
+  /**
+   * @brief Move across by pixels in map, and then either use encoded value or just use pixel in map 
+   * 
+   */
+    for(uint8_t grad_pair_index=0;
+                grad_pair_index<pixels_in_map;
+                grad_pair_index++
+    ){
+
+      uint8_t desired_index_upper = 0;
+      if(grad_pair_index<pixels_in_map-1) // ie not last one
+      {
+        desired_index_upper = grad_pair_index+1; // use next
+      }else{
+        desired_index_upper = 0; //assume its the first and wrap back
+      }
+      
+      start_colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, grad_pair_index,   &start_pixel_position);
+      end_colour   = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_index_upper, &end_pixel_position);
+
+      // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "grad_pair_index %d|%d  %d|%d"),grad_pair_index,pixels_in_map, grad_pair_index,desired_index_upper);
+      // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%02d start_pixel_position %d"),grad_pair_index,start_pixel_position);
+      // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "     end_pixel_position %d"),end_pixel_position);
+
+      /**
+       * @brief No start/stop mapping with segments I think
+       *  */
+      uint16_t start_pixel = 0;
+      uint16_t stop_pixel  = SEGLEN;
+      
+      mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(SEGMENT.palette.id);
+
+      if(ptr->encoding.index_scaled_to_segment)
+      {
+        start_pixel_position = map(start_pixel_position, 0,255, start_pixel,stop_pixel);
+        end_pixel_position   = map(end_pixel_position,   0,255, start_pixel,stop_pixel);
+      }
+      else
+      { //
+        start_pixel_position = map(grad_pair_index, 0,pixels_in_map, start_pixel,stop_pixel);
+        end_pixel_position   = map(grad_pair_index+1, 0,pixels_in_map, start_pixel,stop_pixel);
+      }
+
+      // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%d start_pixel_position %d"),grad_pair_index,start_pixel_position);
+      // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "end_pixel_position %d"),end_pixel_position);
+
+
+      float progress = 0;
+      for(
+        int 
+        index=start_pixel_position;
+        index<=end_pixel_position;
+        index++){
+        
+          progress = mSupport::mapfloat(index,start_pixel_position,end_pixel_position,0,1);
+          
+          out_colour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
+
+          if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+            out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, pCONT_iLight->getBriRGB_Global());
+          }
+          
+          SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), index, SEGMENT.colour_type, out_colour);
+      }
+
+  }
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  segment_active_index, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
 /********************************************************************************************************************************************************************************************************************
