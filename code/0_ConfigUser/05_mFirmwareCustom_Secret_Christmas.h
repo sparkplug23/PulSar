@@ -1176,12 +1176,11 @@
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
     #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
     #define ENABLE_EXTRA_WLED_EFFECTS
-    #define ENABLE_DEVFEATURE_GROUPING_FIX_METHOD_B_XMAS2022
-
-    #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
     #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
     #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
-    // #define ENABLE_DEVFEATURE_REMOVE_OLD_PALETTE_ENCODING       // This will take some time, slow merge to new method
+    // #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
+    // #define ENABLE_DEVFEATURE_PALETTECONTAINER
+    #define ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
 
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
@@ -1209,7 +1208,7 @@
     "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
     "\"AnimationMode\":\"Effects\","
     "\"ColourOrder\":\"RGB\","
-    "\"ColourPalette\":0,"
+    "\"ColourPalette\":\"Christmas 01\","
     "\"Effects\":{"
       "\"Function\":1," //shimmering palette
       "\"Speed\":255,"

@@ -23,6 +23,7 @@
 // #define ENABLE_MODULE_DEBUG__ANIMATOR_LIGHT_EFFECTS_LOW_LEVEL  // will be detailed, and slow timing down
 
 
+#include "6_Lights/02_Palette/mPaletteContainer.h"
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 #include "6_Lights/02_Palette/mPalette.h"
@@ -261,11 +262,11 @@ class mAnimatorLight :
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
         // typedef Neo800KbpsMethod selectedNeoSpeedType;
 
-#ifdef ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+        #ifdef ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
         typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
-#else
+        #else
         typedef Neo800KbpsMethod selectedNeoSpeedType;
-#endif
+        #endif
 
       #endif
     #endif   
@@ -291,12 +292,7 @@ class mAnimatorLight :
     
     void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool brightness_needs_applied = false);// uint16_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
-    
-    
-    // #ifdef ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
-    // RgbcctColor GetPixelColor_FromBus(uint16_t indexPixel = 0);
-    // #endif // ENABLE_DEVFEATURE_GETPIXELCOLOUR_DIRECTLY_DEC2022
-    
+       
 
     /**
      * @brief 
@@ -308,59 +304,7 @@ class mAnimatorLight :
     void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool brightness_needs_applied = false);  
     void SetPixelColor(uint16_t indexPixel, uint32_t color, bool brightness_needs_applied = false);//, uint16_t segment_length = 0);
 
-    // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-    // // what is stored for state is specific to the need, in this case, the colors.
-    // // Basically what ever you need inside the animation update function
-    // // Can this be moved into the segment_runtime data?
-    // struct AnimationColours
-    // {
-    //   RgbTypeColor StartingColor; // or should this be a pointer buffer only
-    //   RgbTypeColor DesiredColour;
-    // };
-    // AnimationColours animation_colours[STRIP_SIZE_MAX];
-    // #endif // ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-    // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_LEDORDERARRAY
-    // /**
-    //  * Make this definable, and or remove it, because it grows with pixel size and will waste memory
-    //  * If its placed into the segment/runtime animation, then it can be held in the shared struct memory for that exact animation
-    //  * WARNING! : Significant memory usage, needs changed to dynamic runtime
-    //  * */
-    // struct LEDOUTPUTSETTINGS{
-    //   uint16_t length = 0;
-    //   uint16_t index = 0;
-    //   uint16_t pattern[STRIP_SIZE_MAX];
-    // }ledout;    
-    // #endif
-
-
     void StartAnimation_AsAnimUpdateMemberFunction();
-    
-    
-    // void Draw_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
-    //                                   RgbcctColor colour_circumference, 
-    //                                   uint16_t radius_pixel,
-    //                                   uint16_t radius_size,
-    //                                   uint8_t center_repeat_size = 0,
-    //                                   bool colour_is_additive = false,
-    //                                   bool values_are_percentage_of_strip_size = false
-    // );
-    // void Remove_DesiredColour_LinearGradientMirrored(RgbcctColor colour_center, 
-    //                                   RgbcctColor colour_circumference, 
-    //                                   uint16_t radius_pixel,
-    //                                   uint16_t radius_size,
-    //                                   uint8_t center_repeat_size = 0,
-    //                                   bool colour_is_additive = false,
-    //                                   bool values_are_percentage_of_strip_size = false
-    // );
-    
-    // void Draw_DesiredColour_LinearGradientMirrored2(RgbcctColor colour_center, 
-    //                                   RgbcctColor colour_circumference, 
-    //                                   uint16_t radius_pixel,
-    //                                   uint16_t radius_size,
-    //                                   uint8_t center_repeat_size = 0,
-    //                                   bool colour_is_additive = false,
-    //                                   bool values_are_percentage_of_strip_size = false
-    // );
     
     const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
 
@@ -374,7 +318,7 @@ class mAnimatorLight :
 
     
     #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
-        void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
+      void FadeToNewColour(RgbcctColor newcolor, uint16_t _time_to_newcolour = 1000, RgbcctColor fromcolor = RgbcctColor(0));
         
       // totally random, or random but not repeating
       enum TRANSITION_ORDER_RANDOM_METHOD_IDS{
@@ -400,18 +344,15 @@ class mAnimatorLight :
       
       void StartAnimationAsBlendFromStartingColorToDesiredColor(void);
       void StartAnimationAsSwitchingFromStartingColorToDesiredColor();
+    #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
 
-    
-     #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
+        
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    void WebPage_Root_AddHandlers();
+    void WebAppend_JSON_RootPage_LiveviewPixels();
+    void WebPage_Root_SendInformationModule();
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
-     
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-
-      void WebPage_Root_AddHandlers();
-      void WebAppend_JSON_RootPage_LiveviewPixels();
-      void WebPage_Root_SendInformationModule();
-
-#endif // USE_MODULE_NETWORK_WEBSERVER
 
     /**
      * @brief 
@@ -426,20 +367,12 @@ class mAnimatorLight :
     void SetRefreshLEDs();    
     void StripUpdate();
     void SetPixelColor_All(RgbcctColor colour);
-        
-
-    HsbColor GetColourFromMapUsingType(
-      uint16_t pixel_I_want,
-      uint8_t *colour_index, uint16_t colour_array_length, uint16_t fMapIDs_Type, //inputs
-      uint16_t* total_hsbcolours_in_map, uint16_t* pixel_index_out, uint16_t* pixel_width_including_indexing //returns
-    );
-        
+                
 
     RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
 
-    void DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(uint16_t palette_id, uint8_t runtime_segment_index);
 
     #ifdef USE_MODULE_NETWORK_WEBSERVER
     #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
@@ -468,12 +401,11 @@ class mAnimatorLight :
     void WebSave_RGBColourSelector(void);
     #endif //USE_MODULE_NETWORK_WEBSERVER
 
+    #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
+    void Test_Config();
+    #endif
 
-      #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
-     void Test_Config();
-      #endif
-
-  #ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
+    #ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
     struct POWER_RATING{
       float Average_mA_Per_Pixel_Step = 0.0784; //  20/255    //MAKE PROGMEM
       // uint8_t G_Channel_mA = 20;
@@ -492,28 +424,28 @@ class mAnimatorLight :
     }
 
     timereached_t tSavedCalculatePowerUsage;
-  #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
+    #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
 
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-  void SubTask_Manual_SetPixel();
-  uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
-  #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    void SubTask_Manual_SetPixel();
+    uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
+    #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
 
-#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-// void mPalette::load_gradient_palette(uint8_t index)
-// {
-//   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
-//   byte tcp[72]; //support gradient palettes with up to 18 entries
-//   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
-//   targetPalette.loadDynamicGradientPalette(tcp);
-// }
-// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+    // void mPalette::load_gradient_palette(uint8_t index)
+    // {
+    //   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
+    //   byte tcp[72]; //support gradient palettes with up to 18 entries
+    //   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
+    //   targetPalette.loadDynamicGradientPalette(tcp);
+    // }
+    // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
-void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
+    void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
 
-#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 
 
@@ -736,11 +668,7 @@ void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
 *** Animation Effect:   Notifications   ***************************************************************************************************************************************************************************
 **  @note:     This is highly specialised effect, and will unlikely ever run next to "animated segment effect"
                It makes sense to keep this as its own effect type
-
-To be phased into normal segment effects
-
-
-
+To be phased into normal segment effect
 **************************************************************************************************************************************************************************
 **************************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************

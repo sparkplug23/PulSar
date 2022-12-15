@@ -33,19 +33,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
   
   switch(function){
     /************
-     * SETTINGS SECTION * 
-    *******************/
-    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-    //   Settings_Load();
-    // break;
-    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-    //   Settings_Save();
-    // break;
-    // case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-    //   Settings_Default();
-    // break;
-    /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_EVERY_SECOND:{
@@ -58,25 +45,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
       // const NeoRgbcctCurrentSettings settings(200,200,200,201,202);
       // uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
-
-      // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      //   char buffer[50];
-      //   AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
-      //     pCONT_lAni->GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
-      //   );
-      // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap0", mPaletteI->palettelist.rgbcct_users[0].data, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap1", mPaletteI->palettelist.rgbcct_users[1].data, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap2", mPaletteI->palettelist.rgbcct_users[2].data, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap3", mPaletteI->palettelist.rgbcct_users[3].data, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap4", mPaletteI->palettelist.rgbcct_users[4].data, 5);
-
-
-
-// ALOG_INF( PSTR("brt = %d"), pCONT_iLight->getBriRGB_Global() );
-
-
 
     }break;
     case FUNC_LOOP: 
@@ -230,42 +198,6 @@ void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
 #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
 
-// #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-// void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
-// {
-
-
-//   // if pixel size changes, free and init again
-//   uint16_t strip_size_tmp = STRIP_SIZE_MAX;
-//   #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
-//   strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;
-//   #endif
-//   // uint16_t strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
-  
-//   /**
-//    * @brief 
-//    * Populate RGB pin#1 across all pins if only 1 pin is set
-//    * Create number of stripbuses based on how many pins are configured
-//    **/ 
-//   int8_t pin = pCONT_pins->GetPin(GPIO_RGB_DATA1_ID);
-//   if(pin != -1)
-//   {
-
-//   }
-
-
-//   #ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
-//   // future methods will need to parse on esp8266 and only permit certain pins, or if very low pixel count, software versions
-//   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, PINSET_TEMP_METHOD_RGB_PIN_RGB);//19); 3 = rx0
-//   #else //legacy method
-//   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
-//   #endif
-
-
-// }
-// #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-     
-
 
 
 void mAnimatorLight::Init(void){ 
@@ -365,6 +297,9 @@ void mAnimatorLight::Init(void){
   }
 
 
+  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  _segment_runtimes[0].palette_container = new mPaletteContainer(100);
+  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
@@ -885,14 +820,7 @@ void mAnimatorLight::SetRefreshLEDs(){
  */
 void mAnimatorLight::StripUpdate(){
 
-  // DEBUG_PIN2_SET(LOW);
-  // #ifdef ENABLE_DEVFEATURE_DEBUG_TRACE_LIGHTING_CHRISTMAS
-  // Serial.print("-");
-  // #endif 
-  
   pCONT_iLight->ShowInterface();
-
-  // DEBUG_PIN2_SET(HIGH);
 
 }
 
@@ -926,10 +854,13 @@ void mAnimatorLight::StripUpdate(){
 void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
 {
 
+  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  uint8_t* palette_buffer_p = _segment_runtimes[segment_index].palette_container->GetDataPtr();
+  #else
   // Clear = Worth while since loading palette will not be called everytime
   memset(&mPaletteI->palette_runtime.loaded.buffer_static, 0, sizeof(mPaletteI->palette_runtime.loaded.buffer_static));
-
   uint8_t* palette_buffer_p = mPaletteI->palette_runtime.loaded.buffer_static;
+  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
   /**
    * @brief My palettes
