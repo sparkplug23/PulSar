@@ -51,6 +51,7 @@
 
 
 
+#include "DoubleEMAFilterLib.h"
 
 
 
@@ -215,7 +216,12 @@ struct ISR_DUAL_CAPTURE{
 
     std::vector<int> samples;
 
-
+    struct DoubleEMAFilter_VALUES{
+      float value = 0;
+      float alpha1 = 0;
+      float alpha2 = 0;
+      DoubleEMAFilter<float>* filter = nullptr;
+    }average_DEMA;
 
 
 

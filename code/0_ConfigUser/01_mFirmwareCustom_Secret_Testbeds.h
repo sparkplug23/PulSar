@@ -8463,7 +8463,6 @@
   #define DEVICENAME_ROOMHINT_CTR "Living Room"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
@@ -8471,23 +8470,10 @@
 
   #define USE_MODULE_CORE_RULES
 
-  /**
-   * 4 pipe sensors (boiler_in, boiler_out, exhaust, garage radiator) = use 3PIN screw terminal
-   * light sensor for lock_out (analog and digital)
-   * furnace power  
-   * bme ambient
-   * motion sensor
-   */
-
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_BH1750
-  // #define USE_MODULE_SENSORS_MOTION // add this       == motion added with esp32 upgrade
-  
+
   #define USE_MODULE_CONTROLLER_FURNACE_SENSOR
  
   #define USE_MODULE_TEMPLATE
@@ -8495,24 +8481,11 @@
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"      
-      #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
-      #endif
-      // #ifdef USE_MODULE_SENSORS_MOTION
-      // "\"5\":\""  D_GPIO_FUNCTION_SWT3_CTR "\","
-      // #endif
-      #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"18\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR  "\","
-      #endif  
+    "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-      "\"35\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18X
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      #endif
+      "\"4\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -8534,62 +8507,12 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\""
-      "],"
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSORS_SWITCH_1_CTR "\","
-        "\"" D_DEVICE_SENSORS_SWITCH_2_CTR "\","
-        "\"" D_DEVICE_SENSORS_SWITCH_3_CTR "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
-      "]"
-    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["    
-        "[40,0,37,149,240,1,60,0],"
-        "[40,124,194,149,240,1,60,110],"
-        "[40,199,255,149,240,1,60,249],"
-        "[40,246,153,149,240,1,60,174]"
-      "]"  
     "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
-
-  
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":2,"
-        "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
-        "\"State\":2" // Started
-      "}"
-    "}"
-  "}";
-
 
 #endif
 
