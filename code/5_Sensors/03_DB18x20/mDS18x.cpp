@@ -25,7 +25,7 @@ int8_t mDS18X::Tasker(uint8_t function, JsonParserObject obj){
       Init();
     break;
   }
-  
+  //change
   // Only continue to remaining functions if sensor has been detected and enabled
   // if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
