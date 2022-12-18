@@ -212,6 +212,7 @@ Bathroom
 // #define DEVICE_AIRPURIFIER
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_FLOORFAN2
+#define DEVICE_DEFAULT_SONOFF_BASIC__15
 
 
 /**************************************************************************************************************************************************
@@ -285,9 +286,11 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 14
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC__15
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 15
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__CANDLE_WARMER   // not sure what candle warmer is, I need to check with button testing
   #define DEVICE_SOCKET_NUMBERED

@@ -81,7 +81,7 @@
 // #define DEVICE_TESTBED_OLED_SH1106
 // #define DEVICE_TESTBED_LILYGO_SIM7000G_WITH_OLED
 
-#define DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
+// #define DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
 
 /**
  * @brief Note: By getting the rows = animation, the achievement can clearly be shown by simply setting "percent animation from wled" or similar
