@@ -1598,7 +1598,7 @@ const char* mPalette::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buf
   
 }
 
-
+#ifndef ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
 /**
  * @brief 
  * 
@@ -1650,6 +1650,8 @@ uint32_t mPalette::color_from_palette_Intermediate(uint16_t i, bool mapping, boo
   return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(pCONT_lAni->_segments[0].palette.id/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, mcol, false /*might need moved after pBri to default it*/, pbri /*others default*/));
   // #endif
 }
+#endif // ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
+
 /** NEW METHOD: To test this, creating a json constructor that can produce each palette under its desired ways
  * Gets a single color from the currently selected palette.
  * @param id                  Palette Index, default (0) will be random from colour wheel

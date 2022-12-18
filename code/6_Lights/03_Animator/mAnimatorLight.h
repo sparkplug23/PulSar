@@ -22,12 +22,13 @@
 
 
 //color mangling macros
-// #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
+#define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
 // #define R(c) (byte((c) >> 16))
 // #define G(c) (byte((c) >> 8))
 // #define B(c) (byte(c))
 // #define W(c) (byte((c) >> 24))
 
+#define WLED_DISABLE_2D
 
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -125,6 +126,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)         "debug
 #endif
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug/segments";
+#endif 
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS_NEW__CTR)        "debug/segments_new";
 #endif 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
@@ -410,7 +414,6 @@ class mAnimatorLight :
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
 
-    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
     // void mPalette::load_gradient_palette(uint8_t index)
     // {
@@ -423,7 +426,6 @@ class mAnimatorLight :
 
     void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
 
-    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 
 
@@ -467,6 +469,9 @@ class mAnimatorLight :
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
   uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0);
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+  uint8_t ConstructJSON_Debug_Segments_New(uint8_t json_level = 0);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
     uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0);  
     ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
@@ -507,6 +512,9 @@ class mAnimatorLight :
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
       MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_TELEPERIOD_ID,
       #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+      MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_NEW_TELEPERIOD_ID,
+      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       MQTT_HANDLER_MODULE__DEBUG_ANIMATOR_ANIMATION_PROGRESS_TELEPERIOD_ID,
       #endif
@@ -541,6 +549,9 @@ class mAnimatorLight :
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
       struct handler<mAnimatorLight> mqtthandler_debug_segments;
     #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+      struct handler<mAnimatorLight> mqtthandler_debug_segments_new;
+    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
     #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
     #endif
@@ -567,6 +578,9 @@ class mAnimatorLight :
         +1
       #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+        +1
+      #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
         +1
       #endif
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -600,6 +614,9 @@ class mAnimatorLight :
         #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
         #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
         &mqtthandler_debug_segments,
+        #endif
+        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+        &mqtthandler_debug_segments_new,
         #endif
         #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
         &mqtthandler_debug_animations_progress,
@@ -875,6 +892,16 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 ******************************************************************************************************************************************************************************
 ****************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
+
+
+  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+  WS2812FX *strip = nullptr;//new WS2812FX();
+  // bool autoSegments = false;
+
+
+  #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
 
 
 #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS

@@ -389,10 +389,6 @@ class mPalette
       };
     } PALETTE_ENCODING_DATA;
 
-    // Create mqtt method for reading all these, so the functions "isRGB" isRGBCCT etc can be shown as array of strings
-    // ie mqtt for palette encoded = ["r","g",b,index=1,is_exact] and one for each palette as debug output. Convert from binary to human readable.
-
-
     /**
      * @brief Should this really be its own list, its already inside the palette class?
      * 
@@ -564,45 +560,12 @@ class mPalette
 
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
-
-    /**
-     * @brief Intermediate functions as I phase out old palette methods
-     **/
-    RgbcctColor GetColourFromPalette_Intermediate(uint16_t palette_id,       uint16_t pixel_num = 0, uint8_t *pixel_position = nullptr);
-    uint32_t color_from_palette_Intermediate(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
+    
 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
 
-
-    /**
-     * @brief Next method to merge fastled and my methods together
-     * */
-    #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
-    uint32_t color_from_palette_internal(uint16_t palette_id, uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255, uint16_t palette_spread_length__virtualSegmentLength = 50);  
-    RgbcctColor GetColourFromPalette_Gradient(uint16_t palette_id, uint16_t pixel_num = 0, int16_t *pixel_position = nullptr, /*uint16_t i, is pixel_id*/ bool mapping = false, bool wrap = true, uint8_t mcol = 0, uint8_t pbri = 255, TBlendType blendType=NOBLEND, uint16_t palette_spread_length__virtualSegmentLength = 50);
-    #endif //ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
-
         
-    #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    RgbcctColor 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-    IRAM_ATTR 
-    #endif 
-    GetColourFromPaletteAdvanced(
-      uint16_t palette_id = 0,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      uint8_t* discrete_colours_in_palette = nullptr
-    );
-    #endif // ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
-
-
-    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     uint32_t 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
@@ -618,9 +581,7 @@ class mPalette
       uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
       uint8_t* discrete_colours_in_palette = nullptr
     );
-    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-
-    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
@@ -636,7 +597,6 @@ class mPalette
       uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
       uint8_t* discrete_colours_in_palette = nullptr
     );
-    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 
     void UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette = nullptr);

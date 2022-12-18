@@ -226,6 +226,16 @@ void mAnimatorLight::Init(void){
 
   pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE);  
 
+  
+
+  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+  strip = new WS2812FX();
+  strip->finalizeInit();
+  strip->makeAutoSegments();
+
+  #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
   // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
   // SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
@@ -824,7 +834,7 @@ void mAnimatorLight::StripUpdate(){
 
 }
 
-#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
 // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
 // void mPalette::load_gradient_palette(uint8_t index)
 // {
@@ -891,9 +901,6 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
     
 
 }
-
-#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

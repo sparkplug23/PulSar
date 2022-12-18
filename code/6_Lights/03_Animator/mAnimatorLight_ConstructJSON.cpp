@@ -221,6 +221,53 @@ return JBI->End();
 }
 
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+
+
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
+{
+
+JBI->Start();
+
+
+//   JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
+
+
+
+//   JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
+//   JBI->Add("CanShow",stripbus->CanShow());
+//   JBI->Add("StripSize", STRIP_SIZE_MAX);
+
+
+for(uint8_t seg_i = 0; seg_i<2; seg_i++)
+{
+  JBI->Level_Start_F("Segment%d",seg_i);
+
+    JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
+    JBI->Add("_segments_new.size()", strip->_segments_new[seg_i].length());
+
+//     JBI->Add("isActive", _segments[seg_i].isActive());
+//       JBI->Level_Start("Transition");
+//         JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
+//         JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
+//         JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
+//         JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
+//       JBI->Level_End();
+//     JBI->Add("virtualLength", _segments[seg_i].virtualLength());
+    
+  
+  JBI->Level_End();
+
+
+}
+
+
+return JBI->End();
+
+}
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+
+
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 //   uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
 //   {

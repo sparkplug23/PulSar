@@ -1,5 +1,5 @@
-#ifndef _AnimatorDALIGHTNEOPIXEL7_segH
-#define _AnimatorDALIGHTNEOPIXEL7_segH 7.0
+#ifndef _ANIMATOR_SEGMENTS_H
+#define _ANIMATOR_SEGMENTS_H
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -61,6 +61,15 @@
 #define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
 
+// #define DEFAULT_BRIGHTNESS (uint8_t)127
+// #define DEFAULT_MODE       (uint8_t)0
+// #define DEFAULT_SPEED      (uint8_t)128
+#define DEFAULT_INTENSITY  (uint8_t)128
+// #define DEFAULT_COLOR      (uint32_t)0xFFAA00
+#define DEFAULT_C1         (uint8_t)128
+#define DEFAULT_C2         (uint8_t)128
+#define DEFAULT_C3         (uint8_t)16
+
 
 //Segment option byte bits
 #define SEG_OPTION_SELECTED       0
@@ -95,6 +104,10 @@
 #define SEGACT           SEGMENT.stop
 #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
 #define FRAMETIME_MS 25
+
+#define WLED_FPS         42
+#define FRAMETIME_FIXED  (1000/WLED_FPS)
+#define DEFAULT_LED_COUNT 30
 
 
   void fill(uint32_t c, bool apply_brightness = false);
@@ -1909,8 +1922,636 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
     float minf2(float v, float w);
     float maxf2(float v, float w);
 
+
+#ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+  #define DEBUG_LINE_HERE    Serial.printf("DEBUG HERE: ");\
+                        Serial.print(__FILE__);\
+                        Serial.println(__LINE__);\
+                        Serial.flush();
+
+// segment, 72 bytes
+typedef struct Segment_New {
+  public:
+    uint16_t start; // start index / start X coordinate 2D (left)
+    uint16_t stop;  // stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
+    uint16_t offset;
+    uint8_t  speed;
+    uint8_t  intensity;
+    uint8_t  palette;
+    uint8_t  mode;
+    union {
+      uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
+      struct {
+        bool    selected    : 1;  //     0 : selected
+        bool    reverse     : 1;  //     1 : reversed
+        bool    on          : 1;  //     2 : is On
+        bool    mirror      : 1;  //     3 : mirrored
+        bool    freeze      : 1;  //     4 : paused/frozen
+        bool    reset       : 1;  //     5 : indicates that Segment runtime requires reset
+        bool    transitional: 1;  //     6 : transitional (there is transition occuring)
+        bool    reverse_y   : 1;  //     7 : reversed Y (2D)
+        bool    mirror_y    : 1;  //     8 : mirrored Y (2D)
+        bool    transpose   : 1;  //     9 : transposed (2D, swapped X & Y)
+        uint8_t map1D2D     : 3;  // 10-12 : mapping for 1D effect on 2D (0-use as strip, 1-expand vertically, 2-circular/arc, 3-rectangular/corner, ...)
+        uint8_t soundSim    : 3;  // 13-15 : 0-7 sound simulation types
+      };
+    };
+    uint8_t  grouping, spacing;
+    uint8_t  opacity;
+    uint32_t colors[NUM_COLORS];
+    uint8_t  cct;                 //0==1900K, 255==10091K
+    uint8_t  custom1, custom2;    // custom FX parameters/sliders
+    struct {
+      uint8_t custom3 : 5;        // reduced range slider (0-31)
+      bool    check1  : 1;        // checkmark 1
+      bool    check2  : 1;        // checkmark 2
+      bool    check3  : 1;        // checkmark 3
+    };
+    uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
+    uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
+    char *name;
+
+    // runtime data
+    unsigned long next_time;  // millis() of next update
+    uint32_t step;  // custom "step" var
+    uint32_t call;  // call counter
+    uint16_t aux0;  // custom var
+    uint16_t aux1;  // custom var
+    byte* data;     // effect data pointer
+    CRGB* leds;     // local leds[] array (may be a pointer to global)
+    static CRGB *_globalLeds;             // global leds[] array
+    static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
+
+  private:
+    union {
+      uint8_t  _capabilities;
+      struct {
+        bool    _isRGB    : 1;
+        bool    _hasW     : 1;
+        bool    _isCCT    : 1;
+        bool    _manualW  : 1;
+        uint8_t _reserved : 4;
+      };
+    };
+    uint16_t _dataLen;
+    static uint16_t _usedSegmentData;
+
+    // transition data, valid only if transitional==true, holds values during transition
+    struct Transition {
+      uint32_t      _colorT[NUM_COLORS];
+      uint8_t       _briT;        // temporary brightness
+      uint8_t       _cctT;        // temporary CCT
+      CRGBPalette16 _palT;        // temporary palette
+      uint8_t       _prevPaletteBlends; // number of previous palette blends (there are max 255 belnds possible)
+      uint8_t       _modeP;       // previous mode/effect
+      //uint16_t      _aux0, _aux1; // previous mode/effect runtime data
+      //uint32_t      _step, _call; // previous mode/effect runtime data
+      //byte         *_data;        // previous mode/effect runtime data
+      uint32_t      _start;
+      uint16_t      _dur;
+      Transition(uint16_t dur=750)
+        : _briT(255)
+        , _cctT(127)
+        , _palT(CRGBPalette16(HTMLColorCode::Black))
+        , _prevPaletteBlends(0)
+        , _modeP(EFFECTS_FUNCTION__WLED_STATIC__ID)
+        , _start(millis())
+        , _dur(dur)
+      {}
+      Transition(uint16_t d, uint8_t b, uint8_t c, const uint32_t *o)
+        : _briT(b)
+        , _cctT(c)
+        , _palT(CRGBPalette16(HTMLColorCode::Black))
+        , _prevPaletteBlends(0)
+        , _modeP(EFFECTS_FUNCTION__WLED_STATIC__ID)
+        , _start(millis())
+        , _dur(d)
+      {
+        for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = o[i];
+      }
+    } *_t;
+
+  public:
+
+    Segment_New(uint16_t sStart=0, uint16_t sStop=30) :
+      start(sStart),
+      stop(sStop),
+      offset(0),
+      speed(DEFAULT_SPEED),
+      intensity(DEFAULT_INTENSITY),
+      palette(0),
+      mode(DEFAULT_MODE),
+      options(SELECTED | SEGMENT_ON),
+      grouping(1),
+      spacing(0),
+      opacity(255),
+      colors{DEFAULT_COLOR,BLACK,BLACK},
+      cct(127),
+      custom1(DEFAULT_C1),
+      custom2(DEFAULT_C2),
+      custom3(DEFAULT_C3),
+      check1(false),
+      check2(false),
+      check3(false),
+      startY(0),
+      stopY(1),
+      name(nullptr),
+      next_time(0),
+      step(0),
+      call(0),
+      aux0(0),
+      aux1(0),
+      data(nullptr),
+      leds(nullptr),
+      _capabilities(0),
+      _dataLen(0),
+      _t(nullptr)
+    {
+      refreshLightCapabilities();
+    }
+
+    Segment_New(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment_New(sStartX, sStopX) {
+      startY = sStartY;
+      stopY  = sStopY;
+    }
+
+    Segment_New(const Segment_New &orig) // copy constructor
+     {
+      Serial.println(F("-- Copy segment constructor --"));
+      memcpy(this, &orig, sizeof(Segment_New));
+      name = nullptr;
+      data = nullptr;
+      _dataLen = 0;
+      _t = nullptr;
+      if (leds && !Segment_New::_globalLeds) leds = nullptr;
+      if (orig.name) { name = new char[strlen(orig.name)+1]; if (name) strcpy(name, orig.name); }
+      if (orig.data) { if (allocateData(orig._dataLen)) memcpy(data, orig.data, orig._dataLen); }
+      if (orig._t)   { _t = new Transition(orig._t->_dur, orig._t->_briT, orig._t->_cctT, orig._t->_colorT); }
+      if (orig.leds && !Segment_New::_globalLeds) { leds = (CRGB*)malloc(sizeof(CRGB)*length()); if (leds) memcpy(leds, orig.leds, sizeof(CRGB)*length()); }
+    };
+
+
+
+    Segment_New(Segment_New &&orig) noexcept // move constructor
+    {
+      Serial.println(F("-- Move segment constructor --"));
+      memcpy(this, &orig, sizeof(mAnimatorLight::Segment_New));
+      orig.name = nullptr;
+      orig.data = nullptr;
+      orig._dataLen = 0;
+      orig._t   = nullptr;
+      orig.leds = nullptr;
+    }
+
+
+    ~Segment_New() {
+      #ifdef WLED_DEBUG
+      Serial.print(F("Destroying segment:"));
+      if (name) Serial.printf(" %s (%p)", name, name);
+      if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
+      if (leds) Serial.printf(" [%u]", length()*sizeof(CRGB));
+      Serial.println();
+      #endif
+      if (!Segment_New::_globalLeds && leds) free(leds);
+      if (name) delete[] name;
+      if (_t) delete _t;
+      deallocateData();
+    }
+
+    Segment_New& operator= (const Segment_New &orig); // copy assignment
+    Segment_New& operator= (Segment_New &&orig) noexcept; // move assignment
+
+    #ifdef WLED_DEBUG
+    size_t getSize() const { return sizeof(Segment_New) + (data?_dataLen:0) + (name?strlen(name):0) + (_t?sizeof(Transition):0) + (!Segment_New::_globalLeds && leds?sizeof(CRGB)*length():0); }
+    #endif
+
+    inline bool     getOption(uint8_t n) const { return ((options >> n) & 0x01); }
+    inline bool     isSelected(void)     const { return selected; }
+    inline bool     isActive(void)       const { return stop > start; }
+    inline bool     is2D(void)           const { return (width()>1 && height()>1); }
+    inline uint16_t width(void)          const { return stop - start; }       // segment width in physical pixels (length if 1D)
+    inline uint16_t height(void)         const { return stopY - startY; }     // segment height (if 2D) in physical pixels
+    inline uint16_t length(void)         const { return width() * height(); } // segment length (count) in physical pixels
+    inline uint16_t groupLength(void)    const { return grouping + spacing; }
+    inline uint8_t  getLightCapabilities(void) const { return _capabilities; }
+
+    static uint16_t getUsedSegmentData(void)    { return _usedSegmentData; }
+    static void     addUsedSegmentData(int len) { _usedSegmentData += len; }
+
+    bool    setColor(uint8_t slot, uint32_t c); //returns true if changed
+    void    setCCT(uint16_t k);
+    void    setOpacity(uint8_t o);
+    void    setOption(uint8_t n, bool val);
+    void    setMode(uint8_t fx, bool loadDefaults = false);
+    void    setPalette(uint8_t pal);
+    uint8_t differs(Segment_New& b) const;
+    void    refreshLightCapabilities(void);
+
+    // runtime data functions
+    inline uint16_t dataSize(void) const { return _dataLen; }
+    bool allocateData(size_t len);
+    void deallocateData(void);
+    void resetIfRequired(void);
+    /** 
+      * Flags that before the next effect is calculated,
+      * the internal segment state should be reset. 
+      * Call resetIfRequired before calling the next effect function.
+      * Safe to call from interrupts and network requests.
+      */
+    inline void markForReset(void) { reset = true; }  // setOption(SEG_OPTION_RESET, true)
+    void setUpLeds(void);   // set up leds[] array for loseless getPixelColor()
+
+    // transition functions
+    void     startTransition(uint16_t dur); // transition has to start before actual segment values change
+    void     handleTransition(void);
+    uint16_t progress(void); //transition progression between 0-65535
+    uint8_t  currentBri(uint8_t briNew, bool useCct = false);
+    uint8_t  currentMode(uint8_t modeNew);
+    uint32_t currentColor(uint8_t slot, uint32_t colorNew);
+    CRGBPalette16 &loadPalette(CRGBPalette16 &tgt, uint8_t pal);
+    CRGBPalette16 &currentPalette(CRGBPalette16 &tgt, uint8_t paletteID);
+
+    // 1D strip
+    uint16_t virtualLength(void) const;
+    void setPixelColor(int n, uint32_t c); // set relative pixel within segment with color
+    void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) { setPixelColor(n, RGBW32(r,g,b,w)); } // automatically inline
+    void setPixelColor(int n, CRGB c)                             { setPixelColor(n, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    void setPixelColor(float i, uint32_t c, bool aa = true);
+    void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
+    void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
+    uint32_t getPixelColor(int i);
+    // 1D support functions (some implement 2D as well)
+    void blur(uint8_t);
+    void fill(uint32_t c);
+    void fade_out(uint8_t r);
+    void fadeToBlackBy(uint8_t fadeBy);
+    void blendPixelColor(int n, uint32_t color, uint8_t blend);
+    void blendPixelColor(int n, CRGB c, uint8_t blend)            { blendPixelColor(n, RGBW32(c.r,c.g,c.b,0), blend); }
+    void addPixelColor(int n, uint32_t color);
+    void addPixelColor(int n, byte r, byte g, byte b, byte w = 0) { addPixelColor(n, RGBW32(r,g,b,w)); } // automatically inline
+    void addPixelColor(int n, CRGB c)                             { addPixelColor(n, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    void fadePixelColor(uint16_t n, uint8_t fade);
+    uint8_t get_random_wheel_index(uint8_t pos);
+    uint32_t color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
+    uint32_t color_wheel(uint8_t pos);
+
+    // 2D matrix
+    uint16_t virtualWidth(void)  const;
+    uint16_t virtualHeight(void) const;
+    uint16_t nrOfVStrips(void) const;
+  #ifndef WLED_DISABLE_2D
+    uint16_t XY(uint16_t x, uint16_t y); // support function to get relative index within segment (for leds[])
+    void setPixelColorXY(int x, int y, uint32_t c); // set relative pixel within segment with color
+    void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    void setPixelColorXY(float x, float y, uint32_t c, bool aa = true);
+    void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColorXY(x, y, RGBW32(r,g,b,w), aa); }
+    void setPixelColorXY(float x, float y, CRGB c, bool aa = true)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), aa); }
+    uint32_t getPixelColorXY(uint16_t x, uint16_t y);
+    // 2D support functions
+    void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend);
+    void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), blend); }
+    void addPixelColorXY(int x, int y, uint32_t color);
+    void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+    void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade);
+    void box_blur(uint16_t i, bool vertical, fract8 blur_amount); // 1D box blur (with weight)
+    void blurRow(uint16_t row, fract8 blur_amount);
+    void blurCol(uint16_t col, fract8 blur_amount);
+    void moveX(int8_t delta);
+    void moveY(int8_t delta);
+    void move(uint8_t dir, uint8_t delta);
+    void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c);
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) { drawLine(x0, y0, x1, y1, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color);
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    void wu_pixel(uint32_t x, uint32_t y, CRGB c);
+    void blur1d(fract8 blur_amount); // blur all rows in 1 dimension
+    void blur2d(fract8 blur_amount) { blur(blur_amount); }
+    void fill_solid(CRGB c) { fill(RGBW32(c.r,c.g,c.b,0)); }
+    void nscale8(uint8_t scale);
+  #else
+    uint16_t XY(uint16_t x, uint16_t y)                                    { return x; }
+    void setPixelColorXY(int x, int y, uint32_t c)                         { setPixelColor(x, c); }
+    void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColor(x, RGBW32(r,g,b,w)); }
+    void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColor(x, RGBW32(c.r,c.g,c.b,0)); }
+    void setPixelColorXY(float x, float y, uint32_t c, bool aa = true)     { setPixelColor(x, c, aa); }
+    void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColor(x, RGBW32(r,g,b,w), aa); }
+    void setPixelColorXY(float x, float y, CRGB c, bool aa = true)         { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), aa); }
+    uint32_t getPixelColorXY(uint16_t x, uint16_t y)                       { return getPixelColor(x); }
+    void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t c, uint8_t blend) { blendPixelColor(x, c, blend); }
+    void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColor(x, RGBW32(c.r,c.g,c.b,0), blend); }
+    void addPixelColorXY(int x, int y, uint32_t color)                     { addPixelColor(x, color); }
+    void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColor(x, RGBW32(r,g,b,w)); }
+    void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColor(x, RGBW32(c.r,c.g,c.b,0)); }
+    void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)            { fadePixelColor(x, fade); }
+    void box_blur(uint16_t i, bool vertical, fract8 blur_amount) {}
+    void blurRow(uint16_t row, fract8 blur_amount) {}
+    void blurCol(uint16_t col, fract8 blur_amount) {}
+    void moveX(int8_t delta) {}
+    void moveY(int8_t delta) {}
+    void move(uint8_t dir, uint8_t delta) {}
+    void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c) {}
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c) {}
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) {}
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color) {}
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB color) {}
+    void wu_pixel(uint32_t x, uint32_t y, CRGB c) {}
+  #endif
+} segment_new;
+//static int segSize = sizeof(Segment_New);
+
+// main "strip" class
+class WS2812FX {  // 96 bytes
+  typedef uint16_t (*mode_ptr)(void); // pointer to mode function
+  typedef void (*show_callback)(void); // pre show callback
+  typedef struct ModeData {
+    uint8_t     _id;   // mode (effect) id
+    mode_ptr    _fcn;  // mode (effect) function
+    const char *_data; // mode (effect) name and its UI control data
+    ModeData(uint8_t id, uint16_t (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
+  } mode_data_t;
+
+  static WS2812FX* instance;
+  
+  public:
+
+    WS2812FX() :
+      paletteFade(0),
+      paletteBlend(0),
+      milliampsPerLed(55),
+      cctBlending(0),
+      ablMilliampsMax(0),//ABL_MILLIAMPS_DEFAULT),
+      currentMilliamps(0),
+      now(millis()),
+      timebase(0),
+      isMatrix(false),
+      #ifndef WLED_DISABLE_2D
+      hPanels(1),
+      vPanels(1),
+      panelH(8),
+      panelW(8),
+      matrix{0,0,0,0},
+      panel{{0,0,0,0}},
+      #endif
+      // semi-private (just obscured) used in effect functions through macros
+      _currentPalette(CRGBPalette16(HTMLColorCode::Black)),
+      _colors_t{0,0,0},
+      _virtualSegmentLength(0),
+      // true private variables
+      _length(DEFAULT_LED_COUNT),
+      _brightness(DEFAULT_BRIGHTNESS),
+      _transitionDur(750),
+      _targetFps(WLED_FPS),
+      _frametime(FRAMETIME_FIXED),
+      _cumulativeFps(2),
+      _isServicing(false),
+      _isOffRefreshRequired(false),
+      _hasWhiteChannel(false),
+      _triggered(false),
+      _modeCount(EFFECTS_FUNCTION__LENGTH__ID),
+      _callback(nullptr),
+      customMappingTable(nullptr),
+      customMappingSize(0),
+      _lastShow(0),
+      _segment_index(0),
+      _mainSegment(0)
+    {
+      WS2812FX::instance = this;
+      _mode.reserve(_modeCount);     // allocate memory to prevent initial fragmentation (does not increase size())
+      _modeData.reserve(_modeCount); // allocate memory to prevent initial fragmentation (does not increase size())
+      if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _modeCount = 1; // memory allocation failed only show Solid
+      else setupEffectData();
+    }
+
+    ~WS2812FX() {
+      if (customMappingTable) delete[] customMappingTable;
+      _mode.clear();
+      _modeData.clear();
+      _segments_new.clear();
+      customPalettes.clear();
+      if (useLedsArray && Segment_New::_globalLeds) free(Segment_New::_globalLeds);
+    }
+
+    static WS2812FX* getInstance(void) { return instance; }
+
+    void
+#ifdef WLED_DEBUG
+      printSize(),
+#endif
+      finalizeInit(),
+      service(void),
+      setMode(uint8_t segid, uint8_t m),
+      setColor(uint8_t slot, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0),
+      setColor(uint8_t slot, uint32_t c),
+      setCCT(uint16_t k),
+      setBrightness(uint8_t b, bool direct = false),
+      setRange(uint16_t i, uint16_t i2, uint32_t col),
+      setTransitionMode(bool t),
+      purgeSegments(bool force = false),
+      setSegment(uint8_t n, uint16_t start, uint16_t stop, uint8_t grouping = 1, uint8_t spacing = 0, uint16_t offset = UINT16_MAX, uint16_t startY=0, uint16_t stopY=1),
+      setMainSegmentId(uint8_t n),
+      restartRuntime(),
+      resetSegments(),
+      makeAutoSegments(bool forceReset = false),
+      fixInvalidSegments(),
+      setPixelColor(int n, uint32_t c),
+      show(void),
+      setTargetFps(uint8_t fps),
+      deserializeMap(uint8_t n=0);
+
+    void fill(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
+    void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
+    void setupEffectData(void); // add default effects to the list; defined in FX.cpp
+
+    // outsmart the compiler :) by correctly overloading
+    inline void setPixelColor(int n, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) { setPixelColor(n, RGBW32(r,g,b,w)); }
+    inline void setPixelColor(int n, CRGB c) { setPixelColor(n, c.red, c.green, c.blue); }
+    inline void trigger(void) { _triggered = true; } // Forces the next frame to be computed on all active segments.
+    inline void setShowCallback(show_callback cb) { _callback = cb; }
+    inline void setTransition(uint16_t t) { _transitionDur = t; }
+    inline void appendSegment(const Segment_New &seg = Segment_New()) { _segments_new.push_back(seg); DEBUG_LINE_HERE;}
+
+    bool
+      checkSegmentAlignment(void),
+      hasRGBWBus(void),
+      hasCCTBus(void),
+      // return true if the strip is being sent pixel updates
+      isUpdating(void),
+      useLedsArray = false;
+
+    inline bool isServicing(void) { return _isServicing; }
+    inline bool hasWhiteChannel(void) {return _hasWhiteChannel;}
+    inline bool isOffRefreshRequired(void) {return _isOffRefreshRequired;}
+
+    uint8_t
+      paletteFade,
+      paletteBlend,
+      milliampsPerLed,
+      cctBlending,
+      getActiveSegmentsNum(void),
+      getFirstSelectedSegId(void),
+      getLastActiveSegmentId(void),
+      setPixelSegment(uint8_t n);
+
+    inline uint8_t getBrightness(void) { return _brightness; }
+    inline uint8_t getMaxSegments(void) { return MAX_NUM_SEGMENTS; }  // returns maximum number of supported segments (fixed value)
+    inline uint8_t getSegmentsNum(void) { return _segments_new.size(); DEBUG_LINE_HERE; }  // returns currently present segments
+    inline uint8_t getCurrSegmentId(void) { return _segment_index; }
+    inline uint8_t getMainSegmentId(void) { return _mainSegment; }
+    inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
+    inline uint8_t getTargetFps() { return _targetFps; }
+    inline uint8_t getModeCount() { return _modeCount; }
+
+    uint16_t
+      ablMilliampsMax,
+      currentMilliamps,
+      getLengthPhysical(void),
+      getFps();
+
+    inline uint16_t getFrameTime(void) { return _frametime; }
+    inline uint16_t getMinShowDelay(void) { return MIN_SHOW_DELAY; }
+    inline uint16_t getLengthTotal(void) { return _length; }
+    inline uint16_t getTransition(void) { return _transitionDur; }
+
+    uint32_t
+      now,
+      timebase,
+      currentColor(uint32_t colorNew, uint8_t tNr),
+      getPixelColor(uint16_t);
+
+    inline uint32_t getLastShow(void) { return _lastShow; }
+    inline uint32_t segColor(uint8_t i) { return _colors_t[i]; }
+
+    const char *
+      getModeData(uint8_t id = 0) { return (id && id<_modeCount) ? _modeData[id] : PSTR("Solid"); }
+
+    const char **
+      getModeDataSrc(void) { return &(_modeData[0]); } // vectors use arrays for underlying data
+
+    Segment_New&        getSegment(uint8_t id);
+    inline Segment_New& getFirstSelectedSeg(void) { return _segments_new[getFirstSelectedSegId()]; }
+    inline Segment_New& getMainSegment(void)      { return _segments_new[getMainSegmentId()]; }
+    inline Segment_New* getSegments(void)         { return &(_segments_new[0]); }
+
+  // 2D support (panels)
+    bool
+      isMatrix;
+
+#ifndef WLED_DISABLE_2D
+    #define WLED_MAX_PANELS 64
+    uint8_t
+      hPanels,
+      vPanels;
+
+    uint16_t
+      panelH,
+      panelW;
+
+    typedef struct panel_bitfield_t {
+      bool bottomStart : 1; // starts at bottom?
+      bool rightStart  : 1; // starts on right?
+      bool vertical    : 1; // is vertical?
+      bool serpentine  : 1; // is serpentine?
+    } Panel;
+    Panel
+      matrix,
+      panel[WLED_MAX_PANELS];
+#endif
+
+    void
+      setUpMatrix(),
+      setPixelColorXY(int x, int y, uint32_t c);
+
+    // outsmart the compiler :) by correctly overloading
+    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    inline void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+
+    uint32_t
+      getPixelColorXY(uint16_t, uint16_t);
+
+  // end 2D support
+
+    void loadCustomPalettes(void); // loads custom palettes from JSON
+    CRGBPalette16 _currentPalette; // palette used for current effect (includes transition)
+    std::vector<CRGBPalette16> customPalettes; // TODO: move custom palettes out of WS2812FX class
+
+    // using public variables to reduce code size increase due to inline function getSegment() (with bounds checking)
+    // and color transitions
+    uint32_t _colors_t[3]; // color used for effect (includes transition)
+    uint16_t _virtualSegmentLength;
+
+    std::vector<segment_new> _segments_new;
+    friend class Segment_New;
+
+  private:
+    uint16_t _length;
+    uint8_t  _brightness;
+    uint16_t _transitionDur;
+
+    uint8_t  _targetFps;
+    uint16_t _frametime;
+    uint16_t _cumulativeFps;
+
+    // will require only 1 byte
+    struct {
+      bool _isServicing          : 1;
+      bool _isOffRefreshRequired : 1; //periodic refresh is required for the strip to remain off.
+      bool _hasWhiteChannel      : 1;
+      bool _triggered            : 1;
+    };
+
+    uint8_t                  _modeCount;
+    std::vector<mode_ptr>    _mode;     // SRAM footprint: 4 bytes per element
+    std::vector<const char*> _modeData; // mode (effect) name and its slider control data array
+
+    show_callback _callback;
+
+    uint16_t* customMappingTable;
+    uint16_t  customMappingSize;
+    
+    uint32_t _lastShow;
+    
+    uint8_t _segment_index;
+    uint8_t _mainSegment;
+
+    void
+      estimateCurrentAndLimitBri(void);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+
+
+
+
 #endif // USE_MODULE_LIGHTS_ANIMATOR
 
 #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-#endif // Guard
+#endif // _ANIMATOR_SEGMENTS_H Guard

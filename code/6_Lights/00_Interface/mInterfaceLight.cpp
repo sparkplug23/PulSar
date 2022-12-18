@@ -57,7 +57,7 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
   uint8_t start_pixel_position = 0;
   // RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, desired_pixel, &start_pixel_position);
 
-  RgbcctColor colour = mPaletteI->GetColourFromPalette_Intermediate(pCONT_lAni->_segments[0].palette.id, desired_pixel, &start_pixel_position);
+  RgbcctColor colour = mPaletteI->GetColourFromPreloadedPalette(pCONT_lAni->_segments[0].palette.id, desired_pixel, &start_pixel_position);
 
   return colour;
 

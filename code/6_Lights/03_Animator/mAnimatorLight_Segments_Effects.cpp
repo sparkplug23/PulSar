@@ -29,7 +29,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
   // Brightness is generated internally, and rgbcct solid palettes are output values
   SEGMENT.flags.brightness_applied_during_colour_generation = false;
 
-  RgbcctColor desired_colour  = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id);
+  RgbcctColor desired_colour  = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id);
   
   ALOG_DBM( PSTR("desired_colour1=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
@@ -88,7 +88,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
                 pixel++
   ){
 
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
     if(SEGMENT.flags.brightness_applied_during_colour_generation){
       colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
@@ -182,7 +182,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     
     desired_pixel = random(0, pixels_in_map);
   
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
 
     // #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
     // AddLog(LOG_LEVEL_TEST, 
@@ -259,7 +259,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
       for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
       {
 
-        colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+        colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
         
         if(SEGMENT.flags.brightness_applied_during_colour_generation){
           colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
@@ -371,8 +371,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
         desired_index_upper = 0; //assume its the first and wrap back
       }
       
-      start_colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, grad_pair_index,   &start_pixel_position);
-      end_colour   = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_index_upper, &end_pixel_position);
+      start_colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, grad_pair_index,   &start_pixel_position);
+      end_colour   = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_index_upper, &end_pixel_position);
 
       // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "grad_pair_index %d|%d  %d|%d"),grad_pair_index,pixels_in_map, grad_pair_index,desired_index_upper);
       // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%02d start_pixel_position %d"),grad_pair_index,start_pixel_position);
@@ -568,7 +568,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
       desired_pixel = *indexes_counter_p ? index_1 : index_2;
     }
     
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel, &pixel_position);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel, &pixel_position);
     
     if(SEGMENT.flags.brightness_applied_during_colour_generation){
       colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
@@ -644,7 +644,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
                pixel++
   ){
 
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
 
     colour_hsb = RgbColor(colour); // to HSB
     colour_hsb.S = saturation;
@@ -749,7 +749,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
     
     desired_pixel = random(0, pixels_in_map);
   
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
 
     #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
     AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
@@ -822,7 +822,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
                 pixel++
   ){
 
-    colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
     if(SEGMENT.flags.brightness_applied_during_colour_generation){
       colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
@@ -856,7 +856,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
                 pixel++
   ){
 
-    // colour = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel);
+    // colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
     // if(SEGMENT.flags.brightness_applied_during_colour_generation){
     //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
@@ -5849,17 +5849,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t colo
     if((i % gap) == SEGENV.aux0) {
       if (do_palette)
       {
-        
-        #ifdef ENABLE_DEVFEATURE_COLOUR_PALETTE_MERGED
-        if(flag_use_new_get_palette_method)
-          SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)); // Functionally the same
-        else
-          SetPixelColor(i, mPaletteI->color_from_palette_Intermediate(i, true, PALETTE_SOLID_WRAP, 0));
-        #else
-        SetPixelColor(i, mPaletteI->color_from_palette_Intermediate(i, true, PALETTE_SOLID_WRAP, 0));
-        #endif
-
-
+        SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)); // Functionally the same
       } else {
         SetPixelColor(i, color1);
       }
@@ -5916,16 +5906,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t co
 
     uint32_t color = color1;
     if(index > width*2/3-1){
-      
-      #ifdef ENABLE_DEVFEATURE_COLOUR_PALETTE_MERGED
-      if(flag_use_new_get_palette_method)
-        color = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1); // Functionally the same
-      else
-        color = mPaletteI->color_from_palette_Intermediate(i, true, PALETTE_SOLID_WRAP, 1);
-      #else
-      color = mPaletteI->color_from_palette_Intermediate(i, true, PALETTE_SOLID_WRAP, 1);
-      #endif
-
+      color = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1); // Functionally the same
     }
     else if(index > width/3-1) color = color2;
 
@@ -8898,7 +8879,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
       // blend ratio from WLED uses 255 range, neopixel is 0 to 1 range blend ratio is really a brightness level
       float blend_ratio = mSupport::mapfloat(s, 0.0f, 255.0f, 0.0f, 1.0f);
 
-      colour1 = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel_palette_counter);
+      colour1 = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel_palette_counter);
       colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
       colour2 = RgbcctColor(0);
       colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
@@ -8935,8 +8916,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
                  p++
       ){
 
-        // colour1 = mPaletteI->GetColourFromPalette(nullptr, pixel_palette_counter);
-        colour1 = mPaletteI->GetColourFromPalette_Intermediate(SEGMENT.palette.id, pixel_palette_counter);
+        colour1 = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel_palette_counter);
         
         // #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
         // ALOG_DBG(PSTR("p=%d|%d\t%d"),p,stop_pixel,colour1.R);

@@ -1208,6 +1208,54 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
 
   #endif //ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
+  
+#ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+  if(jtok = obj["SegNew"].getObject()["appendSegment"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    // uint8_t val = jtok.getInt();
+    // mixer.running_id = val;
+    // LoadMixerGroupByID(val);
+    // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+
+    uint8_t start = 0;
+    uint8_t stop = 0;
+    byte id = jtok.getInt();
+
+    for (size_t s = 0; s < strip->getSegmentsNum(); s++) {
+        Segment_New &sg = strip->getSegment(s);
+        DEBUG_LINE_HERE;
+        if (sg.isSelected()) {
+        DEBUG_LINE_HERE;
+          // deserializeSegment(segVar, s, presetId);
+
+          Segment_New& seg = strip->getSegment(s);
+          Segment_New prev = seg; //make a backup so we can tell if something changed
+
+          // if using vectors use this code to append segment
+          if (id >= strip->getSegmentsNum()) {
+        DEBUG_LINE_HERE;
+            if (stop <= 0) return 0; // ignore empty/inactive segments
+            strip->appendSegment(Segment_New(0, strip->getLengthTotal()));
+            id = strip->getSegmentsNum()-1; // segments are added at the end of list
+          }
+
+          //didSet = true;
+        }
+      }
+
+
+
+
+
+
+  }
+
+#endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
 
 } // END PARSE COMMANDS
 
