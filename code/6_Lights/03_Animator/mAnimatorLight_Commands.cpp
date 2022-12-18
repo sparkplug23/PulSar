@@ -1241,6 +1241,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
             if (stop <= 0) return 0; // ignore empty/inactive segments
             strip->appendSegment(Segment_New(0, strip->getLengthTotal()));
             id = strip->getSegmentsNum()-1; // segments are added at the end of list
+            ALOG_INF(PSTR("new ID"), id);
           }
 
           //didSet = true;
