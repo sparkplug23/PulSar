@@ -196,12 +196,12 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level){
 uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_method){
 
   // return 0;
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
   // 
 
-Serial.printf("settings.active_zones=%d", settings.active_zones); Serial.flush();
+// Serial.printf("settings.active_zones=%d", settings.active_zones); Serial.flush();
 
 
   JBI->Start();

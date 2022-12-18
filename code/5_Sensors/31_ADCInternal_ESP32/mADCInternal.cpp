@@ -126,7 +126,7 @@ void IRAM_ATTR ISR_External_Pin_ADC_Config_All_Trigger()
 
 int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
 {
-  
+
   switch(function){
     case FUNC_PRE_INIT:
       Pre_Init();
@@ -147,7 +147,9 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
     break;   
     case FUNC_EVERY_SECOND:
     {
-
+      // Update_Channel1_ADC_Readings();
+       average_DEMA.value = average_DEMA.filter->AddValue(adc1_get_raw(ADC1_CHANNEL_7));
+ 
     }
     break;
     /************
@@ -165,7 +167,7 @@ int8_t mADCInternal::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Init();
       break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      // MQTTHandler_Set_TelePeriod();
       break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -182,6 +184,8 @@ void mADCInternal::Pre_Init(){
 
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
+  
+  
 
 #ifdef ESP32
   if(pCONT_pins->PinUsed(GPIO_ADC1_CH6_ID))
@@ -216,6 +220,10 @@ void mADCInternal::Pre_Init(){
     external_interrupt.trigger_pin = pCONT_pins->GetPin(GPIO_ADC1_EXTERNAL_INTERRUPT_TRIGGER_ID);
     external_interrupt.flag_enabled = true;
   }
+
+  average_DEMA.alpha1 = 2.0f / (100.0f-1.0f);
+  average_DEMA.alpha2 = 1-(2.0f / (100.0f-1.0f));
+  average_DEMA.filter = new DoubleEMAFilter<float>(average_DEMA.alpha1, average_DEMA.alpha2);
   
 #endif // ESP32
 
@@ -231,7 +239,7 @@ void mADCInternal::Pre_Init(){
 void mADCInternal::Init(void){
 
 
-#ifdef ESP32
+  #ifdef ESP32
   #ifdef ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
   if(external_interrupt.flag_enabled)
   {
@@ -319,7 +327,7 @@ void mADCInternal::Update_Channel1_ADC_Readings()
     readings[0].adc_level = adc1_get_raw(ADC1_CHANNEL_6);
     ets_delay_us(1);
     readings[1].adc_level = adc1_get_raw(ADC1_CHANNEL_7);
-    AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"),readings[0].adc_level,readings[1].adc_level);
+    AddLog(LOG_LEVEL_TEST, PSTR("adc_level = \t%d\t%d"), readings[0].adc_level, readings[1].adc_level);
   #endif
 
 #endif // ESP32
@@ -365,10 +373,19 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level){
     // Update_Channel1_ADC_Readings();
     
   JBI->Array_Start("chADC1");
-  for(int i=0;i<2;i++){
-    JBI->Add(readings[i].adc_level);
-  }
+  // for(int i=0;i<1;i++){
+    JBI->Add(adc1_get_raw(ADC1_CHANNEL_7));//readings[i].adc_level);
+  // }
   JBI->Array_End();
+
+  JBI->Add("dma_smoothed", average_DEMA.value);
+
+
+  JBI->Add("Percentage", constrain(map(average_DEMA.value, 2280,715,  0,100),0,100)); //Inverse!
+  JBI->Add("Percentage_Raw", map(average_DEMA.value, 2280,715,  0,100) ); //Inverse!
+
+  
+  JBI->Add("DigitalPin", digitalRead(4));
 
   // JBI->Array_Start("ADC1");
   // for(int i=0;i<8;i++){
@@ -376,30 +393,30 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level){
   // }
   // JBI->Array_End();
 
-  JBI->Array_Start("stored_values.index");
-  for(int i=0;i<2;i++){
-    JBI->Add(readings[0].stored_values.index);
-  }
-  JBI->Array_End();
-  JBI->Array_Start("samples_between_resets");
-  for(int i=0;i<2;i++){
-    JBI->Add(readings[i].samples_between_resets);
-  }
-  JBI->Array_End();
+  // JBI->Array_Start("stored_values.index");
+  // for(int i=0;i<2;i++){
+  //   JBI->Add(readings[0].stored_values.index);
+  // }
+  // JBI->Array_End();
+  // JBI->Array_Start("samples_between_resets");
+  // for(int i=0;i<2;i++){
+  //   JBI->Add(readings[i].samples_between_resets);
+  // }
+  // JBI->Array_End();
 
-  uint16_t send_size = 0;
-  send_size = 10; //STORED_VALUE_ADC_MAX
+  // uint16_t send_size = 0;
+  // send_size = 10; //STORED_VALUE_ADC_MAX
 
-  JBI->Array_Start("adc0");
-  for(int i=0;i<send_size;i++){
-    JBI->Add(readings[0].stored_values.adc[i]);
-  }
-  JBI->Array_End();
-  JBI->Array_Start("adc1");
-  for(int i=0;i<send_size;i++){
-    JBI->Add(readings[1].stored_values.adc[i]);
-  }
-  JBI->Array_End();
+  // JBI->Array_Start("adc0");
+  // for(int i=0;i<send_size;i++){
+  //   JBI->Add(readings[0].stored_values.adc[i]);
+  // }
+  // JBI->Array_End();
+  // JBI->Array_Start("adc1");
+  // for(int i=0;i<send_size;i++){
+  //   JBI->Add(readings[1].stored_values.adc[i]);
+  // }
+  // JBI->Array_End();
 
 
   
@@ -431,7 +448,7 @@ void mADCInternal::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -439,7 +456,7 @@ void mADCInternal::MQTTHandler_Init(){
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
+  ptr->flags.PeriodicEnabled = true;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;

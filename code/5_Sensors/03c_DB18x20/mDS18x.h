@@ -1,11 +1,11 @@
-#ifndef MSENSORSDB_H_V1
-#define MSENSORSDB_H_V1 0.3
+#ifndef MSENSORSDB_H_V3
+#define MSENSORSDB_H_V3 0.3
 
 #define D_UNIQUE_MODULE_SENSORS_DB18_ID ((5*1000)+03)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_DS18X
+#ifdef USE_MODULE_SENSORS_DS18X_V3
 
 #define REQUIRESALARMS false //turn off
 
@@ -123,6 +123,7 @@ class mDS18X :
     #define REQUIRE_COMPLETE true
     #define DONTREQUIRE_COMPLETE false
 
+void Init_Static();
     
 int8_t FindStructIndexByAddressID(int8_t address_id);
 

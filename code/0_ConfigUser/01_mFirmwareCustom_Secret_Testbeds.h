@@ -81,6 +81,8 @@
 // #define DEVICE_TESTBED_OLED_SH1106
 // #define DEVICE_TESTBED_LILYGO_SIM7000G_WITH_OLED
 
+#define DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
+
 /**
  * @brief Note: By getting the rows = animation, the achievement can clearly be shown by simply setting "percent animation from wled" or similar
  * 
@@ -8453,6 +8455,69 @@
 
 
 #endif
+
+
+#ifdef DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
+  #define DEVICENAME_CTR          "xmas_livingroom_tree_water_level"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Tree Water"
+  #define DEVICENAME_ROOMHINT_CTR "Living Room"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+
+  #define USE_MODULE_CONTROLLER_FURNACE_SENSOR
+ 
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\","
+      #endif
+      "\"4\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
+  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG  "FurnaceOutflow"
+  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG  "Exhaust"
+  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG  "GarageRadiator"
+  #define D_DEVICE_SENSORS_ANALOG_1_CTR       "LockOut Lamp Luminance"
+  #define D_DEVICE_SENSORS_SWITCH_1_CTR       "FurnaceActive"
+  #define D_DEVICE_SENSORS_SWITCH_2_CTR       "FurnaceLockOut"
+  #define D_DEVICE_SENSORS_SWITCH_3_CTR       "PIR"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Garage"
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "}";
+
+#endif
+
+
+
 
 
 #ifdef DEVICE_FORCED_TO_BE_TESTER

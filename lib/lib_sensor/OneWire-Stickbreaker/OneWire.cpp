@@ -393,9 +393,6 @@ void OneWire::target_search(uint8_t family_code)
 //
 uint8_t OneWire::search(uint8_t *newAddr, bool search_mode /* = true */)
 {
-  
-		// Serial.println("OneWire::search")
-
    uint8_t id_bit_number;
    uint8_t last_zero, rom_byte_number, search_result;
    uint8_t id_bit, cmp_id_bit;
