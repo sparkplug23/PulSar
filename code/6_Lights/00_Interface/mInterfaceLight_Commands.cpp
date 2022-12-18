@@ -72,14 +72,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), jtok.getInt());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // alternate full range 0-255
     CommandSet_Brt_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -87,14 +87,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     CommandSet_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
     #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
     CommandSet_BrtRGB_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 

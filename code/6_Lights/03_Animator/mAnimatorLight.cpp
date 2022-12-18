@@ -36,7 +36,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case FUNC_EVERY_SECOND:{
-
+      
       //EverySecond();
 
       #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM

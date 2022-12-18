@@ -278,9 +278,6 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
             SubTask_Segment_Animation__Candle_Single();
           break;     
-          case EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID:
-            SubTask_Segment_Animation__Candle_Multi();
-          break;     
           case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
             SubTask_Segment_Animation__Shimmering_Palette();
           break;   
@@ -312,7 +309,7 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
           break;
           #endif
 
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
+          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING    
           case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
             SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
           break; 
@@ -1915,39 +1912,6 @@ uint8_t mAnimatorLight::get_random_wheel_index(uint8_t pos) {
 
 
 
-uint16_t mAnimatorLight::triwave16(uint16_t in)
-{
-  if (in < 0x8000) return in *2;
-  return 0xFFFF - (in - 0x8000)*2;
-}
-
-uint16_t mAnimatorLight::mode_palette()
-{
-  uint8_t segment_index  = segment_active_index;
-  uint16_t segment_length = _segments[segment_index].length();
-  uint16_t start_pixel   = _segments[segment_index].pixel_range.start;
-  uint16_t stop_pixel    = _segments[segment_index].pixel_range.stop;
-  _virtualSegmentLength = segment_length;
-
-  uint16_t counter = 0;
-  if (_segments[segment_active_index].speed() != 0) 
-  {
-    counter = (millis() * ((_segments[segment_index].speed() >> 3) +1)) & 0xFFFF;
-    counter = counter >> 8;
-  }
-  
-  bool noWrap = (paletteBlend == 2 || (paletteBlend == 0 && _segments[segment_index].speed() == 0));
-  for (uint16_t i = 0; i < segment_length; i++)
-  {
-    uint8_t colorIndex = (i * 255 / segment_length) - counter;
-    
-    if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
-    
-    SetPixelColor(i, color_from_palette(colorIndex, false, true, 255));
-  }
-  return FRAMETIME_MS;
-}
-
 
 
 /********************************************************************************************************************************
@@ -2107,10 +2071,10 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
 
 void mAnimatorLight::CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index)
 {
-  flashersettings_segments.update_colour_region.refresh_secs = value; 
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings_segments.update_colour_region.refresh_secs);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
+  // flashersettings_segments.update_colour_region.refresh_secs = value; 
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings_segments.update_colour_region.refresh_secs);
+  // #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR

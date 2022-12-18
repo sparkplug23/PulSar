@@ -1599,37 +1599,57 @@ const char* mPalette::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buf
 }
 
 
-
+/**
+ * @brief 
+ * 
+ * TO BE PHASED OUT INTO "GetColourFromPreloadedPalette"
+ */
 RgbcctColor mPalette::GetColourFromPalette_Intermediate(uint16_t palette_id, uint16_t pixel_num, uint8_t *pixel_position)
 {
-  #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
-  return GetColourFromPalette(GetPalettePointerByID(palette_id), pixel_num, pixel_position);
-  #endif
-  #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  return GetColourFromPaletteAdvanced(palette_id,pixel_num,pixel_position /*others default*/);
-  #endif
-  #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
+  // return GetColourFromPalette(GetPalettePointerByID(palette_id), pixel_num, pixel_position);
+  // #endif
+  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  // return GetColourFromPaletteAdvanced(palette_id,pixel_num,pixel_position /*others default*/);
+  // #endif
+  // #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
   return GetColourFromPreloadedPalette(palette_id,pixel_num,pixel_position /*others default*/);
-  #endif
+  // #endif
 }
+/**
+ * @brief 
+ * 
+ * TO BE PHASED OUT INTO "GetColourFromPreloadedPalette"
+ * 
+    uint16_t palette_id         = SEGMENT.palette.id;
+    uint16_t pixel_position     = "i"; 
+    uint8_t* encoded_value      = nullptr;
+    bool     flag_map_scaling   = "mapping";
+    bool     flag_wrap          = "wrap";
+    bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false;
+    uint8_t  brightness_scale   = "pbri";
+    uint8_t* discrete_colours_in_palette = nullptr; 
+    uint32_t color_from_palette32 = returned_value
 
+    (i, true, PALETTE_SOLID_WRAP, 1)
+    (A, B, C, D) = pixel_position, mapping, wrap, mcol
+    0, i, nullptr, true, PALETTE_SOLID_WRAP, 
+
+ */
 uint32_t mPalette::color_from_palette_Intermediate(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri)
 {
-  #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
-  pCONT_lAni->color_from_palette(i, mapping, wrap, mcol, pbri);
-  #endif
-  #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  // mcol currenlty not set, needs included!
-  return RgbcctColor::GetU32Colour(GetColourFromPaletteAdvanced(0/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, false /*might need moved after pBri to default it*/, pbri /*others default*/));
-  #endif
-  #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-  // mcol currenlty not set, needs included!
-  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(0/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, false /*might need moved after pBri to default it*/, pbri /*others default*/));
-  #endif
+  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
+  // pCONT_lAni->color_from_palette(i, mapping, wrap, mcol, pbri);
+  // #endif
+  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  // // mcol currenlty not set, needs included!
+  // return RgbcctColor::GetU32Colour(GetColourFromPaletteAdvanced(0/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, false /*might need moved after pBri to default it*/, pbri /*others default*/));
+  // #endif
+  // #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+  // // mcol currenlty not set, needs included!
+  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(pCONT_lAni->_segments[0].palette.id/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, mcol, false /*might need moved after pBri to default it*/, pbri /*others default*/));
+  // #endif
 }
-
-
-
 /** NEW METHOD: To test this, creating a json constructor that can produce each palette under its desired ways
  * Gets a single color from the currently selected palette.
  * @param id                  Palette Index, default (0) will be random from colour wheel
@@ -1643,8 +1663,43 @@ uint32_t mPalette::color_from_palette_Intermediate(uint16_t i, bool mapping, boo
  
  without IRAM_ATTR, function takes 10.5 per call
  with IRAM_ATTR, STILL 10.5 per call
- 
+
+Conversion map
+  GetColourFromPalette_Intermediate(palette_id, pixel_num,       *pixel_position)
+  GetColourFromPreloadedPalette    (palette_id, _pixel_position,  encoded_value)
+Conversion map
+  color_from_palette_Intermediate  (                 uint16_t i,                     bool mapping, bool wrap, uint8_t mcol,                                          uint8_t pbri                              )
+  GetColourFromPreloadedPalette    (UNSET,      _pixel_position, *encoded_value, flag_map_scaling, flag_wrap, flag_convert_pixel_index_to_get_exact_crgb_colour, brightness_scale, *discrete_colours_in_palette) 
+     mcol is now mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID
+     mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, A, nullptr, B, C, D)  <<<< copy and fill in as needed
  */
+uint32_t 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::GetColourFromPreloadedPaletteU32(
+  uint16_t palette_id,
+  uint16_t _pixel_position,//desired_index_from_palette,  
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  uint8_t mcol, // will be phased out
+  bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+  uint8_t  brightness_scale, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+  uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+){
+  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(
+    palette_id,
+    _pixel_position,//desired_index_from_palette,  
+    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    mcol, // will be phased out
+    flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+    brightness_scale, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+    discrete_colours_in_palette //ie length of palette as optional return    
+  ));
+}
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 IRAM_ATTR 
@@ -1655,6 +1710,7 @@ mPalette::GetColourFromPreloadedPalette(
   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  uint8_t mcol, // will be phased out
   bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
   uint8_t  brightness_scale, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
   uint8_t* discrete_colours_in_palette //ie length of palette as optional return
@@ -1783,7 +1839,7 @@ mPalette::GetColourFromPreloadedPalette(
   /**
    * @brief mEffects
    **/
-  if(
+  if( // Currently checked this way, but really the encoding type of CRGBPalette should inform this decision!
     (palette_id >= PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID) &&
     (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
   ){  
@@ -1805,18 +1861,24 @@ mPalette::GetColourFromPreloadedPalette(
 
     uint16_t palette_id_adjusted = palette_id-PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID;
 
+// if(flag_wrap)
+// {
+// ALOG_INF(PSTR("%d flag_wrap{%d}"), _pixel_position, flag_wrap);
+// }
     
-    // ALOG_INF(PSTR("WS2812FX palette_id_adjusted %d  \tpixel_position%d colours_in_palette{%d}"), palette_id_adjusted, pixel_position, colours_in_palette);
+    // ALOG_INF(PSTR("id_adjusted %d  \tpixel_pos%d in_palette{%d}"), palette_id_adjusted, _pixel_position, colours_in_palette);
 
     uint8_t pixel_position_adjust = _pixel_position;
 
     
-    if(flag_convert_pixel_index_to_get_exact_crgb_colour)
+    if(flag_convert_pixel_index_to_get_exact_crgb_colour)  // change this to auto switch between mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && _pixel_position < 3) and this new method
     {
       uint8_t pixels_in_segment = colours_in_palette;
       uint8_t remainder = _pixel_position%pixels_in_segment;
-      uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255);
+      uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255); //change to "scale8" for speed
       pixel_position_adjust = remainder_scaled255;
+
+      
       
       // Serial.printf("pixel = %d|%d \t %d||%d\n\r", pixel_position, pixel_position_adjust , remainder, remainder_scaled255);
 
@@ -1835,7 +1897,11 @@ mPalette::GetColourFromPreloadedPalette(
       if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
 
     }
+    
+    // Should only need to be loaded once, but added here to make the decoding easier
+    // mPaletteI->UpdatePalette_FastLED_TargetPalette();  // Cant be here, since it updates with EACH pixel, not just once
 
+    // FastLED Get ColorFromPalette that is CRGBPalette16
     fastled_col = ColorFromPalette( mPaletteI->currentPalette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
     uint32_t fastled_col32 = 0;
@@ -1843,7 +1909,7 @@ mPalette::GetColourFromPreloadedPalette(
     
     if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = colours_in_palette; }
 
-    colour = RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
+    colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
 
   } // END of CRGBPalette's
 

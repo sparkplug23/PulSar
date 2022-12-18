@@ -103,7 +103,7 @@
 #define D_EFFECTS_FUNCTION__SPOTS_FADE__NAME_CTR              "Spots Fade"
 #define D_EFFECTS_FUNCTION__GLITTER__NAME_CTR                 "Glitter"
 #define D_EFFECTS_FUNCTION__CANDLE__NAME_CTR                  "Candle"
-#define D_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR      "Shimmering Palette"
+#define D_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR      "Shimmering Palette|Candle Multi"
 #define D_EFFECTS_FUNCTION__STARBURST__NAME_CTR               "Fireworks Starburst"
 #define D_EFFECTS_FUNCTION__EXPLODING_FIREWORKS__NAME_CTR     "Fireworks 1D"
 #define D_EFFECTS_FUNCTION__BOUNCINGBALLS__NAME_CTR           "Bouncing Balls"

@@ -7,12 +7,34 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+/**
+ * @brief List of planned changes and the order to be done (change as needed)
+ * 
+ * ** x) Figure out how to merge WLED/PulSar colour palettes, so a single GetColour can be used universally
+ * ** x) 
+ * ** x) Rewrite Segment runtime/SEG to be together
+ * ** x) Figure out how to effectively store active palettes in memory, so each segment can be unique
+
+
+
+
+ */
+
+
+//color mangling macros
+// #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
+// #define R(c) (byte((c) >> 16))
+// #define G(c) (byte((c) >> 8))
+// #define B(c) (byte(c))
+// #define W(c) (byte((c) >> 24))
+
+
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
@@ -77,55 +99,8 @@
   typedef NeoRgbFeature selectedNeoFeatureType;
 #endif
 
-
-// enum TIME_MAP_SECS_IDS{
-//   TIME_MAP_SECS_0_ID = 0,
-//   TIME_MAP_SECS_1_ID,
-//   TIME_MAP_SECS_2_ID,
-//   TIME_MAP_SECS_4_ID,
-//   TIME_MAP_SECS_6_ID,
-//   TIME_MAP_SECS_10_ID,
-//   TIME_MAP_SECS_15_ID,
-//   TIME_MAP_SECS_20_ID,
-//   TIME_MAP_SECS_30_ID,
-//   TIME_MAP_SECS_60_ID,
-//   TIME_MAP_SECS_LENGTH_ID
-// };
-// const uint8_t time_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
-
-// enum RATE_MAP_SECS_IDS{
-//   RATE_MAP_SECS_0_ID = 0,
-//   RATE_MAP_SECS_1_ID,
-//   RATE_MAP_SECS_2_ID,
-//   RATE_MAP_SECS_4_ID,
-//   RATE_MAP_SECS_6_ID,
-//   RATE_MAP_SECS_10_ID,
-//   RATE_MAP_SECS_15_ID,
-//   RATE_MAP_SECS_20_ID,
-//   RATE_MAP_SECS_30_ID,
-//   RATE_MAP_SECS_60_ID,
-//   RATE_MAP_SECS_LENGTH_ID
-// };
-// const uint8_t rate_map_secs[] PROGMEM = {0,1,2,4,6,10,15,20,30,60};
-
-// enum PIXELS_UPDATE_PERCENTAGE_IDS{
-//   PIXELS_UPDATE_PERCENTAGE_0_ID = 0,
-//   PIXELS_UPDATE_PERCENTAGE_5_ID,
-//   PIXELS_UPDATE_PERCENTAGE_10_ID,
-//   PIXELS_UPDATE_PERCENTAGE_15_ID,
-//   PIXELS_UPDATE_PERCENTAGE_20_ID,
-//   PIXELS_UPDATE_PERCENTAGE_30_ID,
-//   PIXELS_UPDATE_PERCENTAGE_40_ID,
-//   PIXELS_UPDATE_PERCENTAGE_50_ID,
-//   PIXELS_UPDATE_PERCENTAGE_60_ID,
-//   PIXELS_UPDATE_PERCENTAGE_70_ID,
-//   PIXELS_UPDATE_PERCENTAGE_80_ID,
-//   PIXELS_UPDATE_PERCENTAGE_90_ID,
-//   PIXELS_UPDATE_PERCENTAGE_100_ID,
-//   PIXELS_UPDATE_PERCENTAGE_LENGTH_ID,
-// };
-// const uint8_t pixels_to_update_as_percentage_map[] PROGMEM =
-//   {0,5,10,15,20,30,40,50,60,70,80,90,100};
+// When no callback is needed for animator and effect function (e.g. WLED) must be called
+#define SET_EFFECT_FUNCTION_HANDLES_ANIMATOR()  SEGENV.anim_function_callback = nullptr
 
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATION_ACTIVE_CTR)       "animation";
@@ -293,6 +268,9 @@ class mAnimatorLight :
     void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool brightness_needs_applied = false);// uint16_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);
        
+    #ifdef ENABLE_DEVFEATURE_COLOUR_PALETTE_MERGED
+    bool flag_use_new_get_palette_method = true;
+    #endif
 
     /**
      * @brief 

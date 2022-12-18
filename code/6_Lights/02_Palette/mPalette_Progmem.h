@@ -2146,7 +2146,7 @@ DEF_PGM_UINT8(PM_PALETTE_SUNSET_02_COLOUR_MAP__DATA)
 
 
 /**
- * Candle Flame for Candle Animation
+ * Candle Flame for Candle Animation - Single RGB Colour
  * */
 #ifndef D_PALETTE_CANDLE_FLAME_01_NAME_CTR
 #define D_PALETTE_CANDLE_FLAME_01_NAME_CTR        "Candle|Candle Flame 01"   
@@ -2155,31 +2155,7 @@ DEF_PGM_CTR  (PM_PALETTE_CANDLE_FLAME_01_NAME_CTR)        D_PALETTE_CANDLE_FLAME
 #define        D_PALETTE_CANDLE_FLAME_01_ENCODING        (PALETTE_ENCODING_INCLUDES_RGBCCT_NO_INDEX)     
 DEF_PGM_UINT8(PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP__DATA)
 { //R,G,B,WW,CW
-  // 0x06, 0x2B, 0x79, 0, 0, // Dark Blue
-  // 0x16, 0x49, 0x8A, 0, 0,
-  // 0x16, 0x49, 0x8A, 25, 25,
-  // 0x16, 0x49, 0x8A, 50, 50,
-  // 0x59, 0x95, 0xB7, 100, 100,
-  // 0x59, 0x95, 0xB7, 175, 175,
-  // 255, 255,   255, 255, 255,
-
-  /**
-   * Animations can work by either using only first two colours, or randomly picking them all
-   * 
-   */
-D_RGB_WHITE_WARM_1 0, 0, 
-  
-  // D_RGB_RED_FULL 0, 0, 
-  D_RGB_ORANGE_WARM_1   0, 0, 
-  // D_RGB_RED_ALT_1 0, 0, 
-  // D_RGB_ORANGE_WARM_1   0, 0, 
-  // D_RGB_RED_FULL 0, 0, 
-  // D_RGB_RED_FULL 0, 0, 
-  // D_RGB_ORANGE_WARM_1   0, 0, 
-  // D_RGB_RED_FULL 0, 0, 
-  // 25, 2, 0,    0, 0, 
-
-
+  255,98,13,255,0 //warm, white added
 };
 
 /**
