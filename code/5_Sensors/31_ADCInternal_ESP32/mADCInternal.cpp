@@ -381,8 +381,8 @@ uint8_t mADCInternal::ConstructJSON_Sensor(uint8_t json_level){
   JBI->Add("dma_smoothed", average_DEMA.value);
 
 
-  JBI->Add("Percentage", constrain(map(average_DEMA.value, 2280,715,  0,100),0,100)); //Inverse!
-  JBI->Add("Percentage_Raw", map(average_DEMA.value, 2280,715,  0,100) ); //Inverse!
+  JBI->Add("Percentage", constrain(map(average_DEMA.value, 1375,2280,  0,100),0,100)); //Inverse!
+  JBI->Add("Percentage_Raw", map(average_DEMA.value, 1375,2280,  0,100) ); //Inverse!
 
   
   JBI->Add("DigitalPin", digitalRead(4));
