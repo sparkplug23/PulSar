@@ -212,7 +212,6 @@ Bathroom
 // #define DEVICE_AIRPURIFIER
 // #define DEVICE_FLOORFAN1
 // #define DEVICE_FLOORFAN2
-#define DEVICE_DEFAULT_SONOFF_BASIC__15
 
 
 /**************************************************************************************************************************************************
@@ -286,11 +285,9 @@ Bathroom
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 14
 #endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC__15
+#ifdef DEVICE_DEFAULT_SONOFF_BASIC_x
   #define DEVICE_SOCKET_NUMBERED
   #define DEVICENAME_SOCKET_NUMBER_CTR 15
-  #define DEVICENAME_ROOMHINT_CTR "Roaming"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 #ifdef DEVICE_DEFAULT_SONOFF_BASIC__CANDLE_WARMER   // not sure what candle warmer is, I need to check with button testing
   #define DEVICE_SOCKET_NUMBERED
@@ -2580,22 +2577,17 @@ Bathroom
 
   #define USE_MODULE_CONTROLLER_HVAC
     // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-    // #define ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
+    #define ENABLE_DEVFEATURE_GET_SENSOR_READINGS_FOR_HVAC_ZONES
 
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING    
-    // #define USE_MODULE_SENSORS_DS18X
-    // #define USE_MODULE_SENSORS_DS18X_V2
-    // #define USE_MODULE_SENSORS_DS18X_V3
-    #define USE_MODULE_SENSORS_DS18X_V4     // Only single pin version
-    
-    // #define ENABLE_DEVFEATURE_ADDLOG_FAILED_SENSOR_WAIT_TIME
-  //   // #define ENABLE_DEVFEATURE_DS18X_RETRY_IF_NOT_EXPECTED_SENSOR_COUNT
-  //   #define D_DS18X_EXPECTED_SENSOR_COUNT 12
-    // #define ENABLE_TEMPLATE_PART__HEATING_DB18_UPSTAIRS    // disable this while gone
-    // #define ENABLE_TEMPLATE_PART__HEATING_DB18_DOWNSTAIRS
-    #define ENABLE_TEMPLATE_PART__HEATING_DB18_JUMPER_PIN_COMBINED
-  // #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_DS18X
+    #define ENABLE_DEVFEATURE_ADDLOG_FAILED_SENSOR_WAIT_TIME
+    // #define ENABLE_DEVFEATURE_DS18X_RETRY_IF_NOT_EXPECTED_SENSOR_COUNT
+    #define D_DS18X_EXPECTED_SENSOR_COUNT 12
+    #define ENABLE_TEMPLATE_PART__HEATING_DB18_UPSTAIRS
+    #define ENABLE_TEMPLATE_PART__HEATING_DB18_DOWNSTAIRS
+  #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
   #define USE_MODULE_SENSORS_DHT
 
   //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on)) 30+ pins == use this to know what has been turned on manually.
@@ -2668,19 +2660,14 @@ Bathroom
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
-      #if defined(USE_MODULE_SENSORS_DS18X) || defined(USE_MODULE_SENSORS_DS18X_V2) || defined(USE_MODULE_SENSORS_DS18X_V3) || defined(USE_MODULE_SENSORS_DS18X_V4)
-        #ifdef ENABLE_TEMPLATE_PART__HEATING_DB18_DOWNSTAIRS
-        "\"14\":\""  D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
-        #endif
+      #ifdef USE_MODULE_SENSORS_DS18X
         #ifdef ENABLE_TEMPLATE_PART__HEATING_DB18_UPSTAIRS
-        "\"4\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\"," // US_DB - 3 pin
+        "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // US_DB - 3 pin
+        #endif
+        #ifdef ENABLE_TEMPLATE_PART__HEATING_DB18_DOWNSTAIRS
+        "\"14\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\"," // DS_DB - 3 pin
         #endif
       #endif    
-      #ifdef USE_MODULE_SENSORS_DS18X_V4
-        #ifdef ENABLE_TEMPLATE_PART__HEATING_DB18_JUMPER_PIN_COMBINED
-        "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // US only or combined with jumper
-        #endif // ENABLE_TEMPLATE_PART__HEATING_DB18_JUMPER_PIN_COMBINED
-      #endif // USE_MODULE_SENSORS_DS18X_V4
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","

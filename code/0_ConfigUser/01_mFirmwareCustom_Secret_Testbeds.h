@@ -80,8 +80,7 @@
 // #define DEVICE_TESTBED_LILYGO_SIM7000G
 // #define DEVICE_TESTBED_OLED_SH1106
 // #define DEVICE_TESTBED_LILYGO_SIM7000G_WITH_OLED
-
-// #define DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
+// #define DEVICE_TESTBED_SDCARD_STORAGE
 
 /**
  * @brief Note: By getting the rows = animation, the achievement can clearly be shown by simply setting "percent animation from wled" or similar
@@ -100,6 +99,8 @@
 // #define DEVICE_TESTBED_BME_ESP32
 
 // #define DEVICE_TESTBED_PRODUCTION__SONOFF_4CHPRO
+
+// #define DEVICE_COLORADO_GARAGESENSOR
 
 
 
@@ -3279,7 +3280,9 @@
 #ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
   #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
   #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"                             // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  // #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_FREERAM_APPENDING_SERIAL
@@ -3322,14 +3325,15 @@
   #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
   #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
 
   #define DISABLE_SLEEP
 
-  #define ESP32
-  #undef ESP8266
+  // #define ESP32
+  // #undef ESP8266
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -6350,7 +6354,7 @@
   // // #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
   // #define DISABLE_WEBSERVER 
   
-  // #define ENABLE_PIXEL_FUNCTION_MIXER
+  // #define ENABLE_PIXEL_AUTOMATION_PLAYLIST
   
   // //#define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
@@ -8457,65 +8461,349 @@
 #endif
 
 
-#ifdef DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
-  #define DEVICENAME_CTR          "xmas_livingroom_tree_water_level"
-  #define DEVICENAME_FRIENDLY_CTR "XMAS Tree Water"
-  #define DEVICENAME_ROOMHINT_CTR "Living Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+
+/** COLORADO
+ * @brief 
+ * Motion Sensor 01 - "Garage"
+ **/
+#ifdef DEVICE_COLORADO_GARAGESENSOR
+  #define DEVICENAME_CTR          "co_garagesensor"
+  #define DEVICENAME_FRIENDLY_CTR "Colorado Garage Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Garage"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,50,206 
+    
+  
+
+  #define ESP32
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_CORE_RULES
+       
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
 
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"      
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
 
-  #define USE_MODULE_CONTROLLER_FURNACE_SENSOR
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Kitchen"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Kitchen"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "}";
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"// for PIR to follow
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "}"
+  "}";
+
+#endif
+
+
+
+
+/**
+ * Primary code development of using external SD Card for storing and logging data 
+ * - Storing for slow call back
+ * - Logging/Appending for larger data files that will append a data entry (json format) for each new data block
+ *    -- this might require ovverriding the end of the data file, appending a block, then reclosing the json data
  
+ Figure out has tas foes filesystem, then merge sdcard into this (phasing it out, I may want it for a while)
+ 
+ * */
+#ifdef DEVICE_TESTBED_SDCARD_STORAGE
+  #define DEVICENAME_CTR          "rgbcooker"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  
+  // // Disable MQTT, or else run it temporarily on SLS for debugging
+  
+  //   #define DEVICENAME_CTR            "node0"
+  // #define DEVICENAME_FRIENDLY_CTR   "node0"  //white wire, blue tape, to be uav 
+  // #define DEVICENAME_FOR_SDCARD_FRIENDLY_CTR   "GPS"
+
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+
+
+  // /**
+  //  * New defines to enable functions below in the way I need for them to work (ie cross enable tasks where needed)
+  //  * */
+  // #define USE_SYSTEM_MAIN_LOGGER_CONTROLLER
+  // #define USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+  // #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  // #define USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
+  // #define USE_SYSTEM_OLED_LOGGER_FEEDBACK
+  // #define USE_SYSTEM_GPS_SD_LOGGER_CONTROLLER
+  // #define USE_SYSTEM_SDCARD_LOGGING
+  // //#define USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
+
+  // /**
+  //  * Debug methods
+  //  * */
+  // /**
+  //  * @note SD Card will still be enabled, but data will be pushed out of serial2(17) 
+  //  * */
+  // // #define USE_SYSTEM_ENABLE_DEBUG_OUTPUT_ON_SERIAL2
+  // // #define USE_SYSTEM_OUTPUT_SDCARD_STREAM_TO_SERIAL0_FOR_FAST_TESTING
+
+  // // Also defining so "HardwareSerial.cpp" will use these
+  // #define RX1 18
+  // #define TX1 19
+  // #define RX2 16
+  // #define TX2 17
+  // #define SERIAL_DEBUG_BAUD_DEFAULT 115200//921600
+
+  // /**
+  //  * If enabled, disable normal logging methods
+  //  * */
+  // #ifdef USE_SYSTEM_OUTPUT_SDCARD_STREAM_TO_SERIAL0_FOR_FAST_TESTING
+  //   #define DISABLE_SERIAL_LOGGING
+  //   #define USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
+  // #endif // USE_SYSTEM_OUTPUT_SDCARD_STREAM_TO_SERIAL0_FOR_FAST_TESTING
+
+  // /**
+  //  * General defines to disable systems not needed
+  //  * */
+  // #define DISABLE_NETWORK
+  // #define DISABLE_SLEEP
+  // #define ESP32
+  // #define ENABLE_DEVFEATURE_DISABLE_ALL_WDT_FOR_TESTING
+
+  // /**
+  //  *  GPS
+  //  * */
+  // #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  //   #define USE_MODULE_DRIVERS_GPS
+  //   #define ENABLE_GPS_PARSER_NMEA
+  //   #define ENABLE_GPS_PARSER_UBX
+  //   #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  //   #define NMEAGPS_DERIVED_TYPES
+  //   #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  //   #define NMEAGPS_PARSE_SAVE_MILLIS
+  //   #define gpsPort Serial1
+  //   #define D_GPS_BAUD_RATE_FAST    921600
+  //   #define D_GPS_BAUD_RATE_DEFAULT 9600
+  //   #define USE_MODULE_DRIVERS_INTERFACE
+  //   #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_1
+  //   #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  // #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+
+  // /**
+  //  * Comms with pic32
+  //  * */
+  // #ifdef USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
+  //   #define USE_MODULE_DRIVERS_INTERFACE
+  //   #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_2
+  //   #define HARDWARE_UART_2_BAUD_RATE_SPEED  2048000
+  //   #define ENABLE_DEVFEATURE_DEBUG_PRINT_UART1_INPUT_STREAM_FROM_RINGBUFFER
+  //   #define ENABLE_DEVFEATURE_SPLASH_RINGBUFFER_TO_DEBUG_SERIAL
+  //   #define ENABLE_DEVFEATURE_RSS_UART2_RINGBUFFER_TYPE_NOSPLIT
+  // #endif // USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
+
+  // /**
+  //  * SDCard
+  //  * */
+  // #ifdef USE_SYSTEM_SDCARD_LOGGING
+  //   #define USE_MODULE_DRIVERS_SDCARD
+  //   #define USE_SDCARD_RINGBUFFER_STREAM_OUT
+  // #endif // USE_SYSTEM_SDCARD_LOGGING
+
+  // /**
+  //  * Logger Controller
+  //  * */
+  // #ifdef USE_SYSTEM_GPS_SD_LOGGER_CONTROLLER
+  //   #define USE_MODULE_CONTROLLER_GPS_SD_LOGGER
+  //   #define ENABLE_SDLOGGER_APPEND_DATA_INTO_RINGBUFFER_STREAMOUT_TEST
+  //   #define ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
+  //   #define PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM 25
+  // #endif // USE_SYSTEM_LOGGER_CONTROLLER
+
+  // /**
+  //  * Button input
+  //  * */
+  // #ifdef USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+  //   #define USE_MODULE_CORE_RULES
+  //   #define USE_MODULE_SENSORS_BUTTONS
+  // #endif // USE_SYSTEM_BUTTON_INPUT_LOGGER_TOGGLE
+
+  // /**
+  //  * OLED display
+  //  * */
+  // #ifdef USE_SYSTEM_OLED_LOGGER_FEEDBACK
+  //   #define USE_MODULE_DISPLAYS_INTERFACE
+  //   #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  //   #define SHOW_SPLASH
+  // #endif // USE_SYSTEM_OLED_LOGGER_FEEDBACK
+
+  // /**
+  //  * Using Serial1 (which is RX RSS) for transmit of logging without requiring disconnect for flashing
+  //  * */
+  // #ifdef USE_SYSTEM_ENABLE_DEBUG_OUTPUT_ON_SERIAL2
+  //   #define USE_MODULE_DRIVERS_INTERFACE
+  //   #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_2
+  //   #define HARDWARE_UART_2_BAUD_RATE_SPEED  2048000
+  //   #define ENABLE_DEVFEATURE_DEBUG_PRINT_UART1_INPUT_STREAM_FROM_RINGBUFFER
+  //   #define ENABLE_DEVFEATURE_SPLASH_RINGBUFFER_TO_DEBUG_SERIAL
+  //   #define ENABLE_DEVFEATURE_RSS_UART2_RINGBUFFER_TYPE_NOSPLIT
+  // #endif // USE_SYSTEM_ENABLE_DEBUG_OUTPUT_ON_SERIAL2
+  
+  // /**
+  //  * I2S Internal Fast Sampling
+  //  * */
+  // #ifdef USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
+  //   // #define ENABLE_ESP32_ADC_SAMPLING // not used in aplha
+  //   // // Next phase, will include saving adc values
+  //   // // #define USE_MODULE_SENSORS_ADC_INTERNAL
+  //   // #define USE_MODULE_SENSORS_ADC_I2S_INTERNAL
+  //   // #define ENABLE_SMOOTHING_ON_ADC_READING
+  //   // #define ENABLE_ADC_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
+  //   // #define ENABLE_ADC_I2S_INTERNAL_PIN_INTERRUPT_ADC_TRIGGER
+  //   // // #define ADC_CAPTURE_EXTERNAL_PIN 32
+  //   // #define ADC_CAPTURE_INPUT0_PIN 34
+  //   // #define ADC_CAPTURE_INPUT1_PIN 35
+  // #endif // USE_SYSTEM_I2S_SINGLE_CHANNEL_SAMPLER
+
+  
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\","
-      #endif
-      "\"4\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      /** 4P large JST - ADC
+       * Yellow     34(I), ADC2G, ADC1_CH6
+       * White      35(I), ADC5G, ADC1_CH7
+       * Red        32(I), ADC Record Trigger
+       * Black      GND
+       * */
+      "\"34\":\"" D_GPIO_FUNCTION_ADC1_CH6_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_EXTERNAL_INTERRUPT_TRIGGER_CTR   "\","
+      /** 5P small - UART2 RSS Stream
+       * Orange      17, UART2_TX
+       * Yellow      16, UART2_RX
+       * White       25, ie superframe event over, rising edge interrupt
+       * Red         5V
+       * Black       GND
+       * */
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_RING_BUFFER_TX_CTR   "\","
+      /** 5P small - UART1 GPS Stream
+       * Orange      19, UART1_TX
+       * Yellow      18, UART1_RX
+       * White        
+       * Red         VCC, 3V3
+       * Black       GND
+       * */
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      /** 6P small - SD Card
+       * Green       15, CS
+       * Orange      14, SCK
+       * Yellow      13, MOSI
+       * White       12, MISO
+       * Red         3V3
+       * Black       GND
+       * */
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MISO_CTR  "\","
+      /** Built in - OLED
+       * 
+       * */
+      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
+      /** 2P small
+       * Red        Button Logging Toggle
+       * Black      GND
+       * */
+      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG  "FurnaceInflow"
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG  "FurnaceOutflow"
-  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG  "Exhaust"
-  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG  "GarageRadiator"
-  #define D_DEVICE_SENSORS_ANALOG_1_CTR       "LockOut Lamp Luminance"
-  #define D_DEVICE_SENSORS_SWITCH_1_CTR       "FurnaceActive"
-  #define D_DEVICE_SENSORS_SWITCH_2_CTR       "FurnaceLockOut"
-  #define D_DEVICE_SENSORS_SWITCH_3_CTR       "PIR"
-  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Garage"
-  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
-      "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
 
-#endif
+  /**
+   * Debug pins
+   * */
+  #define DEBUG_PIN1_GPIO     21
+  #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
 
+  #define DEBUG_PIN2_GPIO     22
+  #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+
+  #define DEBUG_PIN3_GPIO     0 //USED
+  #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
+  #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+
+  #define DEBUG_PIN4_GPIO     27
+  #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
+  #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+
+  #define DEBUG_ADC_ISR_EVENT_SET(X)          DEBUG_PIN1_SET(X)
+  //#define DEBUG_ADC_ISR_EVENT_SET(X)          // nothing
+
+
+
+
+#endif // DEVICE_GPS_SDCARD_LOGGER
 
 
 
