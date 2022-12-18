@@ -1222,14 +1222,21 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
     uint8_t start = 0;
-    uint8_t stop = 0;
-    byte id = jtok.getInt();
+    uint8_t stop = 100;
+    uint8_t id = jtok.getInt();
+
+    Serial.println();
+
+    ALOG_INF(PSTR("strip->getSegmentsNum() %d|%d"), id, strip->getSegmentsNum());
+
 
     for (size_t s = 0; s < strip->getSegmentsNum(); s++) {
         Segment_New &sg = strip->getSegment(s);
         DEBUG_LINE_HERE;
-        if (sg.isSelected()) {
-        DEBUG_LINE_HERE;
+        // if (sg.isSelected()) 
+        // {
+
+          DEBUG_LINE_HERE;
           // deserializeSegment(segVar, s, presetId);
 
           Segment_New& seg = strip->getSegment(s);
@@ -1237,20 +1244,66 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
 
           // if using vectors use this code to append segment
           if (id >= strip->getSegmentsNum()) {
-        DEBUG_LINE_HERE;
+            DEBUG_LINE_HERE;
             if (stop <= 0) return 0; // ignore empty/inactive segments
-            strip->appendSegment(Segment_New(0, strip->getLengthTotal()));
+            strip->appendSegment(Segment_New(0+id, strip->getLengthTotal()));
             id = strip->getSegmentsNum()-1; // segments are added at the end of list
-            ALOG_INF(PSTR("new ID"), id);
+            ALOG_INF(PSTR("new ID %d"), id);
           }
 
           //didSet = true;
-        }
+        // }
       }
 
 
 
 
+
+
+  }
+
+    if(jtok = obj["SegNew"].getObject()["removeSegment"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    // uint8_t val = jtok.getInt();
+    // mixer.running_id = val;
+    // LoadMixerGroupByID(val);
+    // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+
+    uint8_t start = 0;
+    uint8_t stop = 100;
+    uint8_t id = jtok.getInt();
+    uint8_t force = 0;
+
+    Serial.println();
+
+    strip->_segments_new[jtok.getInt()].stop = 0; // to disable segment
+
+    ALOG_INF(PSTR("strip->getSegmentsNum() %d|%d"), id, strip->getSegmentsNum());
+
+    // remove all inactive segments (from the back)
+    int deleted = 0;
+    if (strip->_segments_new.size() <= 1) return 0;
+    for (size_t i = strip->_segments_new.size()-1; i > 0; i--)
+      if (strip->_segments_new[i].stop == 0 || force) {
+        DEBUG_PRINT(F("Purging segment segment: ")); DEBUG_PRINTLN(i);
+        deleted++;
+        strip->_segments_new.erase(strip->_segments_new.begin() + i);
+      }else{
+        DEBUG_LINE_HERE;
+      }
+    if (deleted) {
+      DEBUG_LINE_HERE;
+      strip->_segments_new.shrink_to_fit();
+      if (strip->_mainSegment >= strip->_segments_new.size()){
+        DEBUG_LINE_HERE;
+        strip->setMainSegmentId(0);
+      }
+    }
+
+// purgeSegments
 
 
   }

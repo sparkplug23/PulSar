@@ -2487,7 +2487,7 @@ class WS2812FX {  // 96 bytes
     std::vector<segment_new> _segments_new;
     friend class Segment_New;
 
-  private:
+  // private:
     uint16_t _length;
     uint8_t  _brightness;
     uint16_t _transitionDur;

@@ -233,18 +233,24 @@ JBI->Start();
 //   JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
 
 
+  JBI->Add("segment .size()", strip->_segments_new.size() );
 
 //   JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
 //   JBI->Add("CanShow",stripbus->CanShow());
 //   JBI->Add("StripSize", STRIP_SIZE_MAX);
 
 
-for(uint8_t seg_i = 0; seg_i<2; seg_i++)
+for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
 {
   JBI->Level_Start_F("Segment%d",seg_i);
 
+    // Config of segment (New stuff)
     JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
     JBI->Add("_segments_new.size()", strip->_segments_new[seg_i].length());
+
+    // Same values as I am using
+    JBI->Add("start", strip->_segments_new[seg_i].start);
+    JBI->Add("stop", strip->_segments_new[seg_i].stop);
 
 //     JBI->Add("isActive", _segments[seg_i].isActive());
 //       JBI->Level_Start("Transition");
