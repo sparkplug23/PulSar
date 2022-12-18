@@ -1,5 +1,5 @@
-#ifndef _AnimatorDALIGHTNEOPIXEL7_segH
-#define _AnimatorDALIGHTNEOPIXEL7_segH 7.0
+#ifndef _ANIMATOR_SEGMENTS_H
+#define _ANIMATOR_SEGMENTS_H
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -20,14 +20,11 @@
 
 // Palette as gradient, show active gradient of anytype spread across the palette
 
+
 #define IBN 5100
 
 #define SET_BRIGHTNESS true
 
-  #define DEBUG_LINE_HERE2    Serial.printf("DEBUG HERE: ");\
-                        Serial.print(__FILE__);\
-                        Serial.println(__LINE__);\
-                        Serial.flush();
 // options
 // bit    7: segment is in transition mode
 // bits 4-6: TBD
@@ -64,13 +61,22 @@
 #define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
 
+// #define DEFAULT_BRIGHTNESS (uint8_t)127
+// #define DEFAULT_MODE       (uint8_t)0
+// #define DEFAULT_SPEED      (uint8_t)128
+#define DEFAULT_INTENSITY  (uint8_t)128
+// #define DEFAULT_COLOR      (uint32_t)0xFFAA00
+#define DEFAULT_C1         (uint8_t)128
+#define DEFAULT_C2         (uint8_t)128
+#define DEFAULT_C3         (uint8_t)16
+
 
 //Segment option byte bits
 #define SEG_OPTION_SELECTED       0
 #define SEG_OPTION_REVERSED       1
 #define SEG_OPTION_ON             2
 #define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
-#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME or needs getPixelColor
+#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
 #define SEG_OPTION_TRANSITIONAL   7
 
 // some common colors
@@ -94,14 +100,15 @@
 #define SEGENV           _segment_runtimes[segment_active_index] //phase out
 #define SEGRUN           _segment_runtimes[segment_active_index]
 #define SEGLEN           _virtualSegmentLength
-#define SEG_STOP_INDEX           _virtualSegmentLength-1
+#define SEG_STOP_INDEX           _virtualSegmentLength-1  //prob wrong now!
 #define SEGACT           SEGMENT.stop
 #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
-#define FRAMETIME 25
+#define FRAMETIME_MS 25
 
+#define WLED_FPS         42
+#define FRAMETIME_FIXED  (1000/WLED_FPS)
+#define DEFAULT_LED_COUNT 30
 
-
-  uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
 
   void fill(uint32_t c, bool apply_brightness = false);
   void fill_ranged(uint32_t c, bool apply_brightness = false); 
@@ -117,12 +124,6 @@
    * */
   enum EFFECTS_FUNCTION__IDS
   {
-
-
-// need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
-// This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
-
-
     /**
      * Default
      * Desc: Same colour across all pixels.
@@ -165,6 +166,15 @@
     EFFECTS_FUNCTION__ROTATING_PALETTE__ID,
     #endif
     /**
+     * Desc: pixels are rotated
+     * Para: direction of motion, speed, instant or blend change
+     * 
+     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,
+    #endif
+    /**
      * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
      *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
      * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
@@ -183,7 +193,80 @@
     // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     // EFFECTS_FUNCTION__STATIC_PALETTE_GRADIENT__ID,
     // #endif
-    
+    /**
+     * Desc: Animation, that fades from selected palette to white,
+     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID,
+    #endif
+    /**
+     * Desc: Animation, that fades from selected palette to white,
+     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID,
+    #endif
+    /**
+     * Desc: Animation, that fades from selected palette to anothor palette,
+     *       The intensity of fade (closer to palette B) will depend on intensity value
+     *       ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
+     * 
+     *       New method to set options
+     *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
+     *        option16 for 65000 value range
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
+    #endif
+    /**
+     * Desc: Draws palette_primary in order, then randomly takes from a second palette (saved by aux0)
+     *       This will allow white palettes to work, or else applying coloured twinkles over a white palette too
+     * 
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
+    #endif
+    /**
+     * Desc: Picks colours from palette and randomly adds them as full brightness
+     *       With each call of the animation (as new colours are added), all pixels will
+     *       decay in brightness (easiest by half each time until 0).
+     *       Note: The decay must happen first, so the new draws are still at full brightness
+     *       This will require saving the total output in the buffer.
+     * 
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
+    #endif
+    /**
+     * Desc: Any set palette, will be set to span (with linearblend) the width of the segment
+     *
+     * 
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,
+    #endif
+
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -191,25 +274,29 @@
     **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
+    
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
+    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID, // EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     // Static
     EFFECTS_FUNCTION__WLED_STATIC__ID,
     EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
     EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_SPOTS__ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_PERCENT__ID,
     // One colour changes
     EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,
     // Wipe/Sweep/Runners     
     EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,
-    EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID, // 1 direction only
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
-    EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID,
+    EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID, //start to end to start again
 
-    
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID,
     EFFECTS_FUNCTION__WLED_ANDROID__ID,
     EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID,
@@ -256,13 +343,15 @@
     EFFECTS_FUNCTION__WLED_FADE__ID,
     EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,
     EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS    
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
     // Fireworks
     EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,
     EFFECTS_FUNCTION__WLED_RAIN__ID,
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // Sparkle/Twinkle
     EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID,
     EFFECTS_FUNCTION__WLED_POPCORN__ID,
@@ -281,13 +370,9 @@
     EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID,
     EFFECTS_FUNCTION__WLED_COLORFUL__ID,
     EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS    
-    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
-    EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
-    EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID,
-    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
-    
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
+        
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // Blink/Strobe
     EFFECTS_FUNCTION__WLED_BLINK__ID,
     EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,
@@ -323,7 +408,7 @@
     EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID,
     EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID,
     EFFECTS_FUNCTION__WLED_DRIP__ID,     
-    #endif // ENABLE_EXTRA_WLED_EFFECTS    
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
     EFFECTS_FUNCTION__WLED_LENGTH__ID, // to show end of declared animation, this will have no actual effect     
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
@@ -400,7 +485,7 @@
     //  * */
 
     // this will likely just use candle effect, maybe forced colour palette?/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
      EFFECTS_FUNCTION__FIREPLACE_1D_01__ID, // Custom to using matrix for fireplace light effect
     #endif 
 
@@ -560,15 +645,19 @@
       7 - Twinkle / Flash
       8 - Steady on (already added)
      * */
-    // EFFECTS_FUNCTION__XMAS_IN_WAVES_ID
-    // EFFECTS_FUNCTION__XMAS_SEQUENTIAL_ID
-    // EFFECTS_FUNCTION__XMAS_SLO_GLO_ID
-    // EFFECTS_FUNCTION__XMAS_CHASING_AND_FLASHING_ID
-    // EFFECTS_FUNCTION__XMAS_SLOW_FADE_ID
-    // EFFECTS_FUNCTION__XMAS_TWINKLE_AND_FLASH_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER_IN_WAVES_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SEQUENTIAL_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLO_GLO_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__CHASING_AND_FLASHING_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLOW_FADE_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__TWINKLE_AND_FLASH_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+
+
+// need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
+// This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
 
     /**
      * Development methods
@@ -630,104 +719,13 @@
 
 
 
-
-  // /**
-  //  * @brief 
-  //  * Phased out since new dyanmic buffer can hold this data
-  //  * not needed when blend can now record full rgbcct type
-  //  * 
-  //  */
-  // #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-  // struct AnimationColours_SOLID_COLOUR
-  // {
-  //   RgbcctColor StartingColor;
-  //   RgbcctColor DesiredColour;
-  // };
-  // AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
-  // #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-
-
-/*****************************************
- * To be absorbed by segment settings
- * START
- * *//////
-  typedef union {
-    uint16_t data;
-    struct { 
-      // enable animations (pause)
-      uint16_t enable_random_rate : 1;
-      // used when internal timers or modes change and both need to execute the one time
-      uint16_t force_finish_flasher_pair_once : 1;
-      /* direction of animation
-      / 00(0) - clockwise
-      / 01(1) - anticlockwise
-      / 10(2) - edges towards center (flipped image)
-      / 11(3) - center towards edges (flipped image) */
-      uint16_t movement_direction : 2; // keep this is an option later (32bit option list)
-
-      uint16_t enable_startcolour_as_alternate : 1;
-      uint16_t enable_endingcolour_as_alternate : 1;
-    
-      // Reserved
-      uint16_t reserved : 12;
-    };
-  } EFFECTSSETTINGS_FLAGS;
-  
-
-  // Segments runtime??
-
-  /**
-   * @brief Phase this out!!!
-   * 
-   */
-  struct EFFECTSSETTINGS{
-    // Flashing function
-    uint8_t function = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-    // Section of animation
-    uint8_t region = 1;//EFFECTS_REGION_COLOUR_SELECT_ID;
-    // flag needed to force completion between regions
-    uint8_t flag_finish_flasher_pair = false;
-
-    EFFECTSSETTINGS_FLAGS flags;
-
-    // struct RANDOM_TRANSITIONS{
-    //   uint32_t rate_ms = 1000;
-    //   uint8_t upper_secs = 20;
-    //   uint8_t lower_secs = 1;
-    //   uint8_t array_index = 0;
-    //   uint8_t array_index_length = 0;
-    //   //uint8_t array[10];   //use different array profiles, "linear ramp", "exponentialhigh", "exp low" (lingers on low)
-    //   // uint8_t profile_id;
-    //   uint32_t tSavedNewSpeedUpdate = millis();
-    // }random_transitions;
-    
-
-    struct UPDATE_COLOUR_GENERATION_REGION{
-      // 0 is not active, 
-      // 1 is everytime
-      // 2+ is seconds
-      uint16_t refresh_secs = 0; 
-      uint16_t refresh_decounter_secs = 10; 
-      uint32_t tSaved = millis();
-    }update_colour_region;
-    
-    uint8_t brightness_max = 255;
-    uint8_t brightness_min = 0;
-    // struct TSAVED{
-    //   uint32_t Update = millis();
-    //   // uint32_t tSavedChange_animation_something;
-    //   //uint32_t Update2 = millis();
-    // }tSaved;
-    
-  }flashersettings_segments;
-
 /*****************************************
  * To be absorbed by segment settings
  * END
  * *//////
 
 
-    void SubTask_Segments_Animation();
+    void SubTask_Segments_Animation(uint8_t segment_index);
     void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
     /**
      * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
@@ -871,9 +869,11 @@
         uint16_t brightness_applied_during_colour_generation : 1;
         // This emulates aging of traditional lights, making them less uniform
         uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
-
+        
+        #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
         uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
         uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
+        #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
         uint16_t Limit_Upper_Brightness_With_BrightnessRGB : 1;
 
@@ -894,6 +894,10 @@
     // };
     uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
 
+
+    
+
+
 /**
  * How to handle multiple neopixelbus, since each segment can share them
  * 
@@ -907,7 +911,7 @@
       /**
        * Change method (eg Blend, Instant)
        * */
-      uint8_t method_id = 2;  // Is this still needed?
+      // uint8_t method_id = 2;  // Is this still needed?
       /**
        * Pixels to change up to maximum of segment
        * */
@@ -924,6 +928,7 @@
     };
 
 
+
     /**
      * @brief To be set with JSON, as the exact index location for the physical pixel indexing
      * 
@@ -937,11 +942,33 @@
     typedef struct Segment 
     { // 24 bytes
       struct PIXEL_INDEX_RANGE{
-          uint16_t start = 0;
-          uint16_t stop  = 0; // means length?
+          uint16_t start = 0; // start means first led index within segment
+          uint16_t stop  = 0; // stop means total leds within the segment (not the index of last pixel)
       }pixel_range;
 
       uint8_t options = NO_OPTIONS; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
+      
+      #ifdef ENABLE_DEVFEATURE_NEW_WLED_DEC2022
+      union {
+        uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
+        struct {
+          bool    selected    : 1;  //     0 : selected
+          bool    reverse     : 1;  //     1 : reversed
+          bool    on          : 1;  //     2 : is On
+          bool    mirror      : 1;  //     3 : mirrored
+          bool    freeze      : 1;  //     4 : paused/frozen
+          bool    reset       : 1;  //     5 : indicates that Segment runtime requires reset
+          bool    transitional: 1;  //     6 : transitional (there is transition occuring)
+          bool    reverse_y   : 1;  //     7 : reversed Y (2D)
+          bool    mirror_y    : 1;  //     8 : mirrored Y (2D)
+          bool    transpose   : 1;  //     9 : transposed (2D, swapped X & Y)
+          uint8_t map1D2D     : 3;  // 10-12 : mapping for 1D effect on 2D (0-use as strip, 1-expand vertically, 2-circular/arc, 3-rectangular/corner, ...)
+          uint8_t soundSim    : 3;  // 13-15 : 0-7 sound simulation types
+        };
+      };
+      #endif
+
+
       uint8_t grouping = 1; //multiplers
       uint8_t spacing = 0;
       // uint32_t tSaved_AnimateRunTime = millis();
@@ -970,6 +997,14 @@
     // To be phased out, only for easy conversion
       uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR}; //? really not needed or understood
 
+      void set_colors(uint8_t index, uint8_t r,uint8_t g,uint8_t b,uint8_t w )
+      {
+        // w,r,g,b packed 32 bit colour
+        colors[index] = (((uint32_t)w << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b);
+      }
+
+
+
       /**
        * Flags
        * */
@@ -977,12 +1012,27 @@
       /**
        * Effects (Scenes & Flasher), Ambilight, Adalight
        * */
-      uint8_t mode_id = 0;
+      uint8_t mode_id = 0; // rename to "effect_id"
+
+      
+      uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
+      {
+        if(mode_id >= EFFECTS_FUNCTION__WLED_STATIC__ID)
+          return FRAMETIME_MS;
+        else
+          return transition.rate_ms;
+      };
+
+
+
       /**
        * Palette (Options on getting from palette)
        * */
       struct PALETTE{
-        uint8_t id = 0; 
+
+        // ID needs changed to uint16_t
+        uint16_t id = 0; 
+
         uint8_t pattern = 0; //Single, Gradient 
         /**
          * Index range, ie with 50%, for palette with 10 colours will only use first 5 colours
@@ -990,6 +1040,19 @@
          * */
         uint8_t index_range_max_limit = 0; 
         uint8_t index_range_as_percentage = 0;
+
+        /**
+         * @brief Temporary solution to store palette info "loaded" here
+         * 
+         */
+        // struct LOADED{
+        //   uint8_t* buffer = nullptr;
+        //   uint16_t buflen = 0;
+        //   uint8_t buffer_static[200]; //tmp fixed buffer
+        // }loaded;
+
+
+
       }palette;
       /**
        * This allows the segment to have optional brightness per segment, by default is set to maximum
@@ -1036,6 +1099,14 @@
         intensity_value = v;
       }
 
+      // uint8_t grouping() //legacy for wled effects, made up from time/rate
+      // {
+      //   return speed_value;
+      // }
+      // void set_grouping(uint8_t v) //legacy for wled effects, made up from time/rate
+      // {
+      //   speed_value = v;
+      // }
 
       void setOption(uint8_t n, bool val)
       {
@@ -1106,7 +1177,12 @@
       }
       
     }segment_settings;
+
+    // WLED now uses vectors for this! With deconstructors needed to free memory
     segment_settings _segments[MAX_NUM_SEGMENTS];
+
+
+    // NOTE!!! There is no runtime now, its together
     
 
     // Flags and states that are used during one transition and reset when completed
@@ -1207,6 +1283,11 @@
       RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
       RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
     
+
+      uint32_t tSaved_LastUpdated = millis();
+      uint32_t tTick_maximum_call_ms = 10;
+
+
       /**
        * Using "index" inside animator as segment index
        * */
@@ -1246,12 +1327,16 @@
       uint16_t DataLength(){ return _dataLen; };
       byte* Data(){ return data; };
 
+      #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+      mPaletteContainer* palette_container = nullptr;
+      #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
       private:
         uint16_t _dataLen = 0;
         bool _requiresReset = false;
 
     }segment_runtime;
+
     segment_runtime _segment_runtimes[MAX_NUM_SEGMENTS]; // SRAM footprint: 28 bytes per element
 
 
@@ -1360,6 +1445,7 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
 
 
   void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
@@ -1369,11 +1455,12 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
    * */
   void SubTask_Segment_Animate_Function__Solid_Single_Colour(); 
   void SubTask_Segment_Animate_Function__Static_Palette();
+  void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
   void SubTask_Segment_Animate_Function__Slow_Glow();
   void SubTask_Segment_Animation__Stepping_Palette();
   void SubTask_Segment_Animation__Rotating_Palette();
+  void SubTask_Segment_Animation__Rotating_Previous_Animation();
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
-  void SubTask_Segment_Animate__Fireplace_1D_01();
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
   void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   
@@ -1381,9 +1468,22 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void SubTask_Flasher_Animate_Function_Tester_01();
   void SubTask_Flasher_Animate_Function_Tester_02();
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
+
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void SubTask_Segment_Animation__Blend_Palette_To_White();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
+  #endif
 
   
   // Static
@@ -1464,7 +1564,9 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animation__Fireworks();
   void SubTask_Segment_Animation__Exploding_Fireworks();
   void SubTask_Segment_Animation__Fireworks_Starburst();
+  void SubTask_Segment_Animation__Fireworks_Starburst_Glows();
   void SubTask_Segment_Animation__Rain();
+  void SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
 // Sparkle/Twinkle
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Animation__Solid_Glitter();
@@ -1490,9 +1592,8 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   #endif // ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Animation__Candle_Base(uint8_t use_multi = false);
   void SubTask_Segment_Animation__Candle_Single();
-  void SubTask_Segment_Animation__Candle_Multi();
+  void SubTask_Segment_Animation__Shimmering_Palette(); // SubTask_Segment_Animation__Candle_Multi();
   void SubTask_Segment_Animation__Fire_Flicker();
-  void SubTask_Segment_Animation__Shimmering_Palette();
   
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
   // Blink/Strobe
@@ -1821,8 +1922,636 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
     float minf2(float v, float w);
     float maxf2(float v, float w);
 
+
+#ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+  #define DEBUG_LINE_HERE    Serial.printf("DEBUG HERE: ");\
+                        Serial.print(__FILE__);\
+                        Serial.println(__LINE__);\
+                        Serial.flush();
+
+// segment, 72 bytes
+typedef struct Segment_New {
+  public:
+    uint16_t start; // start index / start X coordinate 2D (left)
+    uint16_t stop;  // stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
+    uint16_t offset;
+    uint8_t  speed;
+    uint8_t  intensity;
+    uint8_t  palette;
+    uint8_t  mode;
+    union {
+      uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
+      struct {
+        bool    selected    : 1;  //     0 : selected
+        bool    reverse     : 1;  //     1 : reversed
+        bool    on          : 1;  //     2 : is On
+        bool    mirror      : 1;  //     3 : mirrored
+        bool    freeze      : 1;  //     4 : paused/frozen
+        bool    reset       : 1;  //     5 : indicates that Segment runtime requires reset
+        bool    transitional: 1;  //     6 : transitional (there is transition occuring)
+        bool    reverse_y   : 1;  //     7 : reversed Y (2D)
+        bool    mirror_y    : 1;  //     8 : mirrored Y (2D)
+        bool    transpose   : 1;  //     9 : transposed (2D, swapped X & Y)
+        uint8_t map1D2D     : 3;  // 10-12 : mapping for 1D effect on 2D (0-use as strip, 1-expand vertically, 2-circular/arc, 3-rectangular/corner, ...)
+        uint8_t soundSim    : 3;  // 13-15 : 0-7 sound simulation types
+      };
+    };
+    uint8_t  grouping, spacing;
+    uint8_t  opacity;
+    uint32_t colors[NUM_COLORS];
+    uint8_t  cct;                 //0==1900K, 255==10091K
+    uint8_t  custom1, custom2;    // custom FX parameters/sliders
+    struct {
+      uint8_t custom3 : 5;        // reduced range slider (0-31)
+      bool    check1  : 1;        // checkmark 1
+      bool    check2  : 1;        // checkmark 2
+      bool    check3  : 1;        // checkmark 3
+    };
+    uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
+    uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
+    char *name;
+
+    // runtime data
+    unsigned long next_time;  // millis() of next update
+    uint32_t step;  // custom "step" var
+    uint32_t call;  // call counter
+    uint16_t aux0;  // custom var
+    uint16_t aux1;  // custom var
+    byte* data;     // effect data pointer
+    CRGB* leds;     // local leds[] array (may be a pointer to global)
+    static CRGB *_globalLeds;             // global leds[] array
+    static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
+
+  private:
+    union {
+      uint8_t  _capabilities;
+      struct {
+        bool    _isRGB    : 1;
+        bool    _hasW     : 1;
+        bool    _isCCT    : 1;
+        bool    _manualW  : 1;
+        uint8_t _reserved : 4;
+      };
+    };
+    uint16_t _dataLen;
+    static uint16_t _usedSegmentData;
+
+    // transition data, valid only if transitional==true, holds values during transition
+    struct Transition {
+      uint32_t      _colorT[NUM_COLORS];
+      uint8_t       _briT;        // temporary brightness
+      uint8_t       _cctT;        // temporary CCT
+      CRGBPalette16 _palT;        // temporary palette
+      uint8_t       _prevPaletteBlends; // number of previous palette blends (there are max 255 belnds possible)
+      uint8_t       _modeP;       // previous mode/effect
+      //uint16_t      _aux0, _aux1; // previous mode/effect runtime data
+      //uint32_t      _step, _call; // previous mode/effect runtime data
+      //byte         *_data;        // previous mode/effect runtime data
+      uint32_t      _start;
+      uint16_t      _dur;
+      Transition(uint16_t dur=750)
+        : _briT(255)
+        , _cctT(127)
+        , _palT(CRGBPalette16(HTMLColorCode::Black))
+        , _prevPaletteBlends(0)
+        , _modeP(EFFECTS_FUNCTION__WLED_STATIC__ID)
+        , _start(millis())
+        , _dur(dur)
+      {}
+      Transition(uint16_t d, uint8_t b, uint8_t c, const uint32_t *o)
+        : _briT(b)
+        , _cctT(c)
+        , _palT(CRGBPalette16(HTMLColorCode::Black))
+        , _prevPaletteBlends(0)
+        , _modeP(EFFECTS_FUNCTION__WLED_STATIC__ID)
+        , _start(millis())
+        , _dur(d)
+      {
+        for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = o[i];
+      }
+    } *_t;
+
+  public:
+
+    Segment_New(uint16_t sStart=0, uint16_t sStop=30) :
+      start(sStart),
+      stop(sStop),
+      offset(0),
+      speed(DEFAULT_SPEED),
+      intensity(DEFAULT_INTENSITY),
+      palette(0),
+      mode(DEFAULT_MODE),
+      options(SELECTED | SEGMENT_ON),
+      grouping(1),
+      spacing(0),
+      opacity(255),
+      colors{DEFAULT_COLOR,BLACK,BLACK},
+      cct(127),
+      custom1(DEFAULT_C1),
+      custom2(DEFAULT_C2),
+      custom3(DEFAULT_C3),
+      check1(false),
+      check2(false),
+      check3(false),
+      startY(0),
+      stopY(1),
+      name(nullptr),
+      next_time(0),
+      step(0),
+      call(0),
+      aux0(0),
+      aux1(0),
+      data(nullptr),
+      leds(nullptr),
+      _capabilities(0),
+      _dataLen(0),
+      _t(nullptr)
+    {
+      refreshLightCapabilities();
+    }
+
+    Segment_New(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment_New(sStartX, sStopX) {
+      startY = sStartY;
+      stopY  = sStopY;
+    }
+
+    Segment_New(const Segment_New &orig) // copy constructor
+     {
+      Serial.println(F("-- Copy segment constructor --"));
+      memcpy(this, &orig, sizeof(Segment_New));
+      name = nullptr;
+      data = nullptr;
+      _dataLen = 0;
+      _t = nullptr;
+      if (leds && !Segment_New::_globalLeds) leds = nullptr;
+      if (orig.name) { name = new char[strlen(orig.name)+1]; if (name) strcpy(name, orig.name); }
+      if (orig.data) { if (allocateData(orig._dataLen)) memcpy(data, orig.data, orig._dataLen); }
+      if (orig._t)   { _t = new Transition(orig._t->_dur, orig._t->_briT, orig._t->_cctT, orig._t->_colorT); }
+      if (orig.leds && !Segment_New::_globalLeds) { leds = (CRGB*)malloc(sizeof(CRGB)*length()); if (leds) memcpy(leds, orig.leds, sizeof(CRGB)*length()); }
+    };
+
+
+
+    Segment_New(Segment_New &&orig) noexcept // move constructor
+    {
+      Serial.println(F("-- Move segment constructor --"));
+      memcpy(this, &orig, sizeof(mAnimatorLight::Segment_New));
+      orig.name = nullptr;
+      orig.data = nullptr;
+      orig._dataLen = 0;
+      orig._t   = nullptr;
+      orig.leds = nullptr;
+    }
+
+
+    ~Segment_New() {
+      #ifdef WLED_DEBUG
+      Serial.print(F("Destroying segment:"));
+      if (name) Serial.printf(" %s (%p)", name, name);
+      if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
+      if (leds) Serial.printf(" [%u]", length()*sizeof(CRGB));
+      Serial.println();
+      #endif
+      if (!Segment_New::_globalLeds && leds) free(leds);
+      if (name) delete[] name;
+      if (_t) delete _t;
+      deallocateData();
+    }
+
+    Segment_New& operator= (const Segment_New &orig); // copy assignment
+    Segment_New& operator= (Segment_New &&orig) noexcept; // move assignment
+
+    #ifdef WLED_DEBUG
+    size_t getSize() const { return sizeof(Segment_New) + (data?_dataLen:0) + (name?strlen(name):0) + (_t?sizeof(Transition):0) + (!Segment_New::_globalLeds && leds?sizeof(CRGB)*length():0); }
+    #endif
+
+    inline bool     getOption(uint8_t n) const { return ((options >> n) & 0x01); }
+    inline bool     isSelected(void)     const { return selected; }
+    inline bool     isActive(void)       const { return stop > start; }
+    inline bool     is2D(void)           const { return (width()>1 && height()>1); }
+    inline uint16_t width(void)          const { return stop - start; }       // segment width in physical pixels (length if 1D)
+    inline uint16_t height(void)         const { return stopY - startY; }     // segment height (if 2D) in physical pixels
+    inline uint16_t length(void)         const { return width() * height(); } // segment length (count) in physical pixels
+    inline uint16_t groupLength(void)    const { return grouping + spacing; }
+    inline uint8_t  getLightCapabilities(void) const { return _capabilities; }
+
+    static uint16_t getUsedSegmentData(void)    { return _usedSegmentData; }
+    static void     addUsedSegmentData(int len) { _usedSegmentData += len; }
+
+    bool    setColor(uint8_t slot, uint32_t c); //returns true if changed
+    void    setCCT(uint16_t k);
+    void    setOpacity(uint8_t o);
+    void    setOption(uint8_t n, bool val);
+    void    setMode(uint8_t fx, bool loadDefaults = false);
+    void    setPalette(uint8_t pal);
+    uint8_t differs(Segment_New& b) const;
+    void    refreshLightCapabilities(void);
+
+    // runtime data functions
+    inline uint16_t dataSize(void) const { return _dataLen; }
+    bool allocateData(size_t len);
+    void deallocateData(void);
+    void resetIfRequired(void);
+    /** 
+      * Flags that before the next effect is calculated,
+      * the internal segment state should be reset. 
+      * Call resetIfRequired before calling the next effect function.
+      * Safe to call from interrupts and network requests.
+      */
+    inline void markForReset(void) { reset = true; }  // setOption(SEG_OPTION_RESET, true)
+    void setUpLeds(void);   // set up leds[] array for loseless getPixelColor()
+
+    // transition functions
+    void     startTransition(uint16_t dur); // transition has to start before actual segment values change
+    void     handleTransition(void);
+    uint16_t progress(void); //transition progression between 0-65535
+    uint8_t  currentBri(uint8_t briNew, bool useCct = false);
+    uint8_t  currentMode(uint8_t modeNew);
+    uint32_t currentColor(uint8_t slot, uint32_t colorNew);
+    CRGBPalette16 &loadPalette(CRGBPalette16 &tgt, uint8_t pal);
+    CRGBPalette16 &currentPalette(CRGBPalette16 &tgt, uint8_t paletteID);
+
+    // 1D strip
+    uint16_t virtualLength(void) const;
+    void setPixelColor(int n, uint32_t c); // set relative pixel within segment with color
+    void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) { setPixelColor(n, RGBW32(r,g,b,w)); } // automatically inline
+    void setPixelColor(int n, CRGB c)                             { setPixelColor(n, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    void setPixelColor(float i, uint32_t c, bool aa = true);
+    void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
+    void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
+    uint32_t getPixelColor(int i);
+    // 1D support functions (some implement 2D as well)
+    void blur(uint8_t);
+    void fill(uint32_t c);
+    void fade_out(uint8_t r);
+    void fadeToBlackBy(uint8_t fadeBy);
+    void blendPixelColor(int n, uint32_t color, uint8_t blend);
+    void blendPixelColor(int n, CRGB c, uint8_t blend)            { blendPixelColor(n, RGBW32(c.r,c.g,c.b,0), blend); }
+    void addPixelColor(int n, uint32_t color);
+    void addPixelColor(int n, byte r, byte g, byte b, byte w = 0) { addPixelColor(n, RGBW32(r,g,b,w)); } // automatically inline
+    void addPixelColor(int n, CRGB c)                             { addPixelColor(n, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    void fadePixelColor(uint16_t n, uint8_t fade);
+    uint8_t get_random_wheel_index(uint8_t pos);
+    uint32_t color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
+    uint32_t color_wheel(uint8_t pos);
+
+    // 2D matrix
+    uint16_t virtualWidth(void)  const;
+    uint16_t virtualHeight(void) const;
+    uint16_t nrOfVStrips(void) const;
+  #ifndef WLED_DISABLE_2D
+    uint16_t XY(uint16_t x, uint16_t y); // support function to get relative index within segment (for leds[])
+    void setPixelColorXY(int x, int y, uint32_t c); // set relative pixel within segment with color
+    void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
+    void setPixelColorXY(float x, float y, uint32_t c, bool aa = true);
+    void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColorXY(x, y, RGBW32(r,g,b,w), aa); }
+    void setPixelColorXY(float x, float y, CRGB c, bool aa = true)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), aa); }
+    uint32_t getPixelColorXY(uint16_t x, uint16_t y);
+    // 2D support functions
+    void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t color, uint8_t blend);
+    void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), blend); }
+    void addPixelColorXY(int x, int y, uint32_t color);
+    void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+    void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade);
+    void box_blur(uint16_t i, bool vertical, fract8 blur_amount); // 1D box blur (with weight)
+    void blurRow(uint16_t row, fract8 blur_amount);
+    void blurCol(uint16_t col, fract8 blur_amount);
+    void moveX(int8_t delta);
+    void moveY(int8_t delta);
+    void move(uint8_t dir, uint8_t delta);
+    void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c);
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c);
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) { drawLine(x0, y0, x1, y1, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color);
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB c) { drawCharacter(chr, x, y, w, h, RGBW32(c.r,c.g,c.b,0)); } // automatic inline
+    void wu_pixel(uint32_t x, uint32_t y, CRGB c);
+    void blur1d(fract8 blur_amount); // blur all rows in 1 dimension
+    void blur2d(fract8 blur_amount) { blur(blur_amount); }
+    void fill_solid(CRGB c) { fill(RGBW32(c.r,c.g,c.b,0)); }
+    void nscale8(uint8_t scale);
+  #else
+    uint16_t XY(uint16_t x, uint16_t y)                                    { return x; }
+    void setPixelColorXY(int x, int y, uint32_t c)                         { setPixelColor(x, c); }
+    void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColor(x, RGBW32(r,g,b,w)); }
+    void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColor(x, RGBW32(c.r,c.g,c.b,0)); }
+    void setPixelColorXY(float x, float y, uint32_t c, bool aa = true)     { setPixelColor(x, c, aa); }
+    void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColor(x, RGBW32(r,g,b,w), aa); }
+    void setPixelColorXY(float x, float y, CRGB c, bool aa = true)         { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), aa); }
+    uint32_t getPixelColorXY(uint16_t x, uint16_t y)                       { return getPixelColor(x); }
+    void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t c, uint8_t blend) { blendPixelColor(x, c, blend); }
+    void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColor(x, RGBW32(c.r,c.g,c.b,0), blend); }
+    void addPixelColorXY(int x, int y, uint32_t color)                     { addPixelColor(x, color); }
+    void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColor(x, RGBW32(r,g,b,w)); }
+    void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColor(x, RGBW32(c.r,c.g,c.b,0)); }
+    void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)            { fadePixelColor(x, fade); }
+    void box_blur(uint16_t i, bool vertical, fract8 blur_amount) {}
+    void blurRow(uint16_t row, fract8 blur_amount) {}
+    void blurCol(uint16_t col, fract8 blur_amount) {}
+    void moveX(int8_t delta) {}
+    void moveY(int8_t delta) {}
+    void move(uint8_t dir, uint8_t delta) {}
+    void fill_circle(uint16_t cx, uint16_t cy, uint8_t radius, CRGB c) {}
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t c) {}
+    void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, CRGB c) {}
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, uint32_t color) {}
+    void drawCharacter(unsigned char chr, int16_t x, int16_t y, uint8_t w, uint8_t h, CRGB color) {}
+    void wu_pixel(uint32_t x, uint32_t y, CRGB c) {}
+  #endif
+} segment_new;
+//static int segSize = sizeof(Segment_New);
+
+// main "strip" class
+class WS2812FX {  // 96 bytes
+  typedef uint16_t (*mode_ptr)(void); // pointer to mode function
+  typedef void (*show_callback)(void); // pre show callback
+  typedef struct ModeData {
+    uint8_t     _id;   // mode (effect) id
+    mode_ptr    _fcn;  // mode (effect) function
+    const char *_data; // mode (effect) name and its UI control data
+    ModeData(uint8_t id, uint16_t (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
+  } mode_data_t;
+
+  static WS2812FX* instance;
+  
+  public:
+
+    WS2812FX() :
+      paletteFade(0),
+      paletteBlend(0),
+      milliampsPerLed(55),
+      cctBlending(0),
+      ablMilliampsMax(0),//ABL_MILLIAMPS_DEFAULT),
+      currentMilliamps(0),
+      now(millis()),
+      timebase(0),
+      isMatrix(false),
+      #ifndef WLED_DISABLE_2D
+      hPanels(1),
+      vPanels(1),
+      panelH(8),
+      panelW(8),
+      matrix{0,0,0,0},
+      panel{{0,0,0,0}},
+      #endif
+      // semi-private (just obscured) used in effect functions through macros
+      _currentPalette(CRGBPalette16(HTMLColorCode::Black)),
+      _colors_t{0,0,0},
+      _virtualSegmentLength(0),
+      // true private variables
+      _length(DEFAULT_LED_COUNT),
+      _brightness(DEFAULT_BRIGHTNESS),
+      _transitionDur(750),
+      _targetFps(WLED_FPS),
+      _frametime(FRAMETIME_FIXED),
+      _cumulativeFps(2),
+      _isServicing(false),
+      _isOffRefreshRequired(false),
+      _hasWhiteChannel(false),
+      _triggered(false),
+      _modeCount(EFFECTS_FUNCTION__LENGTH__ID),
+      _callback(nullptr),
+      customMappingTable(nullptr),
+      customMappingSize(0),
+      _lastShow(0),
+      _segment_index(0),
+      _mainSegment(0)
+    {
+      WS2812FX::instance = this;
+      _mode.reserve(_modeCount);     // allocate memory to prevent initial fragmentation (does not increase size())
+      _modeData.reserve(_modeCount); // allocate memory to prevent initial fragmentation (does not increase size())
+      if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _modeCount = 1; // memory allocation failed only show Solid
+      else setupEffectData();
+    }
+
+    ~WS2812FX() {
+      if (customMappingTable) delete[] customMappingTable;
+      _mode.clear();
+      _modeData.clear();
+      _segments_new.clear();
+      customPalettes.clear();
+      if (useLedsArray && Segment_New::_globalLeds) free(Segment_New::_globalLeds);
+    }
+
+    static WS2812FX* getInstance(void) { return instance; }
+
+    void
+#ifdef WLED_DEBUG
+      printSize(),
+#endif
+      finalizeInit(),
+      service(void),
+      setMode(uint8_t segid, uint8_t m),
+      setColor(uint8_t slot, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0),
+      setColor(uint8_t slot, uint32_t c),
+      setCCT(uint16_t k),
+      setBrightness(uint8_t b, bool direct = false),
+      setRange(uint16_t i, uint16_t i2, uint32_t col),
+      setTransitionMode(bool t),
+      purgeSegments(bool force = false),
+      setSegment(uint8_t n, uint16_t start, uint16_t stop, uint8_t grouping = 1, uint8_t spacing = 0, uint16_t offset = UINT16_MAX, uint16_t startY=0, uint16_t stopY=1),
+      setMainSegmentId(uint8_t n),
+      restartRuntime(),
+      resetSegments(),
+      makeAutoSegments(bool forceReset = false),
+      fixInvalidSegments(),
+      setPixelColor(int n, uint32_t c),
+      show(void),
+      setTargetFps(uint8_t fps),
+      deserializeMap(uint8_t n=0);
+
+    void fill(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
+    void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
+    void setupEffectData(void); // add default effects to the list; defined in FX.cpp
+
+    // outsmart the compiler :) by correctly overloading
+    inline void setPixelColor(int n, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) { setPixelColor(n, RGBW32(r,g,b,w)); }
+    inline void setPixelColor(int n, CRGB c) { setPixelColor(n, c.red, c.green, c.blue); }
+    inline void trigger(void) { _triggered = true; } // Forces the next frame to be computed on all active segments.
+    inline void setShowCallback(show_callback cb) { _callback = cb; }
+    inline void setTransition(uint16_t t) { _transitionDur = t; }
+    inline void appendSegment(const Segment_New &seg = Segment_New()) { _segments_new.push_back(seg); DEBUG_LINE_HERE;}
+
+    bool
+      checkSegmentAlignment(void),
+      hasRGBWBus(void),
+      hasCCTBus(void),
+      // return true if the strip is being sent pixel updates
+      isUpdating(void),
+      useLedsArray = false;
+
+    inline bool isServicing(void) { return _isServicing; }
+    inline bool hasWhiteChannel(void) {return _hasWhiteChannel;}
+    inline bool isOffRefreshRequired(void) {return _isOffRefreshRequired;}
+
+    uint8_t
+      paletteFade,
+      paletteBlend,
+      milliampsPerLed,
+      cctBlending,
+      getActiveSegmentsNum(void),
+      getFirstSelectedSegId(void),
+      getLastActiveSegmentId(void),
+      setPixelSegment(uint8_t n);
+
+    inline uint8_t getBrightness(void) { return _brightness; }
+    inline uint8_t getMaxSegments(void) { return MAX_NUM_SEGMENTS; }  // returns maximum number of supported segments (fixed value)
+    inline uint8_t getSegmentsNum(void) { return _segments_new.size(); DEBUG_LINE_HERE; }  // returns currently present segments
+    inline uint8_t getCurrSegmentId(void) { return _segment_index; }
+    inline uint8_t getMainSegmentId(void) { return _mainSegment; }
+    inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
+    inline uint8_t getTargetFps() { return _targetFps; }
+    inline uint8_t getModeCount() { return _modeCount; }
+
+    uint16_t
+      ablMilliampsMax,
+      currentMilliamps,
+      getLengthPhysical(void),
+      getFps();
+
+    inline uint16_t getFrameTime(void) { return _frametime; }
+    inline uint16_t getMinShowDelay(void) { return MIN_SHOW_DELAY; }
+    inline uint16_t getLengthTotal(void) { return _length; }
+    inline uint16_t getTransition(void) { return _transitionDur; }
+
+    uint32_t
+      now,
+      timebase,
+      currentColor(uint32_t colorNew, uint8_t tNr),
+      getPixelColor(uint16_t);
+
+    inline uint32_t getLastShow(void) { return _lastShow; }
+    inline uint32_t segColor(uint8_t i) { return _colors_t[i]; }
+
+    const char *
+      getModeData(uint8_t id = 0) { return (id && id<_modeCount) ? _modeData[id] : PSTR("Solid"); }
+
+    const char **
+      getModeDataSrc(void) { return &(_modeData[0]); } // vectors use arrays for underlying data
+
+    Segment_New&        getSegment(uint8_t id);
+    inline Segment_New& getFirstSelectedSeg(void) { return _segments_new[getFirstSelectedSegId()]; }
+    inline Segment_New& getMainSegment(void)      { return _segments_new[getMainSegmentId()]; }
+    inline Segment_New* getSegments(void)         { return &(_segments_new[0]); }
+
+  // 2D support (panels)
+    bool
+      isMatrix;
+
+#ifndef WLED_DISABLE_2D
+    #define WLED_MAX_PANELS 64
+    uint8_t
+      hPanels,
+      vPanels;
+
+    uint16_t
+      panelH,
+      panelW;
+
+    typedef struct panel_bitfield_t {
+      bool bottomStart : 1; // starts at bottom?
+      bool rightStart  : 1; // starts on right?
+      bool vertical    : 1; // is vertical?
+      bool serpentine  : 1; // is serpentine?
+    } Panel;
+    Panel
+      matrix,
+      panel[WLED_MAX_PANELS];
+#endif
+
+    void
+      setUpMatrix(),
+      setPixelColorXY(int x, int y, uint32_t c);
+
+    // outsmart the compiler :) by correctly overloading
+    inline void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColorXY(x, y, RGBW32(r,g,b,w)); } // automatically inline
+    inline void setPixelColorXY(int x, int y, CRGB c)                             { setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0)); }
+
+    uint32_t
+      getPixelColorXY(uint16_t, uint16_t);
+
+  // end 2D support
+
+    void loadCustomPalettes(void); // loads custom palettes from JSON
+    CRGBPalette16 _currentPalette; // palette used for current effect (includes transition)
+    std::vector<CRGBPalette16> customPalettes; // TODO: move custom palettes out of WS2812FX class
+
+    // using public variables to reduce code size increase due to inline function getSegment() (with bounds checking)
+    // and color transitions
+    uint32_t _colors_t[3]; // color used for effect (includes transition)
+    uint16_t _virtualSegmentLength;
+
+    std::vector<segment_new> _segments_new;
+    friend class Segment_New;
+
+  // private:
+    uint16_t _length;
+    uint8_t  _brightness;
+    uint16_t _transitionDur;
+
+    uint8_t  _targetFps;
+    uint16_t _frametime;
+    uint16_t _cumulativeFps;
+
+    // will require only 1 byte
+    struct {
+      bool _isServicing          : 1;
+      bool _isOffRefreshRequired : 1; //periodic refresh is required for the strip to remain off.
+      bool _hasWhiteChannel      : 1;
+      bool _triggered            : 1;
+    };
+
+    uint8_t                  _modeCount;
+    std::vector<mode_ptr>    _mode;     // SRAM footprint: 4 bytes per element
+    std::vector<const char*> _modeData; // mode (effect) name and its slider control data array
+
+    show_callback _callback;
+
+    uint16_t* customMappingTable;
+    uint16_t  customMappingSize;
+    
+    uint32_t _lastShow;
+    
+    uint8_t _segment_index;
+    uint8_t _mainSegment;
+
+    void
+      estimateCurrentAndLimitBri(void);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+
+
+
+
 #endif // USE_MODULE_LIGHTS_ANIMATOR
 
 #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-#endif // Guard
+#endif // _ANIMATOR_SEGMENTS_H Guard

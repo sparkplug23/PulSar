@@ -78,14 +78,72 @@ return JBI->End();
 uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level)
 {
 
+char buffer[100];
+
 JBI->Start();
 
     JBI->Add("AvailablePalettes", (uint16_t)mPaletteI->PALETTELIST_TOTAL_LENGTH );
+
+    #ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+
+    JBI->Level_Start("Encoding");
+
+
+      // JBI->Add("encoding",mPaletteI->palettelist.christmas_01.encoding_type);
+
+
+      for(uint8_t palette_id=mPalette::PALETTELIST_STATIC_HOLLOWEEN_OP__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_01__ID;palette_id++)
+      {
+
+        // JBI->Array_Start_P("%s", mPaletteI->GetPaletteNameByID( palette_id, buffer, sizeof(buffer) ));
+        JBI->Array_Start_P("P_%d", palette_id );
+        
+          mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+          uint16_t value = ptr->encoding.data;
+          char buffer[33] = {0}; //null terminated
+          for(uint8_t i=0;i<16;i++)
+          {
+            buffer[15-i] = bitRead(value,i) ? '1' : '0';
+          }
+          JBI->Add(buffer);
+
+        JBI->Array_End();
+
+      }
+
+    JBI->Level_End();
+
+
+
+    #endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+
+
+    #ifdef ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
+
+JBI->Array_Start_P("DataLength" );
+    for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_28__ID;palette_id++)
+    {
+
+      mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+
+
+      JBI->Add(ptr->data_length);
+
+
+
+    }
+
+        JBI->Array_End();
+
+
+    #endif 
 
 
     uint16_t id = 0;
     uint16_t pixel = 0;
     uint8_t encoded_value = 0;
+    
+    #ifndef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     // uint16_t count   = mPaletteI->GetLengthFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
     RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
 
@@ -100,6 +158,24 @@ JBI->Start();
       JBI->Add(colour.W2);
     }
     JBI->Array_End();
+    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
+    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    /**
+     * @brief Moving towards preloading palettes from memory into ram/heap for speed (then iram will work)
+     * 
+     */
+    JBI->Level_Start("LoadPalette");
+
+      uint8_t segment_index = 0;
+
+      JBI->Array_AddArray("buffer", mPaletteI->palette_runtime.loaded.buffer_static, ARRAY_SIZE(mPaletteI->palette_runtime.loaded.buffer_static));
+
+
+    JBI->Level_End();
+    
+    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
 
 return JBI->End();
 
@@ -115,22 +191,24 @@ JBI->Start();
   JBI->Add("millis", millis());
 
   JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
-  JBI->Add("isActive", _segments[0].isActive());
   JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
-  JBI->Add("isActive", _segments[0].isActive());
-  JBI->Add("_segments[0].flags.IsDirty", stripbus->IsDirty());
   JBI->Add("CanShow",stripbus->CanShow());
+  JBI->Add("StripSize", STRIP_SIZE_MAX);
 
 
 for(uint8_t seg_i = 0; seg_i<2; seg_i++)
 {
   JBI->Level_Start_F("Segment%d",seg_i);
 
-    JBI->Level_Start("Transition");
-      JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
-      JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
-    JBI->Level_End();
-  
+    JBI->Add("isActive", _segments[seg_i].isActive());
+      JBI->Level_Start("Transition");
+        JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
+        JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
+        JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
+        JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
+      JBI->Level_End();
+    JBI->Add("virtualLength", _segments[seg_i].virtualLength());
+    
   
   JBI->Level_End();
 
@@ -143,6 +221,59 @@ return JBI->End();
 }
 
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+
+
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
+{
+
+JBI->Start();
+
+
+//   JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
+
+
+  JBI->Add("segment .size()", strip->_segments_new.size() );
+
+//   JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
+//   JBI->Add("CanShow",stripbus->CanShow());
+//   JBI->Add("StripSize", STRIP_SIZE_MAX);
+
+
+for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+{
+  JBI->Level_Start_F("Segment%d",seg_i);
+
+    // Config of segment (New stuff)
+    JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
+    JBI->Add("_segments_new.size()", strip->_segments_new[seg_i].length());
+
+    // Same values as I am using
+    JBI->Add("start", strip->_segments_new[seg_i].start);
+    JBI->Add("stop", strip->_segments_new[seg_i].stop);
+
+//     JBI->Add("isActive", _segments[seg_i].isActive());
+//       JBI->Level_Start("Transition");
+//         JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
+//         JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
+//         JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
+//         JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
+//       JBI->Level_End();
+//     JBI->Add("virtualLength", _segments[seg_i].virtualLength());
+    
+  
+  JBI->Level_End();
+
+
+}
+
+
+return JBI->End();
+
+}
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+
+
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 //   uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
 //   {

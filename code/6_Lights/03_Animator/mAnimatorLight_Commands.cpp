@@ -94,13 +94,8 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     }
     _segments[0].pixel_range.start = 0;
 
-    // #ifdef ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    // _segments[0].pixel_range.stop  = STRIP_SIZE_MAX;
-    // #else
-    _segments[0].pixel_range.stop  = STRIP_SIZE_MAX-1;
-    // #endif
-  
-  
+    _segments[0].pixel_range.stop  = STRIP_SIZE_MAX;
+   
   }
 
   /**
@@ -169,10 +164,10 @@ ALOG_INF( PSTR("PixelRange") );
 
       // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
 
-      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
+      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX+1)
       {
         ALOG_ERR( PSTR("_segments[segment_index].pixel_range.stop exceeds max %d %d"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
-        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX-1;
+        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX+1;
       }
 
 
@@ -204,7 +199,7 @@ ALOG_INF( PSTR("PixelRange") );
   { 
     CommandSet_Flasher_UpdateColourRegion_RefreshSecs(jtok.getInt(), segment_index);
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -223,7 +218,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     
     
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -234,7 +229,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     
     
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -242,7 +237,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
   { 
     _segments[segment_index].setOption(SEG_OPTION_REVERSED, jtok.getInt());  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -251,7 +246,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
   { 
     _segments[segment_index].setOption(SEG_OPTION_MIRROR, jtok.getInt());  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -262,7 +257,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
     _segments[segment_index].grouping = jtok.getInt();  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
@@ -278,7 +273,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
     _segment_runtimes[segment_index].aux0 = jtok.getInt();  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Option1"])
@@ -288,10 +283,17 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
     _segment_runtimes[segment_index].aux1 = jtok.getInt();  
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
-  
+
+
+  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  if(jtok = obj["Container"].getObject()["Allocate"])
+  { 
+    ALOG_INF(PSTR("GetDataLength=%d"), _segment_runtimes[0].palette_container->GetDataLength());
+  }
+  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
 
   if(jtok = obj["PixelRange"]){ 
@@ -326,12 +328,12 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
       }
       // CommandSet_PixelGrouping_MappedMultiplierData(array, arrlen);
 
-      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX)
+      if(_segments[segment_index].pixel_range.stop > STRIP_SIZE_MAX+1)
       {
     #ifdef ENABLE_LOG_LEVEL_ERROR
         AddLog(LOG_LEVEL_ERROR, PSTR("_segments[segment_index].pixel_range.stop exceeds max %d %d"), _segments[segment_index].pixel_range.stop, STRIP_SIZE_MAX);
     #endif //ef ENABLE_LOG_LEVEL_INFO
-        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX-1;
+        _segments[segment_index].pixel_range.stop = STRIP_SIZE_MAX+1;
       }
 
 
@@ -408,7 +410,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
         // w,r,g,b packed 32 bit colour
         uint32_t colour32_bit = (((uint32_t)array[3] << 24) | ((uint32_t)array[0] << 16) | ((uint32_t)array[1] << 8) | (uint32_t)array[2]);
 
-        ALOG_INF(PSTR("[%d] colour32bit: (%d,%d,%d,%d) %d"), segment_active_index, array[0], array[1], array[2], array[3], colour32_bit);
+        ALOG_INF(PSTR("[%d] colour32bit: (%d,%d,%d,%d) %d"), segment_index, array[0], array[1], array[2], array[3], colour32_bit);
 
         _segments[segment_index].colors[colour_id] = colour32_bit;      
         data_buffer.isserviced++;
@@ -425,9 +427,24 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
       data_buffer.isserviced++;
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
     #endif // ENABLE_LOG_LEVEL_DEBUG
+    
   }
+
+
+  if(jtok = obj["Debug_NewPalette"]){
+    flag_use_new_get_palette_method = jtok.getInt();
+
+  }
+
+  if(jtok = obj["paletteBlend"]){
+    paletteBlend = jtok.getInt();
+
+  }
+
+   
+
 
   if(jtok = obj[PM_JSON_COLOUR_TYPE]){
     // if(jtok.isStr()){
@@ -574,39 +591,6 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
   //   }
   // }
   // #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-
-  // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
-  //   // CommandSet_Mixer_Flags_Enabled(jtok.getInt());
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-   
-  // // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
-  // //   mixer.time_scaler = jtok.getInt();
-  // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  // //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
-  // //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // // }
-
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
-  //   // CommandSet_Mixer_RunTimeScalerPercentage(jtok.getInt());
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-
-  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-  //   // CommandSet_Mixer_RunningID(jtok.getInt());
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-  // #endif //ENABLE_PIXEL_FUNCTION_MIXER
 
 
   
@@ -870,7 +854,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     CommandSet_LightsCountToUpdateAsNumber(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), _segments[segment_index].transition.pixels_to_update_as_percentage.val);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), _segments[segment_index].transition.pixels_to_update_as_percentage.val);
     #endif
   }else
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
@@ -901,7 +885,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     CommandSet_ActiveSolidPalette_Hue_360(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -909,14 +893,14 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     CommandSet_ActiveSolidPalette_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), getSat());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), getSat());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_SAT_255]){ // alternate full range 0-255
     CommandSet_ActiveSolidPalette_Sat_255(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT_255)), getSat());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SAT_255)), getSat());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -939,14 +923,14 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     CommandSet_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
     #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
     CommandSet_BrtRGB_255(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -954,14 +938,14 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
     CommandSet_BrtCT_255(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -971,14 +955,14 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, pCONT_iLight->_ct_min_range, pCONT_iLight->_ct_max_range), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
     CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -1003,7 +987,7 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
     // CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -1147,7 +1131,187 @@ if(jtok = obj[PM_JSON_EFFECTS].getObject()["Intensity"])
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
-}
+/**
+ * @brief 
+ * All PRESET options
+ * 
+ */
+
+  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  if(jtok = obj["Presets"].getObject()["SetPresetManual"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    uint8_t val = jtok.getInt();
+    mixer.running_id = val;
+    LoadMixerGroupByID(val);
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  }
+
+  if(jtok = obj["Presets"].getObject()["SetPresetManual_Testing"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    uint8_t val = jtok.getInt();
+    mixer.running_id = val;
+    LoadPreset_ManualTesting_ByID(val);
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  }
+
+  if(jtok = obj["Presets"].getObject()["SetPreset_ManualUserCustom"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    uint8_t val = jtok.getInt();
+    mixer.running_id = val;
+    LoadPreset_ManualUserCustom_ByID(val);
+    #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  }
+
+  
+
+  // #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
+  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
+  //   // CommandSet_Mixer_Flags_Enabled(jtok.getInt());
+  //   data_buffer.isserviced++;
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_ENABLED)), mixer.flags.Enabled);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+   
+  // // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_TIME_SCALER_AS_PERCENTAGE]){ 
+  // //   mixer.time_scaler = jtok.getInt();
+  // //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  // //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_SCALER_AS_PERCENTAGE)), mixer.time_scaler);
+  // //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // // }
+
+  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE]){ 
+  //   // CommandSet_Mixer_RunTimeScalerPercentage(jtok.getInt());
+  //   data_buffer.isserviced++;
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_MIXER D_JSON_RUNTIME_DURATION_SCALER_PERCENTAGE)), mixer.run_time_duration_scaler_as_percentage);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+
+  // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
+  //   // CommandSet_Mixer_RunningID(jtok.getInt());
+  //   data_buffer.isserviced++;
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
+  // #endif //ENABLE_PIXEL_AUTOMATION_PLAYLIST
+
+  #endif //ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+
+  
+#ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+  if(jtok = obj["SegNew"].getObject()["appendSegment"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    // uint8_t val = jtok.getInt();
+    // mixer.running_id = val;
+    // LoadMixerGroupByID(val);
+    // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+
+    uint8_t start = 0;
+    uint8_t stop = 100;
+    uint8_t id = jtok.getInt();
+
+    Serial.println();
+
+    ALOG_INF(PSTR("strip->getSegmentsNum() %d|%d"), id, strip->getSegmentsNum());
+
+
+    for (size_t s = 0; s < strip->getSegmentsNum(); s++) {
+        Segment_New &sg = strip->getSegment(s);
+        DEBUG_LINE_HERE;
+        // if (sg.isSelected()) 
+        // {
+
+          DEBUG_LINE_HERE;
+          // deserializeSegment(segVar, s, presetId);
+
+          Segment_New& seg = strip->getSegment(s);
+          Segment_New prev = seg; //make a backup so we can tell if something changed
+
+          // if using vectors use this code to append segment
+          if (id >= strip->getSegmentsNum()) {
+            DEBUG_LINE_HERE;
+            if (stop <= 0) return 0; // ignore empty/inactive segments
+            strip->appendSegment(Segment_New(0+id, strip->getLengthTotal()));
+            id = strip->getSegmentsNum()-1; // segments are added at the end of list
+            ALOG_INF(PSTR("new ID %d"), id);
+          }
+
+          //didSet = true;
+        // }
+      }
+
+
+
+
+
+
+  }
+
+    if(jtok = obj["SegNew"].getObject()["removeSegment"]){  
+    // void mAnimatorLight::
+    // CommandSet_Mixer_RunningID(jtok.getInt());
+    // uint8_t val = jtok.getInt();
+    // mixer.running_id = val;
+    // LoadMixerGroupByID(val);
+    // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+    // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+
+    uint8_t start = 0;
+    uint8_t stop = 100;
+    uint8_t id = jtok.getInt();
+    uint8_t force = 0;
+
+    Serial.println();
+
+    strip->_segments_new[jtok.getInt()].stop = 0; // to disable segment
+
+    ALOG_INF(PSTR("strip->getSegmentsNum() %d|%d"), id, strip->getSegmentsNum());
+
+    // remove all inactive segments (from the back)
+    int deleted = 0;
+    if (strip->_segments_new.size() <= 1) return 0;
+    for (size_t i = strip->_segments_new.size()-1; i > 0; i--)
+      if (strip->_segments_new[i].stop == 0 || force) {
+        DEBUG_PRINT(F("Purging segment segment: ")); DEBUG_PRINTLN(i);
+        deleted++;
+        strip->_segments_new.erase(strip->_segments_new.begin() + i);
+      }else{
+        DEBUG_LINE_HERE;
+      }
+    if (deleted) {
+      DEBUG_LINE_HERE;
+      strip->_segments_new.shrink_to_fit();
+      if (strip->_mainSegment >= strip->_segments_new.size()){
+        DEBUG_LINE_HERE;
+        strip->setMainSegmentId(0);
+      }
+    }
+
+// purgeSegments
+
+
+  }
+
+#endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+} // END PARSE COMMANDS
 
 
 // void mAnimatorLight::CommandSet_EffectsModeID(uint8_t mode, uint8_t segment)
@@ -1665,7 +1829,7 @@ void mAnimatorLight::CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t 
 //   **********Flasher Region ******************************************************************************************************
 //   ********************************************************************************************************************************/
 
-//   #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+//   #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
 // //  void mAnimatorLight:: CommandSet_Mixer_Flags_Enabled
 // //   if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_ENABLED]){ 
 // //     mixer.flags.Enabled = jtok.getInt();
@@ -1696,20 +1860,6 @@ void mAnimatorLight::CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t 
 //   **********Flasher Region ******************************************************************************************************
 //   ********************************************************************************************************************************/
 
-
-//   // if(jtok = obj[PM_JSON_MIXER].getObject()[PM_JSON_RUNNING_ID]){  
-//   //   void mAnimatorLight::
-//   //   CommandSet_Mixer_RunningID(jtok.getInt());
-//   //   uint8_t val = jtok.getInt();
-//   //   mixer.running_id = val;
-//   //   LoadMixerGroupByID(val);
-//   //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-//   //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   // }
-//   #endif //ENABLE_PIXEL_FUNCTION_MIXER
-
-
 //   /********************************************************************************************************************************
 //   **********Flasher Region ******************************************************************************************************
 //   ********************************************************************************************************************************/
@@ -1727,6 +1877,10 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
   char buffer[50];
 
   _segments[segment_index].palette.id = value < mPalette::PALETTELIST_TOTAL_LENGTH ? value : 0;
+
+#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+  loadPalette_Michael(_segments[segment_index].palette.id, segment_index);
+#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)

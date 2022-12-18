@@ -55,7 +55,9 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
 
   uint16_t desired_pixel = 0; // always first
   uint8_t start_pixel_position = 0;
-  RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, desired_pixel, &start_pixel_position);
+  // RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, desired_pixel, &start_pixel_position);
+
+  RgbcctColor colour = mPaletteI->GetColourFromPreloadedPalette(pCONT_lAni->_segments[0].palette.id, desired_pixel, &start_pixel_position);
 
   return colour;
 
@@ -417,13 +419,13 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 //       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
 //       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
 // #else
 
-//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].colour_map_id);
+//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 //       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
 //       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
@@ -572,12 +574,12 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
 // Serial.println("rgbcct0");
 // for(int i=0;i<5;i++)
 // {
-//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].colour_map_id[i]);
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].data[i]);
 // }
 // Serial.println("rgbcct1");
 // for(int i=0;i<5;i++)
 // {
-//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].colour_map_id[i]);
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].data[i]);
 // }
 // Serial.println("every second");
 
@@ -727,7 +729,8 @@ void mInterfaceLight::ShowInterface(){
 
   // ALOG_INF(PSTR("t=%d"),pCONT_set->Settings.light_settings.type);
 
-  switch(pCONT_set->Settings.light_settings.type){
+  switch(pCONT_set->Settings.light_settings.type)
+  {
     case LT_ADDRESSABLE_WS281X:  
     case LT_ADDRESSABLE_SK6812:
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
@@ -754,29 +757,31 @@ void mInterfaceLight::EveryLoop(){
   // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE_WS281X HERE %d"),pCONT_set->Settings.light_settings.type);
   // #endif
+  for( 
+    int ii = 0; 
+    ii<MAX_NUM_SEGMENTS; 
+    ii++
+  ){
 
-  
-
-
-
-  /**
-   * @brief 
-   * If PWM types
-   * 
-   */
-  if(pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END){
+  // /**
+  //  * @brief 
+  //  * If PWM types, should merge this into below, as effects are output agnostic
+  //  * 
+  //  */
+  // if(pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END){
      
-    switch(pCONT_lAni->_segments[0].mode_id)    
-      {
-      case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Segments_Animation();
-      break;
-      case ANIMATION_MODE_NONE_ID: default: break; // resting position
-    }
+  //   switch(pCONT_lAni->_segments[0].mode_id)    
+  //     {
+  //     case ANIMATION_MODE_EFFECTS_ID:
+  //       pCONT_lAni->SubTask_Segments_Animation();
+  //     break;
+  //     case ANIMATION_MODE_NONE_ID: default: break; // resting position
+  //   }  
+  // }
+
   
-  }
-  
-  if((pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X)||
+  if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
+     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X)||
      (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_SK6812)){
 
   // if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ 
@@ -784,14 +789,14 @@ void mInterfaceLight::EveryLoop(){
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE_WS281X %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     
-    switch(pCONT_lAni->_segments[0].mode_id)    
+    switch(pCONT_lAni->_segments[0].mode_id)    // needs to know the id 
     {
       /**
        * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
        * */
       #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
       case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Segments_Animation();
+        pCONT_lAni->SubTask_Segments_Animation(ii);
       break;
       #endif
       /**
@@ -830,6 +835,8 @@ void mInterfaceLight::EveryLoop(){
     #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
     ALOG_DBM( PSTR("Invalid Light Type"));
     #endif
+  }
+
   }
 
 } // END everyloop

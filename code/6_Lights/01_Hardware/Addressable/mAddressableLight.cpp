@@ -50,13 +50,18 @@ void mAddressableLight::ShowHardware(){
   // Serial.print(".");
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-  
     neopixel_runner->execute();   
-
   #else
+  
+#ifdef ENABLE_DEVFEATURE_CANSHOW_VERSION3
+
+      pCONT_lAni->stripbus->Show();
+
+#else
     if(pCONT_lAni->stripbus->CanShow()){ 
       pCONT_lAni->stripbus->Show();
     }
+    #endif
   #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 }
@@ -92,7 +97,7 @@ void NeoPixelShowTask::begin(CommitHandler handler, uint8_t core_id)
                             "NeoPixelShow",      /* name of task. */
                             10000,               /* Stack size of task */
                             &_commit_params,     /* parameter of the task */
-                            4,                   /* priority of the task */
+                            2,                   /* priority of the task */
                             &_commit_task,       /* Task handle to keep track of created task */
                             core_id);            /* pin task to core core_id */
   }

@@ -72,14 +72,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), jtok.getInt());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // alternate full range 0-255
     CommandSet_Brt_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -87,14 +87,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     CommandSet_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
     #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
     CommandSet_BrtRGB_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
@@ -1269,7 +1269,7 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 //     CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value);
 //   }
 
-//   // #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+//   // #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
 //   // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
 //   //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
 //   // }
@@ -1295,7 +1295,6 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
       // AddLog(LOG_LEVEL_TEST, PSTR("START[%d|%d] fMapIDs_Type=%d"),
       // palette_id,mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH_ID,
-      // mPaletteI->palettelist.rgbcct_users[0].flags.fMapIDs_Type);
 
   // Serial.flush();
   // delay(3000);
@@ -1315,7 +1314,6 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   uint8_t* palette_buffer = nullptr;
 
   if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-    // AddLog(LOG_LEVEL_TEST, PSTR("STARTa fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     palette_id_adjusted_to_array_index = palette_id;
     palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
     // Clear the entire new colour to the "unset" values
@@ -1329,9 +1327,7 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID)){
-    // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
-// palettelist.rgbcct_users[0].flags.fMapIDs_Type = 9;
-
+ 
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;    
     palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
@@ -1345,7 +1341,6 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
   }else
   if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)){
-    // AddLog(LOG_LEVEL_TEST, PSTR("STARTb fIndexs_Type=%d"),mPaletteI->palettelist.rgbcct_users[0].flags.fIndexs_Type);
     
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
@@ -1379,16 +1374,14 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
   // AddLog_Array(LOG_LEVEL_COMMANDS, "hsbid map", pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map, 20*2);
   // AddLog_Array(LOG_LEVEL_COMMANDS, "rgbcct map", pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map, 5*5);
   // AddLog_Array(LOG_LEVEL_COMMANDS, "encoded map", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, 25);
-  // AddLog_Array(LOG_LEVEL_COMMANDS, "colour id map", mPaletteI->palettelist.ptr->colour_map_id, 25);
-  // AddLog(LOG_LEVEL_COMMANDS, "colour map size %d", mPaletteI->palettelist.ptr->colour_map_size);
+  // AddLog_Array(LOG_LEVEL_COMMANDS, "colour id map", mPaletteI->palettelist.ptr->data, 25);
+  // AddLog(LOG_LEVEL_COMMANDS, "colour map size %d", mPaletteI->palettelist.ptr->data_length);
   // #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   // Serial.flush();
   // delay(3000);
 
-  
-      // AddLog(LOG_LEVEL_TEST, PSTR("END fIndexs_Type=%d"),palettelist.rgbcct_users[0].flags.fIndexs_Type);
-
+ 
 
 }
 

@@ -253,16 +253,16 @@ void mAnimatorLight::WebSave_RGBColourSelector(void)
 //       // Colour Add
 //       if(arg_value != COLOUR_MAP_NONE_ID){
 //         arg_value = arg_value < PRESET_COLOUR_MAP_INDEXES_MAX ? arg_value : 0; // Check it doesnt exceed array 
-//         mPaletteI->palettelist.ptr->colour_map_id[new_amount++] = arg_value;
+//         mPaletteI->palettelist.ptr->data[new_amount++] = arg_value;
 //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%d newamount=%d"),arg_ctr,arg_value,new_amount-1);
 //       }else{
 //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "hasParam(\"%s\")=%s"),arg_ctr,"COLOUR_MAP_NONE_ID");
-//         mPaletteI->palettelist.ptr->colour_map_id[arg_id] = COLOUR_MAP_NONE_ID; //set to unused
+//         mPaletteI->palettelist.ptr->data[arg_id] = COLOUR_MAP_NONE_ID; //set to unused
 //       }
 
 //     }else{
 //         //AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "SKIPPING hasParam(\"%s\")=%d"),arg_ctr,arg_value);
-//         mPaletteI->palettelist.ptr->colour_map_id[arg_id] = COLOUR_MAP_NONE_ID;
+//         mPaletteI->palettelist.ptr->data[arg_id] = COLOUR_MAP_NONE_ID;
 //         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "NOT hasParam(\"%s\")=%s"),arg_ctr,"COLOUR_MAP_NONE_ID");
 //     }
 
@@ -270,14 +270,14 @@ void mAnimatorLight::WebSave_RGBColourSelector(void)
 
 //   // if new amount != 0 ie new values, stored new amount
 //   if(new_amount){
-//     mPaletteI->palettelist.ptr->colour_map_size = new_amount-1;
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "colour_map_size=%d"),mPaletteI->palettelist.ptr->colour_map_size);
+//     mPaletteI->palettelist.ptr->data_length = new_amount-1;
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "data_length=%d"),mPaletteI->palettelist.ptr->data_length);
 //   }
 
 //   // Erase others
-//   for(int erase_id=mPaletteI->palettelist.ptr->colour_map_size;erase_id<PALETTELIST_COLOUR_AMOUNT_MAX;erase_id++){
+//   for(int erase_id=mPaletteI->palettelist.ptr->data_length;erase_id<PALETTELIST_COLOUR_AMOUNT_MAX;erase_id++){
 //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "erase_id %d=%s"),erase_id,"COLOUR_MAP_NONE_ID");
-//     mPaletteI->palettelist.ptr->colour_map_id[erase_id] = COLOUR_MAP_NONE_ID; //set to unused
+//     mPaletteI->palettelist.ptr->data[erase_id] = COLOUR_MAP_NONE_ID; //set to unused
 //   }
 
 //   memset(tmp,0,sizeof(tmp));
@@ -452,12 +452,12 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   // colours in palette
 //   HsbColor set_colours[20];
 //   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-//     set_colours[i] = preset_colour_map[mPaletteI->palettelist.ptr->colour_map_id[i]]; 
+//     set_colours[i] = preset_colour_map[mPaletteI->palettelist.ptr->data[i]]; 
 
 // // GETCOLOURSFN
 
 //     //if(mPaletteI->palettelist.ptr->flags.fColours_from_map){
-//       colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
+//       colour_selected_id[i] = mPaletteI->palettelist.ptr->data[i];    
 //     //}else{
 //       // USE * for random colours not within colour_map
 //     //
@@ -629,12 +629,12 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   // colours in palette
 //   HsbColor set_colours[20];
 //   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-//     set_colours[i] = HsbColor(RgbColor(0));//preset_colour_map[palettelist.ptr->colour_map_id[i]]; 
+//     set_colours[i] = HsbColor(RgbColor(0));//preset_colour_map[palettelist.ptr->data[i]]; 
 
 // // GETCOLOURSFN
 
 //     //if(palettelist.ptr->flags.fColours_from_map){
-//       colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
+//       colour_selected_id[i] = mPaletteI->palettelist.ptr->data[i];    
 //     //}else{
 //       // USE * for random colours not within colour_map
 //     //
@@ -1692,9 +1692,9 @@ void mAnimatorLight::WebAppend_PaletteEditor_Draw_Editor_Form(){
   // colours in palette
   HsbColor set_colours[20];
   for(int i=0;i<PALETTELIST_COLOUR_AMOUNT_MAX;i++){ 
-    set_colours[i] = HsbColor(RgbColor(0));//preset_colour_map[mPaletteI->palettelist.ptr->colour_map_id[i]]; 
+    set_colours[i] = HsbColor(RgbColor(0));//preset_colour_map[mPaletteI->palettelist.ptr->data[i]]; 
     //if(mPaletteI->palettelist.ptr->flags.fColours_from_map){
-      colour_selected_id[i] = mPaletteI->palettelist.ptr->colour_map_id[i];    
+      colour_selected_id[i] = mPaletteI->palettelist.ptr->data[i];    
     //}else{
       // USE * for random colours not within colour_map
     //

@@ -1,12 +1,18 @@
-#ifndef _AnimatorDALIGHTNEOPIXEL7_segH
-#define _AnimatorDALIGHTNEOPIXEL7_segH 7.0
+#ifndef _ANIMATORLIGHT_AUTO_PRESETS_H
+#define _ANIMATORLIGHT_AUTO_PRESETS_H
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  void LoadMixerGroupByID(uint8_t id);
+  
+  void SubTask_Flasher_Animate_Mixer();
+  void LoadPreset_ManualTesting_ByID(uint8_t id = 0);
+  void LoadPreset_OutsideFrontTree_ByID(uint8_t id = 0);
+  void LoadPreset_ManualUserCustom_ByID(uint8_t id = 0);
 
-    void LoadMixerGroupByID(uint8_t id);
+  
   enum EFFECTS_FUNCTION_MIXER{
     EFFECTS_FUNCTION_MIXER_01_ID=0,
     // EFFECTS_FUNCTION_MIXER_02_ID,
@@ -134,7 +140,7 @@
       uint8_t brightness_higher_255 = 255;
 
       uint8_t animation_transition_order = 0;//TRANSITION_ORDER_INORDER_ID;
-      uint8_t flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+      uint8_t flashersettings_function = 1;//EFFECTS_FUNCTION_SLOW_GLOW_ID;
       uint16_t run_time_duration_sec = 120;
       uint8_t palette_id = 0;
 
@@ -148,7 +154,7 @@
   }mixer;
 
   void init_mixer_defaults();
-  #endif //ENABLE_PIXEL_FUNCTION_MIXER
+  #endif //ENABLE_PIXEL_AUTOMATION_PLAYLIST
 
 #endif
 

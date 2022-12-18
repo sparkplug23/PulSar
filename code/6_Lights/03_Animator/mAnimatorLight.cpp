@@ -5,13 +5,17 @@
 const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
 const char* mAnimatorLight::PM_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR = D_MODULE_LIGHTS_ANIMATOR_FRIENDLY_CTR;
 
+/**
+ * @brief 
+ * Animator should NOT have its own Tasker, but isntead should be called from light interface
+ * 
+ * @param function 
+ * @param obj 
+ * @return int8_t 
+ */
 
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
-
-  #ifdef ENABLE_DEVFEATURE_Tasker_Override_Forcing_Variables_Testing
-  Tasker_Override_Forcing_Variables_Testing();
-  #endif // ENABLE_DEVFEATURE_FLICKERING_TEST5
 
   /************
    * INIT SECTION * 
@@ -29,59 +33,18 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
   
   switch(function){
     /************
-     * SETTINGS SECTION * 
-    *******************/
-    // case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE: 
-    //   Settings_Load();
-    // break;
-    // case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE: 
-    //   Settings_Save();
-    // break;
-    // case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:
-    // case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:
-    //   Settings_Default();
-    // break;
-    /************
      * PERIODIC SECTION * 
     *******************/
     case FUNC_EVERY_SECOND:{
-
-      #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-
-      // RgbcctColor updatedColor = pCONT_lAni->stripbus->GetPixelColor(0);
-
-      // ALOG_INF( PSTR("colour_type=%d, desired_colour1=%d,%d,%d,%d,%d AR=%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW, analogRead(4));
-      // ALOG_INF( PSTR("colour_type=%d, desired_colour1=%d,%d,%d,%d,%d AR=%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
-
-      // StripUpdate();
-
-
-
-      #endif
-    
+      
       //EverySecond();
+
+      #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+      // loadPalette_Michael(0,0);
+      #endif
 
       // const NeoRgbcctCurrentSettings settings(200,200,200,201,202);
       // uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
-
-      // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      //   char buffer[50];
-      //   AddLog(LOG_LEVEL_TEST, PSTR("GetEffectsModeNamebyID=%s"), 
-      //     pCONT_lAni->GetEffectsModeNamebyID(mEffects->getMode(),buffer,sizeof(buffer))
-      //   );
-      // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap0", mPaletteI->palettelist.rgbcct_users[0].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap1", mPaletteI->palettelist.rgbcct_users[1].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap2", mPaletteI->palettelist.rgbcct_users[2].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap3", mPaletteI->palettelist.rgbcct_users[3].colour_map_id, 5);
-      // AddLog_Array(LOG_LEVEL_WARN, "colourmap4", mPaletteI->palettelist.rgbcct_users[4].colour_map_id, 5);
-
-
-
-// ALOG_INF( PSTR("brt = %d"), pCONT_iLight->getBriRGB_Global() );
-
-
 
     }break;
     case FUNC_LOOP: 
@@ -187,7 +150,7 @@ void mAnimatorLight::Pre_Init(void){
     pCONT_ladd->neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
     // constexpr
     // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
-    uint8_t kTaskRunnerCore = xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+    uint8_t kTaskRunnerCore = 1;//ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
     pCONT_ladd->neopixel_runner->begin(
         [this]() {
             stripbus->Show();
@@ -235,42 +198,6 @@ void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
 #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
 
-// #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-// void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
-// {
-
-
-//   // if pixel size changes, free and init again
-//   uint16_t strip_size_tmp = STRIP_SIZE_MAX;
-//   #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
-//   strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;
-//   #endif
-//   // uint16_t strip_size_tmp = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;//pCONT_iLight->settings.light_size_count<STRIP_SIZE_MAX?pCONT_iLight->settings.light_size_count:STRIP_SIZE_MAX; // Catch values exceeding limit
-  
-//   /**
-//    * @brief 
-//    * Populate RGB pin#1 across all pins if only 1 pin is set
-//    * Create number of stripbuses based on how many pins are configured
-//    **/ 
-//   int8_t pin = pCONT_pins->GetPin(GPIO_RGB_DATA1_ID);
-//   if(pin != -1)
-//   {
-
-//   }
-
-
-//   #ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
-//   // future methods will need to parse on esp8266 and only permit certain pins, or if very low pixel count, software versions
-//   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, PINSET_TEMP_METHOD_RGB_PIN_RGB);//19); 3 = rx0
-//   #else //legacy method
-//   stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
-//   #endif
-
-
-// }
-// #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-     
-
 
 
 void mAnimatorLight::Init(void){ 
@@ -299,6 +226,16 @@ void mAnimatorLight::Init(void){
 
   pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE);  
 
+  
+
+  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+  strip = new WS2812FX();
+  strip->finalizeInit();
+  strip->makeAutoSegments();
+
+  #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
   // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
   // // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
   // SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
@@ -306,8 +243,11 @@ void mAnimatorLight::Init(void){
 
   _segments[0].flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
   _segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+  
+  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
   _segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
-    
+  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+
   // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
   //   flashersettings.brightness_max = 255;
   //   flashersettings.brightness_min = 0;
@@ -367,10 +307,13 @@ void mAnimatorLight::Init(void){
   }
 
 
+  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  _segment_runtimes[0].palette_container = new mPaletteContainer(100);
+  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
-    stripbus->ClearTo(0);
+    // stripbus->ClearTo(0);
     pCONT_iLight->ShowInterface();
   }
 
@@ -381,7 +324,7 @@ void mAnimatorLight::Init(void){
   blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
   init_Ambilight();
   #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  #ifdef ENABLE_PIXEL_FUNCTION_MIXER
+  #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
   init_mixer_defaults();
   #endif
 
@@ -408,7 +351,7 @@ void mAnimatorLight::Settings_Load(){
 
   // uint8_t list = 0;
   // SetPaletteListPtrFromID(list);
-  // AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d amount = %d"),list,palettelist.ptr->colour_map_size);
+  // AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d amount = %d"),list,palettelist.ptr->data_length);
   // for(uint8_t element=0;element<20;element++){
   //   AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d i%d amount = %d"),list,element,pCONT_set->Settings.palette_user_colour_map_ids[list][element]);
   // }
@@ -416,9 +359,9 @@ void mAnimatorLight::Settings_Load(){
   // Save colour map IDS
   // for(uint8_t list=0;list<20;list++){
   //   SetPaletteListPtrFromID(list);
-  //   palettelist.ptr->colour_map_size = pCONT_set->Settings.animation_settings.palette_user_amounts[list]<20?pCONT_set->Settings.animation_settings.palette_user_amounts[list]:20;
+  //   palettelist.ptr->data_length = pCONT_set->Settings.animation_settings.palette_user_amounts[list]<20?pCONT_set->Settings.animation_settings.palette_user_amounts[list]:20;
   //   for(uint8_t element=0;element<20;element++){
-  //     palettelist.ptr->colour_map_id[element] = pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element];
+  //     palettelist.ptr->data[element] = pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element];
   //   }
   // }
   
@@ -457,9 +400,9 @@ void mAnimatorLight::Settings_Save(){
   // Save colour map IDS
   // for(uint8_t list=0;list<20;list++){
   //   SetPaletteListPtrFromID(list);
-  //   pCONT_set->Settings.animation_settings.palette_user_amounts[list] = palettelist.ptr->colour_map_size;
+  //   pCONT_set->Settings.animation_settings.palette_user_amounts[list] = palettelist.ptr->data_length;
   //   for(uint8_t element=0;element<20;element++){
-  //     pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element] = palettelist.ptr->colour_map_id[element];
+  //     pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element] = palettelist.ptr->data[element];
   //   }
   // }
 
@@ -469,7 +412,6 @@ void mAnimatorLight::Settings_Save(){
 
   pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
   pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  pCONT_set->Settings.animation_settings.animation_transition_method  = _segments[0].transition.method_id;
   pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
   pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
 
@@ -745,7 +687,8 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 // Create new function of ApplyBrightnesstoDesiredColour to do this if statement generically
 // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
 
-
+#ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
+  // Remove this, as it will just be inside effects that need it
   if(_segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice)
   {
 
@@ -768,8 +711,11 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   }
   // Default: apply global brightness
   else{
+  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
     new_brightness_255 = brightness;
+  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
   }
+  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
   // AddLog(LOG_LEVEL_TEST, PSTR("ledGamma=new_brightness_255=%d - >%d"), 
   //   new_brightness_255, pCONT_iLight->ledGamma(new_brightness_255)
@@ -865,15 +811,11 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
 void mAnimatorLight::SetRefreshLEDs(){
 
-ALOG_ERR(PSTR("This function should never be called going forward"));
+  ALOG_ERR(PSTR("This function should never be called going forward"));
 
   _segments[0].single_animation_override.time_ms = 10;
   segment_animation_override.fRefreshAllPixels = true;
   // segment_animation_override.time_ms = 10;
-
-
-
-
 
   _segments[0].flags.fForceUpdate = true;
 
@@ -881,175 +823,84 @@ ALOG_ERR(PSTR("This function should never be called going forward"));
 
 
 
-
-
-
-
-
-
-
-
-// Final output, but check for power limit
-void mAnimatorLight::StripUpdate(){
-
-  DEBUG_PIN2_SET(LOW);
-  // Serial.print("-");
-
-  // STRIP_SIZE_REPEAT_MAX
-
-  // if(settings.strip_size_repeat_animation)
-
-  // Calculate output pixel size
-  // uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
-  // if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
-  //   pixel_output_length = STRIP_SIZE_MAX;
-  // }
-  // // Replicate SetPixel for repeated output
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // pixel_output_length = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;  
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-
-
-// AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
-  // // Replicate SetPixel for repeated output
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // int pixels_existing_index = 0;
-  // for(int i=0;i<ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;i++){
-  //   SetPixelColor(i,GetPixelColor(pixels_existing_index++));
-  //   if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
-  // }
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-
-
-  
-#ifdef ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
-if(mTime::TimeReached(&tSavedCalculatePowerUsage,1000)){
-// #ifdef USE_SPEED_TESTING
-  uint8_t channel_count = 3;
-
-//ADD TO ONLY Check power level every 1 second to improve speed
-
-  RgbTypeColor c;
-  // float estimated_power_new_mA = 0;
-  // uint32_t last_power = 0;
-  // float pixel_units = 0;
-  // float this_power = 0;
-  // for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
-  //   // colour_tmp = desired_colour[ledout.index];
-  //   // estimated_power_new +=  WebColorFromColourType(desired_colour[ledout.index]) * channel_count * 20;
-  //   c = desired_colour[ledout.index];
-  //   pixel_units = c.R + c.G + c.B;
-  //   this_power = (pixel_units * power_rating.Average_mA_Per_Pixel_Step;
-  //   estimated_power_new_mA +=  this_power;
-  //   //last_power = (c.R + c.G + c.B) * power_rating.Average_mA_Per_Pixel_Step;
-  //   // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-  //   //   c.R,c.G,c.B,
-  //   //   (int)pixel_units,
-  //   //   (int)this_power,
-  //   //   (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-  //   //   (int)estimated_power_new_mA
-  //   // );
-  
-  //   // estimated_power_new +=  colour_tmp.W * channel_count * 20;
-  // }
-  // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-  //     c.R,c.G,c.B,
-  //     (int)pixel_units,
-  //     (int)this_power,
-  //     (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-  //     (int)estimated_power_new_mA
-  //   );
-
-  float estimated_power_new_mA = 0;
-  uint32_t power = 0;
-  float pixel_units = 0;
-  float this_power = 0;
-  for(ledout.index=0;ledout.index<ledout.length;ledout.index++){ 
-    // colour_tmp = desired_colour[ledout.index];
-    // estimated_power_new +=  WebColorFromColourType(desired_colour[ledout.index]) * channel_count * 20;
-    c = desired_colour[ledout.index];, 19
-    power += c.R + c.G + c.B;
-    // this_power = (pixel_units * power_rating.Average_mA_Per_Pixel_Step;
-    // estimated_power_new_mA +=  this_power;
-    //last_power = (c.R + c.G + c.B) * power_rating.Average_mA_Per_Pixel_Step;
-    // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-    //   c.R,c.G,c.B,
-    //   (int)pixel_units,
-    //   (int)this_power,
-    //   (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-    //   (int)estimated_power_new_mA
-    // );
-  
-    // estimated_power_new +=  colour_tmp.W * channel_count * 20;
-  }
-  // AddLog(LOG_LEVEL_TEST,PSTR("%d.%d.%d\t%d\t%d\t%d\t%d"),
-  //     c.R,c.G,c.B,
-  //     (int)pixel_units,
-  //     (int)this_power,
-  //     (int)(pixel_units * power_rating.Average_mA_Per_Pixel_Step),
-  //     (int)estimated_power_new_mA
-  //   );
-  // Store current power usage
-  power_rating.current_mA = (float)(power);// * power_rating.Average_mA_Per_Pixel_Step);//estimated_power_new_mA;
-  power_rating.power = (power_rating.current_mA/1000)*5;  // /1000*5
-
-  // AddLog(LOG_LEVEL_TEST,PSTR("Estimated Power Consumption = %d (mA) p%d"),(int)estimated_power_new_mA,(int)last_power);
-  
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("Estimated Power Consumption = %d (mA)"),(int)estimated_power_new_mA);
-    #endif
-}
-#endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
-
-
 /**
- * @brief Before showing, duplicate the output by taking the 0-X pixels and replicating it... though this might not work since setpixellength is not long enough anymore? (or should I make a library edit to do this same feature)
+ * @brief Optional calculate power limit here before commiting?
+ * Actually, this is string dependent and should be moved into "hardware" type (pwm/ws2812)
  * 
  */
+void mAnimatorLight::StripUpdate(){
 
-// Serial.print("i");
   pCONT_iLight->ShowInterface();
-
-  // for (auto copies = 0; copies < 3; copies++) {
-  //   image.Blt(stripbus, copies * image.PixelCount());
-  // }
-  
-  /**
-   * Replicate output if enabled
-   * Notice this has been moved the the function above, so needs to be called there
-   * It sould be changed to a runtime variable/flag option for mqtt command
-   * */
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // uint16_t internal_length = pCONT_iLight->settings.light_size_count;
-  // uint16_t external_length = STRIP_OUTPUT_REPEATED_LENGTH;
-
-  // uint16_t pixel_output_length = pCONT_iLight->settings.light_size_count;
-  // if(pCONT_iLight->settings.light_size_count>STRIP_SIZE_MAX){
-  //   pixel_output_length = STRIP_SIZE_MAX;
-  // }
-  // // Replicate SetPixel for repeated output
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // pixel_output_length = ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;  
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-  // // AddLog(LOG_LEVEL_WARN, PSTR("Disabled Replicate SetPixel for repeated output"));
-  // // Replicate SetPixel for repeated output
-  // // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // #ifdef ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // int pixels_existing_index = 0;
-  // for(int i=0;i<ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES;i++){
-  //   SetPixelColor(i,GetPixelColor(pixels_existing_index++));
-  //   if(pixels_existing_index>=STRIP_SIZE_MAX){ pixels_existing_index = 0;}
-  // }
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-  // #endif // ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES
-
-  DEBUG_PIN2_SET(HIGH);
 
 }
 
+
+// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+// void mPalette::load_gradient_palette(uint8_t index)
+// {
+//   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
+//   byte tcp[72]; //support gradient palettes with up to 18 entries
+//   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
+//   targetPalette.loadDynamicGradientPalette(tcp);
+// }
+// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+
+/**
+ * @brief Function to load palette_id into the segment
+ *   (lets just use largest possible byte value without making it dynamic for now)
+ * 
+ * For now, calling this function will take all data from the palette (rgb data) and 
+ * move it into the array
+ * 
+ * Later, GetColourFromPreloadedPalette will retreive data from ram array, NEVER progmem
+ * 
+ * loadPalette 
+ *  ** create buffer into heap, save pointer
+ * 
+ * unloadPalette
+ *  ** delete buffer data from heap, reset to nullptr
+ * 
+ */
+void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
+{
+
+  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  uint8_t* palette_buffer_p = _segment_runtimes[segment_index].palette_container->GetDataPtr();
+  #else
+  // Clear = Worth while since loading palette will not be called everytime
+  memset(&mPaletteI->palette_runtime.loaded.buffer_static, 0, sizeof(mPaletteI->palette_runtime.loaded.buffer_static));
+  uint8_t* palette_buffer_p = mPaletteI->palette_runtime.loaded.buffer_static;
+  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
+
+  /**
+   * @brief My palettes
+   **/
+  if(
+      (palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) &&
+      (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
+  ){  
+
+    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+
+    // ALOG_INF(PSTR("ptr->id %d"), ptr->id);
+    // ALOG_INF(PSTR("ptr->data_length %d"), ptr->data_length);
+    
+    if(ptr->id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
+      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
+    }else
+    if(ptr->id < mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID){
+      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
+    }else
+    if(ptr->id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
+      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
+    }else{ // progmem
+      memcpy_P(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
+    }
+    
+    } // END of CRGBPalette's
+    
+
+}
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 
