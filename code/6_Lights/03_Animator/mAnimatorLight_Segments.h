@@ -97,9 +97,6 @@
 #define FRAMETIME_MS 25
 
 
-
-  uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
-
   void fill(uint32_t c, bool apply_brightness = false);
   void fill_ranged(uint32_t c, bool apply_brightness = false); 
   // void seg_fill_ranged(uint32_t c, bool apply_brightness = false);
@@ -267,17 +264,16 @@
     
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
-    EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
-    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
+    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID, // EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     // Static
     EFFECTS_FUNCTION__WLED_STATIC__ID,
     EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
     EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_SPOTS__ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_PERCENT__ID,
     // One colour changes
     EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,
@@ -287,8 +283,7 @@
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID, //start to end to start again
 
-    
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID,
     EFFECTS_FUNCTION__WLED_ANDROID__ID,
     EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID,
@@ -335,7 +330,7 @@
     EFFECTS_FUNCTION__WLED_FADE__ID,
     EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,
     EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS    
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
     // Fireworks
     EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
@@ -343,7 +338,7 @@
     EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,
     EFFECTS_FUNCTION__WLED_RAIN__ID,
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // Sparkle/Twinkle
     EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID,
     EFFECTS_FUNCTION__WLED_POPCORN__ID,
@@ -362,9 +357,9 @@
     EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID,
     EFFECTS_FUNCTION__WLED_COLORFUL__ID,
     EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,
-    #endif // ENABLE_EXTRA_WLED_EFFECTS    
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
         
-    #ifdef ENABLE_EXTRA_WLED_EFFECTS
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // Blink/Strobe
     EFFECTS_FUNCTION__WLED_BLINK__ID,
     EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,
@@ -400,7 +395,7 @@
     EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID,
     EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID,
     EFFECTS_FUNCTION__WLED_DRIP__ID,     
-    #endif // ENABLE_EXTRA_WLED_EFFECTS    
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
     EFFECTS_FUNCTION__WLED_LENGTH__ID, // to show end of declared animation, this will have no actual effect     
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
@@ -711,97 +706,6 @@
 
 
 
-
-  // /**
-  //  * @brief 
-  //  * Phased out since new dyanmic buffer can hold this data
-  //  * not needed when blend can now record full rgbcct type
-  //  * 
-  //  */
-  // #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-  // struct AnimationColours_SOLID_COLOUR
-  // {
-  //   RgbcctColor StartingColor;
-  //   RgbcctColor DesiredColour;
-  // };
-  // AnimationColours_SOLID_COLOUR animation_colours_rgbcct;
-  // #endif // DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
-
-
-/*****************************************
- * To be absorbed by segment settings
- * START
- * *//////
-  typedef union {
-    uint16_t data;
-    struct { 
-      // enable animations (pause)
-      uint16_t enable_random_rate : 1;
-      // used when internal timers or modes change and both need to execute the one time
-      uint16_t force_finish_flasher_pair_once : 1;
-      /* direction of animation
-      / 00(0) - clockwise
-      / 01(1) - anticlockwise
-      / 10(2) - edges towards center (flipped image)
-      / 11(3) - center towards edges (flipped image) */
-      uint16_t movement_direction : 2; // keep this is an option later (32bit option list)
-
-      uint16_t enable_startcolour_as_alternate : 1;
-      uint16_t enable_endingcolour_as_alternate : 1;
-    
-      // Reserved
-      uint16_t reserved : 12;
-    };
-  } EFFECTSSETTINGS_FLAGS;
-  
-
-  // Segments runtime??
-
-  /**
-   * @brief Phase this out!!!
-   * 
-   */
-  struct EFFECTSSETTINGS{
-    // Flashing function
-    uint8_t function = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-    // Section of animation
-    uint8_t region = 1;//EFFECTS_REGION_COLOUR_SELECT_ID;
-    // flag needed to force completion between regions
-    uint8_t flag_finish_flasher_pair = false;
-
-    EFFECTSSETTINGS_FLAGS flags;
-
-    // struct RANDOM_TRANSITIONS{
-    //   uint32_t rate_ms = 1000;
-    //   uint8_t upper_secs = 20;
-    //   uint8_t lower_secs = 1;
-    //   uint8_t array_index = 0;
-    //   uint8_t array_index_length = 0;
-    //   //uint8_t array[10];   //use different array profiles, "linear ramp", "exponentialhigh", "exp low" (lingers on low)
-    //   // uint8_t profile_id;
-    //   uint32_t tSavedNewSpeedUpdate = millis();
-    // }random_transitions;
-    
-
-    struct UPDATE_COLOUR_GENERATION_REGION{
-      // 0 is not active, 
-      // 1 is everytime
-      // 2+ is seconds
-      uint16_t refresh_secs = 0; 
-      uint16_t refresh_decounter_secs = 10; 
-      uint32_t tSaved = millis();
-    }update_colour_region;
-    
-    uint8_t brightness_max = 255;
-    uint8_t brightness_min = 0;
-    // struct TSAVED{
-    //   uint32_t Update = millis();
-    //   // uint32_t tSavedChange_animation_something;
-    //   //uint32_t Update2 = millis();
-    // }tSaved;
-    
-  }flashersettings_segments;
-
 /*****************************************
  * To be absorbed by segment settings
  * END
@@ -1030,6 +934,28 @@
       }pixel_range;
 
       uint8_t options = NO_OPTIONS; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
+      
+      #ifdef ENABLE_DEVFEATURE_NEW_WLED_DEC2022
+      union {
+        uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
+        struct {
+          bool    selected    : 1;  //     0 : selected
+          bool    reverse     : 1;  //     1 : reversed
+          bool    on          : 1;  //     2 : is On
+          bool    mirror      : 1;  //     3 : mirrored
+          bool    freeze      : 1;  //     4 : paused/frozen
+          bool    reset       : 1;  //     5 : indicates that Segment runtime requires reset
+          bool    transitional: 1;  //     6 : transitional (there is transition occuring)
+          bool    reverse_y   : 1;  //     7 : reversed Y (2D)
+          bool    mirror_y    : 1;  //     8 : mirrored Y (2D)
+          bool    transpose   : 1;  //     9 : transposed (2D, swapped X & Y)
+          uint8_t map1D2D     : 3;  // 10-12 : mapping for 1D effect on 2D (0-use as strip, 1-expand vertically, 2-circular/arc, 3-rectangular/corner, ...)
+          uint8_t soundSim    : 3;  // 13-15 : 0-7 sound simulation types
+        };
+      };
+      #endif
+
+
       uint8_t grouping = 1; //multiplers
       uint8_t spacing = 0;
       // uint32_t tSaved_AnimateRunTime = millis();
@@ -1238,7 +1164,12 @@
       }
       
     }segment_settings;
+
+    // WLED now uses vectors for this! With deconstructors needed to free memory
     segment_settings _segments[MAX_NUM_SEGMENTS];
+
+
+    // NOTE!!! There is no runtime now, its together
     
 
     // Flags and states that are used during one transition and reset when completed
@@ -1392,6 +1323,7 @@
         bool _requiresReset = false;
 
     }segment_runtime;
+
     segment_runtime _segment_runtimes[MAX_NUM_SEGMENTS]; // SRAM footprint: 28 bytes per element
 
 
@@ -1523,8 +1455,10 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void SubTask_Flasher_Animate_Function_Tester_01();
   void SubTask_Flasher_Animate_Function_Tester_02();
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
 
 
@@ -1645,9 +1579,8 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   #endif // ENABLE_EXTRA_WLED_EFFECTS
   void SubTask_Segment_Animation__Candle_Base(uint8_t use_multi = false);
   void SubTask_Segment_Animation__Candle_Single();
-  void SubTask_Segment_Animation__Candle_Multi();
+  void SubTask_Segment_Animation__Shimmering_Palette(); // SubTask_Segment_Animation__Candle_Multi();
   void SubTask_Segment_Animation__Fire_Flicker();
-  void SubTask_Segment_Animation__Shimmering_Palette();
   
   #ifdef ENABLE_EXTRA_WLED_EFFECTS
   // Blink/Strobe
