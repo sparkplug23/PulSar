@@ -11,6 +11,7 @@ void mInterfaceLight::Init_NeoPixelAnimator(uint16_t size, uint8_t timebase){
 
   animator_controller = new NeoPixelAnimator(size, timebase); // NeoPixel animation management object
   
+  
 }  
 
 
@@ -45,7 +46,7 @@ void mInterfaceLight::Settings_Default(){
 
 RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
 
-  mPaletteI->SetPaletteListPtrFromID(pCONT_lAni->_segments[0].palette.id);
+  mPaletteI->SetPaletteListPtrFromID(pCONT_lAni->SEGMENT_I(0).palette.id);
   
   uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
           
@@ -57,7 +58,7 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
   uint8_t start_pixel_position = 0;
   // RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, desired_pixel, &start_pixel_position);
 
-  RgbcctColor colour = mPaletteI->GetColourFromPreloadedPalette(pCONT_lAni->_segments[0].palette.id, desired_pixel, &start_pixel_position);
+  RgbcctColor colour = mPaletteI->GetColourFromPreloadedPalette(pCONT_lAni->SEGMENT_I(0).palette.id, desired_pixel, &start_pixel_position);
 
   return colour;
 
@@ -83,12 +84,6 @@ bool mInterfaceLight::Pre_Init(void)
   }
 
     
-  pCONT_lAni->_segments[0].hardware_element_colour_order.red = 0;
-  pCONT_lAni->_segments[0].hardware_element_colour_order.green = 1;
-  pCONT_lAni->_segments[0].hardware_element_colour_order.blue = 2;
-  pCONT_lAni->_segments[0].hardware_element_colour_order.white_cold = 3;
-  pCONT_lAni->_segments[0].hardware_element_colour_order.white_warm = 4;
-
   //temp fix
   if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
     // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
@@ -98,6 +93,10 @@ bool mInterfaceLight::Pre_Init(void)
   if (pCONT_set->Settings.light_settings.type > LT_BASIC) {
     pCONT_set->devices_present++;
   }
+
+  
+
+
 
   // // post-process for lights
   // if (Settings.flag3.pwm_multi_channels) {  // SetOption68 - Enable multi-channels PWM instead of Color PWM
@@ -113,7 +112,8 @@ bool mInterfaceLight::Pre_Init(void)
 }
 
 
-void mInterfaceLight::Template_Load(){
+void mInterfaceLight::Template_Load()
+{
 
   // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("mInterfaceLight::Template_Load()"));
@@ -210,14 +210,14 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 // setSubType(subtype);
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -225,7 +225,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ //RGB only
     
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -233,7 +233,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   }else{
     
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -241,7 +241,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   }
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -249,7 +249,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   // RGB parts
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -257,14 +257,14 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   // CCT parts
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 // setRGBCCTLinked(false);
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 // #else
 //       rgbcct_controller.
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
@@ -372,8 +372,8 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
 void mInterfaceLight::init_Animations(){
 
-  pCONT_lAni->_segments[0].flags.fEnable_Animation = true;
-  pCONT_lAni->_segments[0].flags.NewAnimationRequiringCompleteRefresh = true;
+  pCONT_lAni->SEGMENT_I(0).flags.fEnable_Animation = true;
+  pCONT_lAni->SEGMENT_I(0).flags.NewAnimationRequiringCompleteRefresh = true;
 
 }
 
@@ -391,22 +391,24 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   switch(function){
-    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:
+    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:{
+      ALOG_INF(PSTR("Disabled from conversion to vector segments, not sure if it is needed here"));
+    };
+    break;
     case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
     
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Tasker\n\r\n\r\n\r\n\r"
-        //Test data
-        "%d:%d:%d:%d"
-      ),
-        //Testdata
-         pCONT_set->Settings.animation_settings.xmas_controller_params[0]
-        ,pCONT_set->Settings.animation_settings.xmas_controller_params[1]
-        ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
-        ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
-    );
-    #endif // ENABLE_LOG_LEVEL_INFO
-
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Tasker\n\r\n\r\n\r\n\r"
+    //     //Test data
+    //     "%d:%d:%d:%d"
+    //   ),
+    //     //Testdata
+    //      pCONT_set->Settings.animation_settings.xmas_controller_params[0]
+    //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[1]
+    //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
+    //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
+    // );
+    // #endif // ENABLE_LOG_LEVEL_INFO
 
 
       Template_Load();
@@ -419,7 +421,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-//       pCONT_lAni->_segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 //       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
 //       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
@@ -479,7 +481,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
       // replace with GetLightPower() so its updated internally
       
-      light_power_state = pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightness255()?1:0;
+      light_power_state = pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255()?1:0;
 
       //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
@@ -547,7 +549,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g
     // pCONT_lAni->SetPixelColor(i, mPaletteI->color_from_palette_internal(i, true, true, 10));
   }
     // pCONT_lAni->SetPixelColor(0, RgbColor(255,0,0));
-  pCONT_lAni->_segment_runtimes[0].animation_has_anim_callback = false; // When no animation callback is needed
+  pCONT_lAni->SEGMENT_I(0).animation_has_anim_callback = false; // When no animation callback is needed
   pCONT_lAni->StripUpdate();
 
 #endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
@@ -600,9 +602,10 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
       parse_JSONCommand(obj);
     break;
     // None json commands
-    case LIGHT_POWER_STATE_OFF_ID: //probably phase out for "SetPower" is generic event type
-      CommandSet_LightPowerState(0);
-    break;
+    // case LIGHT_POWER_STATE_OFF_ID: //probably phase out for "SetPower" is generic event type
+    // DEBUG_LINE_HERE;
+    //   CommandSet_LightPowerState(0);
+    // break;
     
     #ifdef USE_MODULE_CORE_RULES
     case FUNC_EVENT_SET_POWER_ID:
@@ -667,6 +670,7 @@ void mInterfaceLight::RulesEvent_Set_Power()
   ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());
 
   // apply invert if needed
+    DEBUG_LINE_HERE;
   CommandSet_LightPowerState(state);
 
 }
@@ -757,11 +761,6 @@ void mInterfaceLight::EveryLoop(){
   // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
   // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE_WS281X HERE %d"),pCONT_set->Settings.light_settings.type);
   // #endif
-  for( 
-    int ii = 0; 
-    ii<MAX_NUM_SEGMENTS; 
-    ii++
-  ){
 
   // /**
   //  * @brief 
@@ -770,7 +769,7 @@ void mInterfaceLight::EveryLoop(){
   //  */
   // if(pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END){
      
-  //   switch(pCONT_lAni->_segments[0].mode_id)    
+  //   switch(pCONT_lAni->SEGMENT_I(0).mode_id)    
   //     {
   //     case ANIMATION_MODE_EFFECTS_ID:
   //       pCONT_lAni->SubTask_Segments_Animation();
@@ -789,44 +788,44 @@ void mInterfaceLight::EveryLoop(){
     // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE_WS281X %d"),animation.mode_id);
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     
-    switch(pCONT_lAni->_segments[0].mode_id)    // needs to know the id 
-    {
-      /**
-       * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
-       * */
+    // switch(pCONT_lAni->SEGMENT_I(0).mode_id)    // needs to know the id 
+    // {
+    //   /**
+    //    * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
+    //    * */
       #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Segments_Animation(ii);
-      break;
+      // case ANIMATION_MODE_EFFECTS_ID:
+        pCONT_lAni->SubTask_Segments_Animation(0); // ignoring loop
+      // break;
       #endif
-      /**
-       * Notifications: Single pixel basic animations (pulse, flash, on/off)
-       * */
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-      case ANIMATION_MODE_NOTIFICATIONS_ID:
-        pCONT_lAni->SubTask_Notifications();   // Convert this into its own segment effect, effect will need to be set first
-      break;
-      #endif
-      /**
-       * Ambilight: Light strips for behind monitors, either static, sunelevation animations, getting TCP/HTTP/Serial data for the pixels from a computer (Eg wallpapers with putty or movies)
-       * */
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      case ANIMATION_MODE_AMBILIGHT__ID:
-        pCONT_lAni->SubTask_Ambilight_Main();
-      break;
-      #endif
-      /**
-       * Set Pixel: Manual method via mqtt json
-       * */
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL // serial, wifi udp connection
-      case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
-        // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS__ID"));
-        pCONT_lAni-> SubTask_Manual_SetPixel();
-        // light_power_state = true;
-      break;
-      #endif
-      case ANIMATION_MODE_NONE_ID: default: break; // resting position
-    }
+    //   /**
+    //    * Notifications: Single pixel basic animations (pulse, flash, on/off)
+    //    * */
+    //   #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
+    //   case ANIMATION_MODE_NOTIFICATIONS_ID:
+    //     pCONT_lAni->SubTask_Notifications();   // Convert this into its own segment effect, effect will need to be set first
+    //   break;
+    //   #endif
+    //   /**
+    //    * Ambilight: Light strips for behind monitors, either static, sunelevation animations, getting TCP/HTTP/Serial data for the pixels from a computer (Eg wallpapers with putty or movies)
+    //    * */
+    //   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    //   case ANIMATION_MODE_AMBILIGHT__ID:
+    //     pCONT_lAni->SubTask_Ambilight_Main();
+    //   break;
+    //   #endif
+    //   /**
+    //    * Set Pixel: Manual method via mqtt json
+    //    * */
+    //   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL // serial, wifi udp connection
+    //   case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
+    //     // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS__ID"));
+    //     pCONT_lAni-> SubTask_Manual_SetPixel();
+    //     // light_power_state = true;
+    //   break;
+    //   #endif
+    //   case ANIMATION_MODE_NONE_ID: default: break; // resting position
+    // }
     #endif
       
   }
@@ -837,7 +836,7 @@ void mInterfaceLight::EveryLoop(){
     #endif
   }
 
-  }
+  // }
 
 } // END everyloop
 
@@ -852,6 +851,7 @@ void mInterfaceLight::EverySecond_AutoOff(){
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "auto_off_settings.time_decounter_secs==1 and disable"));
     #endif       
+    DEBUG_LINE_HERE;
     CommandSet_LightPowerState(LIGHT_POWER_STATE_OFF_ID);
     //#ifdef ENABLE_LOG_LEVEL_INFO
     auto_off_settings.time_decounter_secs=0;
@@ -869,15 +869,15 @@ void mInterfaceLight::EverySecond_AutoOff(){
 
 void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
 
-  colour->R  = mapvalue(colour->R,  0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+  colour->R  = mapvalue(colour->R,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 getBrightnessRGB255());
-  colour->G  = mapvalue(colour->G,  0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+  colour->G  = mapvalue(colour->G,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 getBrightnessRGB255());
-  colour->B  = mapvalue(colour->B,  0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+  colour->B  = mapvalue(colour->B,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 getBrightnessRGB255());
-  colour->WW = mapvalue(colour->WW, 0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+  colour->WW = mapvalue(colour->WW, 0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 getBrightnessCCT255());
-  colour->WC = mapvalue(colour->WC, 0, 255, 0,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->
+  colour->WC = mapvalue(colour->WC, 0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
 getBrightnessCCT255());
 
 }

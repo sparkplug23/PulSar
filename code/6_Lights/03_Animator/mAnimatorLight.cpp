@@ -159,6 +159,13 @@ void mAnimatorLight::Pre_Init(void){
     );
     #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
+  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+  pCONT_lAni->strip = new mAnimatorLight::WS2812FX();
+  ALOG_INF(PSTR("SET strip = new WS2812FX()")); 
+  pCONT_lAni->strip->finalizeInit();
+  pCONT_lAni->strip->makeAutoSegments();
+  #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+  
 
 }
 
@@ -207,6 +214,7 @@ void mAnimatorLight::Init(void){
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
   DEBUG_LINE;
+  
 
   // stripbus->NeoRgbCurrentSettings(1,2,3);
 
@@ -224,16 +232,9 @@ void mAnimatorLight::Init(void){
   // #endif
 
 
-  pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE);  
+  pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE);     // I dont think this is the active one????????????????????????
 
-  
 
-  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
-  strip = new WS2812FX();
-  strip->finalizeInit();
-  strip->makeAutoSegments();
-
-  #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
 
 
   // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
@@ -241,11 +242,17 @@ void mAnimatorLight::Init(void){
   // SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
   // #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
-  _segments[0].flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
-  _segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+  SEGMENT_I(0).flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
+  SEGMENT_I(0).flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+  
+  for (segment_new &seg : strip->_segments_new) 
+  {
+    seg.flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
+    seg.flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
+  }
   
   #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-  _segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
+  SEGMENT_I(0).flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
   #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
   // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
@@ -331,6 +338,13 @@ void mAnimatorLight::Init(void){
   settings.flags.EnableModule = true;
 
   Init_Segments();
+  
+  pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.red = 0;
+  pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.green = 1;
+  pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.blue = 2;
+  pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.white_cold = 3;
+  pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.white_warm = 4;
+
 
   #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
   user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
@@ -371,12 +385,12 @@ void mAnimatorLight::Settings_Load(){
 
 
 // these need reversed!!!
-  // pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
-  // pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  // pCONT_set->Settings.animation_settings.animation_transition_order   = _segments[0].transition.order_id;
-  // pCONT_set->Settings.animation_settings.animation_transition_method  = _segments[0].transition.method_id;
-  // pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
-  // pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
+  // pCONT_set->Settings.animation_settings.animation_mode               = SEGMENT_I(0).mode_id;
+  // pCONT_set->Settings.animation_settings.animation_palette            = SEGMENT_I(0).palette.id;
+  // pCONT_set->Settings.animation_settings.animation_transition_order   = SEGMENT_I(0).transition.order_id;
+  // pCONT_set->Settings.animation_settings.animation_transition_method  = SEGMENT_I(0).transition.method_id;
+  // pCONT_set->Settings.animation_settings.animation_transition_time_ms = SEGMENT_I(0).transition.time_ms;
+  // pCONT_set->Settings.animation_settings.animation_transition_rate_ms = SEGMENT_I(0).transition.rate_ms;
 
 #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
   user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
@@ -410,10 +424,10 @@ void mAnimatorLight::Settings_Save(){
   //   memcpy(pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,palettelist_variable_users_ctr,sizeof(palettelist_variable_users_ctr));
   // }
 
-  pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
-  pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
-  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
+  // pCONT_set->Settings.animation_settings.animation_mode               = SEGMENT_I(0).mode_id;
+  // pCONT_set->Settings.animation_settings.animation_palette            = SEGMENT_I(0).palette.id;
+  // pCONT_set->Settings.animation_settings.animation_transition_time_ms = SEGMENT_I(0).transition.time_ms;
+  // pCONT_set->Settings.animation_settings.animation_transition_rate_ms = SEGMENT_I(0).transition.rate_ms;
 
   // pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
 
@@ -602,9 +616,9 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
     snprintf_P(buffer, buflen, PSTR("Animating"));
     return buffer;
   }
-  if(_segments[0].flags.fEnable_Animation){
+  if(SEGMENT_I(0).flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int16_t until_next_millis = _segments[0].transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
+    int16_t until_next_millis = SEGMENT_I(segment_active_index).transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
     int16_t secs_until_next_event = until_next_millis/1000;
     // secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
@@ -689,7 +703,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
 
 #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
   // Remove this, as it will just be inside effects that need it
-  if(_segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice)
+  if(SEGMENT_I(0).flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice)
   {
 
     // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
@@ -698,7 +712,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
     uint8_t temp_max_brightness = 255;
     // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
 
-    if(_segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB)
+    if(SEGMENT_I(0).flags.Limit_Upper_Brightness_With_BrightnessRGB)
     {
       temp_max_brightness = pCONT_iLight->getBriRGB_Global();
     }
@@ -722,7 +736,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   // );
 
   #ifdef ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
-  if(_segments[0].flags.use_gamma_for_brightness)
+  if(SEGMENT_I(0).flags.use_gamma_for_brightness)
   {
     new_brightness_255 = pCONT_iLight->ledGamma(new_brightness_255);
   }
@@ -809,17 +823,17 @@ bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
 
 
 
-void mAnimatorLight::SetRefreshLEDs(){
+// void mAnimatorLight::SetRefreshLEDs(){
 
-  ALOG_ERR(PSTR("This function should never be called going forward"));
+//   ALOG_ERR(PSTR("This function should never be called going forward"));
 
-  _segments[0].single_animation_override.time_ms = 10;
-  segment_animation_override.fRefreshAllPixels = true;
-  // segment_animation_override.time_ms = 10;
+//   SEGMENT_I(0).single_animation_override.time_ms = 10;
+//   // segment_animation_override.fRefreshAllPixels = true;
+//   // segment_animation_override.time_ms = 10;
 
-  _segments[0].flags.fForceUpdate = true;
+//   SEGMENT_I(0).flags.fForceUpdate = true;
 
-}
+// }
 
 
 

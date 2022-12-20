@@ -21,8 +21,8 @@ uint8_t mAnimatorLight::ConstructJSON_Animation_Active(uint8_t json_level)
 
     JBI->Add("millis", millis());
 
-    JBI->Add("Start", _segments[0].pixel_range.start);
-    JBI->Add("Stop", _segments[0].pixel_range.stop);
+    JBI->Add("Start", SEGMENT_I(0).pixel_range.start);
+    JBI->Add("Stop", SEGMENT_I(0).pixel_range.stop);
 
   return JBI->End();
 
@@ -190,30 +190,30 @@ JBI->Start();
 
   JBI->Add("millis", millis());
 
-  JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
-  JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
+  JBI->Add("EnableAnimation",SEGMENT_I(0).flags.fEnable_Animation);
+  JBI->Add("SEGMENT_I(0).flags.fRunning", SEGMENT_I(0).flags.fRunning);
   JBI->Add("CanShow",stripbus->CanShow());
   JBI->Add("StripSize", STRIP_SIZE_MAX);
 
 
-for(uint8_t seg_i = 0; seg_i<2; seg_i++)
-{
-  JBI->Level_Start_F("Segment%d",seg_i);
+// for(uint8_t seg_i = 0; seg_i<2; seg_i++)
+// {
+//   JBI->Level_Start_F("Segment%d",seg_i);
 
-    JBI->Add("isActive", _segments[seg_i].isActive());
-      JBI->Level_Start("Transition");
-        JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
-        JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
-        JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
-        JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
-      JBI->Level_End();
-    JBI->Add("virtualLength", _segments[seg_i].virtualLength());
+//     JBI->Add("isActive", _segments[seg_i].isActive());
+//       JBI->Level_Start("Transition");
+//         JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
+//         JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
+//         JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
+//         JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
+//       JBI->Level_End();
+//     JBI->Add("virtualLength", _segments[seg_i].virtualLength());
     
   
-  JBI->Level_End();
+//   JBI->Level_End();
 
 
-}
+// }
 
 
 return JBI->End();
@@ -226,49 +226,44 @@ return JBI->End();
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
 uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 {
+  char buffer[50];
 
-JBI->Start();
+  JBI->Start(); 
 
+  JBI->Add("size", strip->_segments_new.size() );
 
-//   JBI->Add("EnableAnimation",_segments[0].flags.fEnable_Animation);
+  for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+  {
+    JBI->Level_Start_F("Segment%d",seg_i);
 
+      // Config of segment (New stuff)
+      JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
+      // JBI->Add("_segments_new.size()", strip->_segments_new[seg_i].si);
 
-  JBI->Add("segment .size()", strip->_segments_new.size() );
+      JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(SEGMENT_I(seg_i).palette.id, buffer, sizeof(buffer)));
 
-//   JBI->Add("_segments[0].flags.fRunning", _segments[0].flags.fRunning);
-//   JBI->Add("CanShow",stripbus->CanShow());
-//   JBI->Add("StripSize", STRIP_SIZE_MAX);
-
-
-for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
-{
-  JBI->Level_Start_F("Segment%d",seg_i);
-
-    // Config of segment (New stuff)
-    JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
-    JBI->Add("_segments_new.size()", strip->_segments_new[seg_i].length());
-
-    // Same values as I am using
-    JBI->Add("start", strip->_segments_new[seg_i].start);
-    JBI->Add("stop", strip->_segments_new[seg_i].stop);
-
-//     JBI->Add("isActive", _segments[seg_i].isActive());
-//       JBI->Level_Start("Transition");
-//         JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
-//         JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
-//         JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
-//         JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
-//       JBI->Level_End();
-//     JBI->Add("virtualLength", _segments[seg_i].virtualLength());
+      // Same values as I am using
+      JBI->Add("Start", strip->_segments_new[seg_i].pixel_range.start);
+      JBI->Add("Stop", strip->_segments_new[seg_i].pixel_range.stop);
+      JBI->Add("SEGLEN", SEGLEN);
+      JBI->Add("virtualLength", strip->_segments_new[seg_i].virtualLength());
+      JBI->Level_Start("Transition");
+        JBI->Add("rate", SEGMENT_I(seg_i).transition.rate_ms);
+        JBI->Add("time", SEGMENT_I(seg_i).transition.time_ms);
+      JBI->Level_End();
+      JBI->Level_Start("Effects");
+        JBI->Add("Function", SEGMENT_I(seg_i).effect_id);
+        JBI->Add("Speed", SEGMENT_I(seg_i).speed_value);
+        JBI->Add("Intensity", SEGMENT_I(seg_i).intensity_value);
+        JBI->Add("Grouping", SEGMENT_I(seg_i).grouping);
+      JBI->Level_End();
     
-  
-  JBI->Level_End();
+    JBI->Level_End();
 
 
-}
+  }
 
-
-return JBI->End();
+  return JBI->End();
 
 }
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
@@ -329,7 +324,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 //     //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
     
 // #ifndef USE_DEVFEATURE_METHOD_WLED_BUILD
-//       JBI->Add(D_JSON_TIME_MS, _segments[0].transition.time_ms);   
+//       JBI->Add(D_JSON_TIME_MS, SEGMENT_I(0).transition.time_ms);   
 // #endif //  USE_DEVFEATURE_METHOD_WLED_BUILD
 //     //   transitionobj[D_JSON_TIME_MS] = ;
 //     //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
@@ -448,8 +443,8 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 //   JsonBuilderI->Start();  
 //     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
 //     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
-//     JBI->Add("ColourPaletteID", pCONT_lAni->_segments[0].palette.id );
-//     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( _segments[0].palette.id, buffer, sizeof(buffer)));
+//     JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette.id );
+//     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette.id, buffer, sizeof(buffer)));
 //     // JsonBuilderI->Array_Start("rgb");
 //     // for(int i=0;i<numpixels;i++){
 //     //   RgbTypeColor c = GetPixelColor(i);
@@ -473,7 +468,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 //     JsonBuilderI->Add_P(PM_JSON_SAT, _segment_runtimes[0].rgbcct_controller->getSat255());
 //     JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, _segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
 
-//     JBI->Add("colour_type", (uint8_t)_segments[0].colour_type);
+//     JBI->Add("colour_type", (uint8_t)SEGMENT_I(0).colour_type);
 
 
 //   //   JBI->Level_Start("Segments");
@@ -518,15 +513,15 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 // // JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
 // // root["region"] = GetFlasherRegionName();
 // // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-// // root[D_JSON_BRIGHTNESS_PERCENTAGE] = _segments[0].brightness*100;
-// // root[D_JSON_BRIGHTNESS] = _segments[0].brightness;
+// // root[D_JSON_BRIGHTNESS_PERCENTAGE] = SEGMENT_I(0).brightness*100;
+// // root[D_JSON_BRIGHTNESS] = SEGMENT_I(0).brightness;
 
 // //   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
 // //   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-// //   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(_segments[0].transition.time_ms,1000);
-// //   //   transitionobj[D_JSON_TIME_MS] = _segments[0].transition.time_ms;
-// //   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(_segments[0].transition.rate_ms,1000);
-// //   //   transitionobj[D_JSON_RATE_MS] = _segments[0].transition.rate_ms;
+// //   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(SEGMENT_I(0).transition.time_ms,1000);
+// //   //   transitionobj[D_JSON_TIME_MS] = SEGMENT_I(0).transition.time_ms;
+// //   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(SEGMENT_I(0).transition.rate_ms,1000);
+// //   //   transitionobj[D_JSON_RATE_MS] = SEGMENT_I(0).transition.rate_ms;
 // //   //   transitionobj[D_JSON_FUNCTION] = GetFlasherFunctionName();
 
 // //   JsonObject seq_obj = root.createNestedObject("sequential");

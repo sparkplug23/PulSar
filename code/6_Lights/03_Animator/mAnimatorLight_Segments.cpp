@@ -8,121 +8,275 @@ uint16_t mAnimatorLight::_usedSegmentData = 0;
 void mAnimatorLight::Init_Segments()
 {
   
+  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+  DEBUG_LINE_HERE;
+
+  //reset segment runtimes
+  for (segment_new &seg : strip->_segments_new) 
+  {
+    seg.markForReset();
+    seg.resetIfRequired();
+  }
+
+  DEBUG_LINE_HERE;
+  // // for the lack of better place enumerate ledmaps here
+  // // if we do it in json.cpp (serializeInfo()) we are getting flashes on LEDs
+  // // unfortunately this means we do not get updates after uploads
+  // enumerateLedmaps();
+
+  // _hasWhiteChannel = _isOffRefreshRequired = false;
+
+  //if busses failed to load, add default (fresh install, FS issue, ...)
+  // if (busses.getNumBusses() == 0) {
+  //   DEBUG_PRINTLN(F("No busses, init default"));
+  //   const uint8_t defDataPins[] = {DATA_PINS};
+  //   const uint16_t defCounts[] = {PIXEL_COUNTS};
+  //   const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+  //   const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+  //   uint16_t prevLen = 0;
+  //   for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
+  //     uint8_t defPin[] = {defDataPins[i]};
+  //     uint16_t start = prevLen;
+  //     uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+  //     prevLen += count;
+  //     BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
+  //     busses.add(defCfg);
+  //   }
+  // }
+
+  // _length = 0;
+  // for (uint8_t i=0; i<busses.getNumBusses(); i++) {
+  //   Bus *bus = busses.getBus(i);
+  //   if (bus == nullptr) continue;
+  //   if (bus->getStart() + bus->getLength() > MAX_LEDS) break;
+  //   //RGBW mode is enabled if at least one of the strips is RGBW
+  //   _hasWhiteChannel |= bus->isRgbw();
+  //   //refresh is required to remain off if at least one of the strips requires the refresh.
+  //   _isOffRefreshRequired |= bus->isOffRefreshRequired();
+  //   uint16_t busEnd = bus->getStart() + bus->getLength();
+  //   if (busEnd > _length) _length = busEnd;
+  //   #ifdef ESP8266
+  //   if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
+  //   uint8_t pins[5];
+  //   if (!bus->getPins(pins)) continue;
+  //   BusDigital* bd = static_cast<BusDigital*>(bus);
+  //   if (pins[0] == 3) bd->reinit();
+  //   #endif
+  // }
+
+  //initialize leds array. TBD: realloc if nr of leds change
+  // if (Segment::_globalLeds) {
+  //   purgeSegments(true);
+  //   free(Segment::_globalLeds);
+  //   Segment::_globalLeds = nullptr;
+  // }
+  // if (useLedsArray) {
+  //   #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
+  //   if (psramFound())
+  //     Segment::_globalLeds = (CRGB*) ps_malloc(sizeof(CRGB) * _length);
+  //   else
+  //   #endif
+  //     Segment::_globalLeds = (CRGB*) malloc(sizeof(CRGB) * _length);
+  //   memset(Segment::_globalLeds, 0, sizeof(CRGB) * _length);
+  // }
+
+  // //segments are created in makeAutoSegments();
+  // loadCustomPalettes(); // (re)load all custom palettes
+  // deserializeMap();     // (re)load default ledmap
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  #else
+  // resetSegments(); not ready to phase out, leave all init code alone until last for stability
+  #endif
+
+  
+
+  DEBUG_LINE_HERE;
   resetSegments();
 
+  DEBUG_LINE_HERE;
   Init_Segments_RgbcctControllers();
+
+  DEBUG_LINE_HERE;
 
   
 #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 uint8_t segment_index = 0;
-  // loadPalette_Michael(_segments[segment_index].palette.id, segment_index);
+  // loadPalette_Michael(SEGMENT_I(segment_index).palette.id, segment_index);
   loadPalette_Michael(0, segment_index); //defualt to 0 for now
 #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 }
 
+#ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index)
+{
+
+  ALOG_INF(PSTR("strip->getSegmentsNum() %d|%d"), seg_index, strip->getSegmentsNum());
+
+
+  for (size_t s = 0; s < strip->getSegmentsNum(); s++) 
+  {
+
+    // if using vectors use this code to append segment
+    if (seg_index >= strip->getSegmentsNum()) {
+      DEBUG_LINE_HERE;
+      // if (stop <= 0) return 0; // ignore empty/inactive segments
+      strip->appendSegment(Segment_New(start_pixel, stop_pixel));
+      seg_index = strip->getSegmentsNum()-1; // segments are added at the end of list
+      ALOG_INF(PSTR("new seg_index %d"), seg_index);
+    }
+
+  }
+
+}
+
+
+
+
+
+#endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+
+
+
+
+
 void mAnimatorLight::Init_Segments_RgbcctControllers()
 {
 
+  DEBUG_LINE_HERE;
+  DEBUG_INSERT_PAGE_BREAK;
+
+  DEBUG_LINE_HERE;
   ALOG_WRN(PSTR("This likely needs changed, since rgbcct can be in ANY segment, needs new method"))
   
-  _segment_runtimes[0].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
-  _segment_runtimes[1].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[1].data);
-  _segment_runtimes[2].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[2].data);
-  _segment_runtimes[3].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[3].data);
-  _segment_runtimes[4].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[4].data);
+  DEBUG_LINE_HERE;
+  
+  // for (segment_new &seg : strip->_segments_new) 
+  // {
+  //   seg.rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);    // data will need to just be integrated, and loaded/unloaded when needed in the dynamic buffer
+  //   // SEGMENT_I(1).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[1].data);
+  //   // SEGMENT_I(2).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[2].data);
+  //   // SEGMENT_I(3).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[3].data);
+  //   // SEGMENT_I(4).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[4].data);
+  // }
 
+
+  DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE; 
 
   // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID, 0);
 
+  DEBUG_LINE_HERE;
   
-  for (uint16_t i = 0; i < MAX_NUM_SEGMENTS; i++)
+  // for (uint16_t i = 0; i < MAX_NUM_SEGMENTS; i++)
+  // {
+  // DEBUG_LINE_HERE;
+  for (segment_new &seg : strip->_segments_new) 
   {
-    _segment_runtimes[i].rgbcct_controller->setSubType(RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID);
-    _segment_runtimes[i].rgbcct_controller->setApplyBrightnessToOutput(false);
+    seg.rgbcct_controller->setSubType(RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID);
+    seg.rgbcct_controller->setApplyBrightnessToOutput(false);
     if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ //RGB only
-      _segment_runtimes[i].rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_RGB);
+      seg.rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_RGB);
     }else{
-      _segment_runtimes[i].rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_BOTH);
+      seg.rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_BOTH);
     }
-    _segment_runtimes[i].rgbcct_controller->Sync();    // calculate the initial values (#8058)
+    seg.rgbcct_controller->Sync();    // calculate the initial values (#8058)
     // RGB parts
-    _segment_runtimes[i].rgbcct_controller->setRGB(1,2,3);
+    seg.rgbcct_controller->setRGB(1,2,3);
     // CCT parts
-    _segment_runtimes[i].rgbcct_controller->setRGBCCTLinked(false);
-    _segment_runtimes[i].rgbcct_controller->setCCT(153);
+    seg.rgbcct_controller->setRGBCCTLinked(false);
+    seg.rgbcct_controller->setCCT(153);
 
     // Set first colour as default
-    //  _segment_runtimes[i].rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
+    //  seg.rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
 
 
-    _segments[i].flags.brightness_applied_during_colour_generation = true;
+    seg.flags.brightness_applied_during_colour_generation = true;
   }
 
+  DEBUG_LINE_HERE;
 
 
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID, 0);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID, 1);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID, 2);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID, 3);
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID, 4);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID, 1);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID, 2);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID, 3);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID, 4);
 
+  DEBUG_LINE_HERE;
   CommandSet_ActiveSolidPalette_Hue_360(123, 0);
-  CommandSet_ActiveSolidPalette_Hue_360(120, 1);
-  CommandSet_ActiveSolidPalette_Hue_360(180, 2);
-  CommandSet_ActiveSolidPalette_Hue_360(240, 3);
-  CommandSet_ActiveSolidPalette_Hue_360(330, 4);
+  // CommandSet_ActiveSolidPalette_Hue_360(120, 1);
+  // CommandSet_ActiveSolidPalette_Hue_360(180, 2);
+  // CommandSet_ActiveSolidPalette_Hue_360(240, 3);
+  // CommandSet_ActiveSolidPalette_Hue_360(330, 4);
 
+  DEBUG_LINE_HERE;
   CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 0);
-  CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 1);
-  CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 2);
-  CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 3);
-  CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 4);
+  // CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 1);
+  // CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 2);
+  // CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 3);
+  // CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 4);
 
+  DEBUG_LINE_HERE;
 }
 
 
 void mAnimatorLight::resetSegments() 
 {
+
   //reset segment runtimes
-  for (uint8_t i = 0; i < MAX_NUM_SEGMENTS; i++) {
-    _segment_runtimes[i].markForReset();
-    _segment_runtimes[i].resetIfRequired();
-  }
-
-
-  for (uint16_t i = 0; i < MAX_NUM_SEGMENTS; i++)
+  for (segment_new &seg : strip->_segments_new) 
   {
-    _segments[i].hardware_element_colour_order.red = 1;    // GRB most popular
-    _segments[i].hardware_element_colour_order.green = 0;  // GRB most popular
-    _segments[i].hardware_element_colour_order.blue = 2;
-    _segments[i].hardware_element_colour_order.white_cold = 3;
-    _segments[i].hardware_element_colour_order.white_warm = 4;
+    seg.markForReset();
+    seg.resetIfRequired();
   }
 
-
-  for (uint16_t i = 0; i < MAX_NUM_SEGMENTS; i++)
+  for (segment_new &seg : strip->_segments_new) 
   {
-    _segments[i].colors[0] = RED;
-    _segments[i].colors[1] = GREEN;
-    _segments[i].colors[2] = BLUE;
-
-    _segments[i].grouping = 1;
-    // _segments[i].setOption(SEG_OPTION_ON, 1);
-    // _segments[i].opacity = 255;
-    
+    seg.hardware_element_colour_order.red = 1;    // GRB most popular
+    seg.hardware_element_colour_order.green = 0;  // GRB most popular
+    seg.hardware_element_colour_order.blue = 2;
+    seg.hardware_element_colour_order.white_cold = 3;
+    seg.hardware_element_colour_order.white_warm = 4;
   }
 
-  _segments[0].pixel_range.start = 0;
+
+  for (segment_new &seg : strip->_segments_new) 
+  {
+    seg.colors[0] = RED;
+    seg.colors[1] = GREEN;
+    seg.colors[2] = BLUE;
+    seg.grouping = 1;
+    // SEGMENT_I(i).setOption(SEG_OPTION_ON, 1);
+    // SEGMENT_I(i).opacity = 255;    
+  }
+
+  SEGMENT_I(0).pixel_range.start = 0;
   #ifdef ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
-  _segments[0].pixel_range.stop = STRIP_SIZE_MAX; //since STRIP_SIZE_MAX is total pixels, the value in "stop" will also be STRIP_SIZE_MAX
+  SEGMENT_I(0).pixel_range.stop = STRIP_SIZE_MAX; //since STRIP_SIZE_MAX is total pixels, the value in "stop" will also be STRIP_SIZE_MAX
   #else
-  _segments[0].pixel_range.stop = STRIP_SIZE_MAX-1; //not sure why this had -1? prob wled issue
+  SEGMENT_I(0).pixel_range.stop = STRIP_SIZE_MAX-1; //not sure why this had -1? prob wled issue
   #endif // ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
-
   #ifdef USE_MODULE_LIGHTS_PWM
-  _segments[0].pixel_range.stop = 2; 
+  SEGMENT_I(0).pixel_range.stop = 2; 
   ALOG_WRN(PSTR("Force fix the stop pixel size"));
   #endif // USE_MODULE_LIGHTS_PWM
 
@@ -132,740 +286,672 @@ void mAnimatorLight::resetSegments()
 
 void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
 {
-
-// char buffer[100];
-  // /**
-  //  * Timer (seconds) to update the EFFECTS_REGION_COLOUR_SELECT_ID when otherwise remains static
-  //  * */
-  // SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Change_Colour_Region();
-  // /**
-  //  * Timer (seconds) to randomise the rates of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
-  //  * */  
-  // SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Rate();
-  // /**
-  //  * Timer (seconds) to randomise the transition time of change. Methods include (random between range, linear map, exponential (longer slow), exponential (longer fast))
-  //  * */    
-  // SubTask_Flasher_Animate_Parameter_Check_Update_Timer_Transition_Time();
-
-
-  // if((mTime::TimeReached(&flashersettings.tSaved.Update,_segments[0].transition.rate_ms))||(_segments[0].flags.fForceUpdate))
-  // {
-
-  //   if(_segments[0].flags.fForceUpdate){ _segments[0].flags.fForceUpdate=false;
-  //     flashersettings.tSaved.Update = millis();
-  //   }
-    // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    // char buffer[100];
-    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d %s"),flashersettings.function,GetFlasherFunctionNamebyID(flashersettings.function, buffer));
-    // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "flashersettings.function=%d"),flashersettings.function);
-    //#endif
-    // #ifdef DEVICE_RGBFIREPLACE_TESTER
-    //     flashersettings.function = EFFECTS_FUNCTION__SLOW_GLOW_ID;
-    // #endif
-
   
-  /**
-   * Update animation "rate"
-   * 
-   * Test1: Apply slow glow on segment 0-50%, apply random solid to 50-100%
-   * */
-  
-  /**
-   * Subtask to handle by each segment ie "flasher" function for each segment
-   * */
-  // for( 
-  //   int ii = 0; 
-  //   ii<MAX_NUM_SEGMENTS; 
-  //   ii++
-  // ){
+  bool doShow = false;
 
-    segment_active_index = segment_index; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
+  segment_active_index = segment_index; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
 
-    /**
-     * @brief 
-     * Temp fix that will override how isActive will not be valid is segment is a single pixel, or at length of 1, is it as 1 |= 0?
-     * 
-     */
-    
+  strip->_isServicing = true;
+  strip->_segment_index = 0;
+  for (segment_new &seg : strip->_segments_new) 
+  {
+
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
     //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),segment_active_index,_segments[segment_active_index].isActive());
     //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),segment_active_index,_segments[segment_active_index].pixel_range.start,_segments[segment_active_index].pixel_range.stop);
     // #endif
 
-    // reset the segment runtime data if needed, called before isActive to ensure deleted
-    // segment's buffers are cleared
-    SEGENV.resetIfRequired();
+    // reset the segment runtime data if needed, called before isActive to ensure deleted segment's buffers are cleared
+    seg.resetIfRequired();
+
+    if (!seg.isActive()) continue;
     
-    // AddLog(LOG_LEVEL_TEST, PSTR("_segments[segment_active_index].isActive() %d"),_segments[segment_active_index].isActive());
 
-    if(_segments[segment_active_index].isActive())// || (pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END))
-    {     
+    if(
+      (mTime::TimeReached(&seg.tSaved_AnimateRunTime, seg.get_transition_rate_ms())) ||
+      (seg.flags.fForceUpdate)
+    ){
 
+      DEBUG_PIN1_SET(LOW);
+
+      if (seg.grouping == 0) seg.grouping = 1; //sanity check == move this into wherever it gets used (ie struct functions)
+      doShow = true;
+
+      ALOG_DBM(PSTR("seg=%d,rate=%d,%d"),segment_active_index, seg.transition.rate_ms, seg.flags.fForceUpdate);
+
+      // if (!seg.freeze) { //only run effect function if not frozen
+
+      /**
+       * @brief Add flag that checks if animation is still running from previous call before we start another, 
+       * hence, detect when frame_rate is not being met (time_ms not finishing before rate_ms)
+       * */
+
+      if(seg.flags.fForceUpdate){ 
+        seg.flags.fForceUpdate=false;
+        seg.tSaved_AnimateRunTime = millis(); // Not reset inside TimeReached
+      }
+      
+      // This maybe cant be global and needs placed inside each effect?
+      // Not valid for long term, needs to be changed
+      Set_Segment_ColourType(segment_active_index, pCONT_set->Settings.light_settings.type);
+      
+      /**
+       * @brief To be safe, always clear and if the effect has a callback, it will be activated inside its function again.
+      **/
+      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
+      #endif
+
+      strip->_virtualSegmentLength = seg.virtualLength();// _segments[segment_active_index].virtualLength();
+        
+      /**
+       * If effect is from WLED, then Generate new colours: to be moved into loadPalette only
+       **/
+      #ifdef ENABLE_WLED_EFFECTS
       if(
-        #ifdef ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
-        (mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, SEGMENT.get_transition_rate_ms() ))||
-        #else
-        (mTime::TimeReached(&SEGENV.tSaved_AnimateRunTime, _segments[segment_active_index].transition.rate_ms))||
-        #endif // ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
-        (_segments[0].flags.fForceUpdate)
-      ){
-        DEBUG_PIN1_SET(LOW);
+        (seg.effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID) &&
+        (seg.effect_id <= EFFECTS_FUNCTION__WLED_LENGTH__ID)
+      ){          
+        mPaletteI->UpdatePalette_FastLED_TargetPalette();
+      }
+      #endif // ENABLE_WLED_EFFECTS
 
-        ALOG_DBM(PSTR("seg=%d,rate=%d,%d"),segment_active_index ,_segments[segment_active_index].transition.rate_ms, _segments[0].flags.fForceUpdate);
+      // ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
+      // ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, seg.effect_id, millis()); 
 
-        /**
-         * @brief Add flag that checks if animation is still running from previous call before we start another, 
-         * hence, detect when frame_rate is not being met (time_ms not finishing before rate_ms)
-         * */
-
-        if(SEGMENT.flags.fForceUpdate){ 
-          SEGMENT.flags.fForceUpdate=false;
-          SEGENV.tSaved_AnimateRunTime = millis(); // Not reset inside TimeReached
-        }
-        
-        // This maybe cant be global and needs placed inside each effect?
-        // Not valid for long term, needs to be changed
-        Set_Segment_ColourType(segment_active_index, pCONT_set->Settings.light_settings.type);
-        
-        /**
-         * @brief To be safe, always clear and if the effect has a callback, it will be activated inside its function again.
-        **/
-        #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-        setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
+      switch(seg.effect_id){
+        default:
+          ALOG_ERR(PSTR("Unknown Effect %d"), seg.effect_id);
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+        case EFFECTS_FUNCTION__SOLID_COLOUR__ID:
+          SubTask_Segment_Animate_Function__Solid_Single_Colour();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+        case EFFECTS_FUNCTION__STATIC_PALETTE__ID:
+          SubTask_Segment_Animate_Function__Static_Palette();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+        case EFFECTS_FUNCTION__SLOW_GLOW__ID:
+          SubTask_Segment_Animate_Function__Slow_Glow();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+        case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:
+          SubTask_Segment_Animate_Function__Static_Gradient_Palette();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+        case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
+          SubTask_Segment_Animation__Candle_Single();
+        break;     
+        case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
+          SubTask_Segment_Animation__Shimmering_Palette();
+        break;   
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:
+          SubTask_Segment_Animation__Rotating_Palette();
+        break;
+        case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID:
+          SubTask_Segment_Animation__Rotating_Previous_Animation();
+        break;
+        case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID:
+          SubTask_Segment_Animation__Rotating_Previous_Animation();
+        break;
+        case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:
+          SubTask_Segment_Animation__Stepping_Palette();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:
+          SubTask_Segment_Animation__Blend_Palette_To_White();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
+          SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
+          SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
+        break;
         #endif
 
-        _virtualSegmentLength = _segments[segment_active_index].virtualLength();
-          
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING    
+        case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
+          SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
+        break; 
+        #endif        
         /**
-         * If effect is from WLED, then Generate new colours
+         * Static
          **/
-        #ifdef ENABLE_WLED_EFFECTS
-        if(
-          (_segments[segment_active_index].effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID) &&
-          (_segments[segment_active_index].effect_id <= EFFECTS_FUNCTION__WLED_LENGTH__ID)
-        ){          
-          mPaletteI->UpdatePalette_FastLED_TargetPalette();
-          // SEGMENT.transition.rate_ms = FRAMETIME_MS; // 
-        }
-        #endif // ENABLE_WLED_EFFECTS
-
-        ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
-
-        switch(_segments[segment_active_index].effect_id){
-          default:
-            ALOG_ERR(PSTR("Unknown Effect %d"), SEGMENT.effect_id);
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__SOLID_COLOUR__ID:
-            SubTask_Segment_Animate_Function__Solid_Single_Colour();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__STATIC_PALETTE__ID:
-            SubTask_Segment_Animate_Function__Static_Palette();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__SLOW_GLOW__ID:
-            SubTask_Segment_Animate_Function__Slow_Glow();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:
-            SubTask_Segment_Animate_Function__Static_Gradient_Palette();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-          case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
-            SubTask_Segment_Animation__Candle_Single();
-          break;     
-          case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
-            SubTask_Segment_Animation__Shimmering_Palette();
-          break;   
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:
-            SubTask_Segment_Animation__Rotating_Palette();
-          break;
-          case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID:
-            SubTask_Segment_Animation__Rotating_Previous_Animation();
-          break;
-          case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:
-            SubTask_Segment_Animation__Stepping_Palette();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:
-            SubTask_Segment_Animation__Blend_Palette_To_White();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
-            SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
-            SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
-          break;
-          #endif
-
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING    
-          case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
-            SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
-          break; 
-          #endif        
-          
-
-          /**
-           * Static
-           **/
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          case EFFECTS_FUNCTION__WLED_STATIC__ID:
-            SubTask_Segment_Animation__Static();
-          break;
-          case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:
-            SubTask_Segment_Animation__Static_Pattern();
-          break;
-          case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:
-            SubTask_Segment_Animation__Tri_Static_Pattern();
-          break;
-          #ifdef ENABLE_EXTRA_WLED_EFFECTS
-          case EFFECTS_FUNCTION__WLED_SPOTS__ID:
-            SubTask_Segment_Animation__Spots();
-          break;
-          #endif // ENABLE_EXTRA_WLED_EFFECTS
-          case EFFECTS_FUNCTION__WLED_PERCENT__ID:
-            SubTask_Segment_Animation__Percent();
-          break;
-          /**
-           * One Colour
-           **/
-          case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:
-            SubTask_Segment_Animation__Random_Colour();
-          break;
-          /**
-           * Wipe/Sweep/Runners 
-           **/
-          case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:
-            SubTask_Segment_Animation__Colour_Wipe();
-          break;
-          case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:
-            SubTask_Segment_Animation__Colour_Wipe_Random();
-          break;
-          case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:
-            SubTask_Segment_Animation__Colour_Sweep();
-          break;
-          case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
-            SubTask_Segment_Animation__Colour_Sweep_Random();
-          break;
-          /**
-           * Fireworks
-           **/
-          case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
-            SubTask_Segment_Animation__Fireworks();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
-            SubTask_Segment_Animation__Exploding_Fireworks();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
-            SubTask_Segment_Animation__Fireworks_Starburst();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
-            SubTask_Segment_Animation__Fireworks_Starburst_Glows();
-          break;
-          case EFFECTS_FUNCTION__WLED_RAIN__ID:
-            SubTask_Segment_Animation__Rain();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
-            SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
-          break;
-          #ifdef ENABLE_EXTRA_WLED_EFFECTS
-          case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
-            SubTask_Segment_Animation__TriColour();
-          break;
-          case EFFECTS_FUNCTION__WLED_ANDROID__ID:
-            SubTask_Segment_Animation__Android();
-          break;
-          case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:
-            SubTask_Segment_Animation__Running_Red_Blue();
-          break;
-          case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:
-            SubTask_Segment_Animation__Running_Colour();
-          break;
-          case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:
-            SubTask_Segment_Animation__Running_Random();
-          break;
-          case EFFECTS_FUNCTION__WLED_GRADIENT__ID:
-            SubTask_Segment_Animation__Gradient();
-          break;
-          case EFFECTS_FUNCTION__WLED_LOADING__ID:
-            SubTask_Segment_Animation__Loading();
-          break;
-          case EFFECTS_FUNCTION__WLED_POLICE__ID:
-            SubTask_Segment_Animation__Police();
-          break;
-          case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:
-            SubTask_Segment_Animation__Polce_All();
-          break;
-          case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:
-            SubTask_Segment_Animation__Two_Dots();
-          break;
-          case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:
-            SubTask_Segment_Animation__Two_Areas();
-          break;
-          case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:
-            SubTask_Segment_Animation__Multi_Comet();
-          break;
-          case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:
-            SubTask_Segment_Animation__Oscillate();
-          break;
-          case EFFECTS_FUNCTION__WLED_BPM__ID:
-            SubTask_Segment_Animation__BPM();
-          break;
-          case EFFECTS_FUNCTION__WLED_JUGGLE__ID:
-            SubTask_Segment_Animation__Juggle();
-          break;
-          case EFFECTS_FUNCTION__WLED_PALETTE__ID:
-            SubTask_Segment_Animation__Palette();
-          break;
-          case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:
-            SubTask_Segment_Animation__ColourWaves();
-          break;
-          case EFFECTS_FUNCTION__WLED_LAKE__ID:
-            SubTask_Segment_Animation__Lake();
-          break;
-          case EFFECTS_FUNCTION__WLED_GLITTER__ID:
-            SubTask_Segment_Animation__Glitter();
-          break;
-          case EFFECTS_FUNCTION__WLED_METEOR__ID:
-            SubTask_Segment_Animation__Meteor();
-          break;
-          case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:
-            SubTask_Segment_Animation__Metoer_Smooth();
-          break;
-          case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:
-            SubTask_Segment_Animation__Pride_2015();
-          break;
-          case EFFECTS_FUNCTION__WLED_PACIFICA__ID:
-            SubTask_Segment_Animation__Pacifica();
-          break;
-          case EFFECTS_FUNCTION__WLED_SUNRISE__ID:
-            SubTask_Segment_Animation__Sunrise();
-          break;
-          case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:
-            SubTask_Segment_Animation__Sinewave();
-          break;
-          case EFFECTS_FUNCTION__WLED_FLOW__ID:
-            SubTask_Segment_Animation__Flow();
-          break;
-          case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:
-            SubTask_Segment_Animation__Running_Lights();
-          break;
-          case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:
-            SubTask_Segment_Animation__Rainbow_Cycle();
-          break;
-          case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:
-            SubTask_Segment_Animation__Merry_Christmas();
-          break;
-          case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:
-            SubTask_Segment_Animation__Halloween();
-          break;
-          /**
-           * Chase
-           **/
-          case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:
-            SubTask_Segment_Animation__Chase_Colour();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:
-            SubTask_Segment_Animation__Chase_Random();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:
-            SubTask_Segment_Animation__Chase_Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:
-            SubTask_Segment_Animation__Chase_Flash();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:
-            SubTask_Segment_Animation__Chase_Flash_Random();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:
-            SubTask_Segment_Animation__Chase_Rainbow_White();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:
-            SubTask_Segment_Animation__Chase_Theater();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:
-            SubTask_Segment_Animation__Chase_Theatre_Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:
-            SubTask_Segment_Animation__Chase_TriColour();
-          break;
-          case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:
-            SubTask_Segment_Animation__Circus_Combustus();
-          break;
-          /**
-           *  Breathe/Fade/Pulse
-           **/    
-          case EFFECTS_FUNCTION__WLED_BREATH__ID:
-            SubTask_Segment_Animation__Breath();
-          break;
-          case EFFECTS_FUNCTION__WLED_FADE__ID:
-            SubTask_Segment_Animation__Fade();
-          break;
-          case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:
-            SubTask_Segment_Animation__Fade_TriColour();
-          break;
-          case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:
-            SubTask_Segment_Animation__Fade_Spots();
-          break;
-          #endif // ENABLE_EXTRA_WLED_EFFECTS
-          /**
-           * Sparkle/Twinkle
-           **/
-          #ifdef ENABLE_EXTRA_WLED_EFFECTS
-          case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:
-            SubTask_Segment_Animation__Solid_Glitter();
-          break;
-          case EFFECTS_FUNCTION__WLED_POPCORN__ID:
-            SubTask_Segment_Animation__Popcorn();
-          break;
-          case EFFECTS_FUNCTION__WLED_PLASMA__ID:
-            SubTask_Segment_Animation__Plasma();
-          break;
-          case EFFECTS_FUNCTION__WLED_SPARKLE__ID:
-            SubTask_Segment_Animation__Sparkle();
-          break;
-          case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:
-            SubTask_Segment_Animation__Sparkle_Flash();
-          break;
-          case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:
-            SubTask_Segment_Animation__Sparkle_Hyper();
-          break;
-          case EFFECTS_FUNCTION__WLED_TWINKLE__ID:
-            SubTask_Segment_Animation__Twinkle();
-          break;
-          case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:
-            SubTask_Segment_Animation__Twinkle_Colour();
-          break;
-          case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:
-            SubTask_Segment_Animation__Twinkle_Fox();
-          break;
-          case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:
-            SubTask_Segment_Animation__Twinkle_Cat();
-          break;
-          case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:
-            SubTask_Segment_Animation__Twinkle_Up();
-          break;
-          case EFFECTS_FUNCTION__WLED_DYNAMIC__ID:
-            SubTask_Segment_Animation__Dynamic();
-          break;
-          case EFFECTS_FUNCTION__WLED_SAW__ID:
-            SubTask_Segment_Animation__Saw();
-          break;
-          case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:
-            SubTask_Segment_Animation__Dissolve();
-          break;
-          case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:
-            SubTask_Segment_Animation__Dissolve_Random();
-          break;
-          case EFFECTS_FUNCTION__WLED_COLORFUL__ID:
-            SubTask_Segment_Animation__ColourFul();
-          break;
-          case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
-            SubTask_Segment_Animation__Traffic_Light();
-          break;
-          #endif // ENABLE_EXTRA_WLED_EFFECTS      
-          #ifdef ENABLE_EXTRA_WLED_EFFECTS
-          /**
-           * Blink/Strobe
-           **/
-          case EFFECTS_FUNCTION__WLED_BLINK__ID:
-            SubTask_Segment_Animation__Blink();
-          break;
-          case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:
-            SubTask_Segment_Animation__Blink_Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_STROBE__ID:
-            SubTask_Segment_Animation__Strobe();
-          break;
-          case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:
-            SubTask_Segment_Animation__Strobe_Multi();
-          break;
-          case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:
-            SubTask_Segment_Animation__Strobe_Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_RAINBOW__ID:
-            SubTask_Segment_Animation__Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:
-            SubTask_Segment_Animation__Lightning();
-          break;
-          case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:
-            SubTask_Segment_Animation__Fire_2012();
-          break;
-          case EFFECTS_FUNCTION__WLED_RAILWAY__ID:
-            SubTask_Segment_Animation__Railway();
-          break;
-          case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:
-            SubTask_Segment_Animation__Heartbeat();
-          break;
-          /**
-           * Noise
-           **/
-          case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:
-            SubTask_Segment_Animation__FillNoise8();
-          break;
-          case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:
-            SubTask_Segment_Animation__Noise16_1();
-          break;
-          case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:
-            SubTask_Segment_Animation__Noise16_2();
-          break;
-          case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:
-            SubTask_Segment_Animation__Noise16_3();
-          break;
-          case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:
-            SubTask_Segment_Animation__Noise16_4();
-          break;
-          case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:
-            SubTask_Segment_Animation__Noise_Pal();
-          break;
-          case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:
-            SubTask_Segment_Animation__PhasedNoise();
-          break;
-          case EFFECTS_FUNCTION__WLED_PHASED__ID:
-            SubTask_Segment_Animation__Phased();
-          break;
-          /**
-           * Scan
-           **/
-          case EFFECTS_FUNCTION__WLED_SCAN__ID:
-            SubTask_Segment_Animation__Scan();
-          break;
-          case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:
-            SubTask_Segment_Animation__Scan_Dual();
-          break;
-          case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:
-            SubTask_Segment_Animation__Larson_Scanner();
-          break;
-          case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:
-            SubTask_Segment_Animation__Larson_Scanner_Dual();
-          break;
-          case EFFECTS_FUNCTION__WLED_ICU__ID:
-            SubTask_Segment_Animation__ICU();
-          break;
-          case EFFECTS_FUNCTION__WLED_RIPPLE__ID:
-            SubTask_Segment_Animation__Ripple();
-          break;
-          case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:
-            SubTask_Segment_Animation__Ripple_Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_COMET__ID:
-            SubTask_Segment_Animation__Comet();
-          break;
-          case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:
-            SubTask_Segment_Animation__Chunchun();
-          break;
-          case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:
-            SubTask_Segment_Animation__Bouncing_Balls();
-          break;
-          case EFFECTS_FUNCTION__WLED_SINELON__ID:
-            SubTask_Segment_Animation__Sinelon();
-          break;
-          case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:
-            SubTask_Segment_Animation__Sinelon_Dual();
-          break;
-          case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:
-            SubTask_Segment_Animation__Sinelon_Rainbow();
-          break;
-          case EFFECTS_FUNCTION__WLED_DRIP__ID:
-            SubTask_Segment_Animation__Drip();
-          break;
-          #endif // ENABLE_EXTRA_WLED_EFFECTS
-          #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-          case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
-            SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-          case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
-            SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
-          case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
-            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-          case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
-            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-          break;
-          #endif
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-          case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
-            SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-          break;   
-          #endif 
-          // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
-          //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-          //  break;
-          //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
-          //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-          //  break;
-          /**
-           * Development effects without full code 
-           **/          
-          //  case EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID:
-          //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
-          //  break;
-          //  case EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID:
-          //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
-          //  break;
-          //  case EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID:
-          //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
-          //  break;
-          //  case EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID:
-          //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-          //  break;
-          //  case EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID:
-          //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-          //  break;
-          //  case EFFECTS_FUNCTION__FADE_GRADIENT__ID:
-          //    SubTask_Flasher_Animate_Function_Fade_Gradient();
-          //  break;
-          //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON:
-          //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
-          //  break;
-          //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID:
-          //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
-          //  break;
-          // EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
-          //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF__ID:
-          //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
-          //  break;
-          //  case EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
-          //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
-          //  break;
-          //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
-          //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
-          //  break;
-          
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-          case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
-            SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
-          break;
-          case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
-            SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
-          break;
-          case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
-            SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-          break;
-          #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
-          case EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID:
-            SubTask_Segment_Animate_Function__Notification_Static_On();
-          break;
-          case EFFECTS_FUNCTION__NOTIFICATION_STATIC_OFF__ID:
-            SubTask_Segment_Animate_Function__Notification_Static_Off();
-          break;
-          case EFFECTS_FUNCTION__NOTIFICATION_FADE_ON__ID:
-            SubTask_Segment_Animate_Function__Notification_Fade_On();
-          break;
-          case EFFECTS_FUNCTION__NOTIFICATION_FADE_OFF__ID:
-            SubTask_Segment_Animate_Function__Notification_Fade_Off();
-          break;
-          case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
-            SubTask_Segment_Animate_Function__Notification_Blinking();
-          break;
-          case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
-            SubTask_Segment_Animate_Function__Notification_Pulsing();
-          break;
-          #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-
-          #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-          case EFFECTS_FUNCTION__TESTER_01__ID:
-            SubTask_Flasher_Animate_Function_Tester_01();
-          break; 
-          case EFFECTS_FUNCTION__TESTER_02__ID:
-            SubTask_Flasher_Animate_Function_Tester_02();
-          break; 
-          // testing to replacement
-          case EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID:
-            SubTask_Segment_Animate_Function__Static_Palette_New();
-          break;
-          case EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID:
-            SubTask_Segment_Animate_Function__Slow_Glow_New();
-          break;
-          #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-        } //end SWITCH
-
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        case EFFECTS_FUNCTION__WLED_STATIC__ID:
+          SubTask_Segment_Animation__Static();
+        break;
+        case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:
+          SubTask_Segment_Animation__Static_Pattern();
+        break;
+        case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:
+          SubTask_Segment_Animation__Tri_Static_Pattern();
+        break;
+        #ifdef ENABLE_EXTRA_WLED_EFFECTS
+        case EFFECTS_FUNCTION__WLED_SPOTS__ID:
+          SubTask_Segment_Animation__Spots();
+        break;
+        #endif // ENABLE_EXTRA_WLED_EFFECTS
+        case EFFECTS_FUNCTION__WLED_PERCENT__ID:
+          SubTask_Segment_Animation__Percent();
+        break;
         /**
-         * If effect is from WLED, then disable animator and write output
+         * One Colour
          **/
-        // #ifdef ENABLE_WLED_EFFECTS
-        if(
-          (_segments[segment_active_index].effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID) &&
-          (_segments[segment_active_index].effect_id <= EFFECTS_FUNCTION__WLED_LENGTH__ID)
-        ){          
-          _segment_runtimes[segment_active_index].animation_has_anim_callback = false; // When no animation callback is needed 
-        }
-        // #endif // ENABLE_WLED_EFFECTS
-
+        case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:
+          SubTask_Segment_Animation__Random_Colour();
+        break;
         /**
-         * @brief If callback is not active, then assume its StipUpdate needs to be called
-         * 
-         */
-        if(
-          (!_segment_runtimes[segment_active_index].animation_has_anim_callback)||
-          (SEGENV.anim_function_callback == nullptr) // assumes direct update
-        ){
-          StripUpdate();         
-          SEGMENT.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
-          // ALOG_INF(PSTR("Calling"));
-        }
-        else
-        { // Configure animator to show output
-          StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_active_index);   
-          // First run must be reset after StartAnimation is first called 
-        }
+         * Wipe/Sweep/Runners 
+         **/
+        case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:
+          SubTask_Segment_Animation__Colour_Wipe();
+        break;
+        case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:
+          SubTask_Segment_Animation__Colour_Wipe_Random();
+        break;
+        case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:
+          SubTask_Segment_Animation__Colour_Sweep();
+        break;
+        case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
+          SubTask_Segment_Animation__Colour_Sweep_Random();
+        break;
+        /**
+         * Fireworks
+         **/
+        case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
+          SubTask_Segment_Animation__Fireworks();
+        break;
+        case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
+          SubTask_Segment_Animation__Exploding_Fireworks();
+        break;
+        case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
+          SubTask_Segment_Animation__Fireworks_Starburst();
+        break;
+        case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
+          SubTask_Segment_Animation__Fireworks_Starburst_Glows();
+        break;
+        case EFFECTS_FUNCTION__WLED_RAIN__ID:
+          SubTask_Segment_Animation__Rain();
+        break;
+        case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
+          SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
+        break;
+        #ifdef ENABLE_EXTRA_WLED_EFFECTS
+        case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
+          SubTask_Segment_Animation__TriColour();
+        break;
+        case EFFECTS_FUNCTION__WLED_ANDROID__ID:
+          SubTask_Segment_Animation__Android();
+        break;
+        case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:
+          SubTask_Segment_Animation__Running_Red_Blue();
+        break;
+        case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:
+          SubTask_Segment_Animation__Running_Colour();
+        break;
+        case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:
+          SubTask_Segment_Animation__Running_Random();
+        break;
+        case EFFECTS_FUNCTION__WLED_GRADIENT__ID:
+          SubTask_Segment_Animation__Gradient();
+        break;
+        case EFFECTS_FUNCTION__WLED_LOADING__ID:
+          SubTask_Segment_Animation__Loading();
+        break;
+        case EFFECTS_FUNCTION__WLED_POLICE__ID:
+          SubTask_Segment_Animation__Police();
+        break;
+        case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:
+          SubTask_Segment_Animation__Polce_All();
+        break;
+        case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:
+          SubTask_Segment_Animation__Two_Dots();
+        break;
+        case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:
+          SubTask_Segment_Animation__Two_Areas();
+        break;
+        case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:
+          SubTask_Segment_Animation__Multi_Comet();
+        break;
+        case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:
+          SubTask_Segment_Animation__Oscillate();
+        break;
+        case EFFECTS_FUNCTION__WLED_BPM__ID:
+          SubTask_Segment_Animation__BPM();
+        break;
+        case EFFECTS_FUNCTION__WLED_JUGGLE__ID:
+          SubTask_Segment_Animation__Juggle();
+        break;
+        case EFFECTS_FUNCTION__WLED_PALETTE__ID:
+          SubTask_Segment_Animation__Palette();
+        break;
+        case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:
+          SubTask_Segment_Animation__ColourWaves();
+        break;
+        case EFFECTS_FUNCTION__WLED_LAKE__ID:
+          SubTask_Segment_Animation__Lake();
+        break;
+        case EFFECTS_FUNCTION__WLED_GLITTER__ID:
+          SubTask_Segment_Animation__Glitter();
+        break;
+        case EFFECTS_FUNCTION__WLED_METEOR__ID:
+          SubTask_Segment_Animation__Meteor();
+        break;
+        case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:
+          SubTask_Segment_Animation__Metoer_Smooth();
+        break;
+        case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:
+          SubTask_Segment_Animation__Pride_2015();
+        break;
+        case EFFECTS_FUNCTION__WLED_PACIFICA__ID:
+          SubTask_Segment_Animation__Pacifica();
+        break;
+        case EFFECTS_FUNCTION__WLED_SUNRISE__ID:
+          SubTask_Segment_Animation__Sunrise();
+        break;
+        case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:
+          SubTask_Segment_Animation__Sinewave();
+        break;
+        case EFFECTS_FUNCTION__WLED_FLOW__ID:
+          SubTask_Segment_Animation__Flow();
+        break;
+        case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:
+          SubTask_Segment_Animation__Running_Lights();
+        break;
+        case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:
+          SubTask_Segment_Animation__Rainbow_Cycle();
+        break;
+        case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:
+          SubTask_Segment_Animation__Merry_Christmas();
+        break;
+        case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:
+          SubTask_Segment_Animation__Halloween();
+        break;
+        /**
+         * Chase
+         **/
+        case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:
+          SubTask_Segment_Animation__Chase_Colour();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:
+          SubTask_Segment_Animation__Chase_Random();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:
+          SubTask_Segment_Animation__Chase_Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:
+          SubTask_Segment_Animation__Chase_Flash();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:
+          SubTask_Segment_Animation__Chase_Flash_Random();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:
+          SubTask_Segment_Animation__Chase_Rainbow_White();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:
+          SubTask_Segment_Animation__Chase_Theater();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:
+          SubTask_Segment_Animation__Chase_Theatre_Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:
+          SubTask_Segment_Animation__Chase_TriColour();
+        break;
+        case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:
+          SubTask_Segment_Animation__Circus_Combustus();
+        break;
+        /**
+         *  Breathe/Fade/Pulse
+         **/    
+        case EFFECTS_FUNCTION__WLED_BREATH__ID:
+          SubTask_Segment_Animation__Breath();
+        break;
+        case EFFECTS_FUNCTION__WLED_FADE__ID:
+          SubTask_Segment_Animation__Fade();
+        break;
+        case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:
+          SubTask_Segment_Animation__Fade_TriColour();
+        break;
+        case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:
+          SubTask_Segment_Animation__Fade_Spots();
+        break;
+        #endif // ENABLE_EXTRA_WLED_EFFECTS
+        /**
+         * Sparkle/Twinkle
+         **/
+        #ifdef ENABLE_EXTRA_WLED_EFFECTS
+        case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:
+          SubTask_Segment_Animation__Solid_Glitter();
+        break;
+        case EFFECTS_FUNCTION__WLED_POPCORN__ID:
+          SubTask_Segment_Animation__Popcorn();
+        break;
+        case EFFECTS_FUNCTION__WLED_PLASMA__ID:
+          SubTask_Segment_Animation__Plasma();
+        break;
+        case EFFECTS_FUNCTION__WLED_SPARKLE__ID:
+          SubTask_Segment_Animation__Sparkle();
+        break;
+        case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:
+          SubTask_Segment_Animation__Sparkle_Flash();
+        break;
+        case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:
+          SubTask_Segment_Animation__Sparkle_Hyper();
+        break;
+        case EFFECTS_FUNCTION__WLED_TWINKLE__ID:
+          SubTask_Segment_Animation__Twinkle();
+        break;
+        case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:
+          SubTask_Segment_Animation__Twinkle_Colour();
+        break;
+        case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:
+          SubTask_Segment_Animation__Twinkle_Fox();
+        break;
+        case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:
+          SubTask_Segment_Animation__Twinkle_Cat();
+        break;
+        case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:
+          SubTask_Segment_Animation__Twinkle_Up();
+        break;
+        case EFFECTS_FUNCTION__WLED_DYNAMIC__ID:
+          SubTask_Segment_Animation__Dynamic();
+        break;
+        case EFFECTS_FUNCTION__WLED_SAW__ID:
+          SubTask_Segment_Animation__Saw();
+        break;
+        case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:
+          SubTask_Segment_Animation__Dissolve();
+        break;
+        case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:
+          SubTask_Segment_Animation__Dissolve_Random();
+        break;
+        case EFFECTS_FUNCTION__WLED_COLORFUL__ID:
+          SubTask_Segment_Animation__ColourFul();
+        break;
+        case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
+          SubTask_Segment_Animation__Traffic_Light();
+        break;
+        #endif // ENABLE_EXTRA_WLED_EFFECTS      
+        #ifdef ENABLE_EXTRA_WLED_EFFECTS
+        /**
+         * Blink/Strobe
+         **/
+        case EFFECTS_FUNCTION__WLED_BLINK__ID:
+          SubTask_Segment_Animation__Blink();
+        break;
+        case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:
+          SubTask_Segment_Animation__Blink_Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_STROBE__ID:
+          SubTask_Segment_Animation__Strobe();
+        break;
+        case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:
+          SubTask_Segment_Animation__Strobe_Multi();
+        break;
+        case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:
+          SubTask_Segment_Animation__Strobe_Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_RAINBOW__ID:
+          SubTask_Segment_Animation__Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:
+          SubTask_Segment_Animation__Lightning();
+        break;
+        case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:
+          SubTask_Segment_Animation__Fire_2012();
+        break;
+        case EFFECTS_FUNCTION__WLED_RAILWAY__ID:
+          SubTask_Segment_Animation__Railway();
+        break;
+        case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:
+          SubTask_Segment_Animation__Heartbeat();
+        break;
+        /**
+         * Noise
+         **/
+        case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:
+          SubTask_Segment_Animation__FillNoise8();
+        break;
+        case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:
+          SubTask_Segment_Animation__Noise16_1();
+        break;
+        case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:
+          SubTask_Segment_Animation__Noise16_2();
+        break;
+        case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:
+          SubTask_Segment_Animation__Noise16_3();
+        break;
+        case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:
+          SubTask_Segment_Animation__Noise16_4();
+        break;
+        case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:
+          SubTask_Segment_Animation__Noise_Pal();
+        break;
+        case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:
+          SubTask_Segment_Animation__PhasedNoise();
+        break;
+        case EFFECTS_FUNCTION__WLED_PHASED__ID:
+          SubTask_Segment_Animation__Phased();
+        break;
+        /**
+         * Scan
+         **/
+        case EFFECTS_FUNCTION__WLED_SCAN__ID:
+          SubTask_Segment_Animation__Scan();
+        break;
+        case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:
+          SubTask_Segment_Animation__Scan_Dual();
+        break;
+        case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:
+          SubTask_Segment_Animation__Larson_Scanner();
+        break;
+        case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:
+          SubTask_Segment_Animation__Larson_Scanner_Dual();
+        break;
+        case EFFECTS_FUNCTION__WLED_ICU__ID:
+          SubTask_Segment_Animation__ICU();
+        break;
+        case EFFECTS_FUNCTION__WLED_RIPPLE__ID:
+          SubTask_Segment_Animation__Ripple();
+        break;
+        case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:
+          SubTask_Segment_Animation__Ripple_Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_COMET__ID:
+          SubTask_Segment_Animation__Comet();
+        break;
+        case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:
+          SubTask_Segment_Animation__Chunchun();
+        break;
+        case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:
+          SubTask_Segment_Animation__Bouncing_Balls();
+        break;
+        case EFFECTS_FUNCTION__WLED_SINELON__ID:
+          SubTask_Segment_Animation__Sinelon();
+        break;
+        case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:
+          SubTask_Segment_Animation__Sinelon_Dual();
+        break;
+        case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:
+          SubTask_Segment_Animation__Sinelon_Rainbow();
+        break;
+        case EFFECTS_FUNCTION__WLED_DRIP__ID:
+          SubTask_Segment_Animation__Drip();
+        break;
+        #endif // ENABLE_EXTRA_WLED_EFFECTS
+        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+        case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
+          SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+        case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
+          SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
+        case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
+          SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+        case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
+          SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+        case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
+          SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+        break;   
+        #endif 
+        // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
+        //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+        //  break;
+        //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
+        //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+        //  break;
+        /**
+         * Development effects without full code 
+         **/          
+        //  case EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID:
+        //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+        //  break;
+        //  case EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID:
+        //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+        //  break;
+        //  case EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID:
+        //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
+        //  break;
+        //  case EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID:
+        //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+        //  break;
+        //  case EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID:
+        //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+        //  break;
+        //  case EFFECTS_FUNCTION__FADE_GRADIENT__ID:
+        //    SubTask_Flasher_Animate_Function_Fade_Gradient();
+        //  break;
+        //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON:
+        //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
+        //  break;
+        //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID:
+        //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+        //  break;
+        // EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
+        //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF__ID:
+        //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+        //  break;
+        //  case EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+        //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+        //  break;
+        //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+        //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+        //  break;
+        
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+        case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
+          SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
+        break;
+        case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
+          SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
+        break;
+        case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
+          SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+        break;
+        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
+        case EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID:
+          SubTask_Segment_Animate_Function__Notification_Static_On();
+        break;
+        case EFFECTS_FUNCTION__NOTIFICATION_STATIC_OFF__ID:
+          SubTask_Segment_Animate_Function__Notification_Static_Off();
+        break;
+        case EFFECTS_FUNCTION__NOTIFICATION_FADE_ON__ID:
+          SubTask_Segment_Animate_Function__Notification_Fade_On();
+        break;
+        case EFFECTS_FUNCTION__NOTIFICATION_FADE_OFF__ID:
+          SubTask_Segment_Animate_Function__Notification_Fade_Off();
+        break;
+        case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
+          SubTask_Segment_Animate_Function__Notification_Blinking();
+        break;
+        case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
+          SubTask_Segment_Animate_Function__Notification_Pulsing();
+        break;
+        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+        case EFFECTS_FUNCTION__TESTER_01__ID:
+          SubTask_Flasher_Animate_Function_Tester_01();
+        break; 
+        case EFFECTS_FUNCTION__TESTER_02__ID:
+          SubTask_Flasher_Animate_Function_Tester_02();
+        break; 
+        // testing to replacement
+        case EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID:
+          SubTask_Segment_Animate_Function__Static_Palette_New();
+        break;
+        case EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID:
+          SubTask_Segment_Animate_Function__Slow_Glow_New();
+        break;
+        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+      } //end SWITCH
+
+      /**
+       * @brief Only calls Animator if effects are not directly handled
+       **/
+      if(SEGMENT.anim_function_callback == nullptr) // assumes direct update
+      {
+        StripUpdate();         
+        seg.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
+        ALOG_DBM(PSTR("Calling"));
+      }
+      else
+      { 
+        DEBUG_LINE_HERE;
+        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_active_index);   
+        // First run must be reset after StartAnimation is first called 
+      }
+              
+      SEGMENT.call++; // Used as progress counter for animations eg rainbow across all hues
+
+      DEBUG_PIN1_SET(HIGH);
                 
-        _segment_runtimes[segment_active_index].call++; // Used as progress counter for animations eg rainbow across all hues
-
-        DEBUG_PIN1_SET(HIGH);
-                 
-      }//end if update reached
-
-    } //  if(_segments[segment_active_index].isActive())
-    // else{
-      
-    //     #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-    //       AddLog(LOG_LEVEL_DEBUG, PSTR("ELSE isActive pCONT_lAni->_segments[0].mode_id=%d"),pCONT_lAni->_segments[0].mode_id);
-    //     #endif
-    // }
-
+    }//end if update reached
   
-  // }
+  } // END for
 
 } // SubTask_Effects_PhaseOut
 
@@ -905,11 +991,6 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
     SetPixelColor(pixel, updatedColor);
 
   }
-
-  // #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-  //   SetPixelColor(0, RgbColor(0));
-  // #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-
 
 }
 
@@ -964,10 +1045,10 @@ RgbcctColor mAnimatorLight::GetSegmentColour(uint8_t colour_index, uint8_t segme
 
   RgbcctColor colour = RgbcctColor(0);
 
-  uint8_t white = (uint8_t)(_segments[segment_index].colors[colour_index] >> 24);
-  uint8_t red   = (uint8_t)(_segments[segment_index].colors[colour_index] >> 16);
-  uint8_t green = (uint8_t)(_segments[segment_index].colors[colour_index] >> 8);
-  uint8_t blue  = (uint8_t)(_segments[segment_index].colors[colour_index] >> 0);
+  uint8_t white = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 24);
+  uint8_t red   = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 16);
+  uint8_t green = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 8);
+  uint8_t blue  = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 0);
 
   colour = RgbcctColor(red, green, blue, white, white);
 
@@ -984,14 +1065,14 @@ void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light
   switch(light_type)
   {
     case LT_PWM5:
-      _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
+      SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
     break;
     case LT_ADDRESSABLE_SK6812:
-      _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID; 
+      SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID; 
     break;
     default:
     case LT_ADDRESSABLE_WS281X:
-      _segments[segment_index].colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+      SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
     break;
   }
 
@@ -1445,15 +1526,17 @@ void mAnimatorLight::EveryLoop()
 
   uint8_t flag_animations_needing_updated = 0;
     
-  for(
-    int ii = 0; 
-    ii<MAX_NUM_SEGMENTS; 
-    ii++
-  ){
+  // for(
+  //   int ii = 0; 
+  //   ii<MAX_NUM_SEGMENTS; 
+  //   ii++
+  // ){
+  for (uint16_t ii = 0; ii < strip->_segments_new.size(); ii++)
+  {
 
     segment_active_index = ii; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
 
-    if(_segments[ii].isActive())
+    if(SEGMENT_I(ii).isActive())
     {
 
       /**
@@ -1462,16 +1545,16 @@ void mAnimatorLight::EveryLoop()
        * 
        */
 
-      if (_segment_runtimes[ii].animator->IsAnimating())
+      if (SEGMENT_I(ii).animator->IsAnimating())
       {
 
         /**
          * @brief A Backoff time is needed per animation so the DMA is not overloaded
          * 
         **/
-        if(mTime::TimeReached(&_segment_runtimes[ii].tSaved_AnimateRunTime, 10))
+        if(mTime::TimeReached(&SEGMENT_I(ii).tSaved_AnimateRunTime, 10))
         {
-          _segment_runtimes[ii].animator->UpdateAnimations(ii);
+          SEGMENT_I(ii).animator->UpdateAnimations(ii);
           flag_animations_needing_updated++; // channels needing updated
         } //end TimeReached
   
@@ -1511,13 +1594,13 @@ void mAnimatorLight::EveryLoop()
      * THESE ARE COMMANDS IF ANY IS ANIMATING
      * checking if animation state has changed from before (maybe check via animation state?)
      * */
-    if(!_segments[0].flags.fRunning)
+    if(!SEGMENT_I(0).flags.fRunning)
     {   
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_DBM( PSTR(D_LOG_NEO "Animation Started"));
       #endif
     }
-    _segments[0].flags.fRunning = true; 
+    SEGMENT_I(0).flags.fRunning = true; 
     fPixelsUpdated = true;
     pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
     //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
@@ -1530,7 +1613,7 @@ void mAnimatorLight::EveryLoop()
       #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 
 
-    if(_segments[0].flags.fRunning)
+    if(SEGMENT_I(0).flags.fRunning)
     { // Was running
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       ALOG_DBM( PSTR(D_LOG_NEO "Animation Finished")); 
@@ -1549,7 +1632,7 @@ void mAnimatorLight::EveryLoop()
       }          
 
     }
-    _segments[0].flags.fRunning = false;
+    SEGMENT_I(0).flags.fRunning = false;
     pCONT_set->Settings.enable_sleep = true;
     if(blocking_force_animate_to_complete){ //if it was running
       #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -1613,9 +1696,9 @@ void mAnimatorLight::EveryLoop()
 mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE)
 {
   // AddLog(LOG_LEVEL_INFO, PSTR("SetSegment_AnimFunctionCallback segment_index=%d"));
-  this->_segment_runtimes[segment_index].anim_function_callback = anim_function_callback;
+  this->SEGMENT_I(segment_index).anim_function_callback = anim_function_callback;
   
-  _segment_runtimes[segment_index].animation_has_anim_callback = true;
+  SEGMENT_I(segment_index).animation_has_anim_callback = true;
 
   return *this;
 }
@@ -1663,23 +1746,23 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
   // pCONT_iLight->runtime.animation_changed_millis = millis();
 
   uint16_t time_tmp = 0;    
-  time_tmp = _segments[segment_index].transition.time_ms; 
+  time_tmp = SEGMENT_I(segment_index).transition.time_ms;//    SEGMENT_I(segment_index).transition.time_ms; 
 
   /**
    * @brief Before starting animation, check the override states to see if they are active
    * 
    */
-  // Overwriting single _segments[0] methods, set, then clear
-  if(_segments[segment_index].single_animation_override.time_ms>0)
+  // Overwriting single SEGMENT_I(0) methods, set, then clear
+  if(SEGMENT_I(segment_index).single_animation_override.time_ms>0)
   {
-    time_tmp = _segments[segment_index].single_animation_override.time_ms;
-    _segments[segment_index].single_animation_override.time_ms = 0; // reset overwrite
+    time_tmp = SEGMENT_I(segment_index).single_animation_override.time_ms;
+    SEGMENT_I(segment_index).single_animation_override.time_ms = 0; // reset overwrite
     ALOG_INF(PSTR("Override: TimeMs: %d"), time_tmp);
   }
 
   //clear forced once only flags
-  if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){
-    _segments[0].flags.NewAnimationRequiringCompleteRefresh = false;    
+  if(SEGMENT_I(segment_index).flags.NewAnimationRequiringCompleteRefresh){
+    SEGMENT_I(segment_index).flags.NewAnimationRequiringCompleteRefresh = false;    
   }
   
     // Serial.printf("TRANSITION_METHOD_INSTANT_ID = %d\n\r",time_tmp);
@@ -1690,9 +1773,9 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
     }
   }
 
-  if(_segment_runtimes[segment_index].animation_has_anim_callback == true)
+  if(SEGMENT_I(segment_index).animation_has_anim_callback == true)
   {
-    _segment_runtimes[segment_index].animator->StartAnimation(0, time_tmp, _segment_runtimes[segment_index].anim_function_callback);
+    SEGMENT_I(segment_index).animator->StartAnimation(0, time_tmp, SEGMENT_I(segment_index).anim_function_callback);
   }
 
 
@@ -1709,9 +1792,9 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
 
   // // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
 
-  uint16_t pixels_in_segment = _segments[segment_index].length();
+  uint16_t pixels_in_segment = SEGMENT_I(segment_index).length();
 
-  _segments[segment_index].pixels_to_update_this_cycle = mapvalue(percentage, 0,100, 0,pixels_in_segment);
+  SEGMENT_I(segment_index).pixels_to_update_this_cycle = mapvalue(percentage, 0,100, 0,pixels_in_segment);
 
   // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "SetLEDOutAmountByPercentage = %d"),strip_size_requiring_update);
 
@@ -1920,20 +2003,27 @@ uint8_t mAnimatorLight::get_random_wheel_index(uint8_t pos) {
 void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index ){
   
 
-  // _segment_runtimes[segment_index].reset(); // Do not reset, as this makes consecutive commands lose the animation already running. 
+  // SEGMENT_I(segment_index).reset(); // Do not reset, as this makes consecutive commands lose the animation already running. 
   // It should only reset if the animation has changed?
-  if(_segments[segment_index].effect_id != value)
+  if(SEGMENT_I(segment_index).effect_id != value)
   {
-    _segment_runtimes[segment_index].markForReset();
-
-    _segments[segment_index].effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
-
-
+    SEGMENT_I(segment_index).markForReset();
+    SEGMENT_I(segment_index).effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
   }
+  SEGMENT_I(segment_index).aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
+  SEGMENT_I(segment_index).flags.animator_first_run= true; // first run, so do extra things
 
+  
 
-  _segment_runtimes[segment_index].aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
-  _segments[segment_index].flags.animator_first_run= true; // first run, so do extra things
+  if(strip->_segments_new[segment_index].effect_id != value)
+  {
+    strip->_segments_new[segment_index].markForReset();
+    strip->_segments_new[segment_index].effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
+  }
+  strip->_segments_new[segment_index].aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
+  strip->_segments_new[segment_index].flags.animator_first_run= true; // first run, so do extra things
+
+  ALOG_INF(PSTR("strip->_segments_new[segment_index].effect_id=%d"),strip->_segments_new[segment_index].effect_id);
 
   
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -2008,7 +2098,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 }
 const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index )
 {
-  return GetFlasherFunctionNamebyID(_segments[segment_index].effect_id, buffer, buflen);
+  return GetFlasherFunctionNamebyID(SEGMENT_I(segment_index).effect_id, buffer, buflen);
 }
 const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen)
 {
@@ -2208,9 +2298,9 @@ void mAnimatorLight::Segment_New::setUpLeds() {
   // deallocation happens in resetIfRequired() as it is called when segment changes or in destructor
   if (mAnimatorLight::Segment_New::_globalLeds)
     #ifndef WLED_DISABLE_2D
-    leds = &mAnimatorLight::Segment_New::_globalLeds[start + startY*mAnimatorLight::Segment_New::maxWidth];
+    leds = &mAnimatorLight::Segment_New::_globalLeds[pixel_range.start + startY*mAnimatorLight::Segment_New::maxWidth];
     #else
-    leds = &mAnimatorLight::Segment_New::_globalLeds[start];
+    leds = &mAnimatorLight::Segment_New::_globalLeds[pixel_range.start];
     #endif
   else if (!leds) {
     #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
@@ -2306,10 +2396,10 @@ void mAnimatorLight::Segment_New::startTransition(uint16_t dur) {
   if (transitional || _t) return; // already in transition no need to store anything
 
   // starting a transition has to occur before change so we get current values 1st
-  uint8_t _briT = currentBri(on ? opacity : 0);
+  uint8_t _briT = currentBri(on ? opacity_wled : 0);
   uint8_t _cctT = currentBri(cct, true);
-  CRGBPalette16 _palT; loadPalette(_palT, palette);
-  uint8_t _modeP = mode;
+  CRGBPalette16 _palT; loadPalette(_palT, palette_wled);
+  uint8_t _modeP = mode_wled;
   uint32_t _colorT[NUM_COLORS];
   for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = currentColor(i, colors[i]);
 
@@ -2840,7 +2930,7 @@ void mAnimatorLight::Segment_New::blur(uint8_t blur_amount)
  * Inspired by the Adafruit examples.
  */
 uint32_t mAnimatorLight::Segment_New::color_wheel(uint8_t pos) { // TODO
-  if (palette) return color_from_palette(pos, false, true, 0);
+  if (palette_wled) return color_from_palette(pos, false, true, 0);
   pos = 255 - pos;
   if(pos < 85) {
     return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
@@ -3218,10 +3308,10 @@ void mAnimatorLight::WS2812FX::setMode(uint8_t segid, uint8_t m) {
    
   if (m >= getModeCount()) m = getModeCount() - 1;
 
-  if (_segments_new[segid].mode != m) {
+  if (_segments_new[segid].mode_wled != m) {
     _segments_new[segid].startTransition(_transitionDur); // set effect transitions
     //_segments_new[segid].markForReset();
-    _segments_new[segid].mode = m;
+    _segments_new[segid].mode_wled = m;
   }
 }
 
@@ -3337,16 +3427,23 @@ bool mAnimatorLight::WS2812FX::hasCCTBus(void) {
   // return false;
 }
 
-void mAnimatorLight::WS2812FX::purgeSegments(bool force) {
+void mAnimatorLight::WS2812FX::purgeSegments(bool force) 
+{
+  ALOG_INF(PSTR("purgeSegments(%d)"),force);
+  ALOG_INF(PSTR("_segments_new.size=%d"),_segments_new.size());
   // remove all inactive segments (from the back)
   int deleted = 0;
   if (_segments_new.size() <= 1) return;
+
   for (size_t i = _segments_new.size()-1; i > 0; i--)
-    if (_segments_new[i].stop == 0 || force) {
+  {
+    ALOG_INF(PSTR("i=%d"),i);
+    if (_segments_new[i].pixel_range.stop == 0 || force) {
       DEBUG_PRINT(F("Purging segment segment: ")); DEBUG_PRINTLN(i);
       deleted++;
       _segments_new.erase(_segments_new.begin() + i);
     }
+  }
   if (deleted) {
     _segments_new.shrink_to_fit();
     if (_mainSegment >= _segments_new.size()) setMainSegmentId(0);
@@ -3357,12 +3454,24 @@ mAnimatorLight::Segment_New& mAnimatorLight::WS2812FX::getSegment(uint8_t id) {
   return _segments_new[id >= _segments_new.size() ? getMainSegmentId() : id]; // vectors
 }
 
+/**
+ * @brief For turning on a new effect/segment
+ * 
+ * @param n 
+ * @param i1 
+ * @param i2 
+ * @param grouping 
+ * @param spacing 
+ * @param offset 
+ * @param startY 
+ * @param stopY 
+ */
 void mAnimatorLight::WS2812FX::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t grouping, uint8_t spacing, uint16_t offset, uint16_t startY, uint16_t stopY) {
   if (n >= _segments_new.size()) return;
   mAnimatorLight::Segment_New& seg = _segments_new[n];
 
   //return if neither bounds nor grouping have changed
-  bool boundsUnchanged = (seg.start == i1 && seg.stop == i2);
+  bool boundsUnchanged = (seg.pixel_range.start == i1 && seg.pixel_range.stop == i2);
   if (isMatrix) {
     boundsUnchanged &= (seg.startY == startY && seg.stopY == stopY);
   }
@@ -3371,12 +3480,12 @@ void mAnimatorLight::WS2812FX::setSegment(uint8_t n, uint16_t i1, uint16_t i2, u
       && (offset == UINT16_MAX || offset == seg.offset)) return;
 
   //if (seg.stop) setRange(seg.start, seg.stop -1, BLACK); //turn old segment range off
-  if (seg.stop) seg.fill(BLACK); //turn old segment range off
+  if (seg.pixel_range.stop) seg.fill(BLACK); //turn old segment range off
   if (i2 <= i1) //disable segment
   {
     // disabled segments should get removed using purgeSegments()
     DEBUG_PRINT(F("-- mAnimatorLight::Segment_New ")); DEBUG_PRINT(n); DEBUG_PRINTLN(F(" marked inactive."));
-    seg.stop = 0;
+    seg.pixel_range.stop = 0;
     //if (seg.name) {
     //  delete[] seg.name;
     //  seg.name = nullptr;
@@ -3394,8 +3503,8 @@ void mAnimatorLight::WS2812FX::setSegment(uint8_t n, uint16_t i1, uint16_t i2, u
     seg.stopY = stopY > mAnimatorLight::Segment_New::maxHeight ? mAnimatorLight::Segment_New::maxHeight : MAX(1,stopY);
     #endif
   } else {
-    if (i1 < _length) seg.start = i1;
-    seg.stop = i2 > _length ? _length : i2;
+    if (i1 < _length) seg.pixel_range.start = i1;
+    seg.pixel_range.stop = i2 > _length ? _length : i2;
     seg.startY = 0;
     seg.stopY  = 1;
   }
@@ -3474,8 +3583,8 @@ void mAnimatorLight::WS2812FX::makeAutoSegments(bool forceReset) {
     //expand the main seg to the entire length, but only if there are no other segments, or reset is forced
     else if (getActiveSegmentsNum() == 1) {
       size_t i = getLastActiveSegmentId();
-      _segments_new[i].start = 0;
-      _segments_new[i].stop  = _length;
+      _segments_new[i].pixel_range.start = 0;
+      _segments_new[i].pixel_range.stop  = _length;
       _mainSegment = 0;
     }
   }
@@ -3486,8 +3595,8 @@ void mAnimatorLight::WS2812FX::makeAutoSegments(bool forceReset) {
 void mAnimatorLight::WS2812FX::fixInvalidSegments() {
   //make sure no segment is longer than total (sanity check)
   for (size_t i = getSegmentsNum()-1; i > 0; i--) {
-    if (_segments_new[i].start >= _length) { _segments_new.erase(_segments_new.begin()+i); continue; }
-    if (_segments_new[i].stop  >  _length) _segments_new[i].stop = _length;
+    if (_segments_new[i].pixel_range.start >= _length) { _segments_new.erase(_segments_new.begin()+i); continue; }
+    if (_segments_new[i].pixel_range.stop  >  _length) _segments_new[i].pixel_range.stop = _length;
     // this is always called as the last step after finalizeInit(), update covered bus types
     _segments_new[i].refreshLightCapabilities();
   }
@@ -3501,7 +3610,7 @@ bool mAnimatorLight::WS2812FX::checkSegmentAlignment() {
     //   Bus *bus = busses.getBus(b);
     //   if (seg.start == bus->getStart() && seg.stop == bus->getStart() + bus->getLength()) aligned = true;
     // }
-    if (seg.start == 0 && seg.stop == _length) aligned = true;
+    if (seg.pixel_range.start == 0 && seg.pixel_range.stop == _length) aligned = true;
     if (!aligned) return false;
   }
   return true;

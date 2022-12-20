@@ -33,9 +33,9 @@
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
@@ -101,7 +101,7 @@
 #endif
 
 // When no callback is needed for animator and effect function (e.g. WLED) must be called
-#define SET_EFFECT_FUNCTION_HANDLES_ANIMATOR()  SEGENV.anim_function_callback = nullptr
+#define SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION()  SEGMENT.anim_function_callback = nullptr
 
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATION_ACTIVE_CTR)       "animation";
@@ -346,7 +346,7 @@ class mAnimatorLight :
     uint8_t fPixelsUpdated = false;
     uint16_t desired_pixel;
     void EveryLoop();
-    void SetRefreshLEDs();    
+    // void SetRefreshLEDs();    
     void StripUpdate();
     void SetPixelColor_All(RgbcctColor colour);
                 

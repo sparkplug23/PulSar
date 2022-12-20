@@ -10,22 +10,22 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
 
   JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
   
-  JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getHue360());
-  JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
+  JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getHue360());
+  JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getSat255());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
 
   
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_colour_order);
   // JBI->Array_AddArray(PM_JSON_RGB_COLOUR_ORDER, hardware_element_c12olour_order);
 
 
-  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessCCT255());
+  JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessCCT255());
 
 
-  // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->_segments[0].transition.pixels_to_update_as_number);
-  #endif // USE_MODULE_LIGHTS_ANIMATOR
+  // // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
+  // #ifdef USE_MODULE_LIGHTS_ANIMATOR
+  // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_NUMBER, pCONT_lAni->SEGMENT_I(0).transition.pixels_to_update_as_number);
+  // #endif // USE_MODULE_LIGHTS_ANIMATOR
 
   return JsonBuilderI->End();
 
@@ -46,7 +46,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_method){
   
   JsonBuilderI->Start();  
 
-    JBI->Add("ColourPaletteID", pCONT_lAni->_segments[0].palette.id);
+    JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette.id);
 
     JBI->Add("Type", pCONT_set->Settings.light_settings.type);
 
@@ -56,12 +56,12 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_method){
   //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
-    JsonBuilderI->Add_P(PM_JSON_HUE, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getHue360());
-    JsonBuilderI->Add_P(PM_JSON_SAT, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getSat255());
-    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, pCONT_lAni->_segment_runtimes[0].rgbcct_controller->getBrightnessRGB255());
+    JsonBuilderI->Add_P(PM_JSON_HUE, pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getHue360());
+    JsonBuilderI->Add_P(PM_JSON_SAT, pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getSat255());
+    JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
 
-    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->_segments[0].transition.time_ms/1000));
-    JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->_segments[0].transition.time_ms);
+    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->SEGMENT_I(0).transition.time_ms/1000));
+    JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->SEGMENT_I(0).transition.time_ms);
 
 
     #ifdef ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
@@ -100,11 +100,11 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_method){
     // JsonBuilderI->Level_End();
     JsonBuilderI->Level_Start("type");
     
-    JsonBuilderI->Add("R", pCONT_lAni->_segments[0].hardware_element_colour_order.r); 
-    JsonBuilderI->Add("G", pCONT_lAni->_segments[0].hardware_element_colour_order.g); 
-    JsonBuilderI->Add("B", pCONT_lAni->_segments[0].hardware_element_colour_order.b); 
-    JsonBuilderI->Add("WW", pCONT_lAni->_segments[0].hardware_element_colour_order.w); 
-    JsonBuilderI->Add("WC", pCONT_lAni->_segments[0].hardware_element_colour_order.c); 
+    JsonBuilderI->Add("R", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.r); 
+    JsonBuilderI->Add("G", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.g); 
+    JsonBuilderI->Add("B", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.b); 
+    JsonBuilderI->Add("WW", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.w); 
+    JsonBuilderI->Add("WC", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.c); 
 
 
     JsonBuilderI->Level_End();
@@ -114,7 +114,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_method){
   JsonBuilderI->Level_End();
 
 
-  if(pCONT_lAni->_segments[0].palette.id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
+  if(pCONT_lAni->SEGMENT_I(0).palette.id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
   {
 
     JBI->Array_AddArray("encoded", pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map, ARRAY_SIZE(pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map));

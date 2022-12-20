@@ -31,7 +31,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
 
   RgbcctColor desired_colour  = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id);
   
-  ALOG_DBM( PSTR("desired_colour1=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+  ALOG_INF( PSTR("desired_colour1=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
   if(!SEGENV.rgbcct_controller->getApplyBrightnessToOutput()){ // If not already applied, do it using global values
     desired_colour = ApplyBrightnesstoRgbcctColour(
@@ -71,6 +71,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
 {
+
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 
   if (!SEGRUN.allocateData(dataSize)){    
@@ -308,7 +309,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
     break;
   }
 
-  SET_EFFECT_FUNCTION_HANDLES_ANIMATOR();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
 
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -412,7 +413,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
           
           out_colour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
 
-          if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+          if(SEGMENT_I(segment_active_index).flags.brightness_applied_during_colour_generation){
             out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, pCONT_iLight->getBriRGB_Global());
           }
           
@@ -484,7 +485,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
     SetPixelColor(SEGLEN-1, colourfirst); // Insert saved first pixel into last pixel as "wrap around"
   // }
 
-  SET_EFFECT_FUNCTION_HANDLES_ANIMATOR();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
 
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -608,7 +609,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
  *          
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
 {
 
@@ -676,7 +677,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
   );
 
 }
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -691,7 +692,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
  *          
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette()
 {
 
@@ -777,7 +778,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
 
 
 }
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 
@@ -1536,7 +1537,7 @@ void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color, byte segDi
 
     pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
 
-    RgbcctColor colour = ColorFromPaletteLCD(_segments[0].palette.id, color);//RgbColor(255,0,0);
+    RgbcctColor colour = ColorFromPaletteLCD(SEGMENT_I(0).palette.id, color);//RgbColor(255,0,0);
 
     // RgbcctColor colour = RgbwColor(1,2,3,4);
 
@@ -5306,6 +5307,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -5330,10 +5333,6 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 
 void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, bool useRandomColors)
 {
-
-  /// Use this animation to work out how I can use the aux0 stuff for my animations
-  // ALOG_INF(PSTR("Learing cycletime"));
-
 
 //speed of 128, cycletime = 19800
   uint32_t cycleTime = 750 + (255 - SEGMENT.speed())*150;
@@ -5395,6 +5394,9 @@ void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, b
       if (i == ledIndex) SetPixelColor(indexPixel, color_blend(back? col0 : col1, back? col1 : col0, rem), true);
     }
   } 
+
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -5501,26 +5503,33 @@ uint32_t mAnimatorLight::color_blend(uint32_t color1, uint32_t color2, uint8_t b
  */
 uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
 
+#ifdef ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
 
+  if (SEGMENT.palette.id){
+    return mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, pos, nullptr, false, true, 0);
+  }
+  
+  pos = 255 - pos;
+
+  if(pos < 85) {
+    return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
+  } else if(pos < 170) {
+    pos -= 85;
+    return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
+  } else {
+    pos -= 170;
+    return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
+  }
+
+
+#else
   float hue_f = mSupport::mapfloat(pos, 0, 255, 0.0f, 1.0f);
-
-  // Serial.println(hue_f);
-
   HsbColor colh = HsbColor(hue_f,1,1);
-
-
   return RgbcctColor::GetU32Colour(colh);
-  // if (SEGMENT.palette) return color_from_palette(pos, false, true, 0);
-  // pos = 255 - pos;
-  // if(pos < 85) {
-  //   return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
-  // } else if(pos < 170) {
-  //   pos -= 85;
-  //   return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
-  // } else {
-  //   pos -= 170;
-  //   return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
-  // }
+#endif
+
+
+
 }
 
 
@@ -5530,7 +5539,7 @@ uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
  */
 void mAnimatorLight::fill(uint32_t c, bool apply_brightness) 
 {
-  for(uint16_t i = 0; i < _virtualSegmentLength; i++) 
+  for(uint16_t i = 0; i < strip->_virtualSegmentLength; i++) 
   {
     SetPixelColor(i, c, apply_brightness);
   }
@@ -5553,7 +5562,7 @@ void mAnimatorLight::fill_ranged(uint32_t c, bool apply_brightness)
  ****************************************************************************************************************************
  ****************************************************************************************************************************/
 
-
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Name
@@ -5652,6 +5661,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -5694,6 +5705,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow()
   uint32_t color = color_wheel(((SEGENV.step * color_sep) + color_index) & 0xFF);
 
   SubTask_Segment_Animation__Base_Chase(color, SEGCOLOR(0), SEGCOLOR(1), false);
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -5743,6 +5756,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash()
     SEGENV.step = (SEGENV.step + 1) % SEGLEN;
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -5793,6 +5808,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
   SEGENV.animation_has_anim_callback = false; // When no animation callback is needed
           Serial.print("@4");
   StripUpdate();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -5817,6 +5834,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow_White()
   uint32_t color3 = color_wheel(((m * 256 / SEGLEN) + (SEGENV.call & 0xFF)) & 0xFF);
 
   SubTask_Segment_Animation__Base_Chase(SEGCOLOR(0), color2, color3, false);
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -5858,6 +5877,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t colo
     }
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  return;
 }
 
 
@@ -5914,6 +5935,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t co
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -5960,6 +5983,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
 
   SEGENV.step = it;
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  return;
 }
 
 
@@ -6010,6 +6035,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Breath()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6031,8 +6058,11 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -6074,7 +6104,7 @@ void mAnimatorLight::blur(uint8_t blur_amount, bool set_brightness)
   uint8_t seep = blur_amount >> 1;
   CRGB carryover = HTMLColorCode::Black;
 
-  for(uint16_t i = 0; i < _virtualSegmentLength; i++)
+  for(uint16_t i = 0; i < strip->_virtualSegmentLength; i++)
   {
 
     CRGB cur = col_to_crgb( RgbcctColor::GetU32Colour(GetPixelColor(i)));
@@ -6093,6 +6123,8 @@ void mAnimatorLight::blur(uint8_t blur_amount, bool set_brightness)
     carryover = part;
   }
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   
 }
 
@@ -6141,7 +6173,7 @@ void mAnimatorLight::fade_out(uint8_t rate, bool set_brightness)
 
   // r2 = 255;
 
-  for(uint16_t i = 0; i < _virtualSegmentLength; i++) {
+  for(uint16_t i = 0; i < strip->_virtualSegmentLength; i++) {
     color = RgbcctColor::GetU32Colour(GetPixelColor(i));
     int w1 = (color >> 24) & 0xff;
     int r1 = (color >> 16) & 0xff;
@@ -6162,6 +6194,8 @@ void mAnimatorLight::fade_out(uint8_t rate, bool set_brightness)
     SetPixelColor(i, RgbwColor(r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta), set_brightness);
   }
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -6215,6 +6249,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks()
       SEGENV.aux0 = index;
     }
   }
+  
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
   
 }
 
@@ -6352,6 +6388,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6469,6 +6507,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst_Glows()
   }
 
   // SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6598,6 +6638,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks()
   SEGMENT.setOption(SEG_OPTION_REVERSED, actuallyReverse);
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6739,6 +6781,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch()
   SEGMENT.setOption(SEG_OPTION_REVERSED, actuallyReverse);
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6778,6 +6822,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Rain()
   }
   
   SubTask_Segment_Animation__Fireworks();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6820,6 +6866,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle() // Firework_Rain
   SetPixelColor(SEGENV.aux0, SEGCOLOR(0));  
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -6846,6 +6894,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Flash() // Firework_Rain
     SEGMENT.transition.rate_ms = 20;//return 20;
   } 
   SEGMENT.transition.rate_ms =  20 + (uint16_t)(255-SEGMENT.speed());
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -6873,6 +6923,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Hyper() // Firework_Rain
     SEGMENT.transition.rate_ms =  20;
   }
   SEGMENT.transition.rate_ms =  20 + (uint16_t)(255-SEGMENT.speed());
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -6914,6 +6966,8 @@ random16_set_seed(535);                                 // The randomizer needs 
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -6962,6 +7016,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Random_Colour()
   fill(color_blend(color_wheel(SEGENV.aux1), color_wheel(SEGENV.aux0), fade), true);
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -7006,6 +7062,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Dynamic()
     SetPixelColor(i, color_wheel(SEGENV.data[i]));
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7036,6 +7094,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Rainbow_Cycle()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -7073,6 +7133,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(bool saw)
     SetPixelColor(i, color_blend(mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7144,6 +7206,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7197,6 +7261,8 @@ uint8_t _brightness = 255;
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7288,6 +7354,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Android()
   SEGENV.step = a;
   
   SEGMENT.transition.rate_ms =  3 + ((8 * (uint32_t)(255 - SEGMENT.speed())) / SEGLEN);
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   
 }
 
@@ -7351,6 +7419,8 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourFul()
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7393,6 +7463,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Traffic_Light()
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7440,6 +7512,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(uint32_t color1, ui
     SEGENV.step = it;
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 /*
@@ -7510,6 +7584,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Running_Random()
 
   SEGENV.aux1 = it;
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 #endif // ENABLE_EXTRA_WLED_EFFECTS
@@ -7556,6 +7632,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Gradient(bool loading)
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7628,12 +7706,16 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Police(uint32_t color1, uin
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
 //American Police Light with all LEDs Red and Blue 
 void mAnimatorLight::SubTask_Segment_Animation__Polce_All()
 {
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   return SubTask_Segment_Animation__Base_Police(RED, BLUE, true);
 }
 
@@ -7643,6 +7725,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Police()
 {
   fill(SEGCOLOR(1));
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
   return SubTask_Segment_Animation__Base_Police(RED, BLUE, false);
 }
 
@@ -7650,6 +7733,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Police()
 //Police All with custom colors
 void mAnimatorLight::SubTask_Segment_Animation__Two_Areas()
 {
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   return SubTask_Segment_Animation__Base_Police(SEGCOLOR(0), SEGCOLOR(1), true);
 }
 
@@ -7660,6 +7745,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Two_Dots()
   fill(SEGCOLOR(2));
   uint32_t color2 = (SEGCOLOR(1) == SEGCOLOR(2)) ? SEGCOLOR(0) : SEGCOLOR(1);
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   return SubTask_Segment_Animation__Base_Police(SEGCOLOR(0), color2, false);
 }
 
@@ -7716,6 +7803,8 @@ void mAnimatorLight::SubTask_Segment_Animation__TriColour()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7772,6 +7861,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade_TriColour()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7825,6 +7916,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Multi_Comet()
 
   SEGENV.step = it;
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7919,6 +8012,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Oscillate()
   SEGENV.step = it;
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -7976,6 +8071,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Pride_2015()
   SEGENV.step = sPseudotime;
   SEGENV.aux0 = sHue16;
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8004,6 +8101,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Juggle()
     dothue += 32;
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8038,6 +8137,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Palette()
     SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8132,6 +8233,8 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourWaves()
   SEGENV.aux0 = sHue16;
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8159,6 +8262,8 @@ void mAnimatorLight::SubTask_Segment_Animation__BPM()
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8234,6 +8339,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Colour()
     }
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8265,6 +8372,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Lake()
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8318,6 +8427,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Meteor()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8369,6 +8480,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
   SEGENV.step += SEGMENT.speed() +1;
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8449,6 +8562,8 @@ CRGB mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uin
     c = HTMLColorCode::Black;
   }
   return c;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   
 }
 
@@ -8528,6 +8643,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat)
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Fox()
@@ -8579,6 +8696,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -8587,6 +8706,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
 void mAnimatorLight::SubTask_Segment_Animation__Spots()
 {
   SubTask_Segment_Animation__Base_Spots((255 - SEGMENT.speed()) << 8);
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8599,6 +8720,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade_Spots()
   uint16_t tr = (t >> 1) + (t >> 2);
 //   return spots_base(tr);
   SubTask_Segment_Animation__Base_Spots(tr);
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8640,6 +8763,8 @@ uint16_t mAnimatorLight::mode_palette()
     SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
   }
   return FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Glitter()
@@ -8653,6 +8778,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Glitter()
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -8728,6 +8855,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Popcorn()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -8947,7 +9076,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
     }
   }
 
-  SET_EFFECT_FUNCTION_HANDLES_ANIMATOR();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
 
 }
 
@@ -8982,6 +9111,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Plasma()
     CRGB color = ColorFromPalette(mPaletteI->currentPalette, colorIndex, thisBright, LINEARBLEND);
     SetPixelColor(i, color.red, color.green, color.blue);
   }
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 } 
 
@@ -9040,6 +9171,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Percent()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9154,6 +9287,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Pacifica()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9161,6 +9296,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Pacifica()
 CRGB mAnimatorLight::pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
 {
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   uint16_t ci = cistart;
   uint16_t waveangle = ioff;
   uint16_t wavescale_half = (wavescale >> 1) + 20;
@@ -9196,6 +9333,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Solid_Glitter()
     SetPixelColor(random16(SEGLEN), ULTRAWHITE);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9260,6 +9399,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Sunrise()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9296,6 +9437,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Sinewave()
 
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9347,6 +9490,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Flow()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9373,7 +9518,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Static()
   
   fill(SEGCOLOR(0), SET_BRIGHTNESS);
   SEGMENT.transition.rate_ms = (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME_MS : 500;
-  SET_EFFECT_FUNCTION_HANDLES_ANIMATOR();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
 
 }
 
@@ -9406,7 +9551,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
   }
   
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
-  SET_EFFECT_FUNCTION_HANDLES_ANIMATOR();
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9461,6 +9607,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint
   } else fill(color);
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9527,6 +9675,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Strobe_Multi()
   }
   SEGENV.step = (SEGENV.step + 1) % (count + 1);  
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9562,6 +9712,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Rainbow()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -9609,6 +9761,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Lightning()
     }
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9678,6 +9832,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Fire_2012()
     SetPixelColor(j, color.red, color.green, color.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9716,6 +9872,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Railway()
   }
   SEGENV.step += FRAMETIME_MS;
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9760,6 +9918,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Heartbeat()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9788,6 +9948,8 @@ void mAnimatorLight::SubTask_Segment_Animation__FillNoise8()
   SEGENV.step += beatsin8(SEGMENT.speed(), 1, 6); //10,1,4
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -9822,6 +9984,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_1()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9853,6 +10017,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_2()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9887,6 +10053,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_3()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9907,6 +10075,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_4()
     SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -9953,6 +10123,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise_Pal()
   SEGENV.aux0 += beatsin8(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -9986,6 +10158,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Phased(uint8_t moder)
     index += 256 / SEGLEN;
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -10040,6 +10214,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Scan(bool dual)
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -10100,6 +10276,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Larson_Scanner(bool dual)
 
   SEGENV.step = index;
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -10164,6 +10342,8 @@ void mAnimatorLight::SubTask_Segment_Animation__ICU()
   SetPixelColor(dest + SEGLEN/space, col);
 
   SEGMENT.transition.rate_ms = SPEED_FORMULA_L;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
   
 }
 
@@ -10255,6 +10435,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Ripple(bool rainbow)
     }
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Ripple(void) {
@@ -10296,6 +10478,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Comet()
   SEGENV.aux0 = index++;
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 
@@ -10324,6 +10508,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chunchun()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -10394,6 +10580,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Bouncing_Balls()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -10437,6 +10625,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rai
     SEGENV.aux0 = pos;
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 void mAnimatorLight::SubTask_Segment_Animation__Sinelon(void) {
@@ -10538,6 +10728,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Drip()
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
@@ -10630,6 +10822,8 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
   // );
 
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 
 }
 
@@ -10690,13 +10884,13 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
 
   uint8_t colours_in_palette = 0;
 
-  RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(pCONT_lAni->_segments[0].palette.id,0,nullptr,true,true,false,255,&colours_in_palette);
+  RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(pCONT_lAni->SEGMENT_I(0).palette.id,0,nullptr,true,true,false,255,&colours_in_palette);
 
   // RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(mPaletteI->PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,0,nullptr,true,true,255,&colours_in_palette);
 
   // SEGMENT.palette.id = mPaletteI->PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID;
 
-  ALOG_INF( PSTR("pID{%d}, colours_in_palette = %d"), pCONT_lAni->_segments[0].palette.id, colours_in_palette );
+  ALOG_INF( PSTR("pID{%d}, colours_in_palette = %d"), pCONT_lAni->SEGMENT_I(0).palette.id, colours_in_palette );
 
   // SetPixelColor(0,colour,true);
 //  for(int i=0;i<50;i++)
@@ -10707,11 +10901,11 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
   for(int i=0;i<256;i++)
   {
 
-    colour = mPaletteI->GetColourFromPaletteAdvanced(pCONT_lAni->_segments[0].palette.id,i,nullptr,true,true,true,255,&colours_in_palette);
+    colour = mPaletteI->GetColourFromPaletteAdvanced(pCONT_lAni->SEGMENT_I(0).palette.id,i,nullptr,true,true,true,255,&colours_in_palette);
 
     SetPixelColor(i, colour, true);
 
-    // ALOG_INF( PSTR("pID{%d}, colours_in_palette = %d"),pCONT_lAni->_segments[0].palette.id, colours_in_palette );
+    // ALOG_INF( PSTR("pID{%d}, colours_in_palette = %d"),pCONT_lAni->SEGMENT_I(0).palette.id, colours_in_palette );
 
     // if(i>colours_in_palette)
     // {
@@ -10772,6 +10966,8 @@ StripUpdate();
 
     #endif// ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
+  
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 
@@ -10844,6 +11040,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static_On()
 //   //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
 //   //   }
 //   // );
+
+  SET_ANIMATOR_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATION();
 
   StripUpdate();
 
@@ -10932,7 +11130,7 @@ uint8_t runtime_segment_index = segment_active_index;
           // Segments_RefreshLEDIndexPattern(segment_index);
 
           // new transition, so force full update of all segment pixels
-          if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){
+          if(SEGMENT_I(0).flags.NewAnimationRequiringCompleteRefresh){
             _segments[segment_index].pixels_to_update_this_cycle = _segments[segment_index].length();
           }   
 
@@ -10972,7 +11170,7 @@ uint8_t runtime_segment_index = segment_active_index;
 
              pixel_index = iter;
 
-            if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+            if(SEGMENT_I(segment_active_index).flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
             SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_index, _segments[segment_index].colour_type, colour);
@@ -11049,7 +11247,7 @@ uint8_t runtime_segment_index = segment_active_index;
           // Segments_RefreshLEDIndexPattern(segment_index);
 
           // new transition, so force full update of all segment pixels
-          if(_segments[0].flags.NewAnimationRequiringCompleteRefresh){ // A GOOD WAY AROUND THIS WOULD BE (IF ANIMATION FIRST RUN) THEN USE INORDER METHOD TO FIRST DRAW ALL PIXELS, then start chaning
+          if(SEGMENT_I(0).flags.NewAnimationRequiringCompleteRefresh){ // A GOOD WAY AROUND THIS WOULD BE (IF ANIMATION FIRST RUN) THEN USE INORDER METHOD TO FIRST DRAW ALL PIXELS, then start chaning
             _segments[segment_index].pixels_to_update_this_cycle = _segments[segment_index].length();
           }    
 
@@ -11110,7 +11308,7 @@ uint8_t runtime_segment_index = segment_active_index;
             AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
             #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
-            if(_segments[segment_active_index].flags.brightness_applied_during_colour_generation){
+            if(SEGMENT_I(segment_active_index).flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
 

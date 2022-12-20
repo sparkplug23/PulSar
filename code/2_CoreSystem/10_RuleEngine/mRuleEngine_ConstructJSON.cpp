@@ -119,8 +119,6 @@ uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method){
 
     JBI->Level_End();
 
-    // DEBUG_LINE_HERE_PAUSE;
-
 
 
   return JBI->End();

@@ -8,10 +8,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   int8_t result = 0;
 
   if(target_tasker){
-// DEBUG_LINE_HERE;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
-    #endif// ENABLE_LOG_LEVEL_INFO
+    ALOG_INF(PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
   }
 
   JsonParserObject obj = 0;
@@ -93,7 +90,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
     #endif
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module started \t%d ms %s"),millis(), pCONT_set->GetTaskName(function, buffer_taskname));
+    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+      ALOG_INF(PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module started \t%d ms %s"),millis(), pCONT_set->GetTaskName(function, buffer_taskname));
+      #endif
     #endif
     
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)

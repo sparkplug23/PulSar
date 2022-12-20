@@ -244,7 +244,7 @@ pCONT_sup->CmndCrash();
  ** Splash boot reason ***************************************************************************
  ********************************************************************************************/
 
-  ALOG_HGL(PSTR("ResetReason=%d"), ResetReason_g());
+  ALOG_INF(PSTR("ResetReason=%d"), ResetReason_g());
 
 /********************************************************************************************
  ** Set boottime values *********************************************************************
@@ -385,7 +385,7 @@ pCONT_sup->CmndCrash();
   ********************************************************************************************/
   #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   
-    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
+    AddLog(LOG_LEVEL_INFO, PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
 
     if (pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) // SetOption36
     {         
@@ -457,7 +457,7 @@ pCONT_sup->CmndCrash();
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
   
-  ALOG_WRN(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
+  ALOG_INF(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
   
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
   // load

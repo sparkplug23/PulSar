@@ -785,6 +785,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
 
   ALOG_INF(PSTR("LoadPreset_OutsideFrontTree_ByID=%d"),id);
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
   /**
    * @brief
@@ -801,7 +802,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
   
   }else
   /**
@@ -819,7 +820,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(500);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -840,7 +841,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
     // Set intensity
 
   }else
@@ -895,7 +896,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_13__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -936,7 +937,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(500);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 4; // to be like 1ft of tree (maybe 200?)
+    SEGMENT_I(0).grouping = 4; // to be like 1ft of tree (maybe 200?)
 
   }else
   /**
@@ -954,7 +955,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(500);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 4; // to be like 1ft of tree (maybe 200?) 
+    SEGMENT_I(0).grouping = 4; // to be like 1ft of tree (maybe 200?) 
 
   }else
   /**
@@ -972,7 +973,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(500);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 4; // to be like 1ft of tree (maybe 200?) 
+    SEGMENT_I(0).grouping = 4; // to be like 1ft of tree (maybe 200?) 
 
   }else
 
@@ -992,7 +993,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -1012,12 +1013,12 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
 
   }
 
-
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 }
 
@@ -1033,6 +1034,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
 
   ALOG_INF(PSTR("LoadPreset_ManualTesting_ByID=%d"),id);
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
   /**
    * @brief
@@ -1049,7 +1051,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_01__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
   
   }else
   /**
@@ -1067,7 +1069,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -1085,7 +1087,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(500);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -1104,7 +1106,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -1214,7 +1216,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).grouping = 1;
 
   }else
   /**
@@ -1244,9 +1246,8 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
 
   } // END if
 
-
-
-
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  
 }
 
 

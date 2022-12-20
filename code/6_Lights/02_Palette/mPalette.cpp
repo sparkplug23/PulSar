@@ -1144,12 +1144,12 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
    **/
   #ifdef ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
   if(strcmp(c,"+")==0){
-    pCONT_lAni->_segments[0].palette.id++;
-    return pCONT_lAni->_segments[0].palette.id;
+    pCONT_lAni->SEGMENT_I(0).palette.id++;
+    return pCONT_lAni->SEGMENT_I(0).palette.id;
   }else
   if(strcmp(c,"-")==0){
-    pCONT_lAni->_segments[0].palette.id--;
-    return pCONT_lAni->_segments[0].palette.id;
+    pCONT_lAni->SEGMENT_I(0).palette.id--;
+    return pCONT_lAni->SEGMENT_I(0).palette.id;
   }
   #endif // ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
 
@@ -1262,7 +1262,7 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 // Check for friendly names first
 const char* mPalette::GetPaletteFriendlyName(char* buffer, uint8_t buflen){
   // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-  return GetPaletteFriendlyNameByID(pCONT_lAni->_segments[0].palette.id, buffer, buflen);
+  return GetPaletteFriendlyNameByID(pCONT_lAni->SEGMENT_I(0).palette.id, buffer, buflen);
   // #else
   // return GetPaletteFriendlyNameByID(0, buffer);
   // #endif
@@ -1328,7 +1328,7 @@ const char* mPalette::GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8
 
 
 const char* mPalette::GetPaletteName(char* buffer, uint8_t buflen){
-  return GetPaletteFriendlyNameByID(pCONT_lAni->_segments[0].palette.id, buffer, buflen);
+  return GetPaletteFriendlyNameByID(pCONT_lAni->SEGMENT_I(0).palette.id, buffer, buflen);
 } 
 const char* mPalette::GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen){  
   PALETTELIST::PALETTE *ptr = GetPalettePointerByID(id);
@@ -1647,7 +1647,7 @@ uint32_t mPalette::color_from_palette_Intermediate(uint16_t i, bool mapping, boo
   // #endif
   // #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
   // // mcol currenlty not set, needs included!
-  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(pCONT_lAni->_segments[0].palette.id/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, mcol, false /*might need moved after pBri to default it*/, pbri /*others default*/));
+  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(pCONT_lAni->SEGMENT_I(0).palette.id/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, mcol, false /*might need moved after pBri to default it*/, pbri /*others default*/));
   // #endif
 }
 #endif // ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
@@ -1891,10 +1891,10 @@ mPalette::GetColourFromPreloadedPalette(
       // if (SEGMENT.palette.id == 0 && mcol < 3) return SEGCOLOR(mcol); //WS2812FX default
       if(palette_id == mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && _pixel_position < 3)
       {
-        return RgbcctColor::GetRgbcctFromU32Colour(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[_pixel_position]);
+        return RgbcctColor::GetRgbcctFromU32Colour(pCONT_lAni->SEGMENT_I(pCONT_lAni->strip->getCurrSegmentId()).colors[_pixel_position]);
       }
       
-      if (flag_map_scaling) pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+      if (flag_map_scaling) pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->strip->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
       // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
       if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
 
@@ -2039,15 +2039,21 @@ uint32_t mPalette::color_from_palette_internal(uint16_t palette_id, uint16_t i, 
  * FastLED palette modes helper function. Limitation: Due to memory reasons, multiple active segments with FastLED will disable the Palette transitions
 
  Really this is the same as my "Setpalette" as it simply changes the pointer to the new palette
+
+
+This should only be called when "loadPalette" happens!!!
+
  */
 void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
 {
 
-  uint8_t length = 0;
-  bool singleSegmentMode = (pCONT_lAni->segment_active_index == pCONT_lAni->segment_iters.index_palette_last);
-  pCONT_lAni->segment_iters.index_palette_last = pCONT_lAni->segment_active_index;
+  uint8_t segIdx = 0;
 
-  byte paletteIndex = pCONT_lAni->_segments[pCONT_lAni->segment_active_index].palette.id;
+  uint8_t length = 0;
+  bool singleSegmentMode = (segIdx == pCONT_lAni->strip->_segments_new[0].segment_iters.index_palette_last);
+  pCONT_lAni->strip->_segments_new[0].segment_iters.index_palette_last = segIdx;
+
+  byte paletteIndex = pCONT_lAni->SEGMENT_I(segIdx).palette.id;
 
   
   // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
@@ -2058,7 +2064,7 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
   #ifdef ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   if (paletteIndex == PALETTELIST__DEFAULT__ID) //default palette. Differs depending on effect
   {
-    switch (pCONT_lAni->_segments[pCONT_lAni->segment_active_index].mode_id)
+    switch (pCONT_lAni->SEGMENT_I(segIdx).mode_id)
     {
       //def move these outside of this class, as they are not technically related to the palette
       case mAnimatorLight::EFFECTS_FUNCTION_WLED_COLORWAVES__ID : paletteIndex = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT____BEACH__ID; break; //landscape 33
@@ -2075,7 +2081,7 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
       #endif // ENABLE_EXTRA_WLED_EFFECTS
     }
   }
-  if (pCONT_lAni->_segments[pCONT_lAni->segment_active_index].mode_id >= pCONT_lAni->EFFECTS_FUNCTION_WLED_METEOR__ID && paletteIndex == PALETTELIST__DEFAULT__ID) paletteIndex = PALETTELIST_STATIC_FASTLED_FOREST_COLOUR__ID;
+  if (pCONT_lAni->SEGMENT_I(segIdx).mode_id >= pCONT_lAni->EFFECTS_FUNCTION_WLED_METEOR__ID && paletteIndex == PALETTELIST__DEFAULT__ID) paletteIndex = PALETTELIST_STATIC_FASTLED_FOREST_COLOUR__ID;
   #endif // ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
 
   // paletteIndex = 43;
@@ -2124,7 +2130,7 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
         break; //fallback
       }
       if (millis() - pCONT_lAni->_lastPaletteChange > 1000 + 
-      ((uint32_t)(255-pCONT_lAni->_segments[pCONT_lAni->segment_active_index].intensity()))*100)
+      ((uint32_t)(255-pCONT_lAni->SEGMENT_I(segIdx).intensity()))*100)
       {
         targetPalette = CRGBPalette16(
                         CHSV(random8(), 255, random8(128, 255)),
@@ -2138,35 +2144,35 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
     }
     case PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
     { //primary color only
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[0]); //is this stable to do? maybe since its not a pointer but instead an instance of a class
+      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]); //is this stable to do? maybe since its not a pointer but instead an instance of a class
       targetPalette = CRGBPalette16(prim); 
       length = 1;
     }
     break;
     case PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID:
     { //primary + secondary
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[0]);
-      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[1]);
+      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]);
+      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[1]);
       targetPalette = CRGBPalette16(prim,prim,sec,sec); 
       length = 4;
     }
     break;
     case PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID:
     { //primary + secondary + tertiary
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[0]);
-      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[1]);
-      CRGB ter  = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[2]);
+      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]);
+      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[1]);
+      CRGB ter  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[2]);
       targetPalette = CRGBPalette16(ter,sec,prim); 
       length = 3; // 3 unique colours
     }
     break;    
     case  PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID:
     { //primary + secondary (+tert if not off), more distinct
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[0]);
-      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[1]);
-      if (pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[2])
+      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]);
+      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[1]);
+      if (pCONT_lAni->SEGMENT_I(segIdx).colors[2])
       {
-        CRGB ter = pCONT_lAni->col_to_crgb(pCONT_lAni->_segments[pCONT_lAni->segment_active_index].colors[2]);
+        CRGB ter = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[2]);
         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
       } else {
         targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);

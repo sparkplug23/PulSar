@@ -409,7 +409,7 @@ class mPalette
       // Can be edited
       PALETTE hsbid_users[10];
       // Can be edited
-      PALETTE rgbcct_users[5]; 
+      PALETTE rgbcct_users[5];    // Remove ?? or it needs to be made dynamic here??
       // Generic variable palette 
       PALETTE encoded_users; // Should remain only option, to permit the largest buffer. Long term, it could be made dynamic
       // Add static palettes here
