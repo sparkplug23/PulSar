@@ -125,6 +125,9 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME
   #error "USE_DEVFEATURE_MOTION_EVENT_USES_MODULE_ID_FOR_DEVICENAME - Needs to be removed"
   #endif
+  #ifdef ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
+  #error "ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD"
+  #endif
 
 
 

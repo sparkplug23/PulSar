@@ -18,7 +18,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
   uint8_t segments_found = 0;
 
-  uint8_t segment_index = 0;
+  // uint8_t segment_index = 0;
 
   for(uint8_t segment_i = 0; segment_i < MAX_NUM_SEGMENTS; segment_i++)
   {
@@ -26,7 +26,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     if(jtok = obj[buffer]){ 
 
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Seg: \"%s\""),buffer);
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Seg: \"%s\" with %d Slots Active"),buffer,pCONT_lAni->strip->_segments_new.size());
       #endif// ENABLE_LOG_LEVEL_INFO
 
       /**
@@ -34,7 +34,34 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
        * 
        */
       
-      if(segment_index >= pCONT_lAni->strip->_segments_new.size()){ return; }
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("%d %d Slots Active"),segment_i,pCONT_lAni->strip->_segments_new.size());
+      if(segment_i > pCONT_lAni->strip->_segments_new.size()-1){ 
+      
+      
+        ALOG_INF(PSTR("Beyond segment count, need another"));
+        // DEBUG_LINE_HERE_PAUSE;
+        // return; 
+        
+        
+        ALOG_INF(PSTR("Creating new segment"));
+
+        Segment_AppendNew(0, 0, segment_i+1);
+
+        DEBUG_LINE_HERE;
+
+        if(pCONT_lAni->strip->_segments_new.size()!=0)
+        {
+          Serial.println(pCONT_lAni->strip->_segments_new.size());Serial.flush();
+          Serial.println(SEGMENT_I(0).testval);
+          Serial.println(SEGMENT_I(1).testval);
+        }
+
+      }
+
+      // if(pCONT_lAni->strip->_segments_new.)
+      // {
+      // }
+        ALOG_INF(PSTR("Start subparse"));
 
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
 
@@ -111,6 +138,8 @@ ALOG_INF(PSTR("Disabled assumed single palette to reset others"));
    
   }
 
+  DEBUG_LINE_HERE;
+
   /**
    * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
    * 
@@ -136,6 +165,7 @@ ALOG_INF(PSTR("Disabled assumed single palette to reset others"));
     // );
   }
   
+  DEBUG_LINE_HERE;
   if(jtok = obj["PixelRange"]){ 
 
 ALOG_INF( PSTR("PixelRange") );
@@ -191,6 +221,7 @@ ALOG_INF( PSTR("PixelRange") );
     }
   }
 
+  DEBUG_LINE_HERE;
   if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_FUNCTION]){
     if(jtok.isStr()){
       if((tmp_id=GetFlasherFunctionIDbyName(jtok.getStr()))>=0){
@@ -305,12 +336,25 @@ ALOG_INF( PSTR("PixelRange") );
   }
 
 
-  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
+  #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
   if(jtok = obj["Container"].getObject()["Allocate"])
   { 
-    ALOG_INF(PSTR("GetDataLength=%d"), _segment_runtimes[0].palette_container->GetDataLength());
+    ALOG_INF(PSTR("GetDataLength=%d"), SEGMENT_I(0).palette_container->allocateData(jtok.getInt()));
+    #ifndef DISABLE_NETWORK
+    mqtthandler_debug_palette.flags.SendNow = true;
+    #endif
   }
-  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
+  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
+  #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+  if(jtok = obj["Container"].getObject()["Load"])
+  { 
+    // ALOG_INF(PSTR("GetDataLength=%d"), SEGMENT_I(0).palette_container->allocateData(jtok.getInt()));
+    // loadPalette_Michael_Vector(jtok.getInt(),segment_index);
+    #ifndef DISABLE_NETWORK
+    mqtthandler_debug_palette.flags.SendNow = true;
+    #endif
+  }
+  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
 
 
   if(jtok = obj["PixelRange"]){ 
@@ -1902,14 +1946,20 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 {
 
   char buffer[50];
-  
-  if(segment_index >= strip->_segments_new.size()){ return; }
-  
+
+  DEBUG_LINE_HERE;
+
   SEGMENT_I(segment_index).palette.id = value < mPalette::PALETTELIST_TOTAL_LENGTH ? value : 0;
   
+  DEBUG_LINE_HERE;
+
   #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+  strip->_segment_index_primary = segment_index;
+  strip->_segment_index_primary = segment_index;
   loadPalette_Michael(strip->_segments_new[segment_index].palette.id, segment_index);
   #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+
+  DEBUG_LINE_HERE;
 
   //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
   if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)

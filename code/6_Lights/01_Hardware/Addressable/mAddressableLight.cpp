@@ -52,12 +52,9 @@ void mAddressableLight::ShowHardware(){
   #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
     neopixel_runner->execute();   
   #else
-  
-#ifdef ENABLE_DEVFEATURE_CANSHOW_VERSION3
-
+    #ifdef ENABLE_DEVFEATURE_CANSHOW_VERSION3
       pCONT_lAni->stripbus->Show();
-
-#else
+    #else
     if(pCONT_lAni->stripbus->CanShow()){ 
       pCONT_lAni->stripbus->Show();
     }

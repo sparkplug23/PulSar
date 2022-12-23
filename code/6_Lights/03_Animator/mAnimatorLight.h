@@ -46,10 +46,10 @@
 // #define ENABLE_MODULE_DEBUG__ANIMATOR_LIGHT_EFFECTS_LOW_LEVEL  // will be detailed, and slow timing down
 
 
-#include "6_Lights/02_Palette/mPaletteContainer.h"
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 #include "6_Lights/02_Palette/mPalette.h"
+#include "6_Lights/02_Palette/aPaletteContainer.h"
 
 #include "6_Lights/00_Interface/mInterfaceLight.h"
 
@@ -75,9 +75,12 @@
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
-#include "6_Lights/02_Palette/mPalette_Progmem.h"
-#include "6_Lights/02_Palette/mPalette.h"
-#include "mAnimatorLight_web.h"
+
+
+
+#include "6_Lights/02_Palette/aPaletteContainer.h"
+class aPaletteContainer;
+
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/98_FastLED_Modified/FastLED.h"
@@ -895,10 +898,11 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 
 
   #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+
+  // Do I need this? Or can I remove it as an unneeded subclass level
+
   WS2812FX *strip = nullptr;//new WS2812FX();
   // bool autoSegments = false;
-
-
   #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
 
 

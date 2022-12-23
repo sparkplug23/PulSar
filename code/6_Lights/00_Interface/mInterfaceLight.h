@@ -29,7 +29,15 @@
 #include "6_Lights/02_Palette/mColourUtils.h"
 #endif // ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
 
+#ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
+#include "6_Lights/02_Palette/aPaletteContainer.h"
+// #else
 #include "6_Lights/02_Palette/mPalette.h"
+#endif
+
+
+
+
 
 //Required as defualt for now
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION

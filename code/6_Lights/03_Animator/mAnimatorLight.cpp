@@ -314,9 +314,10 @@ void mAnimatorLight::Init(void){
   }
 
 
-  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
-  _segment_runtimes[0].palette_container = new mPaletteContainer(100);
-  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
+  #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+  ALOG_WRN(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced"));
+  SEGMENT_I(0).palette_container = new aPaletteContainer(100);
+  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
 
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
@@ -618,7 +619,7 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
   }
   if(SEGMENT_I(0).flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int16_t until_next_millis = SEGMENT_I(segment_active_index).transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
+    int16_t until_next_millis = SEGMENT_I(strip->_segment_index_primary).transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
     int16_t secs_until_next_event = until_next_millis/1000;
     // secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
@@ -874,17 +875,13 @@ void mAnimatorLight::StripUpdate(){
  * unloadPalette
  *  ** delete buffer data from heap, reset to nullptr
  * 
+ * should load even be here? surely into palette container
+ * 
  */
 void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
 {
 
-  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
-  uint8_t* palette_buffer_p = _segment_runtimes[segment_index].palette_container->GetDataPtr();
-  #else
-  // Clear = Worth while since loading palette will not be called everytime
-  memset(&mPaletteI->palette_runtime.loaded.buffer_static, 0, sizeof(mPaletteI->palette_runtime.loaded.buffer_static));
-  uint8_t* palette_buffer_p = mPaletteI->palette_runtime.loaded.buffer_static;
-  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
+  ALOG_INF(PSTR("LOADING %d %d %d"), palette_id, segment_index, pCONT_lAni->strip->_segment_index_primary);
 
   /**
    * @brief My palettes
@@ -893,28 +890,25 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
       (palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) &&
       (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
   ){  
+    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);    
+    SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
+    
+    ALOG_INF(PSTR("LOADINGAA %d %d"), segment_index, ptr->data_length);
+  }
+  else
+   if( // Currently checked this way, but really the encoding type of CRGBPalette should inform this decision!
+    (palette_id >= mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID) &&
+    (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+  ){  
+    mPaletteI->UpdatePalette_FastLED_TargetPalette(); // ie WLED22 "loadPalette"
+  }
 
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
 
-    // ALOG_INF(PSTR("ptr->id %d"), ptr->id);
-    // ALOG_INF(PSTR("ptr->data_length %d"), ptr->data_length);
-    
-    if(ptr->id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }else
-    if(ptr->id < mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }else
-    if(ptr->id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }else{ // progmem
-      memcpy_P(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }
-    
-    } // END of CRGBPalette's
-    
+
+
 
 }
+
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

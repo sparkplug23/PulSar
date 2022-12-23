@@ -165,8 +165,11 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
   auto_off_settings.time_decounter_secs = 0;
 
+  ALOG_HGL(PSTR("mPaletteI->init_PresetColourPalettes(); to be made internal to class"));
+  #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
   mPaletteI->init_PresetColourPalettes();
   init_Animations();
+  #endif // ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
 
   
   char buffer[30];
@@ -417,8 +420,10 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
       // mpalette = new mPalette();
 
+      #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
       mPaletteI->init_PresetColourPalettes();
-      
+      #endif // ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
 //       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
@@ -685,7 +690,7 @@ void mInterfaceLight::RulesEvent_Set_Power()
 void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16_t index, bool flag_replicate_for_total_pixel_length){
 
   #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-   ALOG_INF( PSTR("SetPixelColor: %d\t(%d,%d,%d,%d,%d) pal%d"), index, colour.R, colour.G, colour.B, colour.W1, colour.W2, pCONT_lAni->_segments[pCONT_lAni->segment_active_index].palette.id );
+   ALOG_INF( PSTR("SetPixelColor: %d\t(%d,%d,%d,%d,%d) pal%d"), index, colour.R, colour.G, colour.B, colour.W1, colour.W2, pCONT_lAni->strip->_segments_new[pCONT_lAni->strip->_segment_index_primary].palette.id );
   #endif
 
   switch(pCONT_set->Settings.light_settings.type){
@@ -795,7 +800,7 @@ void mInterfaceLight::EveryLoop(){
     //    * */
       #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
       // case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Segments_Animation(0); // ignoring loop
+        pCONT_lAni->SubTask_Segments_Animation(); // ignoring loop
       // break;
       #endif
     //   /**

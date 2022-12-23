@@ -6,12 +6,18 @@
 /* Null, because instance will be initialized on demand. */
 mPalette* mPalette::instance = nullptr;
 
-mPalette* mPalette::GetInstance(){
+mPalette* mPalette::GetInstance()
+{
   if (instance == nullptr){
     instance = new mPalette();
-    // PRINT_FLUSHED("instance = new JsonBuilder()");
   }
   return instance;
+}
+
+void mPalette::Init_Palettes()
+{
+  init_PresetColourPalettes();
+  ALOG_HGL(PSTR("init_PresetColourPalettes")); delay(4000);
 }
 
 /*******************************************************************************************************************
@@ -20,7 +26,8 @@ mPalette* mPalette::GetInstance(){
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-void mPalette::init_PresetColourPalettes(){
+void mPalette::init_PresetColourPalettes()
+{
   
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   AddLog(LOG_LEVEL_DEBUG,PSTR("init_PresetColourPalettes"));
@@ -791,6 +798,7 @@ void mPalette::init_PresetColourPalettes_HSBID_UserFill(uint8_t id){
   palettelist.ptr->id = id+PALETTELIST_VARIABLE_HSBID_01__ID;
 
   // Point to memory location
+  // This should be changed, the settings removed out of this. Instead, have them preloaded with internal (to palette.h) defaults and then another function that loads in these (double load, but makes the class self contained!!)
   palettelist.ptr->data = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[id*20];
 
   palettelist.ptr->data_length = 20;//Get
@@ -1598,59 +1606,6 @@ const char* mPalette::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buf
   
 }
 
-#ifndef ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
-/**
- * @brief 
- * 
- * TO BE PHASED OUT INTO "GetColourFromPreloadedPalette"
- */
-RgbcctColor mPalette::GetColourFromPalette_Intermediate(uint16_t palette_id, uint16_t pixel_num, uint8_t *pixel_position)
-{
-  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
-  // return GetColourFromPalette(GetPalettePointerByID(palette_id), pixel_num, pixel_position);
-  // #endif
-  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  // return GetColourFromPaletteAdvanced(palette_id,pixel_num,pixel_position /*others default*/);
-  // #endif
-  // #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-  return GetColourFromPreloadedPalette(palette_id,pixel_num,pixel_position /*others default*/);
-  // #endif
-}
-/**
- * @brief 
- * 
- * TO BE PHASED OUT INTO "GetColourFromPreloadedPalette"
- * 
-    uint16_t palette_id         = SEGMENT.palette.id;
-    uint16_t pixel_position     = "i"; 
-    uint8_t* encoded_value      = nullptr;
-    bool     flag_map_scaling   = "mapping";
-    bool     flag_wrap          = "wrap";
-    bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false;
-    uint8_t  brightness_scale   = "pbri";
-    uint8_t* discrete_colours_in_palette = nullptr; 
-    uint32_t color_from_palette32 = returned_value
-
-    (i, true, PALETTE_SOLID_WRAP, 1)
-    (A, B, C, D) = pixel_position, mapping, wrap, mcol
-    0, i, nullptr, true, PALETTE_SOLID_WRAP, 
-
- */
-uint32_t mPalette::color_from_palette_Intermediate(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri)
-{
-  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
-  // pCONT_lAni->color_from_palette(i, mapping, wrap, mcol, pbri);
-  // #endif
-  // #ifdef ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  // // mcol currenlty not set, needs included!
-  // return RgbcctColor::GetU32Colour(GetColourFromPaletteAdvanced(0/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, false /*might need moved after pBri to default it*/, pbri /*others default*/));
-  // #endif
-  // #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-  // // mcol currenlty not set, needs included!
-  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(pCONT_lAni->SEGMENT_I(0).palette.id/*Internally known by UpdateWledPalette*/, i, nullptr, mapping, wrap, mcol, false /*might need moved after pBri to default it*/, pbri /*others default*/));
-  // #endif
-}
-#endif // ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
 
 /** NEW METHOD: To test this, creating a json constructor that can produce each palette under its desired ways
  * Gets a single color from the currently selected palette.
@@ -1738,12 +1693,20 @@ mPalette::GetColourFromPreloadedPalette(
 
     // AddLog(LOG_LEVEL_TEST, PSTR("ptr->data_length=%d"),ptr->data_length );
 
-    #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
-      uint8_t* palette_elements = _segment_runtimes[0].palette_container->Get
+    #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
+    #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+      uint8_t* palette_elements = pCONT_lAni->strip->_segments_new[pCONT_lAni->strip->_segment_index_primary].palette_container->pData.data();
+      #else
+      uint8_t* palette_elements = nullptr;
+
+      #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
     #else
       uint8_t* palette_elements = palette_runtime.loaded.buffer_static;//&[ptr->data_length]; // if this was defined (optional define?) it would not need to be created each time, but "loading_palette" would enable all this to be changed too
-    #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
+    #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
 
+  // DEBUG_LINE_HERE;
+// if(pCONT_lAni->strip->_segment_index_primary!=0)
+  // Serial.printf("active=%d\n\r",pCONT_lAni->strip->_segment_index_primary);
   
 
     uint8_t pixels_in_map = GetPixelsInMap(ptr);  
@@ -1779,7 +1742,9 @@ mPalette::GetColourFromPreloadedPalette(
       if(ptr->encoding.index_scaled_to_segment)
       {
         // If desired, return the index value
-        *encoded_value = palette_elements[index_relative];
+        if(encoded_value != nullptr){
+          *encoded_value = palette_elements[index_relative];
+        }
         // Serial.println(*encoded_value);
         // Set the index to move beyond the indexing information
         index_relative++;
@@ -1788,6 +1753,10 @@ mPalette::GetColourFromPreloadedPalette(
       colour = RgbcctColor(
         GetHsbColour(palette_elements[index_relative])
       );
+
+      // if(pixel_position==0)
+      Serial.printf("%d|%d c %d %d %d\n\r", palette_id, pCONT_lAni->strip->_segment_index_primary, colour.R, colour.G, colour.B);
+      // DEBUG_LINE_HERE;
             
     }
 
@@ -1812,7 +1781,9 @@ mPalette::GetColourFromPreloadedPalette(
         // ALOG_INF(PSTR("index_relative=%d"),index_relative);
         // If desired, return the index value
         // if(encoded_value != nullptr){ 
-          *encoded_value = palette_elements[index_relative]; 
+        if(encoded_value != nullptr){
+          *encoded_value = palette_elements[index_relative];
+        }
           // }
         // Set the index to move beyond the indexing information
         index_relative++;
@@ -1855,7 +1826,7 @@ mPalette::GetColourFromPreloadedPalette(
     /**
      * @brief This should be moved out of this, and only ran when the palette changes (note, this wont happen for the time varying, so leave here for now)
      **/
-    mPaletteI->UpdatePalette_FastLED_TargetPalette(&colours_in_palette);
+    // mPaletteI->UpdatePalette_FastLED_TargetPalette(&colours_in_palette);
 
     //palette_id will not matter here, as its set/loaded "UpdatePalette_FastLED_TargetPalette"
 
@@ -2043,6 +2014,8 @@ uint32_t mPalette::color_from_palette_internal(uint16_t palette_id, uint16_t i, 
 
 This should only be called when "loadPalette" happens!!!
 
+
+this is now called "loadPalette" in WLED22
  */
 void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
 {

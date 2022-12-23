@@ -141,6 +141,12 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
       strip->appendSegment(Segment_New(start_pixel, stop_pixel));
       seg_index = strip->getSegmentsNum()-1; // segments are added at the end of list
       ALOG_INF(PSTR("new seg_index %d"), seg_index);
+      
+      Serial.println(F("-- Copy segment constructor -- palette_container = new aPaletteContainer(0);"));
+      SEGMENT_I(seg_index).palette_container = new aPaletteContainer(0);
+      // SEGMENT_I(seg_index).palette_container.
+      
+
     }
 
   }
@@ -284,28 +290,25 @@ void mAnimatorLight::resetSegments()
 
 
 
-void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
+void mAnimatorLight::SubTask_Segments_Animation()
 {
   
-  bool doShow = false;
-
-  segment_active_index = segment_index; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
+  // Need to also have a general backoff timer so the outputs are never hit faster than neopixelbus can update
+  if(!mTime::TimeReached(&tSaved_MinimumAnimateRunTime, MINIMUM_SHOW_BACKOFF_PERIOD_MS)){ return; } // Note: Override must still abide by this backoff
 
   strip->_isServicing = true;
-  strip->_segment_index = 0;
+  strip->_segment_index_primary = 0;
   for (segment_new &seg : strip->_segments_new) 
   {
-
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),segment_active_index,_segments[segment_active_index].isActive());
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),segment_active_index,_segments[segment_active_index].pixel_range.start,_segments[segment_active_index].pixel_range.stop);
+    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),strip->_segment_index_primary,_segments[strip->_segment_index_primary].isActive());
+    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),strip->_segment_index_primary,_segments[strip->_segment_index_primary].pixel_range.start,_segments[strip->_segment_index_primary].pixel_range.stop);
     // #endif
 
     // reset the segment runtime data if needed, called before isActive to ensure deleted segment's buffers are cleared
     seg.resetIfRequired();
 
-    if (!seg.isActive()) continue;
-    
+    if (!seg.isActive()) continue;    
 
     if(
       (mTime::TimeReached(&seg.tSaved_AnimateRunTime, seg.get_transition_rate_ms())) ||
@@ -315,9 +318,8 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
       DEBUG_PIN1_SET(LOW);
 
       if (seg.grouping == 0) seg.grouping = 1; //sanity check == move this into wherever it gets used (ie struct functions)
-      doShow = true;
-
-      ALOG_DBM(PSTR("seg=%d,rate=%d,%d"),segment_active_index, seg.transition.rate_ms, seg.flags.fForceUpdate);
+    
+      // ALOG_INF(PSTR("seg=%d,rate=%d,%d"),strip->_segment_index_primary, seg.transition.rate_ms, seg.flags.fForceUpdate);
 
       // if (!seg.freeze) { //only run effect function if not frozen
 
@@ -333,7 +335,7 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
       
       // This maybe cant be global and needs placed inside each effect?
       // Not valid for long term, needs to be changed
-      Set_Segment_ColourType(segment_active_index, pCONT_set->Settings.light_settings.type);
+      Set_Segment_ColourType(strip->_segment_index_primary, pCONT_set->Settings.light_settings.type);
       
       /**
        * @brief To be safe, always clear and if the effect has a callback, it will be activated inside its function again.
@@ -342,22 +344,10 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
       setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
       #endif
 
-      strip->_virtualSegmentLength = seg.virtualLength();// _segments[segment_active_index].virtualLength();
-        
-      /**
-       * If effect is from WLED, then Generate new colours: to be moved into loadPalette only
-       **/
-      #ifdef ENABLE_WLED_EFFECTS
-      if(
-        (seg.effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID) &&
-        (seg.effect_id <= EFFECTS_FUNCTION__WLED_LENGTH__ID)
-      ){          
-        mPaletteI->UpdatePalette_FastLED_TargetPalette();
-      }
-      #endif // ENABLE_WLED_EFFECTS
+      strip->_virtualSegmentLength = seg.virtualLength();
 
-      // ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, _segments[segment_active_index].effect_id, millis()); 
-      // ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),segment_active_index, seg.effect_id, millis()); 
+      // ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),strip->_segment_index_primary, _segments[strip->_segment_index_primary].effect_id, millis()); 
+      // ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),strip->_segment_index_primary, seg.effect_id, millis()); 
 
       switch(seg.effect_id){
         default:
@@ -934,14 +924,13 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
        **/
       if(SEGMENT.anim_function_callback == nullptr) // assumes direct update
       {
-        StripUpdate();         
+        StripUpdate();    // I cant do doShow here, since direct method (no callback) needs to happen now, whereas AnimUpdate will need to call show later. So call them when needed (though, still worth working out a better/unified show/solution)     
         seg.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
         ALOG_DBM(PSTR("Calling"));
       }
       else
       { 
-        DEBUG_LINE_HERE;
-        StartSegmentAnimation_AsAnimUpdateMemberFunction(segment_active_index);   
+        StartSegmentAnimation_AsAnimUpdateMemberFunction(strip->_segment_index_primary);   
         // First run must be reset after StartAnimation is first called 
       }
               
@@ -950,6 +939,12 @@ void mAnimatorLight::SubTask_Segments_Animation(uint8_t segment_index)
       DEBUG_PIN1_SET(HIGH);
                 
     }//end if update reached
+
+    /**
+     * @brief Now iter forward on active segment
+     * 
+     */
+    strip->_segment_index_primary++;
   
   } // END for
 
@@ -981,13 +976,14 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
                 pixel < SEGMENT.virtualLength();
                 pixel++
   ){  
-    GetTransitionColourBuffer(SEGENV.Data(), SEGENV.DataLength(), pixel, SEGMENT.colour_type, &colour_pairs);
+    GetTransitionColourBuffer(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, &colour_pairs);
 
     updatedColor = RgbTypeColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);  
 
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("SEGMENT.length_m() %d %d"),segment_active_index,SEGMENT.length_m());
+    //AddLog(LOG_LEVEL_TEST, PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d"),strip->_segment_index_primary,SEGMENT.length_m(), pixel, updatedColor.R, updatedColor.G, updatedColor.B);
 
+//wrong in here!
     SetPixelColor(pixel, updatedColor);
 
   }
@@ -1007,7 +1003,7 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
 
   if(SEGENV.data == nullptr)
   { 
-    ALOG_ERR( PSTR("_segment_runtimes[%d].Data() == nullptr = %d"), segment_active_index);
+    ALOG_ERR( PSTR("_segment_runtimes[%d].Data() == nullptr = %d"), strip->_segment_index_primary);
     return;
   }
 
@@ -1534,7 +1530,7 @@ void mAnimatorLight::EveryLoop()
   for (uint16_t ii = 0; ii < strip->_segments_new.size(); ii++)
   {
 
-    segment_active_index = ii; // Important! Otherwise segment_active_index can be incremented out of scope when a later callback is called
+    strip->_segment_index_primary = ii; // Important! Otherwise strip->_segment_index_primary can be incremented out of scope when a later callback is called
 
     if(SEGMENT_I(ii).isActive())
     {
@@ -1554,6 +1550,10 @@ void mAnimatorLight::EveryLoop()
         **/
         if(mTime::TimeReached(&SEGMENT_I(ii).tSaved_AnimateRunTime, 10))
         {
+
+// Temp fix, make sure we have the right segment set
+strip->_segment_index_primary = ii;
+
           SEGMENT_I(ii).animator->UpdateAnimations(ii);
           flag_animations_needing_updated++; // channels needing updated
         } //end TimeReached
@@ -1722,8 +1722,8 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
           pixel++
   ){
 
-    SetTransitionColourBuffer_StartingColour( SEGENV.Data(), 
-                                              SEGENV.DataLength(),
+    SetTransitionColourBuffer_StartingColour( SEGMENT.Data(), 
+                                              SEGMENT.DataLength(),
                                               pixel, 
                                               SEGMENT.colour_type, 
                                               RgbcctColor(GetPixelColor(pixel))
@@ -1812,10 +1812,10 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
 // void mAnimatorLight::UpdatePalette_FastLED_TargetPalette(void)
 // {
 
-//   bool singleSegmentMode = (segment_active_index == segment_iters.index_palette_last);
-//   segment_iters.index_palette_last = segment_active_index;
+//   bool singleSegmentMode = (strip->_segment_index_primary == segment_iters.index_palette_last);
+//   segment_iters.index_palette_last = strip->_segment_index_primary;
 
-//   byte paletteIndex = _segments[segment_active_index].palette.id;
+//   byte paletteIndex = _segments[strip->_segment_index_primary].palette.id;
   
 //   AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
 
@@ -1824,7 +1824,7 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
 //    */
 //   if (paletteIndex == mPalette::PALETTELIST__DEFAULT__ID) //default palette. Differs depending on effect
 //   {
-//     switch (_segments[segment_active_index].mode_id)
+//     switch (_segments[strip->_segment_index_primary].mode_id)
 //     {
 //       case EFFECTS_FUNCTION__WLED_COLORWAVES_ID : paletteIndex = mPalette::PALETTELIST_STATIC_WLED_GRADIENT__BEACH__ID; break; //landscape 33
 //       case EFFECTS_FUNCTION__WLED_GLITTER_ID    : paletteIndex = mPalette::PALETTELIST_STATIC_WLED_GRADIENT__RAINBOW_SHERBET__ID; break; //rainbow colors
@@ -1840,7 +1840,7 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
 //       #endif // ENABLE_EXTRA_WLED_EFFECTS
 //     }
 //   }
-//   if (_segments[segment_active_index].mode_id >= EFFECTS_FUNCTION__WLED_METEOR_ID && paletteIndex == mPalette::PALETTELIST__DEFAULT__ID) paletteIndex = mPalette::PALETTELIST_STATIC_FASTLED_FOREST_COLOUR_ID;
+//   if (_segments[strip->_segment_index_primary].mode_id >= EFFECTS_FUNCTION__WLED_METEOR_ID && paletteIndex == mPalette::PALETTELIST__DEFAULT__ID) paletteIndex = mPalette::PALETTELIST_STATIC_FASTLED_FOREST_COLOUR_ID;
    
 //   // paletteIndex = 43;
 //   //Serial.printf("_segments[_segment_index].palette %d %d\n\r",_segments[_segment_index].palette, paletteIndex);
@@ -1879,7 +1879,7 @@ void mAnimatorLight::Segments_SetLEDOutAmountByPercentage(uint8_t percentage, ui
 //       {
 //         targetPalette = PartyColors_p; break; //fallback
 //       }
-//       if (millis() - _lastPaletteChange > 1000 + ((uint32_t)(255-_segments[segment_active_index].intensity()))*100)
+//       if (millis() - _lastPaletteChange > 1000 + ((uint32_t)(255-_segments[strip->_segment_index_primary].intensity()))*100)
 //       {
 //         targetPalette = CRGBPalette16(
 //                         CHSV(random8(), 255, random8(128, 255)),
@@ -2263,8 +2263,12 @@ bool mAnimatorLight::Segment_New::allocateData(size_t len) {
   else
   #endif
     data = (byte*) malloc(len);
-  if (!data) return false; //allocation failed
-  mAnimatorLight::Segment_New::addUsedSegmentData(len);
+  if (!data){
+    // Serial.println("ALLOC FAILED");
+    return false; //allocation failed
+  }
+  // Serial.printf("NEW_MEMORY of %d for segment index %d\n\r\n\r\n\r\n\r", len, palette.id ); delay(2000);
+  addUsedSegmentData(len);
   _dataLen = len;
   memset(data, 0, len);
   return true;
@@ -2274,7 +2278,7 @@ void mAnimatorLight::Segment_New::deallocateData() {
   if (!data) return;
   free(data);
   data = nullptr;
-  mAnimatorLight::Segment_New::addUsedSegmentData(-_dataLen);
+  addUsedSegmentData(-_dataLen);
   _dataLen = 0;
 }
 
@@ -3115,7 +3119,7 @@ void mAnimatorLight::WS2812FX::service() {
   // bool doShow = false;
 
   _isServicing = true;
-  _segment_index = 0;
+  _segment_index_primary = 0;
   for (segment_new &seg : _segments_new) {
     // reset the segment runtime data if needed
     seg.resetIfRequired();
@@ -3151,7 +3155,7 @@ void mAnimatorLight::WS2812FX::service() {
 
   //     seg.next_time = nowUp + delay;
   //   }
-    _segment_index++;
+    _segment_index_primary++;
   }
   // _virtualSegmentLength = 0;
   // busses.setSegmentCCT(-1);
@@ -3621,10 +3625,10 @@ bool mAnimatorLight::WS2812FX::checkSegmentAlignment() {
 //otherwise it can lead to a crash on ESP32 because _segment_index is modified while in use by the main thread
 uint8_t mAnimatorLight::WS2812FX::setPixelSegment(uint8_t n)
 {
-  uint8_t prevSegId = _segment_index;
+  uint8_t prevSegId = _segment_index_primary;
   if (n < _segments_new.size()) {
-    _segment_index = n;
-    _virtualSegmentLength = _segments_new[_segment_index].virtualLength();
+    _segment_index_primary = n;
+    _virtualSegmentLength = _segments_new[_segment_index_primary].virtualLength();
   }
   return prevSegId;
 }

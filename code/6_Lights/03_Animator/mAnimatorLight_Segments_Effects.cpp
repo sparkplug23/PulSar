@@ -29,7 +29,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
   // Brightness is generated internally, and rgbcct solid palettes are output values
   SEGMENT.flags.brightness_applied_during_colour_generation = false;
 
-  RgbcctColor desired_colour  = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id);
+  RgbcctColor desired_colour  = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id);  
   
   ALOG_INF( PSTR("desired_colour1=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
@@ -46,7 +46,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
   SetTransitionColourBuffer_DesiredColour (SEGENV.data, SEGENV.DataLength(), 0, SEGMENT.colour_type, desired_colour); 
   SetTransitionColourBuffer_StartingColour(SEGENV.data, SEGENV.DataLength(), 0, SEGMENT.colour_type, GetPixelColor(0));
 
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -74,7 +74,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 
-  if (!SEGRUN.allocateData(dataSize)){    
+  if (!SEGMENT.allocateData(dataSize)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
     SEGMENT.mode_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
     return;
@@ -89,16 +89,16 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
                 pixel++
   ){
 
-    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);  //change it long term so I access it via the controller and hence it knows which to get from
     
     if(SEGMENT.flags.brightness_applied_during_colour_generation){
       colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
     }
 
-    SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), pixel, SEGMENT.colour_type, colour);
-    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
-    #endif
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
+    // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    //ALOG_INF( PSTR("EFFECT sIndexIO=I%d start%d,stop%d\tp%d,PL %d, RGB:%d,%d,%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(SEGMENT.palette.id), colour.R, colour.G, colour.B );
+    // #endif
 
   }
 
@@ -106,7 +106,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -210,7 +210,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -254,7 +254,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
       // So colour region does not need to change each loop to prevent colour crushing
       SEGMENT.flags.brightness_applied_during_colour_generation = true;
       
-      ALOG_DBM( PSTR("Segment: %d\t(%d,%d),(%d)"), segment_active_index, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, SEGMENT.palette.id);
+      ALOG_DBM( PSTR("Segment: %d\t(%d,%d),(%d)"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, SEGMENT.palette.id);
 
       RgbcctColor colour = RgbcctColor(0);
       for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
@@ -269,7 +269,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
         SetPixelColor(pixel, colour, false);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
         #endif
 
       }
@@ -413,7 +413,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
           
           out_colour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
 
-          if(SEGMENT_I(segment_active_index).flags.brightness_applied_during_colour_generation){
+          if(SEGMENT_I(strip->_segment_index_primary).flags.brightness_applied_during_colour_generation){
             out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, pCONT_iLight->getBriRGB_Global());
           }
           
@@ -426,7 +426,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -587,7 +587,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
   
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -658,7 +658,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
     SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -670,7 +670,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -770,7 +770,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -832,7 +832,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, pixel_index, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -868,7 +868,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGRUN.Data(), SEGRUN.DataLength(), random_pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), segment_index, start_pixel, end_pixel, random_pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -884,7 +884,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -938,14 +938,14 @@ void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_P
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -985,14 +985,14 @@ void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_P
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
   // Check if output multiplying has been set, if so, change desiredcolour array
   // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // Get starting positions already on show
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -1020,7 +1020,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 
 //   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
-//   uint8_t segment_index = segment_active_index;
+//   uint8_t segment_index = strip->_segment_index_primary;
 //   uint16_t start_pixel = SEGMENT.pixel_range.start;
 //   uint16_t end_pixel = SEGMENT.pixel_range.stop;
 
@@ -1220,7 +1220,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
 //         // Call the animator to blend from previous to new
-//   SetSegment_AnimFunctionCallback(  segment_active_index, 
+//   SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
 //     [this](const AnimationParam& param){
 //       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
 //     }
@@ -1317,7 +1317,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
 //         // Call the animator to blend from previous to new
-//   SetSegment_AnimFunctionCallback(  segment_active_index, 
+//   SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
 //     [this](const AnimationParam& param){
 //       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
 //     }
@@ -1632,7 +1632,7 @@ void mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
 void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR("_segments[%d].colour_type = %d"), segment_active_index, SEGMENT.colour_type);
+  AddLog(LOG_LEVEL_TEST, PSTR("_segments[%d].colour_type = %d"), strip->_segment_index_primary, SEGMENT.colour_type);
 
     
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
@@ -1667,7 +1667,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -1779,7 +1779,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   }
 
   // Pick new colours
-  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
 
 
   // if(tempcol++>5){
@@ -1802,7 +1802,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -1999,7 +1999,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 
   // Pick new colours
-  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
 
 /**
  * @brief Temporary force until handled in code
@@ -2025,7 +2025,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -5281,11 +5281,11 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 
     // New method, combining palettes to get colour from any type "GetPaletteGeneric"
     if ( currSeg % 3 == 0 ) {
-      SetPixelColor(i, GetSegmentColour(0, segment_active_index), SET_BRIGHTNESS);
+      SetPixelColor(i, GetSegmentColour(0, strip->_segment_index_primary), SET_BRIGHTNESS);
     } else if( currSeg % 3 == 1) {
-      SetPixelColor(i, GetSegmentColour(1, segment_active_index), SET_BRIGHTNESS);
+      SetPixelColor(i, GetSegmentColour(1, strip->_segment_index_primary), SET_BRIGHTNESS);
     } else {
-      SetPixelColor(i, (GetSegmentColour(2, segment_active_index).CalculateBrightness() > 0 ? GetSegmentColour(2, segment_active_index) : WHITE), SET_BRIGHTNESS);
+      SetPixelColor(i, (GetSegmentColour(2, strip->_segment_index_primary).CalculateBrightness() > 0 ? GetSegmentColour(2, strip->_segment_index_primary) : WHITE), SET_BRIGHTNESS);
     }   
 
     // WLED method, before joining palette getters
@@ -9018,7 +9018,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
         pixel_palette_counter = 0;
       }
 
-      SetPixelColor(SEGMENT.pixel_range.start + i, colour_blended, segment_active_index);
+      SetPixelColor(SEGMENT.pixel_range.start + i, colour_blended, strip->_segment_index_primary);
 
       SEGENV.data[d  ] = s; 
       SEGENV.data[d+1] = s_target; 
@@ -9060,7 +9060,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
         colour2 = RgbcctColor(0);
         colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
 
-        SetPixelColor(p, colour_blended, segment_active_index);
+        SetPixelColor(p, colour_blended, strip->_segment_index_primary);
 
         if(pixel_palette_counter++ >= pixels_in_palette-1)
         {
@@ -10808,14 +10808,14 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
   // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // // Pick new colours
-  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
   // // Check if output multiplying has been set, if so, change desiredcolour array
   // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // // Get starting positions already on show
   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // // Call the animator to blend from previous to new
-  // SetSegment_AnimFunctionCallback(  segment_active_index, 
+  // SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
   //   [this](const AnimationParam& param){ 
   //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
   //   }
@@ -10950,14 +10950,14 @@ StripUpdate();
   // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // // Pick new colours
-  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
   // // Check if output multiplying has been set, if so, change desiredcolour array
   // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
   // // Get starting positions already on show
   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // // Call the animator to blend from previous to new
-  // SetSegment_AnimFunctionCallback(  segment_active_index, 
+  // SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
   //   [this](const AnimationParam& param){ 
   //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
   //   }
@@ -11028,14 +11028,14 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static_On()
 //   // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
 //   // // Pick new colours
-//   // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+//   // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
 //   // // Check if output multiplying has been set, if so, change desiredcolour array
 //   // // OverwriteUpdateDesiredColourIfMultiplierIsEnabled();
 //   // // Get starting positions already on show
 //   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
 //   // // Call the animator to blend from previous to new
-//   // SetSegment_AnimFunctionCallback(  segment_active_index, 
+//   // SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
 //   //   [this](const AnimationParam& param){ 
 //   //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
 //   //   }
@@ -11094,10 +11094,10 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette_New()
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
 
 uint16_t palette_id = SEGMENT.palette.id;
-uint8_t runtime_segment_index = segment_active_index;
+uint8_t runtime_segment_index = strip->_segment_index_primary;
 
   /**
    * @brief 
@@ -11116,7 +11116,7 @@ uint8_t runtime_segment_index = segment_active_index;
   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "UpdateDesiredColourFromPaletteSelected fMapIDs_Type %d"),mPaletteI->palettelist.ptr->flags.fMapIDs_Type);// \"%s\""),GetPaletteFriendlyName());
   // AddLog(LOG_LEVEL_DEBUG_MORE
 
-  uint8_t segment_index = segment_active_index;
+  uint8_t segment_index = strip->_segment_index_primary;
   
 
 
@@ -11170,7 +11170,7 @@ uint8_t runtime_segment_index = segment_active_index;
 
              pixel_index = iter;
 
-            if(SEGMENT_I(segment_active_index).flags.brightness_applied_during_colour_generation){
+            if(SEGMENT_I(strip->_segment_index_primary).flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
             SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_index, _segments[segment_index].colour_type, colour);
@@ -11199,7 +11199,7 @@ uint8_t runtime_segment_index = segment_active_index;
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }
@@ -11237,12 +11237,12 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow_New()
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, segment_active_index);
+  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
   
   
-  uint8_t segment_index = segment_active_index;
+  uint8_t segment_index = strip->_segment_index_primary;
 uint16_t palette_id = SEGMENT.palette.id;
-uint8_t runtime_segment_index = segment_active_index;
+uint8_t runtime_segment_index = strip->_segment_index_primary;
   
           // Segments_RefreshLEDIndexPattern(segment_index);
 
@@ -11308,7 +11308,7 @@ uint8_t runtime_segment_index = segment_active_index;
             AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
             #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
-            if(SEGMENT_I(segment_active_index).flags.brightness_applied_during_colour_generation){
+            if(SEGMENT_I(strip->_segment_index_primary).flags.brightness_applied_during_colour_generation){
               colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
             }
 
@@ -11327,7 +11327,7 @@ uint8_t runtime_segment_index = segment_active_index;
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  segment_active_index, 
+  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
     [this](const AnimationParam& param){ 
       this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
     }

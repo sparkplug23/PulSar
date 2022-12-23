@@ -84,6 +84,27 @@ JBI->Start();
 
     JBI->Add("AvailablePalettes", (uint16_t)mPaletteI->PALETTELIST_TOTAL_LENGTH );
 
+    #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+
+    for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+    {
+      JBI->Level_Start_F("Segment%d",seg_i);
+      
+        JBI->Add("dataLen", SEGMENT_I(seg_i).palette_container->pData.size());
+
+        JBI->Array_Start("data");
+        for(uint8_t i=0;i<SEGMENT_I(seg_i).palette_container->pData.size();i++){
+          JBI->Add(SEGMENT_I(seg_i).palette_container->pData[i]);
+        }
+        JBI->Array_End();
+
+      JBI->Level_End();
+    }
+
+
+
+    #endif// ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
+
     #ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
 
     JBI->Level_Start("Encoding");
@@ -138,6 +159,8 @@ JBI->Array_Start_P("DataLength" );
 
     #endif 
 
+    
+
 
     uint16_t id = 0;
     uint16_t pixel = 0;
@@ -169,8 +192,10 @@ JBI->Array_Start_P("DataLength" );
 
       uint8_t segment_index = 0;
 
+  #ifndef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
       JBI->Array_AddArray("buffer", mPaletteI->palette_runtime.loaded.buffer_static, ARRAY_SIZE(mPaletteI->palette_runtime.loaded.buffer_static));
 
+  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
 
     JBI->Level_End();
     
@@ -238,7 +263,6 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 
       // Config of segment (New stuff)
       JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
-      // JBI->Add("_segments_new.size()", strip->_segments_new[seg_i].si);
 
       JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(SEGMENT_I(seg_i).palette.id, buffer, sizeof(buffer)));
 
@@ -256,6 +280,45 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
         JBI->Add("Speed", SEGMENT_I(seg_i).speed_value);
         JBI->Add("Intensity", SEGMENT_I(seg_i).intensity_value);
         JBI->Add("Grouping", SEGMENT_I(seg_i).grouping);
+      JBI->Level_End();
+      JBI->Level_Start("Palette");
+        JBI->Add("Size", SEGMENT_I(seg_i).palette_container->pData.size());
+        JBI->Array_Start("Data");
+          for(uint8_t i=0;i<SEGMENT_I(seg_i).palette_container->pData.size();i++)
+          {
+            JBI->Add(SEGMENT_I(seg_i).palette_container->pData[i]);
+          }
+        JBI->Array_End();
+        // DEBUG_LINE_HERE;
+      JBI->Level_Start("DataBuffer");
+        // JBI->Array_Start("Data");
+        //   uint8_t *p = SEGMENT.Data();
+        //   uint8_t len = 5;//SEGMENT_I(seg_i).DataLength()>10?10:SEGMENT_I(seg_i).DataLength();
+        // DEBUG_LINE_HERE;
+        //   if(len)
+        //   {
+        // DEBUG_LINE_HERE;
+        //     for(uint8_t i=0;i<len;i++)
+        //     {
+        // DEBUG_LINE_HERE;
+        //       if(p==nullptr)
+        //         JBI->Add("n");
+        //       else
+        //         JBI->Add(p[i]);
+        //     }
+        // DEBUG_LINE_HERE;
+        //   }
+        // JBI->Array_End();
+
+        JBI->Add("DataLength", SEGMENT_I(seg_i).DataLength());
+  
+      
+      
+      
+      JBI->Level_End();
+
+
+
       JBI->Level_End();
     
     JBI->Level_End();

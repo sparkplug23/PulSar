@@ -52,7 +52,7 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
 {
 
   // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  // if(segment_active_index==1)
+  // if(strip->_segment_index_primary==1)
   // ALOG_INF( PSTR("SetPixelColor=%d"), indexPixel);
   // #endif 
 
@@ -63,14 +63,16 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
   // }
   // #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
 
-  uint16_t segment_length = SEGMENT_I(segment_active_index).length();
-  uint16_t segIdx = segment_active_index;
+  uint16_t segment_length = SEGMENT_I(strip->_segment_index_primary).length();
+  uint16_t segIdx = strip->_segment_index_primary;
 
   RgbcctColor color_hardware = color_internal;
 
   HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(segIdx).hardware_element_colour_order;
   
-  // ALOG_INF( PSTR("RGB(%d)=%d,%d,%d\t %d,%d,%d,%d,%d"),indexPixel,color_internal.R, color_internal.G, color_internal.B, order.r,order.g,order.b,order.w,order.c);
+// Serial.println("by the time it gets here, it is wrong!"); //might be okay, as the shifted indexing (start/stop) is not yet applied
+
+//  ALOG_INF( PSTR("SEG%d|RGB(%d)=%d,%d,%d\t %d,%d,%d,%d,%d Hex%X"), segIdx, indexPixel,color_internal.R, color_internal.G, color_internal.B, order.r,order.g,order.b,order.w,order.c, order.data);
 
   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_hardware[order.r] = color_internal.R;  }
   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_hardware[order.g] = color_internal.G;  }
@@ -85,7 +87,7 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
     // 
     brightness_needs_applied 
     // ||
-  // (IsWithinLimits((uint16_t)EFFECTS_FUNCTION__WLED_STATIC__ID, (uint16_t)SEGMENT_I(segment_active_index).effect_id, (uint16_t)EFFECTS_FUNCTION__WLED_LENGTH__ID))
+  // (IsWithinLimits((uint16_t)EFFECTS_FUNCTION__WLED_STATIC__ID, (uint16_t)SEGMENT_I(strip->_segment_index_primary).effect_id, (uint16_t)EFFECTS_FUNCTION__WLED_LENGTH__ID))
   ){
     color_hardware = ApplyBrightnesstoRgbcctColour(color_hardware, pCONT_iLight->getBriRGB_Global());
   }
@@ -134,7 +136,7 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
     uint16_t indexSet = physical_indexPixel + ((SEGMENT_I(segIdx).options & REVERSE) ? -j : j);
     
   // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  // if(segment_active_index==1)
+  // if(strip->_segment_index_primary==1)
     // ALOG_INF( PSTR("indexSet{%d},start{%d},stop{%d}"),indexSet, SEGMENT_I(segIdx).pixel_range.start, SEGMENT_I(segIdx).pixel_range.stop);
   // #endif // ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
 
@@ -161,8 +163,8 @@ void mAnimatorLight::SetPixelColor(uint16_t indexPixel, RgbcctColor color_intern
       // if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
 
   // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  // if(segment_active_index==1)
-      // ALOG_INF( PSTR("indexSet=%d\t R%dG%dB%d"), indexSet, color_hardware.R, color_hardware.G, color_hardware.B);
+  // if(strip->_segment_index_primary==1)
+   //   ALOG_INF( PSTR("indexSet=%d\t R%dG%dB%d"), indexSet, color_hardware.R, color_hardware.G, color_hardware.B);
   // #endif // ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
 
         // Serial.println(indexSet);
@@ -205,26 +207,26 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
   physical_indexPixel = indexPixel;
 
   // get physical pixel
-  physical_indexPixel = physical_indexPixel * SEGMENT_I(segment_active_index).groupLength();  // should this be happening???
+  physical_indexPixel = physical_indexPixel * SEGMENT_I(strip->_segment_index_primary).groupLength();  // should this be happening???
 
   if (IS_REVERSE) {
-    if (IS_MIRROR) physical_indexPixel = (SEGMENT_I(segment_active_index).length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
-    else           physical_indexPixel = (SEGMENT_I(segment_active_index).length_wled() - 1) - physical_indexPixel;
+    if (IS_MIRROR) physical_indexPixel = (SEGMENT_I(strip->_segment_index_primary).length() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
+    else           physical_indexPixel = (SEGMENT_I(strip->_segment_index_primary).length() - 1) - physical_indexPixel;
   }
 
-  physical_indexPixel += SEGMENT_I(segment_active_index).pixel_range.start;
+  physical_indexPixel += SEGMENT_I(strip->_segment_index_primary).pixel_range.start;
 
 /**
  * @brief If segment has any length, execute
  * 
  */
-  if (SEGMENT_I(segment_active_index).length_wled()) {
+  if (SEGMENT_I(strip->_segment_index_primary).length()) {
     /* offset/phase */
-    physical_indexPixel += SEGMENT_I(segment_active_index).offset;
+    physical_indexPixel += SEGMENT_I(strip->_segment_index_primary).offset;
 
-    if(physical_indexPixel >= SEGMENT_I(segment_active_index).pixel_range.stop)
+    if(physical_indexPixel >= SEGMENT_I(strip->_segment_index_primary).pixel_range.stop)
     {
-      physical_indexPixel -= SEGMENT_I(segment_active_index).length_wled();
+      physical_indexPixel -= SEGMENT_I(strip->_segment_index_primary).length();
     }
 
 
@@ -235,7 +237,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 
 // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 // // if (i >= _length) return 0; //length here is not the same as the segment length?
-// // if (i >= SEGMENT_I(segment_active_index).length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
+// // if (i >= SEGMENT_I(strip->_segment_index_primary).length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
 // #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 
 // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
@@ -247,7 +249,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
   RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(physical_indexPixel);
   RgbcctColor color_internal = color_hardware; // To catch white element if present
 
-  HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(segment_active_index).hardware_element_colour_order;
+  HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(strip->_segment_index_primary).hardware_element_colour_order;
 
   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.r] = color_hardware.R;  }
   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.g] = color_hardware.G;  }
@@ -260,7 +262,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
   // Serial.printf("Bi=%d\to=%d\n\r",indexPixel, physical_indexPixel);
 
   // if(indexPixel<10){
-    // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||v%d|p%d}=internal{%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel, color_internal.R, color_internal.G, color_internal.B);
+    // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||v%d|p%d}=internal{%d,%d,%d}"),strip->_segment_index_primary,indexPixel,physical_indexPixel, color_internal.R, color_internal.G, color_internal.B);
   // }
 
   return color_internal;
@@ -303,8 +305,8 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 //   uint32_t physical_indexPixel = 0;
 //   physical_indexPixel = indexPixel;
 
-//   uint32_t groupLength = SEGMENT_I(segment_active_index).groupLength();
-//   uint32_t wled_length32 = SEGMENT_I(segment_active_index).length_wled();
+//   uint32_t groupLength = SEGMENT_I(strip->_segment_index_primary).groupLength();
+//   uint32_t wled_length32 = SEGMENT_I(strip->_segment_index_primary).length_wled();
 
 //   // get physical pixel
 //   physical_indexPixel = physical_indexPixel * groupLength;  // should this be happening???
@@ -329,27 +331,27 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 
 // #else
 //   if (IS_REVERSE) {
-//     if (IS_MIRROR) physical_indexPixel = (SEGMENT_I(segment_active_index).length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
-//     else           physical_indexPixel = (SEGMENT_I(segment_active_index).length_wled() - 1) - physical_indexPixel;
+//     if (IS_MIRROR) physical_indexPixel = (SEGMENT_I(strip->_segment_index_primary).length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
+//     else           physical_indexPixel = (SEGMENT_I(strip->_segment_index_primary).length_wled() - 1) - physical_indexPixel;
 //   }
 // #endif
 
 
 
 
-//   physical_indexPixel += SEGMENT_I(segment_active_index).pixel_range.start;
+//   physical_indexPixel += SEGMENT_I(strip->_segment_index_primary).pixel_range.start;
 
 // /**
 //  * @brief If segment has any length, execute
 //  * 
 //  */
-//   if (SEGMENT_I(segment_active_index).length_wled()) {
+//   if (SEGMENT_I(strip->_segment_index_primary).length_wled()) {
 //     /* offset/phase */
-//     physical_indexPixel += SEGMENT_I(segment_active_index).offset;
+//     physical_indexPixel += SEGMENT_I(strip->_segment_index_primary).offset;
 
-//     if(physical_indexPixel >= SEGMENT_I(segment_active_index).pixel_range.stop)
+//     if(physical_indexPixel >= SEGMENT_I(strip->_segment_index_primary).pixel_range.stop)
 //     {
-//       physical_indexPixel -= SEGMENT_I(segment_active_index).length_wled();
+//       physical_indexPixel -= SEGMENT_I(strip->_segment_index_primary).length_wled();
 //     }
 
 
@@ -371,7 +373,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 
 // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 // // if (i >= _length) return 0; //length here is not the same as the segment length?
-// // if (i >= SEGMENT_I(segment_active_index).length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
+// // if (i >= SEGMENT_I(strip->_segment_index_primary).length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
 // #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 
 // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
@@ -383,7 +385,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 //   RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(physical_indexPixel);
 //   RgbcctColor color_internal = color_hardware; // To catch white element if present
 
-//   HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(segment_active_index).hardware_element_colour_order;
+//   HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(strip->_segment_index_primary).hardware_element_colour_order;
 
 //   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.r] = color_hardware.R;  }
 //   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.g] = color_hardware.G;  }
@@ -396,7 +398,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 //   // Serial.printf("Bi=%d\to=%d\n\r",indexPixel, physical_indexPixel);
 
 //   // if(indexPixel<10){
-//     // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
+//     // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),strip->_segment_index_primary,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
 //   // }
 
 //   return color_internal;
@@ -432,23 +434,23 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 //   physical_indexPixel = indexPixel;
 
 // //   if (IS_REVERSE) {
-// //     if (IS_MIRROR) physical_indexPixel = (SEGMENT_I(segment_active_index).length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
-// //     else           physical_indexPixel = (SEGMENT_I(segment_active_index).length_wled() - 1) - physical_indexPixel;
+// //     if (IS_MIRROR) physical_indexPixel = (SEGMENT_I(strip->_segment_index_primary).length_wled() - 1) / 2 - physical_indexPixel;  //only need to index half the pixels
+// //     else           physical_indexPixel = (SEGMENT_I(strip->_segment_index_primary).length_wled() - 1) - physical_indexPixel;
 // //   }
 
-// //   physical_indexPixel += SEGMENT_I(segment_active_index).pixel_range.start;
+// //   physical_indexPixel += SEGMENT_I(strip->_segment_index_primary).pixel_range.start;
 
 // // /**
 // //  * @brief If segment has any length, execute
 // //  * 
 // //  */
-// //   if (SEGMENT_I(segment_active_index).length_wled()) {
+// //   if (SEGMENT_I(strip->_segment_index_primary).length_wled()) {
 // //     /* offset/phase */
-// //     physical_indexPixel += SEGMENT_I(segment_active_index).offset;
+// //     physical_indexPixel += SEGMENT_I(strip->_segment_index_primary).offset;
 
-// //     if(physical_indexPixel >= SEGMENT_I(segment_active_index).pixel_range.stop)
+// //     if(physical_indexPixel >= SEGMENT_I(strip->_segment_index_primary).pixel_range.stop)
 // //     {
-// //       physical_indexPixel -= SEGMENT_I(segment_active_index).length_wled();
+// //       physical_indexPixel -= SEGMENT_I(strip->_segment_index_primary).length_wled();
 // //     }
 
 
@@ -460,7 +462,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 
 // // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 // // // if (i >= _length) return 0; //length here is not the same as the segment length?
-// // // if (i >= SEGMENT_I(segment_active_index).length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
+// // // if (i >= SEGMENT_I(strip->_segment_index_primary).length_wled()) return RgbcctColor(255,0,0,0,0); //length here is not the same as the segment length?
 // // #endif // ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
 
 // // #ifdef ENABLE_DEVFEATURE_GROUPING_FIX_DEC2022
@@ -472,7 +474,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 //   RgbcctColor color_hardware = pCONT_iLight->GetPixelColourHardwareInterface(physical_indexPixel);
 //   RgbcctColor color_internal = color_hardware; // To catch white element if present
 
-//   HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(segment_active_index).hardware_element_colour_order;
+//   HARDWARE_ELEMENT_COLOUR_ORDER order = SEGMENT_I(strip->_segment_index_primary).hardware_element_colour_order;
 
 //   if(order.r != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.r] = color_hardware.R;  }
 //   if(order.g != D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE){ color_internal[order.g] = color_hardware.G;  }
@@ -485,7 +487,7 @@ RgbcctColor mAnimatorLight::GetPixelColor(uint16_t indexPixel)
 //   // Serial.printf("Bi=%d\to=%d\n\r",indexPixel, physical_indexPixel);
 
 //   // if(indexPixel<10){
-//     // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),segment_active_index,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
+//     // AddLog(LOG_LEVEL_INFO, PSTR("RGB{s%d||%d|%d}={%d,%d,%d}"),strip->_segment_index_primary,indexPixel,physical_indexPixel,color_hardware.R, color_hardware.G, color_hardware.B);
 //   // }
 
 //   return color_internal;

@@ -38,12 +38,21 @@ class mPalette
     mPalette(mPalette const& other) = delete;
     mPalette(mPalette&& other) = delete;
     /* Private constructor to prevent instancing. */
-    mPalette(){};
+    mPalette(){ 
+      // Serial.println("DEBUG_LINE_HERE_PAUSE"); delay(2000); 
+      Init_Palettes();
+    };
   public:
     // External function to get instance
     static mPalette* GetInstance();
     /* Here will be the instance stored. */
     static mPalette* instance;
+
+    void Init_Palettes();
+
+    bool flag_started = false;
+
+    uint8_t test_value = 123;
 
 
     void init_PresetColourPalettes(); 
@@ -490,7 +499,7 @@ class mPalette
       PALETTE *ptr = &rainbow;
     }palettelist;
 
-
+  #ifndef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
     /**
      * @brief I need a method to add/delete palettes loaded into RAM
      * ie, segment 1 and 2 may use the same palette, so it doesnt need to be loaded twice, or else, I should just to keep it simple
@@ -526,6 +535,7 @@ class mPalette
     }palette_runtime;  // this should be a struct for holding palette info, but NOT defined here
     // Ie in other files, I can have MyPalette name1, MyPalette name2 ... where these hold the info about the palette using the same data methods as each effect
 
+#endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
 
     // #endif
         
@@ -612,6 +622,8 @@ class mPalette
     bool CheckPaletteByIDIsEditable(uint8_t id);
 
     void SetPaletteListPtrFromID(uint8_t id);
+
+    // friend class aPaletteContainer;
 
 };
 
