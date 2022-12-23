@@ -62,7 +62,6 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_EVENT_CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Motion_Event;
 
-
 } //end "MQTTHandler_Init"
 
 

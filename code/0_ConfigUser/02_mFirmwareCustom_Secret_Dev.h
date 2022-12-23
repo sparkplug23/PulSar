@@ -4538,38 +4538,38 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
 #endif
 
 
-#ifdef DEVICE_KITCHENPANEL
-  #define DEVICENAME_CTR          "kitchenpanel"
-  #define DEVICENAME_FRIENDLY_CTR "Kitchen Panel"
+// #ifdef DEVICE_KITCHENPANEL //delete this
+//   #define DEVICENAME_CTR          "kitchenpanel"
+//   #define DEVICENAME_FRIENDLY_CTR "Kitchen Panel"
 
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
+//   //#define FORCE_TEMPLATE_LOADING
+//   #define SETTINGS_HOLDER 2
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 4 //heating page
+//   #define USE_MODULE_DISPLAYS_NEXTION
+//   #define NEXTION_DEFAULT_PAGE_NUMBER 4 //heating page
 
-  #define USE_BUILD_TYPE_DISPLAY
+//   #define USE_BUILD_TYPE_DISPLAY
 
-  // #define ENABLE_BUG_TRACING
+//   // #define ENABLE_BUG_TRACING
   
-  // #define USE_SOFTWARE_SERIAL_DEBUG
-  // #define DISABLE_SERIAL_LOGGING //temp measure
+//   // #define USE_SOFTWARE_SERIAL_DEBUG
+//   // #define DISABLE_SERIAL_LOGGING //temp measure
 
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"3\":\""  D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," 
-      "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
+//   #define USE_MODULE_TEMPLATE
+//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+//   "{"
+//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+//     "\"" D_JSON_GPIOC "\":{"
+//       "\"1\":\""  D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+//       "\"3\":\""  D_GPIO_FUNCTION_NEXTION_RX_CTR "\"," 
+//       "\"D0\":\""  D_GPIO_FUNCTION_LED1_INV_CTR   "\","  
+//       "\"D4\":\""  D_GPIO_FUNCTION_LED1_CTR "\""
+//     "},"
+//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+//   "}";
 
-#endif
+// #endif
 
 
 
