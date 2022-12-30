@@ -125,21 +125,7 @@ void mInterfaceLight::Template_Load()
   memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("mInterfaceLight::Template_Load SettingsMerge\n\r\n\r\n\r\n\r"
-  //     //Test data
-  //     "%d:%d:%d:%d"
-  //   ),
-  //     //Testdata
-  //      pCONT_set->Settings.animation_settings.xmas_controller_params[0]
-  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[1]
-  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[2]
-  //     ,pCONT_set->Settings.animation_settings.xmas_controller_params[3]
-  // );
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_DEBUG, PSTR("LIGHTING_TEMPLATE Load"));// " READ = \"%s\""), data_buffer.payload.ctr);
   ALOG_DBM( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
   #endif // USE_LIGHTING_TEMPLATE
@@ -165,7 +151,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 
   auto_off_settings.time_decounter_secs = 0;
 
-  ALOG_HGL(PSTR("mPaletteI->init_PresetColourPalettes(); to be made internal to class"));
+  ALOG_DBM(PSTR("mPaletteI->init_PresetColourPalettes(); to be made internal to class"));
   #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
   mPaletteI->init_PresetColourPalettes();
   init_Animations();
@@ -376,7 +362,6 @@ void mInterfaceLight::Init(void) //LightInit(void)
 void mInterfaceLight::init_Animations(){
 
   pCONT_lAni->SEGMENT_I(0).flags.fEnable_Animation = true;
-  pCONT_lAni->SEGMENT_I(0).flags.NewAnimationRequiringCompleteRefresh = true;
 
 }
 
@@ -761,88 +746,11 @@ void mInterfaceLight::ShowInterface(){
 
 
 
-void mInterfaceLight::EveryLoop(){
-      
-  // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-  // AddLog(LOG_LEVEL_TEST, PSTR("Invalid Light LT_ADDRESSABLE_WS281X HERE %d"),pCONT_set->Settings.light_settings.type);
-  // #endif
+void mInterfaceLight::EveryLoop()
+{
 
-  // /**
-  //  * @brief 
-  //  * If PWM types, should merge this into below, as effects are output agnostic
-  //  * 
-  //  */
-  // if(pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END){
-     
-  //   switch(pCONT_lAni->SEGMENT_I(0).mode_id)    
-  //     {
-  //     case ANIMATION_MODE_EFFECTS_ID:
-  //       pCONT_lAni->SubTask_Segments_Animation();
-  //     break;
-  //     case ANIMATION_MODE_NONE_ID: default: break; // resting position
-  //   }  
-  // }
-
-  
-  if((pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
-     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X)||
-     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_SK6812)){
-
-  // if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ 
-    
-    // AddLog(LOG_LEVEL_DEBUG, PSTR("Invalid Light LT_ADDRESSABLE_WS281X %d"),animation.mode_id);
-    #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    
-    // switch(pCONT_lAni->SEGMENT_I(0).mode_id)    // needs to know the id 
-    // {
-    //   /**
-    //    * New Segments animations: Merging WLED/HACS into this mode, wait until 2022 to make this happen.
-    //    * */
-      #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-      // case ANIMATION_MODE_EFFECTS_ID:
-        pCONT_lAni->SubTask_Segments_Animation(); // ignoring loop
-      // break;
-      #endif
-    //   /**
-    //    * Notifications: Single pixel basic animations (pulse, flash, on/off)
-    //    * */
-    //   #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-    //   case ANIMATION_MODE_NOTIFICATIONS_ID:
-    //     pCONT_lAni->SubTask_Notifications();   // Convert this into its own segment effect, effect will need to be set first
-    //   break;
-    //   #endif
-    //   /**
-    //    * Ambilight: Light strips for behind monitors, either static, sunelevation animations, getting TCP/HTTP/Serial data for the pixels from a computer (Eg wallpapers with putty or movies)
-    //    * */
-    //   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-    //   case ANIMATION_MODE_AMBILIGHT__ID:
-    //     pCONT_lAni->SubTask_Ambilight_Main();
-    //   break;
-    //   #endif
-    //   /**
-    //    * Set Pixel: Manual method via mqtt json
-    //    * */
-    //   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL // serial, wifi udp connection
-    //   case ANIMATION_MODE_MANUAL_SETPIXEL_ID:
-    //     // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_LIGHT "ANIMATION_MODE_EFFECTS__ID"));
-    //     pCONT_lAni-> SubTask_Manual_SetPixel();
-    //     // light_power_state = true;
-    //   break;
-    //   #endif
-    //   case ANIMATION_MODE_NONE_ID: default: break; // resting position
-    // }
-    #endif
-      
-  }
-  else
-  {
-    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    ALOG_DBM( PSTR("Invalid Light Type"));
-    #endif
-  }
-
-  // }
-
+  ALOG_DBM(PSTR("mInterfaceLight::EveryLoop()"));
+        
 } // END everyloop
 
 

@@ -316,20 +316,20 @@ void mAnimatorLight::init_mixer_defaults(){
    * */
 
   // Group 0 "Static, few"
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].flags.enable_force_preset_brightness_scaler = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixels_to_update_as_percentage = 100; // amount to change as percentage
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].isenabled = true;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].transition.time = 4500;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].transition.rate = 5000;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].run_time_duration_sec = 60;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixel_multiplier_enabled = false;
-  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
-  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
-  mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].starttime = {8, 1, 2, 3};
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].flags.enable_force_preset_brightness_scaler = true;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixels_to_update_as_percentage = 100; // amount to change as percentage
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].ifenabled_forced_brightness_level_percentage = brightness_low_value;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].isenabled = true;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].transition.time = 4500;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].transition.rate = 5000;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].transition.time_unit_id = TIME_UNIT_MILLISECONDS_ID;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].run_time_duration_sec = 60;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixel_multiplier_id = PIXEL_MULTIPLIER_MODE_NONE_ID;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixel_multiplier_enabled = false;
+  // // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
+  // // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
+  // // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
+  // mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].starttime = {8, 1, 2, 3};
 
 //   // Group 1 "Random, slow, few"
 //   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flags.enable_force_preset_brightness_scaler = true;
@@ -1298,7 +1298,6 @@ void mAnimatorLight::LoadMixerGroupByID(uint8_t id)
 
 
   // pCONT_iLight->animation_override.fRefreshAllPixels = true;
-  // pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh = true;
 
   // // uint8_t brightness = 0;
   // if(mixer.group[id].flags.enable_force_preset_brightness_scaler){

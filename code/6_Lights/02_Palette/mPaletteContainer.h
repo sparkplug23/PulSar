@@ -7,11 +7,11 @@
 
 #include <vector>
 
-// uint16_t aPaletteContainer::_usedSegmentData = 0;
+// uint16_t mPaletteContainer::_usedSegmentData = 0;
 
-// #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
+// #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
 
-class aPaletteContainer
+class mPaletteContainer
 {
 	public:
 // private:
@@ -22,37 +22,23 @@ class aPaletteContainer
 	uint8_t palette_id = 0;
 
 // public:
-    aPaletteContainer(uint16_t buffer_size)
+    mPaletteContainer(uint16_t buffer_size)
 	{
 
 		// allocateData(buffer_size);
 		Serial.println(buffer_size);
 
-		test();
-
 		// Init_LoadedPaletted();
 		LoadPaletteI();
 	};
-    aPaletteContainer(){};
+    mPaletteContainer(){};
 
-    ~aPaletteContainer(){};
+    ~mPaletteContainer(){};
 
 	std::vector<uint8_t> pData;
 
 	void LoadPaletteI();
 
-
-
-    // bool allocateData(uint16_t len)
-    // {
-	// 	pData.clear();
-	// 	pData.push_back(0);
-	// 	pData.push_back(1);
-
-	// 	return true;
-    // }
-
-	void test();
 
     bool allocateData(uint16_t len)
     {
@@ -70,15 +56,6 @@ class aPaletteContainer
     };
 
 
-
-	// uint8_t* GetDataPtr()
-	// {
-	// 	return data;
-	// };
-	// uint16_t GetDataLength()
-	// {
-	// 	return _dataLen;
-	// };
 
 };
 

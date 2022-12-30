@@ -17,7 +17,6 @@ mPalette* mPalette::GetInstance()
 void mPalette::Init_Palettes()
 {
   init_PresetColourPalettes();
-  ALOG_HGL(PSTR("init_PresetColourPalettes")); delay(4000);
 }
 
 /*******************************************************************************************************************
@@ -109,6 +108,8 @@ void mPalette::init_PresetColourPalettes()
   init_ColourPalettes_Christmas_26();
   init_ColourPalettes_Christmas_27();
   init_ColourPalettes_Christmas_28();
+  init_ColourPalettes_Christmas_29();
+  init_ColourPalettes_Christmas_30();
   init_ColourPalettes_Sky_Glow_01();
   init_ColourPalettes_Sunrise_01();
   init_ColourPalettes_Sunrise_02();
@@ -542,6 +543,24 @@ void mPalette::init_ColourPalettes_Christmas_28(){
   palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_28_NAME_CTR; 
 }
 
+void mPalette::init_ColourPalettes_Christmas_29(){
+  palettelist.ptr                      = &palettelist.christmas_29;  
+  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_29__ID;
+  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA;
+  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA);
+  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_29_ENCODING;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_29_NAME_CTR; 
+}
+
+void mPalette::init_ColourPalettes_Christmas_30(){
+  palettelist.ptr                      = &palettelist.christmas_30;  
+  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_30__ID;
+  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA;
+  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA);
+  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_30_ENCODING;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_30_NAME_CTR; 
+}
+
 
 void mPalette::init_ColourPalettes_Sunrise_01(){  
   palettelist.ptr                      = &palettelist.sunrise_01;  
@@ -932,7 +951,7 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
     default:
     
     #ifdef ENABLE_LOG_LEVEL_ERROR
-    AddLog(LOG_LEVEL_WARN, PSTR("GetPalettePointerByID=%d DEFAULT"),id);
+    ALOG_DBM(PSTR("GetPalettePointerByID=%d DEFAULT"),id);
     #endif // ENABLE_LOG_LEVEL_INFO
     /**
      * Variable User HSBID
@@ -1021,6 +1040,8 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
     case PALETTELIST_STATIC_CHRISTMAS_26__ID:     return &palettelist.christmas_26;
     case PALETTELIST_STATIC_CHRISTMAS_27__ID:     return &palettelist.christmas_27;
     case PALETTELIST_STATIC_CHRISTMAS_28__ID:     return &palettelist.christmas_28;
+    case PALETTELIST_STATIC_CHRISTMAS_29__ID:     return &palettelist.christmas_29;
+    case PALETTELIST_STATIC_CHRISTMAS_30__ID:     return &palettelist.christmas_30;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01__ID:     return &palettelist.gradient_sunlevel_group01_01;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02__ID:     return &palettelist.gradient_sunlevel_group01_02;
     case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03__ID:     return &palettelist.gradient_sunlevel_group01_03;
@@ -1147,40 +1168,6 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   char buffer[50];
   int8_t index_found = -1;
 
-  /**
-   * @brief Basic command of "+" and "-" to increment and decrement easily
-   **/
-  #ifdef ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  if(strcmp(c,"+")==0){
-    pCONT_lAni->SEGMENT_I(0).palette.id++;
-    return pCONT_lAni->SEGMENT_I(0).palette.id;
-  }else
-  if(strcmp(c,"-")==0){
-    pCONT_lAni->SEGMENT_I(0).palette.id--;
-    return pCONT_lAni->SEGMENT_I(0).palette.id;
-  }
-  #endif // ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-
-  /**
-   * @brief Search 1: For dynamic names by user in DeviceNameList
-   * 
-   * This currently assumes they start from 0 index, which should be the case for INSIDE this class, but may not be inside the DeviceNameList
-   * 
-   */
-  // Check for matches with variables names  
-  // if ((index_found = pCONT_sup->GetDListIDbyNameCtr(buffer, sizeof(buffer), c, pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr)) >= 0) {
-  //   // index_found = STATE_NUMBER_OFF__ID;    
-  //     ALOG_DBM( PSTR("index_found = %d"),index_found);    
-  //     return index_found;
-  // }
-
-  // ALOG_INF( PSTR("GetPaletteIDbyName = \"%s\""), c );
-
-  /**
-   * @brief Search 2: For progmem names for static palettes
-   * 
-   */
-
   // Check against stored progmem static names
   for(uint8_t ii=0;ii<PALETTELIST_STATIC_LENGTH__ID;ii++){
     ptr = GetPalettePointerByID(ii);
@@ -1206,11 +1193,6 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 
   }
 
-  /**
-   * @brief Search 3: Fallback, search for default names for the dynamic palettes
-   * 
-   * 
-   */
 
   /**
    * @brief Currently, these are being searched for manually (ie not using the device list)
@@ -1657,6 +1639,8 @@ mPalette::GetColourFromPreloadedPaletteU32(
     discrete_colours_in_palette //ie length of palette as optional return    
   ));
 }
+
+
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 IRAM_ATTR 
@@ -1693,21 +1677,7 @@ mPalette::GetColourFromPreloadedPalette(
 
     // AddLog(LOG_LEVEL_TEST, PSTR("ptr->data_length=%d"),ptr->data_length );
 
-    #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
-    #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
-      uint8_t* palette_elements = pCONT_lAni->strip->_segments_new[pCONT_lAni->strip->_segment_index_primary].palette_container->pData.data();
-      #else
-      uint8_t* palette_elements = nullptr;
-
-      #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
-    #else
-      uint8_t* palette_elements = palette_runtime.loaded.buffer_static;//&[ptr->data_length]; // if this was defined (optional define?) it would not need to be created each time, but "loading_palette" would enable all this to be changed too
-    #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
-
-  // DEBUG_LINE_HERE;
-// if(pCONT_lAni->strip->_segment_index_primary!=0)
-  // Serial.printf("active=%d\n\r",pCONT_lAni->strip->_segment_index_primary);
-  
+    uint8_t* palette_elements = pCONT_lAni->strip->_segments_new[pCONT_lAni->strip->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
 
     uint8_t pixels_in_map = GetPixelsInMap(ptr);  
     uint8_t colour_width  = GetEncodedColourWidth(ptr->encoding); 
@@ -1755,7 +1725,7 @@ mPalette::GetColourFromPreloadedPalette(
       );
 
       // if(pixel_position==0)
-      Serial.printf("%d|%d c %d %d %d\n\r", palette_id, pCONT_lAni->strip->_segment_index_primary, colour.R, colour.G, colour.B);
+      // Serial.printf("%d|%d c %d %d %d\n\r", palette_id, pCONT_lAni->strip->_segment_index_primary, colour.R, colour.G, colour.B);
       // DEBUG_LINE_HERE;
             
     }
@@ -1870,6 +1840,11 @@ mPalette::GetColourFromPreloadedPalette(
       if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
 
     }
+    
+    
+    // CRGBPalette16 curPal;
+    // if (transitional && _t) curPal = _t->_palT;
+    // else                    loadPalette(curPal, palette);
     
     // Should only need to be loaded once, but added here to make the decoding easier
     // mPaletteI->UpdatePalette_FastLED_TargetPalette();  // Cant be here, since it updates with EACH pixel, not just once
@@ -2020,7 +1995,16 @@ this is now called "loadPalette" in WLED22
 void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
 {
 
+  // remove "   length = 16" since for CRGB16 is will always be 16
+
   uint8_t segIdx = 0;
+
+  #ifdef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
+  CRGBPalette16 targetPalette;
+  byte tcp[72];
+  if (paletteIndex < 245 && paletteIndex > GRADIENT_PALETTE_COUNT+13) paletteIndex = 0;
+  if (paletteIndex > 245 && (pCONT_lAni->strip->customPalettes.size() == 0 || 255U-paletteIndex > pCONT_lAni->strip.customPalettes.size()-1)) paletteIndex = 0;
+  #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
 
   uint8_t length = 0;
   bool singleSegmentMode = (segIdx == pCONT_lAni->strip->_segments_new[0].segment_iters.index_palette_last);
@@ -2028,7 +2012,6 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
 
   byte paletteIndex = pCONT_lAni->SEGMENT_I(segIdx).palette.id;
 
-  
   // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
 
   /**
@@ -2037,7 +2020,7 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
   #ifdef ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
   if (paletteIndex == PALETTELIST__DEFAULT__ID) //default palette. Differs depending on effect
   {
-    switch (pCONT_lAni->SEGMENT_I(segIdx).mode_id)
+    switch (pCONT_lAni->SEGMENT_I(segIdx).effect_id)
     {
       //def move these outside of this class, as they are not technically related to the palette
       case mAnimatorLight::EFFECTS_FUNCTION_WLED_COLORWAVES__ID : paletteIndex = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT____BEACH__ID; break; //landscape 33
@@ -2054,7 +2037,7 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
       #endif // ENABLE_EXTRA_WLED_EFFECTS
     }
   }
-  if (pCONT_lAni->SEGMENT_I(segIdx).mode_id >= pCONT_lAni->EFFECTS_FUNCTION_WLED_METEOR__ID && paletteIndex == PALETTELIST__DEFAULT__ID) paletteIndex = PALETTELIST_STATIC_FASTLED_FOREST_COLOUR__ID;
+  if (pCONT_lAni->SEGMENT_I(segIdx).effect_id >= pCONT_lAni->EFFECTS_FUNCTION_WLED_METEOR__ID && paletteIndex == PALETTELIST__DEFAULT__ID) paletteIndex = PALETTELIST_STATIC_FASTLED_FOREST_COLOUR__ID;
   #endif // ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
 
   // paletteIndex = 43;
@@ -2065,7 +2048,9 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
     /**
      * @brief WLED palettes
      **/
+    #ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     default:
+    #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID: //Party colors
       targetPalette = PartyColors_p; 
       length = 16;
@@ -2153,8 +2138,23 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
       length = 16;
     }
     break;
+    #ifdef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
+    default:
+      
+      if (paletteIndex>245) {
+        targetPalette = pCONT_lAni->strip->customPalettes[255-paletteIndex]; // we checked bounds above
+      } else {
+        memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[paletteIndex-13])), 72);
+        targetPalette.loadDynamicGradientPalette(tcp);
+      }
+
+      length = 16;
+
+    break;
+    #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
   } //end fo switch
 
+  #ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
   /**
    * @brief Fastled palettes
    **/
@@ -2165,27 +2165,17 @@ void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
     // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
     load_gradient_palette(gradient_id);
     // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
-    length = 16;
   }
+  #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
   
-  // if (singleSegmentMode && pCONT_lAni->paletteFade) // Only blend if just one segment uses FastLED mode
-  // {
-  //   nblendPaletteTowardPalette(currentPalette, targetPalette, 48);
-  // }
-  // else
-  // {
-    currentPalette = targetPalette;
-  // }
-
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("UpdatePalette_FastLED_TargetPalette paletteIndex=%d"),paletteIndex);
-
-  
-  if(colours_in_palette != nullptr){ *colours_in_palette = length; }
+  currentPalette = targetPalette; // This should be returned!
+    
+  if(colours_in_palette != nullptr){ *colours_in_palette = length; }  // DELETE this
 
 }
 
 
-// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
+#ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
 void mPalette::load_gradient_palette(uint8_t index)
 {
   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
@@ -2193,7 +2183,7 @@ void mPalette::load_gradient_palette(uint8_t index)
   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
   targetPalette.loadDynamicGradientPalette(tcp);
 }
-// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+#endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
 
 
 

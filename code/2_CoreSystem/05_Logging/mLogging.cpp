@@ -95,6 +95,25 @@ void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP
 
 
 
+void ErrorMessage_P(uint8_t error_type, const char* message)
+{
+
+
+  AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %S"), message);
+
+
+}
+
+void ErrorMessage(uint8_t error_type, const char* message)
+{
+
+  AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %s"), message);
+
+
+
+}
+
+
 
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
@@ -175,17 +194,14 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
    * */
 
   memset(mxtime,0,sizeof(mxtime));
+  // if time is short, ie debugging, them only show uptime (not RTCTime)
   if(pCONT_set->Settings.log_time_isshort){
     if(pCONT_time->uptime.hour<1){
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d %02d:%02d F%d "),
-      // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
-        pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
-        pCONT_time->uptime.minute,pCONT_time->uptime.second,
-        RtcFastboot.fast_reboot_count);
+      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
+        pCONT_time->uptime.minute,pCONT_time->uptime.second
+      );
     }else{
-      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %02d:%02d:%02d "), //add hour
-      // sprintf(mxtime, PSTR("%02d:%02d %02d:%02d "),
-        pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second,
+      snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
         pCONT_time->uptime.hour,pCONT_time->uptime.minute,pCONT_time->uptime.second);
     }
     

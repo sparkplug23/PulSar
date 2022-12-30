@@ -370,13 +370,25 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_BrtRGB_255(255);
 
   }else
+
+  /**
+   * @brief Aiming to take current G=100 blocked colours that rotate, and instead do blocks of 
+   *        Repeated 4 colours that rotate with blending on the tree
+   * 
+   * This will still not work!
+   * 
+   * This close to the end of christmas, lets just make up manual new animations and input via openhab
+   * 
+   * @param id 
+   */
   if(
     (id == 15) &&
     (true) // Time Allowed, true for always
   ){
 
     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__STATIC_PALETTE__ID);
-    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_28__ID);  //to be 29 // no purple
+    CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_29__ID);  
+    
     CommandSet_Animation_Transition_Time_Ms(10000);
     CommandSet_Animation_Transition_Rate_Ms(20000); 
     SEGMENT_I(0).set_intensity(20);

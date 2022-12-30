@@ -84,7 +84,7 @@ JBI->Start();
 
     JBI->Add("AvailablePalettes", (uint16_t)mPaletteI->PALETTELIST_TOTAL_LENGTH );
 
-    #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
 
     for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
     {
@@ -103,9 +103,9 @@ JBI->Start();
 
 
 
-    #endif// ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
+    #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
 
-    #ifdef ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
 
     JBI->Level_Start("Encoding");
 
@@ -136,10 +136,10 @@ JBI->Start();
 
 
 
-    #endif // ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
 
 
-    #ifdef ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
 
 JBI->Array_Start_P("DataLength" );
     for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_28__ID;palette_id++)
@@ -157,7 +157,7 @@ JBI->Array_Start_P("DataLength" );
         JBI->Array_End();
 
 
-    #endif 
+    #endif  // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
 
     
 
@@ -166,24 +166,21 @@ JBI->Array_Start_P("DataLength" );
     uint16_t pixel = 0;
     uint8_t encoded_value = 0;
     
-    #ifndef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-    // uint16_t count   = mPaletteI->GetLengthFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
-    RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
+    // // uint16_t count   = mPaletteI->GetLengthFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
+    // RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
 
-    JBI->Array_Start("Palette");
-    for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-    {
-      JBI->Add(encoded_value);
-      JBI->Add(colour.R);
-      JBI->Add(colour.G);
-      JBI->Add(colour.B);
-      JBI->Add(colour.W1);
-      JBI->Add(colour.W2);
-    }
-    JBI->Array_End();
-    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-
-    #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
+    // JBI->Array_Start("Palette");
+    // for(int i=0;i<MAX_NUM_SEGMENTS;i++)
+    // {
+    //   JBI->Add(encoded_value);
+    //   JBI->Add(colour.R);
+    //   JBI->Add(colour.G);
+    //   JBI->Add(colour.B);
+    //   JBI->Add(colour.W1);
+    //   JBI->Add(colour.W2);
+    // }
+    // JBI->Array_End();
+    
     /**
      * @brief Moving towards preloading palettes from memory into ram/heap for speed (then iram will work)
      * 
@@ -192,21 +189,46 @@ JBI->Array_Start_P("DataLength" );
 
       uint8_t segment_index = 0;
 
-  #ifndef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
-      JBI->Array_AddArray("buffer", mPaletteI->palette_runtime.loaded.buffer_static, ARRAY_SIZE(mPaletteI->palette_runtime.loaded.buffer_static));
-
-  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER
-
     JBI->Level_End();
     
-    #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-
 
 return JBI->End();
 
 }
 
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+
+
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level)
+{
+
+  JBI->Start();
+
+  for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+  {
+    JBI->Level_Start_F("Segment%d", seg_i);
+
+      JBI->Add("ColourOrderHex", SEGMENT_I(seg_i).hardware_element_colour_order.data);
+    
+      JBI->Array_Start("ColourOrder");
+        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.red);
+        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.green);
+        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.blue);
+        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.white_cold);
+        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.white_warm);
+      JBI->Array_End();
+
+    JBI->Level_End();
+  }
+
+  return JBI->End();
+
+}
+
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+
+
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level)
 {

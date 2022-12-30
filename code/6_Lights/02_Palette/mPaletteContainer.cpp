@@ -1,37 +1,15 @@
 
-#include "6_Lights/02_Palette/aPaletteContainer.h"
-
-void aPaletteContainer::test()
-{
-
-    
-	// Serial.println(mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID);
+#include "6_Lights/02_Palette/mPaletteContainer.h"
 
 
-}
-
-void aPaletteContainer::LoadPaletteI()
+void mPaletteContainer::LoadPaletteI()
 {
 
 
 
 
- Serial.println("TRYING TO LOAD"); Serial.flush(); //delay(4000);
-
-//  delay(10000);
-
+ Serial.println("TRYING TO LOAD");
  
-  if(
-      (palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) &&
-      (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
-  ){  
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);    
-    pData.assign(ptr->data, ptr->data + ptr->data_length);
-  }
-
-
-
-
 
 
 
@@ -39,7 +17,31 @@ void aPaletteContainer::LoadPaletteI()
 
 
 
-// aPaletteContainer::aPaletteContainer(){
+// /**
+//  * @brief Internally load palette into container
+//  * 
+//  * @return true  If the palette ID was correctly found within container
+//  * @return false If the palette ID was not in container and load failed (i.e. should be done by another external method)
+//  */
+// bool mPaletteContainer::LoadPaletteI(uint8_t palette_id)
+// {
+
+//  Serial.println("TRYING TO LOAD"); Serial.flush(); //delay(4000);
+ 
+//   if(
+//       (palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) &&
+//       (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
+//   ){  
+//     mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);    
+//     pData.assign(ptr->data, ptr->data + ptr->data_length);
+//     return true; // load succesful
+//   }
+//   return false; // Out of range, not loaded
+
+// }
+
+
+// mPaletteContainer::mPaletteContainer(){
 
 //     // Should palette id be moved into this, or at least copy of active ID?
 

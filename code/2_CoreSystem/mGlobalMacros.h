@@ -64,9 +64,9 @@
 #define DEBUGGING_PROCEED_ONLY_AFTER_MILLIS_SHOWS_STABLE(X) \
               if(millis()<60000){ return X; } 
 
-// #define ENABLE_DEBUG123 //USE_SOFTWARE_SERIAL_DEBUG
+// #define ENABLE_DEBUG_SERIAL //USE_SOFTWARE_SERIAL_DEBUG
 
-#if defined(ENABLE_DEBUG123)
+#if defined(ENABLE_DEBUG_SERIAL)
   // #define DEBUG_PRINT_FUNCTION_NAME   SERIAL_DEBUG.print(__FILE__);\
   //                                     SERIAL_DEBUG.print("\t");\
   //                                     SERIAL_DEBUG.println(__FUNCTION__);\

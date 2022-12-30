@@ -1545,7 +1545,7 @@ DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_28_COLOUR_MAP__DATA)
  * New rotation of 25 with fade instead of g=1, should give a nice rotation of blending colours
  * */
 #ifndef D_PALETTE_CHRISTMAS_29_NAME_CTR
-#define D_PALETTE_CHRISTMAS_29_NAME_CTR        "Christmas 2022 - DiningRoom Tree|Christmas 29"   
+#define D_PALETTE_CHRISTMAS_29_NAME_CTR        "Christmas 29|Christmas Grouped 4"   
 #endif
 // #define PM_PALETTE_CHRISTMAS_29_DESCRIPTION_CTR   "Mostly white white with some cold white" // new optional (for memory) descriptions
 DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_29_NAME_CTR)        D_PALETTE_CHRISTMAS_29_NAME_CTR;
@@ -1600,6 +1600,30 @@ DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA)
   D_RGB_YELLOW_WARM_2
   D_RGB_YELLOW_WARM_2
   D_RGB_YELLOW_WARM_2
+};
+
+
+/**
+ *  New for outside tree only, repeated colours so instead of grouping 100, I can do grouping 25
+ * New rotation of 25 with fade instead of g=1, should give a nice rotation of blending colours
+ * */
+#ifndef D_PALETTE_CHRISTMAS_30_NAME_CTR
+#define D_PALETTE_CHRISTMAS_30_NAME_CTR        "Christmas 30|Christmas Golden Yellow" // Yellow and slight gold (not orange)   
+#endif
+DEF_PGM_CTR  (PM_PALETTE_CHRISTMAS_30_NAME_CTR)        D_PALETTE_CHRISTMAS_30_NAME_CTR;
+#define        D_PALETTE_CHRISTMAS_30_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA)
+{ // R,G,B        
+  255,215,0, //gold  
+  252,94,3, //yellow-orange  
+  255,215,10,       
+  255,230,0, //gold   
+  218,125,17, //goldenrod
+  252,94,3, //yellow-orange
+  252,157,3, //
+  252,157,15, //
+  255,223,0, //goldern yellow
+  252,84,3, //yellow-orange
 };
 
 

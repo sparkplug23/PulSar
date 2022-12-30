@@ -30,7 +30,7 @@ int8_t mInterfaceLight::Tasker_Web(uint8_t function){
     
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
-      //if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE_EFFECTS_ID){
+      //if(pCONT_iLight->animation.mode_id == pCONT_iLight->ANIMATION_MODE__EFFECTS){
         WebAppend_Root_RGBPalette();
       //}
       WebAppend_Root_Sliders();  //move webui stuff into here, as "scenes" will soon be replaced by colour[5].. make it a struct, but read/write using bytes when need by pointer of struct
@@ -351,7 +351,7 @@ void mInterfaceLight::Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request
 void mInterfaceLight::WebAppend_Root_Draw_Table(){
 
   WebAppend_Root_Draw_RGBLive();
-  // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
+  // if(animation.mode_id == ANIMATION_MODE__EFFECTS){
     WebAppend_Root_Draw_RGBPalette();
   // }
   WebAppend_Root_Draw_PaletteSelect_Placeholder();

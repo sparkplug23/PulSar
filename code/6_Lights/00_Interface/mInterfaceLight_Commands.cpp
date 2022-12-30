@@ -167,22 +167,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     }
   }
 
-  if(jtok = obj[PM_JSON_ANIMATIONMODE]){
-    if(jtok.isStr()){
-      if((tmp_id=GetAnimationModeIDbyName(jtok.getStr()))>=0){
-        CommandSet_AnimationModeID(tmp_id);
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){      
-      CommandSet_AnimationModeID(jtok.getInt());
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
   
   if(jtok = obj[PM_JSON_ANIMATIONENABLE]){ 
     int8_t state = 0;
@@ -324,11 +308,11 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 //   mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order;
 
-//   order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
 
 //   for(uint8_t index=0;index<strlen(c);index++){
 //     // if(c[index]==0){ break; }
@@ -361,11 +345,11 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 // #else
 
-// pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//  pCONT_lAni-> SEGMENT_I(0).hardware_element_colour_order.b = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//  pCONT_lAni-> SEGMENT_I(0).hardware_element_colour_order.blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//  pCONT_lAni-> SEGMENT_I(0).hardware_element_colour_order.white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-// pCONT_lAni->  SEGMENT_I(0).hardware_element_colour_order.white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.red = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//  pCONT_lAni-> SEGMENT_I(0).hardware_element_colour_order.b = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//  pCONT_lAni-> SEGMENT_I(0).hardware_element_colour_order.blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//  pCONT_lAni-> SEGMENT_I(0).hardware_element_colour_order.white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+// pCONT_lAni->  SEGMENT_I(0).hardware_element_colour_order.white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
 
 
 //   for(uint8_t index=0;index<strlen(c);index++){
@@ -473,11 +457,11 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 // //   // mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
 
-// //   // order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-// //   // order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-// //   // order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-// //   // order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-// //   // order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+// //   // order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+// //   // order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+// //   // order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+// //   // order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+// //   // order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
 
 // //   // for(uint8_t index=0;index<strlen(c);index++){
 // //   //   if(c[index]==0){ break; }
@@ -584,11 +568,11 @@ const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buff
 
 //   mInterfaceLight::HARDWARE_ELEMENT_COLOUR_ORDER* order = &pCONT_iLight->hardware_element_colour_order[0];
 
-//   order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
-//   order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE;
+//   order->red = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->green = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->blue = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->white_cold = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
+//   order->white_warm = D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE;
 
 //   for(uint8_t index=0;index<strlen(c);index++){
 //     if(c[index]==0){ break; }
@@ -1280,7 +1264,7 @@ void mInterfaceLight::CommandSet_LightSizeCount(uint16_t value){
 //   }
 
 //   // #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
-//   // if(animation.mode_id == ANIMATION_MODE_EFFECTS_ID){
+//   // if(animation.mode_id == ANIMATION_MODE__EFFECTS){
 //   //     pCONT_ladd->flashersettings.region = pCONT_ladd->EFFECTS_REGION_COLOUR_SELECT_ID; //update colours in use
 //   // }
 //   // #endif
@@ -1393,76 +1377,6 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
 
  
 
-}
-
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** AnimationMode *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mInterfaceLight::CommandSet_AnimationModeID(uint8_t value){
-
-  uint8_t segment_index = 0;
-
-  char buffer[60];
-  
-  if(segment_index >= pCONT_lAni->strip->_segments_new.size()){ return; }
-
-  pCONT_lAni->SEGMENT_I(0).mode_id = value;
-          
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_ANIMATIONMODE)), GetAnimationModeName(buffer, sizeof(buffer)));
-  #endif
-
-}
-
-
-const char* mInterfaceLight::GetAnimationModeName(char* buffer, uint16_t buflen){
-  return GetAnimationModeNameByID(  pCONT_lAni->SEGMENT_I(0).mode_id, buffer, buflen);
-}
-const char* mInterfaceLight::GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen){
-  switch(id){
-    default:
-    case ANIMATION_MODE_NONE_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_NONE_NAME_CTR , sizeof(PM_ANIMATION_MODE_NONE_NAME_CTR)); break;
-    // case ANIMATION_MODE_TURN_ON_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_ON_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_ON_NAME_CTR)); break;
-    // case ANIMATION_MODE_TURN_OFF_ID:          memcpy_P(buffer, PM_ANIMATION_MODE_TURN_OFF_NAME_CTR , sizeof(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR)); break;
-    #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-    case ANIMATION_MODE_AMBILIGHT_ID:     memcpy_P(buffer, PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR, sizeof(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)); break;
-    #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-    #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-      case ANIMATION_MODE_NOTIFICATIONS_ID: memcpy_P(buffer, PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR,sizeof(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)); break;
-    #endif
-    case ANIMATION_MODE_EFFECTS_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_EFFECTS_NAME_CTR, sizeof(PM_ANIMATION_MODE_EFFECTS_NAME_CTR)); break;
-    
-    
-  #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
-    case ANIMATION_MODE_WLED_ID:       memcpy_P(buffer, PM_ANIMATION_MODE_WLED_NAME_CTR, sizeof(PM_ANIMATION_MODE_WLED_NAME_CTR)); break;
-    #endif
-    
-    #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-    case ANIMATION_MODE_MANUAL_SETPIXEL_ID:         memcpy_P(buffer, PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR , sizeof(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR)); break;
-    #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-  }
-  return buffer;
-} 
-int8_t mInterfaceLight::GetAnimationModeIDbyName(const char* c){
-
-  if(*c=='\0'){
-    return -1;
-  }
-  if(strcmp_P(c,PM_ANIMATION_MODE_NONE_NAME_CTR)==0){ return ANIMATION_MODE_NONE_ID; }
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-  if(strcmp_P(c,PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)==0){  return ANIMATION_MODE_NOTIFICATIONS_ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  if(strstr_P(c,PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR)){      return ANIMATION_MODE_AMBILIGHT_ID; }
-  #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_EFFECTS_ID; }
-  // #ifdef ENABLE_PIXEL_FUNCTION_WLED_EFFECTS
-  // if(strcmp_P(c,PM_ANIMATION_MODE_EFFECTS_NAME_CTR)==0){        return ANIMATION_MODE_WLED_ID; }
-  // #endif
-  return -1;
 }
 
 

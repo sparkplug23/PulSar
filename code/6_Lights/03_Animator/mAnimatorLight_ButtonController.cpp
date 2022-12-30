@@ -334,7 +334,6 @@ void mAnimatorLight::PhysicalController_Convert_IDs_to_Internal_Parameters()
       pCONT_iLight->animation.transition.time_ms = 2000;
       pCONT_iLight->animation.transition.rate_ms = 10000;
       pCONT_lAni->SetLEDOutAmountByPercentage(100);
-      pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
     break;
     case EFFECTS_FUNCTION_SEQUENTIAL_ID:
       /**
@@ -353,19 +352,16 @@ void mAnimatorLight::PhysicalController_Convert_IDs_to_Internal_Parameters()
         break;
       }
       pCONT_lAni->SetLEDOutAmountByPercentage(100);
-      pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
     break;
     case EFFECTS_FUNCTION_SLOW_GLOW_ID:
       pCONT_iLight->animation.transition.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 19,20000);
       pCONT_iLight->animation.transition.rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 20,30000);
       pCONT_lAni->SetLEDOutAmountByPercentage(map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 1,35));
-      pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
     break;
     case EFFECTS_FUNCTION_STEPPING_PALETTE_ID:
       pCONT_iLight->animation.transition.time_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 23,9000);
       pCONT_iLight->animation.transition.rate_ms = map(intensity_options_ids[user_input.selected.intensity_id], 0,100, 25,10000);
       pCONT_lAni->SetLEDOutAmountByPercentage(100);
-      pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = true;
     break;
   }
 

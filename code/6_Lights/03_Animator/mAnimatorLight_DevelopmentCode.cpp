@@ -3,8 +3,9 @@
 /**
  * @brief Temporary file
  * 
- * To clean up the Set/Get of pixel to include MIRROR/REVERSE/MAPPED/MULTIPLIED/GROUPED
- */
+ * Showing different animations on a 2D matrix for large scale testing
+ * 
+ **/
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
