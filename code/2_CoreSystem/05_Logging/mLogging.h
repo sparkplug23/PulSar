@@ -201,6 +201,17 @@ enum LoggingLevels {LOG_LEVEL_NONE,
   #define DEBUG_LINE_HERE_PAUSE   //nothing, no code
 #endif
 
+#if !defined(USE_SOFTWARE_SERIAL_DEBUG)
+  #define DEBUG_LINE_HERE_SHORT_PAUSE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
+                        SERIAL_DEBUG.print(__FILE__);\
+                        SERIAL_DEBUG.println(__LINE__);\
+                        SERIAL_DEBUG.flush();\
+                        delay(1000);
+
+#else
+  #define DEBUG_LINE_HERE_PAUSE   //nothing, no code
+#endif
+
 
 
 // Can only be used when hardware serial is enabled
@@ -418,6 +429,14 @@ void AddLog_Array2(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 
 }
 
+
+enum ERROR_MESSAGE_TYPES
+{
+  ERROR_MESSAGE_TYPE_INVALID_FORMAT=0
+};
+
+void ErrorMessage_P(uint8_t error_type, const char* message);
+void ErrorMessage(uint8_t error_type, const char* message);
 
 
 template<typename T, typename U>

@@ -109,7 +109,7 @@ void mAnimatorLight::WebAppend_Root_Status_Table(){
   
 
   // char colour_button[8];
-  // char button_ids[] = {ANIMATION_MODE_EFFECTS_ID, ANIMATION_MODE_SCENE_ID, 
+  // char button_ids[] = {ANIMATION_MODE__EFFECTS, ANIMATION_MODE_SCENE_ID, 
   // #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
   // ANIMATION_MODE_NOTIFICATIONS_ID, 
   // #endif

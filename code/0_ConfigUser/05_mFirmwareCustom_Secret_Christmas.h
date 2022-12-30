@@ -26,8 +26,10 @@
 // #define DEVICE_RGBBEDLIGHT 
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_DININGROOM_XMAS2022
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_PRIMATY_WIFI_ENABLED_XMAS2022
+// #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_CONTROLLER_SEGMENTS
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022
-// #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
+#define DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
+// #define DEVICE_RGBSTRING_DEVELOPMENT_NODE2
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_TREE
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_CANDLE
 
@@ -161,9 +163,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
   // #define ENABLE_DEVFEATURE_DEBUG_TRACE_LIGHTING_CHRISTMAS
   // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
@@ -748,9 +750,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -764,7 +766,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 
@@ -834,9 +836,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -849,7 +851,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
@@ -916,9 +918,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -932,7 +934,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
 
@@ -1006,9 +1008,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1021,7 +1023,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
@@ -1080,6 +1082,214 @@
 
 #endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_TESTER_01_BLENDING_XMAS2022
 
+
+
+/**
+ * @brief 
+ * No WIFI
+ * Basic Fallback that creates the desired static colours
+ * For installing, it will show blending
+ * 
+ * Installing after segment upgrade 29Dec2022
+ */
+#ifdef DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_CONTROLLER_SEGMENTS // DEVICE_RGBSTRING_DEVELOPMENT_NODE2 //node2 is spare room, node1 is bedroom string
+  #define DEVICENAME_CTR          "xmas_outsidetree"
+  #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree 03 Segment"
+  #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define DISABLE_NETWORK
+
+  #define DISABLE_SERIAL
+  #define DISABLE_SERIAL0_CORE
+  #define DISABLE_SERIAL_LOGGING
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    #define ENABLE_WLED_EFFECTS
+    #define ENABLE_EXTRA_WLED_EFFECTS
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+
+/**
+ * @brief The issue is template loading is not boot safe.
+ * I need to move this to init() and have it configure after boot has happened using the new segment method
+ * */
+  #define STRIP_SIZE_MAX 1201
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+  #define USE_LIGHTING_TEMPLATE__SINGLE
+  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  // #define USE_LIGHTING_TEMPLATE_3
+
+  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "Segment0":{
+      "PixelRange": [
+        0,
+        1201
+      ],
+      "ColourPalette":"Christmas 24",
+      "Effects": {
+        "Function":2,
+        "Intensity":50
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    }
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__SINGLE
+
+
+  #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "Segment0":{
+      "PixelRange": [
+        0,
+        10
+      ],
+      "ColourPalette":"Christmas 01",
+      "Effects": {
+        "Function":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 10
+    },
+    "Segment1": {
+      "PixelRange": [
+        10,
+        20
+      ],
+      "ColourPalette": "Christmas 01",
+      "Effects": {
+        "Function": 24,
+        "Speed":255,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 23
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment2": {
+      "PixelRange": [
+        20,
+        80
+      ],
+      "ColourPalette": "Rainbow",
+      "Effects": {
+        "Function":1,
+        "Speed":100
+      },
+      "Transition": {
+        "TimeMs": 400,
+        "RateMs": 500
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment3": {
+      "PixelRange": [
+        80,
+        100
+      ],
+      "ColourPalette": "Rainbow",
+      "Effects": {
+        "Function":22,
+        "Speed":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 23
+      },
+      "BrightnessRGB": 100
+    }
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE_1
+
+#endif // DEVICE_RGBSTRING_DEVELOPMENT_NODE2
+
+
+
+
+
 /**
  * @brief 
  * No WIFI
@@ -1115,9 +1325,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1130,7 +1340,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
@@ -1200,65 +1410,63 @@
   #define DEVICENAME_ROOMHINT_CTR "xmas"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  //#define DISABLE_NETWORK
+  // #define DISABLE_NETWORK
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
   // #define DISABLE_SERIAL_LOGGING
 
-  #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-
-  #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
-  #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
-
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    /********* Group: Ready for full integration ************************/
+    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
+    // #define ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    #define ENABLE_WLED_EFFECTS
+    #define ENABLE_EXTRA_WLED_EFFECTS
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
+    /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
-    #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-    #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-
-    #define ENABLE_DEVFEATURE_FIX_STRIPSIZE_LENGTH_ISSUE_XMAS2022
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
-    #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
-    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
-    #define ENABLE_EXTRA_WLED_EFFECTS
-    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
-    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
-    // #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
-    // #define ENABLE_DEVFEATURE_PALETTECONTAINER
-    #define ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
-    #define ENABLE_DEVFEATURE_COLOUR_PALETTE_MERGED
-    #define ENABLE_DEVFEATURE_COLOUR_PALETTE_REMOVE_OLD
-
-    #define WLED_DEBUG
-    #define ENABLE_DEBUG123
-
-    #define ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
-
-
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
     // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1275,31 +1483,325 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define STRIP_SIZE_MAX 100
+
+
+/**
+ * @brief The issue is template loading is not boot safe.
+ * I need to move this to init() and have it configure after boot has happened using the new segment method
+ * */
+  #define STRIP_SIZE_MAX 1201
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"AnimationMode\":\"Effects\","
-    "\"ColourOrder\":\"RGB\","
-    "\"ColourPalette\":\"Christmas 01\","
-    "\"Effects\":{"
-      "\"Function\":1," //shimmering palette
-      "\"Speed\":255,"
-      "\"Intensity\":255,"
-      "\"Grouping\":1"
-    "},"
-    "\"Transition\":{"
-      "\"TimeMs\":0,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":100"
-  "}";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
+  #define USE_LIGHTING_TEMPLATE__SINGLE
+  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  // #define USE_LIGHTING_TEMPLATE_3
+
+  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "Segment0":{
+      "PixelRange": [
+        0,
+        1201
+      ],
+      "ColourPalette":"Christmas 30",
+      "Effects": {
+        "Function":1,
+        "Intensity":50
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    }
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__SINGLE
+
+
+  #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "Segment0":{
+      "PixelRange": [
+        0,
+        10
+      ],
+      "ColourPalette":"Christmas 01",
+      "Effects": {
+        "Function":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 10
+    },
+    "Segment1": {
+      "PixelRange": [
+        10,
+        20
+      ],
+      "ColourPalette": "Christmas 01",
+      "Effects": {
+        "Function": 24,
+        "Speed":255,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 23
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment2": {
+      "PixelRange": [
+        20,
+        80
+      ],
+      "ColourPalette": "Rainbow",
+      "Effects": {
+        "Function":1,
+        "Speed":100
+      },
+      "Transition": {
+        "TimeMs": 400,
+        "RateMs": 500
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment3": {
+      "PixelRange": [
+        80,
+        100
+      ],
+      "ColourPalette": "Rainbow",
+      "Effects": {
+        "Function":22,
+        "Speed":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 23
+      },
+      "BrightnessRGB": 100
+    }
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE_1
+
 #endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+
+/**
+ * @brief 
+ * No WIFI
+ * Basic Fallback that creates the desired static colours
+ * For installing, it will show blending
+ */
+#ifdef DEVICE_RGBSTRING_DEVELOPMENT_NODE2 //node2 is spare room, node1 is bedroom string
+  #define DEVICENAME_CTR          "testbed_rgb_node2"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed RGB Node 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    #define ENABLE_WLED_EFFECTS
+    #define ENABLE_EXTRA_WLED_EFFECTS
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+
+/**
+ * @brief The issue is template loading is not boot safe.
+ * I need to move this to init() and have it configure after boot has happened using the new segment method
+ * */
+  #define STRIP_SIZE_MAX 300
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+  #define USE_LIGHTING_TEMPLATE__SINGLE
+  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  // #define USE_LIGHTING_TEMPLATE_3
+
+  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "Segment0":{
+      "PixelRange": [
+        0,
+        300
+      ],
+      "ColourPalette":"Christmas 11",
+      "Effects": {
+        "Function":2,
+        "Intensity":50
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100
+    }
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__SINGLE
+
+
+  #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "Segment0":{
+      "PixelRange": [
+        0,
+        10
+      ],
+      "ColourPalette":"Christmas 01",
+      "Effects": {
+        "Function":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 10
+    },
+    "Segment1": {
+      "PixelRange": [
+        10,
+        20
+      ],
+      "ColourPalette": "Christmas 01",
+      "Effects": {
+        "Function": 24,
+        "Speed":255,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 23
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment2": {
+      "PixelRange": [
+        20,
+        80
+      ],
+      "ColourPalette": "Rainbow",
+      "Effects": {
+        "Function":1,
+        "Speed":100
+      },
+      "Transition": {
+        "TimeMs": 400,
+        "RateMs": 500
+      },
+      "BrightnessRGB": 100
+    },
+    "Segment3": {
+      "PixelRange": [
+        80,
+        100
+      ],
+      "ColourPalette": "Rainbow",
+      "Effects": {
+        "Function":22,
+        "Speed":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 23
+      },
+      "BrightnessRGB": 100
+    }
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE_1
+
+#endif // DEVICE_RGBSTRING_DEVELOPMENT_NODE2
 
 
 
@@ -1331,9 +1833,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1346,7 +1848,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
@@ -1356,8 +1858,8 @@
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
     #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
     #define ENABLE_EXTRA_WLED_EFFECTS
-    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
-    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+    
+    #define 
     // #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
     // #define ENABLE_DEVFEATURE_PALETTECONTAINER
     #define ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
@@ -1433,9 +1935,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1451,7 +1953,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
@@ -1461,8 +1963,8 @@
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
     #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
     #define ENABLE_EXTRA_WLED_EFFECTS
-    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE
-    #define ENABLE_DEVFEATURE_PALETTE_ENCODING_REWRITE_MQTT_INFO
+    
+    #define 
     // #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
     // #define ENABLE_DEVFEATURE_PALETTECONTAINER
     #define ENABLE_DEVFEATURE_DEBUG_PALETTE_DATA_LENGTH_MQTT
@@ -1540,9 +2042,9 @@
 
 
   #define ENABLE_DEVFEATURE_CANSHOW_VERSION3
-  #define ENABLE_DEVFEATURE_COLORADO_FORCED_TYPE
+  #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
   #define ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  #define ENABLE_DEVFEATURE_ANIMATORLIGHT_EVERYLOOP_2022_METHOD
+  
 
 
   #define USE_BUILD_TYPE_LIGHTING
@@ -1555,7 +2057,7 @@
     #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
     #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID    
+      
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
     #define ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 

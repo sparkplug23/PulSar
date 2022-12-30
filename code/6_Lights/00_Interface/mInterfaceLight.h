@@ -17,6 +17,7 @@
   #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Solid Rgbcct %02d"
   #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_GENERIC__NAME_CTR "Generic %02d"
 
+#define ENABLE_ANIMATION_MODE__EFFECTS
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
@@ -29,26 +30,11 @@
 #include "6_Lights/02_Palette/mColourUtils.h"
 #endif // ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
 
+#include "6_Lights/02_Palette/mPaletteContainer.h"
 #include "6_Lights/02_Palette/mPalette.h"
 
 //Required as defualt for now
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-enum PIXEL_MULTIPLIER_MODE_IDS{
-  PIXEL_MULTIPLIER_MODE_NONE_ID,
-  /**
-   * using a fixed amount, multiply the output/set, divide the input/get
-   * */ 
-  PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID,
-  /**
-   * Random will not work, unless I record the mapped values
-   * */
-  // PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID,
-  /**
-   * I need this for the outside tree
-   * */
-  PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID
-};
 
 // TRANSITION_METHOD
 // DEFINE_PGM_CTR(PM_TRANSITION_METHOD_NONE_NAME_CTR)    "None";   
@@ -333,39 +319,6 @@ class mInterfaceLight :
 
     void LightCalcPWMRange();
 
-    /**************
-     * CHANGE_POWER - TURN_ON - fade ON, returns to previous lighting array.  TURN_OFF - fade off, either turns off, or calls "SCENE" to set number = ALSO SAVES CURRENT OUTPUT
-     * NOTHING - to be named "off", does nothing, simply remains off
-     * AMBILIHGT - keep, dell screen, set directly
-     * PRESETS - animation from a group of colour patterns
-     * EFFECTS - christmad themes, standard 8, shimmering/twinkling. Now also SCENE - scene names might be same as presets? or preset subset of scene? scene might best be named "direct"
-    **************/ 
-    enum ANIMATION_MODE{
-      ANIMATION_MODE_NONE_ID = 0,
-      ANIMATION_MODE_CHANGE_POWER_ID,
-      /**
-       * @brief Segments effects
-       **/
-      ANIMATION_MODE_EFFECTS_ID,
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      ANIMATION_MODE_AMBILIGHT_ID,
-      #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
-      ANIMATION_MODE_NOTIFICATIONS_ID,
-      #endif
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-      ANIMATION_MODE_MANUAL_SETPIXEL_ID,
-      #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-      /**
-       * @brief WLED is only included so debugging WLED effects insitu can be performed, no release build will include this option
-       * **/
-      ANIMATION_MODE_WLED_ID, 
-      ANIMATION_MODE_LENGTH_ID
-    };             
-    int8_t GetAnimationModeIDbyName(const char* c);
-    const char* GetAnimationModeName(char* buffer, uint16_t buflen);
-    const char* GetAnimationModeNameByID(uint8_t id, char* buffer, uint16_t buflen);
-
   
     enum LIHGT_POWER_STATE_IDS{
       LIGHT_POWER_STATE_OFF_ID=0,
@@ -376,6 +329,8 @@ class mInterfaceLight :
       LIGHT_POWER_STATE_LENGTH_ID
     };
     // void SetAnimationProfile(uint8_t profile_id);
+
+    
 
     /******************************************************************************************************************************
     ****************** CommandSet_x *************************************************************************************************************
@@ -399,7 +354,6 @@ class mInterfaceLight :
     void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);
     // void CommandSet_PaletteID(uint8_t value);
-    void CommandSet_AnimationModeID(uint8_t value);
     
     void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);

@@ -15,9 +15,6 @@
 #include "soc/efuse_reg.h"
 #endif
 
-
-
-
 #include <vector>
 
 #include "JsonParser.h"

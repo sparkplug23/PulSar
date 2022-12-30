@@ -39,10 +39,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       
       //EverySecond();
 
-      #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-      // loadPalette_Michael(0,0);
-      #endif
-
       // const NeoRgbcctCurrentSettings settings(200,200,200,201,202);
       // uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
 
@@ -159,6 +155,20 @@ void mAnimatorLight::Pre_Init(void){
     );
     #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
+  #ifdef ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+  pCONT_lAni->strip = new mAnimatorLight::WS2812FX();
+  ALOG_INF(PSTR("SET strip = new WS2812FX()")); 
+  pCONT_lAni->strip->finalizeInit();
+  pCONT_lAni->strip->makeAutoSegments();
+  #endif // ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+  
+    #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+    busses = new BusManager();
+
+
+    #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+  
 
 }
 
@@ -202,90 +212,24 @@ void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
 
 void mAnimatorLight::Init(void){ 
     
-  // ledout.length = STRIP_SIZE_MAX; 
-  
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
-  DEBUG_LINE;
-
   // stripbus->NeoRgbCurrentSettings(1,2,3);
+  
+  /**
+   * @brief Start PixelAnimator
+   * 
+   */
+  pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE);     // I dont think this is the active one????????????????????????
 
-  //step1:  moving the desired/starting colours into a buffer type, so it is dynamic
-  //step2:  to become its own function, so strips can be changed at runtime
-  // stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(strip_size_tmp, 23);//19); 3 = rx0
+  /**
+   * @brief Start NeoBus
+   * 
+   */
 
   #ifndef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT 
   Init_NeoPixelBus();
   #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT 
-
-
-  // #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  // mqtthandler_debug_animations_progress.tRateSecs = 1;
-  // #endif
-
-
-  pCONT_iLight->Init_NeoPixelAnimator(1, NEO_ANIMATION_TIMEBASE);  
-
-  
-
-  #ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
-  strip = new WS2812FX();
-  strip->finalizeInit();
-  strip->makeAutoSegments();
-
-  #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
-
-
-  // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-  // // pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val = 100;  
-  // SetLEDOutAmountByPercentage(100);//pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);  
-  // #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-  _segments[0].flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique = false;
-  _segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB = false;
-  
-  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-  _segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = false; // FIX
-  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-
-  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  //   flashersettings.brightness_max = 255;
-  //   flashersettings.brightness_min = 0;
-  // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-
-  // #ifdef ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET // move to proper command options
-  //   // pCONT_iLight->animation.flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice = true; // FIX
-  //   pCONT_iLight->animation.flags.Limit_Upper_Brightness_With_BrightnessRGB = true;
-  // #endif // ENABLE_DEVFEATURE_DIRECT_TEMPFIX_RANDOMISE_BRIGHTNESS_ON_PALETTE_GET
-
-  #ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-  pixel_group.flags.fEnabled = true;
-  pixel_group.flags.multiplier_mode_id = PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID;
-  pixel_group.multiplier = 10;
-  pixel_group.mapped_array_data.values = editable_mapped_array_data_array;
-  pixel_group.flags.mapped_array_editable_or_progmem = 0;
-  pixel_group.mapped_array_data.length = 0;
-  // flashersettings.flags.enable_startcolour_as_alternate = true;
-  // flashersettings.flags.enable_endingcolour_as_alternate = true;
-  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-  
-  // for(ledout.index=0;
-  //   ledout.index<STRIP_SIZE_MAX;
-  //   ledout.index++){ 
-  //   ledout.pattern[ledout.index] = ledout.index; 
-  // }
-
-  DEBUG_LINE;
-
-  // #ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-  // // Clear stored light output
-  // memset(&animation_colours,0,sizeof(animation_colours));
-  
-  // #endif //ifndef ENABLE_DEVFEATURE_PHASE_OUT_ANIMATIONCOLOUR_STRUCT
-
-
-  // Start display
-
   if(stripbus == nullptr)
   {
     // not configured, no pin? disable lighting
@@ -302,21 +246,27 @@ void mAnimatorLight::Init(void){
     #else
     stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, 23);
     #endif
-
-
   }
-
-
-  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
-  _segment_runtimes[0].palette_container = new mPaletteContainer(100);
-  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
-
   stripbus->Begin();
   if(pCONT_set->Settings.flag_animations.clear_on_reboot){
     // stripbus->ClearTo(0);
     pCONT_iLight->ShowInterface();
   }
 
+  /**
+   * @brief Start PaletteContainer
+   * 
+   */
+  #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+  ALOG_WRN(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced"));
+  SEGMENT_I(0).palette_container = new mPaletteContainer(100);
+  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+
+  /**
+   * @brief Init Types of Modes
+   * 
+   */  
+  Init_Segments();
   #ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
     init_Notifications();
   #endif
@@ -327,11 +277,6 @@ void mAnimatorLight::Init(void){
   #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
   init_mixer_defaults();
   #endif
-
-  settings.flags.EnableModule = true;
-
-  Init_Segments();
-
   #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
   user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
   user_input.selected.brightness_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[1];
@@ -340,43 +285,17 @@ void mAnimatorLight::Init(void){
   PhysicalController_Convert_IDs_to_Internal_Parameters();
   #endif
 
+  settings.flags.EnableModule = true;
+
 } //end "init"
 
-
+/**
+ * @brief Now, do I use "Save" going forward as simple byte packed struct, or, saving them as json encoded in memory (much larger, but more dynamic)
+ * 
+ */
 void mAnimatorLight::Settings_Load(){
     
-  // pCONT_iLight->animation.brightness = pCONT_set->Settings.light_settings.light_brightness_as_percentage/100.0f;
-  
   pCONT_iLight->setBriRGB_Global(pCONT_set->Settings.light_settings.light_brightness_as_percentage);
-
-  // uint8_t list = 0;
-  // SetPaletteListPtrFromID(list);
-  // AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d amount = %d"),list,palettelist.ptr->data_length);
-  // for(uint8_t element=0;element<20;element++){
-  //   AddLog(LOG_LEVEL_TEST,PSTR("LOADED %d i%d amount = %d"),list,element,pCONT_set->Settings.palette_user_colour_map_ids[list][element]);
-  // }
-
-  // Save colour map IDS
-  // for(uint8_t list=0;list<20;list++){
-  //   SetPaletteListPtrFromID(list);
-  //   palettelist.ptr->data_length = pCONT_set->Settings.animation_settings.palette_user_amounts[list]<20?pCONT_set->Settings.animation_settings.palette_user_amounts[list]:20;
-  //   for(uint8_t element=0;element<20;element++){
-  //     palettelist.ptr->data[element] = pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element];
-  //   }
-  // }
-  
-  // for(uint8_t list=0;list<20;list++){
-  //   memcpy(palettelist_variable_users_ctr,pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,sizeof(palettelist_variable_users_ctr));
-  // }
-
-
-// these need reversed!!!
-  // pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
-  // pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  // pCONT_set->Settings.animation_settings.animation_transition_order   = _segments[0].transition.order_id;
-  // pCONT_set->Settings.animation_settings.animation_transition_method  = _segments[0].transition.method_id;
-  // pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
-  // pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
 
 #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
   user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
@@ -391,36 +310,6 @@ void mAnimatorLight::Settings_Load(){
 
 void mAnimatorLight::Settings_Save(){
   
-  // pCONT_set->Settings.light_settings.light_brightness_as_percentage = pCONT_iLight->animation.brightness*100;
-
-  // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST,PSTR("SAVED pCONT_iLight->animation.brightness = %d"),pCONT_set->Settings.light_settings.light_brightness_as_percentage);
-  // #endif
-  
-  // Save colour map IDS
-  // for(uint8_t list=0;list<20;list++){
-  //   SetPaletteListPtrFromID(list);
-  //   pCONT_set->Settings.animation_settings.palette_user_amounts[list] = palettelist.ptr->data_length;
-  //   for(uint8_t element=0;element<20;element++){
-  //     pCONT_set->Settings.animation_settings.palette_user_colour_map_ids[list][element] = palettelist.ptr->data[element];
-  //   }
-  // }
-
-  // for(uint8_t list=0;list<20;list++){
-  //   memcpy(pCONT_set->Settings.animation_settings.palette_user_variable_name_ctr,palettelist_variable_users_ctr,sizeof(palettelist_variable_users_ctr));
-  // }
-
-  pCONT_set->Settings.animation_settings.animation_mode               = _segments[0].mode_id;
-  pCONT_set->Settings.animation_settings.animation_palette            = _segments[0].palette.id;
-  pCONT_set->Settings.animation_settings.animation_transition_time_ms = _segments[0].transition.time_ms;
-  pCONT_set->Settings.animation_settings.animation_transition_rate_ms = _segments[0].transition.rate_ms;
-
-  // pCONT_set->Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
-
-  // pCONT_set->Settings.animation_settings.xmas_controller_params[0] = user_input.selected.palette_id;
-  // pCONT_set->Settings.animation_settings.xmas_controller_params[1] = user_input.selected.brightness_id;
-  // pCONT_set->Settings.animation_settings.xmas_controller_params[2] = user_input.selected.effects_id;
-  // pCONT_set->Settings.animation_settings.xmas_controller_params[3] = user_input.selected.intensity_id;
   
 #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
 
@@ -442,8 +331,6 @@ void mAnimatorLight::Settings_Save(){
 
 void mAnimatorLight::Settings_Default(){
 
-DEBUG_LINE;
-  
   init(); //default values
 
   #ifdef ENABLE_LOG_LEVEL_INFO
@@ -459,88 +346,18 @@ DEBUG_LINE;
     //pCONT_iLight->Template_Load();
 
   }else{
-    
-    //pCONT_iLight->animation.transition.method_id = TRANSITION_METHOD_BLEND_ID;
-
-
-    // // Check for user defined defaults
-    // #ifdef DEFAULT_LIGHTING_TRANSITION_ORDER_ID
-    //   pCONT_iLight->animation.transition.order_id = 6;/*DEFAULT_LIGHTING_TRANSITION_ORDER_ID<TRANSITION_ORDER_LENGTH_ID?
-    //                                         DEFAULT_LIGHTING_TRANSITION_ORDER_ID:TRANSITION_ORDER_INORDER_ID;*/
-    // #else
-    //   pCONT_iLight->animation.transition.order_id = TRANSITION_ORDER_INORDER_ID;
-    // #endif
-    
-    // #ifdef DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID
-    //   // pCONT_iLight->animation.transition.time_ms.map_id = 10;
-    //   /*DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID<TIME_MAP_SECS_LENGTH_ID?
-    //                                             DEFAULT_LIGHTING_TRANSITION_TIME_MAP_SECS_ID:TIME_MAP_SECS_15_ID;*/
-    //   pCONT_iLight->animation.transition.time_ms = 2000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
-    //   pCONT_iLight->animation.flags.ftime_use_map = true;
-    // #else
-    //   pCONT_iLight->animation.transition.time_ms.map_id = TIME_MAP_SECS_15_ID;
-    //   pCONT_iLight->animation.transition.time_ms.val = 1000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.time_ms.map_id]*1000;
-    //   pCONT_iLight->animation.flags.ftime_use_map = true;
-    // // #endif
-
-    // // #ifdef DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID
-    //   // pCONT_iLight->animation.transition.rate_ms.map_id = 6;
-    //   /*DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID<RATE_MAP_SECS_LENGTH_ID?
-    //                                             DEFAULT_LIGHTING_TRANSITION_RATE_MAP_SECS_ID:RATE_MAP_SECS_15_ID;*/
-    //   pCONT_iLight->animation.transition.rate_ms = 10000;//PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
-    //   pCONT_iLight->animation.flags.frate_use_map = true;
-    // // #else
-    // //   pCONT_iLight->animation.transition.rate_ms.map_id = RATE_MAP_SECS_15_ID;
-    // //   pCONT_iLight->animation.transition.rate_ms = PROGMEM rate_map_secs[pCONT_iLight->animation.transition.rate_ms.map_id]*1000;
-    // //   pCONT_iLight->animation.flags.frate_use_map = true;
-    // // #endif
-
-    // // #ifdef DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID
-    // //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = 4;/*DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID<PIXELS_UPDATE_PERCENTAGE_LENGTH_ID?
-    // //                         DEFAULT_LIGHTING_PIXELS_UPDATE_PERCENTAGE_ID:PIXELS_UPDATE_PERCENTAGE_20_ID;*/
-    // // #else
-    // //   pCONT_iLight->animation.transition.pixels_to_update_as_percentage.map_id = PIXELS_UPDATE_PERCENTAGE_20_ID;
-    // // #endif
-
-    #ifdef DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE
-      // pCONT_iLight->animation.brightness = (float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f;//mSupport::WithinLimits(0,(float)DEFAULT_LIGHTING_BRIGHTNESS_PERCENTAGE/100.0f,1)
-    #else
-      // pCONT_iLight->animation.brightness = WithinLimits(0,(float)1/100.0f,1);
-      // pCONT_iLight->animation.brightness = 1; //default ot 50% normally for power reasons
-    #endif
-
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #ifdef DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ
-      liveview.refresh_rate = DEFAULT_LIGHTING_LIVEVIEW_REFRESH_RATE_HZ;
-    #else
-      pCONT_iLight->liveview.refresh_rate = 1000;
-    #endif
-    #endif // USE_MODULE_NETWORK_WEBSERVER
-    
-    
-    // #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-    // #ifdef DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID
-    //   flashersettings.function = 1;/*DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID<EFFECTS_FUNCTION_LENGTH_ID?
-    //                         DEFAULT_LIGHTING_EFFECTS_FUNCTION_ID:EFFECTS_FUNCTION_SLOW_GLOW_ID;*/
-    // #else
-    //   flashersettings.function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-    // #endif
-    // #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
   }
 
-
-  // uint16_t buffer_length = 0;
-  // char* buffer = pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;
-  // for(uint8_t i=0;i<20;i++){
-  //  buffer_length+=sprintf(buffer+buffer_length,"%s%02d|\0","User",i);
-  // }
-  // #ifndef DISABLE_SERIAL_LOGGING
-  // //  Serial.println(buffer); log debuf more
-  // #endif
-
-  
   #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
+  /**
+   * @brief To be included in 2023
+   * 
+   * Alternate of grouping from WLED, I also want a "dynamic_group" that uses an array to set the group width.
+   * 
+   * ie is group is set, and group_map is provided, then widths from group_map will be set for each group [1,2,3] will become [1, 2,2, 3,3,3] for a total of 14 pixels set
+   * 
+   */
   memset(&editable_mapped_array_data_array,0,sizeof(editable_mapped_array_data_array));
   
   uint16_t single_row_count_array[] = {
@@ -579,18 +396,10 @@ DEBUG_LINE;
 }
 
 
-
-
-
-
-
-
-
-
 /********************************************************************************************/
 /********************************************************************************************/
 /********************************************************************************************/
-/********************* Helper Functions ie rarely edited ************************************/
+/********************* Helper Functions                  ************************************/
 /********************************************************************************************/
 /********************************************************************************************/
 /********************************************************************************************/
@@ -602,9 +411,9 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
     snprintf_P(buffer, buflen, PSTR("Animating"));
     return buffer;
   }
-  if(_segments[0].flags.fEnable_Animation){
+  if(SEGMENT_I(0).flags.fEnable_Animation){
     // (millis since) + (next event millis)
-    int16_t until_next_millis = _segments[0].transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
+    int16_t until_next_millis = SEGMENT_I(strip->_segment_index_primary).transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
     int16_t secs_until_next_event = until_next_millis/1000;
     // secs_until_next_event/=1000;
     // Serial.println(secs_until_next_event);
@@ -639,22 +448,6 @@ const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 
 
 
-/*******************************************************************************************************************
-********************************************************************************************************************
-************CODE ABOVE THIS LINE IS PART OF THE NEWEST REWRITE********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
-
-
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ANIMATION AND BLENDING**************************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
-
 RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness){
 
   RgbcctColor colour_adjusted_with_brightness; // No init for speed// = RgbcctColor();//0);
@@ -684,45 +477,14 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   
   uint8_t new_brightness_255 = 0;
 
-// Create new function of ApplyBrightnesstoDesiredColour to do this if statement generically
-// if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-
-#ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-  // Remove this, as it will just be inside effects that need it
-  if(_segments[0].flags.Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice)
-  {
-
-    // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-    // uint8_t temp_max_brightness = flashersettings.brightness_max;
-    // #else
-    uint8_t temp_max_brightness = 255;
-    // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-
-    if(_segments[0].flags.Limit_Upper_Brightness_With_BrightnessRGB)
-    {
-      temp_max_brightness = pCONT_iLight->getBriRGB_Global();
-    }
-    // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-    // new_brightness_255 = random(flashersettings.brightness_min, temp_max_brightness);
-    // #else
-    new_brightness_255 = random(0, temp_max_brightness);
-
-    // #endif // USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  }
-  // Default: apply global brightness
-  else{
-  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
     new_brightness_255 = brightness;
-  #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-  }
-  #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
 
   // AddLog(LOG_LEVEL_TEST, PSTR("ledGamma=new_brightness_255=%d - >%d"), 
   //   new_brightness_255, pCONT_iLight->ledGamma(new_brightness_255)
   // );
 
   #ifdef ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
-  if(_segments[0].flags.use_gamma_for_brightness)
+  if(SEGMENT_I(0).flags.use_gamma_for_brightness)
   {
     new_brightness_255 = pCONT_iLight->ledGamma(new_brightness_255);
   }
@@ -743,91 +505,6 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
-#ifdef ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-bool mAnimatorLight::OverwriteUpdateDesiredColourIfMultiplierIsEnabled(){
-
-  //Use starting pixel as temporary buffer, record desired as already set
-  for (uint16_t pixel = 0; pixel < pCONT_iLight->settings.light_size_count; pixel++){
-    animation_colours[pixel].StartingColor = animation_colours[pixel].DesiredColour;
-  } // END for
-
-
-  for(uint16_t indexPixel=0; indexPixel<pCONT_iLight->settings.light_size_count; indexPixel++){
-    
-    uint8_t pixel_multiplier_count = 0;
-    if(indexPixel == 0){
-      setpixel_variable_index_counter = 0; // reset
-      pixel_group.mapped_array_data.index = 0;
-    }
-
-    if(setpixel_variable_index_counter>pCONT_iLight->settings.light_size_count-1){ return true; }
-
-    if(pixel_group.flags.fEnabled){
-
-      switch(pixel_group.flags.multiplier_mode_id){
-        default:
-        case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_UNIFORM_ID:
-          pixel_multiplier_count = pixel_group.multiplier;
-          break;
-        //case PIXEL_MULTIPLIER_MODE_BASIC_MULTIPLIER_RANDOM_ID:
-          //pixel_multiplier_count = random(1,pixel_group.multiplier);
-          //break;
-        case PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID:
-          if(pixel_group.mapped_array_data.values != nullptr){
-            // if any match, then jump index of lights forward
-            pixel_multiplier_count = pixel_group.mapped_array_data.values[pixel_group.mapped_array_data.index];
-            //AddLog(LOG_LEVEL_WARN, PSTR("PIXEL_MULTIPLIER_MODE_MAPPED_INDEX_ARRAY_ID %d %d %d"),pixel_multiplier_count,pixel_group.mapped_array_data.index,pixel_group.mapped_array_data.length);
-            if(pixel_group.mapped_array_data.index++ >= pixel_group.mapped_array_data.length-1){
-              pixel_group.mapped_array_data.index = 0;
-            }
-          }else{
-            pixel_multiplier_count = 1;//pixel_group.multiplier;
-          }
-          break;
-      }
-  AddLog(LOG_LEVEL_TEST, PSTR("pixel_multiplier_count=%d"),pixel_multiplier_count);
-
-      for(uint8_t ii = 0; ii < pixel_multiplier_count; ii++){
-        animation_colours[setpixel_variable_index_counter++].DesiredColour = animation_colours[indexPixel].StartingColor;
-        if(setpixel_variable_index_counter>pCONT_iLight->settings.light_size_count-1){ return true; }
-      }
-
-    }
-    else{
-      animation_colours[indexPixel].DesiredColour = animation_colours[indexPixel].StartingColor;
-    } // pixel_group.flags.fEnabled
-
-    AddLog(LOG_LEVEL_TEST, PSTR("indexPixel=%d,setpixel_variable_index_counterhere=%d %d"),indexPixel,setpixel_variable_index_counter,pixel_multiplier_count);
-
-  }
-
-  return true; // returns if this function changed the desiredcolour
-
-}
-
-  #endif // ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-
-
-
-void mAnimatorLight::SetRefreshLEDs(){
-
-  ALOG_ERR(PSTR("This function should never be called going forward"));
-
-  _segments[0].single_animation_override.time_ms = 10;
-  segment_animation_override.fRefreshAllPixels = true;
-  // segment_animation_override.time_ms = 10;
-
-  _segments[0].flags.fForceUpdate = true;
-
-}
-
-
-
-/**
- * @brief Optional calculate power limit here before commiting?
- * Actually, this is string dependent and should be moved into "hardware" type (pwm/ws2812)
- * 
- */
 void mAnimatorLight::StripUpdate(){
 
   pCONT_iLight->ShowInterface();
@@ -835,15 +512,6 @@ void mAnimatorLight::StripUpdate(){
 }
 
 
-// #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-// void mPalette::load_gradient_palette(uint8_t index)
-// {
-//   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
-//   byte tcp[72]; //support gradient palettes with up to 18 entries
-//   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
-//   targetPalette.loadDynamicGradientPalette(tcp);
-// }
-// #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
 /**
  * @brief Function to load palette_id into the segment
@@ -860,17 +528,13 @@ void mAnimatorLight::StripUpdate(){
  * unloadPalette
  *  ** delete buffer data from heap, reset to nullptr
  * 
+ * should load even be here? surely into palette container
+ * 
  */
 void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
 {
 
-  #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
-  uint8_t* palette_buffer_p = _segment_runtimes[segment_index].palette_container->GetDataPtr();
-  #else
-  // Clear = Worth while since loading palette will not be called everytime
-  memset(&mPaletteI->palette_runtime.loaded.buffer_static, 0, sizeof(mPaletteI->palette_runtime.loaded.buffer_static));
-  uint8_t* palette_buffer_p = mPaletteI->palette_runtime.loaded.buffer_static;
-  #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
+  ALOG_INF(PSTR("loadPalette_Michael %d %d %d"), palette_id, segment_index, pCONT_lAni->strip->_segment_index_primary);
 
   /**
    * @brief My palettes
@@ -879,28 +543,105 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
       (palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) &&
       (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
   ){  
-
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
-
-    // ALOG_INF(PSTR("ptr->id %d"), ptr->id);
-    // ALOG_INF(PSTR("ptr->data_length %d"), ptr->data_length);
+    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);    
+    SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
     
-    if(ptr->id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }else
-    if(ptr->id < mPalette::PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }else
-    if(ptr->id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID){
-      memcpy(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }else{ // progmem
-      memcpy_P(palette_buffer_p,ptr->data,sizeof(uint8_t)*ptr->data_length);
-    }
-    
-    } // END of CRGBPalette's
-    
+    ALOG_INF(PSTR("Direct load, move into container %d %d"), segment_index, ptr->data_length);
+  }
+  else
+   if( // Currently checked this way, but really the encoding type of CRGBPalette should inform this decision!
+    (palette_id >= mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID) &&
+    (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+  ){  
+    mPaletteI->UpdatePalette_FastLED_TargetPalette(); // ie WLED22 "loadPalette"
+  }
 
 }
+
+
+#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+
+//get RGB values from color temperature in K (https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
+void mAnimatorLight::colorKtoRGB(uint16_t kelvin, byte* rgb) //white spectrum to rgb, calc
+{
+  float r = 0, g = 0, b = 0;
+  float temp = kelvin / 100;
+  if (temp <= 66) {
+    r = 255;
+    g = round(99.4708025861 * log(temp) - 161.1195681661);
+    if (temp <= 19) {
+      b = 0;
+    } else {
+      b = round(138.5177312231 * log((temp - 10)) - 305.0447927307);
+    }
+  } else {
+    r = round(329.698727446 * pow((temp - 60), -0.1332047592));
+    g = round(288.1221695283 * pow((temp - 60), -0.0755148492));
+    b = 255;
+  } 
+  //g += 12; //mod by Aircoookie, a bit less accurate but visibly less pinkish
+  rgb[0] = (uint8_t) constrain(r, 0, 255);
+  rgb[1] = (uint8_t) constrain(g, 0, 255);
+  rgb[2] = (uint8_t) constrain(b, 0, 255);
+  rgb[3] = 0;
+}
+
+// adjust RGB values based on color temperature in K (range [2800-10200]) (https://en.wikipedia.org/wiki/Color_balance)
+uint32_t mAnimatorLight::colorBalanceFromKelvin(uint16_t kelvin, uint32_t rgb)
+{
+  //remember so that slow colorKtoRGB() doesn't have to run for every setPixelColor()
+  if (lastKelvin != kelvin) colorKtoRGB(kelvin, correctionRGB);  // convert Kelvin to RGB
+  lastKelvin = kelvin;
+  byte rgbw[4];
+  rgbw[0] = ((uint16_t) correctionRGB[0] * R(rgb)) /255; // correct R
+  rgbw[1] = ((uint16_t) correctionRGB[1] * G(rgb)) /255; // correct G
+  rgbw[2] = ((uint16_t) correctionRGB[2] * B(rgb)) /255; // correct B
+  rgbw[3] =                                W(rgb);
+  return RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]);
+}
+
+//approximates a Kelvin color temperature from an RGB color.
+//this does no check for the "whiteness" of the color,
+//so should be used combined with a saturation check (as done by auto-white)
+//values from http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html (10deg)
+//equation spreadsheet at https://bit.ly/30RkHaN
+//accuracy +-50K from 1900K up to 8000K
+//minimum returned: 1900K, maximum returned: 10091K (range of 8192)
+uint16_t mAnimatorLight::approximateKelvinFromRGB(uint32_t rgb) {
+  //if not either red or blue is 255, color is dimmed. Scale up
+  uint8_t r = R(rgb), b = B(rgb);
+  if (r == b) return 6550; //red == blue at about 6600K (also can't go further if both R and B are 0)
+
+  if (r > b) {
+    //scale blue up as if red was at 255
+    uint16_t scale = 0xFFFF / r; //get scale factor (range 257-65535)
+    b = ((uint16_t)b * scale) >> 8;
+    //For all temps K<6600 R is bigger than B (for full bri colors R=255)
+    //-> Use 9 linear approximations for blackbody radiation blue values from 2000-6600K (blue is always 0 below 2000K)
+    if (b < 33)  return 1900 + b       *6;
+    if (b < 72)  return 2100 + (b-33)  *10;
+    if (b < 101) return 2492 + (b-72)  *14;
+    if (b < 132) return 2900 + (b-101) *16;
+    if (b < 159) return 3398 + (b-132) *19;
+    if (b < 186) return 3906 + (b-159) *22;
+    if (b < 210) return 4500 + (b-186) *25;
+    if (b < 230) return 5100 + (b-210) *30;
+                 return 5700 + (b-230) *34;
+  } else {
+    //scale red up as if blue was at 255
+    uint16_t scale = 0xFFFF / b; //get scale factor (range 257-65535)
+    r = ((uint16_t)r * scale) >> 8;
+    //For all temps K>6600 B is bigger than R (for full bri colors B=255)
+    //-> Use 2 linear approximations for blackbody radiation red values from 6600-10091K (blue is always 0 below 2000K)
+    if (r > 225) return 6600 + (254-r) *50;
+    uint16_t k = 8080 + (225-r) *86;
+    return (k > 10091) ? 10091 : k;
+  }
+}
+
+#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 
