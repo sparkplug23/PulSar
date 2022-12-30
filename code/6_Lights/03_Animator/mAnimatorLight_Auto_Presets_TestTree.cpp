@@ -42,9 +42,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);   
-    _segments[0].set_intensity(30);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(30);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
   
   }else
@@ -63,9 +63,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);    
-    _segments[0].set_intensity(255);
-    _segments[0].set_speed(200);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(255);
+    SEGMENT_I(0).set_speed(200);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -84,9 +84,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(500);
     CommandSet_Animation_Transition_Rate_Ms(1000); 
-    _segments[0].set_intensity(30);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(30);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -108,9 +108,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(50); 
-    _segments[0].set_intensity(20);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(20);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -130,9 +130,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(100); 
-    _segments[0].set_intensity(3);
-    _segments[0].set_speed(127);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(3);
+    SEGMENT_I(0).set_speed(127);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -152,12 +152,12 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(50); 
-    _segments[0].set_intensity(255);
-    _segments[0].set_speed(127);
-    _segments[0].grouping = 3;
+    SEGMENT_I(0).set_intensity(255);
+    SEGMENT_I(0).set_speed(127);
+    SEGMENT_I(0).grouping = 3;
     CommandSet_BrtRGB_255(255);
 
-    _segments[0].set_colors(1, 50,50,50, 0);
+    SEGMENT_I(0).set_colors(1, 50,50,50, 0);
     // [0] = ((uint32_t)0 << 24) | ((uint32_t)50 << 16) | ((uint32_t)50 << 8) | (uint32_t)50);
 
   }else
@@ -174,9 +174,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(1500);
     CommandSet_Animation_Transition_Rate_Ms(3000); 
-    _segments[0].set_intensity(20);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(20);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -193,9 +193,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(1500);
     CommandSet_Animation_Transition_Rate_Ms(3000); 
-    _segments[0].set_intensity(20);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 100;
+    SEGMENT_I(0).set_intensity(20);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 100;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -212,9 +212,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_25__ID);   // no purple
     CommandSet_Animation_Transition_Time_Ms(10000);
     CommandSet_Animation_Transition_Rate_Ms(20000); 
-    _segments[0].set_intensity(20);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 100;
+    SEGMENT_I(0).set_intensity(20);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 100;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -234,9 +234,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_25__ID); //no purple
     CommandSet_Animation_Transition_Time_Ms(50);
     CommandSet_Animation_Transition_Rate_Ms(100); 
-    _segments[0].set_intensity(20);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(20);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
 
@@ -257,9 +257,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23); 
-    _segments[0].set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
-    _segments[0].set_speed(127);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
+    SEGMENT_I(0).set_speed(127);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -276,9 +276,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23); 
-    _segments[0].set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
-    _segments[0].set_speed(126);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
+    SEGMENT_I(0).set_speed(126);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -295,9 +295,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23); 
-    _segments[0].set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
-    _segments[0].set_speed(126);
-    _segments[0].grouping = 1;
+    SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
+    SEGMENT_I(0).set_speed(126);
+    SEGMENT_I(0).grouping = 1;
     CommandSet_BrtRGB_255(255);
 
   }else
@@ -317,9 +317,9 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_27__ID);   // no purple
     CommandSet_Animation_Transition_Time_Ms(10000);
     CommandSet_Animation_Transition_Rate_Ms(20000); 
-    _segments[0].set_intensity(20);
-    _segments[0].set_speed(255);
-    _segments[0].grouping = 100;
+    SEGMENT_I(0).set_intensity(20);
+    SEGMENT_I(0).set_speed(255);
+    SEGMENT_I(0).grouping = 100;
     CommandSet_BrtRGB_255(255);
 
 
@@ -365,7 +365,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   //   CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_13__ID);
   //   CommandSet_Animation_Transition_Time_Ms(0);
   //   CommandSet_Animation_Transition_Rate_Ms(1000);
-  //   _segments[0].grouping = 1;
+  //   SEGMENT_I(0).grouping = 1;
 
   // }else
   // /**
@@ -406,7 +406,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   //   CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
   //   CommandSet_Animation_Transition_Time_Ms(500);
   //   CommandSet_Animation_Transition_Rate_Ms(1000);
-  //   _segments[0].grouping = 4; // to be like 1ft of tree (maybe 200?)
+  //   SEGMENT_I(0).grouping = 4; // to be like 1ft of tree (maybe 200?)
 
   // }else
   // /**
@@ -424,7 +424,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   //   CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
   //   CommandSet_Animation_Transition_Time_Ms(500);
   //   CommandSet_Animation_Transition_Rate_Ms(1000);
-  //   _segments[0].grouping = 4; // to be like 1ft of tree (maybe 200?) 
+  //   SEGMENT_I(0).grouping = 4; // to be like 1ft of tree (maybe 200?) 
 
   // }else
   // /**
@@ -442,7 +442,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   //   CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
   //   CommandSet_Animation_Transition_Time_Ms(500);
   //   CommandSet_Animation_Transition_Rate_Ms(1000);
-  //   _segments[0].grouping = 4; // to be like 1ft of tree (maybe 200?) 
+  //   SEGMENT_I(0).grouping = 4; // to be like 1ft of tree (maybe 200?) 
 
   // }else
 
@@ -462,7 +462,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   //   CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
   //   CommandSet_Animation_Transition_Time_Ms(0);
   //   CommandSet_Animation_Transition_Rate_Ms(23);
-  //   _segments[0].grouping = 1;
+  //   SEGMENT_I(0).grouping = 1;
 
   // }else
   // /**
@@ -482,7 +482,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   //   CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
   //   CommandSet_Animation_Transition_Time_Ms(0);
   //   CommandSet_Animation_Transition_Rate_Ms(23);
-  //   _segments[0].grouping = 1;
+  //   SEGMENT_I(0).grouping = 1;
 
 
   // }

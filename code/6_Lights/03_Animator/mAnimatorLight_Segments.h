@@ -38,17 +38,14 @@
 #define SEGMENT_ON   (uint8_t)0x04
 #define REVERSE      (uint8_t)0x02
 #define SELECTED     (uint8_t)0x01
-#define IS_TRANSITIONAL ((_segments[segment_active_index].options & TRANSITIONAL) == TRANSITIONAL)
-#define IS_MIRROR       ((_segments[segment_active_index].options & MIRROR      ) == MIRROR      )
-#define IS_SEGMENT_ON   ((_segments[segment_active_index].options & SEGMENT_ON  ) == SEGMENT_ON  )
-#define IS_REVERSE      ((_segments[segment_active_index].options & REVERSE     ) == REVERSE     )
-#define IS_SELECTED     ((_segments[segment_active_index].options & SELECTED    ) == SELECTED    )
+#define IS_TRANSITIONAL ((SEGMENT_I(strip->_segment_index_primary).options & TRANSITIONAL) == TRANSITIONAL)
+#define IS_MIRROR       ((SEGMENT_I(strip->_segment_index_primary).options & MIRROR      ) == MIRROR      )
+#define IS_SEGMENT_ON   ((SEGMENT_I(strip->_segment_index_primary).options & SEGMENT_ON  ) == SEGMENT_ON  )
+#define IS_REVERSE      ((SEGMENT_I(strip->_segment_index_primary).options & REVERSE     ) == REVERSE     )
+#define IS_SELECTED     ((SEGMENT_I(strip->_segment_index_primary).options & SELECTED    ) == SELECTED    )
 
-#define DEFAULT_BRIGHTNESS (uint8_t)127
-#define DEFAULT_MODE       (uint8_t)0
-#define DEFAULT_SPEED      (uint8_t)128
-#define DEFAULT_COLOR      (uint32_t)0xFFAA00
-
+// #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
+#define MINIMUM_SHOW_BACKOFF_PERIOD_MS 15
 
 /* How much data bytes all segments combined may allocate */
 #ifdef ESP8266
@@ -61,11 +58,11 @@
 #define LED_SKIP_AMOUNT  0
 #define MIN_SHOW_DELAY  15
 
-// #define DEFAULT_BRIGHTNESS (uint8_t)127
-// #define DEFAULT_MODE       (uint8_t)0
-// #define DEFAULT_SPEED      (uint8_t)128
+#define DEFAULT_BRIGHTNESS (uint8_t)127
+#define DEFAULT_MODE       (uint8_t)0
+#define DEFAULT_SPEED      (uint8_t)128
 #define DEFAULT_INTENSITY  (uint8_t)128
-// #define DEFAULT_COLOR      (uint32_t)0xFFAA00
+#define DEFAULT_COLOR      (uint32_t)0xFFAA00
 #define DEFAULT_C1         (uint8_t)128
 #define DEFAULT_C2         (uint8_t)128
 #define DEFAULT_C3         (uint8_t)16
@@ -95,13 +92,18 @@
 #define ULTRAWHITE (uint32_t)0xFFFFFFFF
 
 #define NUM_COLORS 3 
-#define SEGCOLOR(x)      _segments[segment_active_index].colors[x]
-#define SEGMENT          _segments[segment_active_index]
-#define SEGENV           _segment_runtimes[segment_active_index] //phase out
-#define SEGRUN           _segment_runtimes[segment_active_index]
-#define SEGLEN           _virtualSegmentLength
-#define SEG_STOP_INDEX           _virtualSegmentLength-1  //prob wrong now!
-#define SEGACT           SEGMENT.stop
+
+// #define segment_active_ind ex strip->_segment_index_primary
+
+
+#define SEGCOLOR(x)      strip->_segments_new[strip->_segment_index_primary].colors[x]//strip->getCurrSegmentId()].colors[x]
+#define SEGMENT          strip->_segments_new[strip->_segment_index_primary]// strip->getCurrSegmentId()]
+#define SEGMENT_I(X)     strip->_segments_new[X]
+// #define SEGENV           SEGMENT//strip->_segments_new[strip->_segment_index_primary] //phase out
+// #define SEGRUN           SEGMENT//strip->_segments_new[strip->_segment_index_primary]
+#define SEGLEN           strip->_virtualSegmentLength
+// #define SEG_STOP_INDEX   strip->_virtualSegmentLength-1  //prob wrong now!
+// #define SEGACT           SEGMENT.stop
 #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
 #define FRAMETIME_MS 25
 
@@ -115,7 +117,7 @@
   // void seg_fill_ranged(uint32_t c, bool apply_brightness = false);
 
   uint32_t color_wheel(uint8_t pos);
-  uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend);
+  uint32_t ColourBlendU32(uint32_t color1, uint32_t color2, uint8_t blend);
 
   void Init_Segments();
 
@@ -173,6 +175,15 @@
      * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,
+    #endif
+    /**
+     * Desc: pixels are rotated
+     * Para: direction of motion, speed, instant or blend change
+     * 
+     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
+     * */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,
     #endif
     /**
      * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
@@ -263,7 +274,7 @@
      *
      * 
      * */
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,
     #endif
 
@@ -364,7 +375,6 @@
     EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID,
     EFFECTS_FUNCTION__WLED_TWINKLECAT__ID,
     EFFECTS_FUNCTION__WLED_TWINKLEUP__ID,
-    EFFECTS_FUNCTION__WLED_DYNAMIC__ID,
     EFFECTS_FUNCTION__WLED_SAW__ID,
     EFFECTS_FUNCTION__WLED_DISSOLVE__ID,
     EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID,
@@ -408,6 +418,9 @@
     EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID,
     EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID,
     EFFECTS_FUNCTION__WLED_DRIP__ID,     
+    // Added 2022
+    EFFECTS_FUNCTION__WLED_BLENDS__ID,            // mode_blends
+    EFFECTS_FUNCTION__WLED_TV_SIMULATOR__ID,      // mode_tv_simulator
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
     EFFECTS_FUNCTION__WLED_LENGTH__ID, // to show end of declared animation, this will have no actual effect     
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -656,8 +669,8 @@
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
 
 
-// need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
-// This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
+    // need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
+    // This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
 
     /**
      * Development methods
@@ -711,11 +724,11 @@
 
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-#define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
-#else
-#define DEFAULT_EFFECTS_FUNCTION    0
-#endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
+  #else
+  #define DEFAULT_EFFECTS_FUNCTION    0
+  #endif
 
 
 
@@ -725,621 +738,126 @@
  * *//////
 
 
-    void SubTask_Segments_Animation(uint8_t segment_index);
-    void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
-    /**
-     * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
-     * */
-
-    /**
-     * how a section (single animation) is configured -- my HACS needs to change to conform to this
-     * */
-
-    // options
-    // bit    7: segment is in transition mode
-    // bits 4-6: TBD
-    // bit    3: mirror effect within segment
-    // bit    2: segment is on
-    // bit    1: reverse segment
-    // // bit    0: segment is selected
-    // #define NO_OPTIONS2   (uint8_t)0x00
-    // #define TRANSITIONAL2 (uint8_t)0x80
-    // #define MIRROR2       (uint8_t)0x08
-    // #define SEGMENT_ON2   (uint8_t)0x04
-    // #define REVERSE2      (uint8_t)0x02
-    // #define SELECTED2     (uint8_t)0x01
-    // // #define IS_TRANSITIONAL2 ((_segments[_segment_index].options & TRANSITIONAL2) == TRANSITIONAL2)
-    // // #define IS_MIRROR2       ((_segments[_segment_index].options & MIRROR2      ) == MIRROR2      )
-    // // #define IS_SEGMENT_ON2   ((_segments[_segment_index].options & SEGMENT_ON2  ) == SEGMENT_ON2  )
-    // // #define IS_REVERSE2      ((_segments[_segment_index].options & REVERSE2     ) == REVERSE2     )
-    // // #define IS_SELECTED2     ((_segments[_segment_index].options & SELECTED2    ) == SELECTED2    )
-
-    // #define DEFAULT_BRIGHTNESS2 (uint8_t)127
-    // #define DEFAULT_MODE2       (uint8_t)0
-    // #define DEFAULT_SPEED2      (uint8_t)128
-    // #define DEFAULT_COLOR2      (uint32_t)0xFFAA00
-
-
-    //realtime modes
-    #define REALTIME_MODE_INACTIVE    0
-    #define REALTIME_MODE_GENERIC     1
-    #define REALTIME_MODE_UDP         2
-    #define REALTIME_MODE_HYPERION    3
-    #define REALTIME_MODE_E131        4
-    #define REALTIME_MODE_ADALIGHT    5
-    #define REALTIME_MODE_ARTNET      6
-    #define REALTIME_MODE_TPM2NET     7
-
-    //realtime override modes
-    #define REALTIME_OVERRIDE_NONE    0
-    #define REALTIME_OVERRIDE_ONCE    1
-    #define REALTIME_OVERRIDE_ALWAYS  2
-
-
-    // #define SEGLEN           _virtualSegmentLength
-    // #define SPEED_FORMULA_L  5 + (50*(255 - _segments[_segment_index].speed))/_virtualSegmentLength
-    // #define RESET_RUNTIME    memset(_segment_runtimes, 0, sizeof(_segment_runtimes))
-    /**
-     * First animations to be ported to new method, they shall both be displayed on string together
-     * Slow Glow (50%)
-     * Solid (50%) with random colour changes
-     * */
-
-    #define NUM_COLORS2       3 /* number of colors per segment */
-
-    uint32_t _lastPaletteChange = 0;
-    // uint32_t _lastShow = 0;
-
-    
-    //uint32_t timebase;
-    //uint32_t now;
-    // bool
-    //   _useRgbw = false,
-    //   // _skipFirstMode,
-    //   _triggered;
-    // uint8_t
-    //   mainSegment = 0,
-    //   rgbwMode = 3,
-    uint8_t  paletteFade = 0;
-   uint8_t   paletteBlend = 0;
-
-    uint16_t //_length, _lengthRaw, 
-    _virtualSegmentLength;
-
-    #define D_HARDWARE_ELEMENT_COLOUR_ORDER_UNUSED_STATE 7
-    typedef union {
-      uint16_t data; // allows full manipulating using union memory overlap
-      struct { 
-        /** 3 bits of memory = 9 combinations
-         *  0 - channel 0 eg [R----]
-         *  1 - channel 1 eg [-R---]
-         *  2 - channel 2 eg [--R--]
-         *  3 - channel 3 eg [---R-]
-         *  4 - channel 4 eg [----R]
-         *  5 - reserved
-         *  6 - reserved
-         *  7 - reserved
-         *  8 - not active eg -----
-         * */
-        union{
-          uint16_t red : 3;        // bit 0-2
-          uint16_t r   : 3;        // bit 0-2
-        };
-        union{
-          uint16_t green : 3;      // bit 3-5
-          uint16_t g     : 3;      // bit 3-5
-        };
-        union{
-          uint16_t blue : 3;       // bit 6-8
-          uint16_t b : 3;       // bit 6-8
-        };
-        union{
-          uint16_t white_warm : 3; // bit 9-11
-          uint16_t w : 3; // bit 9-11
-          uint16_t w1 : 3; // bit 9-11
-        };
-        union{
-          uint16_t white_cold : 3; // bit 12-14
-          uint16_t c : 3; // bit 12-14
-          uint16_t w2 : 3; // bit 12-14
-        };
-        uint16_t reserved : 1;   // bit 15
-      };
-    } HARDWARE_ELEMENT_COLOUR_ORDER;
-
-
-    typedef union {
-      uint16_t data; // allows full manipulating
-      struct { 
-        // enable animations (pause)
-        uint16_t fEnable_Animation : 1;
-        uint16_t fForceUpdate : 1; 
-        uint16_t fRunning : 1;
-
-
-        uint16_t ColourComponentsUpdatedButNotYetApplied : 1; // new colours, not yet applied
-
-        uint16_t fEndUpdatesWhenAnimationCompletes : 1;// = false;
-
-        uint16_t NewAnimationRequiringCompleteRefresh : 1;           // phase out, same as first_run so not needed
-        
-        uint16_t ftime_use_map : 1;//= true;
-        uint16_t frate_use_map : 1;//= true;
-
-        uint16_t brightness_applied_during_colour_generation : 1;
-        // This emulates aging of traditional lights, making them less uniform
-        uint16_t apply_small_saturation_randomness_on_palette_colours_to_make_them_unique : 1;
-        
-        #ifndef ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-        uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Exactly_To_Palette_Choice : 1;
-        uint16_t Apply_Upper_And_Lower_Brightness_Randomly_Ranged_To_Palette_Choice : 1;
-        #endif // ENABLE_DEVFEATURE_REMOVE_BRIGHTNESS_RANDOMNESS_INSIDE_APPLY_BRIGHTNESS
-
-        uint16_t Limit_Upper_Brightness_With_BrightnessRGB : 1;
-
-        uint16_t use_gamma_for_brightness : 1;
-
-        uint16_t animator_first_run : 1;
-
-
-        // Reserved
-        uint16_t reserved : 3;
-      };
-    } ANIMATION_FLAGS;
-
-    // enum Colour_Type{
-    //   COLOUR_TYPE_RGB_ID,
-    //   COLOUR_TYPE_RGBW_ID,
-    //   COLOUR_TYPE_RGBCCT_ID,
-    // };
-    uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
-
-
-    
-
-
-/**
- * How to handle multiple neopixelbus, since each segment can share them
- * 
- * */
-// bool flag_run_animation_now = false;
-
-    /**
-     * Transition settings
-     * */
-    struct TRANSITION_SETTINGS{
-      /**
-       * Change method (eg Blend, Instant)
-       * */
-      // uint8_t method_id = 2;  // Is this still needed?
-      /**
-       * Pixels to change up to maximum of segment
-       * */
-      uint16_t pixels_to_update_as_number  = 1;
-      /**
-       * Refresh rate, calculate new colours
-       * */
-      uint16_t rate_ms = 2000;
-      /**
-       * Time to new colours
-       * */
-      uint16_t time_ms = 1000;  
-    
-    };
-
-
-
-    /**
-     * @brief To be set with JSON, as the exact index location for the physical pixel indexing
-     * 
-     */
-    uint16_t* customMappingTable = nullptr;
-    uint16_t  customMappingSize  = 0;
-
-    /**
-     * previous animation settings will be moved into here
-     * */
-    typedef struct Segment 
-    { // 24 bytes
-      struct PIXEL_INDEX_RANGE{
-          uint16_t start = 0; // start means first led index within segment
-          uint16_t stop  = 0; // stop means total leds within the segment (not the index of last pixel)
-      }pixel_range;
-
-      uint8_t options = NO_OPTIONS; //bit pattern: msb first: transitional needspixelstate tbd tbd (paused) on reverse selected
-      
-      #ifdef ENABLE_DEVFEATURE_NEW_WLED_DEC2022
-      union {
-        uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
-        struct {
-          bool    selected    : 1;  //     0 : selected
-          bool    reverse     : 1;  //     1 : reversed
-          bool    on          : 1;  //     2 : is On
-          bool    mirror      : 1;  //     3 : mirrored
-          bool    freeze      : 1;  //     4 : paused/frozen
-          bool    reset       : 1;  //     5 : indicates that Segment runtime requires reset
-          bool    transitional: 1;  //     6 : transitional (there is transition occuring)
-          bool    reverse_y   : 1;  //     7 : reversed Y (2D)
-          bool    mirror_y    : 1;  //     8 : mirrored Y (2D)
-          bool    transpose   : 1;  //     9 : transposed (2D, swapped X & Y)
-          uint8_t map1D2D     : 3;  // 10-12 : mapping for 1D effect on 2D (0-use as strip, 1-expand vertically, 2-circular/arc, 3-rectangular/corner, ...)
-          uint8_t soundSim    : 3;  // 13-15 : 0-7 sound simulation types
-        };
-      };
-      #endif
-
-
-      uint8_t grouping = 1; //multiplers
-      uint8_t spacing = 0;
-      // uint32_t tSaved_AnimateRunTime = millis();
-
-      uint8_t effect_id = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-
-      // phase out? or move it to become a "private" style that is never set directly but calculated variable
-      uint16_t pixels_to_update_this_cycle = 0;
-
-      HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;
-      RgbcctColor_Controller::LightSubType colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
-
-      uint16_t offset = 0;
-
-      /**
-       * @brief Moving neopixelbus and pin here, so each segment can also be on different pins
-       **/
-      // #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-      //   NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType> *stripbus = nullptr;  // needs moved to segments array so a pin can also be in there
-      //   int8_t bus_pin = -1;
-      //   // void Init_NeoPixelBus(int8_t pin);
-      // #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-  
-    //   uint8_t opacity = 255; //??
-
-    // To be phased out, only for easy conversion
-      uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR}; //? really not needed or understood
-
-      void set_colors(uint8_t index, uint8_t r,uint8_t g,uint8_t b,uint8_t w )
-      {
-        // w,r,g,b packed 32 bit colour
-        colors[index] = (((uint32_t)w << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b);
-      }
-
-
-
-      /**
-       * Flags
-       * */
-      ANIMATION_FLAGS flags;
-      /**
-       * Effects (Scenes & Flasher), Ambilight, Adalight
-       * */
-      uint8_t mode_id = 0; // rename to "effect_id"
-
-      
-      uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
-      {
-        if(mode_id >= EFFECTS_FUNCTION__WLED_STATIC__ID)
-          return FRAMETIME_MS;
-        else
-          return transition.rate_ms;
-      };
-
-
-
-      /**
-       * Palette (Options on getting from palette)
-       * */
-      struct PALETTE{
-
-        // ID needs changed to uint16_t
-        uint16_t id = 0; 
-
-        uint8_t pattern = 0; //Single, Gradient 
-        /**
-         * Index range, ie with 50%, for palette with 10 colours will only use first 5 colours
-         * Value '0': is unused
-         * */
-        uint8_t index_range_max_limit = 0; 
-        uint8_t index_range_as_percentage = 0;
-
-        /**
-         * @brief Temporary solution to store palette info "loaded" here
-         * 
-         */
-        // struct LOADED{
-        //   uint8_t* buffer = nullptr;
-        //   uint16_t buflen = 0;
-        //   uint8_t buffer_static[200]; //tmp fixed buffer
-        // }loaded;
-
-
-
-      }palette;
-      /**
-       * This allows the segment to have optional brightness per segment, by default is set to maximum
-       * and will therefore have no effect 
-       **/
-      uint8_t brightness_optional = 255;
-
-      TRANSITION_SETTINGS transition;
-
-      // Flags and states that are used during one transition and reset when completed
-      struct ANIMATION_SINGLE_USE_OVERRIDES
-      {
-        // uint8_t fRefreshAllPixels = false;
-        /**
-         * Can't be zero, as that means not active
-         * */
-        uint16_t time_ms = 1000; //on boot
-        // uint16_t rate_ms = 1000;
-      }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
-
-
-
-      /**
-       * legacy value from wled, when updated via function, it will select the rate/time for animation
-       * */
-      uint8_t speed_value = DEFAULT_SPEED; // rate/blend time
-      uint8_t intensity_value = 127; //tmp value, as intensity/rate/time need to be make into a value (or optional link them together)      
-      
-      uint8_t speed() //legacy for wled effects, made up from time/rate
-      {
-        return speed_value;
-      }
-      void set_speed(uint8_t v) //legacy for wled effects, made up from time/rate
-      {
-        speed_value = v;
-      }
-
-      uint8_t intensity() //legacy for wled effects, made up from time/rate
-      {
-        return intensity_value; // amount of animations in it
-      }
-      void set_intensity(uint8_t v) //legacy for wled effects, made up from time/rate
-      {
-        intensity_value = v;
-      }
-
-      // uint8_t grouping() //legacy for wled effects, made up from time/rate
-      // {
-      //   return speed_value;
-      // }
-      // void set_grouping(uint8_t v) //legacy for wled effects, made up from time/rate
-      // {
-      //   speed_value = v;
-      // }
-
-      void setOption(uint8_t n, bool val)
-      {
-        if (val) {
-          options |= 0x01 << n;
-        } else
-        {
-          options &= ~(0x01 << n);
-        }
-      }
-      bool getOption(uint8_t n)
-      {
-        return ((options >> n) & 0x01);
-      }
-      bool isSelected()
-      {
-        return getOption(0);
-      }
-      bool isActive()
-      {
-        return pixel_range.stop > pixel_range.start;
-      }
-      #ifdef USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
-      uint16_t length()
-      {
-        return pixel_range.stop - pixel_range.start; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
-      }
-      #else
-      uint16_t length()
-      {
-        //wled currently does not need this, so create length for both types
-        return pixel_range.stop - pixel_range.start;
-      }
-      uint16_t length_wled()
-      {           
-        return pixel_range.stop - pixel_range.start;
-      }
-      #endif // USE_DEVFEATURE_FIX_TO_PIXEL_LENGTH
-      
-      /**
-       * @brief Returns pixels in segment
-       * @note, start=0,stop=7 will be (7-0)=>7 but including the "0" index means +1 for pixel count
+  void SubTask_Segments_Animation();
+  void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
+  /**
+   * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
+   * */
+
+  /**
+   * how a section (single animation) is configured -- my HACS needs to change to conform to this
+   * */
+
+  // options
+  // bit    7: segment is in transition mode
+  // bits 4-6: TBD
+  // bit    3: mirror effect within segment
+  // bit    2: segment is on
+  // bit    1: reverse segment
+  // // bit    0: segment is selected
+  // #define NO_OPTIONS2   (uint8_t)0x00
+  // #define TRANSITIONAL2 (uint8_t)0x80
+  // #define MIRROR2       (uint8_t)0x08
+  // #define SEGMENT_ON2   (uint8_t)0x04
+  // #define REVERSE2      (uint8_t)0x02
+  // #define SELECTED2     (uint8_t)0x01
+
+  // #define DEFAULT_BRIGHTNESS2 (uint8_t)127
+  // #define DEFAULT_MODE2       (uint8_t)0
+  // #define DEFAULT_SPEED2      (uint8_t)128
+  // #define DEFAULT_COLOR2      (uint32_t)0xFFAA00
+
+
+  //realtime modes
+  #define REALTIME_MODE_INACTIVE    0
+  #define REALTIME_MODE_GENERIC     1
+  #define REALTIME_MODE_UDP         2
+  #define REALTIME_MODE_HYPERION    3
+  #define REALTIME_MODE_E131        4
+  #define REALTIME_MODE_ADALIGHT    5
+  #define REALTIME_MODE_ARTNET      6
+  #define REALTIME_MODE_TPM2NET     7
+
+  //realtime override modes
+  #define REALTIME_OVERRIDE_NONE    0
+  #define REALTIME_OVERRIDE_ONCE    1
+  #define REALTIME_OVERRIDE_ALWAYS  2
+
+  #define NUM_COLORS2       3 /* number of colors per segment */
+
+  uint32_t _lastPaletteChange = 0;
+  uint8_t  paletteFade = 0;
+  uint8_t   paletteBlend = 0;
+
+  #define D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE 7
+  typedef union {
+    uint16_t data; // allows full manipulating using union memory overlap
+    struct { 
+      /** 3 bits of memory = 9 combinations
+       *  0 - channel 0 eg [R----]
+       *  1 - channel 1 eg [-G---]
+       *  2 - channel 2 eg [--B--]
+       *  3 - channel 3 eg [---WC-]
+       *  4 - channel 4 eg [----WW]
+       *  5 - not used - future led colour (eg another white, amber)
+       *  6 - not used - future led colour (eg another white, amber)
+       *  7 - DISABLED
        * 
-       * @return uint16_t 
-       */
-      uint16_t length_m() //temporary using my version until the above function indexing is fixed
-      {
-        return pixel_range.stop - pixel_range.start + 1; // this +1 needs removed, as "legnth" should only be "50-0 => 50 total" but for loops need to do "length-1 so its 0 to 49"
-      }
-      uint16_t groupLength()
-      {
-        uint16_t result = grouping + spacing;
-        // if(result==0){
-        //   Serial.printf("grouping + spacing ERROR %d \n\r", grouping);
-        //   return 1;
-        // }
-        // else{
-          return result;
-        // }
-      }
-      uint16_t virtualLength()
-      {
-        uint16_t groupLen = groupLength();
-        uint16_t vLength = (length() + groupLen - 1) / groupLen;
-        if (options & MIRROR)
-          vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
-        return vLength;
-      }
-      
-    }segment_settings;
-
-    // WLED now uses vectors for this! With deconstructors needed to free memory
-    segment_settings _segments[MAX_NUM_SEGMENTS];
+       * default R,G,B,none,none : 0,1,2,7,7 dec : 000 001 010 111 111 R bits : 0000 0101 0111 111R bits and in reverse order R111 1110 1010 0000
+       * */
+      uint16_t red : 3;
+      uint16_t green : 3;
+      uint16_t blue : 3;
+      uint16_t white_cold : 3;      // Cold will take the FIRST white, as it is most likely as the 4th colour, warm_white will likely only exist when both whites do
+      uint16_t white_warm : 3;
+      uint16_t reserved : 1;
+    };
+  } HARDWARE_ELEMENT_COLOUR_ORDER;
 
 
-    // NOTE!!! There is no runtime now, its together
-    
+  typedef union {
+    uint16_t data; // allows full manipulating
+    struct { 
+      // enable animations (pause)
+      uint16_t fEnable_Animation : 1;
+      uint16_t fForceUpdate : 1; 
+      uint16_t fRunning : 1;
+      uint16_t animator_first_run : 1;
+      // Reserved
+      uint16_t reserved : 12;
+    };
+  } ANIMATION_FLAGS;
 
-    // Flags and states that are used during one transition and reset when completed
-    struct SEGMENT_ANIMATION_OVERRIDES_TO_BE_DELETED
-    {
-      uint8_t fRefreshAllPixels = false;
-      /**
-    //    * Can't be zero, as that means not active
-    //    * */
-    //   uint16_t time_ms = 1000; //on boot
-    //   uint16_t rate_ms = 1000;
-    }segment_animation_override; // ie "oneshot" variables that get checked and executed one time only
+  uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
 
 
+  /**
+   * Transition settings
+   * */
+  struct TRANSITION_SETTINGS{
     /**
-     * values that are used as global iters rather than passing between each function
+     * Pixels to change up to maximum of segment
      * */
-    struct segment_shared_iters
-    {
-      // uint8_t index = 0;
-      // uint8_t index = 0; segment_active_index
-      uint8_t index_palette_last = 99; //mine is longer
-    }segment_iters;
-
-    uint8_t segment_active_index = 0;
-      
+    uint16_t pixels_to_update_as_number  = 1;
     /**
-     * Runtime data for that segment, ie holds animation data
+     * Refresh rate, calculate new colours
      * */
-    typedef struct Segment_runtime
-    { // 28 bytes
+    uint16_t rate_ms = 2000;
+    /**
+     * Time to new colours
+     * */
+    uint16_t time_ms = 1000;    
+  };
 
-      /**
-       * Next few bytes are a simple version that dont require structs
-       * */
-      // unsigned long next_time;
-      uint32_t step;
-      uint32_t call;
-      uint32_t tSaved_AnimateRunTime = millis();
+  /**
+   * @brief To be set with JSON, as the exact index location for the physical pixel indexing
+   * 
+   */
+  uint16_t* customMappingTable = nullptr;
+  uint16_t  customMappingSize  = 0;
 
-      /**
-       * Simple data values animations can use, anything beyound these will require large buffer
-       * */
-      uint16_t aux0 = 0;
-      uint16_t aux1 = 0;
-      uint16_t aux2 = 0;
-      uint16_t aux3 = 0;
-
-      /**
-       * This likely wont work, as it needs to be moved into its own class so it can have mulitple instances
-       * This should work, as its pointers and creating on the heap
-       * */
-      byte* data = nullptr; // note: how all my previous hardcorded structs will need to conform to this
-      bool allocateData(uint16_t len)
-      {
-        if (data && _dataLen == len) return true; //already allocated
-        deallocateData();
-        // if (_usedSegmentData + len > MAX_SEGMENT_DATA)
-        // {
-        //   // AddLog(LOG_LEVEL_WARN, PSTR("allocateData not enough memory"));
-        //   return false; //not enough memory
-        // }
-        // data = new (std::nothrow) byte[len];
-
-         // if possible use SPI RAM on ESP32
-        #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
-        if (psramFound())
-          data = (byte*) ps_malloc(len);
-        else
-        #endif
-          data = (byte*) malloc(len);
-
-
-        if (!data) return false; //allocation failed
-        _usedSegmentData += len;
-        _dataLen = len;
-        memset(data, 0, len);
-        return true;
-      }
-      void deallocateData()
-      {
-        // delete[] data;
-        free(data);
-        data = nullptr;
-        _usedSegmentData -= _dataLen;
-        _dataLen = 0;
-      }
-
-      /**
-       * Each segment will have its own animator
-       * This will also need to share its index into the animation so it knows what segments to run
-       * */
-      NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
-
-      bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
+  // uint8_t strip->_segment_index_primary = 0;  // REMOVING MINE TO REPLACE WITH STRIP VERSION
       
-      // can I default this to nullptr when not used, will this actually reduce memory?
-      RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
-      RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
-    
-
-      uint32_t tSaved_LastUpdated = millis();
-      uint32_t tTick_maximum_call_ms = 10;
-
-
-      /**
-       * Using "index" inside animator as segment index
-       * */
-      ANIM_FUNCTION_SIGNATURE;
-      
-      /** 
-       * If reset of this segment was request, clears runtime
-       * settings of this segment.
-       * Must not be called while an effect mode function is running
-       * because it could access the data buffer and this method 
-       * may free that data buffer.
-       */
-      void resetIfRequired() {
-        if (_requiresReset) {
-          // next_time = 0; 
-          tSaved_AnimateRunTime = millis()-120000; // to ensure it skips forward
-          // _segments[segment_active_index].tSaved_AnimateRunTime = millis() + 10000; // set ahead so it will fire, but this needs changed to another method
-          #ifdef ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
-          Serial.println("resetIfRequired TRIGGERED");
-          #endif
-
-          step = 0; call = 0; aux0 = 0; aux1 = 0; 
-          animator = new NeoPixelAnimator(1, NEO_MILLISECONDS);
-          deallocateData();
-          _requiresReset = false;
-        }
-      }
-
-      /** 
-       * Flags that before the next effect is calculated,
-       * the internal segment state should be reset. 
-       * Call resetIfRequired before calling the next effect function.
-       * Safe to call from interrupts and network requests.
-       */
-      inline void markForReset() { _requiresReset = true; }
-      
-      uint16_t DataLength(){ return _dataLen; };
-      byte* Data(){ return data; };
-
-      #ifdef ENABLE_DEVFEATURE_PALETTECONTAINER
-      mPaletteContainer* palette_container = nullptr;
-      #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
-
-      private:
-        uint16_t _dataLen = 0;
-        bool _requiresReset = false;
-
-    }segment_runtime;
-
-    segment_runtime _segment_runtimes[MAX_NUM_SEGMENTS]; // SRAM footprint: 28 bytes per element
-
-
 
   struct TransitionColourPairs
   {
@@ -1357,29 +875,6 @@
    * 
    */
   RgbcctColor GetSegmentColour(uint8_t colour_index, uint8_t segment_index = 0);
-// #define SEGCOLOR(x)      _segments[segment_active_index].colors[x]
-
-
-#ifdef ENABLE_DEVFEATURE_TRANSITION_MODE_LEVEL_OPTIONS
-
-enum EM_TRANSITION_MODE_LEVEL_IDS{
-  /**
-   * @brief User has control of Intensity/Speed only, internally TimeMs/RateMs are calculated from Intensity/Speed when required
-   **/
-  EM_TRANSITION_MODE_LEVEL__SIMPLE=0,
-  /**
-   * @brief Intensity/Speed/TimeMS/RateMs are independant and set directly/manually
-   **/
-  EM_TRANSITION_MODE_LEVEL__MANUAL=1
-};
-
-
-
-
-#endif // ENABLE_DEVFEATURE_TRANSITION_MODE_LEVEL_OPTIONS
-
-
-
 
   enum EFFECTSREGION
   {
@@ -1387,55 +882,12 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
       EFFECTS_REGION_ANIMATE_ID
   };      
 
-  /**
-   * @brief 
-   *to be sorted
-    * 
-    */
-  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-    #define D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH 55
-    uint16_t editable_mapped_array_data_array[D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH];
-    
-    typedef union {
-      uint16_t data; // allows full manipulating
-      struct { 
-        // enable animations (pause)
-        uint16_t fEnabled : 1;
-        /**
-         * 0 - None
-         * 1 - Basic multiplier
-         * 2 - Using mapped index array 
-        */
-        uint16_t multiplier_mode_id : 4; // 2 bit : 4 levels
-        uint16_t mapped_array_editable_or_progmem : 1;
-      };
-    } PIXEL_GROUPED_FLAGS;
-    
-    struct PIXEL_GROUPED{
-      uint8_t method_id = 0;
-      uint8_t multiplier = 5; // nearby pixels repeat colours
-      struct MAPPED_ARRAY_DATA{
-        uint16_t* values = nullptr;
-        uint8_t  index = 0;
-        uint8_t  length = 0;
-      }mapped_array_data;
-      PIXEL_GROUPED_FLAGS flags;
-    }pixel_group;
-  
-  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-
 
 
   void Init_Segments_RgbcctControllers();
-
-
   mAnimatorLight& SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
   void StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index = 0);
-
-
   void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
-
-
   void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
   void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
   void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
@@ -1446,9 +898,8 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
-
-
   void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
+
 
   /**
    * My animations (and their animators where applicable)
@@ -1461,20 +912,6 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animation__Rotating_Palette();
   void SubTask_Segment_Animation__Rotating_Previous_Animation();
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
-  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   
-  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  void SubTask_Flasher_Animate_Function_Tester_01();
-  void SubTask_Flasher_Animate_Function_Tester_02();
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  // void SubTask_Segment_Animate_Function__Slow_Glow_Animation_Struct_Testing();
-
-
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void SubTask_Segment_Animation__Blend_Palette_To_White();
   #endif
@@ -1483,9 +920,7 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
-  #endif
-
-  
+  #endif  
   // Static
   void SubTask_Segment_Animation__Static();
   void SubTask_Segment_Animation__Static_Pattern();
@@ -1582,7 +1017,6 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animation__Twinkle_Fox();
   void SubTask_Segment_Animation__Twinkle_Cat();
   void SubTask_Segment_Animation__Twinkle_Up();
-  void SubTask_Segment_Animation__Dynamic();
   void SubTask_Segment_Animation__Saw();
   void SubTask_Segment_Animation__Base_Dissolve(uint32_t color);
   void SubTask_Segment_Animation__Dissolve();
@@ -1635,7 +1069,17 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animation__Sinelon_Rainbow();
   void SubTask_Segment_Animation__Drip();
   #endif // ENABLE_EXTRA_WLED_EFFECTS
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
+  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   
+  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  void SubTask_Flasher_Animate_Function_Tester_01();
+  void SubTask_Flasher_Animate_Function_Tester_02();
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void SubTask_Segment_Animate_Function__Static_Palette_New();
   void SubTask_Segment_Animate_Function__Slow_Glow_New();
 
@@ -1649,6 +1093,7 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   uint16_t mode_palette();
 
 
+  uint32_t tSaved_MinimumAnimateRunTime = millis();
 
   void CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
   const char* GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
@@ -1656,18 +1101,10 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
 
   void CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t array_length, uint8_t style_index = 0, uint8_t palette_id = 255);
 
-
-
   void Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type);
 
-  // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-  // void load_gradient_palette(uint8_t index);
-  // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
-
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
-
-
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
   /**
    * @brief These need to be turned into a list of segment style animations
    * 
@@ -1746,24 +1183,20 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
   void SubTask_Segment_Animate_Function__Notification_Fade_Off();
   void SubTask_Segment_Animate_Function__Notification_Blinking();
   void SubTask_Segment_Animate_Function__Notification_Pulsing();
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
 
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-
   byte displayMode = 1;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
-
   byte lastSecond = 0;
   uint16_t testnum = 0;
   byte startColor = 0;                             // "index" for the palette color used for drawing
   // byte displayMode = 0;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
   byte colorOffset = 29;//32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
 
-
   void LCDDisplay_colorOverlay() ;
   void LCDDisplay_updateDisplay(byte color, byte colorSpacing) ;
-
 
   #define LED_PWR_LIMIT 750                        // 750mA - Power limit in mA (voltage is set in setup() to 5v)
   #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
@@ -1810,120 +1243,104 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
     {   0,   1,   1,   1,   1,   0,   1 }   // d
   };
 
-    void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
-    void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
-    void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-    void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
-    void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
-    void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
-    void LCDDisplay_showDigit(byte digit, byte color, byte pos);
-    void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
-    void LCDDisplay_showDots(byte dots, byte color);
-    RgbcctColor ColorFromPaletteLCD(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
-    uint8_t tempcol = 0;
-    uint16_t lcd_display_show_number = 0;
+  void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
+  void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
+  void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+  void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
+  void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
+  void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
+  void LCDDisplay_showDigit(byte digit, byte color, byte pos);
+  void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
+  void LCDDisplay_showDots(byte dots, byte color);
+  RgbcctColor ColorFromPaletteLCD(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
+  uint8_t tempcol = 0;
+  uint16_t lcd_display_show_number = 0;
 
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-
-
-    void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
-    void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
-    void resetSegments();
-    // void UpdatePalette_FastLED_TargetPalette(void);
-    
-
-    /***************
-     * 
-     * Command List
-     * 
-     * START
-     * *********************/
-    
-    void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
-
-    void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
-    int8_t GetFlasherFunctionIDbyName(const char* f);
-    const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
-    const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen);
-
-    void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
-
-    void CommandSet_HardwareColourOrderTypeByStr(const char* value, uint8_t segment_index = 0);
-    void CommandSet_ColourTypeByStr(const char* value, uint8_t segment_index = 0);
-    const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
-    const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
-
-    void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
-    void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
-
-    
-    void CommandSet_LightsCountToUpdateAsNumber(uint16_t value, uint8_t segment_index = 0);
-    void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value, uint8_t segment_index = 0);
-    uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage, uint8_t segment_index = 0);
-    uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number, uint8_t segment_index = 0);
-
-    /**
-     * rgbcctcontroller commands
-     */
-    void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0);
-    void CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uint8_t segment_index = 0);
-
-    // void CommandSet_PixelHardwareTypeID(uint8_t value);
-    // void CommandSet_LightPowerState(uint8_t value);
-    // void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
-    void CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint8_t segment_index = 0);
-    // void CommandSet_Brt_255(uint8_t value);
-    void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
-    void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);
-    void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index = 0);
-
-    void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
-
-    // void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
-    // void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
-    // void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
-    // bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
-    // void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
-    // void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
-    // void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
-    // void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    // void CommandSet_PaletteID(uint8_t value);
-    // void CommandSet_AnimationModeID(uint8_t value);
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
 
-    /***************
-     * END
-     * 
-     * Command List 
-     * 
-     * *********************/
+  void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
+  void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
+  void resetSegments();
+  
+
+  /***************
+   * 
+   * Command List
+   * 
+   * START
+   * *********************/
+  
+  void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
+
+  void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
+  int8_t GetFlasherFunctionIDbyName(const char* f);
+  const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
+  const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen);
+
+  void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
+
+  void CommandSet_HardwareColourOrderTypeByStr(const char* value, uint8_t segment_index = 0);
+  void CommandSet_ColourTypeByStr(const char* value, uint8_t segment_index = 0);
+  const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
+  const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
+
+  void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
+  void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
+
+  
+  void CommandSet_LightsCountToUpdateAsNumber(uint16_t value, uint8_t segment_index = 0);
+  void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value, uint8_t segment_index = 0);
+  uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage, uint8_t segment_index = 0);
+  uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number, uint8_t segment_index = 0);
+
+  
+  void CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index = 0);
+  void CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index = 0);
+  
+
+  /**
+   * rgbcctcontroller commands
+   */
+  void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0);
+  void CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uint8_t segment_index = 0);
+  void CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint8_t segment_index = 0);
+  void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
+  void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);
+  void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index = 0);
+  void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
+
+  /***************
+   * END
+   * 
+   * Command List 
+   * 
+   * *********************/
+
+  void setValuesFromMainSeg();
+  void resetTimebase();
+  void toggleOnOff();
+  void setAllLeds();
+  void setLedsStandard(bool justColors = false);
+  bool colorChanged();
+  void colorUpdated(int callMode);
+  void updateInterfaces(uint8_t callMode);
+  void handleTransitions();
+
+  void colorFromUint32(uint32_t in, bool secondary = false);
+  void colorFromUint24(uint32_t in, bool secondary = false);
+  void relativeChangeWhite(int8_t amount, byte lowerBoundary = 0);
+  void colorHStoRGB(uint16_t hue, byte sat, byte* rgb); //hue, sat to rgb
+  void colorCTtoRGB(uint16_t mired, byte* rgb); //white spectrum to rgb
+
+  void colorFromDecOrHexString(byte* rgb, char* in);
+  void colorRGBtoRGBW(byte* rgb); //rgb to rgbw (http://codewelt.com/rgbw). (RGBW_MODE_LEGACY)
+
+  float minf2(float v, float w);
+  float maxf2(float v, float w);
 
 
-    void setValuesFromMainSeg();
-    void resetTimebase();
-    void toggleOnOff();
-    void setAllLeds();
-    void setLedsStandard(bool justColors = false);
-    bool colorChanged();
-    void colorUpdated(int callMode);
-    void updateInterfaces(uint8_t callMode);
-    void handleTransitions();
-
-    //colors.cpp
-    void colorFromUint32(uint32_t in, bool secondary = false);
-    void colorFromUint24(uint32_t in, bool secondary = false);
-    void relativeChangeWhite(int8_t amount, byte lowerBoundary = 0);
-    void colorHStoRGB(uint16_t hue, byte sat, byte* rgb); //hue, sat to rgb
-    void colorCTtoRGB(uint16_t mired, byte* rgb); //white spectrum to rgb
-
-    void colorFromDecOrHexString(byte* rgb, char* in);
-    void colorRGBtoRGBW(byte* rgb); //rgb to rgbw (http://codewelt.com/rgbw). (RGBW_MODE_LEGACY)
-
-    float minf2(float v, float w);
-    float maxf2(float v, float w);
-
-
-#ifdef ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+#ifdef ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
 
 
   #define DEBUG_LINE_HERE    Serial.printf("DEBUG HERE: ");\
@@ -1931,16 +1348,27 @@ enum EM_TRANSITION_MODE_LEVEL_IDS{
                         Serial.println(__LINE__);\
                         Serial.flush();
 
-// segment, 72 bytes
+void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index = 0);
+
+
+
+/**
+* Segment, 72 bytes
+**/
 typedef struct Segment_New {
   public:
-    uint16_t start; // start index / start X coordinate 2D (left)
-    uint16_t stop;  // stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
-    uint16_t offset;
-    uint8_t  speed;
-    uint8_t  intensity;
-    uint8_t  palette;
-    uint8_t  mode;
+    struct PIXEL_INDEX_RANGE{
+        uint16_t start = 0; // start means first led index within segment : start index / start X coordinate 2D (left)
+        uint16_t stop  = 0; // stop means total leds within the segment (not the index of last pixel) : stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
+    }pixel_range;
+    uint16_t offset = 0;
+    uint8_t  speed_value = DEFAULT_SPEED; // rate/blend time
+    uint8_t  intensity_value = 127; //tmp value, as intensity/rate/time need to be make into a value (or optional link them together) 
+    uint8_t  palette_wled = 0; //PHASE OUT
+    /**
+     * @brief Note with union here not having a name, all options are accesible directly in Segment_New
+     * 
+     */
     union {
       uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
       struct {
@@ -1958,9 +1386,130 @@ typedef struct Segment_New {
         uint8_t soundSim    : 3;  // 13-15 : 0-7 sound simulation types
       };
     };
-    uint8_t  grouping, spacing;
-    uint8_t  opacity;
-    uint32_t colors[NUM_COLORS];
+
+    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;// = {32392}; // R,G,B,unset,unset
+    RgbcctColor_Controller::LightSubType colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
+
+    uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR}; //? really not needed or understood
+    void set_colors(uint8_t index, uint8_t r,uint8_t g,uint8_t b,uint8_t w )
+    {// w,r,g,b packed 32 bit colour
+      colors[index] = (((uint32_t)w << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b);
+    }
+
+
+    /**
+     * values that are used as global iters rather than passing between each function
+     * */
+    struct segment_shared_iters
+    {
+      uint8_t index_palette_last = 99; //mine is longer
+    }segment_iters;
+
+    ANIMATION_FLAGS flags;
+    /**
+     * Effects (Scenes & Flasher), Ambilight, Adalight
+     * */
+    uint8_t animation_mode_id = ANIMATION_MODE__EFFECTS; // rename to "effect_id"
+
+    
+    uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
+    {
+      #ifdef ENABLE_WLED_EFFECTS
+      if(effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID)
+        return FRAMETIME_MS;
+      else
+        return transition.rate_ms;
+      #endif
+        return transition.rate_ms;
+    };
+
+
+
+    /**
+     * Palette (Options on getting from palette)
+     * */
+    struct PALETTE{
+
+      // ID needs changed to uint16_t
+      uint16_t id = 0; 
+
+
+
+
+      // uint8_t pattern = 0; //Single, Gradient 
+      /**
+       * Index range, ie with 50%, for palette with 10 colours will only use first 5 colours
+       * Value '0': is unused
+       * */
+      uint8_t index_range_max_limit = 0; 
+      uint8_t index_range_as_percentage = 0;
+
+      /**
+       * @brief Temporary solution to store palette info "loaded" here
+       * 
+       */
+      // struct LOADED{
+      //   uint8_t* buffer = nullptr;
+      //   uint16_t buflen = 0;
+      //   uint8_t buffer_static[200]; //tmp fixed buffer
+      // }loaded;
+
+
+
+    }palette;
+    /**
+     * This allows the segment to have optional brightness per segment, by default is set to maximum
+     * and will therefore have no effect 
+     **/
+    uint8_t brightness_optional = 255;
+
+    TRANSITION_SETTINGS transition;
+
+    // Flags and states that are used during one transition and reset when completed
+    struct ANIMATION_SINGLE_USE_OVERRIDES
+    {
+      // uint8_t fRefreshAllPixels = false;
+      /**
+       * Can't be zero, as that means not active
+       * */
+      uint16_t time_ms = 1000; //on boot
+      // uint16_t rate_ms = 1000;
+    }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
+    
+    uint8_t speed(){ return speed_value; }
+    void set_speed(uint8_t v){ speed_value = v; }
+
+    uint8_t intensity(){ return intensity_value; }
+    void set_intensity(uint8_t v){ intensity_value = v; }
+
+    uint8_t get_grouping(){ return speed_value; }
+    void set_grouping(uint8_t v){ speed_value = v; }
+
+    uint16_t groupLength() { return grouping + spacing; }
+    uint16_t virtualLength()
+    {
+      uint16_t groupLen = groupLength();
+      uint16_t vLength = (length() + groupLen - 1) / groupLen;
+      if (options & MIRROR)
+        vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
+      return vLength;
+    }
+
+    uint8_t  grouping = 1;
+    uint8_t  spacing = 0;
+    uint8_t opacity = 255;
+    uint8_t effect_id = 0; //EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+    // Future edit maybe?
+    /**
+     * @brief Allow a second effect to be loaded at the same time, this will enable a single effect to show just once, and then the id_next will be loaded into the primary position
+     * e.g. For rotating effect, preload the initial animation and then rotate it
+     * 
+     */
+      uint8_t effect_id_next = 0;  
+
+
+
+    #ifdef ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     uint8_t  cct;                 //0==1900K, 255==10091K
     uint8_t  custom1, custom2;    // custom FX parameters/sliders
     struct {
@@ -1969,9 +1518,10 @@ typedef struct Segment_New {
       bool    check2  : 1;        // checkmark 2
       bool    check3  : 1;        // checkmark 3
     };
+    #endif // ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
     uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
-    char *name;
+    char *name; // Keep, segment name to be added later by me
 
     // runtime data
     unsigned long next_time;  // millis() of next update
@@ -1979,12 +1529,14 @@ typedef struct Segment_New {
     uint32_t call;  // call counter
     uint16_t aux0;  // custom var
     uint16_t aux1;  // custom var
+    uint16_t aux2 = 0;
+    uint16_t aux3 = 0;
     byte* data;     // effect data pointer
     CRGB* leds;     // local leds[] array (may be a pointer to global)
     static CRGB *_globalLeds;             // global leds[] array
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
 
-  private:
+  // private:
     union {
       uint8_t  _capabilities;
       struct {
@@ -1998,6 +1550,11 @@ typedef struct Segment_New {
     uint16_t _dataLen;
     static uint16_t _usedSegmentData;
 
+    uint16_t DataLength(){ return _dataLen; };
+    byte* Data(){ return data; };
+
+
+    #ifdef ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     // transition data, valid only if transitional==true, holds values during transition
     struct Transition {
       uint32_t      _colorT[NUM_COLORS];
@@ -2016,7 +1573,7 @@ typedef struct Segment_New {
         , _cctT(127)
         , _palT(CRGBPalette16(HTMLColorCode::Black))
         , _prevPaletteBlends(0)
-        , _modeP(EFFECTS_FUNCTION__WLED_STATIC__ID)
+        , _modeP(EFFECTS_FUNCTION__STATIC_PALETTE__ID)
         , _start(millis())
         , _dur(dur)
       {}
@@ -2025,24 +1582,70 @@ typedef struct Segment_New {
         , _cctT(c)
         , _palT(CRGBPalette16(HTMLColorCode::Black))
         , _prevPaletteBlends(0)
-        , _modeP(EFFECTS_FUNCTION__WLED_STATIC__ID)
+        , _modeP(EFFECTS_FUNCTION__STATIC_PALETTE__ID)
         , _start(millis())
         , _dur(d)
       {
         for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = o[i];
       }
     } *_t;
+    #endif // ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
 
-  public:
+
+      /**
+       * Each segment will have its own animator
+       * This will also need to share its index into the animation so it knows what segments to run
+       * */
+      NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
+
+      bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
+      
+      /**
+       * @brief This is where it should be added, add with vectors?
+       * 
+       */
+      // can I default this to nullptr when not used, will this actually reduce memory?
+      RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
+
+      RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
+
+      #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+      mPaletteContainer* palette_container = nullptr;
+      // mPaletteContainer* palette_container = new mPaletteContainer(0);
+      #endif
+
+      uint32_t tSaved_LastUpdated = millis();
+      uint32_t tTick_maximum_call_ms = 10;
+
+      /**
+       * Using "index" inside animator as segment index
+       * */
+      ANIM_FUNCTION_SIGNATURE;
+      
+
+      uint32_t tSaved_AnimateRunTime = millis();
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // public:
 
     Segment_New(uint16_t sStart=0, uint16_t sStop=30) :
-      start(sStart),
-      stop(sStop),
+      // start(sStart),
+      // stop(sStop),
       offset(0),
-      speed(DEFAULT_SPEED),
-      intensity(DEFAULT_INTENSITY),
-      palette(0),
-      mode(DEFAULT_MODE),
+      speed_value(DEFAULT_SPEED),
+      intensity_value(DEFAULT_INTENSITY),
+      effect_id(DEFAULT_MODE),
       options(SELECTED | SEGMENT_ON),
       grouping(1),
       spacing(0),
@@ -2069,7 +1672,19 @@ typedef struct Segment_New {
       _dataLen(0),
       _t(nullptr)
     {
+      pixel_range.start = sStart;
+      pixel_range.stop = sStop;
       refreshLightCapabilities();
+      
+      // // Init
+      // palette_container = new mPaletteContainer(0);//nullptr;
+      
+      hardware_element_colour_order.red        = 0; // R,G,B,WC,WW // Default ColourOrder
+      hardware_element_colour_order.green      = 1; // R,G,B,WC,WW // Default ColourOrder
+      hardware_element_colour_order.blue       = 2; // R,G,B,WC,WW // Default ColourOrder
+      hardware_element_colour_order.white_cold = 7; // R,G,B,WC,WW // Default ColourOrder
+      hardware_element_colour_order.white_warm = 7; // R,G,B,WC,WW // Default ColourOrder
+
     }
 
     Segment_New(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment_New(sStartX, sStopX) {
@@ -2080,6 +1695,11 @@ typedef struct Segment_New {
     Segment_New(const Segment_New &orig) // copy constructor
      {
       Serial.println(F("-- Copy segment constructor --"));
+      
+
+      // Serial.println(F("-- Copy segment constructor -- palette_container = new mPaletteContainer(0);"));
+      // palette_container = new mPaletteContainer(0);
+
       memcpy(this, &orig, sizeof(Segment_New));
       name = nullptr;
       data = nullptr;
@@ -2090,6 +1710,8 @@ typedef struct Segment_New {
       if (orig.data) { if (allocateData(orig._dataLen)) memcpy(data, orig.data, orig._dataLen); }
       if (orig._t)   { _t = new Transition(orig._t->_dur, orig._t->_briT, orig._t->_cctT, orig._t->_colorT); }
       if (orig.leds && !Segment_New::_globalLeds) { leds = (CRGB*)malloc(sizeof(CRGB)*length()); if (leds) memcpy(leds, orig.leds, sizeof(CRGB)*length()); }
+    
+  
     };
 
 
@@ -2107,7 +1729,7 @@ typedef struct Segment_New {
 
 
     ~Segment_New() {
-      #ifdef WLED_DEBUG
+      #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
       Serial.print(F("Destroying segment:"));
       if (name) Serial.printf(" %s (%p)", name, name);
       if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
@@ -2123,15 +1745,17 @@ typedef struct Segment_New {
     Segment_New& operator= (const Segment_New &orig); // copy assignment
     Segment_New& operator= (Segment_New &&orig) noexcept; // move assignment
 
-    #ifdef WLED_DEBUG
-    size_t getSize() const { return sizeof(Segment_New) + (data?_dataLen:0) + (name?strlen(name):0) + (_t?sizeof(Transition):0) + (!Segment_New::_globalLeds && leds?sizeof(CRGB)*length():0); }
+    #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
+    size_t getSize() const { return sizeof(Segment_New) + (data?_dataLen:0) + 
+    (name?strlen(name):0) + 
+    (_t?sizeof(Transition):0) + (!Segment_New::_globalLeds && leds?sizeof(CRGB)*length():0); }
     #endif
 
     inline bool     getOption(uint8_t n) const { return ((options >> n) & 0x01); }
     inline bool     isSelected(void)     const { return selected; }
-    inline bool     isActive(void)       const { return stop > start; }
+    inline bool     isActive(void)       const { return pixel_range.stop > pixel_range.start; }
     inline bool     is2D(void)           const { return (width()>1 && height()>1); }
-    inline uint16_t width(void)          const { return stop - start; }       // segment width in physical pixels (length if 1D)
+    inline uint16_t width(void)          const { return pixel_range.stop - pixel_range.start; }       // segment width in physical pixels (length if 1D)
     inline uint16_t height(void)         const { return stopY - startY; }     // segment height (if 2D) in physical pixels
     inline uint16_t length(void)         const { return width() * height(); } // segment length (count) in physical pixels
     inline uint16_t groupLength(void)    const { return grouping + spacing; }
@@ -2182,6 +1806,16 @@ typedef struct Segment_New {
     void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
     void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
     uint32_t getPixelColor(int i);
+    
+    
+    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool brightness_needs_applied = false);// uint16_t segment_length = 0);
+    RgbcctColor GetPixelColor(uint16_t indexPixel = 0);       
+    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool brightness_needs_applied = false);  
+    void SetPixelColor(uint16_t indexPixel, uint32_t color, bool brightness_needs_applied = false);//, uint16_t segment_length = 0);
+    void SetPixelColor_All(RgbcctColor colour);
+    
+    
+
     // 1D support functions (some implement 2D as well)
     void blur(uint8_t);
     void fill(uint32_t c);
@@ -2264,6 +1898,11 @@ typedef struct Segment_New {
 } segment_new;
 //static int segSize = sizeof(Segment_New);
 
+
+/**
+ * @brief Temporary use the WS2812FX class, but work towards removing it as the mAnimatorLight class is already the class
+ * 
+ */
 // main "strip" class
 class WS2812FX {  // 96 bytes
   typedef uint16_t (*mode_ptr)(void); // pointer to mode function
@@ -2317,7 +1956,7 @@ class WS2812FX {  // 96 bytes
       customMappingTable(nullptr),
       customMappingSize(0),
       _lastShow(0),
-      _segment_index(0),
+      _segment_index_primary(0),
       _mainSegment(0)
     {
       WS2812FX::instance = this;
@@ -2339,7 +1978,7 @@ class WS2812FX {  // 96 bytes
     static WS2812FX* getInstance(void) { return instance; }
 
     void
-#ifdef WLED_DEBUG
+#ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
       printSize(),
 #endif
       finalizeInit(),
@@ -2363,6 +2002,9 @@ class WS2812FX {  // 96 bytes
       setTargetFps(uint8_t fps),
       deserializeMap(uint8_t n=0);
 
+
+
+
     void fill(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
     void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
     void setupEffectData(void); // add default effects to the list; defined in FX.cpp
@@ -2373,7 +2015,7 @@ class WS2812FX {  // 96 bytes
     inline void trigger(void) { _triggered = true; } // Forces the next frame to be computed on all active segments.
     inline void setShowCallback(show_callback cb) { _callback = cb; }
     inline void setTransition(uint16_t t) { _transitionDur = t; }
-    inline void appendSegment(const Segment_New &seg = Segment_New()) { _segments_new.push_back(seg); DEBUG_LINE_HERE;}
+    inline void appendSegment(const Segment_New &seg = Segment_New()) { _segments_new.push_back(seg); }
 
     bool
       checkSegmentAlignment(void),
@@ -2400,7 +2042,7 @@ class WS2812FX {  // 96 bytes
     inline uint8_t getBrightness(void) { return _brightness; }
     inline uint8_t getMaxSegments(void) { return MAX_NUM_SEGMENTS; }  // returns maximum number of supported segments (fixed value)
     inline uint8_t getSegmentsNum(void) { return _segments_new.size(); DEBUG_LINE_HERE; }  // returns currently present segments
-    inline uint8_t getCurrSegmentId(void) { return _segment_index; }
+    inline uint8_t getCurrSegmentId(void) { return _segment_index_primary; }
     inline uint8_t getMainSegmentId(void) { return _mainSegment; }
     inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
     inline uint8_t getTargetFps() { return _targetFps; }
@@ -2475,6 +2117,10 @@ class WS2812FX {  // 96 bytes
 
   // end 2D support
 
+/**
+ * @brief New method to allow different FastLED palettes in each segment
+ * 
+ */
     void loadCustomPalettes(void); // loads custom palettes from JSON
     CRGBPalette16 _currentPalette; // palette used for current effect (includes transition)
     std::vector<CRGBPalette16> customPalettes; // TODO: move custom palettes out of WS2812FX class
@@ -2515,7 +2161,7 @@ class WS2812FX {  // 96 bytes
     
     uint32_t _lastShow;
     
-    uint8_t _segment_index;
+    uint8_t _segment_index_primary;
     uint8_t _mainSegment;
 
     void
@@ -2523,27 +2169,8 @@ class WS2812FX {  // 96 bytes
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
-    #endif // ENABLE_DEVFEATURE_NEW_UNIFIED_SEGMENT_STRUCT_DEC2022
+    #endif // ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
 
 
 

@@ -1318,6 +1318,7 @@
 #define D_LOG_UPNP "UPP: "         // UPnP
 #define D_LOG_WIFI "WIF: "         // Wifi
 #define D_LOG_NEO "NEO: "         // Neopixels
+#define D_LOG_PIXEL "PIX: "         // Neopixels
 #define D_LOG_LIGHT "LGT: "         // Light interface
 #define D_LOG_DOORBELL "DRB: "         // Neopixels
 #define D_LOG_RELAYS "RLY: "         // relays
@@ -1638,6 +1639,7 @@
 #define D_JSON_ENABLED "Enabled"
 
 #define D_JSON_PIXELGROUPING "PixelGrouping"
+#define D_JSON_PIXELRANGE "PixelRange"
 #define D_JSON_MULTIPLIER "Multiplier"
 
 #define D_JSON_BRIGHTNESS_MIN "BrightnessMin"
@@ -1677,6 +1679,7 @@
 #define D_JSON_CAPTURE_UPSECONDS "CaptureUpSeconds"
 #define D_JSON_IMPORTANCE "importance"
 #define D_JSON_INORDER "InOrder"
+#define D_JSON_INTENSITY "Intensity"
 #define D_JSON_LIMIT "Limit"
 #define D_JSON_LASTREAD "LastRead"
 #define D_JSON_LENGTH "length"

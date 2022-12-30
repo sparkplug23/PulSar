@@ -110,6 +110,19 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+  ptr = &mqtthandler_debug_hardware;
+  ptr->handler_id = MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_HARDWARE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Hardware;
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
   ptr                         = &mqtthandler_debug_segments;
   ptr->handler_id             = MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_TELEPERIOD_ID;

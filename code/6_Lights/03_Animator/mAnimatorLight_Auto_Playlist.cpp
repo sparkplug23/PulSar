@@ -749,7 +749,6 @@
 
 
 //   // pCONT_iLight->animation_override.fRefreshAllPixels = true;
-//   // pCONT_iLight->animation.flags.NewAnimationRequiringCompleteRefresh = true;
 
 //   // // uint8_t brightness = 0;
 //   // if(mixer.group[id].flags.enable_force_preset_brightness_scaler){

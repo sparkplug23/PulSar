@@ -38,12 +38,21 @@ class mPalette
     mPalette(mPalette const& other) = delete;
     mPalette(mPalette&& other) = delete;
     /* Private constructor to prevent instancing. */
-    mPalette(){};
+    mPalette(){ 
+      // Serial.println("DEBUG_LINE_HERE_PAUSE"); delay(2000); 
+      Init_Palettes();
+    };
   public:
     // External function to get instance
     static mPalette* GetInstance();
     /* Here will be the instance stored. */
     static mPalette* instance;
+
+    void Init_Palettes();
+
+    bool flag_started = false;
+
+    uint8_t test_value = 123;
 
 
     void init_PresetColourPalettes(); 
@@ -99,6 +108,8 @@ class mPalette
     void init_ColourPalettes_Christmas_26();
     void init_ColourPalettes_Christmas_27();
     void init_ColourPalettes_Christmas_28();
+    void init_ColourPalettes_Christmas_29();
+    void init_ColourPalettes_Christmas_30();
     void init_ColourPalettes_Sky_Glow_01();
     void init_ColourPalettes_Custom_User_01();
     void init_ColourPalettes_Sunrise_01();
@@ -215,6 +226,8 @@ class mPalette
       PALETTELIST_STATIC_CHRISTMAS_26__ID,
       PALETTELIST_STATIC_CHRISTMAS_27__ID,
       PALETTELIST_STATIC_CHRISTMAS_28__ID,
+      PALETTELIST_STATIC_CHRISTMAS_29__ID,
+      PALETTELIST_STATIC_CHRISTMAS_30__ID,
       PALETTELIST_STATIC_SUNRISE_01__ID,
       PALETTELIST_STATIC_SUNRISE_02__ID,
       PALETTELIST_STATIC_SUNRISE_03__ID,
@@ -409,7 +422,7 @@ class mPalette
       // Can be edited
       PALETTE hsbid_users[10];
       // Can be edited
-      PALETTE rgbcct_users[5]; 
+      PALETTE rgbcct_users[5];    // Remove ?? or it needs to be made dynamic here??
       // Generic variable palette 
       PALETTE encoded_users; // Should remain only option, to permit the largest buffer. Long term, it could be made dynamic
       // Add static palettes here
@@ -485,46 +498,12 @@ class mPalette
       PALETTE christmas_26;
       PALETTE christmas_27;
       PALETTE christmas_28;
+      PALETTE christmas_29;
+      PALETTE christmas_30;
       // Created for other people
       PALETTE custom_user_01;
       PALETTE *ptr = &rainbow;
     }palettelist;
-
-
-    /**
-     * @brief I need a method to add/delete palettes loaded into RAM
-     * ie, segment 1 and 2 may use the same palette, so it doesnt need to be loaded twice, or else, I should just to keep it simple
-     * ie, segment X using palette Y, which is loaded into here. Use a pointer array,
-     *    double pointer, pointer to list of pointers
-     * 
-     * Stores active palette
-     * ** need to store on the heap, so new/delete[]
-     * 
-     * temporarily storing in the segment info to make it easier to convert
-     * 
-     */
-    struct PALETTE_RUNTIME{
-      // maybe not here, I need a way to "load" the active ones, so probably another struct as "runtime" palette (like segment runtime)
-        #ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-        // uint8_t* colour_map_dynamic_buffer = nullptr;
-        // uint16_t colour_map_dynamic_buflen = 0;
-        /**
-         * @brief For now, only 1 palette can be used at a time
-         * New dynamic memory methods needs to be added to allow varying palette types
-         * 
-         */
-        struct LOADED{
-          // uint8_t* buffer = nullptr;
-          uint16_t buflen = 0;
-          uint8_t buffer_static[200]; //tmp fixed buffer
-        }loaded;
-
-
-
-        #endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-
-    }palette_runtime;  // this should be a struct for holding palette info, but NOT defined here
-    // Ie in other files, I can have MyPalette name1, MyPalette name2 ... where these hold the info about the palette using the same data methods as each effect
 
 
     // #endif
@@ -558,8 +537,14 @@ class mPalette
     #endif // ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
 
 
+/**
+ * @brief Needs to be moved so FastLED palettes can differ in each segment
+ * 
+ */
     CRGBPalette16 currentPalette;
+    #ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     CRGBPalette16 targetPalette;
+    #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     
 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
@@ -581,7 +566,7 @@ class mPalette
       uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
       uint8_t* discrete_colours_in_palette = nullptr
     );
-    
+
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
@@ -612,6 +597,8 @@ class mPalette
     bool CheckPaletteByIDIsEditable(uint8_t id);
 
     void SetPaletteListPtrFromID(uint8_t id);
+
+    // friend class mPaletteContainer;
 
 };
 
