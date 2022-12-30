@@ -6,6 +6,28 @@ Section Next, will always be "Development", which with copy and paste will becom
 
 ## [Unreleased] - Development
 
+## [D0.113.0.0] - Created 30-12-2022
+### Milestone Point
+Created for the merge of all lighting branches into unified development branch for start of 2023
+
+### Added
+- template
+
+### Breaking Changed
+- template
+
+### Changed
+- template
+
+### Fixed
+- templete
+
+### Removed
+- template
+
+
+## [Unreleased] - Development
+
 ## [B0.86.0.0]
 ### Added
 - 
