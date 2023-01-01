@@ -18,6 +18,7 @@ void mAnimatorLight::Init_Segments()
   {
     seg.markForReset();
     seg.resetIfRequired();
+    
   }
 
   
@@ -148,6 +149,13 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
     
       SEGMENT_I(seg_index).palette_container = new mPaletteContainer(0); // Needs internalised
       
+      SEGMENT_I(seg_index).rgbcctcolors.clear();
+      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
+      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
+      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
+      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
+      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
+      
       Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
     
     }
@@ -180,11 +188,11 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
   
   // for (segment_new &seg : strip->_segments_new) 
   // {
-  //   seg.rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);    // data will need to just be integrated, and loaded/unloaded when needed in the dynamic buffer
-  //   // SEGMENT_I(1).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[1].data);
-  //   // SEGMENT_I(2).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[2].data);
-  //   // SEGMENT_I(3).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[3].data);
-  //   // SEGMENT_I(4).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[4].data);
+  //   seg.rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[0].data);    // data will need to just be integrated, and loaded/unloaded when needed in the dynamic buffer
+  //   // SEGMENT_I(1).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[1].data);
+  //   // SEGMENT_I(2).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[2].data);
+  //   // SEGMENT_I(3).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[3].data);
+  //   // SEGMENT_I(4).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[4].data);
   // }
 
 
@@ -194,18 +202,18 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
   // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01_ID, 0);
 
   
+  #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
   
   // for (uint16_t i = 0; i < MAX_NUM_SEGMENTS; i++)
   // {
   // 
   for (segment_new &seg : strip->_segments_new) 
   {
-    seg.rgbcct_controller->setSubType(RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID);
-    seg.rgbcct_controller->setApplyBrightnessToOutput(false);
+    seg.rgbcct_controller->setSubType(RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID);
     if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ //RGB only
-      seg.rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_RGB);
+      seg.rgbcct_controller->setColorMode(RgbcctColor::LightColorModes::LIGHT_MODE_RGB);
     }else{
-      seg.rgbcct_controller->setColorMode(RgbcctColor_Controller::LightColorModes::LIGHT_MODE_BOTH);
+      seg.rgbcct_controller->setColorMode(RgbcctColor::LightColorModes::LIGHT_MODE_BOTH);
     }
     seg.rgbcct_controller->Sync();    // calculate the initial values (#8058)
     // RGB parts
@@ -215,18 +223,37 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
     seg.rgbcct_controller->setCCT(153);
 
     // Set first colour as default
-    //  seg.rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
+    //  seg.rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[0].data);
 
   }
 
+  #endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+
   
+  #ifdef ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+
+  CommandSet_SegColour_RgbcctColour_Hue_360(123, 0, 0);
+  CommandSet_SegColour_RgbcctColour_Sat_255(255, 0, 0);
+  CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(153, 0, 0);
+  
+  // seg.rgbcct_controller->setSubType(RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID);
+  // if(pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X){ //RGB only
+  //   seg.rgbcct_controller->setColorMode(RgbcctColor::LightColorModes::LIGHT_MODE_RGB);
+  // }else{
+  //   seg.rgbcct_controller->setColorMode(RgbcctColor::LightColorModes::LIGHT_MODE_BOTH);
+  // }
 
 
-  CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID, 0);
-  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID, 1);
-  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID, 2);
-  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID, 3);
-  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID, 4);
+  // CommandSet_SegColour_RgbcctColour_SetColourMode(153, 0, 0);
+
+
+#else
+
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID, 0);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID, 1);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID, 2);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID, 3);
+  // CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID, 4);
 
   
   CommandSet_ActiveSolidPalette_Hue_360(123, 0);
@@ -242,6 +269,7 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
   // CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 3);
   // CommandSet_ActiveSolidPalette_Sat_255(map(90, 0,100, 0,255), 4);
 
+#endif //  ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
   
 }
 
@@ -268,9 +296,21 @@ void mAnimatorLight::resetSegments()
 
   for (segment_new &seg : strip->_segments_new) 
   {
-    seg.colors[0] = RED;
-    seg.colors[1] = GREEN;
-    seg.colors[2] = BLUE;
+    // seg.colors[0] = RED;
+    // seg.colors[1] = GREEN;
+    // seg.colors[2] = BLUE;
+    
+    /**
+     * @brief Adding 5 colours for each segment
+     * 
+     */
+    seg.rgbcctcolors.clear();
+    seg.rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
+    seg.rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
+    seg.rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
+    seg.rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
+    seg.rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
+
     seg.grouping = 1;
     // SEGMENT_I(i).setOption(SEG_OPTION_ON, 1);
     // SEGMENT_I(i).opacity = 255;    
@@ -330,6 +370,15 @@ void mAnimatorLight::SubTask_Segments_Animation()
         seg.flags.fForceUpdate=false;
         seg.tSaved_AnimateRunTime = millis(); // Not reset inside TimeReached
       }
+
+      
+      #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+      // if(!seg.transitional)  // Needs better integration before it can be used
+      // {
+        loadPalette_Michael(seg.palette.id, strip->_segment_index_primary);
+      // }
+      #endif // ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+
       
       // This maybe cant be global and needs placed inside each effect?
       // Not valid for long term, needs to be changed
@@ -952,7 +1001,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
  * 
  * @param param 
  */
-void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param)
+void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
 {    
 
   RgbcctColor updatedColor = RgbcctColor(0);
@@ -984,7 +1033,7 @@ void mAnimatorLight::AnimationProcess_Generic_AnimationColour_LinearBlend_Segmen
  * 
  * @param param 
  */
-void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param)
+void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
 {    
 
   RgbcctColor updatedColor = RgbcctColor(0);
@@ -1012,24 +1061,7 @@ void mAnimatorLight::AnimationProcess_Generic_SingleColour_AnimationColour_Linea
 
 RgbcctColor mAnimatorLight::GetSegmentColour(uint8_t colour_index, uint8_t segment_index)
 {
-
-  // 
-
-  // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST, PSTR("segment_index=%d"),segment_index);
-  // #endif // ENABLE_LOG_LEVEL_INFO
-
-  RgbcctColor colour = RgbcctColor(0);
-
-  uint8_t white = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 24);
-  uint8_t red   = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 16);
-  uint8_t green = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 8);
-  uint8_t blue  = (uint8_t)(SEGMENT_I(segment_index).colors[colour_index] >> 0);
-
-  colour = RgbcctColor(red, green, blue, white, white);
-
-  return colour;
-
+  return SEGMENT_I(segment_index).rgbcctcolors[colour_index];
 }
 
 
@@ -1041,14 +1073,14 @@ void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light
   switch(light_type)
   {
     case LT_PWM5:
-      SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
+      SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
     break;
     case LT_ADDRESSABLE_SK6812:
-      SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID; 
+      SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID; 
     break;
     default:
     case LT_ADDRESSABLE_WS281X:
-      SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+      SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
     break;
   }
 
@@ -1056,15 +1088,15 @@ void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light
 
 
 
-uint8_t mAnimatorLight::GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type)
+uint8_t mAnimatorLight::GetSizeOfPixel(RgbcctColor::LightSubType colour_type)
 {
   switch(colour_type)
   {
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:     return 3;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:    
-    // case RgbcctColor_Controller::LightSubType::LIGHT_TYPE_RGBC__ID:      
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:     return 3;
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:    
+    // case RgbcctColor::LightSubType::LIGHT_TYPE_RGBC__ID:      
     return 4;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID:  return 5;
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:  return 5;
   }
 
 }
@@ -1073,7 +1105,7 @@ bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
-  RgbcctColor_Controller::LightSubType pixel_type, 
+  RgbcctColor::LightSubType pixel_type, 
   RgbcctColor starting_colour
 ){
 
@@ -1098,7 +1130,7 @@ uint16_t pixel_start_i = 0;
     // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
   switch(pixel_type)
   {
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:
     
       pixel_start_i = pixel_index*6;
 
@@ -1116,7 +1148,7 @@ uint16_t pixel_start_i = 0;
       }
 
     break;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:
     
       pixel_start_i = pixel_index*8;
 
@@ -1139,7 +1171,7 @@ uint16_t pixel_start_i = 0;
       }
 
     break;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
@@ -1207,7 +1239,7 @@ uint16_t pixel_start_i = 0;
 
 
 bool mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, 
-RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor desired_colour)
+RgbcctColor::LightSubType pixel_type, RgbcctColor desired_colour)
 {
 
   if(buffer == nullptr)
@@ -1228,7 +1260,7 @@ uint16_t pixel_start_i = 0;
 
   switch(pixel_type)
   {
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:
     
       pixel_start_i = pixel_index*6;
 
@@ -1246,7 +1278,7 @@ uint16_t pixel_start_i = 0;
       }
 
     break;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:
     
       pixel_start_i = pixel_index*8; // rgbw * 2
 
@@ -1265,7 +1297,7 @@ uint16_t pixel_start_i = 0;
       }
 
     break;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
@@ -1352,7 +1384,7 @@ copies_of_that_pixel
 length_of_pixels
     number of pixel in that segment up to (100?) then replicate and wrap output*/
 
-bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, 
+bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, 
 RgbcctColor starting_colour, RgbcctColor desired_colour)
 {
 
@@ -1427,7 +1459,7 @@ void mAnimatorLight::GetTransitionColourBuffer(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
-  RgbcctColor_Controller::LightSubType pixel_type, 
+  RgbcctColor::LightSubType pixel_type, 
   mAnimatorLight::TransitionColourPairs* colour  // Get and Set colours will still only store in rgb or rgbw format, for now, limited to rgb
 ){
 
@@ -1452,19 +1484,19 @@ uint16_t pixel_start_i = 0;
   switch(pixel_type)
   {
     default: return;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:
       pixel_start_i = pixel_index*6;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbColor(c[0], c[1], c[2]);
       colour->DesiredColour  = RgbColor(c[3], c[4], c[5]);
       break;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:
       pixel_start_i = pixel_index*8;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbwColor(c[0], c[1], c[2], c[3]);
       colour->DesiredColour  = RgbwColor(c[4], c[5], c[6], c[7]);
       break;
-    case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID:
+    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:
       pixel_start_i = pixel_index*10;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbcctColor(c[0], c[1], c[2], c[3], c[4]);
@@ -1604,6 +1636,17 @@ void mAnimatorLight::EveryLoop()
         } //end TimeReached
   
         SEGMENT.flags.animator_first_run = false;     // CHANGE to function: reset here for all my methods
+
+        /**
+         * @brief If it completes, reset
+         *
+         * Need proper checks here to only reset if it was running before
+         */
+        if(!SEGMENT_I(seg_i).animator->IsAnimationActive(0))
+        {
+          SEGMENT_I(seg_i).transitional = false; // Since this is already inside "IsAnimating" then it should only be set if it was animating but is now stopping
+        }
+
       }
 
     }//isactive
@@ -1748,11 +1791,8 @@ void mAnimatorLight::EveryLoop()
 
 mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE)
 {
-  // AddLog(LOG_LEVEL_INFO, PSTR("SetSegment_AnimFunctionCallback segment_index=%d"));
   this->SEGMENT_I(segment_index).anim_function_callback = anim_function_callback;
-  
   SEGMENT_I(segment_index).animation_has_anim_callback = true;
-
   return *this;
 }
 
@@ -1825,6 +1865,8 @@ void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t se
   {
     SEGMENT_I(segment_index).animator->StartAnimation(0, time_tmp, SEGMENT_I(segment_index).anim_function_callback);
   }
+
+  SEGMENT_I(segment_index).transitional = true;
 
 
 } //end function
@@ -2286,7 +2328,8 @@ void mAnimatorLight::Segment_New::startTransition(uint16_t dur) {
   CRGBPalette16 _palT; loadPalette(_palT, palette_wled);
   uint8_t _modeP = effect_id;
   uint32_t _colorT[NUM_COLORS];
-  for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = currentColor(i, colors[i]);
+  
+  for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = currentColor(i, RgbcctColor::GetU32Colour(rgbcctcolors[i]));
 
   if (!_t) _t = new Transition(dur); // no previous transition running
   if (!_t) return; // failed to allocate data
@@ -2842,6 +2885,38 @@ uint8_t mAnimatorLight::Segment_New::get_random_wheel_index(uint8_t pos) {
   }
   return r;
 }
+
+uint8_t mAnimatorLight::Segment_New::getBrightnessRGB()
+{
+
+  uint8_t brightness = pCONT_iLight->getBriRGB_Global();
+  if(seg_brightness!=255)
+  {
+    brightness = scale8(brightness, seg_brightness);
+  }
+
+  return brightness;
+
+  
+}
+
+
+uint8_t mAnimatorLight::Segment_New::getBrightnessCCT()
+{
+
+  uint8_t brightness = pCONT_iLight->getBriCCT_Global();
+  if(seg_brightness!=255)
+  {
+    brightness = scale8(brightness, seg_brightness);
+  }
+
+  return brightness;
+
+  
+}
+
+
+
 
 /*
  * Gets a single color from the currently selected palette.
@@ -3628,6 +3703,7 @@ void mAnimatorLight::WS2812FX::deserializeMap(uint8_t n) {
   // releaseJSONBufferLock();
 }
 
+
 mAnimatorLight::WS2812FX* mAnimatorLight::WS2812FX::instance = nullptr;
 
 // //Bus static member definition, would belong in bus_manager.cpp
@@ -3744,29 +3820,37 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
 
   // uint16_t len = length();
 
+
   /**
    * @brief Apply brightness if required
    * 
    */
   if(brightness_needs_applied){
     // uint8_t _bri_t = currentBri(on ? opacity : 0);
-    uint8_t brightnesss = pCONT_iLight->getBriRGB_Global();
-    color_internal.R  = scale8(color_internal.R,  brightnesss);
-    color_internal.G  = scale8(color_internal.G,  brightnesss);
-    color_internal.B  = scale8(color_internal.B,  brightnesss);
-    color_internal.W1 = scale8(color_internal.W1, brightnesss);
-    color_internal.W2 = scale8(color_internal.W2, brightnesss);
+    uint8_t brightness = pCONT_iLight->getBriRGB_Global();
+
+    if(seg_brightness!=255)
+    {
+      brightness = scale8(brightness, seg_brightness);
+    }
+
+    color_internal.R  = scale8(color_internal.R,  brightness);
+    color_internal.G  = scale8(color_internal.G,  brightness);
+    color_internal.B  = scale8(color_internal.B,  brightness);
+    color_internal.W1 = scale8(color_internal.W1, brightness);
+    color_internal.W2 = scale8(color_internal.W2, brightness);
+    
   }
 
   /**
    * @brief Apply Pixel hardware colour mapping from internal to hardware order
    **/
   RgbcctColor color_hardware = color_internal; // Copy
-  if(hardware_element_colour_order.red        != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware[hardware_element_colour_order.red]         = color_internal.R;  }
-  if(hardware_element_colour_order.green      != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware[hardware_element_colour_order.green]       = color_internal.G;  }
-  if(hardware_element_colour_order.blue       != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware[hardware_element_colour_order.blue]        = color_internal.B;  }
-  if(hardware_element_colour_order.white_cold != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware[hardware_element_colour_order.white_cold]  = color_internal.WC; }
-  if(hardware_element_colour_order.white_warm != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware[hardware_element_colour_order.white_warm]  = color_internal.WW; }
+  if(hardware_element_colour_order.red        != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.red]         = color_internal.R;  }
+  if(hardware_element_colour_order.green      != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.green]       = color_internal.G;  }
+  if(hardware_element_colour_order.blue       != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.blue]        = color_internal.B;  }
+  if(hardware_element_colour_order.white_cold != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.white_cold]  = color_internal.WC; }
+  if(hardware_element_colour_order.white_warm != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.white_warm]  = color_internal.WW; }
 
   uint16_t physical_indexPixel = indexPixel; // Going from virtual/internal index to physical/external index
   uint16_t segment_length      = length();
@@ -3874,11 +3958,11 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment_New::GetPixelColor(uint16_t indexP
   /**
    * @brief Convert from external colour back into internal colour (This step is not required when using WLED busses, as it is set by the neopixel method)
    **/
-  if(hardware_element_colour_order.red        != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal[hardware_element_colour_order.red]         = colour_hardware.R;  }
-  if(hardware_element_colour_order.green      != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal[hardware_element_colour_order.green]       = colour_hardware.G;  }
-  if(hardware_element_colour_order.blue       != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal[hardware_element_colour_order.blue]        = colour_hardware.B;  }
-  if(hardware_element_colour_order.white_cold != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal[hardware_element_colour_order.white_cold]  = colour_hardware.WC; }
-  if(hardware_element_colour_order.white_warm != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal[hardware_element_colour_order.white_warm]  = colour_hardware.WW; }
+  if(hardware_element_colour_order.red        != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.red]         = colour_hardware.R;  }
+  if(hardware_element_colour_order.green      != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.green]       = colour_hardware.G;  }
+  if(hardware_element_colour_order.blue       != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.blue]        = colour_hardware.B;  }
+  if(hardware_element_colour_order.white_cold != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.white_cold]  = colour_hardware.WC; }
+  if(hardware_element_colour_order.white_warm != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.white_warm]  = colour_hardware.WW; }
 
   return colour_internal;
 

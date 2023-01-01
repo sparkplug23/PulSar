@@ -9,7 +9,8 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
   JsonBuilderI->Start();
 
   JsonBuilderI->Add_P(PM_JSON_TYPE, pCONT_set->Settings.light_settings.type);
-  
+
+  #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
   JsonBuilderI->Add_P(PM_JSON_HUE,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getHue360());
   JsonBuilderI->Add_P(PM_JSON_SAT,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getSat255());
   JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
@@ -20,6 +21,7 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_method){
 
 
   JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_CCT,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessCCT255());
+  #endif // #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 
 
   // // JsonBuilderI->Add_P(PM_JSON_PIXELS_UPDATE_PERCENTAGE, animation.transition.pixels_to_update_as_percentage);
@@ -56,9 +58,11 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_method){
   //   JsonBuilderI->Add_P(PM_JSON_SCENE_NAME, GetSceneName(buffer, sizeof(buffer)));  
   //   #endif //  ENABLE_DEVFEATURE_PHASING_SCENE_OUT
   
+    #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
     JsonBuilderI->Add_P(PM_JSON_HUE, pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getHue360());
     JsonBuilderI->Add_P(PM_JSON_SAT, pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getSat255());
     JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
+    #endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->SEGMENT_I(0).transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->SEGMENT_I(0).transition.time_ms);

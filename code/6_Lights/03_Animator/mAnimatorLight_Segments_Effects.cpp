@@ -30,16 +30,16 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Single_Colour()
   
   ALOG_DBM( PSTR("desired_colour1=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
-  desired_colour = ApplyBrightnesstoRgbcctColour( desired_colour, SEGMENT.rgbcct_controller->getBrightnessRGB255(), SEGMENT.rgbcct_controller->getBrightnessCCT255() );
+  desired_colour = ApplyBrightnesstoRgbcctColour( desired_colour, SEGMENT.getBrightnessRGB(), SEGMENT.getBrightnessCCT() );
 
   ALOG_DBM( PSTR("desired_colour2=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
   
   SetTransitionColourBuffer_DesiredColour (SEGMENT.data, SEGMENT.DataLength(), 0, SEGMENT.colour_type, desired_colour); 
   SetTransitionColourBuffer_StartingColour(SEGMENT.data, SEGMENT.DataLength(), 0, SEGMENT.colour_type, SEGMENT.GetPixelColor(0));
 
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback( SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -78,11 +78,12 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   ){
 
     colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);  //change it long term so I access it via the controller and hence it knows which to get from
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
     // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    //ALOG_INF( PSTR("EFFECT sIndexIO=I%d start%d,stop%d\tp%d,PL %d, RGB:%d,%d,%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(SEGMENT.palette.id), colour.R, colour.G, colour.B );
+    //ALOG_INF( PSTR("EFFECT sIndexIO=I%d start%d,stop%d\tp%d,PL %d, RGB:%d,%d,%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(SEGMENT.palette.id), colour.R, colour.G, colour.B );
     // #endif
 
   }
@@ -91,9 +92,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -165,7 +166,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     
     desired_pixel = random(0, pixels_in_map);
   
-    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel);
 
     // #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
     // AddLog(LOG_LEVEL_TEST, 
@@ -177,7 +178,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     //   ); 
     // #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
 
     // 2us
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_type, colour);
@@ -189,9 +190,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -230,7 +231,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
       
       ALOG_DBM(PSTR(D_LOG_NEO "EFFECTS_SEQUENTIAL EFFECTS_COLOUR_SELECT"));
            
-      ALOG_DBM( PSTR("Segment: %d\t(%d,%d),(%d)"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, SEGMENT.palette.id);
+      ALOG_DBM( PSTR("Segment: %d\t(%d,%d),(%d)"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, SEGMENT.palette.id);
 
       RgbcctColor colour = RgbcctColor(0);
       for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
@@ -238,12 +239,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 
         colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
         
-        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
         
         SEGMENT.SetPixelColor(pixel, colour, false);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
         #endif
 
       }
@@ -385,7 +386,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
           
           out_colour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
 
-          out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, pCONT_iLight->getBriRGB_Global());
+          out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, SEGMENT.getBrightnessRGB());
      
           SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), index, SEGMENT.colour_type, out_colour);
       }
@@ -396,9 +397,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -455,7 +456,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
     SEGMENT.SetPixelColor(SEGLEN-1, colourfirst); // Insert saved first pixel into last pixel as "wrap around"
   // }
 
-  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR(); // Change this to be function that sets transition up
 
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -536,7 +537,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
     
     colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel, &pixel_position);
     
-    colour = ApplyBrightnesstoRgbcctColour(colour, pCONT_iLight->getBriRGB_Global());
+    colour = ApplyBrightnesstoRgbcctColour(colour, SEGMENT.getBrightnessRGB());
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.data, SEGMENT.DataLength(), index, SEGMENT.colour_type, colour);
         
@@ -550,9 +551,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
   
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -611,12 +612,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
     colour_hsb.S = saturation;
     colour = colour_hsb;
     
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -628,9 +629,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -705,13 +706,13 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
     
     desired_pixel = random(0, pixels_in_map);
   
-    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel);//, &pixel_position);
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel);
 
     #ifdef DEBUG_TRACE_ANIMATOR_SEGMENTS
     AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
     #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
     
     // 2us
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_type, colour);
@@ -722,9 +723,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -774,12 +775,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
 
     colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
     
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -804,10 +805,10 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
                 pixel++
   ){
 
-    // colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
+    // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
     // if(SEGMENT.flags.brightness_applied_during_colour_generation){
-    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, pCONT_iLight->getBriRGB_Global());
+    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
     // }
 
     random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
@@ -815,7 +816,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), strip->_segment_index_primary, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -831,9 +832,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -885,14 +886,14 @@ void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_P
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
   // Get starting positions already on show
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -930,14 +931,14 @@ void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_P
   SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Pick new colours
-  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+  DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
   // Get starting positions already on show
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -963,7 +964,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 
 //   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
-//   uint8_t segment_index = strip->_segment_index_primary;
+//   uint8_t segment_index = SEGIDX;
 //   uint16_t start_pixel = SEGMENT.pixel_range.start;
 //   uint16_t end_pixel = SEGMENT.pixel_range.stop;
 
@@ -1163,7 +1164,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
 //         // Call the animator to blend from previous to new
-//   SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+//   SetSegment_AnimFunctionCallback(  SEGIDX, 
 //     [this](const AnimationParam& param){
 //       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
 //     }
@@ -1260,7 +1261,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   //     this->AnimationProcess_Generic_RGBCCT_Single_Colour_All(param); });
 
 //         // Call the animator to blend from previous to new
-//   SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+//   SetSegment_AnimFunctionCallback(  SEGIDX, 
 //     [this](const AnimationParam& param){
 //       this->AnimationProcess_Generic_RGBCCT_LinearBlend_Segments(param);
 //     }
@@ -1573,7 +1574,7 @@ void mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
 void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
 {
 
-  AddLog(LOG_LEVEL_TEST, PSTR("_segments[%d].colour_type = %d"), strip->_segment_index_primary, SEGMENT.colour_type);
+  AddLog(LOG_LEVEL_TEST, PSTR("_segments[%d].colour_type = %d"), SEGIDX, SEGMENT.colour_type);
 
     
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
@@ -1608,9 +1609,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -1720,7 +1721,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   }
 
   // Pick new colours
-  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
 
 
   // if(tempcol++>5){
@@ -1740,9 +1741,9 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -1935,7 +1936,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 
   // Pick new colours
-  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
 
 /**
  * @brief Temporary force until handled in code
@@ -1959,9 +1960,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
   DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // Call the animator to blend from previous to new
-  SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
     [this](const AnimationParam& param){ 
-      this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
     }
   );
 
@@ -2123,7 +2124,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 // //if already on, dont change the colour
 //             if(!animation_colours[random_pixel_index].DesiredColour.CalculateBrightness()){// if off, allow new colour 
 //               if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//                 colour_random = ApplyBrightnesstoRgbcctColour(colour_random,pCONT_iLight->getBriRGB_Global());
+//                 colour_random = ApplyBrightnesstoRgbcctColour(colour_random,SEGMENT.getBrightnessRGB());
 //               }
 //               animation_colours[random(0,10)].DesiredColour = colour_random;//RgbColor(0,0,255);//
 //             }else{
@@ -5196,22 +5197,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 
     // New method, combining palettes to get colour from any type "GetPaletteGeneric"
     if ( currSeg % 3 == 0 ) {
-      SEGMENT.SetPixelColor(i, GetSegmentColour(0, strip->_segment_index_primary), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(i, GetSegmentColour(0, SEGIDX), SET_BRIGHTNESS);
     } else if( currSeg % 3 == 1) {
-      SEGMENT.SetPixelColor(i, GetSegmentColour(1, strip->_segment_index_primary), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(i, GetSegmentColour(1, SEGIDX), SET_BRIGHTNESS);
     } else {
-      SEGMENT.SetPixelColor(i, (GetSegmentColour(2, strip->_segment_index_primary).CalculateBrightness() > 0 ? GetSegmentColour(2, strip->_segment_index_primary) : WHITE), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(i, (GetSegmentColour(2, SEGIDX).CalculateBrightness() > 0 ? GetSegmentColour(2, SEGIDX) : WHITE), SET_BRIGHTNESS);
     }   
-
-    // WLED method, before joining palette getters
-    // if ( currSeg % 3 == 0 ) 
-    // {
-    //   SEGMENT.SetPixelColor(i, SEGCOLOR(0), SET_BRIGHTNESS);
-    // } else if( currSeg % 3 == 1) {
-    //   SEGMENT.SetPixelColor(i, SEGCOLOR(1), SET_BRIGHTNESS);
-    // } else {
-    //   SEGMENT.SetPixelColor(i, (SEGCOLOR(2) > 0 ? SEGCOLOR(2) : WHITE), SET_BRIGHTNESS);
-    // }   
 
     currSegCount += 1;
     if (currSegCount >= segSize) {
@@ -5294,13 +5285,13 @@ void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, b
   rem /= (SEGMENT.intensity() +1);
   if (rem > 255) rem = 255;
 
-  uint32_t col1 = useRandomColors ? color_wheel(SEGMENT.aux1) : SEGMENT.colors[1];
+  uint32_t col1 = useRandomColors ? color_wheel(SEGMENT.aux1) : SEGCOLOR(1);
 
   for (uint16_t i = 0; i < SEGLEN; i++)
   {
     uint16_t indexPixel = (rev && back)? SEGLEN -1 -i : i;
 
-    uint32_t col0 = useRandomColors ? color_wheel(SEGMENT.aux0) : mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, indexPixel, nullptr, true, PALETTE_SOLID_WRAP, 0);
+    uint32_t col0 = useRandomColors ? color_wheel(SEGMENT.aux0) : RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, indexPixel, nullptr, true, PALETTE_SOLID_WRAP, 0));
     
     if (i < ledIndex) 
     {
@@ -5422,7 +5413,7 @@ uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
 #ifdef ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
 
   if (SEGMENT.palette.id){
-    return mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, pos, nullptr, false, true, 0);
+    return RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pos, nullptr, false, true, 0));
   }
   
   pos = 255 - pos;
@@ -5522,7 +5513,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint
   if (do_palette)
   {
     for(uint16_t i = 0; i < SEGLEN; i++) {
-      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
+      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
     }
   } else fill(color1);
 
@@ -5636,7 +5627,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash()
 
   for(uint16_t i = 0; i < SEGLEN; i++) 
   {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)); // Functionally the same
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)); // Functionally the same
   }
 
   uint16_t delay = 10 + ((30 * (uint16_t)(255 - SEGMENT.speed())) / SEGLEN);
@@ -5766,7 +5757,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t colo
     if((i % gap) == SEGMENT.aux0) {
       if (do_palette)
       {
-        SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)); // Functionally the same
+        SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)); // Functionally the same
       } else {
         SEGMENT.SetPixelColor(i, color1);
       }
@@ -5825,7 +5816,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t co
 
     uint32_t color = color1;
     if(index > width*2/3-1){
-      color = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1); // Functionally the same
+      color = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1)); // Functionally the same
     }
     else if(index > width/3-1) color = color2;
 
@@ -5929,7 +5920,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Breath()
   uint8_t lum = 30 + var;
   for(uint16_t i = 0; i < SEGLEN; i++) 
   {
-    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), lum));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)), lum));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -5952,7 +5943,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade()
 
   for(uint16_t i = 0; i < SEGLEN; i++)
   {
-    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), lum));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)), lum));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -6063,7 +6054,8 @@ void mAnimatorLight::fade_out(uint8_t rate, bool set_brightness)
   rate = (255-rate) >> 1;
   float mappedRate = float(rate) +1.1;
 
-  uint32_t color = RgbcctColor::GetU32Colour(SEGMENT.colors[1]); // target color
+  uint32_t color = RgbcctColor::GetU32Colour(SEGMENT.rgbcctcolors[1]); // target color
+
   int w2 = (color >> 24) & 0xff;
   int r2 = (color >> 16) & 0xff;
   int g2 = (color >>  8) & 0xff;
@@ -6140,7 +6132,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks()
       uint8_t pixels_in_palette = mPaletteI->GetPixelsInMap();
       SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1)), true);
       #else // wled way for now
-      SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, random8(), nullptr, false, false, 0), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, random8(), nullptr, false, false, 0), SET_BRIGHTNESS);
       #endif // ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES
       SEGMENT.aux1 = SEGMENT.aux0;
       SEGMENT.aux0 = index;
@@ -6750,7 +6742,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle() // Firework_Rain
   
   for(uint16_t i = 0; i < SEGLEN; i++) 
   {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
   }
   uint32_t cycleTime = 10 + (255 - SEGMENT.speed())*2;
   uint32_t it = millis() / cycleTime;
@@ -6782,7 +6774,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Flash() // Firework_Rain
 {
   
   for(uint16_t i = 0; i < SEGLEN; i++) {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
   }
 
   if(random8(5) == 0) {
@@ -6810,7 +6802,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Hyper() // Firework_Rain
 {
 
   for(uint16_t i = 0; i < SEGLEN; i++) {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
   }
 
   if(random8(5) < 2) {
@@ -6859,7 +6851,7 @@ random16_set_seed(535);                                 // The randomizer needs 
     uint8_t ranstart = random8();                         // The starting value (aka brightness) for each pixel. Must be consistent each time through the loop for this to work.
     uint8_t pixBri = sin8(ranstart + 16 * millis()/(256-SEGMENT.speed()));
     if (random8() > SEGMENT.intensity()) pixBri = 0;
-    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i*20, nullptr, false, PALETTE_SOLID_WRAP, 0), pixBri));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i*20, nullptr, false, PALETTE_SOLID_WRAP, 0)), pixBri));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -6976,7 +6968,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(bool saw)
       }
     }
     s = sin8(a);
-    SEGMENT.SetPixelColor(i, ColourBlendU32(mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), s));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)), SEGCOLOR(1), s));
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
@@ -7043,7 +7035,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle()
     PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
     uint32_t p = (uint32_t)SEGLEN * (uint32_t)PRNG16;
     uint16_t j = p >> 16;
-    SEGMENT.SetPixelColor(j, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, j, nullptr, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.SetPixelColor(j, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, j, nullptr, true, PALETTE_SOLID_WRAP, 0));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -7079,7 +7071,7 @@ uint8_t _brightness = pCONT_iLight->getBriRGB_Global();
           {
             if (color == SEGCOLOR(0))
             {
-              SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
+              SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
             } else { SEGMENT.SetPixelColor(i, color); }     
             break; //only spawn 1 new pixel per frame per 50 LEDs
           }
@@ -7148,7 +7140,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Android()
 {
   
   for(uint16_t i = 0; i < SEGLEN; i++) {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
   }
 
   if (SEGMENT.aux1 > ((float)SEGMENT.intensity()/255.0)*(float)SEGLEN)
@@ -7277,7 +7269,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourFul()
 void mAnimatorLight::SubTask_Segment_Animation__Traffic_Light()
 {
   for(uint16_t i=0; i < SEGLEN; i++)
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
   uint32_t mdelay = 500;
   for (int i = 0; i < SEGLEN-2 ; i+=3)
   {
@@ -7332,7 +7324,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(uint32_t color1, ui
     if((i + SEGMENT.aux0) % (pxw*2) < pxw) {
       if (color1 == SEGCOLOR(0))
       {
-        SEGMENT.SetPixelColor(SEGLEN -i -1, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, SEGLEN -i -1, nullptr, true, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.SetPixelColor(SEGLEN -i -1, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, SEGLEN -i -1, nullptr, true, PALETTE_SOLID_WRAP, 0));
       } else
       {
         SEGMENT.SetPixelColor(SEGLEN -i -1, color1);
@@ -7464,7 +7456,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Gradient(bool loading)
       val = MIN(abs(pp-i),MIN(abs(p1-i),abs(p2-i)));
     }
     val = (brd > val) ? val/brd * 255 : 255;
-    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(0), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1), val));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(0), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1)), val));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -7615,7 +7607,7 @@ void mAnimatorLight::SubTask_Segment_Animation__TriColour()
 
   for (uint16_t i = 0; i < SEGLEN; i++)
   {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 2));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 2));
   }
   
   if(ledIndex < SEGLEN) { //wipe from 0 to 1
@@ -7687,9 +7679,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade_TriColour()
   uint32_t color = 0;
   for(uint16_t i = 0; i < SEGLEN; i++) {
     if (stage == 2) {
-      color = ColourBlendU32(mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 2), color2, stp);
+      color = ColourBlendU32(RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 2)), color2, stp);
     } else if (stage == 1) {
-      color = ColourBlendU32(color1, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 2), stp);
+      color = ColourBlendU32(color1, RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 2)), stp);
     } else {
       color = ColourBlendU32(color1, color2, stp);
     }
@@ -7737,10 +7729,10 @@ void mAnimatorLight::SubTask_Segment_Animation__Multi_Comet()
       uint16_t index = comets[i];
       if (SEGCOLOR(2) != 0)
       {
-        SEGMENT.SetPixelColor(index, i % 2 ? mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
+        SEGMENT.SetPixelColor(index, i % 2 ? RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0)) : SEGCOLOR(2));
       } else
       {
-        SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0));
       }
       comets[i]++;
     } else {
@@ -7970,7 +7962,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Palette()
     
     if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
     
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
@@ -8247,7 +8239,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Meteor()
     {
       byte meteorTrailDecay = 128 + random8(127);
       trail[i] = scale8(trail[i], meteorTrailDecay);
-      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, trail[i], nullptr, false, true, 255));
+      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, trail[i], nullptr, false, true, 255));
     }
   }
 
@@ -8259,7 +8251,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Meteor()
     }
 
     trail[index] = 240;
-    SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, trail[index], nullptr, false, true, 255));
+    SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, trail[index], nullptr, false, true, 255));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -8299,7 +8291,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
       trail[i] += change;
       if (trail[i] > 245) trail[i] = 0;
       if (trail[i] > 240) trail[i] = 240;
-      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, trail[i], nullptr, false, true, 255));
+      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, trail[i], nullptr, false, true, 255));
     }
   }
   
@@ -8309,7 +8301,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
     if(in + j >= SEGLEN) {
       index = (in + j - SEGLEN);
     }
-    SEGMENT.SetPixelColor(index, ColourBlendU32(RgbcctColor::GetU32Colour(SEGMENT.GetPixelColor(index)), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, 240, nullptr, false, true, 255), 48));
+    SEGMENT.SetPixelColor(index, ColourBlendU32(RgbcctColor::GetU32Colour(SEGMENT.GetPixelColor(index)), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, 240, nullptr, false, true, 255)), 48));
     trail[index] = 240;
   }
 
@@ -8526,7 +8518,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
       if (wave > threshold) {
         uint16_t index = 0 + pos + i;
         uint8_t s = (wave - threshold)*255 / (0xFFFF - threshold);
-        SEGMENT.SetPixelColor(index, ColourBlendU32(mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255-s));
+        SEGMENT.SetPixelColor(index, ColourBlendU32(RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0)), SEGCOLOR(1), 255-s));
       }
     }
   }
@@ -8596,7 +8588,7 @@ uint16_t mAnimatorLight::mode_palette()
     
     if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
     
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
   }
   return FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
@@ -8843,7 +8835,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
       float blend_ratio = mSupport::mapfloat(s, 0.0f, 255.0f, 0.0f, 1.0f);
 
       colour1 = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel_palette_counter);
-      colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
+      colour1 = ApplyBrightnesstoRgbcctColour(colour1, SEGMENT.getBrightnessRGB());
       colour2 = RgbcctColor(0);
       colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
 
@@ -8852,7 +8844,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
         pixel_palette_counter = 0;
       }
 
-      SEGMENT.SetPixelColor(SEGMENT.pixel_range.start + i, colour_blended, strip->_segment_index_primary);
+      SEGMENT.SetPixelColor(SEGMENT.pixel_range.start + i, colour_blended, SEGIDX);
 
       SEGMENT.data[d  ] = s; 
       SEGMENT.data[d+1] = s_target; 
@@ -8890,11 +8882,11 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Base(uint8_t use_multi)
          * To apply constrain, should I change the "full" colour brightness? this might work (at least temporarily)
          * 
          */
-        colour1 = ApplyBrightnesstoRgbcctColour(colour1, pCONT_iLight->getBriRGB_Global());
+        colour1 = ApplyBrightnesstoRgbcctColour(colour1, SEGMENT.getBrightnessRGB());
         colour2 = RgbcctColor(0);
         colour_blended = RgbcctColor::LinearBlend(colour1, colour2, blend_ratio); 
 
-        SEGMENT.SetPixelColor(p, colour_blended, strip->_segment_index_primary);
+        SEGMENT.SetPixelColor(p, colour_blended, SEGIDX);
 
         if(pixel_palette_counter++ >= pixels_in_palette-1)
         {
@@ -8979,7 +8971,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Percent()
   if (percent < 100) {
     for (uint16_t i = 0; i < SEGLEN; i++) {
 	  	if (i < SEGMENT.step) {
-        SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SET_BRIGHTNESS);
+        SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SET_BRIGHTNESS);
 	  	}
 	  	else {
         SEGMENT.SetPixelColor(i, SEGCOLOR(1), SET_BRIGHTNESS);
@@ -8991,7 +8983,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Percent()
         SEGMENT.SetPixelColor(i, SEGCOLOR(1), SET_BRIGHTNESS);
 	  	}
 	  	else {
-        SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SET_BRIGHTNESS);
+        SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SET_BRIGHTNESS);
 	  	}
 	  }
   }
@@ -9217,16 +9209,16 @@ void mAnimatorLight::SubTask_Segment_Animation__Sunrise()
   for (uint16_t i = 0; i <= SEGLEN/2; i++)
   {
     //default palette is Fire
-    uint32_t c = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, 0, nullptr, false, true, 255); //background
+    uint32_t c = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, 0, nullptr, false, true, 255)); //background
 
     uint16_t wave = triwave16((i * stage) / SEGLEN);
 
     wave = (wave >> 8) + ((wave * SEGMENT.intensity()) >> 15);
 
     if (wave > 240) { //clipped, full white sun
-      c = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id,  240, nullptr, false, true, 255);
+      c = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id,  240, nullptr, false, true, 255));
     } else { //transition
-      c = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, wave, nullptr, false, true, 255);
+      c = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, wave, nullptr, false, true, 255));
     }
     SEGMENT.SetPixelColor(i, c);
     SEGMENT.SetPixelColor(SEGLEN - i - 1, c);
@@ -9266,7 +9258,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sinewave()
   for (int i=0; i<SEGLEN; i++) {                   // For each of the LED's in the strand, set a brightness based on a wave as follows:
     int pixBri = cubicwave8((i*freq)+SEGMENT.step);//qsuba(cubicwave8((i*freq)+SEGMENT.step), (255-SEGMENT.intensity())); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
     //setPixCol(i, i*colorIndex/255, pixBri);
-    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i*colorIndex/255, nullptr, false, PALETTE_SOLID_WRAP, 0), pixBri));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i*colorIndex/255, nullptr, false, PALETTE_SOLID_WRAP, 0)), pixBri));
   }
 
 
@@ -9309,7 +9301,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Flow()
   uint16_t zoneLen = SEGLEN / zones;
   uint16_t offset = (SEGLEN - zones * zoneLen) >> 1;
 
-  fill(mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, -counter, nullptr, false, true, 255));
+  fill(RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, -counter, nullptr, false, true, 255)));
 
   for (uint16_t z = 0; z < zones; z++)
   {
@@ -9319,7 +9311,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Flow()
       uint8_t colorIndex = (i * 255 / zoneLen) - counter;
       uint16_t led = (z & 0x01) ? i : (zoneLen -1) -i;
       if (IS_REVERSE) led = (zoneLen -1) -led;
-      SEGMENT.SetPixelColor(pos + led, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
+      SEGMENT.SetPixelColor(pos + led, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
     }
   }
 
@@ -9374,7 +9366,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
 
   for (uint16_t i = 0; i < SEGLEN; i++) {
     SEGMENT.SetPixelColor(i, 
-      (drawingLit) ? mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(1),
+      (drawingLit) ? RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)) : SEGCOLOR(1),
       true
     );
     cnt++;
@@ -9435,7 +9427,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint
   if (color == color1 && do_palette)
   {
     for(uint16_t i = 0; i < SEGLEN; i++) {
-      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
     }
   } else fill(color);
 
@@ -9491,7 +9483,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Strobe()
 void mAnimatorLight::SubTask_Segment_Animation__Strobe_Multi()
 {
   for(uint16_t i = 0; i < SEGLEN; i++) {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
   }
 
   uint16_t delay = 50 + 20*(uint16_t)(255-SEGMENT.speed());
@@ -9575,7 +9567,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Lightning()
   if (SEGMENT.aux1 > 3 && !(SEGMENT.aux1 & 0x01)) { //flash on even number >2
     for (int i = ledstart; i < ledstart + ledlen; i++)
     {
-      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0, bri));
+      SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0, bri));
     }
     SEGMENT.aux1--;
 
@@ -9697,10 +9689,10 @@ void mAnimatorLight::SubTask_Segment_Animation__Railway()
   if (SEGMENT.aux0) pos = 255 - pos;
   for (uint16_t i = 0; i < SEGLEN; i += 2)
   {
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, 255 - pos, nullptr, false, false, 255));
+    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, 255 - pos, nullptr, false, false, 255));
     if (i < SEGLEN -1)
     {
-      SEGMENT.SetPixelColor(i + 1, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, pos, nullptr, false, false, 255));
+      SEGMENT.SetPixelColor(i + 1, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pos, nullptr, false, false, 255));
     }
   }
   SEGMENT.step += FRAMETIME_MS;
@@ -9747,7 +9739,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Heartbeat()
   }
 
   for (uint16_t i = 0; i < SEGLEN; i++) {
-    SEGMENT.SetPixelColor(i, ColourBlendU32(mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), 255 - (SEGMENT.aux1 >> 8)));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)), SEGCOLOR(1), 255 - (SEGMENT.aux1 >> 8)));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -9987,7 +9979,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Phased(uint8_t moder)
     val += phase * (i % modVal +1) /2;                           // This sets the varying phase change of the waves. By Andrew Tuline.
     uint8_t b = cubicwave8(val);                                 // Now we make an 8 bit sinewave.
     b = (b > cutOff) ? (b - cutOff) : 0;                         // A ternary operator to cutoff the light.
-    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, index, nullptr, false, false, 0), b));
+    SEGMENT.SetPixelColor(i, ColourBlendU32(SEGCOLOR(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, index, nullptr, false, false, 0)), b));
     index += 256 / SEGLEN;
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -10038,12 +10030,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Scan(bool dual)
   if (dual) {
     for (uint16_t j = led_offset; j < led_offset + size; j++) {
       uint16_t i2 = SEGLEN -1 -j;
-      SEGMENT.SetPixelColor(i2, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i2, nullptr, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
+      SEGMENT.SetPixelColor(i2, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i2, nullptr, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
     }
   }
 
   for (uint16_t j = led_offset; j < led_offset + size; j++) {
-    SEGMENT.SetPixelColor(j, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, j, nullptr, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.SetPixelColor(j, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, j, nullptr, true, PALETTE_SOLID_WRAP, 0));
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -10091,14 +10083,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Larson_Scanner(bool dual)
   
   for (uint16_t i = SEGMENT.step; i < index; i++) {
     uint16_t j = (SEGMENT.aux0)?i:SEGLEN-1-i;
-    SEGMENT.SetPixelColor( j, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, j, nullptr, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.SetPixelColor( j, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, j, nullptr, true, PALETTE_SOLID_WRAP, 0));
   }
   if (dual) {
     uint32_t c;
     if (SEGCOLOR(2) != 0) {
       c = SEGCOLOR(2);
     } else {
-      c = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0);
+      c = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0));
     }
 
     for (uint16_t i = SEGMENT.step; i < index; i++) {
@@ -10146,7 +10138,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ICU()
   fill(SEGCOLOR(1));
 
   byte pindex = map(dest, 0, SEGLEN-SEGLEN/space, 0, 255);
-  uint32_t col = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, pindex, nullptr, false, false, 0);
+  uint32_t col = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pindex, nullptr, false, false, 0));
 
   SEGMENT.SetPixelColor(dest, col);
   SEGMENT.SetPixelColor(dest + SEGLEN/space, col);
@@ -10235,7 +10227,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Ripple(bool rainbow)
     {
       uint8_t rippledecay = (SEGMENT.speed() >> 4) +1; //faster decay if faster propagation
       uint16_t rippleorigin = ripples[i].pos;
-      uint32_t col = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, ripples[i].color, nullptr, false, false, 255);
+      uint32_t col = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, ripples[i].color, nullptr, false, false, 255));
       uint16_t propagation = ((ripplestate/rippledecay -1) * SEGMENT.speed());
       int16_t propI = propagation >> 8;
       uint8_t propF = propagation & 0xFF;
@@ -10298,14 +10290,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Comet()
 
   fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
 
-  SEGMENT.SetPixelColor( index, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0));
+  SEGMENT.SetPixelColor( index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, index, nullptr, true, PALETTE_SOLID_WRAP, 0));
   if (index > SEGMENT.aux0) {
     for (uint16_t i = SEGMENT.aux0; i < index ; i++) {
-       SEGMENT.SetPixelColor( i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
+       SEGMENT.SetPixelColor( i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
     }
   } else if (index < SEGMENT.aux0 && index < 10) {
     for (uint16_t i = 0; i < index ; i++) {
-       SEGMENT.SetPixelColor( i, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
+       SEGMENT.SetPixelColor( i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
     }      
   }
   SEGMENT.aux0 = index++;
@@ -10336,7 +10328,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chunchun()
     counter -= span/numBirds;
     int megumin = sin16(counter) + 0x8000;
     uint32_t bird = (megumin * SEGLEN) >> 16;
-    uint32_t c = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, (i * 255)/ numBirds, nullptr, false, true, 0);
+    uint32_t c = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, (i * 255)/ numBirds, nullptr, false, true, 0));
     SEGMENT.SetPixelColor(bird, c);
   }
 
@@ -10432,14 +10424,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rai
   fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
   uint16_t pos = beatsin16(SEGMENT.speed()/10,0,SEGLEN-1);
   if (SEGMENT.call == 0) SEGMENT.aux0 = pos;
-  uint32_t color1 = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, pos, nullptr, true, false, 0);
+  uint32_t color1 = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pos, nullptr, true, false, 0));
   uint32_t color2 = SEGCOLOR(2);
   if (rainbow) {
     color1 = color_wheel((pos & 0x07) * 32);
   }
   SEGMENT.SetPixelColor(pos, color1);
   if (dual) {
-    if (!color2) color2 = mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, pos, nullptr, true, false, 0);
+    if (!color2) color2 = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pos, nullptr, true, false, 0));
     if (rainbow) color2 = color1; //rainbow
     SEGMENT.SetPixelColor(SEGLEN-1-pos, color2);
   }
@@ -10595,7 +10587,7 @@ CRGB colour;
 
  uint16_t j = 0;
  uint16_t i = 0;
-    pCONT_lAni->SEGMENT.SetPixelColor(j, mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, i, nullptr, true, false, 10));
+    pCONT_lAni->SEGMENT.SetPixelColor(j, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, false, 10));
   for(uint16_t i = 0; i < 50; i++) {
     
     j = i;//map(i,0,50,0,255);
@@ -10637,15 +10629,15 @@ uint32_t col = colour.r*65536 +  colour.g*256 +  colour.b;
   
   
   // // Pick new colours
-  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
   
   // // Get starting positions already on show
   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // // Call the animator to blend from previous to new
-  // SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  // SetSegment_AnimFunctionCallback(  SEGIDX, 
   //   [this](const AnimationParam& param){ 
-  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+  //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
   //   }
   // );
 
@@ -10772,15 +10764,15 @@ StripUpdate();
   
   
   // // Pick new colours
-  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+  // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
   
   // // Get starting positions already on show
   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
   // // Call the animator to blend from previous to new
-  // SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+  // SetSegment_AnimFunctionCallback(  SEGIDX, 
   //   [this](const AnimationParam& param){ 
-  //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+  //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
   //   }
   // );
 
@@ -10843,15 +10835,15 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static_On()
 
   
 //   // // Pick new colours
-//   // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, strip->_segment_index_primary);
+//   // DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
 
 //   // // Get starting positions already on show
 //   // DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
 
 //   // // Call the animator to blend from previous to new
-//   // SetSegment_AnimFunctionCallback(  strip->_segment_index_primary, 
+//   // SetSegment_AnimFunctionCallback(  SEGIDX, 
 //   //   [this](const AnimationParam& param){ 
-//   //     this->AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(param); 
+//   //     this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
 //   //   }
 //   // );
 

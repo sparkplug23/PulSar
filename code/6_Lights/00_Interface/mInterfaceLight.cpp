@@ -139,7 +139,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
   device = pCONT_set->devices_present;
   
   //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
-  subtype = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID;
+  subtype = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID;
   
   pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
 
@@ -165,9 +165,9 @@ void mInterfaceLight::Init(void) //LightInit(void)
     // DLI->AddDeviceName(buffer,E M_MODULE_LIGHTS_INTERFACE_ID,ii);
     DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID);
   }
-  for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);ii++){ 
+  for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);ii++){ 
     sprintf(buffer, D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR, ii);
-    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
+    DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
   }
   for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID);ii++){ 
     sprintf(buffer, D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_GENERIC__NAME_CTR, ii);
@@ -196,7 +196,7 @@ void mInterfaceLight::Init(void) //LightInit(void)
 //   /***
 //    * Configure RgbcctController Instance
 //    * */
-//   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
+//   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
   
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 //       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
@@ -411,16 +411,16 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
 // #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
-//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
+//       pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[0].data);
+//       // active_scene_palette_id = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
-//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
+//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
 // #else
 
-//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_users[0].data);
-//       // active_scene_palette_id = PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
+//       rgbcct_controller.setRgbcctColourOutputAddress(mPaletteI->palettelist.rgbcct_segment_colour_users[0].data);
+//       // active_scene_palette_id = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
 //       // active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_user_colour_map_ids[0]); // use first for now
-//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);
+//       CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
 //   DEBUG_LINE_HERE;
 
 
@@ -471,7 +471,9 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef USE_MODULE_LIGHTS_ANIMATOR
       // replace with GetLightPower() so its updated internally
       
+      #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
       light_power_state = pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255()?1:0;
+      #endif
 
       //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
       #endif // USE_MODULE_LIGHTS_ANIMATOR
@@ -566,12 +568,12 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
 // Serial.println("rgbcct0");
 // for(int i=0;i<5;i++)
 // {
-//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[0].data[i]);
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_segment_colour_users[0].data[i]);
 // }
 // Serial.println("rgbcct1");
 // for(int i=0;i<5;i++)
 // {
-//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_users[1].data[i]);
+//   Serial.printf("%d,", mPaletteI->palettelist.rgbcct_segment_colour_users[1].data[i]);
 // }
 // Serial.println("every second");
 
@@ -779,7 +781,7 @@ void mInterfaceLight::EverySecond_AutoOff(){
 
 }// END EverySecond_AutoOff
 
-
+#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
 
   colour->R  = mapvalue(colour->R,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
@@ -794,6 +796,7 @@ getBrightnessCCT255());
 getBrightnessCCT255());
 
 }
+#endif // #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 
 
 

@@ -965,9 +965,20 @@
 #define D_GPIO_FUNCTION_RGB_CLOCK_CTR     "WS281x Clock"
 #define D_GPIO_FUNCTION_SWT1_CTR     "SWT1"
 #define D_GPIO_FUNCTION_SWT2_CTR     "SWT2"
+#define D_GPIO_FUNCTION_SWT3_CTR     "SWT3"
+#define D_GPIO_FUNCTION_SWT4_CTR     "SWT4"
+#define D_GPIO_FUNCTION_SWT5_CTR     "SWT5"
+#define D_GPIO_FUNCTION_SWT6_CTR     "SWT6"
+#define D_GPIO_FUNCTION_SWT7_CTR     "SWT7"
+#define D_GPIO_FUNCTION_SWT8_CTR     "SWT8"
 #define D_GPIO_FUNCTION_SWT1_INV_CTR     "SWT1 Inv"
 #define D_GPIO_FUNCTION_SWT2_INV_CTR     "SWT2 Inv"
 #define D_GPIO_FUNCTION_SWT3_INV_CTR     "SWT3 Inv"
+#define D_GPIO_FUNCTION_SWT4_INV_CTR     "SWT4 Inv"
+#define D_GPIO_FUNCTION_SWT5_INV_CTR     "SWT5 Inv"
+#define D_GPIO_FUNCTION_SWT6_INV_CTR     "SWT6 Inv"
+#define D_GPIO_FUNCTION_SWT7_INV_CTR     "SWT7 Inv"
+#define D_GPIO_FUNCTION_SWT8_INV_CTR     "SWT8 Inv"
 #define D_GPIO_FUNCTION_SWT1_NP_CTR     "SWT1_NP"
 #define D_GPIO_FUNCTION_SWT2_NP_CTR     "SWT2_NP"
 #define D_GPIO_FUNCTION_REL1_CTR          "Relay 1"
@@ -1288,66 +1299,133 @@
 
 #define D_CMND_RESET "CommandReset"
 
+
+// #define ENABLE_FEATURE_LOG_PREFIXES
+
+
 /**
  *  Log message prefix
+ * 
+ * Lets add a define that optionally replaces these will nothing so the log window can be simplified when needed
  * */
-#define D_LOG_APPLICATION "APP: "  // Application
-#define D_LOG_BRIDGE "BRG: "       // Bridge
-#define D_LOG_BUTTONS "BTN: "
-#define D_LOG_CONFIG "CFG: "       // Settings
-#define D_LOG_POINTERCONFIG "PCFG: "       // Settings
-#define D_LOG_COMMAND "CMD: "      // Command
-#define D_LOG_DEBUG "DBG: "        // Debug
-#define D_LOG_DHT "DHT: "          // DHT sensor
-#define D_LOG_DSB "DSB: "          // DS18xB20 sensor
-#define D_LOG_GARAGE "GAR: "         // relays
-#define D_LOG_HTTP "HTP: "         // HTTP webserver
-#define D_LOG_I2C "I2C: "          // I2C
-#define D_LOG_IRR "IRR: "          // Infra Red Received
-#define D_LOG_LOG "LOG: "          // Logging
-#define D_LOG_MODULE "MOD: "       // Module
-#define D_LOG_MDNS "DNS: "         // mDNS
-#define D_LOG_MQTT "MQT: "         // MQTT
-#define D_LOG_PUBSUB "PSB: "         // PubSub
-#define D_LOG_OTHER "OTH: "        // Other
-#define D_LOG_RESULT "RSL: "       // Result
-#define D_LOG_RFR "RFR: "          // RF Received
-#define D_LOG_SERIAL "SER: "       // Serial
-#define D_LOG_SHT1 "SHT: "         // SHT1x sensor
-#define D_LOG_UPLOAD "UPL: "       // Upload
-#define D_LOG_UPNP "UPP: "         // UPnP
-#define D_LOG_WIFI "WIF: "         // Wifi
-#define D_LOG_NEO "NEO: "         // Neopixels
-#define D_LOG_PIXEL "PIX: "         // Neopixels
-#define D_LOG_LIGHT "LGT: "         // Light interface
-#define D_LOG_DOORBELL "DRB: "         // Neopixels
-#define D_LOG_RELAYS "RLY: "         // relays
-#define D_LOG_TIME "TIM: "         // Time
-#define D_LOG_UPTIME "UPT: "         // Uptime
-#define D_LOG_DHT "DHT: "         // Uptime
-#define D_LOG_BME "BME: "         // Uptime
-#define D_LOG_PZEM "PZM: "         // Uptime
-#define D_LOG_SETTINGS "SET: "         // Uptime
-#define D_LOG_ULTRASONIC "ULT: "         // Uptime
-#define D_LOG_DB18 "DB8: "         // Uptime
-#define D_LOG_HEATINGPANEL "HPL: "         // Uptime
-#define D_LOG_HEATING "HET: "         // Uptime
-#define D_LOG_PIR "PIR: "         // PIR
-#define D_LOG_CEILINGFAN "CFN: "         // Ceiling Fan
-#define D_LOG_RESPONSE "RES: "
-#define D_LOG_CLASSLIST "CLL: "
-#define D_LOG_NEXTION "NEX: "
-#define D_LOG_CHIME "CHM: "         // Uptime
-#define D_LOG_BLINDS "BLD: " 
-#define D_LOG_MEMORY "MEM: "       // 
-#define D_LOG_ASYNC "ASC: "
-#define D_LOG_TEST "TST: "
-#define D_LOG_SDCARD "SDC: "
-#define D_LOG_SWITCHES "SWH: "
-#define D_LOG_RULES "RUL: "
-#define D_LOG_SR04 "SR4: "
-#define D_LOG_FONA "FON: "
-#define D_LOG_BH1750 "BH1: "
+#ifdef ENABLE_FEATURE_LOG_PREFIXES
+  #define D_LOG_APPLICATION "APP: "  // Application
+  #define D_LOG_BRIDGE "BRG: "       // Bridge
+  #define D_LOG_BUTTONS "BTN: "
+  #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
+  #define D_LOG_COMMAND "CMD: "      // Command
+  #define D_LOG_DEBUG "DBG: "        // Debug
+  #define D_LOG_DHT "DHT: "          // DHT sensor
+  #define D_LOG_DSB "DSB: "          // DS18xB20 sensor
+  #define D_LOG_GARAGE "GAR: "         // relays
+  #define D_LOG_HTTP "HTP: "         // HTTP webserver
+  #define D_LOG_I2C "I2C: "          // I2C
+  #define D_LOG_IRR "IRR: "          // Infra Red Received
+  #define D_LOG_LOG "LOG: "          // Logging
+  #define D_LOG_MODULE "MOD: "       // Module
+  #define D_LOG_MDNS "DNS: "         // mDNS
+  #define D_LOG_MQTT "MQT: "         // MQTT
+  #define D_LOG_PUBSUB "PSB: "         // PubSub
+  #define D_LOG_OTHER "OTH: "        // Other
+  #define D_LOG_RESULT "RSL: "       // Result
+  #define D_LOG_RFR "RFR: "          // RF Received
+  #define D_LOG_SERIAL "SER: "       // Serial
+  #define D_LOG_SHT1 "SHT: "         // SHT1x sensor
+  #define D_LOG_UPLOAD "UPL: "       // Upload
+  #define D_LOG_UPNP "UPP: "         // UPnP
+  #define D_LOG_WIFI "WIF: "         // Wifi
+  #define D_LOG_NEO "NEO: "         // Neopixels
+  #define D_LOG_PIXEL "PIX: "         // Neopixels
+  #define D_LOG_LIGHT "LGT: "         // Light interface
+  #define D_LOG_DOORBELL "DRB: "         // Neopixels
+  #define D_LOG_RELAYS "RLY: "         // relays
+  #define D_LOG_TIME "TIM: "         // Time
+  #define D_LOG_UPTIME "UPT: "         // Uptime
+  #define D_LOG_DHT "DHT: "         // Uptime
+  #define D_LOG_BME "BME: "         // Uptime
+  #define D_LOG_PZEM "PZM: "         // Uptime
+  #define D_LOG_SETTINGS "SET: "         // Uptime
+  #define D_LOG_ULTRASONIC "ULT: "         // Uptime
+  #define D_LOG_DB18 "DB8: "         // Uptime
+  #define D_LOG_HEATINGPANEL "HPL: "         // Uptime
+  #define D_LOG_HEATING "HET: "         // Uptime
+  #define D_LOG_PIR "PIR: "         // PIR
+  #define D_LOG_CEILINGFAN "CFN: "         // Ceiling Fan
+  #define D_LOG_RESPONSE "RES: "
+  #define D_LOG_CLASSLIST "CLL: "
+  #define D_LOG_NEXTION "NEX: "
+  #define D_LOG_CHIME "CHM: "         // Uptime
+  #define D_LOG_BLINDS "BLD: " 
+  #define D_LOG_MEMORY "MEM: "       // 
+  #define D_LOG_ASYNC "ASC: "
+  #define D_LOG_TEST "TST: "
+  #define D_LOG_SDCARD "SDC: "
+  #define D_LOG_SWITCHES "SWH: "
+  #define D_LOG_RULES "RUL: "
+  #define D_LOG_SR04 "SR4: "
+  #define D_LOG_FONA "FON: "
+  #define D_LOG_BH1750 "BH1: "
+#else 
+  #define D_LOG_APPLICATION "APP: "  // Application
+  #define D_LOG_BRIDGE "BRG: "       // Bridge
+  #define D_LOG_BUTTONS "BTN: "
+  #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
+  #define D_LOG_COMMAND "CMD: "      // Command
+  #define D_LOG_DEBUG "DBG: "        // Debug
+  #define D_LOG_DHT "DHT: "          // DHT sensor
+  #define D_LOG_DSB "DSB: "          // DS18xB20 sensor
+  #define D_LOG_GARAGE "GAR: "         // relays
+  #define D_LOG_HTTP "HTP: "         // HTTP webserver
+  #define D_LOG_I2C "I2C: "          // I2C
+  #define D_LOG_IRR "IRR: "          // Infra Red Received
+  #define D_LOG_LOG "LOG: "          // Logging
+  #define D_LOG_MODULE "MOD: "       // Module
+  #define D_LOG_MDNS "DNS: "         // mDNS
+  #define D_LOG_MQTT "MQT: "         // MQTT
+  #define D_LOG_PUBSUB "PSB: "         // PubSub
+  #define D_LOG_OTHER "OTH: "        // Other
+  #define D_LOG_RESULT "RSL: "       // Result
+  #define D_LOG_RFR "RFR: "          // RF Received
+  #define D_LOG_SERIAL "SER: "       // Serial
+  #define D_LOG_SHT1 "SHT: "         // SHT1x sensor
+  #define D_LOG_UPLOAD "UPL: "       // Upload
+  #define D_LOG_UPNP "UPP: "         // UPnP
+  #define D_LOG_WIFI "WIF: "         // Wifi
+  #define D_LOG_NEO "NEO: "         // Neopixels
+  #define D_LOG_PIXEL         // Neopixels
+  #define D_LOG_LIGHT "LGT: "         // Light interface
+  #define D_LOG_DOORBELL "DRB: "         // Neopixels
+  #define D_LOG_RELAYS "RLY: "         // relays
+  #define D_LOG_TIME "TIM: "         // Time
+  #define D_LOG_UPTIME "UPT: "         // Uptime
+  #define D_LOG_DHT "DHT: "         // Uptime
+  #define D_LOG_BME "BME: "         // Uptime
+  #define D_LOG_PZEM "PZM: "         // Uptime
+  #define D_LOG_SETTINGS "SET: "         // Uptime
+  #define D_LOG_ULTRASONIC "ULT: "         // Uptime
+  #define D_LOG_DB18 "DB8: "         // Uptime
+  #define D_LOG_HEATINGPANEL "HPL: "         // Uptime
+  #define D_LOG_HEATING "HET: "         // Uptime
+  #define D_LOG_PIR "PIR: "         // PIR
+  #define D_LOG_CEILINGFAN "CFN: "         // Ceiling Fan
+  #define D_LOG_RESPONSE "RES: "
+  #define D_LOG_CLASSLIST "CLL: "
+  #define D_LOG_NEXTION "NEX: "
+  #define D_LOG_CHIME "CHM: "         // Uptime
+  #define D_LOG_BLINDS "BLD: " 
+  #define D_LOG_MEMORY "MEM: "       // 
+  #define D_LOG_ASYNC "ASC: "
+  #define D_LOG_TEST "TST: "
+  #define D_LOG_SDCARD "SDC: "
+  #define D_LOG_SWITCHES "SWH: "
+  #define D_LOG_RULES "RUL: "
+  #define D_LOG_SR04 "SR4: "
+  #define D_LOG_FONA "FON: "
+  #define D_LOG_BH1750 "BH1: "
+#endif // ENABLE_FEATURE_LOG_PREFIXES
+
 
 //SDM220
 #define D_PHASE_ANGLE     "Phase Angle"

@@ -148,6 +148,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         SEGMENT_I(segment_index).palette.id--;
       }else
       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+        ALOG_HGL(PSTR("tmp_id=%d"),tmp_id);
         CommandSet_PaletteID(tmp_id, segment_index);
         data_buffer.isserviced++;
       }
@@ -266,6 +267,17 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["Opacity"])
+  { 
+
+
+    ALOG_INF( PSTR("Opacity %d %d"), jtok.getInt(), segment_index );
+   SEGMENT_I(segment_index).opacity = jtok.getInt();  
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
   #else
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Reverse"])
@@ -309,6 +321,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   #endif // ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
 
 
+  if(jtok = obj[PM_JSON_EFFECTS].getObject()["SegBrightness"])
+  { 
+    SEGMENT_I(segment_index).seg_brightness = jtok.getInt();  
+    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K("SegBrightness")), SEGMENT_I(segment_index).seg_brightness);
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
 
 
   
@@ -464,41 +484,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_AGED_COLOURING)), pCONT_iLight->SEGMENT_I(segment_index).flags.apply_small_saturation_randomness_on_palette_colours_to_make_them_unique);
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
-
-  /**
-   * @brief 
-   * This needs another name, but should be included until after colour wled type is removed
-   * 
-   */
-  // #ifdef E NABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
-  /**
-   * @brief These are for WLED effects basic 3 colour system, eventually to be merged into mine (likely use the 3 rgbcct options? or add another? or simply more of rgbcct users * 
-   */
-  for(uint8_t colour_id=0;colour_id<3;colour_id++)
-  {
-    // Edit this so it must be length of 4 (or maybe 5?), change colour to RGBCCT value
-    snprintf(buffer,sizeof(buffer),"SegColour%d",colour_id);
-    if(jtok = obj[buffer]){ 
-      if(jtok.isArray()){
-        uint8_t array[4] = {0};
-        uint8_t arrlen = 0;
-        JsonParserArray arrobj = jtok;
-        for(auto v : arrobj) {
-          if(arrlen > 4){ break; }
-          array[arrlen++] = v.getInt();       
-        }
-        // w,r,g,b packed 32 bit colour
-        uint32_t colour32_bit = (((uint32_t)array[3] << 24) | ((uint32_t)array[0] << 16) | ((uint32_t)array[1] << 8) | (uint32_t)array[2]);
-
-        ALOG_INF(PSTR("[%d] colour32bit: (%d,%d,%d,%d) %d"), segment_index, array[0], array[1], array[2], array[3], colour32_bit);
-
-       SEGMENT_I(segment_index).colors[colour_id] = colour32_bit;      
-        data_buffer.isserviced++;
-      }
-    }
-
-  }
-  // #endif // NABLE_DEVFEATURE_INCLUDE_WLED_PRIMARY_COLOUR_OPTIONS
 
 
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
@@ -871,6 +856,160 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    * Rgbcct controller that will be added into segments (phasing out of interlight?)
    * 
    * *******************************/
+
+  #ifdef ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+  /**
+   * @brief 
+   * 
+   * New method will assume the first Rgbcct_colors is the primary scene, since it is not likely they will be used more than once
+   * 
+   * However, for some effects that may use multiple (possible large amount now it is vector)
+   * I need a way to encapsulate RgbcctColor(blank), Rgbcct1, 2 etc
+   * Use for loop
+   * 
+   * If(rgbcct exactly), loop once
+   * 
+   * if(rgbcct1/2/3/4/5) then loop for each found. I will therefore have to loop until none are found and hence must be increasing numbers only
+   * 
+   */
+
+  // if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
+  //   CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
+  //   data_buffer.isserviced++;
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // } 
+
+  // Wled.color aka segcolour will be merged into this method to allow full colour options
+
+  uint8_t colour_index = 0;
+
+  for(uint8_t col_i=0;col_i<6;col_i++)
+  {
+    JsonParserObject seg_obj = 0;
+
+    if(col_i==0)
+    { // No index so default to 0
+      snprintf(buffer, sizeof(buffer), "SegColour");
+      colour_index = 0;
+    }
+    else
+    { 
+      snprintf(buffer, sizeof(buffer), "SegColour%d", col_i);
+      colour_index = col_i;
+    }
+
+    if(seg_obj = obj[buffer].getObject())
+    {
+
+      if(jtok = seg_obj[PM_JSON_HUE]){ // Assume range 0-359
+        CommandSet_SegColour_RgbcctColour_Hue_360(jtok.getInt(), colour_index, segment_index);
+        data_buffer.isserviced++;
+        ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getHue360());
+      }
+
+      
+      if(jtok = seg_obj[PM_JSON_SAT]){ // Assume range 0-100
+        CommandSet_SegColour_RgbcctColour_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
+        data_buffer.isserviced++; 
+        ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_SAT)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getSat255());
+      }else
+      if(jtok = seg_obj[PM_JSON_SAT_255]){ // alternate full range 0-255
+        CommandSet_SegColour_RgbcctColour_Sat_255(jtok.getInt(), colour_index, segment_index);
+        data_buffer.isserviced++;
+        ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_SAT255)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getSat255());
+      }
+
+
+      if(jtok = seg_obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
+        CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(mapvalue(jtok.getInt(), 0,100, pCONT_iLight->_ct_min_range, pCONT_iLight->_ct_max_range), colour_index, segment_index);
+        data_buffer.isserviced++;
+        ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_PERCENTAGE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getCCT());
+      }else
+      if(jtok = seg_obj[PM_JSON_CCT_TEMP]){ // Exact kelvin
+        CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(jtok.getInt(), colour_index, segment_index);
+        data_buffer.isserviced++;
+        ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_PERCENTAGE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getCCT());
+      }
+
+    }
+  
+  }
+
+
+// Flip these so default is 0 to 100%, and the other is range controlled
+
+//   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
+//     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   } 
+
+
+  /**
+   * @brief "RgbcctController" as level one to target everything inside the controllers
+   * 
+   */
+  if(jtok = obj["RgbcctController"].getObject()[D_JSON_SUBTYPE]){ // Assume range 0-100
+
+    CommandSet_RgbcctController_SubType(jtok.getInt(), segment_index);
+    // _segment_runtimes[i].rgbcct_controller->setSubType(RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID);
+
+    // CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt(), segment_index);
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+//     CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
+//     CommandSet_BrtCT_255(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+
+
+// // Flip these so default is 0 to 100%, and the other is range controlled
+//   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
+//     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }else
+//   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
+//     CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   }
+
+//   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
+//     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
+//     data_buffer.isserviced++;
+//     #ifdef ENABLE_LOG_LEVEL_DEBUG
+//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
+//     #endif // ENABLE_LOG_LEVEL_DEBUG
+//   } 
+
+
+
+  #else
   
 
   // if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
@@ -983,7 +1122,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   if(jtok = obj["RgbcctController"].getObject()[D_JSON_SUBTYPE]){ // Assume range 0-100
 
     CommandSet_RgbcctController_SubType(jtok.getInt(), segment_index);
-    // _segment_runtimes[i].rgbcct_controller->setSubType(RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBCCT__ID);
+    // _segment_runtimes[i].rgbcct_controller->setSubType(RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID);
 
     // CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt(), segment_index);
     data_buffer.isserviced++;
@@ -1033,6 +1172,40 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 //     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
 //     #endif // ENABLE_LOG_LEVEL_DEBUG
 //   } 
+
+#endif // ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
+    CommandSet_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255), segment_index);
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
+    #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
+    CommandSet_BrtRGB_255(jtok.getInt(), segment_index);
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+    CommandSet_BrtCT_255(mapvalue(jtok.getInt(), 0,100, 0,255), segment_index);
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
+    CommandSet_BrtCT_255(jtok.getInt(), segment_index);
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+
 
 //   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
 //     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000);
@@ -1561,11 +1734,11 @@ void mAnimatorLight::CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index)
 
   //   case 4:SEGMENT_I(segment_index).colour_type = 
 
-  //   case 4:SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
-  //   case 4:SEGMENT_I(segment_index).colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID;
+  //   case 4:SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
+  //   case 4:SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID;
   // }
   
- SEGMENT_I(segment_index).colour_type = (RgbcctColor_Controller::LightSubType)id;
+ SEGMENT_I(segment_index).colour_type = (RgbcctColor::LightSubType)id;
 
   ALOG_INF(PSTR("ColourType = %d"),SEGMENT_I(segment_index).colour_type);
 
@@ -1575,8 +1748,8 @@ const char* mAnimatorLight::GetColourTypeNameByID(uint8_t id, char* buffer, uint
 {
   // switch(id){  default:    
   
-  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID:    memcpy(buffer, "RGB", sizeof("RGB")); break;
-  //   case RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID:    memcpy(buffer, "RGBW", sizeof("RGBW")); break;
+  //   case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:    memcpy(buffer, "RGB", sizeof("RGB")); break;
+  //   case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:    memcpy(buffer, "RGBW", sizeof("RGBW")); break;
   
   // }
   return buffer;
@@ -1619,8 +1792,8 @@ void mAnimatorLight::CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t 
         hue_f = constrain(hue_f, 0.0f, 180.0f);
       uint16_t hue_i = (uint16_t)hue_f;
 
-      CommandSet_ActiveSolidPalette_Hue_360(hue_i);
-      CommandSet_ActiveSolidPalette_Sat_255(255);
+      // CommandSet_ActiveSolidPalette_Hue_360(hue_i);
+      // CommandSet_ActiveSolidPalette_Sat_255(255);
 
     }
     break;
@@ -1655,8 +1828,8 @@ void mAnimatorLight::CommandSet_ColourHeatMap_Palette(float* array_val, uint8_t 
 
       ALOG_COM(PSTR("Hue = %d"), hue_i);
 
-      CommandSet_ActiveSolidPalette_Hue_360(hue_i);
-      CommandSet_ActiveSolidPalette_Sat_255(255);
+      // CommandSet_ActiveSolidPalette_Hue_360(hue_i);
+      // CommandSet_ActiveSolidPalette_Sat_255(255);
 
 
     break;
@@ -1910,12 +2083,12 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
   strip->_segment_index_primary = segment_index;
   loadPalette_Michael(strip->_segments_new[segment_index].palette.id, segment_index);
 
-  //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
-  if((value>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)
-  &&(value<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID))
-  {
-    CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
-  }
+  // //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
+  // if((value>=mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)
+  // &&(value<mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
+  // {
+  //   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
+  // }
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_COLOUR_PALETTE)),SEGMENT_I(segment_index).palette.id);
@@ -2022,66 +2195,320 @@ uint8_t mAnimatorLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number,
 }
 
 
+#ifdef ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** ActiveRgbcctColourPaletteIDUsedAsScene *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+// #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+// //rename these in the future, enable more than 5 options for rgbcct colours 
+// void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index)
+// {
+
+//     uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;  
+//   if(segment_index<strip->_segments_new.size())
+//   {
+
+//     // mPaletteI->active_scene_palette_id = palette_id; // not used?
+
+//     /**
+//      * Temp conversion fix, set the original pointers in ilight
+//      * 
+//      */
+
+//     // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//     //                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+
+//     // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+//     SEGMENT_I(segment_index).active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+
+//     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
+//     #endif // ENABLE_LOG_LEVEL_INFO
+
+
+
+
+//     // #ifdef ENABLE_DEVFEATURE_UNIFIED_SEGMENT_REMOVING_MY_CODE
+//     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;  
+
+//   }
+
+// //   // mPaletteI->active_scene_palette_id = palette_id; // not used?
+
+// // /**
+// //  * Temp conversion fix, set the original pointers in ilight
+// //  * 
+// //  */
+
+// // // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// // //                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+
+// // // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+// // SEGMENT_I(segment_index).active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+  
+// //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
+// //     #endif // ENABLE_LOG_LEVEL_INFO
+
+// //     #endif
+// }
+// #endif //#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+
+void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index, uint8_t segment_index)
+{
+  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setHue360(hue_new);      
+}
+
+
+void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new, uint8_t colour_index, uint8_t segment_index)
+{
+  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setSat255(sat_new);    
+}
+
+
+void mAnimatorLight::CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index, uint8_t segment_index)
+{
+  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  SEGMENT_I(segment_index).rgbcctcolors[colour_index].setCCT(ct);    
+}
+
+
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** Brt *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
+
+// void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new, uint8_t segment_index)
+// {
+//   rgbcct_controller.setBrightness255(brt_new);
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   setBriRGB_Global(brt_new);
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), rgbcct_controller.getBrightness255());
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** BrtRGB *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mAnimatorLight::CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index)
+{
+  // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessRGB255(bri);
+ SEGMENT_I(segment_index).flags.fForceUpdate = true;
+
+  pCONT_iLight->_briRGB_Global = bri;
+  pCONT_iLight->setBriRGB_Global(bri);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB255());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** BrtCCT *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mAnimatorLight::CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index) {
+  // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessCCT255(bri);
+  // pCONT_iLight->_briCT_Global = bri;
+  pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true;
+  
+  pCONT_iLight->setBriCT_Global(bri);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** BrtCCT *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+
+// /**
+//  * direct percentage version
+//  * */
+// void mInterfaceLight::CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage) {
+
+//   CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(percentage, 0,100, _ct_min_range,_ct_max_range));
+
+//   // rgbcct_controller.setCCT(ct);
+//   // animation.flags.fForceUpdate = true;
+//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), rgbcct_controller.getCCT());
+//   // #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+
+// /**
+//  * "InternalSet" ie direct control, does not have Addlog feedback like commandset
+//  * */
+// void mInterfaceLight::InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) {
+//   rgbcct_controller.setCCT(ct);
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+// }
+
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** CommandSet_RGBCT_Linked *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
+
+// bool mInterfaceLight::CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked) {
+//   rgbcct_controller.setRGBCCTLinked(ct_rgb_linked);
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), rgbcct_controller.getRGBCCTLinked());
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// }
+
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** setSubType *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mAnimatorLight::CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index)
+{
+#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+  SEGMENT_I(segment_index).rgbcct_controller->setSubType(subtype);       // does NOT currrently work for always enabled white (without temperature)
+  // SEGMENT_I(segment_index).rgbcct_controller->setColorMode(subtype);
+  // pCONT_iLight->_briCT_Global = bri;
+  pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true;
+  
+  // pCONT_iLight->setBriCT_Global(bri);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SUBTYPE)), SEGMENT_I(segment_index).rgbcct_controller->getSubType());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+#endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+}
+
+
+
+// /******************************************************************************************************************************
+// *******************************************************************************************************************************
+// ****************** ActiveSolidPalette *****************************************************************************************
+// *******************************************************************************************************************************
+// *******************************************************************************************************************************/
+
+// void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc){
+//   rgbcct_controller.setChannelsRaw(r,g,b,ww,wc);  
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   // #ifdef ENABLE_LOG_LEVEL_INFO
+//   // char buffer[30];
+//   // snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+//   // #endif // ENABLE_LOG_LEVEL_DEBUG
+// }
+
+// void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
+//   rgbcct_controller.setChannelsRaw(values);    
+// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   animation.flags.fForceUpdate = true;
+// #else
+//   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
+//   #ifdef ENABLE_LOG_LEVEL_INFO
+//   char buffer[30];
+//   snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),values[0],values[1],values[2],values[3],values[4]);
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+//   #endif // ENABLE_LOG_LEVEL_DEBUG
+// }
+
+#else
+
+
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** ActiveRgbcctColourPaletteIDUsedAsScene *****************************************************************************************
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-//rename these in the future, enable more than 5 options for rgbcct colours 
-void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index)
-{
+// //rename these in the future, enable more than 5 options for rgbcct colours 
+// void mAnimatorLight::CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index)
+// {
 
-    uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;  
-  if(segment_index<strip->_segments_new.size())
-  {
+//     uint8_t palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;  
+//   if(segment_index<strip->_segments_new.size())
+//   {
 
-    // mPaletteI->active_scene_palette_id = palette_id; // not used?
+//     // mPaletteI->active_scene_palette_id = palette_id; // not used?
 
-    /**
-     * Temp conversion fix, set the original pointers in ilight
-     * 
-     */
+//     /**
+//      * Temp conversion fix, set the original pointers in ilight
+//      * 
+//      */
 
-    // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    //                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+//     // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//     //                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
 
-    // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//     // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 
-    SEGMENT_I(segment_index).active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+//     SEGMENT_I(segment_index).active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
 
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
-    #endif // ENABLE_LOG_LEVEL_INFO
-
-
-
-
-    // #ifdef ENABLE_DEVFEATURE_UNIFIED_SEGMENT_REMOVING_MY_CODE
-    palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;  
-
-  }
-
-//   // mPaletteI->active_scene_palette_id = palette_id; // not used?
-
-// /**
-//  * Temp conversion fix, set the original pointers in ilight
-//  * 
-//  */
-
-// // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-// //                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
-
-// // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-// SEGMENT_I(segment_index).active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
-  
 //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
+//     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
 //     #endif // ENABLE_LOG_LEVEL_INFO
 
-//     #endif
-}
+
+
+
+//     // #ifdef ENABLE_DEVFEATURE_UNIFIED_SEGMENT_REMOVING_MY_CODE
+//     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;  
+
+//   }
+
+// //   // mPaletteI->active_scene_palette_id = palette_id; // not used?
+
+// // /**
+// //  * Temp conversion fix, set the original pointers in ilight
+// //  * 
+// //  */
+
+// // // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+// // //                    pCONT_iLight->active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+
+// // // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+
+// // SEGMENT_I(segment_index).active_rgbcct_colour_p = reinterpret_cast<RgbcctColor*>(&pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[5*palette_id_adjusted_to_array_index]); // use first for now
+  
+// //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+// //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT "CommandSet_ActiveRgbcctColourPalette(%d) as %d"), palette_id, palette_id_adjusted_to_array_index);
+// //     #endif // ENABLE_LOG_LEVEL_INFO
+
+// //     #endif
+// }
 
 
 /******************************************************************************************************************************
@@ -2144,6 +2571,7 @@ void mAnimatorLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint
   #endif // ENABLE_LOG_LEVEL_COMMANDS
   #endif
 }
+
 
 // /******************************************************************************************************************************
 // *******************************************************************************************************************************
@@ -2327,6 +2755,12 @@ void mAnimatorLight::CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_
 //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
 //   #endif // ENABLE_LOG_LEVEL_DEBUG
 // }
+
+#endif // ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+
+
+
+
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 

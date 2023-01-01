@@ -341,17 +341,17 @@ class mInterfaceLight :
     void CommandSet_LightPowerState(uint8_t value);
     bool CommandGet_LightPowerState();
 
-    void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
+    // void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     void CommandSet_Brt_255(uint8_t value);
     void CommandSet_BrtRGB_255(uint8_t bri);
     void CommandSet_BrtCT_255(uint8_t bri);
-    void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
-    void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
-    void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
-    bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
-    void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
-    void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
-    void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
+    // void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
+    // void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
+    // void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
+    // bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
+    // void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
+    // void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
+    // void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);
     // void CommandSet_PaletteID(uint8_t value);
     
@@ -496,7 +496,9 @@ void RulesEvent_Set_Power();
     RgbcctColor Color32bit2RgbColour(uint32_t colour32bit);
 
     void UpdateSetOutputs();  
+#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
     void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
+#endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 
     
     RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);

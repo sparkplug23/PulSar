@@ -33,30 +33,9 @@ void mPalette::init_PresetColourPalettes()
   #endif
   
   /**
-   *  Variable HSBID 
-   * */
-  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID-PALETTELIST_VARIABLE_HSBID_01__ID);id++){
-    init_PresetColourPalettes_HSBID_UserFill(id);
-  }
-
-  /**
-   *  Variable HSBID 
-   * */
-  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);id++){
-    init_PresetColourPalettes_User_RGBCCT_Fill(id);
-  }
-
-  /**
-   *  Variable Encoded Generic 
-   * */
-  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_GENERIC_LENGTH__ID-PALETTELIST_VARIABLE_GENERIC_01__ID);id++){
-    init_PresetColourPalettes_User_Generic_Fill(0);
-  }
-
-  // DEBUG_LINE_HERE;
-  /**
    *  Static 
    * */
+  init_ColourPalettes_Party_Default();
   init_ColourPalettes_Autumn_Red();
   init_ColourPalettes_Autumn_Green();
   init_ColourPalettes_Winter(); 
@@ -72,7 +51,6 @@ void mPalette::init_PresetColourPalettes()
   init_ColourPalettes_Pink_Purple_01();
   init_ColourPalettes_Pink_Purple_02();
   init_ColourPalettes_Pink_Purple_03();
-  init_ColourPalettes_Shelf_Hearts();
   init_ColourPalettes_Pastel_01();
   init_ColourPalettes_Pastel_02();
   init_ColourPalettes_Gradient_01();
@@ -131,10 +109,40 @@ void mPalette::init_PresetColourPalettes()
   init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03();
   init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04();
   init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01();
+  
+  /**
+   *  Variable HSBID 
+   * */
+  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID-PALETTELIST_VARIABLE_HSBID_01__ID);id++){
+    init_PresetColourPalettes_HSBID_UserFill(id);
+  }
+
+  /**
+   *  Variable HSBID 
+   * */
+  for(uint8_t id=0;id<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);id++){
+    init_PresetColourPalettes_User_RGBCCT_Fill(id);
+  }
+
+  /**
+   *  Variable Encoded Generic 
+   * */
+  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_GENERIC_LENGTH__ID-PALETTELIST_VARIABLE_GENERIC_01__ID);id++){
+    init_PresetColourPalettes_User_Generic_Fill(0);
+  }
 
   // DEBUG_LINE_HERE;
 }
 
+
+void mPalette::init_ColourPalettes_Party_Default(){
+  palettelist.ptr                      = &palettelist.party_default;  
+  palettelist.ptr->id                  = PALETTELIST_STATIC_PARTY_DEFAULT__ID;
+  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA;
+  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA);
+  palettelist.ptr->encoding.data       = D_PALETTE_PARTY_DEFAULT_ENCODING;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PARTY_DEFAULT_NAME_CTR; 
+}
 
 void mPalette::init_ColourPalettes_Holloween_OP(){
   palettelist.ptr                      = &palettelist.holloween_op;  
@@ -234,15 +242,6 @@ void mPalette::init_ColourPalettes_Pastel_02(){
   palettelist.ptr->data_length         = sizeof(PM_PALETTE_PASTEL_02_COLOUR_MAP__DATA);
   palettelist.ptr->encoding.data       = D_PALETTE_PASTEL_02_ENCODING;
   palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PASTEL_02_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Shelf_Hearts(){
-  palettelist.ptr                      = &palettelist.shelf_hearts;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SHELF_HEARTS__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SHELF_HEARTS_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SHELF_HEARTS_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SHELF_HEARTS_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SHELF_HEARTS_NAME_CTR; 
 }
 
 void mPalette::init_ColourPalettes_Gradient_01(){
@@ -845,8 +844,8 @@ void mPalette::init_PresetColourPalettes_HSBID_UserFill(uint8_t id){
 
 void mPalette::init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id){
 
-  palettelist.ptr     = &palettelist.rgbcct_users[id];
-  palettelist.ptr->id = id+PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID;
+  palettelist.ptr     = &palettelist.rgbcct_segment_colour_users[id];
+  palettelist.ptr->id = id+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
 
   // Point to memory location
   palettelist.ptr->data = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[id*5];
@@ -954,34 +953,9 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
     ALOG_DBM(PSTR("GetPalettePointerByID=%d DEFAULT"),id);
     #endif // ENABLE_LOG_LEVEL_INFO
     /**
-     * Variable User HSBID
+     * Static Encoded Palettes
      * */
-    case PALETTELIST_VARIABLE_HSBID_01__ID: return &palettelist.hsbid_users[0];
-    case PALETTELIST_VARIABLE_HSBID_02__ID: return &palettelist.hsbid_users[1];
-    case PALETTELIST_VARIABLE_HSBID_03__ID: return &palettelist.hsbid_users[2];
-    case PALETTELIST_VARIABLE_HSBID_04__ID: return &palettelist.hsbid_users[3];
-    case PALETTELIST_VARIABLE_HSBID_05__ID: return &palettelist.hsbid_users[4];
-    case PALETTELIST_VARIABLE_HSBID_06__ID: return &palettelist.hsbid_users[5];
-    case PALETTELIST_VARIABLE_HSBID_07__ID: return &palettelist.hsbid_users[6];
-    case PALETTELIST_VARIABLE_HSBID_08__ID: return &palettelist.hsbid_users[7];
-    case PALETTELIST_VARIABLE_HSBID_09__ID: return &palettelist.hsbid_users[8];
-    case PALETTELIST_VARIABLE_HSBID_10__ID: return &palettelist.hsbid_users[9];
-    /**
-     * Variable User RGBCCT
-     * */
-    case PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID: return &palettelist.rgbcct_users[0];
-    case PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID: return &palettelist.rgbcct_users[1];
-    case PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID: return &palettelist.rgbcct_users[2];
-    case PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID: return &palettelist.rgbcct_users[3];
-    case PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID: return &palettelist.rgbcct_users[4];
-    /**
-     * Variable User Encoded Generic
-     * */
-    case PALETTELIST_VARIABLE_GENERIC_01__ID:       return &palettelist.encoded_users;
-    /**
-     * Variable User HSBID
-     * */
-    case PALETTELIST_STATIC_SHELF_HEARTS__ID:    return &palettelist.shelf_hearts;
+    case PALETTELIST_STATIC_PARTY_DEFAULT__ID:    return &palettelist.party_default;
     case PALETTELIST_STATIC_HOLLOWEEN_OP__ID:    return &palettelist.holloween_op;
     case PALETTELIST_STATIC_HOLLOWEEN_OGP__ID:   return &palettelist.holloween_ogp;
     case PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID:    return &palettelist.hot_pink_neon_with_navy;
@@ -1055,6 +1029,33 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
     case PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;
     case PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
     case PALETTELIST_STATIC_CUSTOM_USER_01__ID: return &palettelist.custom_user_01;
+    
+    /**
+     * Variable User HSBID
+     * */
+    case PALETTELIST_VARIABLE_HSBID_01__ID: return &palettelist.hsbid_users[0];
+    case PALETTELIST_VARIABLE_HSBID_02__ID: return &palettelist.hsbid_users[1];
+    case PALETTELIST_VARIABLE_HSBID_03__ID: return &palettelist.hsbid_users[2];
+    case PALETTELIST_VARIABLE_HSBID_04__ID: return &palettelist.hsbid_users[3];
+    case PALETTELIST_VARIABLE_HSBID_05__ID: return &palettelist.hsbid_users[4];
+    case PALETTELIST_VARIABLE_HSBID_06__ID: return &palettelist.hsbid_users[5];
+    case PALETTELIST_VARIABLE_HSBID_07__ID: return &palettelist.hsbid_users[6];
+    case PALETTELIST_VARIABLE_HSBID_08__ID: return &palettelist.hsbid_users[7];
+    case PALETTELIST_VARIABLE_HSBID_09__ID: return &palettelist.hsbid_users[8];
+    case PALETTELIST_VARIABLE_HSBID_10__ID: return &palettelist.hsbid_users[9];
+    /**
+     * Variable User RGBCCT
+     * */
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID: return &palettelist.rgbcct_segment_colour_users[0];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID: return &palettelist.rgbcct_segment_colour_users[1];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID: return &palettelist.rgbcct_segment_colour_users[2];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID: return &palettelist.rgbcct_segment_colour_users[3];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID: return &palettelist.rgbcct_segment_colour_users[4];
+    /**
+     * Variable User Encoded Generic
+     * */
+    case PALETTELIST_VARIABLE_GENERIC_01__ID:       return &palettelist.encoded_users;
+
   }
 
 }
@@ -1150,8 +1151,8 @@ bool mPalette::CheckPaletteByIDIsEditable(uint8_t id)
   if(( (id>=PALETTELIST_VARIABLE_HSBID_01__ID)&&
       (id<PALETTELIST_VARIABLE_HSBID_LENGTH__ID) )
     || 
-    ( (id>=PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)&&
-      (id<PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID) )
+    ( (id>=PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&
+      (id<PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID) )
     ){
     return true;
   }
@@ -1165,14 +1166,23 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
   }
 
   PALETTELIST::PALETTE *ptr = nullptr;
-  char buffer[50];
+  char buffer[100] = {0};
   int8_t index_found = -1;
 
-  // Check against stored progmem static names
-  for(uint8_t ii=0;ii<PALETTELIST_STATIC_LENGTH__ID;ii++){
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC__IDS
+   * 
+  ***************************************************************/
+
+  for( // loops relative to exact palette id
+    uint8_t ii=PALETTELIST_STATIC_PARTY_DEFAULT__ID;
+            ii<PALETTELIST_STATIC_LENGTH__ID;
+            ii++
+  ){
     ptr = GetPalettePointerByID(ii);
-    // AddLog(LOG_LEVEL_ERROR, PSTR("ptr->id %d"),ptr->id);
-    // AddLog(LOG_LEVEL_ERROR, PSTR("ptr->friendly_name_ctr %s"),ptr->friendly_name_ctr);
+
+    ALOG_DBM( PSTR("Name \"%s\"=?\"%s\""), c, ptr->friendly_name_ctr );
 
     if(ptr->friendly_name_ctr == nullptr)
     {
@@ -1181,71 +1191,135 @@ int8_t mPalette::GetPaletteIDbyName(const char* c){
 
     if(ptr->friendly_name_ctr != nullptr)
     { 
-      if(ii>PALETTELIST_VARIABLE_HSBID_LENGTH__ID)
-      { 
-        if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr))
-        {
-          ALOG_INF( PSTR("MATCH \"%c\" %d"), c, ii ); 
-          return ii;            
-        }
+      if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr))
+      {
+        ALOG_DBM( PSTR("MATCH \"%c\" %d"), c, ii ); 
+        return ii+PALETTELIST_STATIC_PARTY_DEFAULT__ID;            
       }
     }
-
   }
 
-
-  /**
-   * @brief Currently, these are being searched for manually (ie not using the device list)
-   * I will keep this code later, but as fallback options. IE if a user renames them, then these (below) will be the default names
+  /**************************************************************
    * 
-   */
+   * PALETTELIST_VARIABLE_HSBID__IDS
+   * 
+  ***************************************************************/
+  
+  for( // loops relative to 0
+    uint8_t ii=0;
+            ii<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID - PALETTELIST_VARIABLE_HSBID_01__ID);
+            ii++
+  ){
 
-  ALOG_WRN( PSTR("GetPaletteIDbyName: Not searching DeviceNameList") );
-
-
-  // Check for default user names 
-  char name_ctr[20];
-  for(uint8_t ii=0;ii<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID-PALETTELIST_VARIABLE_HSBID_01__ID);ii++){
-    memset(name_ctr,0,sizeof(name_ctr));
-    sprintf_P(name_ctr, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR), ii);
+    memset(buffer,0,sizeof(buffer));
+    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR), ii);
     
-    ALOG_DBG( PSTR("s> \"%c\""), name_ctr ); 
-    // Default names
-    if(strcmp(c,name_ctr)==0){
+    ALOG_DBM( PSTR("s> \"%s\""), buffer ); 
+    /**
+     * @brief Default Names
+     */
+    if(strcmp(c,buffer)==0){
       return PALETTELIST_VARIABLE_HSBID_01__ID+ii;
     }
+    /**
+     * @brief Future user defined names
+     * ALOG_WRN( PSTR("GetPaletteIDbyName: Not searching DeviceNameList") );
+     */
+    
   }
-// DEBUG_LINE_HERE;
-  // Check for default user names 
-  for(uint8_t ii=0;ii<(PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID);ii++){
-    memset(name_ctr,0,sizeof(name_ctr));
+  
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE_GENERIC__IDS
+   * 
+  ***************************************************************/
+  for( // loops relative to 0
+    uint8_t ii=0;
+            ii<(PALETTELIST_VARIABLE_GENERIC_LENGTH__ID - PALETTELIST_VARIABLE_GENERIC_01__ID);
+            ii++
+  ){
+
+    memset(buffer,0,sizeof(buffer));
+    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR), ii);
+    
+    ALOG_DBG( PSTR("s> \"%s\""), buffer ); 
+    // Default names
+    if(strcmp(c,buffer)==0){
+      return ii+PALETTELIST_VARIABLE_HSBID_01__ID;
+    }
+    
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * 
+  ***************************************************************/ 
+  for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
+            ii++
+  ){
+    memset(buffer,0,sizeof(buffer));
     // sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
     // Default names
-    sprintf_P(name_ctr, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), ii);
-
-// DEBUG_LINE_HERE;
-//     ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Searching with \"%s\" for \"%s\""),name_ctr,c );
-
-    if(strcmp(c,name_ctr)==0){
-// DEBUG_LINE_HERE;
-      return PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID+ii;
+    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), ii);
+    //     ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Searching with \"%s\" for \"%s\""),name_ctr,c );
+    if(strcmp(c,buffer)==0)
+    {
+      return ii+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
     }
   }
+    
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * 
+  ***************************************************************/
+  int16_t id = -1;
+ for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID-PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID);
+            ii++
+  ){
+    
+    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_NAMES_CTR ); 
 
-/**
- * @brief Search 4: Check if the name is the index in string format 
- * 
- * 
- */
-  // Finally, check if palette name was simply its index as string
+     if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_NAMES_CTR))>=0)
+      {
+        ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+        return id+PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID;            
+      }
+
+
+
+  }
+ 
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * 
+  ***************************************************************/
+  // if(
+  //   ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+  //   ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  // ){  
+
+
+  // }
+
+  /**************************************************************
+   * 
+   * Final check, palette id was given as string number
+   * 
+  ***************************************************************/
   uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
   if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH__ID)){
     return found_index;
   }
 
-// DEBUG_LINE_HERE;
-  return -1; // This may need to be "0" so at least a stable/valid palette is chosen
-
+  return -1; // Must be -1 to show name not found
 }
 
 
@@ -1450,7 +1524,8 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
   uint8_t new_size = 1; // assumed 1 at least
   PALETTELIST::PALETTE *ptr_tmp = GetPalettePointerByID(palette_id);
 
-  if(palette_id<PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
+  if((palette_id>=PALETTELIST_VARIABLE_HSBID_01__ID)&&(palette_id<PALETTELIST_VARIABLE_HSBID_LENGTH__ID))
+  {
     //Count until "not set value"  
     // new_size = GetDefaultColourPaletteUserIDsCount(palette.id);
 
@@ -1471,7 +1546,7 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
     ptr_tmp->data_length = new_size;
 
   }else
-  if((palette_id>=PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)&&(palette_id<PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID)){
+  if((palette_id>=PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
 
     new_size = 5; // only 1*5
     
@@ -1612,35 +1687,6 @@ Conversion map
      mcol is now mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID
      mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, A, nullptr, B, C, D)  <<<< copy and fill in as needed
  */
-uint32_t 
-#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-IRAM_ATTR 
-#endif 
-mPalette::GetColourFromPreloadedPaletteU32(
-  uint16_t palette_id,
-  uint16_t _pixel_position,//desired_index_from_palette,  
-  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-  bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-  uint8_t mcol, // will be phased out
-  bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-  uint8_t  brightness_scale, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-  uint8_t* discrete_colours_in_palette //ie length of palette as optional return
-){
-  return RgbcctColor::GetU32Colour(GetColourFromPreloadedPalette(
-    palette_id,
-    _pixel_position,//desired_index_from_palette,  
-    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    mcol, // will be phased out
-    flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-    brightness_scale, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-    discrete_colours_in_palette //ie length of palette as optional return    
-  ));
-}
-
-
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 IRAM_ATTR 
@@ -1653,18 +1699,28 @@ mPalette::GetColourFromPreloadedPalette(
   bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
   uint8_t mcol, // will be phased out
   bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-  uint8_t  brightness_scale, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-  uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+  uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+  // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
   RgbcctColor colour = RgbcctColor(0);
 
-  /**
-   * @brief My palettes
-   **/
+  #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+  Serial.println(palette_id);
+  DEBUG_LINE_HERE;
+  #endif
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC__IDS
+   * PALETTELIST_VARIABLE_HSBID__IDS
+   * PALETTELIST_VARIABLE_GENERIC__IDS
+   * 
+  ***************************************************************/
   if(
-    (palette_id >= PALETTELIST_VARIABLE_HSBID_01__ID) &&
-    (palette_id < PALETTELIST_STATIC_LENGTH__ID)
+    ((palette_id >= PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC_LENGTH__ID)) ||
+    ((palette_id >= PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
+    ((palette_id >= PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
   ){  
 
     // ALOG_INF(PSTR("MINE %d"), palette_id);
@@ -1679,6 +1735,12 @@ mPalette::GetColourFromPreloadedPalette(
 
     uint8_t* palette_elements = pCONT_lAni->strip->_segments_new[pCONT_lAni->strip->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
 
+    if(palette_elements==nullptr)
+    {
+      ALOG_ERR(PSTR("palette_elements unset"));
+      return RgbcctColor(0);
+    }
+
     uint8_t pixels_in_map = GetPixelsInMap(ptr);  
     uint8_t colour_width  = GetEncodedColourWidth(ptr->encoding); 
     // Serial.println(pixels_in_map);
@@ -1688,14 +1750,11 @@ mPalette::GetColourFromPreloadedPalette(
 
     uint16_t index_relative = 0; // get expected pixel position
 
-
-    // uint16_t expected_pixel_count = 1; // get expected pixel position
-    // case 
-
-    // Serial.println(palette_id);
-    // Serial.println(ptr->encoding.data, BIN);
-    // Serial.println(ptr->encoding.encoded_as_hsb_ids);
-    // Serial.println(ptr->encoding.index_scaled_to_segment);
+    #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    Serial.println(ptr->encoding.data, BIN);
+    Serial.println(ptr->encoding.encoded_as_hsb_ids);
+    Serial.println(ptr->encoding.index_scaled_to_segment);
+    #endif // ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
     
     /**
       Encoded as HSBID, must handle all index methods
@@ -1704,6 +1763,7 @@ mPalette::GetColourFromPreloadedPalette(
       (ptr->encoding.encoded_as_hsb_ids)
     ){
 
+    // DEBUG_LINE_HERE;
       // DEBUG_LINE_HERE;
       // Serial.println("MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID"); 
 
@@ -1740,15 +1800,21 @@ mPalette::GetColourFromPreloadedPalette(
       (ptr->encoding.white_cold_enabled)||
       (ptr->encoding.white_warm_enabled)
     ){
+      
+      // ALOG_INF(PSTR("enabled %d,%d,%d,%d,%d"), ptr->encoding.red_enabled, ptr->encoding.green_enabled, ptr->encoding.blue_enabled, ptr->encoding.white_cold_enabled, ptr->encoding.white_warm_enabled);
+      // ALOG_INF(PSTR("palette_elements %d"), palette_elements[0]);
 
+    // DEBUG_LINE_HERE;
       // DEBUG_LINE_HERE;      
       // ALOG_INF(PSTR("p = %d, r = %d, v = %d|%d, w=%d"), pixel_position, index_relative, palette_elements[index_relative], palette_elements[index_relative+1],colour_width);
 
       // Get Start of Colour Information by adjusting for indexing
       index_relative = pixel_position*GetEncodedColourWidth(ptr->encoding); // get expected pixel position
+        // ALOG_INF(PSTR("index_relative=%d"),index_relative);
       if(ptr->encoding.index_scaled_to_segment)
       {
-        // ALOG_INF(PSTR("index_relative=%d"),index_relative);
+    // DEBUG_LINE_HERE;
+    //     ALOG_INF(PSTR("index_relative=%d"),index_relative);
         // If desired, return the index value
         // if(encoded_value != nullptr){ 
         if(encoded_value != nullptr){
@@ -1759,6 +1825,7 @@ mPalette::GetColourFromPreloadedPalette(
         index_relative++;
       }
       
+    // DEBUG_LINE_HERE;
       // Get colour
       colour = RgbcctColor(
         ptr->encoding.red_enabled         ? palette_elements[index_relative  ] : 0,
@@ -1770,39 +1837,82 @@ mPalette::GetColourFromPreloadedPalette(
 
     }
 
+    // DEBUG_LINE_HERE;
 
-    if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = 1; } //phase out
+    // if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = 1; } //phase out
 
-
+    // DEBUG_LINE_HERE;
+    return colour;
 
   } // end of my palettes
 
-   DEBUG_PIN6_SET(HIGH);
+    // DEBUG_LINE_HERE;
 
-  /**
-   * @brief mEffects
-   **/
-  if( // Currently checked this way, but really the encoding type of CRGBPalette should inform this decision!
-    (palette_id >= PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID) &&
-    (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * 
+  ***************************************************************/
+  if(
+    (palette_id >= PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
   ){  
 
+    uint8_t adjusted_id = palette_id - PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    uint8_t segIdx = pCONT_lAni->strip->_segment_index_primary;
+
+    if(adjusted_id < pCONT_lAni->strip->_segments_new[segIdx].rgbcctcolors.size())
+    {
+      return pCONT_lAni->strip->_segments_new[segIdx].rgbcctcolors[adjusted_id];
+    }
+    return RgbcctColor(0);
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
+    ((palette_id >= PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
+  ){  
+
+    // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
     // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
 
     // Assumes other function has already set and loaded it? into "currentPalette", which is part of "loading" palette
 
-    uint8_t colours_in_palette = 0;
+    // uint8_t colours_in_palette = 0;
 
     /**
      * @brief This should be moved out of this, and only ran when the palette changes (note, this wont happen for the time varying, so leave here for now)
      **/
-    // mPaletteI->UpdatePalette_FastLED_TargetPalette(&colours_in_palette);
+    // mPaletteI->LoadPalette_CRGBPalette16_Static(&colours_in_palette);
+
+
+
 
     //palette_id will not matter here, as its set/loaded "UpdatePalette_FastLED_TargetPalette"
-
     CRGB fastled_col;
 
-    uint16_t palette_id_adjusted = palette_id-PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID;
+    // uint16_t palette_id_adjusted = 0;     //palette_id-PALETTELIST_CRGBPALETTE_FIRST_ID;
+    
+    // if((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
+    // {
+    //   palette_id_adjusted = palette_id-PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID;
+    // }
+    // if((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+    // {
+    //   palette_id_adjusted = palette_id-PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    // }
+    // if((palette_id >= PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID)    && (palette_id < PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
+    // {
+    //   palette_id_adjusted = palette_id-PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID;
+    // }  
+
+
 
 // if(flag_wrap)
 // {
@@ -1814,32 +1924,34 @@ mPalette::GetColourFromPreloadedPalette(
     uint8_t pixel_position_adjust = _pixel_position;
 
     
-    if(flag_convert_pixel_index_to_get_exact_crgb_colour)  // change this to auto switch between mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && _pixel_position < 3) and this new method
-    {
-      uint8_t pixels_in_segment = colours_in_palette;
-      uint8_t remainder = _pixel_position%pixels_in_segment;
-      uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255); //change to "scale8" for speed
-      pixel_position_adjust = remainder_scaled255;
+    // if(flag_convert_pixel_index_to_get_exact_crgb_colour)  // change this to auto switch between mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && _pixel_position < 3) and this new method
+    // {
+    //   uint8_t pixels_in_segment = colours_in_palette;
+    //   uint8_t remainder = _pixel_position%pixels_in_segment;
+    //   uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255); //change to "scale8" for speed
+    //   pixel_position_adjust = remainder_scaled255;
 
       
       
-      // Serial.printf("pixel = %d|%d \t %d||%d\n\r", pixel_position, pixel_position_adjust , remainder, remainder_scaled255);
+    //   // Serial.printf("pixel = %d|%d \t %d||%d\n\r", pixel_position, pixel_position_adjust , remainder, remainder_scaled255);
 
-    }
-    else //standard WLED method
-    {
+    // }
+    // else //standard WLED method
+    // {
       
       // if (SEGMENT.palette.id == 0 && mcol < 3) return SEGCOLOR(mcol); //WS2812FX default
-      if(palette_id == mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && _pixel_position < 3)
+      if(palette_id == 0 && _pixel_position < 3)
       {
-        return RgbcctColor::GetRgbcctFromU32Colour(pCONT_lAni->SEGMENT_I(pCONT_lAni->strip->getCurrSegmentId()).colors[_pixel_position]);
+        
+        return pCONT_lAni->SEGMENT_I(pCONT_lAni->strip->getCurrSegmentId()).rgbcctcolors[_pixel_position];
+        
       }
       
       if (flag_map_scaling) pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->strip->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
       // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
       if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
 
-    }
+    // }
     
     
     // CRGBPalette16 curPal;
@@ -1847,15 +1959,31 @@ mPalette::GetColourFromPreloadedPalette(
     // else                    loadPalette(curPal, palette);
     
     // Should only need to be loaded once, but added here to make the decoding easier
-    // mPaletteI->UpdatePalette_FastLED_TargetPalette();  // Cant be here, since it updates with EACH pixel, not just once
+    // UpdatePalette_FastLED_TargetPalette();  // Cant be here, since it updates with EACH pixel, not just once
 
+
+
+  // uint32_t colour0 = RgbcctColor::GetU32Colour(pCONT_lAni->strip->_segments_new[0].rgbcctcolors[0]);
+  // uint32_t colour1 = RgbcctColor::GetU32Colour(pCONT_lAni->strip->_segments_new[0].rgbcctcolors[1]);
+  // uint32_t colour2 = RgbcctColor::GetU32Colour(pCONT_lAni->strip->_segments_new[0].rgbcctcolors[2]);
+  //     CRGB prim = pCONT_lAni->col_to_crgb(colour0);
+  //     CRGB sec  = pCONT_lAni->col_to_crgb(colour1);
+  //     CRGB tri  = pCONT_lAni->col_to_crgb(colour2);
+
+
+
+  //     currentPalette = CRGBPalette16(prim,sec,tri); 
+
+
+
+    // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
     // FastLED Get ColorFromPalette that is CRGBPalette16
-    fastled_col = ColorFromPalette( mPaletteI->currentPalette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
+    fastled_col = ColorFromPalette( currentPalette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
     uint32_t fastled_col32 = 0;
     fastled_col32 = fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
     
-    if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = colours_in_palette; }
+    // if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = colours_in_palette; }
 
     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
 
@@ -1865,365 +1993,35 @@ mPalette::GetColourFromPreloadedPalette(
 }
 
 
-
-/***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-**************************************************************************************************************************************************************************************************************************************************************************
-************ Function below are being phased out **************************************************************************************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
-************************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************************************************************
-*************************************************************************************************************************************************************************************************************************************************************************/
-
-
-    #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
-/**
- * @brief 
- * Variation of using pointer, instead, pointer id mostly for testing
- * 
- * If using number (instead of pointer), I can easily check for hacs or fastled palettes
- * 
- * TO ADD: Same as fastled/wled, I need an option to "SINGLE_PIXEL", "LINEARBLEND" to know when I want one pixel exactly, or a scaled version of the colour blended
- * 
- * 
- * 
- * @param ptr 
- * @param pixel_num 
- * @param pixel_position 
- * @return RgbcctColor 
- */
-
-
-
-/**
- * Gets a single color from the currently selected palette.
- * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
- * @param mapping if true, LED position in segment is considered for color
- * @param wrap FastLED palettes will usally wrap back to the start smoothly. Set false to get a hard edge
- * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
- * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
- * @returns Single color from palette
- */
-uint32_t mPalette::color_from_palette_internal(uint16_t palette_id, uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri, uint16_t palette_spread_length__virtualSegmentLength)
+void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id)
 {
 
-  // AddLog(LOG_LEVEL_TEST, PSTR("color_from_palette_internal=%d"),palette_id);
-
-  uint16_t palette_fastled_id = palette_id - PALETTELIST_STATIC_LENGTH__ID;
-  // if (palette_id == 0 && mcol < 3){
-  //   // return SEGCOLOR(mcol); //WS2812FX default
-
-  //   return GetSegmentColour(i, segment_index);
-
-  // }
-  uint8_t paletteIndex = i; //index within palette? so really pixel_index
-  
-
-  /**
-   * mapping = conversion from single pixel to map into the 255 
-   * 0 to segment_length to 0 to 255
-   **/
-  if (mapping) paletteIndex = (i*255)/( palette_spread_length__virtualSegmentLength-1);//pCONT_lAni-> _virtualSegmentLength -1);
-
-  if (!wrap) paletteIndex = scale8(paletteIndex, 240); //cut off blend at palette "end" OH! 240 would be 15th element, this stops palette from going to last (255) and thus stops it wrapping
-  
-  CRGB fastled_col;
-  
-  // AddLog(LOG_LEVEL_TEST, PSTR("color_from_palette_internal paletteIndex=%d"),paletteIndex);
-
-  fastled_col = ColorFromPalette( currentPalette, paletteIndex, pbri, (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
-
-  return  fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
-
-}
-
-
-    #endif // ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
-
-
-
-
-
-
-/*
- * FastLED palette modes helper function. Limitation: Due to memory reasons, multiple active segments with FastLED will disable the Palette transitions
-
- Really this is the same as my "Setpalette" as it simply changes the pointer to the new palette
-
-
-This should only be called when "loadPalette" happens!!!
-
-
-this is now called "loadPalette" in WLED22
- */
-void mPalette::UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette)
-{
-
-  // remove "   length = 16" since for CRGB16 is will always be 16
-
-  uint8_t segIdx = 0;
-
-  #ifdef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-  CRGBPalette16 targetPalette;
-  byte tcp[72];
-  if (paletteIndex < 245 && paletteIndex > GRADIENT_PALETTE_COUNT+13) paletteIndex = 0;
-  if (paletteIndex > 245 && (pCONT_lAni->strip->customPalettes.size() == 0 || 255U-paletteIndex > pCONT_lAni->strip.customPalettes.size()-1)) paletteIndex = 0;
-  #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-
-  uint8_t length = 0;
-  bool singleSegmentMode = (segIdx == pCONT_lAni->strip->_segments_new[0].segment_iters.index_palette_last);
-  pCONT_lAni->strip->_segments_new[0].segment_iters.index_palette_last = segIdx;
-
-  byte paletteIndex = pCONT_lAni->SEGMENT_I(segIdx).palette.id;
-
-  // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
-
-  /**
-   * @brief If effect should use its default, then this will internally fix to the desired type based on effect (I likely want to phase this out or move elsewhere)
-   */
-  #ifdef ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
-  if (paletteIndex == PALETTELIST__DEFAULT__ID) //default palette. Differs depending on effect
+  /******************************************************
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   ******************************************************/
+  switch (palette_id)
   {
-    switch (pCONT_lAni->SEGMENT_I(segIdx).effect_id)
-    {
-      //def move these outside of this class, as they are not technically related to the palette
-      case mAnimatorLight::EFFECTS_FUNCTION_WLED_COLORWAVES__ID : paletteIndex = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT____BEACH__ID; break; //landscape 33
-      case mAnimatorLight::EFFECTS_FUNCTION_WLED_GLITTER__ID    : paletteIndex = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT____RAINBOW_SHERBET__ID; break; //rainbow colors
-      case mAnimatorLight::EFFECTS_FUNCTION_WLED_SUNRISE__ID    : paletteIndex = PALETTELIST_STATIC_FASTLED_HEAT_COLOUR__ID; break; //heat palette
-      case mAnimatorLight::EFFECTS_FUNCTION_WLED_FLOW__ID       : paletteIndex = PALETTELIST_STATIC_FASTLED_PARTY_COLOUR__ID; break; //party
-      #ifdef ENABLE_EXTRA_WLED_EFFECTS
-      case FX_MODE_FIRE_2012  : paletteIndex = 35; break; //heat palette
-      case EFFECTS_FUNCTION_WLED_FILLNOISE8__ID : paletteIndex =  9; break; //ocean colors
-      case EFFECTS_FUNCTION_WLED_NOISE16_1__ID  : paletteIndex = 20; break; //Drywet
-      case EFFECTS_FUNCTION_WLED_NOISE16_2__ID  : paletteIndex = 43; break; //Blue cyan yellow
-      case EFFECTS_FUNCTION_WLED_NOISE16_3__ID  : paletteIndex = 35; break; //heat palette
-      case EFFECTS_FUNCTION_WLED_NOISE16_4__ID  : paletteIndex = 26; break; //landscape 33
-      #endif // ENABLE_EXTRA_WLED_EFFECTS
-    }
-  }
-  if (pCONT_lAni->SEGMENT_I(segIdx).effect_id >= pCONT_lAni->EFFECTS_FUNCTION_WLED_METEOR__ID && paletteIndex == PALETTELIST__DEFAULT__ID) paletteIndex = PALETTELIST_STATIC_FASTLED_FOREST_COLOUR__ID;
-  #endif // ENABLE_DEVFEATURE_WS2812FX_DEFAULT_PALETTE_EFFECTS
-
-  // paletteIndex = 43;
-  // Serial.printf("_segments[_segment_index].palette %d %d\n\r",_segments[_segment_index].palette, paletteIndex);
-
-  switch (paletteIndex)
-  {
-    /**
-     * @brief WLED palettes
-     **/
-    #ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     default:
-    #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-    case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID: //Party colors
-      targetPalette = PartyColors_p; 
-      length = 16;
-    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID: //Cloud colors
-      targetPalette = CloudColors_p; 
-      length = 16;
-    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID: //Lava colors
-      targetPalette = LavaColors_p; 
-      length = 16;
-    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID: //Ocean colors
-      targetPalette = OceanColors_p; 
-      length = 16;
-    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID: //Forest colors
-      targetPalette = ForestColors_p; 
-      length = 16;
-    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID: //Rainbow colors
-      targetPalette = RainbowColors_p; 
-      length = 16;
-    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIBE_COLOUR__ID: //Rainbow stripe colors
-      targetPalette = RainbowStripeColors_p;
-      length = 16;
-    break;
-    case PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID:
-    {// periodically replace palette with a random one. Doesn't work with multiple FastLED segments
-      if (!singleSegmentMode)
-      {
-        targetPalette = PartyColors_p; 
-        length = 16;
-        break; //fallback
-      }
-      if (millis() - pCONT_lAni->_lastPaletteChange > 1000 + 
-      ((uint32_t)(255-pCONT_lAni->SEGMENT_I(segIdx).intensity()))*100)
-      {
-        targetPalette = CRGBPalette16(
-                        CHSV(random8(), 255, random8(128, 255)),
-                        CHSV(random8(), 255, random8(128, 255)),
-                        CHSV(random8(), 192, random8(128, 255)),
-                        CHSV(random8(), 255, random8(128, 255)));
-        pCONT_lAni->_lastPaletteChange = millis();
-        length = 4;
-      }
-      break;
-    }
-    case PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
-    { //primary color only
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]); //is this stable to do? maybe since its not a pointer but instead an instance of a class
-      targetPalette = CRGBPalette16(prim); 
-      length = 1;
-    }
-    break;
-    case PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID:
-    { //primary + secondary
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]);
-      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[1]);
-      targetPalette = CRGBPalette16(prim,prim,sec,sec); 
-      length = 4;
-    }
-    break;
-    case PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID:
-    { //primary + secondary + tertiary
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]);
-      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[1]);
-      CRGB ter  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[2]);
-      targetPalette = CRGBPalette16(ter,sec,prim); 
-      length = 3; // 3 unique colours
-    }
-    break;    
-    case  PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID:
-    { //primary + secondary (+tert if not off), more distinct
-      CRGB prim = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[0]);
-      CRGB sec  = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[1]);
-      if (pCONT_lAni->SEGMENT_I(segIdx).colors[2])
-      {
-        CRGB ter = pCONT_lAni->col_to_crgb(pCONT_lAni->SEGMENT_I(segIdx).colors[2]);
-        targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
-      } else {
-        targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
-      }
-      length = 16;
-    }
-    break;
-    #ifdef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-    default:
-      
-      if (paletteIndex>245) {
-        targetPalette = pCONT_lAni->strip->customPalettes[255-paletteIndex]; // we checked bounds above
-      } else {
-        memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[paletteIndex-13])), 72);
-        targetPalette.loadDynamicGradientPalette(tcp);
-      }
-
-      length = 16;
-
-    break;
-    #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-  } //end fo switch
-
-  #ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-  /**
-   * @brief Fastled palettes
-   **/
-  if(IsWithinRange(paletteIndex, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ATLANTICA__ID))
-  {
-    uint16_t gradient_id = paletteIndex - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    // AddLog(LOG_LEVEL_TEST, PSTR("gradient_id=%d"),gradient_id);
-    // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-    load_gradient_palette(gradient_id);
-    // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
+    case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    currentPalette = PartyColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   currentPalette = CloudColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    currentPalette = LavaColors_p;    break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    currentPalette = OceanColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   currentPalette = ForestColors_p;  break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  currentPalette = RainbowColors_p; break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: currentPalette = RainbowStripeColors_p; break;
   }
-  #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
+
+  /******************************************************
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   ******************************************************/
+  if(IsWithinRange(palette_id, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ATLANTICA__ID))
+  {
+    uint16_t gradient_id = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    byte tcp[72]; //support gradient palettes with up to 18 entries
+    memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
+    currentPalette.loadDynamicGradientPalette(tcp);
+  }
   
-  currentPalette = targetPalette; // This should be returned!
-    
-  if(colours_in_palette != nullptr){ *colours_in_palette = length; }  // DELETE this
-
 }
-
-
-#ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-void mPalette::load_gradient_palette(uint8_t index)
-{
-  byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
-  byte tcp[72]; //support gradient palettes with up to 18 entries
-  memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
-  targetPalette.loadDynamicGradientPalette(tcp);
-}
-#endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-
-
-
-
-
-
-    #ifdef ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
-/**
- * @brief For basic test, lets start getting pixel0 and pixel1, and return the blend in between
- * 
- * Step 1: The best first step is to make my gradients work with ws2812fx effects, that way, I should fully understand the problem and then conversion back should be easier
- * Step 1a:  Get my palette, using segment_length, and blend the full palette across (without wrap)
- * 
- * 
- * @param palette_id 
- * @param pixel_num 
- * @param pixel_position 
- * @param mapping 
- * @param wrap 
- * @param mcol 
- * @param pbri 
- * @param blendType 
- * @param palette_spread_length__virtualSegmentLength 
- * @return RgbcctColor 
- */
-RgbcctColor mPalette::GetColourFromPalette_Gradient(uint16_t palette_id, uint16_t pixel_num, int16_t *pixel_position, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri, TBlendType blendType, uint16_t palette_spread_length__virtualSegmentLength)
-{
-
-  RgbcctColor colour0 = GetColourFromPalette(palette_id, 0);
-  RgbcctColor colour1 = GetColourFromPalette(palette_id, 1);
-
-  return RgbcctColor::LinearBlend(colour0, colour1, 0.5f);
-
-}
-
-    #endif // ENABLE_DEVFEATURE_PALETTE_ADVANCED_METHODS_GEN2
-
-
-
-
-
 
 #endif // header gaurd

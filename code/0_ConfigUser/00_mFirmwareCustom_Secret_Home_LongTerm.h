@@ -74,7 +74,7 @@ Kitchen/Dining
 // #define DEVICE_RGBLIGHTS_GLASSBOX
 // #define DEVICE_RGBCOOKER
 // #define DEVICE_KITCHENSENSOR
-#define DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
+// #define DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
 // #define DEVICE_RGBFRIDGE
 // #define DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN
 
@@ -5406,7 +5406,7 @@ Bathroom
   #define USE_MODULE_SENSORS_BH1750
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_DOOR
+  // #define USE_MODULE_SENSORS_DOOR
 
   //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
 
@@ -5418,17 +5418,58 @@ Bathroom
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
+    // #define ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    #define ENABLE_WLED_EFFECTS
+    #define ENABLE_EXTRA_WLED_EFFECTS
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+
     #define STRIP_SIZE_MAX 88                                                                        // Change: Set *total* length of string, segment0 will default to this length
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
-      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+    //   #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
     
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    // #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    // #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    // #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+    // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -5466,10 +5507,12 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DOOR
-      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
-      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
-      #endif
+      // #ifdef USE_MODULE_SENSORS_DOOR
+      // "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      // "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      "\"18\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR "\","
+      "\"19\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR "\","
+      // #endif
       #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
       // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
@@ -5482,6 +5525,8 @@ Bathroom
   "}";
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Bedroom"
+  #define D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "Door Closed"
+  #define D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "Door Lock"
   #define D_DEVICE_SENSOR_CLIMATE "Bedroom"
   
   #define USE_FUNCTION_TEMPLATE
@@ -5495,14 +5540,19 @@ Bathroom
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
-        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "1m\""
+        "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "2m\","
       "],"  
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "\""
       "],"  
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "1d\","
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "2d\""
       "]"  
     "}"
   "}";
@@ -5525,21 +5575,34 @@ Bathroom
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
       "}"
-    // "},"
-    // // Door Opening
-    // "\"Rule1\":{"
-    //   "\"Trigger\":{"
-    //     "\"Module\":\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-    //     "\"DeviceName\":0,"
-    //     "\"State\":\"On\""
-    //   "},"
-    //   "\"Command\":{"
-    //     "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-    //     "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-    //     "\"DeviceName\":1," 
-    //     "\"State\":\"Follow\""
-    //   "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":1," 
+        "\"State\":\"Follow\""
+      "}"
+    "},"
+    "\"Rule2\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":2,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":2," 
+        "\"State\":\"Follow\""
+      "}"
     "}"
   "}";
 

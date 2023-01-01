@@ -36,11 +36,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_CORE     0
 
 /**@@@@@ Module changes
-<<<<<<< HEAD
  * #00 : Restarting for 2023
-=======
- * #34 : Working on new segments method
->>>>>>> 7a73d9f5438a22023da0e6af7ac3af9e671aaa0b
  * #33 : Fixed incorrect use of virtual/segment length, grouping of up to 200 has been tested for some effects
  * #32 : Moved lighting branch back to desktop 
  * #31 : Adding a palette step that splits progmem loads to only when a palette is loaded 

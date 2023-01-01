@@ -35,13 +35,13 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
-  if(jtok = obj[PM_JSON_RGB]){ // Must accept "RRGGBBCC" and "RR,GG,BB,CC"
-    CommandSet_ActiveSolidPalette_RGB_Ctr(jtok.getStr());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  // if(jtok = obj[PM_JSON_RGB]){ // Must accept "RRGGBBCC" and "RR,GG,BB,CC"
+  //   CommandSet_ActiveSolidPalette_RGB_Ctr(jtok.getStr());
+  //   data_buffer.isserviced++;
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), getHue());
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
 
   // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
   // if(jtok = obj[PM_JSON_HUE]){ // Assume range 0-359
@@ -205,26 +205,26 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
-  if(jtok = obj[PM_JSON_SCENE].getObject()[PM_JSON_COLOUR]){
+  // if(jtok = obj[PM_JSON_SCENE].getObject()[PM_JSON_COLOUR]){
 
-    uint8_t colour_array[5];
-    memset(colour_array,0,sizeof(colour_array));
-    uint8_t jsonpair_count = jtok.size();
+  //   uint8_t colour_array[5];
+  //   memset(colour_array,0,sizeof(colour_array));
+  //   uint8_t jsonpair_count = jtok.size();
 
-    for(int index = 0; index < jsonpair_count; index++){
-      jtok.nextOne(); //skip start of object
-      Serial.println(jtok.getInt());
-      colour_array[index] = jtok.getInt();
-    }
+  //   for(int index = 0; index < jsonpair_count; index++){
+  //     jtok.nextOne(); //skip start of object
+  //     Serial.println(jtok.getInt());
+  //     colour_array[index] = jtok.getInt();
+  //   }
     
-    CommandSet_ActiveSolidPalette_Raw(colour_array);
-    data_buffer.isserviced++;
+  //   CommandSet_ActiveSolidPalette_Raw(colour_array);
+  //   data_buffer.isserviced++;
 
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),colour_array[0],colour_array[1],colour_array[2],colour_array[3],colour_array[4]);
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   snprintf_P(buffer, sizeof(buffer), PSTR("[%d,%d,%d,%d,%d]"),colour_array[0],colour_array[1],colour_array[2],colour_array[3],colour_array[4]);
+  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
 
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI)
@@ -703,80 +703,119 @@ bool mInterfaceLight::CommandGet_LightPowerState()
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-/**
- * @param rgb Accepts both "RRGGBBWW" and "RR,GG,BB,WW", use of "#" will also be checked and omitted
- * */
-void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
-{
+// /**
+//  * @param rgb Accepts both "RRGGBBWW" and "RR,GG,BB,WW", use of "#" will also be checked and omitted
+//  * */
+// void mInterfaceLight::CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb)
+// {
 
-  uint32_t colour32bit = 0;
-  bool hash_used = false;
-  bool delimeter_used = false;
-  if(strstr(rgb,"#")!=NULL){ hash_used = true; }
-  if(strstr(rgb,",")!=NULL){ delimeter_used = true; }
+//   uint32_t colour32bit = 0;
+//   bool hash_used = false;
+//   bool delimeter_used = false;
+//   if(strstr(rgb,"#")!=NULL){ hash_used = true; }
+//   if(strstr(rgb,",")!=NULL){ delimeter_used = true; }
 
-  // if(delimeter_used)
-  // {
-    // to be done, with iterator moving across for rgb and rgbw can be parsed
-  // }
+//   // if(delimeter_used)
+//   // {
+//     // to be done, with iterator moving across for rgb and rgbw can be parsed
+//   // }
 
-  if(hash_used)
-  {
-    colour32bit = (long) strtol( &rgb[1], NULL, 16);
-  }
-  else
-  {
-    colour32bit = (long) strtol( &rgb[0], NULL, 16);
-  }
+//   if(hash_used)
+//   {
+//     colour32bit = (long) strtol( &rgb[1], NULL, 16);
+//   }
+//   else
+//   {
+//     colour32bit = (long) strtol( &rgb[0], NULL, 16);
+//   }
 
-  RgbwColor colour = RgbwColor(0);
-  // Check if upper 8 bits are set
-  if(colour32bit&0xFF000000)
-  { //4 colours
-    colour.R = colour32bit >> 24; //RGB
-    colour.G = colour32bit >> 16; //RGB
-    colour.B = colour32bit >> 8 & 0xFF; //RGB
-    colour.W = colour32bit & 0xFF; //RGB
-  }else{
-    colour.R = colour32bit >> 16; //RGB
-    colour.G = colour32bit >> 8 & 0xFF; //RGB
-    colour.B = colour32bit & 0xFF; //RGB
-  }
+//   RgbwColor colour = RgbwColor(0);
+//   // Check if upper 8 bits are set
+//   if(colour32bit&0xFF000000)
+//   { //4 colours
+//     colour.R = colour32bit >> 24; //RGB
+//     colour.G = colour32bit >> 16; //RGB
+//     colour.B = colour32bit >> 8 & 0xFF; //RGB
+//     colour.W = colour32bit & 0xFF; //RGB
+//   }else{
+//     colour.R = colour32bit >> 16; //RGB
+//     colour.G = colour32bit >> 8 & 0xFF; //RGB
+//     colour.B = colour32bit & 0xFF; //RGB
+//   }
 
  
-  // Serial.println("HER"); Serial.flush();
+//   // Serial.println("HER"); Serial.flush();
   
   
-      pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setRGB(colour.R, colour.G, colour.B);
+//   #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+//   pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setRGB(colour.R, colour.G, colour.B);
+//   #endif
 
+  
+//   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+  
+
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getrgb());
+//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "%d  %d,%d,%d,%d"), colour32bit, colour.R, colour.G, colour.B, colour.W);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+  
+
+// // //   if(!obj[D_JSON_RGB].isNull()){
+// // //     const char* rgbpacked = obj[D_JSON_RGB];
+// // //     uint32_t colour32bit = 0;
+// // //     RgbColor rgb;
+// // //     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// // //     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
+// // //     // // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
+// // //     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
+// // //     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
+// // //   }
+
+
+
+
+// }
+
+
+
+void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
+    
+  // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightness255(brt_new);
+  pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+  setBriRGB_Global(brt_new);
+  // probably needs to check if they are linked here, or internally
+  setBriCT_Global(brt_new);
+
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
+  // #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** BrtRGB *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
+    
+  // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightnessRGB255(bri);
+  _briRGB_Global = bri;
   
   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
   
-
+  setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), rgbcct_controller.getrgb());
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "%d  %d,%d,%d,%d"), colour32bit, colour.R, colour.G, colour.B, colour.W);
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-  
-
-// //   if(!obj[D_JSON_RGB].isNull()){
-// //     const char* rgbpacked = obj[D_JSON_RGB];
-// //     uint32_t colour32bit = 0;
-// //     RgbColor rgb;
-// //     // #ifndef ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-// //     // scene.colour = HsbColor(RgbColor(rgb.R,rgb.G,rgb.B));
-// //     // // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_NEOPIXEL_RGB ":%s " D_NEOPIXEL_RGB ":%d,%d,%d " D_NEOPIXEL_HSB ":%d,%d,%d"),
-// //     // //   rgbpacked,rgb.R,rgb.G,rgb.B,scene.colour.H,scene.colour.S,scene.colour.B);
-// //     // #endif //ENABLE_DEVFEATURE_LIGHTING_SCENE_OBJECT_TO_STRUCT
-// //   }
-
-
-
-
 }
- 
 
+
+
+ 
+#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 //   #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 // /******************************************************************************************************************************
 // *******************************************************************************************************************************
@@ -816,37 +855,6 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
-    
-  pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightness255(brt_new);
-  pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
-  setBriRGB_Global(brt_new);
-  // probably needs to check if they are linked here, or internally
-  setBriCT_Global(brt_new);
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** BrtRGB *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
-    
-  pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightnessRGB255(bri);
-  _briRGB_Global = bri;
-  
-  pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
-  
-  setBriRGB_Global(bri);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
 
 // #ifndef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
 // /******************************************************************************************************************************
@@ -913,8 +921,9 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
 //   #endif // ENABLE_LOG_LEVEL_COMMANDS
 // }
 // #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+#endif // #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 
-
+#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 /**
  * direct percentage version
  * */
@@ -991,6 +1000,9 @@ void mInterfaceLight::CommandSet_ActiveSolidPalette_Raw(uint8_t* values){
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_SCENE,D_JSON_COLOUR)), buffer);
   #endif // ENABLE_LOG_LEVEL_DEBUG
 }
+
+#endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1320,11 +1332,11 @@ void mInterfaceLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
 
   }else
-  if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID)){
+  if((palette_id>=mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
  
 
     palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;    
-    palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
+    palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
     memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
 
     // Add to select correct buffer depending on palette type

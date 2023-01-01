@@ -342,8 +342,25 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 
 
       JBI->Level_End();
+
+
+      JBI->Level_Start("RgbcctColours");
+      for(uint8_t rgb_i = 0; rgb_i<  strip->_segments_new[seg_i].rgbcctcolors.size(); rgb_i++)
+      {
+        JBI->Array_Start_P("Colour%d", rgb_i);
+        for(uint8_t i=0;i<5;i++)
+        {
+          JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].raw[i]); //might need to get rid of operator!
+          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].G); //might need to get rid of operator!
+          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].B); //might need to get rid of operator!
+          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].W1); //might need to get rid of operator!
+          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].W2); //might need to get rid of operator!
+        }
+        JBI->Array_End();
+      }
+      JBI->Level_End();
     
-    JBI->Level_End();
+    JBI->Level_End(); // Segment
 
 
   }

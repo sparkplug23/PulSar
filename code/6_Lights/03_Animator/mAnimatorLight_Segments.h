@@ -96,7 +96,11 @@
 // #define segment_active_ind ex strip->_segment_index_primary
 
 
-#define SEGCOLOR(x)      strip->_segments_new[strip->_segment_index_primary].colors[x]//strip->getCurrSegmentId()].colors[x]
+#define SEGIDX           strip->_segment_index_primary
+
+#define SEGCOLOR(x)      RgbcctColor::GetU32Colour(strip->_segments_new[strip->_segment_index_primary].rgbcctcolors[x])
+#define SEGCOLOR_U32(s,x)  RgbcctColor::GetU32Colour(strip->_segments_new[s].rgbcctcolors[x])
+
 #define SEGMENT          strip->_segments_new[strip->_segment_index_primary]// strip->getCurrSegmentId()]
 #define SEGMENT_I(X)     strip->_segments_new[X]
 // #define SEGENV           SEGMENT//strip->_segments_new[strip->_segment_index_primary] //phase out
@@ -785,7 +789,7 @@
 
   #define NUM_COLORS2       3 /* number of colors per segment */
 
-  uint32_t _lastPaletteChange = 0;
+  // uint32_t _lastPaletteChange = 0; 
   uint8_t  paletteFade = 0;
   uint8_t   paletteBlend = 0;
 
@@ -828,7 +832,7 @@
     };
   } ANIMATION_FLAGS;
 
-  uint8_t GetSizeOfPixel(RgbcctColor_Controller::LightSubType colour_type);
+  uint8_t GetSizeOfPixel(RgbcctColor::LightSubType colour_type);
 
 
   /**
@@ -866,8 +870,8 @@
   };
   
   // TransitionColourPairs* 
-  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
-  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
+  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
+  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
 
 
   /**
@@ -890,11 +894,11 @@
   void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
   void Segments_UpdateDesiredColourFromPaletteSelected(uint16_t segment_index = 0);
   void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments(const AnimationParam& param);
-  void AnimationProcess_Generic_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
-  void AnimationProcess_Generic_SingleColour_AnimationColour_LinearBlend_Segments_Dynamic_Buffer(const AnimationParam& param);
+  void AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
+  void AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
 
-  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour);
-  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor_Controller::LightSubType pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::LightSubType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
@@ -1302,13 +1306,28 @@
   /**
    * rgbcctcontroller commands
    */
-  void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0);
+  #ifdef ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+
+  // void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0); //remove
+  void CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index = 0, uint8_t segment_index = 0);
+  void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
+  void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
+  void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
+
+  #else
+
+  // void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0);
   void CommandSet_ActiveSolidPalette_Hue_360(uint16_t hue_new, uint8_t segment_index = 0);
   void CommandSet_ActiveSolidPalette_Sat_255(uint8_t sat_new, uint8_t segment_index = 0);
   void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
   void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);
   void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct, uint8_t segment_index = 0);
   void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
+
+  #endif
+
+  void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
+  void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);
 
   /***************
    * END
@@ -1388,14 +1407,16 @@ typedef struct Segment_New {
     };
 
     HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;// = {32392}; // R,G,B,unset,unset
-    RgbcctColor_Controller::LightSubType colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
+    RgbcctColor::LightSubType colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
 
-    uint32_t colors[NUM_COLORS2] = {DEFAULT_COLOR}; //? really not needed or understood
-    void set_colors(uint8_t index, uint8_t r,uint8_t g,uint8_t b,uint8_t w )
-    {// w,r,g,b packed 32 bit colour
-      colors[index] = (((uint32_t)w << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b);
+    std::vector<RgbcctColor> rgbcctcolors; // new way of holding colours that will perhaps also replace WLED colors
+
+    void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w )
+    {
+      rgbcctcolors[index<rgbcctcolors.size()?index:0] = RgbcctColor(r,g,b,w,w);
     }
 
+    
 
     /**
      * values that are used as global iters rather than passing between each function
@@ -1497,7 +1518,12 @@ typedef struct Segment_New {
 
     uint8_t  grouping = 1;
     uint8_t  spacing = 0;
-    uint8_t opacity = 255;
+    uint8_t opacity = 255; // ie opacity is the segment "brightness"
+
+    uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
+    uint8_t getBrightnessRGB();
+    uint8_t getBrightnessCCT();
+
     uint8_t effect_id = 0; //EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     // Future edit maybe?
     /**
@@ -1530,12 +1556,12 @@ typedef struct Segment_New {
     uint16_t aux0;  // custom var
     uint16_t aux1;  // custom var
     uint16_t aux2 = 0;
-    uint16_t aux3 = 0;
+    uint16_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
     byte* data;     // effect data pointer
     CRGB* leds;     // local leds[] array (may be a pointer to global)
     static CRGB *_globalLeds;             // global leds[] array
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
-
+    
   // private:
     union {
       uint8_t  _capabilities;
@@ -1600,14 +1626,22 @@ typedef struct Segment_New {
 
       bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
       
+      
+  
+      #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
       /**
        * @brief This is where it should be added, add with vectors?
        * 
        */
       // can I default this to nullptr when not used, will this actually reduce memory?
-      RgbcctColor_Controller* rgbcct_controller = new RgbcctColor_Controller(); // can this be rolled into a buffer? so its only defined when needed
-
+      RgbcctColor* rgbcct_controller = new RgbcctColor(); // can this be rolled into a buffer? so its only defined when needed
       RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
+      #endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+
+      // Create controller without pointer
+      RgbcctColor rgbcctcolour22;
+
+
 
       #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
       mPaletteContainer* palette_container = nullptr;
@@ -1650,7 +1684,7 @@ typedef struct Segment_New {
       grouping(1),
       spacing(0),
       opacity(255),
-      colors{DEFAULT_COLOR,BLACK,BLACK},
+      // colors{DEFAULT_COLOR,BLACK,BLACK},
       cct(127),
       custom1(DEFAULT_C1),
       custom2(DEFAULT_C2),
@@ -1678,6 +1712,11 @@ typedef struct Segment_New {
       
       // // Init
       // palette_container = new mPaletteContainer(0);//nullptr;
+
+      // rgbcctcolors.push_back(RgbcctColor(1,2,3,4,5));
+      // rgbcctcolors.push_back(RgbcctColor(6,7,8,9,10));
+      // rgbcctcolors.push_back(RgbcctColor(11,12,13,14,15));
+
       
       hardware_element_colour_order.red        = 0; // R,G,B,WC,WW // Default ColourOrder
       hardware_element_colour_order.green      = 1; // R,G,B,WC,WW // Default ColourOrder

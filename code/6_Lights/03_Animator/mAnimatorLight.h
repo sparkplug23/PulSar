@@ -126,7 +126,14 @@ class mPaletteContainer;
 #endif
 
 // When no callback is needed for animator and effect function (e.g. WLED) must be called
-#define SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR()  SEGMENT.anim_function_callback = nullptr
+#ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+#define SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR()  \
+                                  SEGMENT.anim_function_callback = nullptr; 
+                                  // \
+                                  // SEGMENT_I(strip->_segment_index_primary).transitional = true;
+#else
+#define SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR()  SEGMENT.anim_function_callback = nullptr 
+#endif
 
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATION_ACTIVE_CTR)       "animation";
@@ -431,17 +438,6 @@ class mAnimatorLight :
     void SubTask_Manual_SetPixel();
     uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-
-
-    // #ifdef ENABLE_CRGBPALETTES_IN_PROGMEM
-    // void mPalette::load_gradient_palette(uint8_t index)
-    // {
-    //   byte i = constrain(index, 0, GRADIENT_PALETTE_COUNT -1);
-    //   byte tcp[72]; //support gradient palettes with up to 18 entries
-    //   memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i])), 72);
-    //   targetPalette.loadDynamicGradientPalette(tcp);
-    // }
-    // #endif // ENABLE_CRGBPALETTES_IN_PROGMEM
 
     void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
 

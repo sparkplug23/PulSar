@@ -57,6 +57,7 @@ class mPalette
 
     void init_PresetColourPalettes(); 
     // First bytes stores length 
+    void init_ColourPalettes_Party_Default();
     void init_ColourPalettes_Autumn_Red();
     void init_ColourPalettes_Autumn_Green();
     void init_ColourPalettes_Winter();
@@ -74,7 +75,6 @@ class mPalette
     void init_ColourPalettes_Pink_Purple_02();
     void init_ColourPalettes_Pink_Purple_03();
     void init_ColourPalettes_Single_Fire_01();
-    void init_ColourPalettes_Shelf_Hearts();
     void init_ColourPalettes_Gradient_01();
     void init_ColourPalettes_Gradient_02();
     void init_ColourPalettes_Gradient_Fire_01();
@@ -145,45 +145,21 @@ class mPalette
     const char* GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen);
     const char* GetPaletteFriendlyName(char* buffer, uint8_t buflen);
 
-
-    // 20*10 = 200 bytes
-    // 5*5   = 20 bytes
-    //       = 100 bytes
-    enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
-      PALETTELIST_VARIABLE_HSBID_01__ID = 0,
-      PALETTELIST_VARIABLE_HSBID_02__ID,
-      PALETTELIST_VARIABLE_HSBID_03__ID,
-      PALETTELIST_VARIABLE_HSBID_04__ID,
-      PALETTELIST_VARIABLE_HSBID_05__ID,
-      PALETTELIST_VARIABLE_HSBID_06__ID,
-      PALETTELIST_VARIABLE_HSBID_07__ID,
-      PALETTELIST_VARIABLE_HSBID_08__ID,
-      PALETTELIST_VARIABLE_HSBID_09__ID,
-      PALETTELIST_VARIABLE_HSBID_10__ID,
-      PALETTELIST_VARIABLE_HSBID_LENGTH__ID  // Count of total handlers and starting point for other modules
-    };
-    enum PALETTELIST_VARIABLE_RGBCCT__IDS{
-      PALETTELIST_VARIABLE_RGBCCT_COLOUR_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
-      PALETTELIST_VARIABLE_RGBCCT_COLOUR_02__ID,
-      PALETTELIST_VARIABLE_RGBCCT_COLOUR_03__ID,
-      PALETTELIST_VARIABLE_RGBCCT_COLOUR_04__ID,
-      PALETTELIST_VARIABLE_RGBCCT_COLOUR_05__ID,
-      PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID
-    };
-    // One special buffer, block of memory allows any format of pallete (eg)
-    // This will also require encoding of type of palette into the buffer somehow
-    // shared, with overlapping memory
-    // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
-    enum PALETTELIST_VARIABLE_GENERIC__IDS{
-      PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE_RGBCCT_LENGTH__ID, // New scene colour, static
-      // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
-      PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
-    };
-    enum PALETTELIST_STATIC__IDS{
-      // Shelf Lights ie has some static leds
-      // This shall be changed later be done via mapping 
-      PALETTELIST_STATIC_SHELF_HEARTS__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,  
-      // Special patterns
+    /**
+     * @brief Overview of palettes
+     *
+     * STATIC progmem mine
+     * STATIC CRGB16 (no grads)
+     * STATIC CRGB16 gradient
+     * 
+     * VARIABLE HSB
+     * VARIABLE Segment Colour
+     * VARIABLE Encoded 
+     */
+    
+    enum PALETTELIST_STATIC__IDS
+    {
+      PALETTELIST_STATIC_PARTY_DEFAULT__ID = 0, 
       PALETTELIST_STATIC_HOLLOWEEN_OP__ID,
       PALETTELIST_STATIC_HOLLOWEEN_OGP__ID,
       PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID,
@@ -295,33 +271,24 @@ class mPalette
        * Rgbcct colour pairs: For ambilight top/bottom arrangement
        * */
       PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,
+      
 
       // Count of total handlers and starting point for other modules
       PALETTELIST_STATIC_LENGTH__ID 
     };
-    enum PALETTELIST_VARIABLE_FASTLED_PALETTES__IDS{ // to be renamed/moved, these palettes are colours stored inside segments
-      PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID = PALETTELIST_STATIC_LENGTH__ID,
-      PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_02__ID, // this will likely some how be merged with rgbcct user palettes later, especially if it needs to be variable to segment count
-      PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_03__ID,
-      //to be added
-      PALETTELIST_VARIABLE_FASTLED__LENGTH__ID    
-    };
-    enum PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID = PALETTELIST_VARIABLE_FASTLED__LENGTH__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID    
-    };
+    
+    /**
+     * @brief Only the static/progmem stuff below will be taken from inside palette.cpp
+     * 
+     */
     enum PALETTELIST_STATIC_CRGBPALETTE16__IDS{
       
-      PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID= PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID,
+      PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID= PALETTELIST_STATIC_LENGTH__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID,
-      PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIBE_COLOUR__ID,
+      PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__HEAT_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID
@@ -370,7 +337,72 @@ class mPalette
       PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
     };
 
-    #define PALETTELIST_TOTAL_LENGTH PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
+    
+    /**
+     * @brief Variable lengths to be moved to end once things are stable
+     * 
+     */
+    enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
+      PALETTELIST_VARIABLE_HSBID_01__ID = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID,
+      PALETTELIST_VARIABLE_HSBID_02__ID,
+      PALETTELIST_VARIABLE_HSBID_03__ID,
+      PALETTELIST_VARIABLE_HSBID_04__ID,
+      PALETTELIST_VARIABLE_HSBID_05__ID,
+      PALETTELIST_VARIABLE_HSBID_06__ID,
+      PALETTELIST_VARIABLE_HSBID_07__ID,
+      PALETTELIST_VARIABLE_HSBID_08__ID,
+      PALETTELIST_VARIABLE_HSBID_09__ID,
+      PALETTELIST_VARIABLE_HSBID_10__ID,
+      PALETTELIST_VARIABLE_HSBID_LENGTH__ID  // Count of total handlers and starting point for other modules
+    };
+    
+    enum PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS{
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
+    };
+
+    
+    // One special buffer, block of memory allows any format of pallete (eg)
+    // This will also require encoding of type of palette into the buffer somehow
+    // shared, with overlapping memory
+    // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
+    enum PALETTELIST_VARIABLE_GENERIC__IDS{
+      PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID, // New scene colour, static
+      // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
+      PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
+    };
+
+
+    /**
+     * @brief These below to become fully added into my methods as another encoding type
+     * to be merged and named in my static list
+     * 
+     */
+    enum PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,
+      
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID,
+
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID    
+    };
+    #define PALETTELIST_CRGBPALETTE_FIRST_ID PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID
+
+
+
+
+
+    #define PALETTELIST_TOTAL_LENGTH PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID
 
     #define PALETTELIST_COLOUR_AMOUNT_MAX 20//15 new max
 
@@ -419,13 +451,8 @@ class mPalette
         // Contains information on formatting of data buffer
         PALETTE_ENCODING_DATA encoding;
       };
-      // Can be edited
-      PALETTE hsbid_users[10];
-      // Can be edited
-      PALETTE rgbcct_users[5];    // Remove ?? or it needs to be made dynamic here??
-      // Generic variable palette 
-      PALETTE encoded_users; // Should remain only option, to permit the largest buffer. Long term, it could be made dynamic
       // Add static palettes here
+      PALETTE party_default;
       PALETTE holloween_op;
       PALETTE holloween_ogp;
       PALETTE hot_pink_neon_with_navy;
@@ -443,7 +470,6 @@ class mPalette
       PALETTE pastel_01;
       PALETTE pastel_02;
       PALETTE ocean_01;
-      PALETTE shelf_hearts;
       PALETTE gradient_01;
       PALETTE gradient_02;
       PALETTE gradient_fire_01;
@@ -502,6 +528,20 @@ class mPalette
       PALETTE christmas_30;
       // Created for other people
       PALETTE custom_user_01;
+
+
+
+
+      // Can be edited
+      PALETTE hsbid_users[10];
+      // Can be edited
+      PALETTE rgbcct_segment_colour_users[5];    // Now contained within segment so is not needed here! (at least data is not, but name may be)
+      // Generic variable palette 
+      PALETTE encoded_users; // Should remain only option, to permit the largest buffer. Long term, it could be made dynamic
+
+
+
+      // Active
       PALETTE *ptr = &rainbow;
     }palettelist;
 
@@ -524,7 +564,9 @@ class mPalette
 
     HsbColor GetHsbColour(uint8_t id);
       
+#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
     void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
+#endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
 
     
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
@@ -549,24 +591,6 @@ class mPalette
 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
 
-        
-
-    uint32_t 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-    IRAM_ATTR 
-    #endif 
-    GetColourFromPreloadedPaletteU32(
-      uint16_t palette_id = 0,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t mcol = 0, // will be phased out
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      uint8_t* discrete_colours_in_palette = nullptr
-    );
-
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
@@ -579,14 +603,12 @@ class mPalette
       bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
       uint8_t mcol = 0, // will be phased out
       bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      uint8_t* discrete_colours_in_palette = nullptr
+      uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      // uint8_t* discrete_colours_in_palette = nullptr
     );
 
 
-    void UpdatePalette_FastLED_TargetPalette(uint8_t* colours_in_palette = nullptr);
-    void load_gradient_palette(uint8_t index);
-
+    void LoadPalette_CRGBPalette16_Static(uint8_t palette_id = 0);
     PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
           
     void init_PresetColourPalettes_HSBID_UserFill(uint8_t id);
@@ -602,7 +624,7 @@ class mPalette
 
 };
 
-#define mPaletteI mPalette::GetInstance()
+#define mPaletteI mPalette::GetInstance() // lets investigate making mPalette NOT a singleton, though, to be included inside palette controller, it might need to be so it only has once instance
 
 #endif
 

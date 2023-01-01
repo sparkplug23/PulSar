@@ -593,6 +593,7 @@ float ModulusRangef(float f, float a, float b);
 static bool CheckCommand_P(const char* needle, const char* haystack);
 static int8_t GetCommandID(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
 static int8_t GetCommandID_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
+static int16_t GetCommandID16_P(const char* needle, const char* haystack, char* destination = nullptr, size_t destination_size = 0);
 
 
   int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);

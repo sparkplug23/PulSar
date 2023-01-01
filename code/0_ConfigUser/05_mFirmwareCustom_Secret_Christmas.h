@@ -1125,6 +1125,13 @@
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
+    #define ENABLE_DEVFEATURE_RGBCCT_NEW_VECTOR_METHOD
+    #define ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+    #define ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+    #define ENABLE_DEVFEATURE_SWITCH_WLED_COLOURS_TO_RGBCCT_VECTORED_COLOURS
+    #define ENABLE_DEVFEATURE_MOVE_VARIABLE_CRGBPALETTE_INTO_ANIMATOR_FROM_PALETTE
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
@@ -1439,6 +1446,12 @@
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     #define ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
+    #define ENABLE_DEVFEATURE_RGBCCT_NEW_VECTOR_METHOD
+    #define ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
+    #define ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
+    #define ENABLE_DEVFEATURE_SWITCH_WLED_COLOURS_TO_RGBCCT_VECTORED_COLOURS
+    #define ENABLE_DEVFEATURE_MOVE_VARIABLE_CRGBPALETTE_INTO_ANIMATOR_FROM_PALETTE
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
     // #define ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -1463,9 +1476,23 @@
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
     #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
     // #define ENABLE_LOG_LEVEL_DEBUG
     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+// Getting at least one "scene" working
+/*
+
+SegColor is only RGBW, but if it was made to be Rgbcct, (or at least big enough)
+then the controller could be directed to use it/modify it only (not save it)
+
+Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per animation) and have way to switch between segcolour and rgbcctcolour
+
+
+
+
+*/
 
 
   #define USE_MODULE_TEMPLATE
@@ -1489,7 +1516,7 @@
  * @brief The issue is template loading is not boot safe.
  * I need to move this to init() and have it configure after boot has happened using the new segment method
  * */
-  #define STRIP_SIZE_MAX 1201
+  #define STRIP_SIZE_MAX 100
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   #endif // USE_MODULE_LIGHTS_INTERFACE
@@ -1507,9 +1534,9 @@
     "Segment0":{
       "PixelRange": [
         0,
-        1201
+        100
       ],
-      "ColourPalette":"Christmas 30",
+      "ColourPalette":0,
       "Effects": {
         "Function":1,
         "Intensity":50
@@ -1524,6 +1551,64 @@
   )=====";
   #endif // USE_LIGHTING_TEMPLATE__SINGLE
 
+// {
+//   "ColourPalette": 11,
+//   "Effects": {
+//     "Function": 0,
+//     "Intensity": 127,
+//     "Speed": 255
+//   },
+//   "Transition": {
+//     "TimeMs": 0,
+//     "RateMs": 5000
+//   },
+//   "BrightnessRGB": 100,
+//   "SegColour1": {
+//     "Hue": 240,
+//     "Sat":70
+//   }
+// }
+
+
+
+// {
+//   "HardwareType": "WS28XX",
+//   "AnimationMode": "Effects",
+//   "BrightnessRGB": 100,
+//   "Segment0": {
+//     "PixelRange": [
+//       0,
+//       5
+//     ],
+//     "ColourPalette": 10,
+//     "Effects": {
+//       "Function": 0,
+//       "Intensity": 255
+//     },
+//     "SegColour":{"Hue":120,"Sat":100},
+//     "Transition": {
+//       "TimeMs": 900,
+//       "RateMs": 1000
+//     }
+//   },
+//   "Segment1": {
+//     "PixelRange": [
+//       5,
+//       10
+//     ],
+//     "ColourPalette": "Christmas 01",
+//     "Effects": {
+//       "Function": 24,
+//       "Speed": 255,
+//       "Intensity": 255,
+//       "SegBrightness":255
+//     },
+//     "Transition": {
+//       "TimeMs": 0,
+//       "RateMs": 23
+//     }
+//   }
+// }
 
   #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
