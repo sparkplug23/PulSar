@@ -2,7 +2,7 @@
 #define MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_MIC4HAEL_CHRISTMAS_H
 
 /*********************************************************************************************\
- * Christmas 2022
+ * Christmas 2022 - Stop using any in this file, phasing out Jan2023
 \*********************************************************************************************/
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -28,7 +28,7 @@
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_PRIMATY_WIFI_ENABLED_XMAS2022
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_CONTROLLER_SEGMENTS
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022
-#define DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
+// #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
 // #define DEVICE_RGBSTRING_DEVELOPMENT_NODE2
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_TREE
 // #define DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_CANDLE
@@ -222,7 +222,7 @@
     // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS    
     #define ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
 
-    // #define ENABLE_WLED_EFFECTS
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
     //#define ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 
@@ -1036,7 +1036,7 @@
 
     // make my own for this
 
-    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE // probably switch to always enabled going forward
 
   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
@@ -1117,20 +1117,12 @@
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
-    #define ENABLE_DEVFEATURE_RGBCCT_NEW_VECTOR_METHOD
-    #define ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
-    #define ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-    #define ENABLE_DEVFEATURE_SWITCH_WLED_COLOURS_TO_RGBCCT_VECTORED_COLOURS
-    #define ENABLE_DEVFEATURE_MOVE_VARIABLE_CRGBPALETTE_INTO_ANIMATOR_FROM_PALETTE
     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -1140,8 +1132,8 @@
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    #define ENABLE_WLED_EFFECTS
-    #define ENABLE_EXTRA_WLED_EFFECTS
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
     #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
     /********* Group: Debug options only ************************/
@@ -1356,9 +1348,9 @@
     #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
 
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
-    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE // probably switch to always enabled going forward
 
-    #define ENABLE_EXTRA_WLED_EFFECTS
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
@@ -1423,7 +1415,6 @@
   // #define DISABLE_SERIAL0_CORE
   // #define DISABLE_SERIAL_LOGGING
 
-
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
@@ -1437,35 +1428,23 @@
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
-    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_CHANGING_TO_NEW_SET_OPTIONS
-    #define ENABLE_DEVFEATURE_RGBCCT_NEW_VECTOR_METHOD
-    #define ENABLE_DEVFEATURE_RGBCCT_ACTIVE_PALETTE_TO_VECTOR
-    #define ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-    #define ENABLE_DEVFEATURE_SWITCH_WLED_COLOURS_TO_RGBCCT_VECTORED_COLOURS
-    #define ENABLE_DEVFEATURE_MOVE_VARIABLE_CRGBPALETTE_INTO_ANIMATOR_FROM_PALETTE
     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    #define ENABLE_WLED_EFFECTS
-    #define ENABLE_EXTRA_WLED_EFFECTS
     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
@@ -1481,20 +1460,6 @@
     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-// Getting at least one "scene" working
-/*
-
-SegColor is only RGBW, but if it was made to be Rgbcct, (or at least big enough)
-then the controller could be directed to use it/modify it only (not save it)
-
-Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per animation) and have way to switch between segcolour and rgbcctcolour
-
-
-
-
-*/
-
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1503,14 +1468,19 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      #endif 
+      #ifdef USE_MODULE_LIGHTS_PWM
+      "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"22\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","      
+      #endif 
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
-
-
 
 /**
  * @brief The issue is template loading is not boot safe.
@@ -1687,6 +1657,9 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
 
 #endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
 
+
+
+
 /**
  * @brief 
  * No WIFI
@@ -1719,11 +1692,9 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    #define ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
     #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
@@ -1735,8 +1706,8 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    #define ENABLE_WLED_EFFECTS
-    #define ENABLE_EXTRA_WLED_EFFECTS
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
     #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE  // replicating outside for testing
     /********* Group: Debug options only ************************/
@@ -1941,8 +1912,8 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
-    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
-    #define ENABLE_EXTRA_WLED_EFFECTS
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE // probably switch to always enabled going forward
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     
     #define 
     // #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
@@ -2046,8 +2017,8 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     #define ENABLE_DEVFEATURE_REMOVE_SEG_STOP_INDEX
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
-    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
-    #define ENABLE_EXTRA_WLED_EFFECTS
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE // probably switch to always enabled going forward
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     
     #define 
     // #define ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
@@ -2153,7 +2124,7 @@ Probably best to keep segcolour but also add my rgbcct colours (lets say 3 per a
 
     #define ENABLE_DEVFEATURE_FORCED_FRAMERATE_FOR_TRANSITION_SPEED_WITH_WLED_EFFECTS
 
-    #define ENABLE_WLED_EFFECTS // probably switch to always enabled going forward
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE // probably switch to always enabled going forward
 
   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 

@@ -195,7 +195,7 @@ void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
   char buffer[30];
    
   BufferWriterI->Append_P(PSTR("{t}"));  
-  BufferWriterI->Append_P(PSTR("<tr><td><b>INA219 Current Sensor</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(mPaletteI->palettelist.ptr));
+  BufferWriterI->Append_P(PSTR("<tr><td><b>INA219 Current Sensor</b></td></tr>"));//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr));
 
   //headers
   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);

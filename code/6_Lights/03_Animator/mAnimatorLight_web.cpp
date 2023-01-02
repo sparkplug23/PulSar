@@ -509,7 +509,7 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 
   
 //   element_list_num = CheckPaletteIsEditable(mPaletteI->palettelist.ptr) ? 
-//         PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(mPaletteI->palettelist.ptr);
+//         PALETTELIST_COLOUR_AMOUNT_MAX : GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 
 //   for (uint8_t menu_id = 0; menu_id < element_list_num; menu_id++) {
 //     BufferWriterI->Append_P(PSTR("sk(%d,%d);"),colour_selected_id[menu_id],menu_id); // active colours
@@ -543,7 +543,7 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
   
 //   // if not users, then only show number of static fields
 //   element_list_num = CheckPaletteIsEditable(mPaletteI->palettelist.ptr) ? 
-//         PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(palettelist.ptr);
+//         PALETTELIST_COLOUR_AMOUNT_MAX : GetNumberOfColoursInPalette(palettelist.ptr);
 
 //   // Send Table
 //   BufferWriterI->Append_P(PSTR("<br/><p></p><b>" "Pixel Colour (Saturation %)" "</b><table>"));
@@ -756,7 +756,7 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
   
 //   // // // if not users, then only show number of static fields
 //   // // element_list_num = CheckPaletteIsEditable(palettelist.ptr) ? 
-//   // //       PALETTELIST_COLOUR_AMOUNT_MAX : GetPixelsInMap(palettelist.ptr);
+//   // //       PALETTELIST_COLOUR_AMOUNT_MAX : GetNumberOfColoursInPalette(palettelist.ptr);
 
 //   // // // Send Table
 //   // // pCONT_web->WSBufferAppend_P2(buffer, PSTR("<br/><p></p><b>" "Pixel Colour (Saturation %)" "</b><table>"));
@@ -1732,7 +1732,7 @@ void mAnimatorLight::WebAppend_PaletteEditor_Draw_Editor_Form(){
 
   // if not users, then only show number of static fields
   element_list_num = pCONT_iLight->CheckPaletteIsEditable(mPaletteI->palettelist.ptr) ? 
-        PALETTELIST_COLOUR_AMOUNT_MAX : mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+        PALETTELIST_COLOUR_AMOUNT_MAX : mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 
         element_list_num = 20;
 

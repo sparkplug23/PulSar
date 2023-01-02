@@ -76,7 +76,11 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
     // #ifdef ENABLE_LOG_LEVEL_INFO
       // AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
     // #endif// ENABLE_LOG_LEVEL_INFO
+    
 
+    break;
+    case FUNC_EVERY_FIVE_MINUTE:
+      ALOG_INF( PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
     break;
     case FUNC_WIFI_CONNECTED:
     
@@ -663,11 +667,8 @@ void mWiFi::WifiCheckIp(void)
 // #else
   if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0)) {
 // #endif  // LWIP_IPV6=1
-    
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str());
-    // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_DEBUG "Connected to IP:%s (%s) WiFi.status() = WL_CONNECTED")); //ip, ssid, connected uptime, connected total downtime
-    #endif// ENABLE_LOG_LEVEL_INFO
+
+    ALOG_DBM( PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
 
     WifiSetState(1);
     connection.counter = WIFI_CHECK_SEC; //20 secs

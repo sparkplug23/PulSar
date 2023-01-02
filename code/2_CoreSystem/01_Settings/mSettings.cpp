@@ -187,9 +187,6 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
     case FUNC_EVERY_MINUTE:
     // Change to saving using counter later, Settings.save_data
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
-    #endif // ENABLE_LOG_LEVEL_INFO
       #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
       // Update Settings with local module values that need saving
       pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
@@ -275,6 +272,11 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
 
 
+
+    break;
+    case FUNC_EVERY_FIVE_MINUTE:
+
+      ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
 
     break;
     

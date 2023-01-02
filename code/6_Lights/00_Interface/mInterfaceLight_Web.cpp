@@ -73,7 +73,7 @@ void mInterfaceLight::WebAppend_Root_ControlUI(){
 
 //  pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_CONTROLS_CTR, D_WEB_HANDLE_RGB_CONTROLS_PAGE);
 
-  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(mPaletteI->palettelist.ptr));
+  BufferWriterI->Append_P(PSTR("<tr><td><b>Scene Colour</b></td></tr>"));//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr));
 
   HsbColor hsb_current = HsbColor(RgbColor(0));//RgbColor(mode_singlecolour.colour.R,mode_singlecolour.colour.G,mode_singlecolour.colour.B));
 
@@ -229,8 +229,8 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
 
   // mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 
-  uint8_t length = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
-  uint8_t pal_length = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
+  uint8_t length = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
+  uint8_t pal_length = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr); //pixelsinmap + name + length
   
   JsonBuilderI->Array_Start("rgb_pal_title");// Class name
     JsonBuilderI->Level_Start();
@@ -238,7 +238,7 @@ void mInterfaceLight::WebAppend_Root_RGBPalette()
     if(mPaletteI->palettelist.ptr->flags.fMapIDs_Type == MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID){
       JsonBuilderI->Add_FV("ih",PSTR("\"%s (Gradient)\""), mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)));
     }else{
-      JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr));
+      JsonBuilderI->Add_FV("ih",PSTR("\"%s (#%d)\""),mPaletteI->GetPaletteFriendlyNameByID(mPaletteI->palettelist.ptr->id,title_ctr,sizeof(title_ctr)),mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr));
     }
     JsonBuilderI->Level_End();
   JsonBuilderI->Array_End();
@@ -497,7 +497,7 @@ void mInterfaceLight::WebAppend_Root_Draw_RGBLive(){
   
   BufferWriterI->Append_P(PSTR("{t}"));
   #ifdef ENABLE_DEVFEATURE_PIXEL_PIXELCOUNT_IN_LIVEVIEW
-  BufferWriterI->Append_P(PSTR("<tr><td>Liveview <span class='p %s'>%d</span></td><td>Amount<span class='q %s'>%d</span></td></tr>"), "rgb_live_ttl", liveview.refresh_rate, "rgb_live_ttl", light_count);//GetPaletteFriendlyName(),GetPixelsInMap(palettelist.ptr));
+  BufferWriterI->Append_P(PSTR("<tr><td>Liveview <span class='p %s'>%d</span></td><td>Amount<span class='q %s'>%d</span></td></tr>"), "rgb_live_ttl", liveview.refresh_rate, "rgb_live_ttl", light_count);//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(palettelist.ptr));
   BufferWriterI->Append_P(PSTR("<tr><td><div class='rgb_live' style='width:100%%;height:%dpx';></div></td></tr>"),
                             map(liveview.height_as_percentage,0,100,1,300)); //pixel height option for liveview
   #else

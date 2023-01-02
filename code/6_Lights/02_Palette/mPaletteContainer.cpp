@@ -8,7 +8,7 @@ void mPaletteContainer::LoadPaletteI()
 
 
 
- Serial.println("TRYING TO LOAD");
+ Serial.println("mPaletteContainer::LoadPaletteI()");
  
 
 
@@ -64,7 +64,7 @@ void mPaletteContainer::LoadPaletteI()
 //     pData.push_back(1);
 //     pData.push_back(2);
 
-//     // pCONT_lAni->loadPalette_Michael(0, pCONT_lAni->strip->getCurrSegmentId());
+//     // pCONT_lAni->loadPalette_Michael(0, pCONT_lAni->getCurrSegmentId());
 
 
 

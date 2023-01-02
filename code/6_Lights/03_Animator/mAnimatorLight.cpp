@@ -43,12 +43,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       // uint32_t maTotal = stripbus->CalcTotalMilliAmpere(settings);
 
       
-//       ALOG_INF(PSTR("raw=%d"),strip->_segments_new[0].rgbcctcolors[0].raw[0]); 
-//       ALOG_INF(PSTR("size=%d"),strip->_segments_new[0].rgbcctcolors.size()); 
+//       ALOG_INF(PSTR("raw=%d"),strip->segments[0].rgbcctcolors[0].raw[0]); 
+//       ALOG_INF(PSTR("size=%d"),strip->segments[0].rgbcctcolors.size()); 
 
 
 // DEBUG_LINE_HERE;
-//       strip->_segments_new[0].rgbcctcolors.push_back(RgbcctColor(11,12,13,14,15));
+//       strip->segments[0].rgbcctcolors.push_back(RgbcctColor(11,12,13,14,15));
 
 // DEBUG_LINE_HERE;
 
@@ -166,21 +166,79 @@ void mAnimatorLight::Pre_Init(void){
         kTaskRunnerCore
     );
     #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    
 
-  #ifdef ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
-  strip = new mAnimatorLight::WS2812FX();
-  ALOG_INF(PSTR("SET strip = new WS2812FX()")); 
-  strip->finalizeInit();
-  strip->makeAutoSegments();
-  #endif // ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
+    ALOG_INF(PSTR("Init_SegmentWS2812FxStrip")); 
+    Init_SegmentWS2812FxStrip();
+    finalizeInit();
+    makeAutoSegments();
+    
   
     #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-
     busses = new BusManager();
-
-
     #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
   
+
+}
+
+
+void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
+{
+
+  paletteFade=0;
+  paletteBlend = 0;
+  milliampsPerLed = 5;
+  cctBlending = 0;
+  ablMilliampsMax = 0;//ABL_MILLIAMPS_DEFAULT),
+  currentMilliamps = 0;
+  now = millis();
+  timebase = 0;
+  isMatrix = false;
+  #ifndef WLED_DISABLE_2D
+  hPanels(1),
+  vPanels(1),
+  panelH(8),
+  panelW(8),
+  matrix{0,0,0,0},
+  panel{{0,0,0,0}},
+  #endif
+  // semi-private (just obscured) used in effect functions through macros
+  _currentPalette = CRGBPalette16(HTMLColorCode::Black);
+  // _colors_t = {0,0,0};
+  _virtualSegmentLength = 0;
+  // true private variables
+  _length = DEFAULT_LED_COUNT;
+  _brightness = DEFAULT_BRIGHTNESS;
+  _transitionDur = 750;
+  _targetFps = WLED_FPS;
+  _frametime = FRAMETIME_FIXED;
+  _cumulativeFps = 2;
+  _isServicing = false;
+  _isOffRefreshRequired = false;
+  _hasWhiteChannel = false;
+  _triggered = false;
+  _modeCount = EFFECTS_FUNCTION__LENGTH__ID;
+  _callback = nullptr;
+  customMappingTable = nullptr;
+  customMappingSize = 0;
+  _lastShow = 0;
+  _segment_index_primary = 0;
+  _mainSegment = 0;
+
+  _mode.reserve(_modeCount);     // allocate memory to prevent initial fragmentation (does not increase size())
+  _modeData.reserve(_modeCount); // allocate memory to prevent initial fragmentation (does not increase size())
+  if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _modeCount = 1; // memory allocation failed only show Solid
+  else setupEffectData();
+
+
+// ~WS2812FX() { // Probably wont need this unless turning off lights module?
+//   if (customMappingTable) delete[] customMappingTable;
+//   _mode.clear();
+//   _modeData.clear();
+//   segments.clear();
+//   customPalettes.clear();
+//   if (useLedsArray && Segment_New::_globalLeds) free(Segment_New::_globalLeds);
+// }
 
 }
 
@@ -269,10 +327,10 @@ void mAnimatorLight::Init(void){
    * @brief Start PaletteContainer
    * 
    */
-  #ifdef ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
   ALOG_WRN(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced"));
   SEGMENT_I(0).palette_container = new mPaletteContainer(100);
-  #endif // ENABLE_DEVFEATURE_NEWPALETTE_CONTAINER_POINTER
+
+  DEBUG_LINE_HERE;
 
   /**
    * @brief Init Types of Modes
@@ -419,42 +477,42 @@ DEBUG_LINE;
 
 const char* mAnimatorLight::GetAnimationStatusCtr(char* buffer, uint8_t buflen){
 
-  if(pCONT_iLight->animator_controller->IsAnimating()){
-    snprintf_P(buffer, buflen, PSTR("Animating"));
-    return buffer;
-  }
-  if(SEGMENT_I(0).flags.fEnable_Animation){
-    // (millis since) + (next event millis)
-    int16_t until_next_millis = SEGMENT_I(strip->_segment_index_primary).transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
-    int16_t secs_until_next_event = until_next_millis/1000;
-    // secs_until_next_event/=1000;
-    // Serial.println(secs_until_next_event);
+  // if(pCONT_iLight->animator_controller->IsAnimating()){
+  //   snprintf_P(buffer, buflen, PSTR("Animating"));
+  //   return buffer;
+  // }
+  // if(SEGMENT_I(0).flags.fEnable_Animation){
+  //   // (millis since) + (next event millis)
+  //   int16_t until_next_millis = SEGMENT_I(->_segment_index_primary).transition.rate_ms-(millis()-pCONT_iLight->runtime.animation_changed_millis);
+  //   int16_t secs_until_next_event = until_next_millis/1000;
+  //   // secs_until_next_event/=1000;
+  //   // Serial.println(secs_until_next_event);
 
-    // char float_ctr[10];
-    // dtostrf(round(secs_until_next_event),3,1,float_ctr);
-    // Serial.println(float_ctr);
+  //   // char float_ctr[10];
+  //   // dtostrf(round(secs_until_next_event),3,1,float_ctr);
+  //   // Serial.println(float_ctr);
 
-    // AddLog(LOG_LEVEL_INFO,PSTR("GetAnimationStatusCtr %d %d"),
-    //   until_next_millis,
-    //   //millis(),pCONT_iLight->runtime.animation_changed_millis,pCONT_iLight->animation.transition.rate_ms,
-    //   secs_until_next_event
-    // );  
+  //   // AddLog(LOG_LEVEL_INFO,PSTR("GetAnimationStatusCtr %d %d"),
+  //   //   until_next_millis,
+  //   //   //millis(),pCONT_iLight->runtime.animation_changed_millis,pCONT_iLight->animation.transition.rate_ms,
+  //   //   secs_until_next_event
+  //   // );  
     
-    if(secs_until_next_event>=0){
-      snprintf_P(buffer, buflen, PSTR("Enabled (in %d secs)"), secs_until_next_event);//float_ctr);
-    }else{
-      snprintf_P(buffer, buflen, PSTR("Not currently running"));
-      //  sprintf(buffer,PSTR("Not currently running"));//float_ctr);
-    }
+  //   if(secs_until_next_event>=0){
+  //     snprintf_P(buffer, buflen, PSTR("Enabled (in %d secs)"), secs_until_next_event);//float_ctr);
+  //   }else{
+  //     snprintf_P(buffer, buflen, PSTR("Not currently running"));
+  //     //  sprintf(buffer,PSTR("Not currently running"));//float_ctr);
+  //   }
 
-    // sprintf(ctr,PSTR("Enabled (%d secs)\0"),secs_until_next_event);
-    // sprintf(ctr,PSTR("Enabled (123 secs)\0"),secs_until_next_event);
-    // Serial.println(ctr);
-    return buffer;
-  }else{
-    return D_CSTRING_ERROR_MESSAGE_CTR;
-    // return "Paused";
-  }
+  //   // sprintf(ctr,PSTR("Enabled (%d secs)\0"),secs_until_next_event);
+  //   // sprintf(ctr,PSTR("Enabled (123 secs)\0"),secs_until_next_event);
+  //   // Serial.println(ctr);
+  //   return buffer;
+  // }else{
+  //   return D_CSTRING_ERROR_MESSAGE_CTR;
+  //   // return "Paused";
+  // }
   return D_CSTRING_ERROR_MESSAGE_CTR;
 }
 
@@ -474,12 +532,18 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range
 
 RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT){
 
+
+  ALOG_DBM( PSTR("full_range_colour=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+
   RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightnessRGB);
   colour_adjusted_with_brightness.G  = mapvalue(full_range_colour.G,  0,255, 0,brightnessRGB);
   colour_adjusted_with_brightness.B  = mapvalue(full_range_colour.B,  0,255, 0,brightnessRGB);
   colour_adjusted_with_brightness.WW = mapvalue(full_range_colour.WW, 0,255, 0,brightnessCCT);
   colour_adjusted_with_brightness.WC = mapvalue(full_range_colour.WC, 0,255, 0,brightnessCCT);
+  
+  ALOG_DBM( PSTR("colour_adjusted_with_brightness=%d,%d,%d,%d,%d"),colour_adjusted_with_brightness.R,colour_adjusted_with_brightness.G,colour_adjusted_with_brightness.B,colour_adjusted_with_brightness.WC,colour_adjusted_with_brightness.WW);
+
   return colour_adjusted_with_brightness;
 
 }
@@ -517,13 +581,6 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
-void mAnimatorLight::StripUpdate(){
-
-  pCONT_iLight->ShowInterface();
-
-}
-
-
 
 /**
  * @brief Function to load palette_id into the segment
@@ -546,7 +603,7 @@ void mAnimatorLight::StripUpdate(){
 void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
 {
 
-  // ALOG_INF(PSTR("loadPalette_Michael %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
+  ALOG_DBM(PSTR("loadPalette_Michael %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
 
   /**
    * @brief My palettes
@@ -556,17 +613,23 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
     ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
     ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
   ){   
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);    
+
+    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);  
+
+    #ifdef ESP32
     SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
-    
-    // ALOG_INF(PSTR("Direct load, move into container %d %d"), segment_index, ptr->data_length);
+    #else // ESP8266 requires safe reading out of progmem first
+    uint8_t buffer[ptr->data_length];
+    memcpy_P(buffer, ptr->data, sizeof(uint8_t)*ptr->data_length);
+    SEGMENT_I(segment_index).palette_container->pData.assign(buffer, buffer + ptr->data_length);
+    #endif  
+ 
   }
   else
   if(
     (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
   ){  
-      // Currently does not need to load
-    
+    // Does not need loaded, contained in segment
   }
   else
   if(
@@ -585,7 +648,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->targetPalette = CRGBPalette16(
+          mPaletteI->currentPalette = CRGBPalette16(
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 192, random8(128, 255)),
@@ -600,7 +663,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->targetPalette = CRGBPalette16(
+          mPaletteI->currentPalette = CRGBPalette16(
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
@@ -617,7 +680,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->targetPalette = CRGBPalette16(
+          mPaletteI->currentPalette = CRGBPalette16(
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
@@ -635,7 +698,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->targetPalette = CRGBPalette16(
+          mPaletteI->currentPalette = CRGBPalette16(
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
@@ -653,7 +716,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->targetPalette = CRGBPalette16(
+          mPaletteI->currentPalette = CRGBPalette16(
                           CHSV(random8(), random8(0, 255), 255),
                           CHSV(random8(), random8(0, 255), 255),
                           CHSV(random8(), random8(0, 255), 255),
@@ -669,7 +732,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
       { //primary color only
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0])); //is this stable to do? maybe since its not a pointer but instead an instance of a class
-        mPaletteI->targetPalette = CRGBPalette16(prim); 
+        mPaletteI->currentPalette = CRGBPalette16(prim); 
         // length = 1;
       }
       break;
@@ -677,7 +740,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
       { //primary + secondary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-        mPaletteI->targetPalette = CRGBPalette16(prim,prim,sec,sec); 
+        mPaletteI->currentPalette = CRGBPalette16(prim,prim,sec,sec); 
         // length = 4;
       }
       break;
@@ -686,7 +749,7 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
         CRGB ter  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-        mPaletteI->targetPalette = CRGBPalette16(ter,sec,prim); 
+        mPaletteI->currentPalette = CRGBPalette16(ter,sec,prim); 
         // length = 3; // 3 unique colours
       }
       break;    
@@ -697,9 +760,9 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
         if (RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]))
         {
           CRGB ter = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-          mPaletteI->targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
+          mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
         } else {
-          mPaletteI->targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
+          mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
         }
         // length = 16;
       }
@@ -707,9 +770,6 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
 
     } //end switch
     
-    mPaletteI->currentPalette = mPaletteI->targetPalette; // This should be returned!
-    // ALOG_INF(PSTR("LOADED currentPalette"));
-
   }
   else
   if(

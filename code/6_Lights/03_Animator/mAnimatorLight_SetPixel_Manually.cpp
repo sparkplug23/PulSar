@@ -23,8 +23,6 @@ void mAnimatorLight::SubTask_Manual_SetPixel(){
 
   
   // _segment_runtimes[0].animation_has_anim_callback = false; // When no animation callback is needed
-  // StripUpdate();
-
 
 
   // //run function once

@@ -281,7 +281,7 @@ int8_t kButtonTitle_Temps_Boiler_Value[] = {-1,30,40,50};
   char listheading[30];
   // BufferWriterI->Append_P("\"%s\":[{\"ihr\":\"","heat_program_buttons_draw");
   // BufferWriterI->Append_P("%s",PSTR("{t}"));
-  // BufferWriterI->Append_P(PSTR("<tr><td> Liveview</td></tr>"));//GetPaletteFriendlyName(),GetPixelsInMap(palettelist.ptr));
+  // BufferWriterI->Append_P(PSTR("<tr><td> Liveview</td></tr>"));//GetPaletteFriendlyName(),GetNumberOfColoursInPalette(palettelist.ptr));
   // BufferWriterI->Append_P(PSTR("<tr><td><div class='heat_program_buttons'style='width:100%%;height:%dpx';></div></td></tr>"),
   //                                                     1); //pixel height option for liveview
 

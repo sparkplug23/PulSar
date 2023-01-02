@@ -140,7 +140,7 @@ class mPalette
      * COLOUR Designs by name
      * PALETTE are different colours by pixel
     **************/                            
-    int8_t GetPaletteIDbyName(const char* c);
+    int16_t GetPaletteIDbyName(const char* c);
     const char* GetPaletteName(char* buffer, uint8_t buflen);  
     const char* GetPaletteNameByID(uint8_t id, char* buffer, uint8_t buflen);
     const char* GetPaletteFriendlyName(char* buffer, uint8_t buflen);
@@ -563,15 +563,10 @@ class mPalette
     const char* GetPaletteFriendlyNameByID(uint8_t id, char* buffer, uint8_t buflen);    
 
     HsbColor GetHsbColour(uint8_t id);
-      
-#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-    void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
-#endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-
-    
+          
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
-    uint16_t GetPixelsInMap(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0);
-    uint16_t GetPixelsInMap(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
+    uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0);
+    uint16_t GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
 
 
     #ifdef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
@@ -583,11 +578,7 @@ class mPalette
  * @brief Needs to be moved so FastLED palettes can differ in each segment
  * 
  */
-    CRGBPalette16 currentPalette;
-    #ifndef ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-    CRGBPalette16 targetPalette;
-    #endif // ENABLE_DEVFEATURE_DYNAMIC_CRGBPALETTE16_FROM_MEMORY
-    
+    CRGBPalette16 currentPalette;    
 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
 
@@ -606,6 +597,24 @@ class mPalette
       uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
       // uint8_t* discrete_colours_in_palette = nullptr
     );
+
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromPreloadedPaletteBuffer(
+      uint16_t palette_id = 0,
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      uint8_t mcol = 0, // will be phased out
+      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
+      uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      // uint8_t* discrete_colours_in_palette = nullptr
+    );
+
 
 
     void LoadPalette_CRGBPalette16_Static(uint8_t palette_id = 0);

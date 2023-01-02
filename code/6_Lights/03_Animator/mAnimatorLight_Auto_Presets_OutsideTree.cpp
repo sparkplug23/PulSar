@@ -26,7 +26,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 
   ALOG_INF(PSTR("LoadPreset_ManualUserCustom_ByID=%d"),id);
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
   /**
    * @brief
@@ -421,7 +421,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
   {}
 
 
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC  
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE  
 
 } // END Function
 

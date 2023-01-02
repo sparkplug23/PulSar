@@ -45,7 +45,7 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-// #define ENABLE_WLED_EFFECTS
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
@@ -276,11 +276,15 @@ class mAnimatorLight :
         // typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
         // typedef Neo800KbpsMethod selectedNeoSpeedType;
 
-        #ifdef ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-        typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+        #ifdef ESP32
+          #ifdef ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+          typedef NeoEsp32I2s1Ws2812xMethod selectedNeoSpeedType;
+          #else
+          typedef Neo800KbpsMethod selectedNeoSpeedType;
+          #endif
         #else
         typedef Neo800KbpsMethod selectedNeoSpeedType;
-        #endif
+        #endif 
 
       #endif
     #endif   
@@ -372,10 +376,9 @@ class mAnimatorLight :
     uint8_t blocking_force_animate_to_complete = true;
     uint8_t fPixelsUpdated = false;
     uint16_t desired_pixel;
-    void EveryLoop();
-    // void SetRefreshLEDs();    
-    void StripUpdate();
+    void EveryLoop();    
                 
+    void Init_SegmentWS2812FxStrip();
 
     RgbcctColor ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness);
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT);
@@ -933,15 +936,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 ******************************************************************************************************************************************************************************
 ****************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
-
-
-  #ifdef ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
-  // Do I need this? Or can I remove it as an unneeded subclass level
-  WS2812FX *strip = nullptr;//new WS2812FX();
-  #endif // ENABLE_DEVFEATURE_WS2812FX_SEGMENT_CONSTRUCTOR
-
-
-
 
 #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
 

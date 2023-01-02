@@ -48,7 +48,7 @@ RgbcctColor mInterfaceLight::GetActiveFirstColourFromCurrentPalette(){
 
   mPaletteI->SetPaletteListPtrFromID(pCONT_lAni->SEGMENT_I(0).palette.id);
   
-  uint8_t pixels_in_map = mPaletteI->GetPixelsInMap(mPaletteI->palettelist.ptr);
+  uint8_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
           
   #ifdef ENABLE_LOG_LEVEL_DEBUG
   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_LIGHT "pixels_in_map %d"),pixels_in_map);
@@ -399,6 +399,8 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     // #endif // ENABLE_LOG_LEVEL_INFO
 
 
+
+
       Template_Load();
     break;
     case FUNC_POINTER_INIT:
@@ -467,17 +469,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:{
 
 
-      //Temp fix until proper monitoring of on/off states
-      #ifdef USE_MODULE_LIGHTS_ANIMATOR
-      // replace with GetLightPower() so its updated internally
-      
-      #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-      light_power_state = pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255()?1:0;
-      #endif
-
-      //AddLog(LOG_LEVEL_TEST, PSTR("light_power_state=%d"),light_power_state);
-      #endif // USE_MODULE_LIGHTS_ANIMATOR
-
 #ifdef ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
 
       uint8_t pbri = 255;
@@ -542,7 +533,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.r,colour.g
   }
     // pCONT_lAni->SetPixelColor(0, RgbColor(255,0,0));
   pCONT_lAni->SEGMENT_I(0).animation_has_anim_callback = false; // When no animation callback is needed
-  pCONT_lAni->StripUpdate();
+  ShowInterface();
 
 #endif // ENABLE_DEVFEATURE_LEARNING_FASTLED_PALETTES
 
@@ -677,7 +668,7 @@ void mInterfaceLight::RulesEvent_Set_Power()
 void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16_t index, bool flag_replicate_for_total_pixel_length){
 
   #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-   ALOG_INF( PSTR("SetPixelColor: %d\t(%d,%d,%d,%d,%d) pal%d"), index, colour.R, colour.G, colour.B, colour.W1, colour.W2, pCONT_lAni->strip->_segments_new[pCONT_lAni->strip->_segment_index_primary].palette.id );
+   ALOG_INF( PSTR("SetPixelColor: %d\t(%d,%d,%d,%d,%d) pal%d"), index, colour.R, colour.G, colour.B, colour.W1, colour.W2, pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette.id );
   #endif
 
   switch(pCONT_set->Settings.light_settings.type){
@@ -780,24 +771,6 @@ void mInterfaceLight::EverySecond_AutoOff(){
   }
 
 }// END EverySecond_AutoOff
-
-#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-void mInterfaceLight::ApplyGlobalBrightnesstoColour(RgbcctColor* colour){
-
-  colour->R  = mapvalue(colour->R,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
-getBrightnessRGB255());
-  colour->G  = mapvalue(colour->G,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
-getBrightnessRGB255());
-  colour->B  = mapvalue(colour->B,  0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
-getBrightnessRGB255());
-  colour->WW = mapvalue(colour->WW, 0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
-getBrightnessCCT255());
-  colour->WC = mapvalue(colour->WC, 0, 255, 0,pCONT_lAni->SEGMENT_I(0).rgbcct_controller->
-getBrightnessCCT255());
-
-}
-#endif // #ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-
 
 
 float mInterfaceLight::HueN2F(uint16_t hue){

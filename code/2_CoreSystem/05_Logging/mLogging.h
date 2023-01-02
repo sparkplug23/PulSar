@@ -383,9 +383,9 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
 template<typename T, typename U>
 void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 {
-#ifndef DISABLE_SERIAL_LOGGING
+  
+  #ifndef DISABLE_SERIAL_LOGGING
   SERIAL_DEBUG.printf("%s = ",name_ctr);
-
   for(T index=0;index<arr_len;index++){
     SERIAL_DEBUG.printf("%d,", arr[index]);
   }

@@ -14,7 +14,8 @@
 
 
   #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR   "HsbID %02d"
-  #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Solid Rgbcct %02d"
+  // #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Solid Rgbcct %02d"
+  #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Rgbcct %02d"
   #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_GENERIC__NAME_CTR "Generic %02d"
 
 #define ENABLE_ANIMATION_MODE__EFFECTS
@@ -496,14 +497,9 @@ void RulesEvent_Set_Power();
     RgbcctColor Color32bit2RgbColour(uint32_t colour32bit);
 
     void UpdateSetOutputs();  
-#ifndef ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-    void ApplyGlobalBrightnesstoColour(RgbcctColor* colour);
-#endif // ENABLE_DEVFEATURE_REMOVE_RGBCCT_CONTROLLER
-
     
     RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
-RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
-
+    RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
     uint8_t ConstructJSON_State(uint8_t json_level = 0);

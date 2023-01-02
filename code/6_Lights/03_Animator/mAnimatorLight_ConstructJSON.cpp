@@ -86,7 +86,7 @@ JBI->Start();
 
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
 
-    for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+    for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
     {
       JBI->Level_Start_F("Segment%d",seg_i);
       
@@ -205,7 +205,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level)
 
   JBI->Start();
 
-  for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+  for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
   {
     JBI->Level_Start_F("Segment%d", seg_i);
 
@@ -277,22 +277,22 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 
   JBI->Start(); 
 
-  JBI->Add("size", strip->_segments_new.size() );
+  JBI->Add("size", segments.size() );
 
-  for(uint8_t seg_i = 0; seg_i<  strip->_segments_new.size(); seg_i++)
+  for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
   {
     JBI->Level_Start_F("Segment%d",seg_i);
 
       // Config of segment (New stuff)
-      JBI->Add("sizeof", sizeof(strip->_segments_new[seg_i]));
+      JBI->Add("sizeof", sizeof(segments[seg_i]));
 
       JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(SEGMENT_I(seg_i).palette.id, buffer, sizeof(buffer)));
 
       // Same values as I am using
-      JBI->Add("Start", strip->_segments_new[seg_i].pixel_range.start);
-      JBI->Add("Stop", strip->_segments_new[seg_i].pixel_range.stop);
+      JBI->Add("Start", segments[seg_i].pixel_range.start);
+      JBI->Add("Stop", segments[seg_i].pixel_range.stop);
       JBI->Add("SEGLEN", SEGLEN);
-      JBI->Add("virtualLength", strip->_segments_new[seg_i].virtualLength());
+      JBI->Add("virtualLength", segments[seg_i].virtualLength());
       JBI->Level_Start("Transition");
         JBI->Add("rate", SEGMENT_I(seg_i).transition.rate_ms);
         JBI->Add("time", SEGMENT_I(seg_i).transition.time_ms);
@@ -345,16 +345,16 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 
 
       JBI->Level_Start("RgbcctColours");
-      for(uint8_t rgb_i = 0; rgb_i<  strip->_segments_new[seg_i].rgbcctcolors.size(); rgb_i++)
+      for(uint8_t rgb_i = 0; rgb_i<  segments[seg_i].rgbcctcolors.size(); rgb_i++)
       {
         JBI->Array_Start_P("Colour%d", rgb_i);
         for(uint8_t i=0;i<5;i++)
         {
-          JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].raw[i]); //might need to get rid of operator!
-          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].G); //might need to get rid of operator!
-          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].B); //might need to get rid of operator!
-          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].W1); //might need to get rid of operator!
-          // JBI->Add(strip->_segments_new[seg_i].rgbcctcolors[rgb_i].W2); //might need to get rid of operator!
+          JBI->Add(segments[seg_i].rgbcctcolors[rgb_i].raw[i]); //might need to get rid of operator!
+          // JBI->Add(segments[seg_i].rgbcctcolors[rgb_i].G); //might need to get rid of operator!
+          // JBI->Add(segments[seg_i].rgbcctcolors[rgb_i].B); //might need to get rid of operator!
+          // JBI->Add(segments[seg_i].rgbcctcolors[rgb_i].W1); //might need to get rid of operator!
+          // JBI->Add(segments[seg_i].rgbcctcolors[rgb_i].W2); //might need to get rid of operator!
         }
         JBI->Array_End();
       }
