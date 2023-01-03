@@ -35,7 +35,7 @@ void mAnimatorLight::Test_Config()
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID, 0);
   CommandSet_ActiveSolidPalette_Hue_360(0, 0);
   CommandSet_ActiveSolidPalette_Sat_255(255, 0);
-  CommandSet_BrtRGB_255(brightness, 0);
+  CommandSet_Global_BrtRGB_255(brightness, 0);
   seg_idx++; if(seg_idx>MAX_NUM_SEGMENTS){ ALOG_ERR(PSTR("seg_idx{%d}>MAX_NUM_SEGMENTS{%d}"),seg_idx,MAX_NUM_SEGMENTS); return; }
   row_start_iter+=8;
 
@@ -52,7 +52,7 @@ void mAnimatorLight::Test_Config()
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID, 1);
   CommandSet_ActiveSolidPalette_Hue_360(120, 1);
   CommandSet_ActiveSolidPalette_Sat_255(255, 1);
-  CommandSet_BrtRGB_255(brightness, 1);
+  CommandSet_Global_BrtRGB_255(brightness, 1);
   seg_idx++; if(seg_idx>MAX_NUM_SEGMENTS){ ALOG_ERR(PSTR("seg_idx{%d}>MAX_NUM_SEGMENTS{%d}"),seg_idx,MAX_NUM_SEGMENTS); return; }
 
   row_start_iter+=8;
@@ -69,7 +69,7 @@ void mAnimatorLight::Test_Config()
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID, 2);
   CommandSet_ActiveSolidPalette_Hue_360(240, 2);
   CommandSet_ActiveSolidPalette_Sat_255(255, 2);
-  CommandSet_BrtRGB_255(brightness, 2);
+  CommandSet_Global_BrtRGB_255(brightness, 2);
   seg_idx++; if(seg_idx>MAX_NUM_SEGMENTS){ ALOG_ERR(PSTR("seg_idx{%d}>MAX_NUM_SEGMENTS{%d}"),seg_idx,MAX_NUM_SEGMENTS); return; }
   row_start_iter+=8;
 
@@ -86,7 +86,7 @@ void mAnimatorLight::Test_Config()
   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID, 0);
   CommandSet_ActiveSolidPalette_Hue_360(345, 3);
   CommandSet_ActiveSolidPalette_Sat_255(255, 3);
-  CommandSet_BrtRGB_255(brightness, 3);
+  CommandSet_Global_BrtRGB_255(brightness, 3);
   seg_idx++; if(seg_idx>MAX_NUM_SEGMENTS){ ALOG_ERR(PSTR("seg_idx{%d}>MAX_NUM_SEGMENTS{%d}"),seg_idx,MAX_NUM_SEGMENTS); return; }
   row_start_iter+=8;
 
@@ -462,7 +462,7 @@ void mAnimatorLight::Test_Config()
   row_start_iter+=8;
 
 
-  pCONT_iLight->CommandSet_BrtRGB_255(brightness);
+  pCONT_iLight->CommandSet_Global_BrtRGB_255(brightness);
 
 
 }

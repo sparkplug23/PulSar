@@ -46,7 +46,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(30);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
   
   }else
   /**
@@ -67,7 +67,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(255);
     SEGMENT_I(0).set_speed(200);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -88,7 +88,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(30);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -112,7 +112,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -134,7 +134,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(3);
     SEGMENT_I(0).set_speed(127);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -156,7 +156,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(255);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 3;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
     SEGMENT_I(0).set_colors(1, 50,50,50, 0);
     // [0] = ((uint32_t)0 << 24) | ((uint32_t)50 << 16) | ((uint32_t)50 << 8) | (uint32_t)50);
@@ -178,7 +178,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -197,7 +197,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 100;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
 
@@ -216,7 +216,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 100;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
 
@@ -238,7 +238,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
 
   }else
@@ -279,7 +279,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     // SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
     // SEGMENT_I(0).set_speed(127);
     // SEGMENT_I(0).grouping = 1;
-    // CommandSet_BrtRGB_255(255);
+    // CommandSet_Global_BrtRGB_255(255);
 
     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID);
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
@@ -288,7 +288,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
     SEGMENT_I(0).set_speed(100);
     SEGMENT_I(0).grouping = 30; //added smoothness for around the tree
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -307,7 +307,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
     SEGMENT_I(0).set_speed(126);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -326,7 +326,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(255); //smoothness // https://github.com/Aircoookie/WLED/wiki/List-of-effects-and-palettes
     SEGMENT_I(0).set_speed(126);
     SEGMENT_I(0).grouping = 1;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
 
@@ -348,7 +348,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 100;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
 
   }else
@@ -367,7 +367,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 100;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
 
@@ -394,7 +394,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 25;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
   }else
   /**
@@ -413,7 +413,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     SEGMENT_I(0).set_intensity(20);
     SEGMENT_I(0).set_speed(255);
     SEGMENT_I(0).grouping = 25;
-    CommandSet_BrtRGB_255(255);
+    CommandSet_Global_BrtRGB_255(255);
 
 
   }else

@@ -668,7 +668,7 @@ void mWiFi::WifiCheckIp(void)
   if ((WL_CONNECTED == WiFi.status()) && (static_cast<uint32_t>(WiFi.localIP()) != 0)) {
 // #endif  // LWIP_IPV6=1
 
-    ALOG_DBM( PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
+    ALOG_DBM( PSTR(1"WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
 
     WifiSetState(1);
     connection.counter = WIFI_CHECK_SEC; //20 secs

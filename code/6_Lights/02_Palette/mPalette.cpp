@@ -1882,6 +1882,35 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
   /**************************************************************
    * 
+   * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+   * 
+  ***************************************************************/
+  if(
+    (palette_id >= PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < PALETTELIST_HTML_COLOUR__LENGTH__ID)
+  ){  
+
+    uint16_t adjusted_id = palette_id - PALETTELIST_HTML_COLOUR__AliceBlue__ID;
+    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+
+    // for (
+      // uint8_t indexName = 0; 
+    //   indexName < HtmlColorNames::Count(); indexName++)
+    // {
+      const HtmlColorPair* colorPair = HtmlColorNames::Pair(adjusted_id);
+      PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
+      RgbcctColor colour = (HtmlColor)colorPair->Color;
+      // ALOG_INF(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), adjusted_id, searchName, colorPair->Color, colour.R, colour.G, colour.B);
+    // }
+
+
+    // RgbcctColor colour = RgbcctColor::GetRgbcctFromU32Colour(0);//HtmlColor::)
+
+   
+    return colour;
+  }
+
+  /**************************************************************
+   * 
    * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
    * 
   ***************************************************************/

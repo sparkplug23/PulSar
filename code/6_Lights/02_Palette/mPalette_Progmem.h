@@ -31,6 +31,7 @@
 
 // Predefined RGB colors
 typedef enum {
+    Black=0x000000,
     AliceBlue=0xF0F8FF,
     Amethyst=0x9966CC,
     AntiqueWhite=0xFAEBD7,
@@ -39,7 +40,6 @@ typedef enum {
     Azure=0xF0FFFF,
     Beige=0xF5F5DC,
     Bisque=0xFFE4C4,
-    Black=0x000000,
     BlanchedAlmond=0xFFEBCD,
     Blue=0x0000FF,
     BlueViolet=0x8A2BE2,
@@ -644,6 +644,16 @@ DEF_PGM_UINT8(PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA)
   D_RGB_PURPLE_ALT_1
   D_RGB_PURPLE_DARKER
   D_RGB_ORANGE_PASTEL_90SAT
+};
+
+#ifndef D_PALETTE_BLACK_NAME_CTR
+#define D_PALETTE_BLACK_NAME_CTR        "Black" // Probably needs better solution, but for now simple "Black" -- I probably want a list of basic static colours (the HTML ones?)   
+#endif
+DEF_PGM_CTR  (PM_PALETTE_BLACK_NAME_CTR)        D_PALETTE_BLACK_NAME_CTR;
+#define D_PALETTE_BLACK_ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_BLACK_COLOUR_MAP__DATA)
+{
+  0,0,0
 };
 
 #ifndef D_PALETTE_HOLLOWEEN_OP_NAME_CTR

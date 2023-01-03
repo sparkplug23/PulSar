@@ -162,7 +162,7 @@ void mImmersionTankColour::EverySecond()
     default:
     case MODE_SHOW_COLOURS_OFF_ID:
       
-      pCONT_lAni->CommandSet_BrtRGB_255(0);
+      pCONT_lAni->CommandSet_Global_BrtRGB_255(0);
 
     break;
     case MODE_SHOW_COLOURS_GRADIENT_COLOUR_TEMP_ON_ID:
@@ -173,14 +173,14 @@ void mImmersionTankColour::EverySecond()
         // pCONT_lAni->CommandSet_PaletteID(mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID);
         // pCONT_iLight->CommandSet_AnimationModeID(pCONT_lAni->EFFECTS_FUNCTION__STATIC_PALETTE__ID);
         pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(0);
-        pCONT_lAni->CommandSet_BrtRGB_255(255);
+        pCONT_lAni->CommandSet_Global_BrtRGB_255(255);
         SubTask_StripSet_Showing();            
         
       }
       else
       {
 
-        pCONT_lAni->CommandSet_BrtRGB_255(0);
+        pCONT_lAni->CommandSet_Global_BrtRGB_255(0);
 
       }
 

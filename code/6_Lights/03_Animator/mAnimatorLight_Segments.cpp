@@ -5,9 +5,6 @@
 uint16_t mAnimatorLight::_usedSegmentData = 0;
 
 
-
-
-
 void mAnimatorLight::Init_Segments()
 { 
 
@@ -15,8 +12,7 @@ void mAnimatorLight::Init_Segments()
   for (segment_new &seg : segments) 
   {
     seg.markForReset();
-    seg.resetIfRequired();
-    
+    seg.resetIfRequired();    
   }
 
   
@@ -89,27 +85,12 @@ void mAnimatorLight::Init_Segments()
 
   #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-
-
-  
-
-  
   resetSegments1();
-
   
   Init_Segments_RgbcctControllers();
-
   
-
-  
-#ifdef ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-ALOG_WRN(PSTR("Removed, might be unstable"));
-// uint8_t segment_index = 0;
-//   // loadPalette_Michael(SEGMENT_I(segment_index).palette.id, segment_index);
-//   loadPalette_Michael(0, segment_index); //defualt to 0 for now
-#endif // ENABLE_DEVFEATURE_MOVING_GETCOLOUR_AND_PALETTE_TO_RAM
-
 }
+
 
 void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index)
 {
@@ -188,22 +169,8 @@ void mAnimatorLight::resetSegments1()
     seg.resetIfRequired();
   }
 
-  // for (segment_new &seg : segments) 
-  // {
-  //   seg.hardware_element_colour_order.red = 1;    // GRB most popular
-  //   seg.hardware_element_colour_order.green = 0;  // GRB most popular
-  //   seg.hardware_element_colour_order.blue = 2;
-  //   seg.hardware_element_colour_order.white_cold = 3;
-  //   seg.hardware_element_colour_order.white_warm = 4;
-  // }
-
-
   for (segment_new &seg : segments) 
-  {
-    // seg.colors[0] = RED;
-    // seg.colors[1] = GREEN;
-    // seg.colors[2] = BLUE;
-    
+  {    
     /**
      * @brief Adding 5 colours for each segment
      * 
@@ -279,7 +246,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
       #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
       // if(!seg.transitional)  // Needs better integration before it can be used
       // {
-        loadPalette_Michael(seg.palette.id, _segment_index_primary);
+        LoadPalette(seg.palette.id, _segment_index_primary);
       // }
       #endif // ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
 
@@ -304,33 +271,47 @@ void mAnimatorLight::SubTask_Segments_Animation()
         default:
           ALOG_ERR(PSTR("Unknown Effect %d"), seg.effect_id);
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-        case EFFECTS_FUNCTION__SOLID_COLOUR__ID:
-          SubTask_Segment_Animate_Function__Solid_Colour();
-        break;
+          case EFFECTS_FUNCTION__SOLID_COLOUR__ID:
+            SubTask_Segment_Animate_Function__Solid_Colour();
+          break;
         #endif
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-        case EFFECTS_FUNCTION__STATIC_PALETTE__ID:
-          SubTask_Segment_Animate_Function__Static_Palette();
-        break;
+          case EFFECTS_FUNCTION__STATIC_PALETTE__ID:
+            SubTask_Segment_Animate_Function__Static_Palette();
+          break;
         #endif
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-        case EFFECTS_FUNCTION__SLOW_GLOW__ID:
-          SubTask_Segment_Animate_Function__Slow_Glow();
-        break;
+          case EFFECTS_FUNCTION__SLOW_GLOW__ID:
+            SubTask_Segment_Animate_Function__Slow_Glow();
+          break;
         #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+          case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
+            SubTask_Segment_Animation__Candle_Single();
+          break;     
+          case EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID:
+            SubTask_Segment_Animation__Candle_Multiple();
+          break;     
+          case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
+            SubTask_Segment_Animation__Shimmering_Palette();
+          break;   
+          case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE_TO_ANOTHER__ID:
+            SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
+          break;   
+        #endif
+
+
+
+
+
+
+
+
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:
           SubTask_Segment_Animate_Function__Static_Gradient_Palette();
         break;
         #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
-          SubTask_Segment_Animation__Candle_Single();
-        break;     
-        case EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID:
-          SubTask_Segment_Animation__Shimmering_Palette();
-        break;   
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID:
           SubTask_Segment_Animation__Rotating_Palette_New();
@@ -2127,20 +2108,45 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
 }
 
 
-void mAnimatorLight::CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index)
+
+/**
+ * @brief Blends between Rgbcct with 0 to 255 range
+ * 
+ * @param color1 
+ * @param color2 
+ * @param blend 
+ * @return RgbcctColor 
+ */
+RgbcctColor mAnimatorLight::ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend) 
 {
+  return RgbcctColor::LinearBlend(color1, color2, mSupport::mapfloat(blend, 0,255, 0.0f, 1.0f));
+}
 
-  SEGMENT_I(segment_index).intensity_value = value;
+uint32_t mAnimatorLight::ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend) 
+{
+  if(blend == 0)   return color1;
+  if(blend == 255) return color2;
 
+  uint32_t w1 = (color1 >> 24) & 0xff;
+  uint32_t r1 = (color1 >> 16) & 0xff;
+  uint32_t g1 = (color1 >>  8) & 0xff;
+  uint32_t b1 =  color1        & 0xff;
+
+  uint32_t w2 = (color2 >> 24) & 0xff;
+  uint32_t r2 = (color2 >> 16) & 0xff;
+  uint32_t g2 = (color2 >>  8) & 0xff;
+  uint32_t b2 =  color2        & 0xff;
+
+  uint32_t w3 = ((w2 * blend) + (w1 * (255 - blend))) >> 8;
+  uint32_t r3 = ((r2 * blend) + (r1 * (255 - blend))) >> 8;
+  uint32_t g3 = ((g2 * blend) + (g1 * (255 - blend))) >> 8;
+  uint32_t b3 = ((b2 * blend) + (b1 * (255 - blend))) >> 8;
+
+  return ((w3 << 24) | (r3 << 16) | (g3 << 8) | (b3));
 }
 
 
-void mAnimatorLight::CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index)
-{
 
-  SEGMENT_I(segment_index).speed_value = value;
-
-}
 
 /********************************************************************************************************************************
 **********Flasher Region ******************************************************************************************************
@@ -2432,7 +2438,7 @@ uint8_t mAnimatorLight::Segment_New::currentMode(uint8_t newMode) {
 }
 
 uint32_t mAnimatorLight::Segment_New::currentColor(uint8_t slot, uint32_t colorNew) {
- // return transitional && _t ? ColourBlendU32(_t->_colorT[slot], colorNew, progress(), true) : colorNew;
+ // return transitional && _t ? ColourBlend(_t->_colorT[slot], colorNew, progress(), true) : colorNew;
 }
 
 CRGBPalette16 &mAnimatorLight::Segment_New::currentPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
@@ -2700,10 +2706,10 @@ void mAnimatorLight::Segment_New::setPixelColor(float i, uint32_t col, bool aa)
   //   uint32_t cIR = getPixelColor(iR | (vStrip<<16));
   //   if (iR!=iL) {
   //     // blend L pixel
-  //     cIL = ColourBlendU32(col, cIL, uint8_t(dL*255.0f));
+  //     cIL = ColourBlend(col, cIL, uint8_t(dL*255.0f));
   //     setPixelColor(iL | (vStrip<<16), cIL);
   //     // blend R pixel
-  //     cIR = ColourBlendU32(col, cIR, uint8_t(dR*255.0f));
+  //     cIR = ColourBlend(col, cIR, uint8_t(dR*255.0f));
   //     setPixelColor(iR | (vStrip<<16), cIR);
   //   } else {
   //     // exact match (x & y land on a pixel)
@@ -2820,7 +2826,7 @@ void mAnimatorLight::Segment_New::fill(uint32_t c) {
 
 // Blends the specified color with the existing pixel color.
 void mAnimatorLight::Segment_New::blendPixelColor(int n, uint32_t color, uint8_t blend) {
-  // setPixelColor(n, ColourBlendU32(getPixelColor(n), color, blend));
+  // setPixelColor(n, ColourBlend(getPixelColor(n), color, blend));
 }
 
 // Adds the specified color with the existing pixel color perserving color balance.
@@ -3737,6 +3743,11 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
   // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
+
+/**
+ * @brief Notice how I can automatically pass the one buffer, or my own to load additional palettes
+ * 
+ */
   return mPaletteI->GetColourFromPreloadedPaletteBuffer(
     palette.id,
     (uint8_t*)palette_container->pData.data(),//desired_index_from_palette,  

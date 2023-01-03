@@ -128,7 +128,7 @@
   // void seg_fill_ranged(uint32_t c, bool apply_brightness = false);
 
   uint32_t color_wheel(uint8_t pos);
-  uint32_t ColourBlendU32(uint32_t color1, uint32_t color2, uint8_t blend);
+  uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
 
   void Init_Segments();
 
@@ -137,38 +137,34 @@
    * */
   enum EFFECTS_FUNCTION__IDS
   {
-    /**
-     * Default
-     * Desc: Same colour across all pixels.
-     * Param: palette (will always use index 0 colour regardless of palette length)
-     * 
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__SOLID_COLOUR__ID,
     #endif
-    /**
-     * Desc: Using EFFECTS_FUNCTION__SLOW_GLOW__ID, with pixel order set to "inorder"
-     *       Each sequential pixel will repeat the palette if type is list, if gradient, then palette is linear blended across output
-     * Parameters: Palette, time to blend, rate of new colours, percentage of new colours changed
-     * 
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__STATIC_PALETTE__ID,
     #endif
-    /**
-     * Desc: Random change of colours (pixel order is random)
-     *       Pixel elements randomly select colour from palette, then slowly blend those pixels to the new colour
-     * Parameters: 
-     *    Palette = Pick colours to chose from
-     *    Transition time = blend time between last and new colours
-     *    Transition rate = time between new colours are selected
-     *    Percentage of change = Number of new colours to change this time (eg 10% of total count will randomly change)
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__SLOW_GLOW__ID,
     #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
+    EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,
+    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID,
+    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE_TO_ANOTHER__ID,
+    #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Desc: pixels are rotated
      * Para: direction of motion, speed, instant or blend change
@@ -306,10 +302,6 @@
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
     
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
-    EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID, // EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID,
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     // Static
     EFFECTS_FUNCTION__WLED_STATIC__ID,
@@ -916,10 +908,27 @@
   /**
    * My animations (and their animators where applicable)
    * */
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   void SubTask_Segment_Animate_Function__Solid_Colour(); 
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   void SubTask_Segment_Animate_Function__Static_Palette();
-  void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   void SubTask_Segment_Animate_Function__Slow_Glow();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  void SubTask_Segment_Animation__Flicker_Base(bool use_multi = false, uint16_t flicker_palette = 0);
+  void SubTask_Segment_Animation__Candle_Single();
+  void SubTask_Segment_Animation__Candle_Multiple();
+  void SubTask_Segment_Animation__Shimmering_Palette();
+  void SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
+  #endif
+
+
+
+
+  void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
   void SubTask_Segment_Animation__Stepping_Palette();
   void SubTask_Segment_Animation__Rotating_Palette_New();
   void SubTask_Segment_Animation__Rotating_Palette();
@@ -1037,10 +1046,8 @@
   void SubTask_Segment_Animation__ColourFul();
   void SubTask_Segment_Animation__Traffic_Light();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  void SubTask_Segment_Animation__Candle_Base(uint8_t use_multi = false);
-  void SubTask_Segment_Animation__Candle_Single();
-  void SubTask_Segment_Animation__Shimmering_Palette(); // SubTask_Segment_Animation__Candle_Multi();
-  void SubTask_Segment_Animation__Fire_Flicker();
+
+  // void SubTask_Segment_Animation__Fire_Flicker();
   
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   // Blink/Strobe
@@ -1321,10 +1328,13 @@
   void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
   // void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
+  void CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
+  void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
 
 
-  void CommandSet_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
-  void CommandSet_BrtCT_255(uint8_t bri, uint8_t segment_index = 0);
+
+  void CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
+  void CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index = 0);
 
   /***************
    * END
@@ -1872,7 +1882,6 @@ typedef struct Segment_New {
 
 
 
-
     // 2D matrix
     uint16_t virtualWidth(void)  const;
     uint16_t virtualHeight(void) const;
@@ -1940,6 +1949,11 @@ typedef struct Segment_New {
 } segment_new;
 //static int segSize = sizeof(Segment_New);
 
+
+const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
+
+
+RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
 /**
  * @brief Temporary use the WS2812FX class, but work towards removing it as the mAnimatorLight class is already the class

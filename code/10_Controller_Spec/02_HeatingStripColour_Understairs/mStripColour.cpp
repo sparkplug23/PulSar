@@ -180,8 +180,8 @@ void mHeatingStripColour_Understairs::Every_Second()
 
 
   pCONT_iLight->CommandSet_PaletteColour_RGBCCT_Raw_By_ID(15, colour_array, sizeof(colour_array));
-  pCONT_lAni->CommandSet_BrtRGB_255(255);
-  pCONT_lAni->CommandSet_BrtCT_255(255);
+  pCONT_lAni->CommandSet_Global_BrtRGB_255(255);
+  pCONT_lAni->CommandSet_Global_BrtCCT_255(255);
   pCONT_lAni->CommandSet_PaletteID(15);
 
 

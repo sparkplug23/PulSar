@@ -344,8 +344,8 @@ class mInterfaceLight :
 
     // void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
     void CommandSet_Brt_255(uint8_t value);
-    void CommandSet_BrtRGB_255(uint8_t bri);
-    void CommandSet_BrtCT_255(uint8_t bri);
+    void CommandSet_Global_BrtRGB_255(uint8_t bri);
+    void CommandSet_Global_BrtCCT_255(uint8_t bri);
     // void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
     // void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
     // void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);

@@ -84,14 +84,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   }
 
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
-    CommandSet_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    CommandSet_Global_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
     #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
-    CommandSet_BrtRGB_255(jtok.getInt());
+    CommandSet_Global_BrtRGB_255(jtok.getInt());
     data_buffer.isserviced++;
     #ifdef ENABLE_LOG_LEVEL_DEBUG
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
@@ -669,8 +669,8 @@ DEBUG_LINE_HERE;
 
 DEBUG_LINE_HERE;
     //make sure both are set
-    // CommandSet_BrtRGB_255(255);
-    // CommandSet_BrtCT_255(255);
+    // CommandSet_Global_BrtRGB_255(255);
+    // CommandSet_Global_BrtCCT_255(255);
     
     // pCONT_lAni->CommandSet_PaletteID(10, 0);
     
@@ -799,7 +799,7 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
+void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri) {
     
   // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightnessRGB255(bri);
   _briRGB_Global = bri;
@@ -808,7 +808,7 @@ void mInterfaceLight::CommandSet_BrtRGB_255(uint8_t bri) {
   
   setBriRGB_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB255());
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 

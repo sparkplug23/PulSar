@@ -52,6 +52,30 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
 // DEBUG_LINE_HERE;
 
+  
+
+
+    // char buff[] = "lightyellow";
+    
+    // uint8_t buffSize = sizeof(buff);
+
+    // HtmlColor colour;
+    // colour.Parse<HtmlColorNames>(buff, sizeof(buff));
+    
+    // char name[50] = {0};
+    // DEBUG_LINE_HERE;
+
+    // for (uint8_t indexName = 0; indexName < HtmlColorNames::Count(); indexName++)
+    // {
+    //   const HtmlColorPair* colorPair = HtmlColorNames::Pair(indexName);
+    //   PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
+    //   RgbColor rgb = (HtmlColor)colorPair->Color;
+    //   ALOG_INF(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), indexName, searchName, colorPair->Color, rgb.R, rgb.G, rgb.B);
+    // }
+
+
+//     Serial.printf("ColourHTML=%s", colour.ToString<HtmlColorNames>(buff, buffSize));
+// DEBUG_LINE_HERE;
 
 
     }break;
@@ -600,10 +624,12 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
  * should load even be here? surely into palette container
  * 
  */
-void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_index)
+void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer, uint16_t palette_buflen)
 {
 
-  ALOG_DBM(PSTR("loadPalette_Michael %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
+  // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
+
+  ALOG_DBM(PSTR("LoadPalette %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
 
   /**
    * @brief My palettes
@@ -628,6 +654,12 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
   else
   if(
     (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+  ){  
+    // Does not need loaded, contained in segment
+  }
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
   ){  
     // Does not need loaded, contained in segment
   }
@@ -780,6 +812,203 @@ void mAnimatorLight::loadPalette_Michael(uint8_t palette_id, uint8_t segment_ind
   }
 
 }
+
+
+/**
+ * @brief Gets palette names directly or from palette class when needed
+ * 
+ * @param palette_id 
+ * @param buffer 
+ * @param buflen 
+ * @return const char* 
+ */
+const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer, uint8_t buflen)
+{
+
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC__IDS
+   * 
+  ***************************************************************/
+
+  // for( // loops relative to exact palette id
+  //   uint8_t ii=PALETTELIST_STATIC_PARTY_DEFAULT__ID;
+  //           ii<PALETTELIST_STATIC_LENGTH__ID;
+  //           ii++
+  // ){
+  //   ptr = GetPalettePointerByID(ii);
+
+  //   ALOG_DBM( PSTR("Name \"%s\"=?\"%s\""), c, ptr->friendly_name_ctr );
+
+  //   if(ptr->friendly_name_ctr == nullptr)
+  //   {
+  //     ALOG_DBM( PSTR("ptr->friendly_name_ctr == nullptr %d %s"), ii, c );
+  //   }
+
+  //   if(ptr->friendly_name_ctr != nullptr)
+  //   { 
+  //     if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr))
+  //     {
+  //       ALOG_DBM( PSTR("MATCH \"%c\" %d"), c, ii ); 
+  //       return ii+PALETTELIST_STATIC_PARTY_DEFAULT__ID;            
+  //     }
+  //   }
+  // }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE_HSBID__IDS
+   * 
+  ***************************************************************/
+  
+  // for( // loops relative to 0
+  //   uint8_t ii=0;
+  //           ii<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID - PALETTELIST_VARIABLE_HSBID_01__ID);
+  //           ii++
+  // ){
+
+  //   memset(buffer,0,sizeof(buffer));
+  //   sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR), ii + 1); // Names are 1-10
+    
+  //   ALOG_DBM( PSTR("s> \"%s\""), buffer ); 
+  //   /**
+  //    * @brief Default Names
+  //    */
+  //   if(strcmp(c,buffer)==0){
+  //     return PALETTELIST_VARIABLE_HSBID_01__ID+ii;
+  //   }
+  //   /**
+  //    * @brief Future user defined names
+  //    * ALOG_WRN( PSTR("GetPaletteIDbyName: Not searching DeviceNameList") );
+  //    */
+    
+  // }
+  
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE_GENERIC__IDS
+   * 
+  ***************************************************************/
+  // for( // loops relative to 0
+  //   uint8_t ii=0;
+  //           ii<(PALETTELIST_VARIABLE_GENERIC_LENGTH__ID - PALETTELIST_VARIABLE_GENERIC_01__ID);
+  //           ii++
+  // ){
+
+  //   memset(buffer,0,sizeof(buffer));
+  //   sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR), ii + 1);
+    
+  //   ALOG_DBG( PSTR("s> \"%s\""), buffer ); 
+  //   // Default names
+  //   if(strcmp(c,buffer)==0){
+  //     return ii+PALETTELIST_VARIABLE_HSBID_01__ID;
+  //   }
+    
+  // }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * 
+  ***************************************************************/ 
+  // for(
+  //   uint8_t ii=0;
+  //           ii<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
+  //           ii++
+  // ){
+  //   memset(buffer,0,sizeof(buffer));
+  //   // sprintf_P(name_ctr,PSTR("%s %02d\0"),D_PALETTE_RGBCCT_COLOURS_NAME_CTR,ii);
+  //   // Default names
+  //   sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), ii + 1); // names are 1-10
+  //       ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Searching with \"%s\" for \"%s\""),buffer,c );
+  //   if(strcmp(c,buffer)==0)
+  //   {
+  //     return ii+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+  //   }
+  // }
+    
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * 
+  ***************************************************************/
+//   int16_t id = -1;
+//  for(
+//     uint8_t ii=0;
+//             ii<(PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID-PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID);
+//             ii++
+//   ){
+    
+//     ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_NAMES_CTR ); 
+
+//      if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_NAMES_CTR))>=0)
+//       {
+//         ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+//         return id+PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID;            
+//       }
+
+
+
+//   }
+ 
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * 
+  ***************************************************************/
+  // if(
+  //   ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+  //   ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  // ){  
+
+
+  // }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+   * 
+  ***************************************************************/
+  if(
+    (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+  ){  
+
+    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID;
+    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+
+    // for (
+      // uint8_t indexName = 0; 
+    //   indexName < HtmlColorNames::Count(); indexName++)
+    // {
+      const HtmlColorPair* colorPair = HtmlColorNames::Pair(adjusted_id);
+      PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
+      RgbcctColor colour = (HtmlColor)colorPair->Color;
+
+      memcpy_P(buffer, searchName, sizeof(char)*strlen_P(searchName)+1);
+
+      ALOG_INF(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), adjusted_id, searchName, colorPair->Color, colour.R, colour.G, colour.B);
+    // }
+
+
+  }
+  /**************************************************************
+   * 
+   * Final check, palette id was given as string number
+   * 
+  ***************************************************************/
+  // uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
+  // if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH__ID)){
+  //   return found_index;
+  // }
+
+  return buffer;
+
+  
+}
+
+
 
 
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT

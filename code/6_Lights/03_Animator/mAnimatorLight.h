@@ -442,7 +442,8 @@ class mAnimatorLight :
     uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
-    void loadPalette_Michael(uint8_t palette_id, uint8_t segment_index);
+
+    void LoadPalette(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer = nullptr, uint16_t palette_buflen = 0);
 
 
 
