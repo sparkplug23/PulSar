@@ -82,7 +82,7 @@
 // #define DEVICE_TESTBED_LILYGO_SIM7000G_WITH_OLED
 // #define DEVICE_TESTBED_SDCARD_STORAGE
 // #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP8266__BEDROOM_ROOF
-#define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__BEDROOM_ROOF
+// #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__BEDROOM_ROOF
 
 /**
  * @brief Note: By getting the rows = animation, the achievement can clearly be shown by simply setting "percent animation from wled" or similar
