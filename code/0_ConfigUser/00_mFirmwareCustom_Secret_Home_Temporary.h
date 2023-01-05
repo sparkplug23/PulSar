@@ -43,6 +43,7 @@
 // #define DEVICE_BLACK_STAND_LIGHT
 // #define DEVICE_RGBCLOCK_TVROOM
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
+// #define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
 
 
 
@@ -355,9 +356,15 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_BUTTONS
-  #define ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES
+    #define ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES
+    #define ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -373,7 +380,8 @@
       "\"D6\":\"" D_GPIO_FUNCTION_KEY6_INV_CTR  "\","
       "\"D7\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -416,20 +424,17 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  // Cat6 cable in immersion needs shortened
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-
-  // #define analogRead(x) error
-
-  // #define DISABLE_NETWORK
 
   #define DISABLE_SLEEP
 
+  #define USE_MODULE_CORE_RULES
+
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
-  // #define USE_MODULE_NETWORK_WEBSERVER // enable by default on esp32 going forward for pushing development
-  // #define DISABLE_WEBSERVER  // phase out to only USE_MODULE_NETWORK_WEBSERVER
-
-  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
 
   // #define USE_MODULE_DRIVERS_LEDS
 
@@ -438,104 +443,72 @@
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
-  #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_LDR_BASIC
+    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DHT
+    #define USE_MODULE_SENSORS_BME
+      #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
+    #define USE_MODULE_SENSORS_BH1750
+    #define USE_MODULE_SENSORS_SWITCHES
+    #define USE_MODULE_SENSORS_MOTION
+    #define USE_MODULE_SENSORS_LDR_BASIC
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
     #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
     #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
   #endif // USE_MODULE_SENSORS_LDR_BASIC
   
+  #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
-    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  // #define STRIP_SIZE_MAX 1500 // 10hz with no network
-  #define STRIP_SIZE_MAX 100 // 17hz == I need to use GPIO digital pins to work on speeding up my code. Likely how I convert colours is too slow, need to speed optimise it? (reduce methods, remove HSB colour codes?)
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    #define STRIP_SIZE_MAX 12
+    #define USE_SK6812_METHOD_DEFAULT
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    #define ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-    // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+  //   // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+  //   // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
-  #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_LDR_BASIC
-
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC
-    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  #endif // USE_MODULE_SENSORS_LDR_BASIC
-  
-  #define USE_MODULE_LIGHTS_INTERFACE
-    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  // #define STRIP_SIZE_MAX 1500 // 10hz with no network
-  #define STRIP_SIZE_MAX 100 // 17hz == I need to use GPIO digital pins to work on speeding up my code. Likely how I convert colours is too slow, need to speed optimise it? (reduce methods, remove HSB colour codes?)
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  // #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    #define ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
-
-    // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-
-    // #define ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
-
-
-    // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
-
-  #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
+  // #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
 
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define SHOW_SPLASH
-
-  #define USE_MODULE_DISPLAYS_NEXTION_V2
-  #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+    #define USE_MODULE_DISPLAYS_NEXTION_V2
+    #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
 
   //   #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-
-// #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-// https://github.com/drzony/FastLED-tests/blob/master/src/main.cpp
-
-
   //   #define ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
-
-  //   #define ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  // #define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 
 
   /**
@@ -582,6 +555,7 @@
   // #define DEBUG_PIN6_SET(X)   digitalWrite(DEBUG_PIN6_GPIO, X);
   // #define DEBUG_PIN6_TOGGLE()   digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
 
+  #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -591,10 +565,10 @@
       /**
        * @brief Right side
        **/
-      #ifdef USE_MODULE_SENSORS_DS18X   
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023   
       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      #endif // USE_MODULE_SENSORS_DS18X
+      #endif // USE_MODULE_SENSORS__DS18X20_ESP32_2023
       // GPIO1 - TX0 - Debug Serial TX
       // GPIO3 - RX0 - Debug Serial RX
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
@@ -612,7 +586,7 @@
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","   // Use the 12LED RGBW ring to permit led testing, and eventually, notification mode
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
@@ -636,8 +610,8 @@
       // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       #endif
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
       // 14 (Debug Header 4)
       // 12 (Debug Header 5)
       // 13 (Debug Header 6)
@@ -648,7 +622,8 @@
   "}";
 
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
-  #define D_DEVICE_SENSOR_CLIMATE_BME "BedroomDesk-BME"
+  #define D_DEVICE_SENSOR_CLIMATE_BME1 "BedroomDesk-BME"
+  #define D_DEVICE_SENSOR_CLIMATE_BME2 "BedroomDesk-BME2"
   #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDesk-DHT1"
   #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2" 
   
@@ -680,7 +655,8 @@
         "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CLIMATE_BME "\""
+        "\"" D_DEVICE_SENSOR_CLIMATE_BME1 "\","
+        "\"" D_DEVICE_SENSOR_CLIMATE_BME2 "\""
       "],"  
       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
@@ -731,65 +707,24 @@
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    // "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBW\","    
-    // "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    // "\"ColourPalette\":15," 
-    // "\"PaletteEdit\": {"
-    //   "\"ColourPalette\": 15,"
-    //   "\"Data\": ["
-    //     "4,5,0,0,0,"
-    //     "255, 0, 0,"
-    //     "0, 2550, 0,"
-    //     "0, 0, 255,"
-    //     "255, 0, 255"
-    //   "]"
-    // "},"
-    // "\"Effects\":{"
-    //   "\"Function\":\"Static\""
-    // "},"
-    // "\"Transition\":{"
-    //   "\"TimeMs\":900,"
-    //   "\"RateMs\":1000"
-    // "},"    
-    // "\"BrightnessRGB\":1"
-
-    // "\"AnimationMode\": \"Effects\","
-    // "\"ColourOrder\": \"grbw\","
-    // "\"ColourPalette\": 10,"
-    // "\"Effects\": {"
-    //   "\"Function\": \"Solid\""
-    // "},"
-    // "\"Hue\": 15,"
-    // "\"Sat\": 100,"
-    // "\"BrightnessRGB\": 100,"
-    // "\"BrightnessCCT\": 0,"
-    // "\"CCT_TempPercentage\": 100,"
-    // "\"Transition\": {"
-    //   "\"Time\": 1"
-    // "}"
-
-    // "\"PixelRange\":[0,6],"
-    "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"grbw\","
-    "\"ColourPalette\":31," //31.5 for "0", 31 is xmas01 is 26.7us
-    "\"Effects\": {" 
-      "\"Function\": \"Slow Glow\""
-    "},"
-    "\"Hue\": 120,"
-    "\"Sat\": 100,"
-    "\"BrightnessRGB\": 0,"
-    "\"BrightnessCCT\": 0,"
-    "\"CCT_TempPercentage\": 100,"
-    "\"Transition\": {"
-      "\"TimeMs\": 0,"
-      "\"RateMs\": 1000"
-    "}"
-    // "\"Light\":{\"TimeOn\":10}"
-
-  "}";
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "ColourOrder":"grbw",
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 01",
+    "Effects": {
+      "Function":1,
+      "Intensity":50,
+      "Grouping":2
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 1
+  }
+  )=====";
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
 
@@ -884,6 +819,96 @@
 // }                
 
 #endif
+
+
+
+/**
+ * @brief 
+ * 
+ * 
+ **/
+#ifdef DEVICE_PORTABLE_TEMPERATURE_SENSOR
+  #define DEVICENAME_CTR          "portable_bath_sensor"
+  #define DEVICENAME_FRIENDLY_CTR "Portable Bath Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+    
+  #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"   
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023   
+      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Short"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
+  #define D_DEVICE_SENSOR_DB18S20_1_NAME        "Long"
+  #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,205,206,170,25]"  
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+      "]"  
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
+        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ""
+      "]"  
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "}";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // "\"AddRuleDefault\":\"Motion0=0\","
+    // MOTION
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "}"
+  "}";
+
+
+#endif
+
 
 
 
@@ -1485,55 +1510,82 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  // #define 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-    
-  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-  #define STRIP_SIZE_MAX 77                                                                           // Change: Set *total* length of string, segment0 will default to this length
-   
-  
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
-      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-  
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
-    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define STRIP_SIZE_MAX 77
+    #define USE_SK6812_METHOD_DEFAULT
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    // #define ENABLE_DEVFEATURE_TRANSITION_MODE_LEVEL_OPTIONS
-    // #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_OLD_FUNCTIONS
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
 
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    
+  #define LIGHTING_TEMPLATE_DEFAULT__WARM_WHITE_ONLY
 
 
-  // Hard coded to alternate pin until I make this template based
-  // #define ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
-  // #define PINSET_TEMP_METHOD_RGB_PIN_RGB 4
-  
-  // #define LIGHTING_TEMPLATE_DEFAULT_STAND_RAINBOW
-  // #define LIGHTING_TEMPLATE_DEFAULT_STAND_WARM_WHITE
-  #define LIGHTING_TEMPLATE_DEFAULT_STAND_CHRISTMAS_GROUPED_STATIC
-
+  #ifdef LIGHTING_TEMPLATE_DEFAULT__WARM_WHITE_ONLY
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "ColourOrder":"GRBW",
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 24",
+    "Effects": {
+      "Function":1,
+      "Intensity":50,
+      "Grouping":10
+    },
+    "SegColour": {
+      "Hue": 15,
+      "Sat": 100,
+      "SubType":3
+    },
+    "Transition": {
+      "TimeMs": 900,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 0,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // LIGHTING_TEMPLATE_DEFAULT_STAND_WARM_WHITE
   #ifdef LIGHTING_TEMPLATE_DEFAULT_STAND_WARM_WHITE
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 

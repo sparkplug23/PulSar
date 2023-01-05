@@ -626,6 +626,7 @@ Bathroom
   #define DEVICENAME_CTR          "dimmer_bedroom_globe"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Bedroom Globe"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   // #define USE_HARDWARE_DEFAULT_RULES_SHELLY_DIMMER_BOTH_INPUTS_TOGGLE_OUTPUT // Going to install 2gang so I can test this going forward
 #endif
 #ifdef DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_CEILING
@@ -710,6 +711,11 @@ Bathroom
   #endif
     
   #define DISABLE_SERIAL_LOGGING //temp measure
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_CORE_RULES
   
@@ -4758,6 +4764,7 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
+// Cant be merged with generic as buttons are unique
 #ifdef DEVICE_SHELLYDIMMER_LANDING_CEILING
   #define DEVICENAME_CTR          "ceiling_landing_light"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
@@ -4765,6 +4772,12 @@ Bathroom
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define DISABLE_SERIAL_LOGGING
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_CORE_RULES
     
   #define USE_MODULE_SENSORS_INTERFACE
@@ -4886,22 +4899,22 @@ Bathroom
   //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
     
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define STRIP_SIZE_MAX 88                                                                        // Change: Set *total* length of string, segment0 will default to this length
-    // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-    // #define USE_SK6812_METHOD_DEFAULT
-      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+  // #define USE_BUILD_TYPE_LIGHTING
+  // #define USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_MODULE_LIGHTS_ANIMATOR
+  // #define USE_MODULE_LIGHTS_ADDRESSABLE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   #define STRIP_SIZE_MAX 88                                                                        // Change: Set *total* length of string, segment0 will default to this length
+  //   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+  //   // #define USE_SK6812_METHOD_DEFAULT
+  //     #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
     
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
+  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
 
 
@@ -4923,9 +4936,9 @@ Bathroom
   // #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR  //should this be a "controller", or via interface "getTemp convert to heatmap"
   // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 60
   
-  #define USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+  // #define USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
 
-  #define USE_DEVFEATURE_SENSOR_COLOURS_TOP_TO_BOTTOM
+  // #define USE_DEVFEATURE_SENSOR_COLOURS_TOP_TO_BOTTOM
      
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -5123,6 +5136,9 @@ Bathroom
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ESP32
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
@@ -5133,9 +5149,6 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ESP32
-
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
@@ -5143,26 +5156,48 @@ Bathroom
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
     
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #define STRIP_SIZE_MAX 15 //14 installed                                                                        // Change: Set *total* length of string, segment0 will default to this length
-  //   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  //   #define USE_SK6812_METHOD_DEFAULT
-  //     #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-    
-  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define STRIP_SIZE_MAX 100
+    #define USE_SK6812_METHOD_DEFAULT
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-  // #define USE_MODULE_DISPLAYS_NEXTION
-  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  //   #define NEXTION_DEFAULT_PAGE_NUMBER 1
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+    #define NEXTION_DEFAULT_PAGE_NUMBER 1
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -5217,30 +5252,33 @@ Bathroom
   "}";
 
 
-  // #ifdef USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"AnimationMode\": \"Effects\","
-  //   "\"ColourOrder\": \"GRBW\","
-  //   "\"ColourPalette\":10,"
-  //   "\"Effects\": {"
-  //     "\"Function\":\"Solid\""
-  //   "},"
-  //   "\"Hue\":120," 
-  //   "\"Sat\":100," 
-  //   "\"BrightnessRGB\":0,"
-  //   "\"BrightnessCCT\":100,"
-  //   "\"CCT_TempPercentage\": 100,"
-  //   "\"Transition\": {"
-  //     "\"TimeMs\":400,"
-  //     "\"RateMs\":1000"
-  //   "},"
-  //   "\"Light\":{\"TimeOn\":60}"
-  // "}";
-  // #endif // USE_MODULE_LIGHTS_INTERFACE
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "AnimationMode":"Effects",
+    "ColourOrder":"grbw",
+    "ColourPalette":"Rgbcct 01",
+    "Effects": {
+      "Function":0,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "SegColour": {
+      "Hue": 120,
+      "Sat": 100,
+      "SubType":3
+    },
+    "BrightnessRGB_255": 1,
+    "BrightnessCCT_255": 1
+  }
+  )=====";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
 
   
   #define USE_RULES_TEMPLATE
@@ -5261,7 +5299,6 @@ Bathroom
       "}"
     "}"
   "}";
-
 
 #endif
 
@@ -5302,7 +5339,6 @@ Bathroom
 #endif
 
 
-// Not yet installed but will be with dual buttons like ensuite
 #ifdef DEVICE_SHELLYDIMMER_BEDROOM_CEILING
   #define DEVICENAME_CTR          "dimmer_bedroom_ceiling"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
@@ -5310,13 +5346,20 @@ Bathroom
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,70
   
   #define DISABLE_SERIAL_LOGGING
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define USE_MODULE_CORE_RULES
     
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SWITCHES
 
   #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER    
+    #define ENABLE_DEVFEATURE_SHELLY_DIMMER_FORCED_BRIGHTNESS_TO_REQUESTED
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -5360,7 +5403,7 @@ Bathroom
         "\"Function\":\"SetPower\"," 
         "\"DeviceName\":0,"
         "\"State\":2,"
-        "\"Value\":50"
+        "\"Value\":100"
       "}"
     "},"
     "\"Rule1\":{"
@@ -5375,7 +5418,7 @@ Bathroom
         "\"Function\":\"SetPower\","
         "\"DeviceName\":0,"
         "\"State\":2,"
-        "\"Value\":100"
+        "\"Value\":35"
       "}"
     "}"   
   "}";

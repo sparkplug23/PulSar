@@ -100,6 +100,9 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
+#ifdef USE_SK6812_METHOD_DEFAULT
+  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
+#endif // USE_SK6812_METHOD_DEFAULT
 
 
 #include "6_Lights/02_Palette/mPaletteContainer.h"

@@ -235,6 +235,18 @@ public:
         return _value.current;
     }
 
+    /**
+     * @brief Set the Current Value object
+     * Used to update externally
+     * 
+     * @return TYPE 
+     */
+    void SetCurrentValue(TYPE v)
+    {
+        // StopBlend
+        _value.current = v;
+    }
+
 
     float mapfloat(float x, float in_min, float in_max, float out_min, float out_max)
     {

@@ -123,8 +123,7 @@ class mDS18X :
     #define REQUIRE_COMPLETE true
     #define DONTREQUIRE_COMPLETE false
 
-    
-int8_t FindStructIndexByAddressID(int8_t address_id);
+    int8_t FindStructIndexByAddressID(int8_t address_id);
 
     // uint8_t GetCorrectedDeviceIDforGetDeviceName(uint8_t id_desired);
     

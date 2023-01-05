@@ -373,6 +373,12 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
     EM_MODULE_SENSORS_ROTARY_ENCODER_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
+    EM_MODULE_SENSORS__DS18X20_ESP8266_2023__ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID,
+  #endif  
   // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -800,10 +806,17 @@ enum MODULE_IDS{
   #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
   #define pCONT_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
 #endif
-
 #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   #include "5_Sensors/31_ADCInternal_ESP32/mADCInternal.h"
   #define pCONT_adc_internal                      static_cast<mADCInternal*>(pCONT->pModule[EM_MODULE_SENSORS_ADC_INTERNAL_ID])
+#endif
+#ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
+  #include "5_Sensors/40_ds18x20/mDB18x20.h"
+  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20_ESP8266_2023__ID])
+#endif
+#ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #include "5_Sensors/41_ds18x20_esp32/mDB18x20_ESP32.h"
+  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID])
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"

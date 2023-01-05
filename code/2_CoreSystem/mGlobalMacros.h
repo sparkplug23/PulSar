@@ -85,6 +85,8 @@
 #define DEBUG_PRINTF //Serial.printf
 #endif
 
+// #define P_CHECK(x) if(x!-nullptr)
+
 /**
  * Use this macro to turn on delays that I can easily turn off again (in case I forget about one). Stoped using "delay" directly, do with macros
  * */

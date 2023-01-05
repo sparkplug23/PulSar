@@ -85,17 +85,24 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
     CommandSet_Global_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB_Global());
     data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB());
-    #endif //#ifdef ENABLE_LOG_LEVEL_DEBUG
   }else
   if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
     CommandSet_Global_BrtRGB_255(jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB_Global());
     data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+    CommandSet_Global_BrtCCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCCT_Global());
+    data_buffer.isserviced++;
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
+    CommandSet_Global_BrtCCT_255(jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCCT_Global());
+    data_buffer.isserviced++;
   }
 
 
@@ -628,30 +635,23 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state){
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_LIGHTPOWER)), light_power_state);
   #endif   
 
-  if(state == 0) // turn off
+  if(state == LIGHT_POWER_STATE_OFF_ID) // turn off
   {
-
-    // Do not use these, it should be temporary functions!!!
-    // pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
-
-
-
-DEBUG_LINE_HERE;
     // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(10000);
     pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
     
-DEBUG_LINE_HERE;
-    pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms = 1000; // slow turn on
+    pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms =  pCONT_lAni->SEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
+
+ALOG_INF(PSTR("Setting override for off %d"), pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms);
+
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
 
-DEBUG_LINE_HERE;
     CommandSet_Brt_255(0);
-DEBUG_LINE_HERE;
+    
   }
   else
   if(state == 1) // turn on
   {
-DEBUG_LINE_HERE;
 
     // pCONT_lAni->CommandSet_Animation_Transition_Time_Ms(1000);
 
@@ -659,15 +659,11 @@ DEBUG_LINE_HERE;
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
 
 
-DEBUG_LINE_HERE;
-
     // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
     // pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
     
-DEBUG_LINE_HERE;
     CommandSet_Brt_255(255);
 
-DEBUG_LINE_HERE;
     //make sure both are set
     // CommandSet_Global_BrtRGB_255(255);
     // CommandSet_Global_BrtCCT_255(255);
@@ -679,9 +675,6 @@ DEBUG_LINE_HERE;
 
 
   }
-DEBUG_LINE_HERE;
-
-
 
 }
 
@@ -799,17 +792,15 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri) {
-    
-  // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightnessRGB255(bri);
-  _briRGB_Global = bri;
-  
-  pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
-  
+void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri) 
+{  
   setBriRGB_Global(bri);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightnessRGB());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+
+void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri) 
+{  
+  setBriCT_Global(bri);
 }
 
 

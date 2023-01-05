@@ -29,10 +29,11 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_method){
  * @param json_method 
  * @return uint8_t 
  */
-uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method)
+{
 
   JBI->Start();
-
+  
   float sensor_data = -1;
   char buffer[100] = {0};
   bool flag_level_started = false;
@@ -41,6 +42,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
   for (uint16_t type_id = 0; type_id < SENSOR_TYPE_LENGTH_ID; type_id++)
   {
 
+        // ALOG_INF( PSTR("type_id = %d"), type_id);
     /**
      * @brief Check by sensor reported type
      **/
@@ -52,38 +54,23 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method){
       
       if(sensors_available)
       {
-        ALOG_DBM( PSTR("GetSensorCount =%d\t%s"),sensors_available,pmod->GetModuleFriendlyName());
+        // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
 
         for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
         {
           sensors_reading_t val;
           pmod->GetSensorReading(&val, sensor_id);
+          
           if(val.Valid())
-          { 
-            
+          {         
+
             if((sensor_data = val.GetValue(type_id)) != SENSOR_TYPE_INVALID_READING)
             {
               
               // Only add sensor type if any has been found
               if(flag_level_started != true)
               {              
-
                 JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
-
-                // /**
-                //  * @brief Level start should contain the sensor_type_name
-                //  * */
-                // switch(type_id)
-                // {
-                //   default:                                  JBI->Level_Start("Error");                            break;
-                //   case SENSOR_TYPE_TEMPERATURE_ID:          JBI->Level_Start_P(PSTR(D_JSON_TEMPERATURE));         break;
-                //   case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:    JBI->Level_Start_P(PSTR(D_JSON_HUMIDITY));            break;
-                //   case SENSOR_TYPE_LIGHT_LEVEL_ID:          JBI->Level_Start_P(PSTR("Light Level"));              break;
-                //   case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:  JBI->Level_Start_P(PSTR("Lux"));                      break;
-                //   case SENSOR_TYPE_SUN_AZIMUTH_ID:          JBI->Level_Start_P(PSTR("SolarAzimuth"));                      break;
-                //   case SENSOR_TYPE_SUN_ELEVATION_ID:        JBI->Level_Start_P(PSTR("SolarElevation"));                      break;
-                // }
-
                 flag_level_started = true;
                 flag_level_ended_needed = true;
               }

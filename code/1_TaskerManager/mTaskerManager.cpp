@@ -445,6 +445,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
     pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID] = new mRotaryEncoder();
   #endif
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
+    pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID] = new mDB18x20_ESP32();
+  #endif
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    pModule[EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID] = new mDB18x20_ESP32();
+  #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();

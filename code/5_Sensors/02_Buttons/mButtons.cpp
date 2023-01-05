@@ -610,10 +610,13 @@ void mButtons::ButtonHandler(void) {
             } else {
               if ((buttons[id].hold_timer == loops_per_second * hold_time_extent * pCONT_set->Settings.setoption_255[P_HOLD_TIME] / 10)) {  // SetOption32 (40) - Button held for factor times longer
                 buttons[id].press_counter = 0;
+                ALOG_INF(PSTR(D_LOG_BUTTONS "ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE id=%d"), id);
+                #ifndef ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
                 // snprintf_P(scmnd, sizeof(scmnd), PSTR(D_CMND_RESET " 1"));
                 // ExecuteCommand(scmnd, SRC_BUTTON);                
                 ALOG_INF(PSTR(D_LOG_BUTTONS D_CMND_RESET " 1"));                
                 pCONT_rules->NewEventRun_NumArg(D_UNIQUE_MODULE_SENSORS_BUTTONS_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, id, 2, state, INPUT_TYPE_SINGLE_HOLD_ID);    // Resetting command
+                #endif // ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
               }
             }
           }

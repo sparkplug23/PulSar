@@ -122,7 +122,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      // MQTTHandler_Set_TelePeriod();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();

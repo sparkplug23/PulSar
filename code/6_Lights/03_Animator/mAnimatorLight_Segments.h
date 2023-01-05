@@ -1327,8 +1327,9 @@
   void CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
-  // void CommandSet_RgbcctController_SubType(uint8_t subtype, uint8_t segment_index = 0);
+  void CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subtype, uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
+  void CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
 
 
@@ -1494,7 +1495,7 @@ typedef struct Segment_New {
     TRANSITION_SETTINGS transition;
 
     // Flags and states that are used during one transition and reset when completed
-    struct ANIMATION_SINGLE_USE_OVERRIDES
+    struct ANIMATION_SINGLE_USE_OVERRIDES_ANYTIME
     {
       // uint8_t fRefreshAllPixels = false;
       /**
@@ -1503,6 +1504,15 @@ typedef struct Segment_New {
       uint16_t time_ms = 1000; //on boot
       // uint16_t rate_ms = 1000;
     }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
+    struct ANIMATION_SINGLE_USE_OVERRIDES_TURNING_OFF
+    {
+      // uint8_t fRefreshAllPixels = false;
+      /**
+       * Can't be zero, as that means not active
+       * */
+      uint16_t time_ms = 0; //on boot
+      // uint16_t rate_ms = 1000;
+    }single_animation_override_turning_off; // ie "oneshot" variables that get checked and executed one time only
     
     uint8_t speed(){ return speed_value; }
     void set_speed(uint8_t v){ speed_value = v; }

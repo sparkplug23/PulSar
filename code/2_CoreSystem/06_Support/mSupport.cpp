@@ -1894,12 +1894,12 @@ bool mSupport::NewerVersion(char* version_str)
 
 float mSupport::ConvertTemp(float c)
 {
-  // float result = c;
+  float result = c;
 
   // if (!isnan(c) && Settings.flag_system.temperature_conversion) {
   //   result = c * 1.8 + 32;  // Fahrenheit
   // }
-  // return result;
+  return result;
 }
 
 char mSupport::TempUnit(void)

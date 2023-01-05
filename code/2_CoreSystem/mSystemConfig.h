@@ -36,6 +36,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_CORE     0
 
 /**@@@@@ Module changes
+ * #01 : Ability to fade shelly dimmer with fader
  * #00 : Restarting for 2023
  * #33 : Fixed incorrect use of virtual/segment length, grouping of up to 200 has been tested for some effects
  * #32 : Moved lighting branch back to desktop 
@@ -43,7 +44,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #30 : Added ultrasonic to unified sensor
  * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
  */
-#define FIRMWARE_VERSION_MODULE   0
+#define FIRMWARE_VERSION_MODULE   1
 
 
 #define FIRMWARE_BRANCH_NAME_STRING "development" // Additions from colorado and for december 2022, to be merged into main dev branch and then deleted
