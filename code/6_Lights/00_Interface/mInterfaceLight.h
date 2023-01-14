@@ -423,8 +423,80 @@ void RulesEvent_Set_Power();
 
     void parse_JSONCommand(JsonParserObject obj);
   
+
+
+/******************************************************************************************************************
+ * 
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+
     int8_t Tasker_Web(uint8_t function);
-    #include "6_Lights/00_Interface/mInterfaceLight_Web.h"
+    // #include "6_Lights/00_Interface/mInterfaceLight_Web.h"
+    
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+
+#ifdef ESP32
+#include <WiFi.h>
+#ifndef DISABLE_NETWORK
+#include <AsyncTCP.h>
+//?#include <ESPAsyncWebServer.h>
+#endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+//?#include <ESPAsyncWebServer.h>
+#endif
+
+
+
+void WebPage_Root_AddHandlers();
+void GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g, uint8_t* _b,uint8_t* _w1, uint8_t* _w2);
+void WebSend_JSON_RootPage_LiveviewPixels(AsyncWebServerRequest *request);
+
+
+void WebAppend_Root_Sliders();
+
+void WebAppend_Root_ControlUI();
+
+
+void WebAppend_Root_Draw_RGBPalette();
+void WebAppend_Root_Draw_PaletteSelect();
+void WebAppend_Root_Draw_PaletteSelect_Placeholder();
+
+void Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request);
+
+void WebAppend_Root_RGBPalette();
+
+#endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER
+
+/******************************************************************************************************************
+ * 
+*******************************************************************************************************************/
+
+
+
+
+
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Init(void);
@@ -501,10 +573,10 @@ void RulesEvent_Set_Power();
     RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_State(uint8_t json_level = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_object_start_end_required = true);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-    uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_level = 0, bool json_object_start_end_required = true);
     #endif
 
   

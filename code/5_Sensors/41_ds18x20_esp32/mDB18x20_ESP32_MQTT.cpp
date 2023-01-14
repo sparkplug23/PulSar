@@ -22,7 +22,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 10; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -37,7 +37,19 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
-  
+
+  #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
+  ptr = &mqtthandler_debug; //each sensor should have its own debug channel for extra output only when needed
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
+  ptr->json_level = JSON_LEVEL_ALL;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Debug;
+  #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
+
 } //end "MQTTHandler_Init"
 
 /**

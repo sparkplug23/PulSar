@@ -206,7 +206,7 @@ void mGPS_SD_Logger::SubTask_UpdateOLED_Detailed_GPS()
 
 
 
-uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -215,7 +215,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
@@ -231,7 +231,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_method){
  *  "GPS":{ minimal data, with 2 byte names}
  * }
  * */
-uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_method){
+uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     

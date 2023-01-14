@@ -365,7 +365,7 @@ void mSR04::SubTask_UpdateAmbientTemperature()
 
 
 
-uint8_t mSR04::ConstructJSON_Settings(uint8_t json_method)
+uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
 {
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_TYPE, sr04_type);
@@ -385,7 +385,7 @@ uint8_t mSR04::ConstructJSON_Settings(uint8_t json_method)
 }
 
 
-uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_method)
+uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required)
 {
   JsonBuilderI->Start();
     JsonBuilderI->Add("Ping", readings.raw.ping_value);

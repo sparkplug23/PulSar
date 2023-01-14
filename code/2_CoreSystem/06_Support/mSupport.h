@@ -194,6 +194,35 @@ bool SetAndKeepHighestNumber(T* current, T new_value){
   return false;
 } 
 
+/**
+ * @brief Faster to check for false than all true
+ * 
+ * @tparam A 
+ * @tparam B 
+ * @tparam C 
+ * @tparam D 
+ * @param x 
+ * @param xl 
+ * @param y 
+ * @param yl 
+ * @return true 
+ * @return false 
+ */
+template<typename A, typename B, typename C, typename D>
+bool ArrayCompare(A x, B x_len, C y, D y_len)
+{
+  for(B i=0; i<x_len; i++)
+  {
+    if(i < y_len)
+    {
+      if(x[i] != y[i])
+      {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 template<typename A,typename B,typename C,typename D,typename E>
 E mapvalue(A a, B b, C c, D d, E e){ //should be returning at largest, the size of E range

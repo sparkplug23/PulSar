@@ -328,7 +328,7 @@ void mUserMod_01::Pre_Init(){
 }
 
 
-uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -336,7 +336,7 @@ uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mUserMod_01::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mUserMod_01::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
   JsonBuilderI->End();

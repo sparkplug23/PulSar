@@ -35,6 +35,7 @@
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_HVAC_HAIRDRYER
 // #define DEVICE_DESKSENSOR
+// #define DEVICE_DESKSENSOR_SLAVE_01
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
@@ -449,7 +450,7 @@
       #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
     #define USE_MODULE_SENSORS_BH1750
     #define USE_MODULE_SENSORS_SWITCHES
-    #define USE_MODULE_SENSORS_MOTION
+    // #define USE_MODULE_SENSORS_MOTION
     #define USE_MODULE_SENSORS_LDR_BASIC
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
@@ -481,6 +482,7 @@
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define ENABLE_DEVFEATURE_INTERFACELIGHT_NEW_UNIQUE_TIMEON
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
@@ -520,6 +522,20 @@
    * 
    */
 
+  #define USE_MODULE_CONTROLLER_HVAC
+    #define HEATING_DEVICE_MAX 2
+    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+    // #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
+  // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+  
+
+  // Actual
+  #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
+  #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
+  // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
   /**
    * Debug pins
    * */
@@ -581,7 +597,7 @@
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      #ifdef USE_MODULE_DISPLAYS_NEXTION_V2
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
@@ -593,6 +609,10 @@
       #endif
       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
       "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
+      #endif
+      #if defined(USE_MODULE_DRIVERS_RELAY)// && !defined(USE_MODULE_DISPLAYS_NEXTION_V2) // Only debug pins
+      "\"2\":\""  GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\"," //pin2 - blue led
+      "\"15\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
       #endif
       // GPIO0 - ADC2 CH1
       /**
@@ -621,6 +641,20 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
+  /**
+   * @brief HVAC zones
+   **/
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Upstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
+
+
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Upstairs"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "Immersion"
+  #define D_DEVICE_DRIVER_RELAY_3_NAME "Boiler"
+
   #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
   #define D_DEVICE_SENSOR_CLIMATE_BME1 "BedroomDesk-BME"
   #define D_DEVICE_SENSOR_CLIMATE_BME2 "BedroomDesk-BME2"
@@ -640,6 +674,18 @@
   #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,195,135,126,242]"
   #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
   #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,195,135,215,193]"
+  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
+  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[1,2,3,4]"//,255,100,29,194,124,254,111]"
+  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "DB_02"
+  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[5,6,7,8]"//,255,100,29,205,206,170,25]"
+  // #define D_DEVICE_SENSOR_DB18S20_2_NAME        "DB_03"
+  // #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[9,10,11,12]"//,255,100,29,195,134,175,63]"
+  // #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
+  // #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[13,14,15,16]"//40,255,100,29,205,202,237,231]"
+  // #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
+  // #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[17,18,19,20]"//,255,100,29,195,135,126,242]"
+  // #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
+  // #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[21,22,23,24]"//,255,100,29,195,135,215,193]"
   
 
   #define USE_FUNCTION_TEMPLATE
@@ -667,19 +713,64 @@
       "],"  
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-      "]"  
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
+      "]," 
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
+      "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
-        D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
-        D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
-      "]"  
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\":" D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\":" D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\":" D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\":" D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\":" D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
+      "}"  
+    "}," 
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_BME1 "\","
+        "\"" D_DEVICE_SENSOR_CLIMATE_BME2 "\"," 
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_3_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "}," 
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1},"
+    "\"MQTTSubscribe\":["
+        "\"desksensor_slave/status/drivers_interface/+/drivers/unified\""
+    "]"
   "}";
 
   
@@ -820,6 +911,73 @@
 
 #endif
 
+
+/**
+ * @brief 
+ * 
+ * To enable testing of "remote" sensors and drivers
+ * Right now, just DHT22 and builtin LED as relay
+ * 
+ */
+#ifdef DEVICE_DESKSENSOR_SLAVE_01
+  #define DEVICENAME_CTR          "desksensor_slave"
+  #define DEVICENAME_FRIENDLY_CTR "Desk Sensor Slave"
+  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_DHT
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+    #define ENABLE_DEVFEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"   
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"13\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\"," 
+      #endif
+      "\"2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Immersion"
+  
+  #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDeskRemote-DHT1"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\""
+      "]," 
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+      "]" 
+    "}," 
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+  "}";
+
+     
+
+#endif
 
 
 /**

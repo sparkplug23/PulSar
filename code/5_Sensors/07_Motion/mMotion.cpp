@@ -264,7 +264,7 @@ char buffer[100];
 
 
 
-uint8_t mMotion::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mMotion::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -273,7 +273,7 @@ uint8_t mMotion::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[80];
 

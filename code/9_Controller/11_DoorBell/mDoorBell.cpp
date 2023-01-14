@@ -212,7 +212,7 @@ void mDoorBell::EveryLoop(){
 
 
 
-uint8_t mDoorBell::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mDoorBell::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -220,7 +220,7 @@ uint8_t mDoorBell::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   if(doorbell_switch.event.ischanged){doorbell_switch.event.ischanged=false;
 

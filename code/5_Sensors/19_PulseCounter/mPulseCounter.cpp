@@ -369,7 +369,7 @@ void mPulseCounter::WebPage_Root_AddHandlers(){
 ********************************************************************************************************************************************/
 
 
-uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
     D_DATA_BUFFER_CLEAR();
     StaticJsonDocument<400> doc;

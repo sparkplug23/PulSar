@@ -1827,7 +1827,7 @@ void mWebCam::Pre_Init(void){
 // }
 
 
-// uint8_t mWebCam::ConstructJSON_Settings(uint8_t json_method){
+// uint8_t mWebCam::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);

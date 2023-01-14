@@ -282,7 +282,7 @@ float mTreadmill::GetSpeed_Mph(uint8_t calibration_method){
 
 
 
-uint8_t mTreadmill::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mTreadmill::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -290,7 +290,7 @@ uint8_t mTreadmill::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     // JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());

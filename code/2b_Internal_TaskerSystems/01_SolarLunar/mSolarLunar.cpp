@@ -329,7 +329,7 @@ void mSolarLunar::parse_JSONCommand(JsonParserObject obj)
 
 }
 
-uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_method, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
 
@@ -360,7 +360,7 @@ uint8_t mSolarLunar::ConstructJSON_Sensor(uint8_t json_level){
 
 }
 
-uint8_t mSolarLunar::ConstructJSON_Settings(uint8_t json_level){
+uint8_t mSolarLunar::ConstructJSON_Settings(uint8_t json_method, bool json_object_start_end_required){
 
   char buffer[20];
 

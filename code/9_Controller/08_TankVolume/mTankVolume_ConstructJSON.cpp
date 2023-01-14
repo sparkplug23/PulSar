@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
 
 
-uint8_t mTankVolume::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mTankVolume::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
@@ -12,7 +12,7 @@ uint8_t mTankVolume::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mTankVolume::ConstructJSON_State(uint8_t json_method){
+uint8_t mTankVolume::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[40];
 
@@ -46,7 +46,7 @@ uint8_t mTankVolume::ConstructJSON_State(uint8_t json_method){
   //   JSON_METHOD_ALL=0
   // };
 // Send all litres calculations from all methods
-uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_method){
+uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
 
@@ -117,7 +117,7 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_method){
 }
 
 
-uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_method){
+uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_object_start_end_required){
 
 //     D_DATA_BUFFER_CLEAR();
 //     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;

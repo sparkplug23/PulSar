@@ -6,7 +6,7 @@
 
 
 
-uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.found);
@@ -14,7 +14,7 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[40];
 

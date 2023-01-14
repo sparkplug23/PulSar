@@ -194,7 +194,7 @@ void mRemoteDevice::EveryLoop(){
 ********************************************************************************************************************************************/
 
 
-uint8_t mRemoteDevice::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mRemoteDevice::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JBI->Add("SensorCount", settings.sensor_active_count);

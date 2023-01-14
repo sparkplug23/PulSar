@@ -285,8 +285,8 @@ uint8_t rule_count2 = 0;
     void Tasker_Rules_Interface(uint16_t function);
     // void Tasker_Rules_Init();
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_State(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
 
   #ifdef USE_MODULE_NETWORK_MQTT

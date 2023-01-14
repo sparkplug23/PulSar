@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_CORE_RULES
 
 
-uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_object_start_end_required){
 
 
   JsonBuilderI->Start();
@@ -101,7 +101,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method){
+uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method, bool json_object_start_end_required){
 
   char buffer[100];
   JBI->Start();

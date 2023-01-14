@@ -166,7 +166,7 @@ void mSensorsL3G::EveryLoop(){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mSensorsL3G::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mSensorsL3G::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);

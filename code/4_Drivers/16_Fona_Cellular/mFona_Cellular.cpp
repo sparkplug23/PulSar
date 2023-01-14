@@ -1045,4 +1045,304 @@ void mFona_Cellular::Command(char command)
 
 
 
+/******************************************************************************************************************
+ * 
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+void mFona_Cellular::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+	if(jtok = obj["LED"].getObject()["SetState"])
+	{
+
+		if(jtok.isNum())
+		{
+			// mySwitch->setReceiveProtocolMask(jtok.getUInt());
+			mqtthandler_settings_teleperiod.flags.SendNow = true;
+		}
+
+		// JBI->Start();
+
+		// pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+
+		// bool ready_to_send = JBI->End();
+
+		// if(!ready_to_send)
+		// {
+		// 	// Nothing was found, create new message
+		// 	JBI->Start();
+		// 		JBI->Add("SensorScan", "No Devices Found");
+		// 	ready_to_send = JBI->End();
+		// }
+
+
+		// if(ready_to_send)
+		// {			
+    	// AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
+		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+		// }
+
+	}
+
+
+
+int8_t led_id = -1;
+uint16_t state_value = 0;
+
+ if(jtok = obj["Fona"].getObject()["CommandList"])
+ {
+	// char buffer[10];
+	const char* buf = jtok.getStr();
+	Command(buf[0]);
+  }
+
+
+ if(jtok = obj["Fona"].getObject()["SendTextMessage"])
+ {
+	// char buffer[10];
+	char* message = (char*)jtok.getStr();
+	// Command(buf[0]);
+
+
+	
+	if (!fona->sendSMS(D_FLEXI_O2_PHONE_NUMBER_CTR, message)) {
+		Serial.println(F("Failed"));
+	} else {
+		Serial.println(F("Sent!"));
+	}
+
+
+  }
+
+ if(jtok = obj["Fona"].getObject()["CallPhone"])
+ {
+// 	// char buffer[10];
+// 	char* message = (char*)jtok.getStr();
+// 	// Command(buf[0]);
+
+
+	
+// 	if (!fona->sendSMS(D_FLEXI_O2_PHONE_NUMBER_CTR, message)) {
+// 		Serial.println(F("Failed"));
+// 	} else {
+// 		Serial.println(F("Sent!"));
+// 	}
+
+	// call a phone!
+        // char number[30];
+        // flushSerial();
+        Serial.print(F("Call #"));
+        // readline(number, 30);
+        // Serial.println();
+        Serial.print(F("Calling ")); Serial.println(D_FLEXI_O2_PHONE_NUMBER_CTR);
+        if (!fona->callPhone(D_FLEXI_O2_PHONE_NUMBER_CTR)) {
+          Serial.println(F("Failed"));
+        } else {
+          Serial.println(F("Sent!"));
+        }
+
+
+  }
+
+
+ if(jtok = obj["Fona"].getObject()["PowerCycle"])
+ {
+	digitalWrite(GPIO_FUNCTION__FONA_POWER_KEY__ID, LOW);
+	delay(1000);
+	digitalWrite(GPIO_FUNCTION__FONA_POWER_KEY__ID, HIGH);
+
+	Serial.println(F("Power Cycle"));
+
+	// ALOG_INF
+	
+
+
+  }
+
+
+    
+}
+  
+/**
+ * @brief 
+ * 
+ * @return int8_t 
+ */
+int8_t mFona_Cellular::CommandGet_RSSI_dBm()
+{
+
+  uint8_t n = fona->getRSSI();
+  int8_t r;
+  
+  if (n == 0) r = -115;
+  if (n == 1) r = -111;
+  if (n == 31) r = -52;
+  if ((n >= 2) && (n <= 30))
+  {
+    r = map(n, 2, 30, -110, -54);
+  }
+
+  ALOG_INF( PSTR("Rssi = %d, dBm = %d"), n, r);
+
+  return r;
+}
+
+/**
+ * @brief Set power
+ * 
+ * @return true 
+ * @return false 
+ */
+bool mFona_Cellular::CommandSet_Power()
+{
+  
+  ALOG_INF( PSTR("CommandSet_Power PS:%d"), digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) );
+
+  if(digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)) == 1)
+  {
+
+
+  }
+
+
+
+
+
+}
+
+
+
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+
+uint8_t mFona_Cellular::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+
+  JBI->Start();
+    // JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
+  return JBI->End();
+
+}
+
+uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+
+  char buffer[40];
+
+  JBI->Start();
+
+    // JBI->Level_Start(D_JSON_RFRECEIVED);
+  
+    //   JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
+    //   // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
+    //   // JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
+    //   // JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   
+    //   // JBI->Add(D_JSON_MILLIS, rx_pkt.received_time_millis);   
+    //   // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+      
+    
+    // JBI->Level_End();
+
+    JBI->Add("rssi", connection.rssi_dBm);
+
+
+    JBI->Level_Start("GPIO_State");
+      JBI->Add("Key", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_KEY__ID)));
+      JBI->Add("PS", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)));
+      JBI->Add("NS", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_NETWORK_STATUS__ID)));
+      JBI->Add("RST", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RESET__ID)));
+      // JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_UART_TX__ID)));
+      // JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_UART_RX__ID)));
+      JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)));
+    JBI->Level_End();
+  
+  
+
+  return JBI->End();
+
+}
+
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+  #ifdef USE_MODULE_NETWORK_MQTT
+void mFona_Cellular::MQTTHandler_Init()
+{
+
+  struct handler<mFona_Cellular>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->tRateSecs = 120; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mFona_Cellular::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_state_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->ConstructJSON_function = &mFona_Cellular::ConstructJSON_State;
+
+} //end "MQTTHandler_Init"
+
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mFona_Cellular::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mFona_Cellular::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mFona_Cellular::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_FONA_CELLULAR_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+
 #endif

@@ -98,22 +98,22 @@ class mTelemetry :
     #endif
     void parse_JSONCommand(JsonParserObject obj);
 
-    uint8_t ConstructJSON_Health(uint8_t json_level);
-    uint8_t ConstructJSON_Settings(uint8_t json_level);
-    uint8_t ConstructJSON_Firmware(uint8_t json_level);
-    uint8_t ConstructJSON_Log(uint8_t json_level);
-    uint8_t ConstructJSON_Memory(uint8_t json_level);
-    uint8_t ConstructJSON_Network(uint8_t json_level);
-    uint8_t ConstructJSON_MQTT(uint8_t json_level);
-    uint8_t ConstructJSON_Time(uint8_t json_level);
-    uint8_t ConstructJSON_Devices(uint8_t json_level);
-    uint8_t ConstructJSON_Reboot(uint8_t json_level);
+    uint8_t ConstructJSON_Health(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Firmware(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Log(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Memory(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Network(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_MQTT(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Time(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Devices(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Reboot(uint8_t json_method = 0, bool json_object_start_end_required = true);
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-    uint8_t ConstructJSON_Debug_Pins(uint8_t json_level);
-    uint8_t ConstructJSON_Debug_Template(uint8_t json_level);
-    uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_level);
-    uint8_t ConstructJSON_Debug_Minimal(uint8_t json_level);
-    uint8_t ConstructJSON_Debug_System_Stored_Settings(uint8_t json_level);
+    uint8_t ConstructJSON_Debug_Pins(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Debug_Template(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Debug_Minimal(uint8_t json_method = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Debug_System_Stored_Settings(uint8_t json_method = 0, bool json_object_start_end_required = true);
     #endif
 
   #ifdef USE_MODULE_NETWORK_WEBSERVER

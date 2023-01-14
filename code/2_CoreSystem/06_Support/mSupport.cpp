@@ -1902,6 +1902,11 @@ float mSupport::ConvertTemp(float c)
   return result;
 }
 
+
+
+
+
+
 char mSupport::TempUnit(void)
 {
   return (pCONT_set->Settings.flag_system.temperature_conversion) ? 'F' : 'C';

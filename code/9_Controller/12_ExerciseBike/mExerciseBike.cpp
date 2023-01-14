@@ -346,7 +346,7 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 
 
 
-uint8_t mExerciseBike::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mExerciseBike::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   D_DATA_BUFFER_CLEAR();
   DynamicJsonDocument doc(250);

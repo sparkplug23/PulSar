@@ -399,7 +399,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
     int8_t CheckAndExecute_JSONCommands();
     void parse_JSONCommand(JsonParserObject obj);
 
-    uint8_t ConstructJSON_Scene(uint8_t json_method);
+    uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_object_start_end_required);
 
     void WebCommand_Parse(void);
 
@@ -408,12 +408,12 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void WebAppend_Root_Status_Table();
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_method = 0);
-    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_method = 0);
-    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_method = 0);
-    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_method = 0);
-    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_level = 0, bool json_object_start_end_required = true);
   
   #ifdef USE_MODULE_NETWORK_MQTT
 

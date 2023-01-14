@@ -334,7 +334,7 @@ void mADCInternal::Update_Channel1_ADC_Readings()
 }
 
 
-uint8_t mADCInternal::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mADCInternal::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
@@ -738,7 +738,7 @@ void mADCInternal::MQTTHandler_Sender(uint8_t id)
 // ********************************************************************************************************************************************/
 
 
-// uint8_t mSensorsAnalog::ConstructJSON_Settings(uint8_t json_method){
+// uint8_t mSensorsAnalog::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add("analog", analogRead(A0));

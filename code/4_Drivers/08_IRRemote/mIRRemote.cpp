@@ -1341,5 +1341,209 @@ void mIRRemote::IrReceiveInit(void)
 
 
 
+/******************************************************************************************************************
+ * 
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+  
+void mIRRemote::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+	if(jtok = obj["LED"].getObject()["SetState"])
+	{
+
+		if(jtok.isNum())
+		{
+			// mySwitch->setReceiveProtocolMask(jtok.getUInt());
+			mqtthandler_settings_teleperiod.flags.SendNow = true;
+		}
+
+		// JBI->Start();
+
+		// pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+
+		// bool ready_to_send = JBI->End();
+
+		// if(!ready_to_send)
+		// {
+		// 	// Nothing was found, create new message
+		// 	JBI->Start();
+		// 		JBI->Add("SensorScan", "No Devices Found");
+		// 	ready_to_send = JBI->End();
+		// }
+
+
+		// if(ready_to_send)
+		// {			
+    	// AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
+		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+		// }
+
+	}
+
+
+
+int8_t led_id = -1;
+uint16_t state_value = 0;
+
+ if(jtok = obj["LEDName"]){
+    // if(jtok.isStr()){
+    //   relay_id = GetRelayIDbyName(jtok.getStr());
+    // }else 
+    // if(jtok.isNum()){
+    //   relay_id  = jtok.getInt();
+    // }
+	led_id = jtok.getInt();
+  }
+
+  // Primary method since v0.86.14.21
+  if(jtok = obj["LEDState"]){
+    // if(jtok.isStr()){
+    //   state = pCONT_sup->GetStateNumber(jtok.getStr());
+    // }else 
+    // if(jtok.isNum()){
+      state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+    // }
+
+    /**
+     * @brief If off, clear any timer decounters for relays
+     * 
+     */
+    // if(state == 0)
+    // {
+    //   CommandSet_Timer_Decounter(0, relay_id);
+    // }
+
+		//state needs checked for flipped
+		// if(state == 2){
+
+		// }
+		
+// SetState()
+
+  }
+    
+}
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+
+uint8_t mIRRemote::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+
+  JBI->Start();
+    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
+  return JBI->End();
+
+}
+
+uint8_t mIRRemote::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+
+  char buffer[40];
+
+  JBI->Start();
+
+    JBI->Level_Start(D_JSON_RFRECEIVED);
+  
+      JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
+      // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
+      // JBI->Add(D_JSON_RF_PROTOCOL, rx_pkt.protocol);
+      // JBI->Add(D_JSON_RF_PULSE, rx_pkt.delay);   
+      // JBI->Add(D_JSON_MILLIS, rx_pkt.received_time_millis);   
+      // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
+      
+    
+    JBI->Level_End();
+  
+  
+
+  return JBI->End();
+
+}
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mIRRemote::MQTTHandler_Init()
+{
+
+  struct handler<mIRRemote>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->tRateSecs = 120; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mIRRemote::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_state_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->ConstructJSON_function = &mIRRemote::ConstructJSON_State;
+
+} //end "MQTTHandler_Init"
+
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mIRRemote::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mIRRemote::MQTTHandler_Set_TelePeriod()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mIRRemote::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_IRREMOTE_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
+
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+
 
 #endif

@@ -101,14 +101,10 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
       const char* key = jtok.getStr();
       
       real_pin = GetRealPinNumberFromName(key);
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_DBM( PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
-      #endif // ENABLE_LOG_LEVEL_COMMANDS
+      ALOG_DBM(PSTR("KEY%d %s %d\n\r"), pair_index, key, real_pin);
 
       int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
       ALOG_DBM( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
-      #endif // ENABLE_LOG_LEVEL_COMMANDS
       
       if(index_pin>=0){
       

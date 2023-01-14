@@ -9,7 +9,7 @@
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mButtons::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
@@ -17,7 +17,7 @@ uint8_t mButtons::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));

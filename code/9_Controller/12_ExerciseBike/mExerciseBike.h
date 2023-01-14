@@ -64,7 +64,7 @@ class mExerciseBike{
     void SubTask_Light();
 
 
-uint8_t ConstructJSON_Settings(uint8_t json_method);
+uint8_t ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required);
 uint8_t ConstructJSON_Sensor(uint8_t json_level);
 uint8_t ConstructJSON_LightStates(uint8_t json_level);
 

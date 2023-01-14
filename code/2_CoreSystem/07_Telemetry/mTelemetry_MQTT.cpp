@@ -35,7 +35,7 @@ void mTelemetry::MQTTHandler_Init()
   p->tSavedLastSent = millis();
   p->flags.PeriodicEnabled = true;
   p->flags.SendNow = true;
-  #ifdef ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
+  #if defined(ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS) || defined(ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS)
   p->tRateSecs = 1; 
   #else
   p->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 

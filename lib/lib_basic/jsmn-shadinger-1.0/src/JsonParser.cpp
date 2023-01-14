@@ -103,7 +103,7 @@ float json_strtof(const char* s) {
 \*********************************************************************************************/
 
 void JsonParserToken::skipToken(void) {
-  // printf("skipToken type = %d   %s\n", t->type, json_string + t->start);
+  // Serial.printf("skipToken type = %d   %s\n", t->type, t->start);
   switch (t->type) {
     case JSMN_OBJECT:
       skipObject();
@@ -207,20 +207,29 @@ JsonParserToken JsonParserArray::operator[](int32_t i) const {
 \*********************************************************************************************/
 
 JsonPair::JsonPair(const jsmntok_t * token) : JsonParserToken(token) {
-  // Serial.println("const_iterator 6");
-  // if (t->type != JSMN_ARRAY) {
-  //   t = &token_bad;
-  // }
+  Serial.println("JsonPair token"); //delay(4000);
+  if (t->type != JSMN_OBJECT) {
+    t = &token_bad;
+  }
 }
+
 JsonPair::JsonPair(const JsonParserToken token) : JsonParserToken(token.t) {
-  // Serial.println("const_iterator 5");
-  // if (t->type != JSMN_ARRAY) {
-  //   t = &token_bad;
-  // }
+  
+    Serial.printf("sizeB1=%d\n\r",t->size);
+
+
+  Serial.println("JsonPair token.t");//delay(4000);
+  if (t->type != JSMN_OBJECT) { 
+    Serial.println("JsonPair != JSMN_OBJECT");//delay(4000);
+  
+    t = &token_bad;
+  }
+   Serial.println("JsonPair == JSMN_OBJECT");//delay(4000);
+  
 }
 
 JsonPair::const_iterator::const_iterator(const JsonPair t): tok(t), remaining(0) {
-  // Serial.println("const_iterator 1");
+  Serial.println("const_iterator 1");
   if (tok.t == &token_bad) { tok.t = nullptr; }
   if (nullptr != tok.t) {
     // ASSERT type == JSMN_ARRAY by constructor
@@ -235,7 +244,7 @@ JsonPair::const_iterator JsonPair::const_iterator::const_iterator::operator++() 
     remaining--;
     tok.skipToken();  // munch value
     if (tok.t->type == JSMN_INVALID) { tok.t = nullptr; }   // unexpected end of stream
-    token_pair.key = tok;
+    // token_pair.key = tok;
   }
   // if (remaining <= 1) { tok.t = nullptr; }
   // else {
@@ -247,8 +256,130 @@ JsonPair::const_iterator JsonPair::const_iterator::const_iterator::operator++() 
   return *this;
 }
 
+// JsonParserKey JsonParserObject::getFirstElement(void) const {
+//   if (t->size > 0) {
+//     return JsonParserKey(t+1);    // return next element and cast to Key
+//   } else {
+//     return JsonParserKey(&token_bad);
+//   }
+// }
+/**
+ * @brief This function will need to iter across all possible pairs until "i" setting the key/value token
+ * 
+ * @param i 
+ * @return JsonPair2 
+ */
+JsonPair2 JsonPair::getObjectPair(uint8_t i)
+{
+    Serial.printf("getObjectPair sizeB1=%d\n\r",t->size);
+//  if (remaining <= 1) { tok.t = nullptr; }
+
+// lets find each key/value place
+
+    tok = t;
+
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.skipToken();  // munch value
+    
+    JsonParserArray array_group = tok;
+  for(auto address_id : array_group) 
+  {
+    Serial.printf("\t\tValue%d \n\r", address_id.getInt());
+  }
+
+
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.skipToken();
+
+
+    JsonParserArray array_group2 = tok;
+  for(auto address_id : array_group2) 
+  {
+    Serial.printf("\t\tValue%d \n\r", address_id.getInt());
+  }
+
+
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.skipToken();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.skipToken();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.nextOne();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.nextOne();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.nextOne();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.nextOne();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.nextOne();
+    Serial.printf("tok.getType() = %d\n\r", tok.getType());
+    Serial.println(tok.getStr());
+    tok.nextOne();
+    // t = 
+
+    // Serial.println(t->)
+ 
+  // key = tok.
+ if (t->size > 0) {
+  Serial.println("JsonPair::getObjectPair Good token");
+  // Return the head of the next key/value pair, then JsonPair2 will iter between key and pair
+    return JsonPair2(t+1);    // return next element and cast to Key
+  } else {
+  Serial.println("Bad token");
+    return JsonPair2(&token_bad);
+  }
+  
+
+}
+
+
+
+
+/*********************************************************************************************\
+ * JsonParserKey
+\*********************************************************************************************/
+
+
+JsonPair2::JsonPair2(const jsmntok_t * token) : JsonParserToken(token) {
+  if (t->type != JSMN_OBJECT) {
+    Serial.println("bad tok1");
+    t = &token_bad;
+  }
+    Serial.println("! bad tok1");
+}
+JsonPair2::JsonPair2(const JsonParserToken token) : JsonParserToken(token.t) {
+  if (t->type != JSMN_OBJECT) {
+    Serial.println("bad tok2");
+    t = &token_bad;
+  }
+    Serial.println("! bad tok2");
+}
+
+JsonParserToken JsonPair2::getValue(void) const {
+  return JsonParserToken(t+1);
+}
+JsonParserToken JsonPair2::getKey(void) const {
+  return JsonParserToken(t+2);
+}
+
+
+
+
+
+
+
 JsonParserToken JsonPair::operator[](int32_t i) const {
-  //Serial.println("const_iterator OP");
+  Serial.println("const_iterator OP");
   if ((i >= 0) && (i < t->size)) {
     uint32_t index = 0;
     for (const auto elt : *this) {
@@ -261,6 +392,11 @@ JsonParserToken JsonPair::operator[](int32_t i) const {
   // fallback
   return JsonParserToken(&token_bad);
 }
+
+
+
+
+
 #endif// ENABLE_DEVFEATURE_JSONPAIR
 
 /*********************************************************************************************\

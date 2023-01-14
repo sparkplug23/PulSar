@@ -1,0 +1,48 @@
+[env]
+platform = ${common.platform}
+platform_packages = ${common.platform_packages}
+framework = ${common.framework}
+board = ${common.board}
+board_build.ldscript  = ${common.board_build.ldscript}
+board_build.flash_mode = ${common.board_build.flash_mode}
+board_build.f_flash = ${common.board_build.f_flash}
+board_build.f_cpu = ${common.board_build.f_cpu}
+build_unflags = ${common.build_unflags}
+build_flags = ${common.build_flags}
+                                -D USER_MICHAEL
+monitor_speed = ${common.monitor_speed}
+upload_port = ${common.upload_port}
+upload_resetmethod = ${common.upload_resetmethod}
+upload_speed = ${common.upload_speed}
+extra_scripts = ${common.extra_scripts}
+lib_extra_dirs = ${common.lib_extra_dirs}
+; lib_deps = ${common.lib_deps}
+
+; ; my devices
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Custom Test Users ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Custom Test Users ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Custom Test Users ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Custom Test Users ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Custom Test Users ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+[env:esp_8266_customuser_example_serial]
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D ENABLE_TESTUSER -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.1.148
+
+
+
+[env:esp_8266_customuser_example_ota]
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D ENABLE_TESTUSER -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+                            pio/override_copy.py
+upload_port = 192.168.1.148
+

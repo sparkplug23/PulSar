@@ -124,7 +124,11 @@ enum XsnsFunctions {
   FUNC_MQTT_HANDLERS_RESET, FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD,
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, 
   FUNC_MQTT_DATA_ID,
-  
+
+  /**
+   * @brief Response Tasks
+   **/
+  FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID,
 
   /**
    * @brief Rules

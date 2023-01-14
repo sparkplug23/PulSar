@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR 
 
 
-uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
 
@@ -14,7 +14,7 @@ uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mAnimatorLight::ConstructJSON_Animation_Active(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Animation_Active(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -30,7 +30,7 @@ uint8_t mAnimatorLight::ConstructJSON_Animation_Active(uint8_t json_level)
 
 
 
-uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -44,7 +44,7 @@ uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level)
 
 
 #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-uint8_t mAnimatorLight::ConstructJSON_Mode_Ambilight(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Mode_Ambilight(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -58,7 +58,7 @@ uint8_t mAnimatorLight::ConstructJSON_Mode_Ambilight(uint8_t json_level)
 
 
 #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-uint8_t mAnimatorLight::ConstructJSON_Mode_SetManual(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Mode_SetManual(uint8_t json_level, bool json_object_start_end_required)
 {
 
 JBI->Start();
@@ -75,7 +75,7 @@ return JBI->End();
  * @brief Debug 
  */
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level, bool json_object_start_end_required)
 {
 
 char buffer[100];
@@ -200,7 +200,7 @@ return JBI->End();
 
 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -230,7 +230,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level)
 
 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool json_object_start_end_required)
 {
 
 JBI->Start();
@@ -271,7 +271,7 @@ return JBI->End();
 
 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level, bool json_object_start_end_required)
 {
   char buffer[50];
 
@@ -372,7 +372,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-//   uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
+//   uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level, bool json_object_start_end_required)
 //   {
 
 // JBI->Start();
@@ -390,7 +390,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level)
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
-uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level)
+uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level, bool json_object_start_end_required)
 {
 
   if(anim_progress_mqtt_function_callback)
@@ -410,7 +410,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 
 
 
-// uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_method){
+// uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_level, bool json_object_start_end_required){
 
 //   #ifdef ENABLE_LOG_LEVEL_DEBUG
 //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Animation"));
@@ -446,7 +446,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 
 
 
-// uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level){
+// uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level, bool json_object_start_end_required){
 //   // Awaiting total redesign
   
 //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -463,7 +463,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 
 
 // // unless this is a debug, only one needs to exist (animation)
-// uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level)
+// uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_object_start_end_required)
 // {
 //   // Awaiting total redesign
 
@@ -534,7 +534,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 //  * @param json_level 
 //  * @return uint8_t 
 //  */
-// uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level)
+// uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required)
 // {
 
 //   uint8_t numpixels = pCONT_iLight->settings.light_size_count<100?pCONT_iLight->settings.light_size_count:100;
@@ -558,7 +558,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 // }
 
 // // // Update struct that shows overview, always sends
-// uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level)
+// uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level, bool json_object_start_end_required)
 // {
 
 //   char buffer[100];
@@ -638,7 +638,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
 
 
 // #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-// uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level)
+// uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level, bool json_object_start_end_required)
 // {
 
 //   char buffer[100];

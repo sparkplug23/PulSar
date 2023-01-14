@@ -18,7 +18,7 @@
  * The RSS samples of 50 rss will now also append millis from here, so when it appends the time from the ISR, add millis into it (so make special ISR for UART2)
  * Instead of "ConstructJSON_" I will also create a "ConstructRAWBytePacked_" for the sd method
  * */
-uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
+uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[30];
   
@@ -84,7 +84,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_method){
  * The RSS samples of 50 rss will now also append millis from here, so when it appends the time from the ISR, add millis into it (so make special ISR for UART2)
  * Instead of "ConstructJSON_" I will also create a "ConstructRAWBytePacked_" for the sd method
  * */
-uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_method){
+uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[30];
   
@@ -164,7 +164,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_method){
  * The RSS samples of 50 rss will now also append millis from here, so when it appends the time from the ISR, add millis into it (so make special ISR for UART2)
  * Instead of "ConstructJSON_" I will also create a "ConstructRAWBytePacked_" for the sd method
  * */
-uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_method){
+uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[30];
   
@@ -258,7 +258,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_method){
 
 }
 
-uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
+uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[30];
   
@@ -310,7 +310,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_method){
 }
 
 
-uint8_t mGPS::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mGPS::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   // Active rgbcct palette used as scene
 
@@ -337,7 +337,7 @@ uint8_t mGPS::ConstructJSON_Settings(uint8_t json_method){
 
 
 
-uint8_t mGPS::ConstructJSON_GPSPacket_Required(uint8_t json_method){
+uint8_t mGPS::ConstructJSON_GPSPacket_Required(uint8_t json_level, bool json_object_start_end_required){
 
   // Active rgbcct palette used as scene
 

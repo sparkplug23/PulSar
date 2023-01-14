@@ -241,7 +241,7 @@ void mBucketWaterLevel::MeasureADCWithRelay()
 }
 
 
-uint8_t mBucketWaterLevel::ConstructJSON_Settings(uint8_t json_method)
+uint8_t mBucketWaterLevel::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
 {
   JBI->Start();
   

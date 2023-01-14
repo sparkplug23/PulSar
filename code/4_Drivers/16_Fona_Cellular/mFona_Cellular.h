@@ -230,8 +230,8 @@ uint8_t standy_mode_id = 0;
     void SetLedLink(uint32_t state);
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_State(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_object_start_end_required = true);
   
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();

@@ -51,6 +51,9 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_SET_POWER_ON_ID:
       CommandSet_Relay_Power(STATE_NUMBER_ON_ID);
     break;    
+    case FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID:
+      AppendJSONResponse_Drivers_Unified(); // should this be an override? prob too complex to be useful
+    break;
     /************
      * RULES SECTION * 
     *******************/
@@ -807,10 +810,10 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
 
 
-uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_object_start_end_required){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
+  JBI->Start();
+    JBI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
 
     JBI->Array_Start_P(PSTR("rel_inverted"));
       for(int8_t bits=0; bits<sizeof(rel_inverted)*8; bits++)
@@ -821,116 +824,144 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
 
 
 
-  JsonBuilderI->End();
+  JBI->End();
 
 }
 
 
-uint8_t mRelays::ConstructJSON_State(uint8_t json_level){
+uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[100];
 
+  if(json_object_start_end_required)
+  {
+    JBI->Start();
+  }
 
-  JsonBuilderI->Start();
-    for(int device_id=0;device_id<settings.relays_connected;device_id++){
-      if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
-        
-        JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-        //phase onoff out
-          JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
-          JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-
-          JsonBuilderI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
-          JsonBuilderI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-          JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-          JBI->Add("TimerDeCounter", CommandGet_SecondsToRemainOn(device_id)); //Phase out
-          JBI->Add("SecondsToRemainOn", CommandGet_SecondsToRemainOn(device_id));          
-          JBI->Add("SecondsToRemainOff", CommandGet_SecondsRelayHasBeenOn(device_id));
+  for(int device_id=0;device_id<settings.relays_connected;device_id++){
+    if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
+      
+      JBI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+      //phase onoff out
 
 
-          JsonBuilderI->Level_Start_P(PM_JSON_LAST);
-            snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
-            JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
-            snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
-            JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
-          JsonBuilderI->Level_End();
-        
-        // Schedules time periods the relays are allowed to run (or should this be locking off?)
-        JsonBuilderI->Level_Start_P("RelayEnabled");
-        for(int ii=0;ii<D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT;ii++){
-          JsonBuilderI->Level_Start_P("Range%d",ii);
+        JBI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
+        JBI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
 
-            time_short_t t = relay_status[device_id].enabled_ranges[ii].ontime;
-            snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-            JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
+        JBI->Add_P(PM_JSON_POWER_STATE,        CommandGet_Relay_Power(device_id));
+        JBI->Add_P(PM_JSON_POWER_STATE_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+        JBI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+        JBI->Add("TimerDeCounter", CommandGet_SecondsToRemainOn(device_id)); //Phase out
+        JBI->Add("SecondsToRemainOn", CommandGet_SecondsToRemainOn(device_id));          
+        JBI->Add("SecondsToRemainOff", CommandGet_SecondsRelayHasBeenOn(device_id));
 
-            t = relay_status[device_id].enabled_ranges[ii].offtime;
-            snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
-            JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
 
-            // Add if relay is within window etc here
-            JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
+        JBI->Level_Start_P(PM_JSON_LAST);
+          snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
+          JBI->Add_P(PM_JSON_ONTIME, buffer);
+          snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
+          JBI->Add_P(PM_JSON_OFFTIME, buffer);
+        JBI->Level_End();
+      
+      // Schedules time periods the relays are allowed to run (or should this be locking off?)
+      JBI->Level_Start_P("RelayEnabled");
+      for(int ii=0;ii<D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT;ii++){
+        JBI->Level_Start_P("Range%d",ii);
 
-          JsonBuilderI->Level_End();
-        }
-        JsonBuilderI->Level_End();
+          time_short_t t = relay_status[device_id].enabled_ranges[ii].ontime;
+          snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
+          JBI->Add_P(PM_JSON_ONTIME, buffer);
 
-        JsonBuilderI->Level_End();
-        
+          t = relay_status[device_id].enabled_ranges[ii].offtime;
+          snprintf(buffer, sizeof(buffer), "%02dD%02d:%02d:%02d", t.Wday, t.hour, t.minute, t.second);
+          JBI->Add_P(PM_JSON_OFFTIME, buffer);
+
+          // Add if relay is within window etc here
+          JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
+
+        JBI->Level_End();
       }
+      JBI->Level_End();
+
+      JBI->Level_End();
+      
     }
+  }
   // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::ConstructJSON_State %d"),JBI->GetLength());
-  JsonBuilderI->End();
+  if(json_object_start_end_required)
+  {
+    return JBI->End();
+  }
+  return JBI->Length();
 
 }
 
+/**
+ * @brief I should consider passing another argument into normal ConstructJson to disabled adding Start/Stop so this function could simply call another without them?
+ * 
+ * @return uint_t 
+ */
+uint8_t mRelays::AppendJSONResponse_Drivers_Unified()
+{
+  JBI->Level_Start_P(PM_MODULE_DRIVERS_RELAY_FRIENDLY_CTR);
+    ConstructJSON_State(JSON_LEVEL_SHORT, false);
+  JBI->Level_End();
+}
 
 
-uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level){
+uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level, bool json_object_start_end_required)
+{
 
   char buffer[50];
 
-  JsonBuilderI->Start();
-
+  if(json_object_start_end_required)
+  {
+    JBI->Start();
+  }
   
-    for(int device_id=0;device_id<settings.relays_connected;device_id++){
-      if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
-        
-        JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-          JsonBuilderI->Level_Start("enabled_ranges");
+  for(int device_id=0;device_id<settings.relays_connected;device_id++){
+    if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
+      
+      JBI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+        JBI->Level_Start("enabled_ranges");
 
-            JsonBuilderI->Array_Start("ontime");
-              JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
-            JsonBuilderI->Array_End();
-            JsonBuilderI->Array_Start("offtime");
-              JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
-            JsonBuilderI->Array_End();
-
-
-            JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
-
-            //  AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
-    
+          JBI->Array_Start("ontime");
+            JBI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
+          JBI->Array_End();
+          JBI->Array_Start("offtime");
+            JBI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].offtime, buffer, sizeof(buffer)));
+          JBI->Array_End();
 
 
+          JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
+
+          //  AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_RELAYS "IsRelayTimeWindowAllowed(num)=%d"), IsRelayTimeWindowAllowed(num));
+  
 
 
-          JsonBuilderI->Level_End();
 
-          // JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
-          // JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
-          // JsonBuilderI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-          // JsonBuilderI->Level_Start_P(PM_JSON_LAST);
-          //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
-          //   JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
-          //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
-          //   JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
-          // JsonBuilderI->Level_End();
-        JsonBuilderI->Level_End();
-        
-      }
+
+        JBI->Level_End();
+
+        // JBI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
+        // JBI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
+        // JBI->Add_P(PM_JSON_FRIENDLYNAME, GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+        // JBI->Level_Start_P(PM_JSON_LAST);
+        //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.ontime.hour,relay_status[device_id].last.ontime.minute,relay_status[device_id].last.ontime.second);
+        //   JBI->Add_P(PM_JSON_ONTIME, buffer);
+        //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
+        //   JBI->Add_P(PM_JSON_OFFTIME, buffer);
+        // JBI->Level_End();
+      JBI->Level_End();
+      
     }
-  JsonBuilderI->End();
+  }
+
+  if(json_object_start_end_required)
+  {
+    return JBI->End();
+  }
+  return JBI->Length();
 
 }
 

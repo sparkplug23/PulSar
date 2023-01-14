@@ -437,10 +437,10 @@ float GetOilHeightCMReadingAdjustedFromTemp(int duration);
 
 
 
-    uint8_t ConstructJSON_Litres(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Furnace(uint8_t json_method = 0);
-    uint8_t ConstructJSON_State(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Litres(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Furnace(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
 
   

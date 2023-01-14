@@ -53,8 +53,8 @@ class mMotion :
     #define MAXIMUM_SENSORS 3
     event_motion_t pir_detect[MAXIMUM_SENSORS]; // up to 2 sensors
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
     void Rules_Add_Rule();
 

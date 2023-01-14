@@ -61,7 +61,7 @@ class JsonBuilder{
     struct WRITER_POINTERS{
       char*     buffer = nullptr;
       uint16_t  buffer_size = 0;
-      uint16_t* length = nullptr;
+      uint16_t length;// = nullptr;
     }writer;
 
   public:
@@ -71,12 +71,12 @@ class JsonBuilder{
     static JsonBuilder* instance;
     
     char* GetBufferPtr();
-char* GetPtr();
+    char* GetPtr();
     uint16_t GetLength();
     uint16_t* GetLengthPtr();
     uint16_t GetBufferSize();
 
-    void Start(char* _buffer, uint16_t* _length, uint16_t _buffer_size);
+    void Start(char* _buffer, uint16_t _length, uint16_t _buffer_size);
     void Start();
     bool End();
 
@@ -104,15 +104,14 @@ char* GetPtr();
     void Level_Start(); //no key name 
 
     bool BufferValid(){
-      if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+      if((writer.buffer == nullptr)||(writer.buffer_size == 0))
       {
         return false;
       }
       return true;
     }
 
-    template <typename T>
-    T GetLength(){
+    uint16_t Length(){
       return writer.length;
     };
 
@@ -131,15 +130,15 @@ char* GetPtr();
 
     template <typename T>
     void Add(T value){
-      if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+      if((writer.buffer == nullptr)||(writer.buffer_size == 0))
         return;
       
       if(
-        (*writer.length>1)&&
-        (writer.buffer[*writer.length-1]!='{')&&
-        (writer.buffer[*writer.length-1]!='[')      
+        (writer.length>1)&&
+        (writer.buffer[writer.length-1]!='{')&&
+        (writer.buffer[writer.length-1]!='[')      
       ){   
-        *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,","); 
+        writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,","); 
       }
 
       #ifdef DEBUG_JSON_BUILDER
@@ -154,16 +153,16 @@ char* GetPtr();
        * 
        */
       if(is_unsigned_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%lu",value);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%lu",value);
       }else
       if(is_signed_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%d",value);
       }else
       if(is_string_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\"",value);
       }else
       if(is_char_type<T>::value){   
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"'%c'",value);
       }
       // #ifndef USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
       else
@@ -174,7 +173,7 @@ char* GetPtr();
         char fvalue[40] = {0};         
         // dtostrfd2(f,3,fvalue);
         dtostrf(f, 5, 2, fvalue);
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",fvalue);
       }
       // #endif // USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
 
@@ -182,20 +181,20 @@ char* GetPtr();
 
     #ifdef USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
     void Addf(float value){
-      if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+      if((writer.buffer == nullptr)||(writer.buffer_size == 0))
         return;
       
       if(
-        (*writer.length>1)&&
-        (writer.buffer[*writer.length-1]!='{')&&
-        (writer.buffer[*writer.length-1]!='[')      
+        (writer.length>1)&&
+        (writer.buffer[writer.length-1]!='{')&&
+        (writer.buffer[writer.length-1]!='[')      
       ){         
-        *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,","); 
+        writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,","); 
       }
 
       char fvalue[40] = {0}; 
       dtostrf(value, 5, 2, fvalue);
-      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);
+      writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",fvalue);
     
 
     }
@@ -205,15 +204,15 @@ char* GetPtr();
     template <typename T>
     void Add(const char* key, T value)
     {
-      if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+      if((writer.buffer == nullptr)||(writer.buffer_size == 0))
         return;
       
       if(
-        (*writer.length>1)&&
-        (writer.buffer[*writer.length-1]!='{')&&
-        (writer.buffer[*writer.length-1]!='[')      
+        (writer.length>1)&&
+        (writer.buffer[writer.length-1]!='{')&&
+        (writer.buffer[writer.length-1]!='[')      
       ){ 
-        *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+        writer.length += sprintf_P(&writer.buffer[writer.length],","); }
 
         #ifdef DEBUG_JSON_BUILDER
         char buffer_id[50];
@@ -229,29 +228,29 @@ char* GetPtr();
          * - pointer of strings needs to be found first
          */
         if(is_unsigned_number_type<T>::value){ 
-          *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%lu",key,value);
+          writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%lu",key,value);
         }else
         if(is_signed_number_type<T>::value){ 
-          *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%d",key,value);
+          writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%d",key,value);
         }else
         if(is_string_type<T>::value){ 
-          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+          writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
         }else
         if(is_char_type<T>::value){   
-          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
+          writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
         }else
         if (is_float_type<T>::value){ 
           float f = 0;     memcpy(&f,&value,sizeof(f));
           char fvalue[20]; dtostrfd2(f,3,fvalue);
-          *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+          writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
         }
 
         /**
          * @brief debug size
          **/
-        if(*writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
+        if(writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
         {
-          //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), *writer.length);
+          //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
         }
 
       }
@@ -267,14 +266,14 @@ char* GetPtr();
 // #ifdef TEMPLATE_JSON
     template <typename T>
     void Add_P(const char* key, T value){
-  if((writer.buffer == nullptr)||(writer.length == nullptr)||(writer.buffer_size == 0))
+  if((writer.buffer == nullptr)||(writer.buffer_size == 0))
     return;
   
   if(
-    (*writer.length>1)&&
-    (writer.buffer[*writer.length-1]!='{')&&
-    (writer.buffer[*writer.length-1]!='[')      
-  ){ *writer.length += sprintf_P(&writer.buffer[*writer.length],","); }
+    (writer.length>1)&&
+    (writer.buffer[writer.length-1]!='{')&&
+    (writer.buffer[writer.length-1]!='[')      
+  ){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
 
   #ifdef DEBUG_JSON_BUILDER
   char buffer_id[50];
@@ -284,25 +283,25 @@ char* GetPtr();
   #endif
   
   if(is_unsigned_number_type<T>::value){ 
-    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%lu",key,value);
+    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%lu",key,value);
   }else
   if(is_signed_number_type<T>::value){ 
-    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%d",key,value);
+    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%d",key,value);
   }else
   if(is_string_type<T>::value){ 
-    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":\"%s\"",key,value);
+    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":\"%s\"",key,value);
   }else
   if(is_char_type<T>::value){   
-    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":'%c'",key,value);
+    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":'%c'",key,value);
   }else
   if(is_float_type<T>::value){ 
     float f = 0;     memcpy(&f,&value,sizeof(f));
     char fvalue[20]; dtostrfd2(f,3,fvalue);
-    *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+    writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
 
     // float f = static_cast<float>(value);
     // char fvalue[20]; dtostrfd2(f,3,fvalue);
-    // *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+    // writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
   }
 
   // DEBUG_PRINTF("TEST TIME = %s\n\r",writer.buffer[0]);
@@ -319,19 +318,19 @@ char* GetPtr();
     for(uint16_t index=0;index<value_arr_len;index++){
 
       // Add comma for any value after first
-      if(index){ *writer.length += sprintf_P(&writer.buffer[*writer.length],"%s",","); }
+      if(index){ writer.length += sprintf_P(&writer.buffer[writer.length],"%s",","); }
 
       if(is_string_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\"",value_arr[index]);
       }else
       if(is_signed_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%d",value_arr[index]);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%d",value_arr[index]);
       }else
       if(is_unsigned_number_type<T>::value){ 
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%lu",value_arr[index]);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%lu",value_arr[index]);
       }else
       if(is_char_type<T>::value){   
-        *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"'%c'",value_arr[index]);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"'%c'",value_arr[index]);
       }
 
 
@@ -339,18 +338,18 @@ char* GetPtr();
     //   if(is_float_type<T>::value){ 
     //     float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
     //     char ctr[10]; dtostrfd2(f,3,ctr);
-    //     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%f",12.34);  
+    //     writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%f",12.34);  
 
     // // float f = static_cast<float>(value_arr[index]);
     // // char fvalue[20]; dtostrfd2(f,3,fvalue);
-    // // // *writer.length += snprintf_P(&writer.buffer[*writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
-    // //     *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",fvalue);  
+    // // // writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":%s",key,fvalue);
+    // //     writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",fvalue);  
 
 
     //     // float f = reinterpret_cast<float>(value_arr[index*4]);
     //     // // float f = 0;  memcpy(&f,&value_arr[index],sizeof(f));
     //     // char ctr[10]; dtostrfd2(f,3,ctr);
-    //     // *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",ctr);  
+    //     // writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",ctr);  
     //   }
     }
 
@@ -364,8 +363,8 @@ char* GetPtr();
     char ctr[10]; 
 
     for(uint16_t index=0;index<value_arr_len;index++){
-      if(index){ *writer.length += sprintf(&writer.buffer[*writer.length],"%s",","); }      // Add comma for any value after first
-      *writer.length += snprintf(&writer.buffer[*writer.length],writer.buffer_size,"%s",dtostrfd2(value_arr[index],3,ctr));  
+      if(index){ writer.length += sprintf(&writer.buffer[writer.length],"%s",","); }      // Add comma for any value after first
+      writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s",dtostrfd2(value_arr[index],3,ctr));  
     }
 
   }

@@ -270,7 +270,7 @@ bool mEnergyADE7953::Command(void)
 
 
 
-uint8_t mEnergyADE7953::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mEnergyADE7953::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -279,7 +279,7 @@ uint8_t mEnergyADE7953::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mEnergyADE7953::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mEnergyADE7953::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
     JBI->Add(D_JSON_VOLTAGE, measured.voltage_rms);

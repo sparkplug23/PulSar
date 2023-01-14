@@ -206,7 +206,7 @@ void mBH1750::SubTask_ReadSensor(void)
 
 
 
-uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_method)
+uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -220,7 +220,7 @@ uint8_t mBH1750::ConstructJSON_Settings(uint8_t json_method)
 }
 
 
-uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_method)
+uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();

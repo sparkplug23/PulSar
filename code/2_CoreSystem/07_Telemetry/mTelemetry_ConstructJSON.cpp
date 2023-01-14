@@ -11,7 +11,7 @@
 #include "mTelemetry.h"
 
 
-uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level)
+uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_object_start_end_required)
 { //BuildHealth
 
   IPAddress localip = WiFi.localIP();
@@ -67,7 +67,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level)
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level)
+uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
 { 
   char buffer[50];
 
@@ -97,7 +97,7 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level)
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
+uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_object_start_end_required){ //BuildHealth
   char buffer[30];
   JBI->Start();
   
@@ -169,7 +169,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level){ //BuildHealth
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level){ 
+uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level, bool json_object_start_end_required){ 
   char buffer[30];
   JBI->Start();
     JBI->Level_Start(PM_JSON_LOGLEVELS);
@@ -182,7 +182,7 @@ uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level){
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level){ // Debug info
+uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_object_start_end_required){ // Debug info
   JBI->Start();
     JBI->Add(PM_JSON_PROGRAMSIZE,      ESP.getSketchSize()/1024);
     #ifdef ESP8266
@@ -203,7 +203,7 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level){ // Debug info
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not just wifi, might be ethernet later
+uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_object_start_end_required){ // Debug info not just wifi, might be ethernet later
   
   IPAddress localip   = WiFi.localIP();
   IPAddress staticip  = IPAddress(pCONT_set->Settings.ip_address[0]);
@@ -239,7 +239,7 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level){ // Debug info not
 }
 
 
-uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
+uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
 
@@ -284,7 +284,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level){
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){ 
+uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_object_start_end_required){ 
 
   char buffer[100];
        
@@ -344,7 +344,7 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level){
  * should this be renamed, as "devices" needs to refer to the internal list, 
  * but, I also want to have a list of connected hardware, so that might be better suited to devices (combining for now)
  * */
-uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){ 
+uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level, bool json_object_start_end_required){ 
 
   JBI->Start();
     JBI->Add(PM_JSON_MODULENAME,          pCONT_set->Settings.module);
@@ -397,7 +397,7 @@ uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level){
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level){ // 
+uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_object_start_end_required){ // 
 
   JBI->Start();
   
@@ -441,7 +441,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level){ //
  * 
  * ****/
 
-uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level)
+uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_object_start_end_required)
 {
 
   IPAddress localip = WiFi.localIP();
@@ -464,7 +464,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level)
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level)
+uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_object_start_end_required)
 {
 
   // return 0;
@@ -542,7 +542,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level)
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHealth
+uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_object_start_end_required){ //BuildHealth
   char buffer[50];
   JBI->Start();
     JBI->Add("Module" D_JSON_TEMPLATE,       pCONT_set->boot_status.module_template_parse_success?"Default":"Saved");
@@ -562,7 +562,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level){ //BuildHea
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level){ //BuildHealth
+uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool json_object_start_end_required){ //BuildHealth
 
   JBI->Start();
   
@@ -611,7 +611,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level){ //B
  * mSettings::SystemSettings_DefaultBody_Sensors
  * Debugging of all values listed inside the settings struct, it shall all be outputted here, mqtt size permitted
  * */
-uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_level)
+uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_level, bool json_object_start_end_required)
 { //BuildHealth
   char buffer[50];
   JBI->Start();

@@ -35,6 +35,9 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
           EveryLoop();
         }
       break;
+      case FUNC_MQTT_CONNECTED:
+        Load_New_Subscriptions_From_Function_Template();
+      break;
       case FUNC_EVERY_50_MSECOND:
         if(Mqtt.connected){
           pubsub->loop();
@@ -79,6 +82,97 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
   }//enabled mqtt_enabled
 
 } // END function
+
+
+void mMQTT::Load_New_Subscriptions_From_Function_Template()
+{
+
+  #ifdef USE_FUNCTION_TEMPLATE  
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.len, data_buffer.payload.ctr);
+  #endif //USE_FUNCTION_TEMPLATE
+
+  JsonParser parser(data_buffer.payload.ctr);
+  JsonParserObject obj = parser.getRootObject();   
+  JsonParserToken jtok = 0; 
+
+  if(jtok = obj["MQTTSubscribe"])
+  {
+    if(jtok.isArray())
+    {
+
+      JsonParserArray arrobj = jtok;
+      for(auto v : arrobj) 
+      {
+
+        const char* new_topic = v.getStr();
+        ALOG_INF(PSTR("New Subscribe = \"%s\""), new_topic);
+
+
+      }
+    }
+
+  }
+
+
+
+
+
+  //   // if(jtok.isStr()){
+  //   //   relay_id = GetRelayIDbyName(jtok.getStr());
+  //   // }else 
+  //   // if(jtok.isNum()){
+  //   //   relay_id  = jtok.getInt();
+  //   // }
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend"));
+  //   #endif //
+  //   JsonParserToken jtok_topic = jtok.getObject()["Topic"];
+  //   JsonParserToken jtok_payload = jtok.getObject()["Payload"];
+
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+  //   #endif // 
+
+  //   char topic_ctr[100] = {0};
+  //   char payload_ctr[300] = {0};
+
+  //   snprintf(topic_ctr, sizeof(topic_ctr), jtok_topic.getStr());
+  //   snprintf(payload_ctr, sizeof(payload_ctr), jtok_payload.getStr());
+
+  //   // char payload2_ctr[300] = {0};
+
+  //   // char buffer_unescaped[200] = {0};
+  //   char buffer_escaped[200] = {0};
+  //   uint8_t len  = 0;
+  //   for(int i=0;i<strlen(payload_ctr);i++){
+  //       if(payload_ctr[i] == '~'){
+  //       len+=sprintf(buffer_escaped+len,"\"");
+  //       }else{    
+  //       buffer_escaped[len++] = payload_ctr[i];
+  //       }
+  //   }
+
+  //   // mSupport
+
+
+  //   // jtok_topic.size()
+
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog(LOG_LEVEL_TEST,PSTR("Topic=%s"),topic_ctr);
+  //   AddLog(LOG_LEVEL_TEST,PSTR("Payload=%s"),payload_ctr);
+  //   AddLog(LOG_LEVEL_TEST,PSTR("buffer_escaped=%s"),buffer_escaped);
+  //   #endif // ENABLE_LOG_LEVEL_INFO
+
+  //   // ppublish(jtok_topic.getStr(),jtok_payload.getStr(),false);
+  //   pubsub->publish(topic_ctr,buffer_escaped,false);
+
+  // }
+
+}
 
 
 void mMQTT::parse_JSONCommand(JsonParserObject obj){
@@ -767,6 +861,7 @@ void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const cha
     case MQTT_TOPIC_TYPE_ROC1M_ID: sprintf(topic_id_ctr,"%s/","roc1m"); break;
     case MQTT_TOPIC_TYPE_ROC10M_ID: sprintf(topic_id_ctr,"%s/","roc10m"); break;
     case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_TELEPERIOD_CTR); break;
+    case MQTT_TOPIC_TYPE__DEBUG__ID: sprintf(topic_id_ctr,"%s/","debug"); break;
     default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
   }
 

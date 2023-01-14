@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_ENERGY_INTERFACE
 
-uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   // Serial.println("mEnergyInterface::ConstructJSON_Sensor"); Serial.flush();
 
@@ -44,7 +44,7 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_method){
 }
 
 
-uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
 
@@ -145,7 +145,7 @@ uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_method){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
 
@@ -171,7 +171,7 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_method){
 }
 
 
-uint8_t mEnergyInterface::ConstructJSON_EnergyStats(uint8_t json_method){
+uint8_t mEnergyInterface::ConstructJSON_EnergyStats(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
 

@@ -358,7 +358,7 @@ void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comp
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);

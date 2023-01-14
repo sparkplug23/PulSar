@@ -436,9 +436,9 @@ void WebCommand_Parse(void);
     void EverySecond_SendScreenInfo();
     
     
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
-    uint8_t ConstructJSON_EnergyStats(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_EnergyStats(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
   
   //#ifdef USE_CORE_MQTT 

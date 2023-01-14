@@ -71,10 +71,10 @@ class mSensorsInterface :
     
     void CommandEvent_Motion(uint8_t event_type);
     
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
-    uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Motion_Event(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 

@@ -207,8 +207,8 @@ void CalculateOrientation(int16_t a_x, int16_t a_y, int16_t a_z, int16_t m_x, in
 
 
         
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
   
     #ifdef USE_MODULE_NETWORK_MQTT
 

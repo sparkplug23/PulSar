@@ -48,6 +48,8 @@ enum TOPIC_TYPE_IDS{
   MQTT_TOPIC_TYPE_SENSOR_TELEPERIOD_ID,   // 1 second
   MQTT_TOPIC_TYPE_SETTINGS_TELEPERIOD_ID, //show settings, but 1 hour increments
   MQTT_TOPIC_TYPE_TELEPERIOD_ID,
+
+  MQTT_TOPIC_TYPE__DEBUG__ID,
   
   MQTT_TOPIC_TYPE_LENGTH_ID
 };
@@ -118,7 +120,7 @@ struct handler {
   const char*   postfix_topic;
   uint8_t       handler_id = 0;
   Handler_Flags flags;
-  uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level); // member-function to sender with one args
+  uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_object_start_end_required); // member-function to sender with two args. Extra "json_object_start_end_required" will allow calling constructjsons directly and adding them to another without closing the main json object
 };
 
 #include "PubSubClient.h"
@@ -190,9 +192,8 @@ class mMQTT :
       uint8_t flag_require_reconnection = false;
     }connection_maintainer;
 
-    
-const char* state_ctr(void);
-
+    const char* state_ctr(void);
+    void Load_New_Subscriptions_From_Function_Template();
 
     // wasteful
     struct SETTINGS{
@@ -341,7 +342,7 @@ const char* state_ctr(void);
         //CALL_MEMBER_FUNCTION_WITH_ARG(class_ptr,handler_ptr->function_sender,handler_ptr->topic_type,handler_ptr->json_level);
           
         // use return flag for if mqtt needs sent, useful with ifchanged
-        uint8_t fSendPayload = (class_ptr.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level); //fSendPayload as uint8_t is what I return, cant be length > 255
+        uint8_t fSendPayload = (class_ptr.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level, true); //fSendPayload as uint8_t is what I return, cant be length > 255
          
         if(fSendPayload > 1){ 
           // Serial.printf("fSendPayload %d: Not set!\n\r", fSendPayload); Serial.flush();

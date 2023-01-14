@@ -252,16 +252,16 @@ class mShellyDimmer :
     int8_t CheckAndExecute_JSONCommands();
     void parse_JSONCommand(JsonParserObject obj);
 
-    uint8_t ConstructJSON_Scene(uint8_t json_method);
-    uint8_t ConstructJSON_State(uint8_t json_method);
+    uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_object_start_end_required);
+    uint8_t ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required);
 
     void WebCommand_Parse(void);
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Status_Table();
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Sensor(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
 
     void MQTTHandler_Init();

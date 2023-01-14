@@ -706,7 +706,7 @@
 //   //   JSON_METHOD_ALL=0
 //   // };
 // // Send all litres calculations from all methods
-// uint8_t mTankVolumeUltrasonic::ConstructJSON_Litres(uint8_t json_method){
+// uint8_t mTankVolumeUltrasonic::ConstructJSON_Litres(uint8_t json_level, bool json_object_start_end_required){
 
 //   JsonBuilderI->Start();
 
@@ -769,7 +769,7 @@
 
 
 
-// uint8_t mTankVolumeUltrasonic::ConstructJSON_Settings(uint8_t json_method){
+// uint8_t mTankVolumeUltrasonic::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
 //     // D_DATA_BUFFER_CLEAR();
 //     // StaticJsonDocument<400> doc;
@@ -789,7 +789,7 @@
 // }
 
 
-// uint8_t mTankVolumeUltrasonic::ConstructJSON_Furnace(uint8_t json_method){
+// uint8_t mTankVolumeUltrasonic::ConstructJSON_Furnace(uint8_t json_level, bool json_object_start_end_required){
 
 // //     D_DATA_BUFFER_CLEAR();
 // //     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;

@@ -242,7 +242,14 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 // DEBUG_LINE_HERE;
 // I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
 
-      snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), device_id);
+/**
+ * @brief If unknown, use unique random name
+ * 
+ */
+
+      // snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), device_id);
+
+      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), random(1000));//device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
       ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);

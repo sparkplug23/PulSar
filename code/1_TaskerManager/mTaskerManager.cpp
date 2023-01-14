@@ -287,7 +287,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   // Drivers (Range 40-129)
   #ifdef USE_MODULE_DRIVERS_INTERFACE
-    // pModule[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
+    pModule[EM_MODULE_DRIVERS_INTERFACE_ID] = new mDriverInterface();
   #endif
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
     pModule[EM_MODULE_DRIVERS_HBRIDGE_ID] = new X();
@@ -456,7 +456,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
   #endif
   #ifdef USE_MODULE_CONTROLLER_HVAC
-    pModule[EM_MODULE_CONTROLLER_HVAC_ID] = new mHVAC();
+    pModule[EM_MODULE_CONTROLLER__HVAC__ID] = new mHVAC();
   #endif
   #ifdef USE_MODULE_CONTROLLER_IRTRANSMITTER
     pModule[EM_MODULE_CONTROLLER_IRTRANSMITTER_ID] = new X();
@@ -638,7 +638,8 @@ uint16_t mTaskerManager::GetModuleUniqueIDbyVectorIndex(uint8_t id)
 
 mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
 {
-  return pModule[GetEnumVectorIndexbyModuleUniqueID(id)];
+  int16_t mod_id = GetEnumVectorIndexbyModuleUniqueID(id);
+  return mod_id >= 0 ? pModule[mod_id] : nullptr;
 }
 
 /**

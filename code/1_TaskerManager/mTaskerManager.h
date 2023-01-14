@@ -213,7 +213,7 @@ enum MODULE_IDS{
   // Drivers (Range 40-129) == INTERFACES should be moved to the bottom, so all modules are called first.
   // Or, new array method should skip all interfaces and call them last? hmm, this does not make sence when interface needs to configure modules first, so prob keep the same
   #ifdef USE_MODULE_DRIVERS_INTERFACE
-    // EM_MODULE_DRIVERS_HBRIDGE_ID,
+    EM_MODULE_DRIVERS_INTERFACE_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
     EM_MODULE_DRIVERS_HBRIDGE_ID,
@@ -384,7 +384,10 @@ enum MODULE_IDS{
     EM_MODULE_CONTROLLER_BLINDS_ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_HVAC
-    EM_MODULE_CONTROLLER_HVAC_ID,
+    EM_MODULE_CONTROLLER__HVAC__ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
+    EM_MODULE_CONTROLLER__HVAC_REMOTE__ID,
   #endif
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     EM_MODULE_CONTROLLER_RADIATORFAN_ID,
@@ -551,8 +554,8 @@ enum MODULE_IDS{
  **/
 
 #ifdef USE_MODULE_DRIVERS_INTERFACE
-  #include "4_Drivers/00_Interface/Interface_Drivers.h"
-  // #define pCONT_iDrivers                           static_cast<mSensorsInterface*>(pCONT->pModule[EM_MODULE_SENSORS_INTERFACE_ID])
+  #include "4_Drivers/00_Interface/mDriverInterface.h"
+  #define pCONT_iDrivers                           static_cast<mDriverInterface*>(pCONT->pModule[EM_MODULE_DRIVERS_INTERFACE_ID])
 #endif
 
 #ifdef USE_MODULE_DRIVERS_LEDS
@@ -822,8 +825,13 @@ enum MODULE_IDS{
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
-  #include "9_Controller/02_HVAC/mHVAC.h"
-  #define pCONT_heating2                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER_HVAC_ID])
+  #include "9_Controller/40_HVAC/mHVAC.h"
+  #define pCONT_hvac                        static_cast<mHVAC*>(pCONT->pModule[EM_MODULE_CONTROLLER__HVAC__ID])
+#endif
+
+#ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
+  #include "9_Controller/41_HVAC_Remote/mHVAC.h"
+  #define pCONT_hvac_remote                        static_cast<mHVAC_Remote*>(pCONT->pModule[EM_MODULE_CONTROLLER__HVAC_REMOTE__ID])
 #endif
 
 #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN

@@ -502,7 +502,7 @@ uint8_t mSwitches::GetVirtual(uint8_t index)
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.switches_found);
@@ -518,7 +518,7 @@ uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[50]; 
   

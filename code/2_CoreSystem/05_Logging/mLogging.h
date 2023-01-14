@@ -394,6 +394,20 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 
 }
 
+template<typename T, typename U>
+void AddLog_Array(const char* name_ctr, T* arr, U arr_len)
+{
+  
+  #ifndef DISABLE_SERIAL_LOGGING
+  SERIAL_DEBUG.printf("%s = ",name_ctr);
+  for(T index=0;index<arr_len;index++){
+    SERIAL_DEBUG.printf("%d,", arr[index]);
+  }
+  SERIAL_DEBUG.printf("\n\r");
+  #endif
+
+}
+
 
 /**
  * @brief Form into message then pass into normal AddLog
@@ -441,6 +455,21 @@ void ErrorMessage(uint8_t error_type, const char* message);
 
 template<typename T, typename U>
 void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
+{
+  T ch;
+  #ifndef DISABLE_SERIAL_LOGGING
+  SERIAL_DEBUG.printf("%S = ",name_ctr);
+  for(T index=0;index<arr_len;index++){
+    ch = pgm_read_byte(arr + index);
+    SERIAL_DEBUG.printf("%d,", ch);
+  }
+  SERIAL_DEBUG.printf("\n\r");
+  #endif
+}
+
+
+template<typename T, typename U>
+void AddLog_Array_P(const char* name_ctr, T* arr, U arr_len)
 {
   T ch;
   #ifndef DISABLE_SERIAL_LOGGING

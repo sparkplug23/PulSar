@@ -345,12 +345,12 @@ uint8_t standy_mode_id = 0;
     
 
     struct handler<mCellular_SIM7000> mqtthandler_settings_teleperiod;
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
     struct handler<mCellular_SIM7000> mqtthandler_state_ifchanged;
-    uint8_t ConstructJSON_State(uint8_t json_method = 0);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_object_start_end_required = true);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__CELLULAR_SIM__DEBUG_POLL_LATEST
     struct handler<mCellular_SIM7000> mqtthandler_debug_poll_latest_teleperiod;
-    uint8_t ConstructJSON_Debug_RequestLatest(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Debug_RequestLatest(uint8_t json_level = 0, bool json_object_start_end_required = true);
     #endif
 
     // No specialised payload therefore use system default instead of enum

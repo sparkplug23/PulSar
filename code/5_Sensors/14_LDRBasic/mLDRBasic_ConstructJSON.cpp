@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
 
-uint8_t mLDRBasic::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mLDRBasic::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
@@ -11,7 +11,7 @@ uint8_t mLDRBasic::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mLDRBasic::ConstructJSON_State(uint8_t json_method){
+uint8_t mLDRBasic::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[40];
 

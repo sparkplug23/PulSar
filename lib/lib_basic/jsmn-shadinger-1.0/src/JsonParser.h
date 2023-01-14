@@ -123,11 +123,9 @@ public:
   // skip the next Token as a whole (i.e. skip an entire array)
   void skipToken(void);
 
-protected:
-
+// protected:
   // skip the next token knowing it's an array
   void skipArray(void);
-
   // skip the next token knowing it's an object
   void skipObject(void);
 };
@@ -221,37 +219,53 @@ public:
 #ifdef ENABLE_DEVFEATURE_JSONPAIR
 /*********************************************************************************************\
  * Subclass for JsonPair 
+ * To do
+ * Similar to HtmlColorPair in Neopixel
+ * I want a way to easily get the key and value, without needing to manual "nextone" in main code
 \*********************************************************************************************/
-class JsonPair : public JsonParserToken {
+
+
+/*********************************************************************************************\
+ * Subclass for JsonPair
+\*********************************************************************************************/
+class JsonPair2 : public JsonParserToken {
+public:
+  JsonPair2(const jsmntok_t * token);
+  explicit JsonPair2(const JsonParserToken token);
+
+  JsonParserToken key;
+  JsonParserToken value;
+
+  // get the value token associated to the key
+  JsonParserToken getKey(void) const;
+  JsonParserToken getValue(void) const;
+};
+
+
+class JsonPair : public JsonParserToken { 
 public:
 
-  
   JsonPair(const jsmntok_t * token);
   JsonPair(const JsonParserToken token);
   // JsonPair() : JsonParserToken() { }
+
+  JsonPair2 getObjectPair(uint8_t i);
+
+  JsonParserToken tok;
+  size_t remaining;
 
   //
   // const iterator
   //
   class const_iterator {
     public:
-
-
-      struct TOKEN_PAIR{
-        JsonParserToken key;
-        JsonParserToken value;
-      }token_pair;
-
+    
+    JsonPair2 getObjectPair(uint8_t i){}
+  
       const_iterator(const JsonPair t);
       const_iterator operator++();
       bool operator!=(const_iterator & other) const { return tok.t != other.tok.t; }
       const JsonParserToken operator*() const { return tok; }
-      
-      // const int operator*() const { return 1; }
-
-      // const struct TOKEN_PAIR operator*() const { return token_pair; }
-
-
     private:
       JsonParserToken tok;
       JsonParserToken toktest;
@@ -260,20 +274,7 @@ public:
   const_iterator begin() const { return const_iterator(*this); }      // start with 'head'
   const_iterator end() const { return const_iterator(JsonPair(&token_bad)); }        // end with null pointer
 
-  
-  // JsonPair(struct token_pair* pair);
-
-  // struct {
-  //       JsonParserToken key;
-  //       JsonParserToken value;
-  //     };
-
-  //     static struct token_pair2;
-
-  // get the element if index `i` from 0 to `size() - 1`
   JsonParserToken operator[](int32_t i) const;
-
-
 
 };
 #endif // ENABLE_DEVFEATURE_JSONPAIR

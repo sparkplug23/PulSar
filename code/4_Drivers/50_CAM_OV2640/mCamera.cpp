@@ -1052,7 +1052,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::Pre_Init"));
 
 
 
-uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   // Active rgbcct palette used as scene
 
@@ -1088,7 +1088,7 @@ uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_method){
+uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
   
   JsonBuilderI->Start();  
 

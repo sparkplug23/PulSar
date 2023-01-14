@@ -607,7 +607,7 @@ void mSensorsLSM303D::CalculateOrientation(
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);

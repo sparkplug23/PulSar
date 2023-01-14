@@ -87,6 +87,8 @@
   #define D_MODULE_DISPLAYS_OLED_SH1106_FRIENDLY_CTR              "display_sh1106"
 
 
+#define D_MODULE_DRIVERS_INTERFACE_FRIENDLY_CTR "drivers_interface"
+#define D_MODULE_DRIVERS_INTERFACE_CTR "drivers_interface"
 // Drivers (Range 40-129
 //#ifdef USE_MODULE_DRIVERS_INTERFACE
   // #define D_MODULE_DRIVERS_HBRIDGE_CTR              "mHBridge"
@@ -967,6 +969,8 @@
 #define D_GPIO_FUNCTION_USER_CTR          "User"
 #define D_GPIO_FUNCTION_DOOR_POSITION_CTR "Door Position"
 #define D_GPIO_FUNCTION_RGB_DATA1_CTR      "RGBData1"
+#define D_GPIO_FUNCTION_RGB_DATA2_CTR      "RGBData2"
+#define D_GPIO_FUNCTION_RGB_DATA3_CTR      "RGBData3"
 #define D_GPIO_FUNCTION_RGB_DATA_CTR      "WS281x Data"
 #define D_GPIO_FUNCTION_RGB_CLOCK_CTR     "WS281x Clock"
 #define D_GPIO_FUNCTION_SWT1_CTR     "SWT1"

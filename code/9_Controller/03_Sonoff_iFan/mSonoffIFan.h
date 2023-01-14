@@ -64,8 +64,8 @@ class mSonoffIFan :
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Status_Table();
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0);
-    uint8_t ConstructJSON_Power(uint8_t json_method = 0);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Power(uint8_t json_level = 0, bool json_object_start_end_required = true);
 
   
     void MQTTHandler_Init();

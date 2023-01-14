@@ -824,7 +824,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
 
 
-uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mRelays::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);

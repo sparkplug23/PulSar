@@ -767,7 +767,7 @@ void mNextionPanel::MQTTSend_LongPressEvent(){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add("test", 1);
@@ -776,7 +776,7 @@ uint8_t mNextionPanel::ConstructJSON_Settings(uint8_t json_method){
 
 }
 
-uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mNextionPanel::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add("test", 1);

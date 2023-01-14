@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_SENSORS_INTERFACE 
 
 
-uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
     JBI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -29,7 +29,7 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_method){
  * @param json_method 
  * @return uint8_t 
  */
-uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method)
+uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -110,7 +110,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method)
 
 #else // until devfeature is fixed
 
-uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method)
+uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required)
 {
 
   JBI->Start();
@@ -161,7 +161,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_method)
 /**
  * @brief For any connected temperature sensors, display their colour as a full brightness rgb colour
  * */
-uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_method){
+uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
 
@@ -290,7 +290,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_m
 
 
 
-uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_method){
+uint8_t mSensorsInterface::ConstructJSON_Motion_Event(uint8_t json_level, bool json_object_start_end_required){
 
   JBI->Start();
     // JBI->Add("motion", 0);

@@ -1,0 +1,1264 @@
+
+; ;;; HOME INSTALLED ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+
+; ;;; ESP8266 Home Default ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;    maybe add wifi in here? SSIDs etc?
+;     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+[env:whitehall_82]
+platform = ${common.platform}
+platform_packages = ${common.platform_packages}
+framework = ${common.framework}
+board = ${common.board}
+board_build.ldscript  = ${common.board_build.ldscript}
+board_build.flash_mode = ${common.board_build.flash_mode}
+board_build.f_flash = ${common.board_build.f_flash}
+board_build.f_cpu = ${common.board_build.f_cpu}
+build_unflags = ${common.build_unflags}
+build_flags = ${common.build_flags}
+                                -D USER_MICHAEL
+monitor_speed = ${common.monitor_speed}
+upload_port = ${common.upload_port}
+upload_resetmethod = ${common.upload_resetmethod}
+upload_speed = ${common.upload_speed}
+extra_scripts = ${common.extra_scripts}
+lib_extra_dirs = ${common.lib_extra_dirs}
+; lib_deps = ${common.lib_deps}
+
+; ;;; ESP32 Home Default ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+[env:whitehall_32]
+framework               = ${common.framework}
+platform                = ${common32.platform}
+platform_packages       = ${common32.platform_packages}
+board                   = ${common32.board}
+board_build.ldscript    = ${common32.board_build.ldscript}
+board_build.partitions  = ${common32.board_build.partitions}
+board_build.flash_mode  = ${common32.board_build.flash_mode}
+board_build.f_flash     = ${common32.board_build.f_flash}
+board_build.f_cpu       = ${common32.board_build.f_cpu}
+monitor_speed           = ${common32.monitor_speed}
+upload_port             = ${common32.upload_port}
+upload_resetmethod      = ${common32.upload_resetmethod}
+upload_speed            = ${common32.upload_speed}
+extra_scripts           = ${common32.extra_scripts}
+build_unflags           = ${common32.build_unflags}
+build_flags             = ${common32.build_flags}
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+lib_deps = ${common.lib_deps}
+lib_ignore              =
+    cc1101
+    ESP32 Azure IoT Arduino
+    ESP32 Async UDP
+    ESP32 BLE Arduino
+    SimpleBLE
+    NetBIOS
+    ; ESP32
+    Preferences
+    BluetoothSerial
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: "Outside" ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_sidelight]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1_1m.platform}
+build_flags               = ${core_2_6_1_1m.build_flags}
+                                 -D DEVICE_SIDEDOORLIGHT 
+                                 -w
+extra_scripts   = gzip_fw.py
+upload_protocol = espota
+; upload_port = 192.168.0.105
+upload_port = sidedoorlight.local
+; upload_port = COM18
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: "Gazebo" ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+[env:wh_gazsen]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_GAZEBO_SENSOR
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+                            lib/lib_energy
+                            lib/lib_sensor
+                            lib/libg_neopixel
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM16
+; upload_port = 192.168.0.171
+upload_port = gazebosensor.local
+upload_protocol = espota
+
+
+[env:wh_gaz4chpro]
+extends = env:whitehall_82
+build_flags               = ${core_2_6_1_1m.build_flags} -w
+                              -D DEVICE_GAZEBO_SONOFF_4CHPRO
+                              -D DISABLE_WEBSERVER
+lib_extra_dirs              = ${library.lib_extra_dirs}
+                              lib/lib_rf
+; board = esp01_1m
+upload_port = 192.168.0.146
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+; upload_port = COM18
+
+
+[env:wh_h801_rgbgazebo]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D DEVICE_H801_RGBGAZEBO -w
+lib_extra_dirs              = ${library.lib_extra_dirs}
+                            ;   lib/lib_neopixel_old
+                              lib/libg_neopixel
+; upload_port=COM19
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = h801_rgbgazebo.local
+upload_port = 192.168.0.169
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Downstairs Toilet ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_consunit]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_CONSUMERUNIT
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+                            lib/lib_energy
+                            lib/lib_sensor
+upload_port = 192.168.0.73
+; upload_port = consumerunit.local
+upload_protocol = espota
+; upload_port = COM5
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Kitchen ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_kitsen]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_KITCHENSENSOR
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/libg_neopixel
+              lib/lib_irremote
+; upload_port = COM24
+upload_protocol = espota
+upload_port = 192.168.0.54
+; upload_port = kitchensensor.local
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+
+
+[env:wh_kitchenlight1]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D DEVICE_KITCHENLIGHT1 -w
+upload_port = 192.168.0.15
+; upload_port = kitchenlight1.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+
+
+[env:wh_kitchenlight2]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D DEVICE_KITCHENLIGHT2 -w
+upload_port = 192.168.0.66
+; upload_port = kitchenlight2.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+
+
+[env:wh_kitchenlight3]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D DEVICE_KITCHENLIGHT3 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.50
+; upload_port = kitchenlight3.local
+
+
+[env:wh_kitchenlight4]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D DEVICE_KITCHENLIGHT4 -w
+                                 -D DISABLE_WEBSERVER
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.64
+; upload_port = kitchenlight4.local
+
+    
+[env:wh_cooker_fan]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                          -D DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = socket_number_11.local
+upload_port = 192.168.0.45
+; upload_port = COM20
+
+
+[env:wh_rgbcooker]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_RGBCOOKER  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+upload_port = 192.168.0.63
+; upload_port = rgbcooker
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+
+
+[env:wh_rgbfridge]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_RGBFRIDGE  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+upload_port = 192.168.0.150
+; upload_port = rgbfridge
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = 192.168.1.201
+; upload_port = COM20
+
+
+[env:wh_rgbglassbox]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_RGBLIGHTS_GLASSBOX  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+upload_port = rgbglassbox.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = 192.168.0.35
+; upload_port=COM5
+
+
+[env:wh_rgbshelf]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSHELF
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+upload_port = COM12
+; upload_protocol = espota
+; upload_port = 192.168.0.230
+
+
+[env:wh_kitpan]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+upload_protocol = espota
+upload_port = 192.168.0.52
+; upload_port = kitchenpanel.local
+; upload_port = COM5
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Utility ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:tasmota32solo1]
+extends                 = env:tasmota32_base
+board                   = esp32_solo1_4M
+platform                = ${core32solo1.platform}
+platform_packages       = ${core32solo1.platform_packages}
+build_flags             = ${core32solo1.build_flags} -DFIRMWARE_TASMOTA32
+                                    -D DEVICE_UTILITY_WALLSWITCH_OUTSIDE_INPUTS_ONLY_SHELLYI4
+                                    -w             
+
+[env:tas32s]
+extends                 = env:tasmota32_base
+board = espea32
+platform                = ${core32solo1.platform}
+platform_packages       = ${core32solo1.platform_packages}
+build_flags             = ${core32solo1.build_flags} -DFIRMWARE_TASMOTA32
+                                    -D DEVICE_UTILITY_WALLSWITCH_OUTSIDE_INPUTS_ONLY_SHELLYI4
+                                    -w             
+
+
+                                         
+
+
+[env:wh_utility_i4]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_UTILITY_WALLSWITCH_OUTSIDE_INPUTS_ONLY_SHELLYI4
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM18
+; upload_port = 192.168.0.171
+; upload_port = gazebosensor.local
+; upload_protocol = espota
+
+
+
+[env:wh_rgbutility]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_RGBUTILITY  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+upload_port = 192.168.0.68
+; upload_port = rgbutility
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = 192.168.1.201
+; upload_port = COM20
+
+
+[env:wh_rgblamp_cylinder]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_RGBLAMP_CYLINDER
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+; upload_port = COM6
+upload_protocol = espota
+; upload_port = rgblamp_cylinder
+upload_port = 192.168.0.57
+
+
+[env:wh_utilsens]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_UTILITYSENSOR
+                                    -D D_USER_MICHAEL
+                                    -w                                     
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/libg_neopixel
+              lib/lib_irremote
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM10
+; upload_port = 192.168.0.23
+upload_port = utilitysensor.local
+upload_protocol = espota
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Landing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_immersion]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_IMMERSIONSENSOR
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/libg_neopixel
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM8
+upload_protocol = espota
+upload_port = 192.168.0.28
+; upload_port = immersionsensor.local
+
+
+[env:wh_lanpan]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_LANDINGPANEL                       
+lib_extra_dirs          = ${common32.lib_extra_dirs}              
+                          lib/libesp32
+                          lib/lib_basic
+                          lib/lib_network
+                          lib/lib_display
+                          lib/lib_dbx_test 
+                          lib/lib_sensor
+                          lib/libg_neopixel
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM9
+upload_protocol = espota
+; upload_port = landingpanel.local
+upload_port = 192.168.0.35
+
+[env:wh_slp]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_IMMERSION_SENSOR_PANEL                       
+lib_extra_dirs          = ${common32.lib_extra_dirs}              
+                          lib/libesp32
+                          lib/lib_basic
+                          lib/lib_network
+                          lib/lib_display
+                          lib/lib_dbx_test 
+                          lib/lib_sensor
+                          lib/libg_neopixel
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM9
+upload_protocol = espota
+; upload_port = landingpanel.local
+upload_port = 192.168.0.35
+
+
+; wh_ceiling_landing
+[env:wh_dimland]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_SHELLYDIMMER_LANDING_CEILING -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.25
+extra_scripts   =  gzip_fw.py
+; upload_port = COM20
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Hallway/Understairs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+; 2022 version, to remain unprogrammed as fallback
+[env:wh_hvac_home] 
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_HEATING
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}              
+                          lib/libesp32
+                          lib/lib_basic
+                          lib/lib_network
+                          lib/lib_display
+                          lib/lib_dbx_test 
+                          lib/lib_sensor
+                          lib/libg_neopixel
+; upload_protocol = espota
+; upload_port = heating.local
+; upload_port = 192.168.0.34
+; upload_port = COM6
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+
+
+[env:wh_heatn1]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_HEATING__MODULE__HEATING_2023_NUMBER1_TIMERS_ONLY_AND_DEFAULT_BACKUP
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}              
+                          lib/libesp32
+                          lib/lib_basic
+                          lib/lib_network
+                          lib/lib_display
+                          lib/lib_onewire2023 
+                          lib/lib_sensor
+                          lib/libg_neopixel
+upload_protocol = espota
+; upload_port = heating.local
+upload_port = 192.168.0.215
+; upload_port = COM14
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+
+
+
+;wh_dimmer_hallway_lamp]
+[env:wh_dhall]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
+                                     -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+; upload_port = rgbshelf.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.48
+; upload_port=COM5
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+
+
+
+[env:wh_radfan]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_RADIATORFAN
+                                    -D D_USER_MICHAEL
+                                    -w                                     
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/libg_neopixel
+              lib/lib_irremote
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM11
+; upload_port = 192.168.0.63
+upload_port = radiatorfan.local
+upload_protocol = espota
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: tv room ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_dimmer_tvroom]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} 
+    -D DEVICE_SHELLYDIMMER_TVROOM_CEILING -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.14
+extra_scripts   =  gzip_fw.py
+; upload_port = COM18
+
+
+[env:wh_tvroom_uplights]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                 -D DEVICE_TVROOM_H801_UPLIGHTS -w
+                -D D_USER_MICHAEL
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = rgbbedroomfloor
+upload_port = 192.168.0.42
+
+
+[env:wh_ambilight_spareroom]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_AMBILIGHT_SAMSUNG_SPAREROOM
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+                            lib/lib_energy
+upload_port = 192.168.0.78
+upload_protocol = espota
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Roaming ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+[env:wh_floorfan1]
+extends = env:whitehall_82
+build_flags               = ${core_2_6_1_1m.build_flags} 
+                            -D DEVICE_FLOORFAN1 
+                            -w
+upload_port = 192.168.0.58
+; upload_port = airpurifier.local
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+; upload_port = COM19
+
+
+[env:wh_floorfan2]
+extends = env:whitehall_82
+build_flags               = ${core_2_6_1_1m.build_flags} 
+                            -D DEVICE_FLOORFAN2 
+                            -w
+upload_port = 192.168.0.223
+; upload_port = airpurifier.local
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+; upload_port = COM19
+
+
+[env:wh_airpurifier]
+extends = env:whitehall_82
+build_flags               = ${core_2_6_1_1m.build_flags} 
+                            -D DEVICE_AIRPURIFIER 
+                            -w
+upload_port = 192.168.0.10
+;upload_port = airpurifier.local
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+; upload_port = COM19
+
+
+[env:wh_sonoff_basic_number_01]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__NUMBER_01
+                                 -w
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.0.59
+; upload_port = socket_number_4.local
+upload_port = COM18
+
+
+[env:wh_sonoff_number_02]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.183
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+
+[env:wh_sonoff_number_06]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__06
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.52
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+[env:wh_sonoff_number_12]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__BEDRROM_DESK_5V_PSU
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.31
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+
+
+[env:wh_sonoff_number_16]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__CANDLE_WARMER
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.14
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+
+[env:wh_sonoff_number_20]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__20
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.25
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+[env:wh_sonoff_number_21]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__21
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.18
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+[env:wh_sonum_22]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__22
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.246
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+
+
+
+; [env:wh_hvac_broom_hairdryer]
+; extends = env:whitehall_32
+; ;build_type                  = debug
+; build_unflags               = ${esp32_defaults.build_unflags}
+; build_flags                 = ${esp32_defaults.build_flags}
+;                                     -D DEVICE_HVAC_HAIRDRYER
+;                                     -w                                     
+; lib_extra_dirs          = ${common32.lib_extra_dirs}
+;                             lib/libesp32/network
+;                             lib/lib_network
+;                             lib/lib_energy
+; ; build_flags             = ${common32.build_flags} -D DEVICE_CONSUMERUNIT  -Wcpp -w
+; ; ; -w -Wl,-u,vfprintf -lprintf_flt -lm
+; ; lib_extra_dirs          = lib/libesp32, lib/libesp32/network, lib/lib_network, lib/lib_basic, lib/lib_energy
+; ; lib_deps =
+; ; , lib/lib_arduinojson
+; ; lib_extra_dirs          = lib/libesp32
+; ; monitor_filters = esp32_exception_decoder
+; ; build_type = debug
+; ;DEVICE_CONSUMERUNIT
+; ; upload_port = COM14
+; upload_port = 192.168.0.70
+; upload_protocol = espota
+; ; extra_scripts   = gzip_fw.py
+; ; platform_packages =
+; ;     toolchain-xtensa32 @ 2.80200.200226
+; ;     framework-arduinoespressif32 @ https://github.com/espressif/arduino-esp32.git#idf-release/v4.0
+
+
+[env:wh_hvac_broom_hairdryer]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_HVAC_HAIRDRYER
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.70
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Master bedroom ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_ceiling_mbedroom]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_SHELLYDIMMER_MASTERBEDROOM_CEILING -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.18
+; upload_port = shellydimmer_masterbedroom.local
+extra_scripts   =  gzip_fw.py
+; upload_port = COM20
+
+
+[env:wh_dresser_lights]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} 
+                -D DEVICE_MASTERBEDROOM_DRESSER_LIGHTS -w
+                -D D_USER_MICHAEL
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.0.39
+; upload_port = testbed_animation_segment_01
+; upload_port = COM5
+
+
+[env:wh_hvac_masterbedroom]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_HVAC_MASTERBEDROOM -w 
+                                    -D D_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/lib_sensor
+; upload_port = heating
+; upload_port = COM5
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = hvac_masterbedroom
+upload_port = 192.168.0.10
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = COM3
+
+
+[env:whitehall_masterbedroomsensor]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_MASTERBEDROOMSENSOR -w
+; upload_port=COM5
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+;upload_port = consumerunit.local
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.1.71
+
+
+[env:wh_mbedroom_lamp1]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_DIMMER_MASTERBEDROOM_LAMP1 -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.176
+; upload_port = shellydimmer_masterbedroom.local
+extra_scripts   =  gzip_fw.py
+; upload_port = COM20
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Ensuite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_ensuite_fan]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                          -D DEVICE_DEFAULT_SONOFF_BASIC__ENSUITE_EXTRACTOR_FAN
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = socket_number_11.local
+upload_port = 192.168.0.44
+; upload_port = COM20
+
+
+[env:wh_ceiling_ensuite]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_SHELLYDIMMER_ENSUITE_CEILING -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.57
+; upload_port = shellydimmer_ensuite.local
+extra_scripts   =  gzip_fw.py
+
+
+[env:whitehall_ensuitesensor]
+extends = env:whitehall_32
+build_flags = ${common.build_flags} -D DEVICE_ENSUITESENSOR -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+upload_port = 192.168.1.118
+; upload_port = ensuitesensor.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+    
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Attic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_attic]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_ATTIC_SENSOR
+                                 -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/lib_rf_extended
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = 192.168.0.22
+upload_port = atticsensor.local
+; upload_port = COM7
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Living room ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_rgbfireplace]
+extends = env:whitehall_32
+build_flags             = ${common32.build_flags} -D DEVICE_RGBFIREPLACE -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM13
+upload_port = 192.168.0.67
+upload_protocol = espota
+; upload_port = rgbfireplace
+
+
+[env:wh_livingroom_lamp1]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP1
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.70
+;upload_port = socket_number_3.local
+; upload_port = COM20
+
+
+[env:wh_livingroom_lamp2]
+extends = env:whitehall_82
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP2
+                                 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.25
+; upload_port = socket_number_4.local
+; upload_port = COM20
+
+
+[env:wh_livingroomsensor]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_LIVINGROOMSENSOR -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/lib_sensor
+; upload_port = livingroomsensor
+upload_port = 192.168.0.10
+upload_protocol = espota
+extra_scripts = gzip_fw.py
+; upload_port=COM23
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Outside (not gazebo) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_oiltank]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_OILTANK
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                              lib/lib_filters
+                              lib/lib_dbx_test
+                              lib/lib_sensor
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM19
+upload_port = 192.168.0.180
+; upload_port = oiltank.local
+upload_protocol = espota
+
+[env:wh_oilfurnace]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_OILFURNACE
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                              lib/lib_filters
+                              lib/lib_dbx_test
+                              lib/lib_sensor
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM14
+upload_port = 192.168.0.23
+upload_protocol = espota
+
+
+[env:wh_garagelight]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1_1m.platform}
+build_flags               = ${core_2_6_1_1m.build_flags}
+                                 -D DEVICE_GARAGELIGHT 
+                                 -w
+extra_scripts   = gzip_fw.py
+upload_protocol = espota
+; upload_port = 192.168.0.43
+upload_port = garagelight.local
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: Bedroom ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+[env:wh_ceilingfan]
+extends = env:whitehall_82
+build_flags               = ${core_2_6_1_1m.build_flags} -D DEVICE_BEDROOM_CEILINGFAN -w
+upload_port = 192.168.0.53
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+; upload_port = COM19
+
+
+[env:wh_bedrmsen]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_BEDROOMSENSOR
+                                    -D D_USER_MICHAEL
+                                    -w                                     
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_rf_extended
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM20
+upload_port = 192.168.0.43
+; upload_port = bedroomsensor
+upload_protocol = espota
+
+
+[env:wh_dimbrc]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} 
+    -D DEVICE_SHELLYDIMMER_BEDROOM_CEILING -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.65
+extra_scripts   =  gzip_fw.py
+; upload_port = COM18
+
+
+[env:wh_broom_louv_hub]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_BEDROOM_LOUVOLITE_HUB
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/lib_cellular, lib/lib_rf_extended
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = 192.168.0.11
+; upload_port = COM27
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+upload_protocol = espota
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: XX ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ROOM: COLORADO ONLY ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+
+
+
+[env:rw_garsen]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_COLORADO_GARAGESENSOR
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_dbx_test 
+              lib/lib_sensor
+              lib/libg_neopixel
+              lib/lib_irremote
+upload_port = COM10
+; upload_protocol = espota
+; upload_port = 192.168.0.25
+; upload_port = kitchensensor.local
+; monitor_filters = esp32_exception_decoder
+; build_type = debug

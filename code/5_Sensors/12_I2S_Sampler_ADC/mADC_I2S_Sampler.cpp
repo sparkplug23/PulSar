@@ -482,7 +482,7 @@ void mADC_I2S_Sampler::Append_JSONPart_ESP32ADCReadings()
 
 
 
-// uint8_t mADC_I2S_Sampler::ConstructJSON_Settings(uint8_t json_method){
+// uint8_t mADC_I2S_Sampler::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);

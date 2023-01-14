@@ -285,7 +285,7 @@ void mSensorsDHT::ShowSensor_AddLog()
 ********************************************************************************************************************************************/
 
 
-uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   JsonBuilderI->Start();
     JBI->Add("SensorCount", settings.sensor_active_count);
@@ -300,7 +300,7 @@ uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_method){
 
 // /************ CONSTRUCT JSON BUILDERS *****************************************************************************************************************************/
 
-uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
 
   char buffer[50];
 

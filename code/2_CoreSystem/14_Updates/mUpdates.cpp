@@ -126,7 +126,7 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
 } // END Tasker
 
 
-uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_method){
+uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
 
   // Active rgbcct palette used as scene
 
