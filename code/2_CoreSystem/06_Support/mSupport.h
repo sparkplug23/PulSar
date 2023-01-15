@@ -222,6 +222,15 @@ bool ArrayCompare(A x, B x_len, C y, D y_len)
     }
   }
   return true;
+
+
+      // if(memcmp(
+      //   sensor[sensor_count].address,
+      //   address_to_find,
+      //   sizeof(sensor[sensor_count].address
+      //   ))==0){ // 0 means equal
+
+
 }
 
 template<typename A,typename B,typename C,typename D,typename E>

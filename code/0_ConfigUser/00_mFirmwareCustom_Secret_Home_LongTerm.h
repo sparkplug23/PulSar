@@ -5135,457 +5135,6 @@ Bathroom
 #endif
 
 
-/**
- * via sensor_interface, temps of all sensors will also generate a heatmap
- * This is considered backup to heating
- * heating will use about 3 sensors on main heating esp32
- * Light strip to show colours of heat, I must add button that will toggle these lights for 1 minute to show, to save power
- * 
- * Put sensor on floor to connect to RGB strip and stairs motion sensor
- * or...
- * 
- * Put esp32 inside box
- * - flip strip, so its coming from the top of the tank down
- * - Add doorbell as way to show colours for 60 seconds (fit on to wood shelf)
- * - 3wire under carpet to stairs for motion
- * - 3wire to water sensors (ie previously backup, but now all the extra detailed ones)
- * 
- * screw terminals
- * 
- * DS18B20 INPUT
- * PIR     INPUT
- * RGB     OUTPUT
- * 3V3
- * 5V
- * GND
- * 
- * 
- * */
-#ifdef DEVICE_IMMERSIONSENSOR
-  #define DEVICENAME_CTR          "immersionsensor"
-  #define DEVICENAME_FRIENDLY_CTR "Immersion Sensor ESP32"
-  #define DEVICENAME_ROOMHINT_CTR "Landing"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_MODULE_CORE_RULES
-  
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
-    
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #define STRIP_SIZE_MAX 88                                                                        // Change: Set *total* length of string, segment0 will default to this length
-  //   // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  //   // #define USE_SK6812_METHOD_DEFAULT
-  //     #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-    
-  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-
-
-
-  
-  #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
-    #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
-
-/**
- * @brief 
- * Add extra settings parameter that allows for "expected total device count" (relays+sensors) and allow a NEW alert topic (status/alert status/event) to tell me something is wrong
- * 
- */
-
-  // #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR  //should this be a "controller", or via interface "getTemp convert to heatmap"
-  // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 60
-  
-  // #define USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-
-  // #define USE_DEVFEATURE_SENSOR_COLOURS_TOP_TO_BOTTOM
-     
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_SENSORS_DS18X
-      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"18\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
-      #endif
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"23\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
-      #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "TankPosition00"  // Bottom
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "TankPosition20"
-  #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "TankPosition40"
-  #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "TankPosition60"
-  #define D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "TankPosition80"
-  #define D_DEVICE_TEMP_6_FRIENDLY_NAME_LONG "TankPosition100" // Top
-
-  #define D_DEVICE_TEMP_7_FRIENDLY_NAME_LONG "BoilerLoopTop"
-  #define D_DEVICE_TEMP_8_FRIENDLY_NAME_LONG "BoilerLoopBottom"
-  #define D_DEVICE_TEMP_9_FRIENDLY_NAME_LONG "ImmersionFeedIn"
-  #define D_DEVICE_TEMP_10_FRIENDLY_NAME_LONG "FeedRed" // not sure what this does, cold in it seems
-  
-  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Stairs"
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_5_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_6_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_7_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_8_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_9_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_10_FRIENDLY_NAME_LONG "\""
-      "]"
-    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
-        "[40,0,118,128,59,71,5,227]," // 1   
-        "[40,0,114,20,59,71,5,19],"   // 2  
-        "[40,0,66,109,59,71,5,172],"  // 3  
-        "[40,0,108,65,59,71,4,202],"  // 4  
-        "[40,0,83,19,59,71,6,66],"    // 5         
-        "[40,0,32,23,59,71,5,141],"   // 6
-        "[40,0,40,61,59,71,4,134],"   // 
-        "[40,0,66,140,59,71,6,136],"  // not calib
-        "[40,0,95,50,59,71,5,126],"   // not calib
-        "[40,0,149,87,59,71,5,240]"   // not calib
-      "]"  
-    "}"
-  "}";
-
-  /**
-   * @brief Currently requires this exact template to make the light work, not sure what command is missing from controller class
-   * 
-   */
-  #define STRIP_SIZE_MAX 33
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":0,"
-      "\"" D_JSON_RATE_MS "\":1000"
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Static" "\""
-    "},"
-    "\"ColourPalette\":10,"
-    "\"Hue\":30,\"Sat\":100,"
-    "\"BrightnessRGB\":0"
-  "}";
-  
-  // 6,5,0,0,0,
-  // 0,0,0,26,
-  // 50,0,26,26,
-  // 100,0,26,26,
-  // 150,0,64,32,
-  // 200,109,156,0,
-  // 255,89,148,0
-  
-  
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"// for PIR to follow
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0," 
-        "\"State\":\"Follow\""
-      "}"
-    "}"
-  "}";
-
-#endif
-
-
-
-/**
- * This will become the final version of this panel, but requires animation fixing first
- * 
- * 
- * Nextion Panel on Landing (Look into larger screens)
- * PIR large for landing
- * BME in landing
- * Masterbedroom BME only (No lights)
- * Landing SK6812 for night lights
- * 
- * */
-/**
- * @brief 
- * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
- * "*" pin = confirmed soldering
- * Ethernet      Function       ESP32         Note        
- *                           
- * ** Green (Landing2 - Nextion, BME, PIR) **************************************************************************
- * w/o           GND            GND           Black
- * o/w           5V             5V            Red
- * w/g           PIR          4*            DS18B20 water pipe sensors
- * bl/w          I2D            22*           BME in Dinning Room (Alternatively, DHT22 data pin)
- * w/bl          I2C            23*           BME in Dinning Room
- * g/w           3V3            3V3           White
- * w/br          NEXTION_RX                             NC
- * br/w          NEXTION_TX     25*           DHT22 (until BME is working)
- * ** Red (Masterbedroom1 - Panel) ************************************************************************** (BME280, LEDStrip 2 that is not yet coded. Will show temp when immersion is on for mums shower)
- * w/o           GND            GND           
- * o/w           5V             5V            
- * w/g           NEO               5*             
- * bl/w          I2D           18*                   
- * w/bl          I2C               19*            
- * g/w           3V           3V3           
- * w/br                                     
- * br/w              
- * 
- * 
- * ** Blue (Landing1 - Nextion Panel) **************************************************************************  (replace with 4 core for lighting?)
- * w/o           GND            GND           
- * o/w           5V             5V            
- * w/g           NEO           21*           Immersion relay (5v IO)
- * bl/w                      12*           Reserving, likely not possible      
- * w/bl                      13*              
- * g/w           3V3            3V3           
- * w/br                    14*            ds18b20 water, 4k7 pulled high        (comes from blue by connector)
- * br/w           -  
- * 
- * 
- * 
- * ** Red (Masterbedroom1 - Relay Board) **************************************************************************
- * Maybe add 4 wire for stairway PIR?
- * ** Red (Two Speaker wire) **************************************************************************
- * White        5V                           LED power injection
- * White/Black  GND 
- * **/
-#ifdef DEVICE_LANDINGPANEL
-  #define DEVICENAME_CTR            "landingpanel"
-  #define DEVICENAME_FRIENDLY_CTR   "Landing Panel"
-  #define DEVICENAME_ROOMHINT_CTR   "Landing"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-  
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ESP32
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_MODULE_CORE_RULES
-
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES  
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define STRIP_SIZE_MAX 100
-    #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-    #define NEXTION_DEFAULT_PAGE_NUMBER 1
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_MOTION
-      "\"26\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
-      #endif
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // "\"5\":\"" D_GPIO_FUNCTION_RGB_DATA2_CTR  "\","  // Masterbedroom panel
-      #endif 
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-      #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Landing"
-  #define D_DEVICE_SENSOR_BME_LANDING_NAME       "Landing"
-  #define D_DEVICE_SENSOR_BME_MASTERBEDROOM_NAME "Master Bedroom"
-
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_BME_MASTERBEDROOM_NAME "\"," //76
-        "\"" D_DEVICE_SENSOR_BME_LANDING_NAME  "\"" //77
-      "]"
-    "}"
-    // "},"
-    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
-  "}";
-
-
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"SK6812",
-    "AnimationMode":"Effects",
-    "ColourOrder":"grbw",
-    "ColourPalette":"Rgbcct 01",
-    "Effects": {
-      "Function":0,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "SegColour": {
-      "Hue": 120,
-      "Sat": 100,
-      "SubType":3
-    },
-    "BrightnessRGB_255": 1,
-    "BrightnessCCT_255": 1
-  }
-  )=====";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
-
-  
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"// for PIR to follow
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0," 
-        "\"State\":\"Follow\""
-      "}"
-    "}"
-  "}";
-
-#endif
-
-
 /** 
 /** NEW SYSTEM WITH FINAL WIRING
  * @description: 
@@ -5657,7 +5206,7 @@ Bathroom
 */
 #ifdef DEVICE_IMMERSION_SENSOR_PANEL //new 2023 system unified
   #define DEVICENAME_CTR          "immersion_sensor_panel"
-  #define DEVICENAME_FRIENDLY_CTR "Immersion Heater, Sensor and Landing Panel"
+  #define DEVICENAME_FRIENDLY_CTR "Immersion Heater Panel"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
@@ -5666,72 +5215,87 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS
+  // #define ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS
+  // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
+  // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 110
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  #define DISABLE_SLEEP
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
   #define USE_MODULE_CORE_RULES
+
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define DS18X20_MAX_SENSORS 20
+  #define USE_MODULE_SENSORS_BME
+    #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES  
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BUTTONS
+  //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
+  //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define STRIP_SIZE_MAX 100
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+    // #define USE_RGB_OUT_TANK
+    #define USE_RGB_OUT_LANDING_PANEL
+
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+    #define NEXTION_DEFAULT_PAGE_NUMBER 1
   
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  // // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  //   // #define ENABLE_DEVFEATURE_DS18X20_DUAL_SEARCH
-  // //   #define DS18X20_MAX_SENSORS 20
-  // #define USE_MODULE_SENSORS_BME
-  //   #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES  
-  // #define USE_MODULE_SENSORS_SWITCHES
-  // #define USE_MODULE_SENSORS_MOTION
-  // #define USE_MODULE_SENSORS_BUTTONS
-  // // //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
-  // // //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
 
-    
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define STRIP_SIZE_MAX 100
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   /********* Group: Needed to build ************************/
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  //   /********* Group: Ready for full integration ************************/
-  //   // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   /********* Group: Testing ************************/
-  //   #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-  //   #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-  //   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-  //   #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-  //   #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-  //   // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-  //   // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-  //   /********* Group: Debug options only ************************/
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-  //   #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-  //   #define ENABLE_DEBUG_SERIAL
-  //   // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-  //   // #define ENABLE_LOG_LEVEL_DEBUG
-  //   // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-  //   // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+    // 4x10
+    // Uptime so I know its working by glance
+    // Relay Minutes On
+    // Shower Temp /     Bath Temp
 
-  //   // #define USE_RGB_OUT_TANK
-  //   #define USE_RGB_OUT_LANDING_PANEL
-
-  // #define USE_MODULE_DISPLAYS_NEXTION
-  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  //   #define NEXTION_DEFAULT_PAGE_NUMBER 1
-
-  // #define USE_MODULE_DRIVERS_INTERFACE
-  // #define USE_MODULE_DRIVERS_RELAY
-  //   #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+  #define USE_MODULE_DRIVERS_LEDS
+    #define MAX_RELAYS 3
     
   /**
    * @brief 
@@ -5752,17 +5316,18 @@ Bathroom
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\"," // Immersion = Also add additonal LED with relay pin
       #endif
-      #ifdef USE_MODULE_SENSORS_BME
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
       "\"18\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
-      // "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
+      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","      // Stairs
+      "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
       "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
+      "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
       #endif 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
         // "\"26\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
@@ -5787,7 +5352,13 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"33\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
       #endif
+      #ifdef USE_MODULE_DRIVERS_LEDS
+      "\"12\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\"," 
+      "\"23\":\""  D_GPIO_FUNCTION_LED3_INV_CTR "\"," 
+      #endif 
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
+      // 5  // i2c oled needs to be another bus because of BME? or, what if it shared!!
+      // 15
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5812,23 +5383,23 @@ Bathroom
    * @brief Group 2: Additonal Sensors
    * */
   #define D_DEVICE_SENSOR_DB18S20_10_NAME        "TankPosition00"
-  #define D_DEVICE_SENSOR_DB18S20_10_ADDRESS     "[40,0,118,128,59,71,5,227]"//
+  #define D_DEVICE_SENSOR_DB18S20_10_ADDRESS     "[40,0,118,128,59,71,5,227]"
   #define D_DEVICE_SENSOR_DB18S20_11_NAME        "TankPosition20"
-  #define D_DEVICE_SENSOR_DB18S20_11_ADDRESS     "[40,0,114,20,59,71,5,19]"//
+  #define D_DEVICE_SENSOR_DB18S20_11_ADDRESS     "[40,0,114,20,59,71,5,19]"
   #define D_DEVICE_SENSOR_DB18S20_12_NAME        "TankPosition40"
-  #define D_DEVICE_SENSOR_DB18S20_12_ADDRESS     "[40,0,66,109,59,71,5,172]"//
+  #define D_DEVICE_SENSOR_DB18S20_12_ADDRESS     "[40,0,66,109,59,71,5,172]"
   #define D_DEVICE_SENSOR_DB18S20_13_NAME        "TankPosition60"
-  #define D_DEVICE_SENSOR_DB18S20_13_ADDRESS     "[40,0,108,65,59,71,4,202]"//
+  #define D_DEVICE_SENSOR_DB18S20_13_ADDRESS     "[40,0,108,65,59,71,4,202]"
   #define D_DEVICE_SENSOR_DB18S20_14_NAME        "TankPosition80"
-  #define D_DEVICE_SENSOR_DB18S20_14_ADDRESS     "[40,0,83,19,59,71,6,66]"//
+  #define D_DEVICE_SENSOR_DB18S20_14_ADDRESS     "[40,0,83,19,59,71,6,66]"
   #define D_DEVICE_SENSOR_DB18S20_15_NAME        "TankPosition100"
-  #define D_DEVICE_SENSOR_DB18S20_15_ADDRESS     "[40,0,32,23,59,71,5,141]"//
+  #define D_DEVICE_SENSOR_DB18S20_15_ADDRESS     "[40,0,32,23,59,71,5,141]"
   #define D_DEVICE_SENSOR_DB18S20_16_NAME        "BoilerLoopTop"
-  #define D_DEVICE_SENSOR_DB18S20_16_ADDRESS     "[40,0,40,61,59,71,4,134]"//
+  #define D_DEVICE_SENSOR_DB18S20_16_ADDRESS     "[40,0,40,61,59,71,4,134]"
   #define D_DEVICE_SENSOR_DB18S20_17_NAME        "BoilerLoopBottom"
-  #define D_DEVICE_SENSOR_DB18S20_17_ADDRESS     "[40,0,66,140,59,71,6,136]"//
+  #define D_DEVICE_SENSOR_DB18S20_17_ADDRESS     "[40,0,66,140,59,71,6,136]"
   #define D_DEVICE_SENSOR_DB18S20_18_NAME        "ImmersionFeedIn"
-  #define D_DEVICE_SENSOR_DB18S20_18_ADDRESS     "[40,0,95,50,59,71,5,126]"//
+  #define D_DEVICE_SENSOR_DB18S20_18_ADDRESS     "[40,0,95,50,59,71,5,126]"
   #define D_DEVICE_SENSOR_DB18S20_19_NAME        "FeedRed"
   #define D_DEVICE_SENSOR_DB18S20_19_ADDRESS     "[40,0,149,87,59,71,5,240]"
   
@@ -5961,9 +5532,8 @@ Bathroom
   }
   )=====";
   #endif // USE_MODULE_LIGHTS_INTERFACE
-  #endif // USE_RGB_OUT_LANDING_PANEL
-  
-  
+  #endif // USE_RGB_OUT_TANK
+    
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
   "{"// for PIR to follow

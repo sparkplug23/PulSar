@@ -16,6 +16,16 @@
   #define DS18X20_MAX_SENSORS 12
 #endif
 
+#define DS18S20_CHIPID       0x10  // +/-0.5C 9-bit
+#define DS1822_CHIPID        0x22  // +/-2C 12-bit
+#define DS18B20_CHIPID       0x28  // +/-0.5C 12-bit
+#define MAX31850_CHIPID      0x3B  // +/-0.25C 14-bit
+
+#define W1_SKIP_ROM          0xCC
+#define W1_CONVERT_TEMP      0x44
+#define W1_READ_SCRATCHPAD   0xBE
+
+
 class mDB18x20_ESP32 :
   public mTaskerInterface
 {
@@ -50,39 +60,16 @@ class mDB18x20_ESP32 :
     
     void SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len);
 
-    #define DS18S20_CHIPID       0x10  // +/-0.5C 9-bit
-    #define DS1822_CHIPID        0x22  // +/-2C 12-bit
-    #define DS18B20_CHIPID       0x28  // +/-0.5C 12-bit
-    #define MAX31850_CHIPID      0x3B  // +/-0.25C 14-bit
-
-    #define W1_SKIP_ROM          0xCC
-    #define W1_CONVERT_TEMP      0x44
-    #define W1_READ_SCRATCHPAD   0xBE
-
-    #ifndef DS18X20_MAX_SENSORS         // DS18X20_MAX_SENSORS fallback to 8 if not defined in user_config_override.h
-    #define DS18X20_MAX_SENSORS  8
-    #endif
-
-
     struct 
     { 
-      uint16_t numread;
       uint8_t address[8] = {0};
       uint8_t index;
       uint8_t valid;
       int8_t pins_id;
-      uint8_t alias_index;
-
+      // uint8_t alias_index;
       int8_t device_name_index = -1; // -1 for unknown
-
       // uint8_t address_stored[8];
       int8_t sensor_group_id = -1; // which pin it comes from 
-
-      struct FLAGS{
-        bool set_from_known_address = -1; //-1 unset, might be same as below "address_id" == so maybe debug only
-
-      }flag;
-
       /**
        * @brief method is not right, I need to align this with devicename ids, so sensor[id] where id matches devicename should be configured
        * */
@@ -93,7 +80,6 @@ class mDB18x20_ESP32 :
         uint8_t ischanged;
         uint32_t captureupsecs; //sensor age
       }reading;
-
     } sensor_new[DS18X20_MAX_SENSORS];
 
     uint8_t devices_pin1 = 0;
@@ -103,14 +89,7 @@ class mDB18x20_ESP32 :
 
     void Scan_ReportAsJsonBuilder();
 
-
-
-
-
     void parse_JSONCommand(JsonParserObject obj);
-
-    void SetIDWithAddress(uint8_t device_id, uint8_t* address_to_find);
-
 
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
@@ -126,8 +105,6 @@ class mDB18x20_ESP32 :
       value->resolution = 123;
     };
     #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-
-
 
 
     OneWire *ds = nullptr;
