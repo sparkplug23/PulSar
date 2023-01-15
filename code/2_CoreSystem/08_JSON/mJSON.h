@@ -204,6 +204,7 @@ class JsonBuilder{
     template <typename T>
     void Add(const char* key, T value)
     {
+
       if((writer.buffer == nullptr)||(writer.buffer_size == 0))
         return;
       
@@ -248,10 +249,10 @@ class JsonBuilder{
         /**
          * @brief debug size
          **/
-        if(writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
-        {
-          //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
-        }
+        // if(writer.length>(DATA_BUFFER_PAYLOAD_MAX_LENGTH*0.9)) // If 90% full
+        // {
+        //   //DEBUG_PRINTF(PSTR("WRN: writer_length = %d\n\r"), writer.length);
+        // }
 
       }
 

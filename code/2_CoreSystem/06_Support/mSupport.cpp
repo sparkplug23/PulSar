@@ -24,6 +24,7 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
   #endif
   void ARDUINO_ISR_ATTR resetModule() {
     ets_printf("reboot\n");
+    Serial.println("WDT REBOOTING!!"); Serial.flush();
     esp_restart();
   }
   // hw_timer_t *timerwdt = NULL;
@@ -35,6 +36,8 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
     timerAlarmEnable(timerwdt);                          //enable interrupt
   }
   void WDT_Reset(){
+  // DEBUG_LINE_HERE;
+  if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
     timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
     // Serial.println("WDT_Reset");
   }

@@ -1311,7 +1311,7 @@ struct Template_Config{
 };
 
 struct SystemName{ 
-  char          friendly[33]; // Used in titles, set by templates "FriendlyName"
+  char          friendly[50]; // Used in titles, set by templates "FriendlyName"
   char          device[50];   // USed as mqtt topic by default, set by templates "Name"
 };
 
@@ -1332,8 +1332,8 @@ struct SettingsMQTT{
   // char          fulltopic[100];       // 558
   
   char lwt_topic[40];
-  char client_name[40]; 
-  char hostname_ctr[20];
+  char client_name[50]; 
+  char hostname_ctr[50];
   char prefixtopic[50]; // "<devicename>/User extras?"
 
   /**

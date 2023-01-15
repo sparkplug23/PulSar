@@ -51,7 +51,8 @@ class mLEDs :
     };
     #endif
     
-    
+    void CommandSet_LED_Power(uint8_t state, uint8_t index = 0);
+
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t leds_found = 0;

@@ -79,9 +79,14 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
         pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
       }
       if(RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
-      if((RtcTime.second%5)==0){              pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
+      
       if(
-        ((RtcTime.minute%5)==0)&&
+        (uptime.seconds_nonreset%5)==0
+      ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
+
+
+      if(
+        ((RtcTime.minute%5)==0)&&         //modulo on RTC time ERRORS when NTP stops updating (With network down), needs fixed
         (uptime.seconds_nonreset>60)
       ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
@@ -135,6 +140,10 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
 
       // Serial.println(GetUptime());
       #endif
+
+      #ifdef ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+      Serial.println(GetUptime());
+      #endif // ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
     }break;
     case FUNC_EVERY_FIVE_SECOND:
@@ -2163,16 +2172,20 @@ void mTime::RtcPreInit(void) {
 void mTime::WifiPollNtp() {
   static uint8_t ntp_sync_minute = 0;
 
-    // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp"));
+  ALOG_INF(PSTR("mTime::WifiPollNtp"));
+
+  DEBUG_LINE_HERE;
+  
   // if (TasmotaGlobal.global_state.network_down || Rtc.user_time_entry) { return; }
   if(pCONT_set->global_state.wifi_down){ 
-    
     
     #ifdef ENABLE_LOG_LEVEL_WARN
     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
     #endif // ENABLE_LOG_LEVEL_INFO
     
-    return ; }
+    return;
+
+  }
     
     // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
 

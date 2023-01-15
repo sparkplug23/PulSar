@@ -54,9 +54,7 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
 
     break;
     case FUNC_EVERY_SECOND:
-// Ds18x20Init();
-
-
+      // Ds18x20Init();
         // AddLog_Array(LOG_LEVEL_COMMANDS, "address0", sensor_new[0].address, (uint8_t)8);
         // AddLog_Array(LOG_LEVEL_COMMANDS, "address1", sensor_new[1].address, (uint8_t)8);
         // ALOG_INF(PSTR("devices_pin1=%d"),devices_pin1);
@@ -213,21 +211,8 @@ void mDB18x20_ESP32::Pre_Init(void){
 
 void mDB18x20_ESP32::Ds18x20Init(void) 
 {
-  
   Ds18x20Search();
   ALOG_INF (PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), DS18X20Data.sensors);
-
-  if(!DS18X20Data.sensors)
-  {
-   // retry once
-
-   delay(1000);
-
-  Ds18x20Search();
-
-
-  }
-  ALOG_INF (PSTR(D_LOG_DSB D_SENSORS_FOUND "RETRY %d"), DS18X20Data.sensors);
 }
 
 #ifdef ENABLE_DEVFEATURE_DS18X20_DUAL_SEARCH
@@ -481,11 +466,9 @@ void mDB18x20_ESP32::Ds18x20EverySecond(void)
 
   ALOG_INF(PSTR("DS18X20Data.sensors=%d"),DS18X20Data.sensors);
 
-  if (!DS18X20Data.sensors) { 
-  
-    
+  if (!DS18X20Data.sensors) 
+  {     
     Ds18x20Search();      // Check for changes in sensors number
-  
     return; 
   }
 
@@ -500,7 +483,7 @@ void mDB18x20_ESP32::Ds18x20EverySecond(void)
       if (Ds18x20Read(i, t)) {   // Read temperature
         sensor_new[i].reading.val = t;
         // Serial.println(t);
-        ALOG_INF(PSTR("Read i%d a%d=-> %d"), i, sensor_new[i].address[7], (int)t);
+        ALOG_INF(PSTR("Read i%d a%d Alias%d =-> %d"), i, sensor_new[i].address[7], sensor_new[i].device_name_index, (int)t);
       } else {
         // Ds18x20Name(i);
         // AddLogMissed(DS18X20Data.name, sensor_new[sensor_new[i].index].valid);
@@ -542,12 +525,12 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_obj
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("NumDevices", DS18X20Data.sensors);
 
-  JBI-> Array_Start("DeviceNameIndex");
-  for (uint32_t i = 0; i < DS18X20Data.sensors; i++) 
-  {
-    JBI->Add(sensor_new[i].device_name_index);
-  }
-  JBI->  Array_End();
+    JBI->Array_Start("DeviceNameIndex");
+    for (uint32_t i = 0; i < DS18X20Data.sensors; i++) 
+    {
+      JBI->Add(sensor_new[i].device_name_index);
+    }
+    JBI->Array_End();
 
   return JsonBuilderI->End();
 
@@ -559,43 +542,42 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level , bool json_obje
   
   char buffer[40];
   char title [40];  
-
   uint8_t corrected_sensor_id = 0;
+  int8_t alias_i = -1;
 
   JsonBuilderI->Start();
 
-  for (uint32_t sensor_id = 0; sensor_id < DS18X20Data.sensors; sensor_id++) {
-    
+  for (uint32_t sensor_id = 0; sensor_id < DS18X20Data.sensors; sensor_id++) 
+  {
 
+    alias_i = sensor_new[sensor_id].device_name_index;
+ 
     // if(sensor_new[sensor_id].reading.ischanged || (json_level<=JSON_LEVEL_IFCHANGED)){ 
 
-      JBI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_new[sensor_id].device_name_index, buffer, sizeof(buffer)));         
-        JBI->Add(D_JSON_TEMPERATURE, sensor_new[sensor_id].reading.val);
-        JBI->Add(D_JSON_ADDRESS,     sensor_new[sensor_id].address[7]);
+    JBI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), alias_i, buffer, sizeof(buffer)));         
+      JBI->Add(D_JSON_TEMPERATURE, sensor_new[sensor_id].reading.val);
+      JBI->Add(D_JSON_ADDRESS,     sensor_new[sensor_id].address[7]);
 
-        if(json_level >= JSON_LEVEL_DETAILED)
+      if(json_level >= JSON_LEVEL_DETAILED)
+      {
+        JBI->Add(D_JSON_ISVALID, sensor_new[sensor_id].reading.isvalid);
+        JBI->Add(D_JSON_CAPTURE_UPSECONDS, sensor_new[corrected_sensor_id].reading.captureupsecs);
+      }
+
+      if(json_level >= JSON_LEVEL_DEBUG)
+      {
+        JBI->Add("ID", sensor_id);
+        JBI->Add("Corrected_ID", corrected_sensor_id);
+        JBI->Array_Start_P("Device%d", sensor_id);
+        
+        // for(int a=2;a<7;a++) // Skipping device and CRC values in address
+        for(int a=0;a<8;a++) // All address bytes
         {
-          JBI->Add(D_JSON_ISVALID, sensor_new[sensor_id].reading.isvalid);
-          JBI->Add(D_JSON_CAPTURE_UPSECONDS, sensor_new[corrected_sensor_id].reading.captureupsecs);
+          JBI->Add(sensor_new[sensor_id].address[a]);
         }
-
-        if(json_level >= JSON_LEVEL_DEBUG)
-        {
-          JBI->Add("set_address",sensor_new[sensor_id].flag.set_from_known_address);
-          JBI->Add("ID", sensor_id);
-          JBI->Add("Corrected_ID", corrected_sensor_id);
-          JBI->Array_Start_P("Device%d", sensor_id);
-          
-          // for(int a=2;a<7;a++) // Skipping device and CRC values in address
-          for(int a=0;a<8;a++) // All address bytes
-          {
-            JBI->Add(sensor_new[sensor_new[sensor_id].index].address[a]);
-          }
-          JBI->Array_End();
-        }
-      JBI->Level_End(); 
-
-    // }
+        JBI->Array_End();
+      }
+    JBI->Level_End(); 
 
   }
 
@@ -722,7 +704,7 @@ void mDB18x20_ESP32::SetDeviceNameID_WithAddress(const char* device_name, uint8_
 
   ALOG_INF(PSTR("Searching to find device with address"));
 
-    AddLog_Array("Searching Input", array_val, array_len);
+  AddLog_Array("Searching Input", array_val, array_len);
 
   int8_t search_id = 0;
   for (uint32_t i = 0; i < DS18X20Data.sensors; i++) 
@@ -746,73 +728,90 @@ void mDB18x20_ESP32::SetDeviceNameID_WithAddress(const char* device_name, uint8_
 }
 
 
-// Search for address, if found, store id against it in struct
-// Assumes template load AFTER init of sensors
-void mDB18x20_ESP32::SetIDWithAddress(uint8_t address_id, uint8_t* address_to_find){
+#ifdef USE_MODULE_NETWORK_MQTT
 
-//   // memcpy(sensor[device_id].address_stored,address_to_find,sizeof(sensor[device_id].address_stored));
+void mDB18x20_ESP32::MQTTHandler_Init(){
 
-//   uint8_t sensor_count = 0; // reset
-//   // Address moved into struct, I need to rearrange now with ids
- 
-//   AddLog(LOG_LEVEL_INFO, "searching start address_id=%d", address_id);
+  struct handler<mDB18x20_ESP32>* ptr;
 
-//   AddLog_Array(LOG_LEVEL_COMMANDS, "address_to_find",address_to_find, (uint8_t)8);
-//   AddLog_Array(LOG_LEVEL_COMMANDS, "address_saved",  sensor[0].address, (uint8_t)8);
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Settings;
 
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 10; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
 
-//   for(uint8_t sensor_group_id=0; sensor_group_id<settings.group_count; sensor_group_id++){
-    
-//     AddLog(LOG_LEVEL_INFO, "\tsearching iter %d",sensor_group_id);
-    
-//     for(uint8_t sensor_id=0; sensor_id<sensor_group[sensor_group_id].sensor_count; sensor_id++){
-//       // Check address has been set    
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Sensor;
 
-//       AddLog(LOG_LEVEL_INFO, "\t\tsensor_id %d",sensor_id);
-      
-//       if(memcmp(
-//         sensor[sensor_count].address,
-//         address_to_find,
-//         sizeof(sensor[sensor_count].address
-//         ))==0){ // 0 means equal
+  #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
+  ptr = &mqtthandler_debug; //each sensor should have its own debug channel for extra output only when needed
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
+  ptr->json_level = JSON_LEVEL_ALL;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mDB18x20_ESP32::ConstructJSON_Debug;
+  #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
 
+} //end "MQTTHandler_Init"
 
-// //temp fix
-// /**
-//  * Issue#1 address_id stored in sensor struct complicates retrieving devicename from module_id, 
-//  * Fix1: Remove address_id, instead making it the struct index, thus reordered contents of struct is required (maybe using address to poll sensor that is stored in struct, ie named sensor X, in index X, uses this address... if not, just append address as new struct indexes)
-//  * This means, on setting name, I should search for the address of X and put it into index X.. swap?
-//  * */
-//         sensor[sensor_count].address_id = address_id;   
-//         // sensor[original_device_id].id = sensor_count;    
-
-//         sensor[sensor_count].flag.set_from_known_address = sensor_count;
-      
-      
-//         AddLog_Array(LOG_LEVEL_INFO, "isconnected", sensor[sensor_count].address, (uint8_t)sizeof(sensor[sensor_count].address));
-//         AddLog(LOG_LEVEL_TEST, PSTR("Searched %02d, Found %02d, Id from %d to %d %d"),
-//           address_to_find[7],
-//           sensor[sensor_count].address[7],
-//           sensor_count,
-//           address_id   ,
-//           sensor[address_id].address_id     
-//         );
-
-//         break; // stop looking for more
-
-
-//       }
-//       else{
-//         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DSB "getAddress failed - no find with search %d @ %d"),sensor[sensor_count].address[7],sensor_id);   
-//       }
-
-//       sensor_count++;
-
-
-//     }
-//   }
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mDB18x20_ESP32::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mDB18x20_ESP32::MQTTHandler_Set_TelePeriod()
+{
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mDB18x20_ESP32::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 #endif // sensor enabled

@@ -41,13 +41,21 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_object_st
     JBI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JBI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
     JBI->Level_Start(PM_JSON_NETWORK);
+    // DEBUG_LINE_HERE_VALUE(JBI->Length());
       JBI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
+    DEBUG_LINE_HERE_VALUE(JBI->Length());
+      // #ifndef ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
       JBI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
+      // #endif // ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
       JBI->Add(PM_JSON_RSSI,         WiFi.RSSI());
+    // DEBUG_LINE_HERE_VALUE(JBI->Length());
       // JBI->Add(PM_JSON_CONNECTCOUNT, wifi_reconnects_counter);
       JBI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
+    // DEBUG_LINE_HERE_VALUE(JBI->Length());
       JBI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
+    // DEBUG_LINE_HERE_VALUE(JBI->Length());
     JBI->Level_End();
+    // DEBUG_LINE_HERE_VALUE(JBI->Length());
     // JBI->Level_Start(PM_JSON_MQTT);
     //   JBI->Add(PM_JSON_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
     //   JBI->Add(PM_JSON_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
@@ -62,6 +70,8 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_object_st
     JBI->Level_End();
     #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
     // JBI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
+    // DEBUG_LINE_HERE_VALUE(JBI->Length());
+    // ALOG_INF(PSTR("JBI=\"%s\""),JBI->GetPtr());
   return JBI->End();
     
 }

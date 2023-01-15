@@ -228,32 +228,31 @@ void JsonBuilder::Level_End()
 // Use valist to populate the key
 void JsonBuilder::Add_P_FV(const char* key, const char* formatP_value, ...) // P = progmem key, FV = format value
 {
-  char* buff = data_buffer.payload.ctr;
-  uint16_t* len = &data_buffer.payload.len;
   // Prefix comma if not first pair
-  if((*len>1)&&(buff[*len-1]!='{')){ *len += sprintf_P(&buff[*len],","); }
+  if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
   // Write key
-  *len += sprintf_P(&buff[*len],"\"%S\":",key);
+  writer.length += sprintf_P(&writer.buffer[writer.length],"\"%S\":",key);
   // Add value
   va_list arg;
   va_start(arg, formatP_value);
-  *len += vsnprintf_P(&buff[*len], DATA_BUFFER_PAYLOAD_MAX_LENGTH-*len, formatP_value, arg);
+  writer.length += vsnprintf_P(&writer.buffer[writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH-writer.length, formatP_value, arg);
   va_end(arg);
 }
 
 // Use valist to populate the key
 void JsonBuilder::Add_FV(const char* key, const char* formatP_value, ...) // FV = format value
 {
-  char* buff = data_buffer.payload.ctr;
-  uint16_t* len = &data_buffer.payload.len;
   // Prefix comma if not first pair
-  if((*len>1)&&(buff[*len-1]!='{')){ *len += sprintf_P(&buff[*len],","); }
+  if(
+    (writer.length>1)&&
+    (writer.buffer[writer.length-1]!='{')
+  ){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
   // Write key
-  *len += sprintf_P(&buff[*len],"\"%s\":",key);
+  writer.length += sprintf_P(&writer.buffer[writer.length],"\"%s\":",key);
   // Add value
   va_list arg;
   va_start(arg, formatP_value);
-  *len += vsnprintf_P(&buff[*len], DATA_BUFFER_PAYLOAD_MAX_LENGTH-*len, formatP_value, arg);
+  writer.length += vsnprintf_P(&writer.buffer[writer.length], DATA_BUFFER_PAYLOAD_MAX_LENGTH-writer.length, formatP_value, arg);
   va_end(arg);
 }
 
@@ -261,7 +260,8 @@ void JsonBuilder::Add_FV(const char* key, const char* formatP_value, ...) // FV 
 void JsonBuilder::Add_FV(const char* formatP_value, ...)
 {
   // Prefix comma if not first pair
-  if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')&&(writer.buffer[writer.length-1]!='[')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
+  if(
+    (writer.length>1)&&(writer.buffer[writer.length-1]!='{')&&(writer.buffer[writer.length-1]!='[')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
   // Add value
   va_list arg;
   va_start(arg, formatP_value);

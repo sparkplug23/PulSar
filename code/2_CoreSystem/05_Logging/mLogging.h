@@ -214,6 +214,17 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 
 
+#define DEBUG_LINE_HERE_WITH_INT(x)    Serial.printf("DEBUG HERE: [%d] ", x);\
+                      Serial.print(__FILE__);\
+                      Serial.println(__LINE__);\
+                      Serial.flush();
+#define DEBUG_LINE_HERE_VALUE(x)    Serial.printf("DEBUG HERE: ");\
+                      Serial.print(x);\
+                      Serial.print(" ");\
+                      Serial.print(__FILE__);\
+                      Serial.println(__LINE__);\
+                      Serial.flush();
+
 // Can only be used when hardware serial is enabled
 // #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_HOLD_POINT   while(1) { \

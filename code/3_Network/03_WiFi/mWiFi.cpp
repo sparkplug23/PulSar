@@ -80,7 +80,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
     break;
     case FUNC_EVERY_FIVE_MINUTE:
-      ALOG_INF( PSTR("WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
+      ALOG_INF( PSTR("FUNC_EVERY_FIVE_MINUTE WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
     break;
     case FUNC_WIFI_CONNECTED:
     

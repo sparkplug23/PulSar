@@ -87,13 +87,30 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     // #ifdef ENABLE_ADVANCED_DEBUGGING
     // Serial.printf("switch_index=%d\n\r",switch_index);
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    /**
+     * @brief Show task about to be called after a certain uptime has elasped.
+     * Setting a time allows "skipping" forward until the expected error point 
+     */
+      #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
+      if(pCONT_time->uptime_seconds_nonreset>ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS)
+      {
+      #endif
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+      #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
+      }
+      #endif
     #endif
     #ifdef ENABLE_ADVANCED_DEBUGGING
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
       ALOG_INF(PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module started \t%d ms %s"),millis(), pCONT_set->GetTaskName(function, buffer_taskname));
       #endif
     #endif
+    // #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
+    // if(pCONT_time->uptime_seconds_nonreset>ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS)
+    // {
+    //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    // }
+    // #endif // ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
     
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t start_millis = millis();

@@ -1374,6 +1374,7 @@
                         Serial.println(__LINE__);\
                         Serial.flush();
 
+
 void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index = 0);
 
 

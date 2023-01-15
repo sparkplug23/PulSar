@@ -36,7 +36,7 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
         }
       break;
       case FUNC_MQTT_CONNECTED:
-        Load_New_Subscriptions_From_Function_Template();
+        // Load_New_Subscriptions_From_Function_Template();
       break;
       case FUNC_EVERY_50_MSECOND:
         if(Mqtt.connected){
@@ -825,14 +825,15 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
 
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
 
-  uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
-  #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
-  loglevel = LOG_LEVEL_TEST;
-  #endif
+  // uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
+  // #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
+  // loglevel = LOG_LEVEL_TEST;
+  // #endif
+  // loglevel = LOG_LEVEL_INFO;
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected());
-  #endif// ENABLE_LOG_LEVEL_INFO
+  // #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected());
+  // #endif// ENABLE_LOG_LEVEL_INFO
 
 
   publish_ft(module_ctr,
@@ -842,9 +843,9 @@ void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, co
              pCONT_set->Settings.sensors.flags.mqtt_retain
             );
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted COMPLETE %d %s %s %d %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected(), strlen(data_buffer.payload.ctr));
-  #endif// ENABLE_LOG_LEVEL_INFO
+  // #ifdef ENABLE_LOG_LEVEL_INFO
+  // AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted COMPLETE %d %s %s %d %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected(), strlen(data_buffer.payload.ctr));
+  // #endif// ENABLE_LOG_LEVEL_INFO
 
 }
 

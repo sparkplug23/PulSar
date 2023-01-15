@@ -349,7 +349,12 @@ class mMQTT :
           fSendPayload= 0; 
         } // to fix when return was not used
 
-        // Serial.printf("payload_length=%d\n\r",payload_length);
+        // Serial.printf("fSendPayload=%d\n\r",fSendPayload); Serial.flush();
+        
+        // Serial.printf("DEBUG HERE: ");
+        // Serial.print(__FILE__);
+        // Serial.println(__LINE__);
+        // Serial.flush();
 
         // Send MQTT payload with structured output
         if(fSendPayload){ 
@@ -357,6 +362,10 @@ class mMQTT :
           MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); 
           // Serial.printf("ENDfSendPayload SendNow postfix_topic=%s %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush();
         }
+        // Serial.printf("DEBUG HERE: ");
+        // Serial.print(__FILE__);
+        // Serial.println(__LINE__);
+        // Serial.flush();
       }
       // Check if this needs reducing
       if(handler_ptr->flags.FrequencyRedunctionLevel){

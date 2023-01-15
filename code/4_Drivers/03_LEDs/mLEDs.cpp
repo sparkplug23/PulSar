@@ -33,8 +33,9 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
       
 
-      digitalWrite(pCONT_pins->GetPin(GPIO_LED1_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_INV_ID))); 
-      digitalWrite(pCONT_pins->GetPin(GPIO_LED2_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED2_INV_ID))); 
+      // digitalWrite(pCONT_pins->GetPin(GPIO_LED1_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED1_INV_ID))); 
+      // digitalWrite(pCONT_pins->GetPin(GPIO_LED2_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED2_INV_ID))); 
+      // digitalWrite(pCONT_pins->GetPin(GPIO_LED3_INV_ID), !digitalRead(pCONT_pins->GetPin(GPIO_LED3_INV_ID))); 
 
 
       // EveryLoop();
@@ -156,7 +157,7 @@ void mLEDs::SubTask_Status_LEDs()
     return digitalRead(bitRead(led_inverted, index)==1?0:1); // inverted, ON when low
   };
 
-  void mLEDs::SetState(uint8_t index)
+  void mLEDs::CommandSet_LED_Power(uint8_t state, uint8_t index)
   {
 
     
@@ -172,7 +173,7 @@ void mLEDs::SubTask_Status_LEDs()
      * 
      */
     
-        digitalWrite(leds[index].pin, bitRead(led_inverted, index)); // inverted, ON when low
+        digitalWrite(leds[index].pin, bitRead(led_inverted, index)?0:1); // inverted, ON when low
   };
 
 
@@ -267,8 +268,19 @@ void mLEDs::SetLedLink(uint32_t state)
 // // #endif // USE_MODULE_DRIVERS_BUZZER
 }
 
-
-void mLEDs::UpdateStatusBlink(){
+/**
+ * @brief 
+ * 
+ * Version 1: Just on/off functions
+ * Version 2: Remove this and do my own method ie how neopixel notifications was to blink, pulse etc
+ *
+ * In this class, I will include a way to set a LED index as a specific type.
+ * PowerLED (tied to relay), StatusLED (network/mqtt connection)
+ * If none are set and only one exists, then assume as StatusLED and dont show PowerLED
+ *  
+ */
+void mLEDs::UpdateStatusBlink()
+{
   
   DEBUG_LINE;
   uint8_t blinkinterval = 1;
@@ -355,79 +367,124 @@ void mLEDs::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
-	if(jtok = obj["LED"].getObject()["SetState"])
-	{
-
-		if(jtok.isNum())
-		{
-			// mySwitch->setReceiveProtocolMask(jtok.getUInt());
-			mqtthandler_settings_teleperiod.flags.SendNow = true;
-		}
-
-		// JBI->Start();
-
-		// pCONT->Tasker_Interface(FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
-
-		// bool ready_to_send = JBI->End();
-
-		// if(!ready_to_send)
-		// {
-		// 	// Nothing was found, create new message
-		// 	JBI->Start();
-		// 		JBI->Add("SensorScan", "No Devices Found");
-		// 	ready_to_send = JBI->End();
-		// }
-
-
-		// if(ready_to_send)
-		// {			
-    	// AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
-		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
-		// }
-
-	}
-
-
-
 int8_t led_id = -1;
 uint16_t state_value = 0;
 
- if(jtok = obj["LEDName"]){
-    // if(jtok.isStr()){
-    //   relay_id = GetRelayIDbyName(jtok.getStr());
-    // }else 
-    // if(jtok.isNum()){
-    //   relay_id  = jtok.getInt();
-    // }
-	led_id = jtok.getInt();
+  int8_t relay_id= -1,state=-1;    //assume index 0 if none given
+
+  if(jtok = obj["LED"].getObject()["Name"]){
+    if(jtok.isStr()){
+      // relay_id = GetRelayIDbyName(jtok.getStr());
+      ALOG_INF( PSTR("relay_id = %s"), jtok.getStr() );
+    }else 
+    if(jtok.isNum()){
+      relay_id  = jtok.getInt();
+    }
+
+    ALOG_INF( PSTR("relay_id = %d"), relay_id );
   }
 
   // Primary method since v0.86.14.21
-  if(jtok = obj["LEDState"]){
-    // if(jtok.isStr()){
-    //   state = pCONT_sup->GetStateNumber(jtok.getStr());
-    // }else 
-    // if(jtok.isNum()){
-      state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
-    // }
+  if(jtok = obj["LED"].getObject()["State"]){
+    if(jtok.isStr()){
+      state = pCONT_sup->GetStateNumber(jtok.getStr());
+    }else 
+    if(jtok.isNum()){
+      state  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+    }
 
     /**
      * @brief If off, clear any timer decounters for relays
      * 
      */
-    // if(state == 0)
-    // {
-    //   CommandSet_Timer_Decounter(0, relay_id);
-    // }
+    if(state == 0)
+    {
+      // CommandSet_Timer_Decounter(0, relay_id);
+    }
 
 		//state needs checked for flipped
 		// if(state == 2){
 
 		// }
-		
-// SetState()
 
   }
+
+
+
+  
+
+
+  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON]){
+  //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
+  // }else
+  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_SECS]){
+  //   CommandSet_Timer_Decounter(jtok.getInt(), relay_id);
+  // }else
+  // if(jtok = obj[PM_JSON_RELAY].getObject()[PM_JSON_TIME_ON_MINUTES]){
+  //   CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
+  // }
+
+  if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.fEnableSensor)){
+    CommandSet_LED_Power(state,relay_id);
+  }
+
+
+// 	if(jtok = obj["LED"].getObject()["Name"])
+// 	{
+
+// 		led_id = jtok.getInt();
+
+// 	}
+
+// 	if(jtok = obj["LED"].getObject()["SetState"])
+// 	{
+
+// 		if(jtok.isNum())
+// 		{
+// 			// mySwitch->setReceiveProtocolMask(jtok.getUInt());
+// 			mqtthandler_settings_teleperiod.flags.SendNow = true;
+// 		}
+
+// 	}
+
+
+
+//  if(jtok = obj["LEDName"]){
+//     // if(jtok.isStr()){
+//     //   relay_id = GetRelayIDbyName(jtok.getStr());
+//     // }else 
+//     // if(jtok.isNum()){
+//     //   relay_id  = jtok.getInt();
+//     // }
+// 	led_id = jtok.getInt();
+//   }
+
+//   // Primary method since v0.86.14.21
+//   if(jtok = obj["LEDState"]){
+//     // if(jtok.isStr()){
+//     //   state = pCONT_sup->GetStateNumber(jtok.getStr());
+//     // }else 
+//     // if(jtok.isNum()){
+//       state_value  = jtok.getInt();//pCONT_sup->GetStateNumber(jtok.getInt());
+//     // }
+
+//     /**
+//      * @brief If off, clear any timer decounters for relays
+//      * 
+//      */
+//     // if(state == 0)
+//     // {
+//     //   CommandSet_Timer_Decounter(0, relay_id);
+//     // }
+
+// 		//state needs checked for flipped
+// 		// if(state == 2){
+
+// 		// }
+		
+// // SetState()
+
+//   }
     
 }
   
