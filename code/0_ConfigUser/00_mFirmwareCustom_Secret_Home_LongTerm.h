@@ -44,6 +44,33 @@
  * - Go around and take pictures of all boards, add a folder to keep track of the current hardware config (folder per device), so I can always compare hardware to software pins easily
  * -
  * 
+ * 
+ * 
+ * 
+ * Design Generic Device that I can use for most devices in the future.
+ * Possibly also get them manufactured if I reproduce them all with same design and test it.
+ * 
+ * Small
+ *  ** ESP32
+ *  ** Single Level Shifted out for RGB on ALL basic boards (I will use it in most cases)
+ *  ** 2p header for power
+ *  ** 3p header for LEDs out
+ *  ** instead of tieing unused levelshifter to gnd to disable, connect to header that can be swapped to group enable/disable 3 outputs together
+ *
+ *
+ * Medium
+ *  ** All of small (optional up to 4 RGB outputs)
+ *  ** One RJ45 wired for standard use
+ *     *** gnd
+ *     *** 5v
+ *     *** gpio_1
+ *     *** i2c_data (data is blue), also works for 1-wire
+ *     *** i2c_clock (clock is white/blue)
+ *     *** 3v3 on green
+ *     *** serial2_rx
+ *     *** serial2_tx transmit out on brown wire (serial as gpio on esp32 can be anything too)
+ *  
+
  */
 
 
@@ -110,7 +137,7 @@ LivingRoom
 
 
 /**
- * @brief Attic
+ * @bri ef Attic
  **/
 // #define DEVICE_ATTIC_SENSOR
 
@@ -124,8 +151,7 @@ Hallway + Understairs
 // #define DEVICE_RADIATORFAN
 // #define DEVICE_CANDLE_ELECTRIC_HALLWAY  // Socket_SocketNumber16_Power
 // #define DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
-// #define DEVICE_HEATING_2022
-// #define DEVICE_HEATING__MODULE__HEATING_2023_NUMBER1_TIMERS_ONLY_AND_DEFAULT_BACKUP
+//  #define DEVICE_HEATING__MODULE__HEATING_2023_NUMBER1_TIMERS_ONLY_AND_DEFAULT_BACKUP
 
 /**
  *  Landing + Hotpress
@@ -134,9 +160,7 @@ Hallway + Understairs
   - dht
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
-// #define DEVICE_LANDINGPANEL
-// #define DEVICE_IMMERSIONSENSOR
-#define DEVICE_IMMERSION_SENSOR_PANEL
+#define DEVICE_IMMERSION_CONTROL_PANEL
 
 /**
 Outside + Garage
@@ -181,7 +205,7 @@ Masterbedroom
  */
 // #define DEVICE_ENSUITESENSOR
 // #define DEVICE_SHELLYDIMMER_ENSUITE_CEILING
-// #define DEVICE_DEFAULT_SONOFF_BASIC_ENSUITE_CEILING_FAN
+// #define DEVICE_ENSUITE_CEILING_EXTRACTOR_FAN
 
 /**
 Bathroom
@@ -349,13 +373,6 @@ Bathroom
   #define DEVICENAME_CTR          "cooker_extractor_fan"
   #define DEVICENAME_FRIENDLY_CTR "Cooker Extractor Fan"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"  
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-#endif
-#ifdef DEVICE_DEFAULT_SONOFF_BASIC__ENSUITE_EXTRACTOR_FAN  
-  #define SUB_DEVICE_SONOFF_BASIC__DEFAULT_CONFIG_NAMED
-  #define DEVICENAME_CTR          "ensuite_extractor_fan"
-  #define DEVICENAME_FRIENDLY_CTR "Ensuite Extractor Fan"
-  #define DEVICENAME_ROOMHINT_CTR "Ensuite"  
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 #endif
 
@@ -1901,14 +1918,12 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Downstairs Toilet"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
     
-  #define ESP32
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
-  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1 // temporary force the value, should be handled by command
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -1924,38 +1939,70 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define STRIP_SIZE_MAX 56
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define STRIP_SIZE_MAX 56 //+1
-    #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-    #define USE_SK6812_METHOD_DEFAULT
-      #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-    
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
   
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_SK6812_METHOD_DEFAULT
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    "\"ColourPalette\":10," 
-    "\"Hue\":25," 
-    "\"Sat\":70," 
-    "\"Effects\":{"
-      "\"Function\":0"
-    "},"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":10"
-  "}";
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "AnimationMode":"Effects",
+    "ColourOrder":"grbw",
+    "ColourPalette":"Rgbcct 01",
+    "Effects": {
+      "Function":0,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 500,
+      "RateMs": 1000
+    },
+    "SegColour": {
+      "Hue": 25,
+      "Sat": 70,
+      "SubType":3
+    },
+    "BrightnessRGB": 20,
+    "BrightnessCCT": 20
+  }
+  )=====";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2083,7 +2130,7 @@ Bathroom
     "\"" D_JSON_ENERGY "\":{"
         "\"DeviceCount\":12"    
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
@@ -2417,7 +2464,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
 
   #define USE_MODULE_SENSORS_DHT
 
@@ -2445,7 +2492,7 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_DHT
       "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18X
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
       "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
       #endif   
       #ifdef USE_MODULE_DRIVERS_RELAY
@@ -2464,6 +2511,13 @@ Bathroom
   #define D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG     "RadiatorPipe"
   #define D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG            "Hallway"     // BME Primary
   #define D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG            "Hallway-DHT" // Secondary
+
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME     D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME     D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME     D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS "[40,170,231,153,29,19,02,43]"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS "[40,170,221,101,29,19,02,113]"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS "[40,159,147,  2, 0, 0, 0,117]" //hex  28:9F:93:2:0:0:0:75    // Longer wire on radiator pipe (this will be used to trigger fan)
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -2488,12 +2542,12 @@ Bathroom
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["                
-        "[40,170,231,153,29,19,02,43],"
-        "[40,170,221,101,29,19,02,113],"    
-        "[40,159,147,  2, 0, 0, 0,117]" //hex  28:9F:93:2:0:0:0:75    // Longer wire on radiator pipe (this will be used to trigger fan)
-      "]"  
-    "}"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ""
+      "}"  
+    "}"  
   "}";
 
   #define USE_RULES_TEMPLATE
@@ -2911,49 +2965,76 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
+
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
-  /**
-   * @brief Increasing buffers for the larger controller than default minimums
-   **/
-  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
-  #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
-  #define DB18_SENSOR_MAX                     15
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
-  #define MQTT_MAX_PACKET_SIZE                3000
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define STRIP_SIZE_MAX 10
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-  // #define USE_MODULE_CONTROLLER_HVAC
-  //   #define HEATING_DEVICE_MAX 4
-  //   #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-  // // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+    #define USE_RGB_OUT_BASIC_SHOW_PALETTE
+
+  #define USE_MODULE_CONTROLLER_HVAC
+    #define HEATING_DEVICE_MAX 4
+    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+  // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
 
   #define USE_MODULE_SENSORS_INTERFACE
-    // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-    // #define ENABLE_DEVFEATURE_ADDLOG_FAILED_SENSOR_WAIT_TIME
-                            // #define ENABLE_DEVFEATURE_DS18X_RETRY_IF_NOT_EXPECTED_SENSOR_COUNT
-    #define DS18X20_MAX_SENSORS 12  // #define D_DS18X_EXPECTED_SENSOR_COUNT 12
-  //   #define ENABLE_TEMPLATE_PART__HEATING_DB18_UPSTAIRS
-  //   #define ENABLE_TEMPLATE_PART__HEATING_DB18_DOWNSTAIRS
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define DS18X20_MAX_SENSORS 20
+      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
   // #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
-  // #define USE_MODULE_SENSORS_DHT
-
+  #define USE_MODULE_SENSORS_DHT
               //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on)) 30+ pins == use this to know what has been turned on manually.
               //Also need to add a mains detector for the furnace trigger (orange wire from servos)
               
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+  
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
 
-  // #define USE_MODULE_DRIVERS_INTERFACE
-  // #define USE_MODULE_DRIVERS_RELAY
-              
-  //             // #define USE_MODULE_DISPLAYS_NEXTION
-  //             // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-
-  // // Actual
-  // #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_INV_CTR
-  // #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_INV_CTR
-  // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
-  // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
+  // Actual
+  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
+  #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
 
 
   #define USE_MODULE_TEMPLATE
@@ -2963,14 +3044,13 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"5\":\""  GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\","
-      "\"19\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
-      "\"21\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\","
+      "\"19\":\"" GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  "\","
+      "\"5\":\""  GPIO_NAME_ZONE1_UPSTAIRS_RELAY    "\","
+      "\"21\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\"," // phase out
       "\"18\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_2_CTR   "\"," // DS_DHT 
-      // "\"12\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // US_DHT 
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
@@ -2983,14 +3063,9 @@ Bathroom
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
-      // #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-      //   #ifdef ENABLE_TEMPLATE_PART__HEATING_DB18_UPSTAIRS
-        "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // US_DB - 3 pin
-        // #endif
-        // #ifdef ENABLE_TEMPLATE_PART__HEATING_DB18_DOWNSTAIRS
-        "\"14\":\""  D_GPIO_FUNCTION_DS18X20_2_CTR "\"," // DS_DB - 3 pin
-      //   #endif
-      // #endif    
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+        "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      #endif    
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -3001,39 +3076,21 @@ Bathroom
   /**
    * @brief Drivers and Sensors for HVAC zones
    **/
-  #define D_DEVICE_DRIVER_RELAY_0_NAME "Upstairs"
-  #define D_DEVICE_DRIVER_RELAY_1_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Upstairs"
   #define D_DEVICE_DRIVER_RELAY_2_NAME "Immersion"
   #define D_DEVICE_DRIVER_RELAY_3_NAME "Boiler"
 
-  #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
-  #define D_DEVICE_SENSOR_DHT_1_NAME "Downstairs_DHT"
+  // #define D_DEVICE_SENSOR_DHT_0_NAME "Upstairs_DHT"
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
 
   /**
    * @brief HVAC zones
    **/
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Upstairs"
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Upstairs"
   #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
   #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
-
-  /**
-   * @brief Pin_US 
-   */
-  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "Immersion_Heater"
-  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,255,136,105,53,22,4,114]"
-
-  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "Tank_Top"
-  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,255,50,176,193,23,4,197]"
-
-  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "Tank_Middle"
-  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,255,216,108,53,22,4,102]"
-
-  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "Tank_Bottom"
-  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,255,162,167,53,22,4,27]"
-
-  #define D_DEVICE_SENSOR_DB18S20_05_NAME        "Tank_Out"
-  #define D_DEVICE_SENSOR_DB18S20_05_ADDRESS     "[40,255,219,93,53,22,4,239]"
 
   /** 
    * Pin_DS
@@ -3077,12 +3134,6 @@ Bathroom
         "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        // Upstairs
-        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\","
         // Downstairs
         "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\","
@@ -3095,7 +3146,6 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
       "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
@@ -3107,12 +3157,6 @@ Bathroom
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
-        // Upstairs
-        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ","      
-        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\":" D_DEVICE_SENSOR_DB18S20_05_ADDRESS ","  
         // Downstairs
         "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\":" D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\":" D_DEVICE_SENSOR_DB18S20_07_ADDRESS ","
@@ -3125,33 +3169,12 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\":" D_DEVICE_SENSOR_DB18S20_14_ADDRESS ""
       "}"  
     "},"
-    // "\"" D_JSON_SENSORADDRESS "\":{"
-    //   "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":[" 
-    //     // Upstairs
-    //     D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_04_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_05_ADDRESS ","
-    //     // Downstairs
-    //     D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_07_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_08_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_09_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_10_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_11_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_12_ADDRESS ","
-    //     D_DEVICE_SENSOR_DB18S20_13_ADDRESS ""
-    //   "]"  
-    // "},"
     "\"" "HVACZone" "\":{"
       "\"" "SetSensor" "\":["
-        // "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
-        // "\"" D_DEVICE_SENSOR_DHT_1_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\"," //debug fix
-        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\"," //debig fix
-        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\""
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\""
       "],"
       "\"" "SetOutput" "\":["
         "{"
@@ -3176,8 +3199,40 @@ Bathroom
         "}"
       "]"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":60,\"TelePeriod\":60,\"ConfigPeriod\":60}"  
   "}";
+
+  
+  #ifdef USE_RGB_OUT_BASIC_SHOW_PALETTE
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_SK6812_METHOD_DEFAULT
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "AnimationMode":"Effects",
+    "ColourOrder":"grbw",
+    "ColourPalette":"Rgbcct 01",
+    "Effects": {
+      "Function":0,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "SegColour": {
+      "Hue": 120,
+      "Sat": 100,
+      "SubType":3
+    },
+    "BrightnessRGB_255": 1,
+    "BrightnessCCT_255": 1
+  }
+  )=====";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+  #endif // USE_RGB_OUT_LANDING_PANEL
   
 #endif
 
@@ -3598,6 +3653,9 @@ Bathroom
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -3610,64 +3668,40 @@ Bathroom
   // #define USE_MODULE_LIGHTS_INTERFACE
   // #define USE_MODULE_LIGHTS_ANIMATOR
   // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
   //   #define STRIP_SIZE_MAX 100
-    
-  //   #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-  //   #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+  //   #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+  //   /********* Group: Needed to build ************************/
+  //   #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+  //   /********* Group: Ready for full integration ************************/
+  //   // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   /********* Group: Testing ************************/
+  //   #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+  //   #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+  //   #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+  //   #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+  //   #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+  //   // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+  //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  //   // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  //   // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+  //   /********* Group: Debug options only ************************/
   //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  //   #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-  //   #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS  
-
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  //   #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+  //   #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+  //   #define ENABLE_DEBUG_SERIAL
+  //   // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+  //   // #define ENABLE_LOG_LEVEL_DEBUG
+  //   // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+  //   // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
     
-  #define USE_MODULE_LIGHTS_INTERFACE
-    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  // #define STRIP_SIZE_MAX 1500 // 10hz with no network
-  #define STRIP_SIZE_MAX 101 // 17hz == I need to use GPIO digital pins to work on speeding up my code. Likely how I convert colours is too slow, need to speed optimise it? (reduce methods, remove HSB colour codes?)
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  // #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    #define ENABLE_DEVFEATURE_ANIMATOR_RESET_IF_REQUIRED
-    
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS2812" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    "\"ColourPalette\":15," 
-    "\"PaletteEdit\": {"
-      "\"ColourPalette\": 15,"
-      "\"Data\": ["
-        "4,5,0,0,0,"
-        "252, 3, 45,"
-        "252, 40, 3,"
-        "252, 3, 177,"
-        "128, 1, 122"
-      "]"
-    "},"
-    "\"Effects\":{"
-      "\"Function\":\"Slow Glow\""
-    "},"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":100,"
-    "\"TimeOn\":3600" // 1 hour
-  "}";
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -3682,7 +3716,7 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"," // ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE forcing this, not working by pinused
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -3705,12 +3739,35 @@ Bathroom
       "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"  
-    "},"
-    "\"" D_JSON_ENERGY "\":{"
-      "\"DeviceCount\":12"    
     "}"
   "}";
 
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"WS28XX",
+    "AnimationMode":"Effects",
+    "ColourOrder":"grb",
+    "ColourPalette":"Christmas 01",
+    "Effects": {
+      "Function":1,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "SegColour": {
+      "Hue": 120,
+      "Sat": 100,
+      "SubType":3
+    },
+    "BrightnessRGB_255": 255,
+    "BrightnessCCT_255": 1
+  }
+  )=====";
   
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
@@ -3900,8 +3957,13 @@ Bathroom
 #ifdef DEVICE_OILFURNACE
   #define DEVICENAME_CTR          "oilfurnace"
   #define DEVICENAME_FRIENDLY_CTR "Oil Furnace"
-  #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define DEVICENAME_ROOMHINT_CTR "Garage"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_CORE_RULES
 
@@ -3917,7 +3979,7 @@ Bathroom
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_DS18X
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_BH1750
   // #define USE_MODULE_SENSORS_MOTION // add this       == motion added with esp32 upgrade
@@ -3944,7 +4006,7 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
       "\"35\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
       #endif
-      #ifdef USE_MODULE_SENSORS_DS18X
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #endif
       "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
@@ -3964,6 +4026,15 @@ Bathroom
   #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Garage"
   #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
 
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME     D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS "[40,0,37,149,240,1,60,0]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME     D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS "[40,124,194,149,240,1,60,110]"
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME     D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS "[40,199,255,149,240,1,60,249]"
+  #define D_DEVICE_SENSOR_DB18S20_04_NAME     D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG
+  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS "[40,246,153,149,240,1,60,174]"
+  
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
@@ -3972,10 +4043,10 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
@@ -3991,16 +4062,16 @@ Bathroom
       "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"
+   "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["    
-        "[40,0,37,149,240,1,60,0],"
-        "[40,124,194,149,240,1,60,110],"
-        "[40,199,255,149,240,1,60,249],"
-        "[40,246,153,149,240,1,60,174]"
-      "]"  
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
+      "}"  
+    "}"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"  
   "}";
 
   
@@ -5034,6 +5105,90 @@ Bathroom
 
 #endif
 
+
+/**
+ * Device Type: Shelly 1
+ * Modules:   
+ *  - 2 Mains " D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "
+ *  - 2 Mains Inputs
+ *  - Energy monitoring (Voltage, Current and power)
+ *  - Reset button on PCB
+ *  - LED
+ * Notes: Requires neutral
+ * 
+ * Default configuration
+ * Mode A (Inputs are switches eg basic wall switch)
+ * Mode B (Inputs are motion events eg security light)
+ * Mode C (If "SwitchChanges" then "SetRelayToSwitchState")
+ * 
+ * */
+#ifdef DEVICE_ENSUITE_CEILING_EXTRACTOR_FAN
+  #define DEVICENAME_CTR          "ensuite_extractor_fan"
+  #define DEVICENAME_FRIENDLY_CTR "Shelly1 Ensuite Extractor Fan"
+  #define DEVICENAME_ROOMHINT_CTR "Ensuite"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+   
+  #define DEVICE_DEFAULT_CONFIGURATION_MODE_C_OUTPUT_FOLLOWS_SWITCH_ON_CHANGE
+
+  #define USE_MODULE_NETWORKS_MQTT
+
+  #define USE_MODULE_CORE_RULES
+    #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 60
+    #define ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY1_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+    
+  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Fan"
+  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Fan" 
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_C_OUTPUT_FOLLOWS_SWITCH_ON_CHANGE
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  R"=====(
+  {
+    "AddRule": {
+      "Default":["Switch1Change->Relay1Follow"]
+    }
+  }
+  )=====";
+  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_C_OUTPUT_FOLLOWS_SWITCH_ON_CHANGE
+
+#endif
+
+
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
 ****** Main bathroom ****************************************************************************************************************************************************
@@ -5139,6 +5294,29 @@ Bathroom
 /** NEW SYSTEM WITH FINAL WIRING
  * @description: 
  * 
+ * Landing Panel
+ *  ** PIR Detector for Landing
+ *  ** Nextion Panel
+ *  ** BME
+ *  ** 4C RGB strip with upper/lower section
+ * MasterBedroom
+ *  ** BME 
+ * Hotpress
+ *  ** Button to be mounted on side of box
+ *  ** Three LEDS to be mounted on box lid
+ *  ** Mount box with rear hole and wood stand off
+ *  ** Keep external 5V source (so it is away from clothes)
+ *  ** OLED on side to show basic heating info as backup (not really needed)
+ *  ** Water Tank RGB Strip to only show when button is pressed and only for 1 minute
+ *  ** All water sensors
+ *  ** Change relay box to the black one with glands. Use DB18 black wire for relay 5v trigger
+ * 
+ * Aim to close box and only open if wiring needs changing. 
+ * Leave USB hanging out and below for easy reflash if needed via laptop
+ * Clean and hover everything else out
+ * 
+ * 
+ * 
  * 
  * "*" pin = confirmed soldering
  * Ethernet      Function       ESP32         Note        
@@ -5204,8 +5382,8 @@ Bathroom
  * 
  * *********************************************************************************************************************************************************************************
 */
-#ifdef DEVICE_IMMERSION_SENSOR_PANEL //new 2023 system unified
-  #define DEVICENAME_CTR          "immersion_sensor_panel"
+#ifdef DEVICE_IMMERSION_CONTROL_PANEL //new 2023 system unified
+  #define DEVICENAME_CTR          "immersion_controller"
   #define DEVICENAME_FRIENDLY_CTR "Immersion Heater Panel"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
@@ -5219,12 +5397,33 @@ Bathroom
   // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
   // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 110
   // #define ENABLE_DEBUG_FUNCTION_NAMES
+  /*
   
+  {
+  "HeatingDevice": "Immersion",
+  "HVAC": {
+    "TimeOn": 60
+  }
+}
+  
+
+
+  
+  */
+
+// Change to only update the immersion nextion every 10 seconds to reduce load on esp32 to check for stability
+
   #define DISABLE_SLEEP
 
   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
   #define USE_MODULE_CORE_RULES
+
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
+  #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
+  #define DB18_SENSOR_MAX                     15
+  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
+  #define MQTT_MAX_PACKET_SIZE                3000
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -5242,7 +5441,7 @@ Bathroom
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define STRIP_SIZE_MAX 100
+    #define STRIP_SIZE_MAX 40
     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -5282,6 +5481,14 @@ Bathroom
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
     #define NEXTION_DEFAULT_PAGE_NUMBER 1
+
+    
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+    #define USE_MODULE_DISPLAYS_NEXTION_V2
+    #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+
   
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
@@ -5295,7 +5502,7 @@ Bathroom
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
   #define USE_MODULE_DRIVERS_LEDS
-    #define MAX_RELAYS 3
+    #define MAX_RELAYS 1
     
   /**
    * @brief 
@@ -5306,6 +5513,12 @@ Bathroom
     // #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR  //should this be a "controller", or via interface "getTemp convert to heatmap"
     // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 60  
     // #define USE_DEVFEATURE_SENSOR_COLOURS_TOP_TO_BOTTOM
+
+  #define USE_MODULE_CONTROLLER_HVAC
+    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+    #define HEATING_DEVICE_MAX 1
+
+  #define USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
      
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -5314,7 +5527,7 @@ Bathroom
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\"," // Immersion = Also add additonal LED with relay pin
+      "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
@@ -5333,7 +5546,7 @@ Bathroom
         // "\"26\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
         // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
         // "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
-        // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Brown - Unused
+        // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
         #ifdef USE_RGB_OUT_LANDING_PANEL
         "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
         #endif
@@ -5351,6 +5564,7 @@ Bathroom
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"33\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_LEDS
       "\"12\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\"," 
@@ -5403,12 +5617,14 @@ Bathroom
   #define D_DEVICE_SENSOR_DB18S20_19_NAME        "FeedRed"
   #define D_DEVICE_SENSOR_DB18S20_19_ADDRESS     "[40,0,149,87,59,71,5,240]"
   
-  #define D_DEVICE_DRIVER_RELAY_01_NAME "ImmersionHeater"
+  #define D_DEVICE_DRIVER_RELAY_01_NAME "Immersion"
   
   #define D_DEVICE_SENSOR_MOTION_STAIRS_FRIENDLY_NAME_LONG "Stairs"
   #define D_DEVICE_SENSOR_MOTION_LANDING_FRIENDLY_NAME_LONG "Landing"
   #define D_DEVICE_SENSOR_BME_LANDING_NAME       "Landing"
   #define D_DEVICE_SENSOR_BME_MASTERBEDROOM_NAME "Master Bedroom"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Immersion"
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -5446,7 +5662,10 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_16_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_17_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_18_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_19_NAME "\""
+        "\"" D_DEVICE_SENSOR_DB18S20_19_NAME "\""      
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
@@ -5470,7 +5689,19 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_19_NAME "\":" D_DEVICE_SENSOR_DB18S20_19_ADDRESS ""
       "}"  
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_01_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "}"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
   #ifdef USE_RGB_OUT_LANDING_PANEL
@@ -5483,9 +5714,9 @@ Bathroom
     "HardwareType":"SK6812",
     "AnimationMode":"Effects",
     "ColourOrder":"grbw",
-    "ColourPalette":"Rgbcct 01",
+    "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function":0,
+      "Function":1,
       "Intensity":50
     },
     "Transition": {
@@ -5497,8 +5728,8 @@ Bathroom
       "Sat": 100,
       "SubType":3
     },
-    "BrightnessRGB_255": 1,
-    "BrightnessCCT_255": 1
+    "BrightnessRGB_255": 255,
+    "BrightnessCCT_255": 255
   }
   )=====";
   #endif // USE_MODULE_LIGHTS_INTERFACE
