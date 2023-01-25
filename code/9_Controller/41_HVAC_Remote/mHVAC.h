@@ -299,7 +299,7 @@ class mHVAC :
     const char* GetClimateSensorNameLongbyIDCtr(uint8_t sensor_id, char* buffer, uint8_t buflen);
     float GetClimateTempsRawByID(uint8_t sensor_id);
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required);
+    uint8_t ConstructJSON_Settings(uint8_t json_level, bool json_appending);
 
 
     void FunctionHandler_Init();
@@ -352,7 +352,7 @@ class mHVAC :
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     

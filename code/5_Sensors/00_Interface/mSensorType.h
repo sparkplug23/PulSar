@@ -21,6 +21,8 @@
 #define _M_SENSOR_TYPE_H
 
 #include <vector>
+#include <String>
+#include <Arduino.h>
 
 
 /* Constants */
@@ -38,8 +40,6 @@
 // #define SENSOR_TYPE_INVALID_READING -2.0f 
 // #define SENSOR_TYPE_INVALID_READING std::numeric_limits<float>::min;
 #define SENSOR_TYPE_INVALID_READING -10000.0f//std::numeric_limits<float>::min;
-
-
 /**
  * List of sensor types
  * */
@@ -125,9 +125,20 @@ typedef enum
 
 
 
-  SENSOR_TYPE_LENGTH_ID // 256 max types
-} sensors_type_t2;
+  SENSOR_TYPE_FLOATS_LENGTH_ID // 256 max types
+} sensors_type_floats_t;
 
+typedef enum
+{
+  SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID = SENSOR_TYPE_FLOATS_LENGTH_ID,
+
+
+  SENSOR_TYPE_LENGTH_ID // 256 max types
+} sensors_type_string_t;
+
+// String invalid = String("invalid");
+
+// #define SENSOR_STRING_TYPE_INVALID String("invalid")
 
 
 /**
@@ -136,34 +147,73 @@ typedef enum
 
 /**
  * @brief typedef struct uses vectors to pass sensor_values around with sensor_type
+ * 
+ * I might need to add a construct/destructor to clean up
  * */
 typedef struct
 {
-  std::vector<uint8_t> type;
-  std::vector<float> data;
+  std::vector<uint8_t> sensor_type;
+
+  std::vector<float> data_f;
+  std::vector<String> data_s;
+
+  String error = String("error");
+
+  // std::vector<uint8_t> 
+
   uint8_t sensor_id;
   // Do I need these? perhaps just so I can pass that information back, or, assume detailed info like this will not be passed but accessed only directly within module
   float    max_value;                       /**< maximum value of this sensor's value in SI units */
   float    min_value;                       /**< minimum value of this sensor's value in SI units */
   float    resolution;                      /**< smallest difference between two values reported by this sensor */
+
   /**
    * @brief If more than one variable is used, return its value
    * @param type sensor_type identifier
    * @param index default is 1 (ie only one instance of that sensor_type), if more than 1 exist (eg multiple temp sensor readings) then indexing can return which one
    * */
-  float GetValue(uint8_t type_search, uint8_t index = 1)
+
+  float GetFloat(uint8_t type_search, uint8_t index = 1) // phase name out
   {    
-    for(uint8_t i=0;i<type.size();i++)
+    for(uint8_t i=0;i<sensor_type.size();i++)
     {
       // I will want to expand this method so it can return if more than 1 of the same data_type exists
-      if(type_search == type[i])
+      if(type_search == sensor_type[i])
       {
         // Serial.printf("type == type[i] %d %d %d %d %d\n\r",type,type[i],i,type.size(),(int)data[1]);
-        return data[i];
+        if(type_search<SENSOR_TYPE_FLOATS_LENGTH_ID) // sanity check type is float
+        {
+          return data_f[i];
+        }
       }
     }
     return SENSOR_TYPE_INVALID_READING; //invalid reading
   };
+
+  String& GetString(uint8_t type_search, uint8_t index = 1) // phase name out
+  {    
+    for(uint8_t i=0;i<sensor_type.size();i++)
+    {
+      // I will want to expand this method so it can return if more than 1 of the same data_type exists
+      if(type_search == sensor_type[i])
+      {
+
+        // data_s.push_back("Test1");
+        // Serial.printf("type == type[%d] %s\n\r", i, data_s[0]);
+
+        if(
+          (type_search >= SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID) && // sanity check type is float
+          (type_search <  SENSOR_TYPE_LENGTH_ID)
+        ){
+          return data_s[0];
+        }
+      }
+    }
+    return error; //invalid reading
+  };
+
+
+
   /**
    * @brief If more than one variable is used, return its value
    * @param type sensor_type identifier
@@ -171,10 +221,10 @@ typedef struct
    * */
   bool HasValue(uint8_t type_search, uint8_t index = 1)
   {    
-    for(uint8_t i=0;i<type.size();i++)
+    for(uint8_t i=0;i<sensor_type.size();i++)
     {
       // I will want to expand this method so it can return if more than 1 of the same data_type exists
-      if(type_search == type[i])
+      if(type_search == sensor_type[i])
       {
         // Serial.printf("type == type[i] %d %d %d %d %d\n\r",type,type[i],i,type.size(),(int)data[1]);
         return true;
@@ -182,9 +232,47 @@ typedef struct
     }
     return false; //invalid reading
   };
-  bool Valid()
+
+
+/**
+ * @brief 
+ * 
+ *
+ * 
+ * Note: not only does there need to be data, it also needs to be the right sensor... name change "isFloatWaiting_WithSensorType"
+ * 
+   if((sensor_data = val.GetFloat(type_id)) != SENSOR_TYPE_INVALID_READING) // "has float needs to perform this check!"
+
+
+Temporary fix, not most efficient code but makes other calls easier. Clean up
+
+  **/        
+  bool isFloatWaiting_WithSensorType(uint8_t type_search)
   {
-    return !data.empty();
+    if(GetFloat(type_search) != SENSOR_TYPE_INVALID_READING)
+    {
+      return true;
+    }
+
+    return false;
+
+
+  }
+
+
+  bool HasString(uint8_t index)
+  {
+    return index < data_s.size() ? true : false;
+  }
+
+
+  // bool Valid()
+  // {
+  //   return (!data_f.empty() && !data_s.empty());
+  // };
+  bool Valid() // valid check needs to be phased out with "AnyValid" and then "HasName" will work out which 
+  {
+    return !data_f.empty();// || !data_s.empty()) ? true : false; //(!data_f.empty() || !data_s.empty());
   };
 } sensors_reading_t;
 

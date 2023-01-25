@@ -67,11 +67,8 @@ int8_t mRemoteDevice::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); 
     break;
-    case FUNC_MQTT_HANDLERS_RESET:
-      MQTTHandler_Init();
-    break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -194,7 +191,7 @@ void mRemoteDevice::EveryLoop(){
 ********************************************************************************************************************************************/
 
 
-uint8_t mRemoteDevice::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mRemoteDevice::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JBI->Add("SensorCount", settings.sensor_active_count);
@@ -209,7 +206,8 @@ uint8_t mRemoteDevice::ConstructJSON_Settings(uint8_t json_level, bool json_obje
 
 // /************ CONSTRUCT JSON BUILDERS *****************************************************************************************************************************/
 
-uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
+{
 
   char buffer[50];
 
@@ -305,7 +303,7 @@ void mRemoteDevice::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mRemoteDevice::MQTTHandler_Set_TelePeriod()
+void mRemoteDevice::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

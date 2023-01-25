@@ -87,100 +87,6 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
     case FUNC_EVERY_FIVE_SECOND:{
 
 
-      // #ifdef ENABLE_LOG_LEVEL_INFO
-      //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d"), Settings.bootcount);
-      // #endif// ENABLE_LOG_LEVEL_INFO
-    // Function_Template_Load();
-
-#ifdef ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
-
-  D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST, PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  #endif // ENABLE_LOG_LEVEL_INFO
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-
-  
-
-  D_DATA_BUFFER_CLEAR();
-
-  // char buffer_unescaped[100];
-  
-  // pCONT_sup->GetTextIndexed(
-  //   buffer_unescaped, 
-  //   sizeof(buffer_unescaped), 
-  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
-  //   pCONT_rules->jsonbuffer.data
-  // ); 
-
-  // for(int i=0;i<strlen(buffer_unescaped);i++){
-  //   // if(buffer_unescaped[i] == '\"'){
-  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
-  //   // }else{    
-  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
-  //   // }
-  // }
-  
-  // char buffer_unescaped[100];
-  
-  pCONT_sup->GetTextIndexed(
-    data_buffer.payload.ctr, 
-    sizeof(data_buffer.payload.ctr), 
-    pCONT_rules->rules[0].command.json_commands_dlist_id, 
-    pCONT_rules->jsonbuffer.data
-  ); 
-  data_buffer.payload.len += strlen(data_buffer.payload.ctr);
-
-  // for(int i=0;i<strlen(buffer_unescaped);i++){
-  //   // if(buffer_unescaped[i] == '\"'){
-  //   //   data_buffer.payload.len+=sprintf(data_buffer.payload.ctr+data_buffer.payload.len,"\\\"");
-  //   // }else{    
-  //    data_buffer.payload.ctr[data_buffer.payload.len++] = buffer_unescaped[i];
-  //   // }
-  // }
-  
-
-  // sprintf(data_buffer.payload.ctr,"\"");
-  
-  // pCONT_sup->GetTextIndexed(
-  //   data_buffer.payload.ctr+strlen(data_buffer.payload.ctr), 
-  //   sizeof(data_buffer.payload.ctr), 
-  //   pCONT_rules->rules[0].command.json_commands_dlist_id, 
-  //   pCONT_rules->jsonbuffer.data
-  // ); 
-  // sprintf(data_buffer.payload.ctr+strlen(data_buffer.payload.ctr),"\"");
-
-  AddLog(LOG_LEVEL_TEST,PSTR("FUNC_JSON_COMMAND_ID1=%s"),data_buffer.payload.ctr);
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-  
-  // snprintf(data_buffer.payload.ctr,pCONT_rules->rules[0].command.);
-  // // memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
-  // data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-#endif // ENABLE_DEVFEATURE_PERIODIC_RULE_FILLING
-
-
-
-      // int8_t device_id;
-      // int8_t class_id = E M_MODULE_DRIVERS_RELAY_ID;
-      // AddLog(LOG_LEVEL_INFO,PSTR("FUNC_EVERY_FIVE_SECOND\n\r\n\r"));
-
-      // int16_t device_id_found = GetDeviceIDbyName("Socket",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-      // device_id_found = GetDeviceIDbyName("Plug",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-      // device_id_found = GetDeviceIDbyName("Plug2",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
-
-      // device_id_found = GetDeviceIDbyName("Plug3",pCONT_set->Settings.device_name_buffer.name_buffer,&device_id,&class_id);
-      // AddLog(LOG_LEVEL_INFO,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
     }break;
 
@@ -350,7 +256,6 @@ const char* mSettings::GetTaskName(uint8_t task, char* buffer){
     case FUNC_MQTT_DISCONNECTED:                      return PM_FUNC_MQTT_DISCONNECTED_CTR;
     case FUNC_MQTT_COMMAND:                           return PM_FUNC_MQTT_COMMAND_CTR;
     case FUNC_MQTT_SENDER:                            return PM_FUNC_MQTT_SENDER_CTR;
-    case FUNC_MQTT_HANDLERS_RESET:                    return PM_FUNC_MQTT_HANDLERS_RESET_CTR;
     case FUNC_MQTT_HANDLERS_INIT:                     return PM_FUNC_MQTT_HANDLERS_INIT_CTR;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:       return PM_FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
     case FUNC_SET_POWER:                              return PM_FUNC_SET_POWER_CTR;
@@ -418,7 +323,7 @@ void mSettings::Function_Template_Load(){
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  // AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
@@ -426,24 +331,6 @@ void mSettings::Function_Template_Load(){
 
   boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
-
-
-  #ifdef USE_RULES_TEMPLATE
-  // Read into local
-  D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
-  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR("RULES_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  ALOG_DBM( PSTR("RULES_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  #endif // ENABLE_LOG_LEVEL_INFO
-
-  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
-//IF TASKER RESULT WAS TRUE, THEN SUCCESS
-  boot_status.rules_template_parse_success = 1;
-  #endif //USE_RULES_TEMPLATE
-
   
 }
 

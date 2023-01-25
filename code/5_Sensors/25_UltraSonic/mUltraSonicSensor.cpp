@@ -239,8 +239,8 @@ float mUltraSonicSensor::GetSpeedOfSoundInMetres()
       int tempsensorid = -1;
       float ambient_temperature;
       if((tempsensorid=pCONT_set->GetDeviceIDbyName("SpeedOfSound_Ambient",0,(int8_t) /*EM_MODULE_SENSORS_DB18S20_ID*/ pCONT_db18->GetModuleUniqueID()))>=0){
-          if(pCONT_msdb18->sensor[tempsensorid].reading.isvalid){
-          ambient_temperature = pCONT_msdb18->sensor[tempsensorid].reading.val;
+          if(pCONT_db18->sensor[tempsensorid].reading.isvalid){
+          ambient_temperature = pCONT_db18->sensor[tempsensorid].reading.val;
           
         AddLog(LOG_LEVEL_ERROR, PSTR("ambient_temperature=%d"),(int)ambient_temperature);
           // Reduce frequency of updates to stop data jumps
@@ -568,11 +568,10 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break; 
     case FUNC_MQTT_SENDER:  
       MQTTHandler_Sender();
@@ -875,12 +874,12 @@ void mUltraSonicSensor::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mUltraSonicSensor::MQTTHandler_Set_TelePeriod(){
+void mUltraSonicSensor::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mUltraSonicSensor::MQTTHandler_Sender(uint8_t mqtt_handler_id){

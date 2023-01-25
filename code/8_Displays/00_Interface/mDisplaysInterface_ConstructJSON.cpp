@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
 
-uint8_t mDisplaysInterface::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mDisplaysInterface::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
 
@@ -26,7 +26,7 @@ uint8_t mDisplaysInterface::ConstructJSON_Settings(uint8_t json_level, bool json
 }
 
 
-uint8_t mDisplaysInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mDisplaysInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);

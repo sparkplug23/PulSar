@@ -44,11 +44,10 @@ int8_t mHeatingStripColour_Understairs::Tasker(uint8_t function, JsonParserObjec
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -139,7 +138,7 @@ void mHeatingStripColour_Understairs::Every_Second()
   {
 
     if(pixel_info[i].flag_blink_state){
-      pixel_info[i].colour = pCONT_iLight->GetColourValueUsingMaps(0);//pCONT_hvac->zone[i].sensor.temperature);
+      pixel_info[i].colour = pCONT_iLight->GetColourValueUsingMaps_FullBrightness(0);//pCONT_hvac->zone[i].sensor.temperature);
     }else{
       pixel_info[i].colour = RgbcctColor(0,0,0,50,50);
     }
@@ -188,7 +187,7 @@ void mHeatingStripColour_Understairs::Every_Second()
 }
 
 
-uint8_t mHeatingStripColour_Understairs::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mHeatingStripColour_Understairs::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
   
@@ -288,7 +287,7 @@ void mHeatingStripColour_Understairs::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mHeatingStripColour_Understairs::MQTTHandler_Set_TelePeriod()
+void mHeatingStripColour_Understairs::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

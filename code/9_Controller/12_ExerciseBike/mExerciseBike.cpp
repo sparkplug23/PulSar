@@ -99,11 +99,8 @@ void mExerciseBike::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
-    case FUNC_MQTT_HANDLERS_RESET:
-      // Reset to the initial parameters
-    break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break;
     case FUNC_JSON_COMMAND:
       //parse_JSONCommand();
@@ -346,7 +343,7 @@ int8_t mExerciseBike::parse_JSONCommand(){ //parse_Command() and pass packet (to
 
 
 
-uint8_t mExerciseBike::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mExerciseBike::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   D_DATA_BUFFER_CLEAR();
   DynamicJsonDocument doc(250);
@@ -473,13 +470,13 @@ void mExerciseBike::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mExerciseBike::MQTTHandler_Set_TelePeriod(){
+void mExerciseBike::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_lightstate_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 

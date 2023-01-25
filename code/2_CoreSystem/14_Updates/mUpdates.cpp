@@ -65,11 +65,10 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -126,7 +125,7 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj){
 } // END Tasker
 
 
-uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mUpdates::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   // Active rgbcct palette used as scene
 
@@ -200,14 +199,14 @@ void mUpdates::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mUpdates::MQTTHandler_Set_TelePeriod(){
+void mUpdates::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 //   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mUpdates::MQTTHandler_Sender(uint8_t mqtt_handler_id){

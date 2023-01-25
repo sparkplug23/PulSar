@@ -64,11 +64,11 @@ class mSensorsDHT :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
-      if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
-      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-      value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-      value->data.push_back(sensor[index].instant.temperature);
-      value->data.push_back(sensor[index].instant.humidity);
+      if(index > MAX_SENSORS-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      value->data_f.push_back(sensor[index].instant.temperature);
+      value->sensor_type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+      value->data_f.push_back(sensor[index].instant.humidity);
       value->sensor_id = index;
     };
 
@@ -160,13 +160,13 @@ class mSensorsDHT :
 
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSensorsDHT> mqtthandler_settings_teleperiod;

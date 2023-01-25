@@ -120,7 +120,7 @@ struct handler {
   const char*   postfix_topic;
   uint8_t       handler_id = 0;
   Handler_Flags flags;
-  uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_object_start_end_required); // member-function to sender with two args. Extra "json_object_start_end_required" will allow calling constructjsons directly and adding them to another without closing the main json object
+  uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending); // member-function to sender with two args. Extra "json_appending" will allow calling constructjsons directly and adding them to another without closing the main json object
 };
 
 #include "PubSubClient.h"
@@ -180,6 +180,7 @@ class mMQTT :
 
 
     void DiscoverServer(void);
+    void Send_LWT_Online();
 
     struct CONNECTION_MAINTAINER_PARAMETERS{
 
@@ -296,18 +297,11 @@ class mMQTT :
     {
       
       // Sanity check
-      if(handler_ptr == nullptr){
+      if(handler_ptr == nullptr)
+      {
         return;
       }
       
-      // Block non matching ids
-      // if(optional_desired_id>=0)  // need to change =0 default to -1
-      // {
-      //   if(optional_desired_id != handler_ptr->handler_id)
-      //     return;
-      // }
-
-
       #ifdef ENABLE_ADVANCED_DEBUGGING
         #ifndef DISABLE_SERIAL_LOGGING
         // AddLog(LOG_LEVEL_DEBUG_LOWLEVEL,PSTR(D_LOG_TEST " MQQTHandler_System_Sender %d"),status_id);
@@ -315,9 +309,15 @@ class mMQTT :
         #endif
       #endif
       
-      #ifdef ENABLE_DEBUG_MESSAGE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+      // // #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+      // if(class_id == 12)
+      // {
+      //   Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
+      // }
+      // // #endif // ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+      #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
       Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
-      #endif // ENABLE_DEBUG_MESSAGE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+      #endif // ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
 
       if(handler_ptr->flags.PeriodicEnabled){
         if(ABS_FUNCTION(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
@@ -344,10 +344,10 @@ class mMQTT :
         // use return flag for if mqtt needs sent, useful with ifchanged
         uint8_t fSendPayload = (class_ptr.*handler_ptr->ConstructJSON_function)(handler_ptr->json_level, true); //fSendPayload as uint8_t is what I return, cant be length > 255
          
-        if(fSendPayload > 1){ 
-          // Serial.printf("fSendPayload %d: Not set!\n\r", fSendPayload); Serial.flush();
-          fSendPayload= 0; 
-        } // to fix when return was not used
+        // if(fSendPayload > 1){ 
+        //   // Serial.printf("fSendPayload \"%s\"\n\r", fSendPayload); Serial.flush();
+        //   fSendPayload= 0; 
+        // } // to fix when return was not used
 
         // Serial.printf("fSendPayload=%d\n\r",fSendPayload); Serial.flush();
         

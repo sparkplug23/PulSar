@@ -570,20 +570,20 @@ void WebAppend_Root_RGBPalette();
 
     void UpdateSetOutputs();  
     
-    RgbColor GetColourValueUsingMaps(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
-    RgbColor GetColourValueUsingMapsMaximumBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+    RgbColor GetColourValueUsingMaps_FullBrightness(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+    RgbColor GetColourValueUsingMaps_AdjustedBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-    uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_level = 0, bool json_appending = true);
     #endif
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;

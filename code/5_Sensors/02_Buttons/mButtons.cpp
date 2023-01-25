@@ -65,11 +65,10 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -692,6 +691,194 @@ char* mButtons::IsButtonActiveCtr(uint8_t id, char* buffer, uint8_t buflen){
   }
   return buffer;
 }
+
+
+
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+uint8_t mButtons::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+
+  JsonBuilderI->Start();
+    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.buttons_found);
+  return JsonBuilderI->End();
+
+}
+
+uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
+
+  JsonBuilderI->Start();
+    // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
+
+    JBI->Level_Start("ButtonPressed");
+      JBI->Add("IsButtonActiveCtr", buttons[0].isactive);
+    JBI->Level_End();
+
+
+    /**
+     * @brief New method to show type of press (short/long/multi)
+     **/
+    JBI->Level_Start("Event"); // asumes only one button at a time, will need nicer formatting later (arrays?)
+      JBI->Add("ID", pCONT_rules->event_triggered.device_id);
+      // JBI->Add("func", pCONT_rules->event_triggered.function_id);
+      // JBI->Array_AddArray("data1", pCONT_rules->event_triggered.value.data, pCONT_rules->event_triggered.value.length);
+
+      // [state][type][opt. count]
+      if(pCONT_rules->event_triggered.value.data[1] == INPUT_TYPE_SINGLE_PRESS_ID)
+      {
+        JBI->Add("type", "Single");
+        JBI->Add("count", 1);
+      }
+      if(pCONT_rules->event_triggered.value.data[1] == INPUT_TYPE_SINGLE_HOLD_ID)
+      {
+        JBI->Add("type", "Hold");
+        JBI->Add("count", pCONT_rules->event_triggered.value.data[2]);
+      }
+      if(pCONT_rules->event_triggered.value.data[1] == INPUT_TYPE_MULTIPLE_PRESS_ID)
+      {
+        JBI->Add("type", "Multiple");
+        JBI->Add("count", pCONT_rules->event_triggered.value.data[2]);
+      }
+
+    JBI->End();
+
+
+
+    JBI->Add("pin",    buttons[0].pin);
+    JBI->Add("dpin",   digitalRead(buttons[0].pin));
+    JBI->Array_Start("bit_set_invert");
+      for(int i=0;i<MAX_KEYS;i++){ JBI->Add(bitRead(key_inverted, i)); }
+    JBI->Array_End();
+    JBI->Array_Start("state");
+      for(int i=0;i<MAX_KEYS;i++){ JBI->Add(buttons[i].state); }
+    JBI->Array_End();
+
+  return JsonBuilderI->End();
+
+}
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mButtons::MQTTHandler_Init(){
+
+  struct handler<mButtons>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = SEC_IN_MIN; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mButtons::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = SEC_IN_MIN; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
+
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 10; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mButtons::ConstructJSON_Sensor;
+  
+} //end "MQTTHandler_Init"
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mButtons::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mButtons::MQTTHandler_Set_DefaultPeriodRate()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mButtons::MQTTHandler_Sender(uint8_t id)
+{    
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BUTTONS_ID, handle, id);
+  }
+}
+  
+#endif// USE_MODULE_NETWORK_MQTT
+
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+
+void mButtons::WebAppend_Root_Draw_Table(){
+
+  pCONT_web->WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(settings.buttons_found,"button_table", "Button");
+
+
+}
+
+//append to internal buffer if any root messages table
+void mButtons::WebAppend_Root_Status_Table(){
+
+  char buffer[20];
+
+  JsonBuilderI->Array_Start_P(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR);// Class name
+  for(int row=0;row<settings.buttons_found;row++){
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,row);
+      JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,IsButtonActiveCtr(row, buffer, sizeof(buffer)));//"\"%s\"", IsButtonActiveCtr(row, buffer, sizeof(buffer)));
+      if(IsButtonActive(row)){
+        JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#00ff00"); //make webcolours dlist in progmem!
+      }else{
+        JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#ff0000");
+      }
+    
+    JsonBuilderI->Level_End();
+  }
+  JsonBuilderI->Array_End();
+  
+}
+
+    #endif // USE_MODULE_NETWORK_WEBSERVER
+
+
 
 
 

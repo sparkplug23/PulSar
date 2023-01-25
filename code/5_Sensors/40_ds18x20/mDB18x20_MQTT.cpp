@@ -1,6 +1,6 @@
 #include "mDB18x20.h" 
 
-#ifdef USE_MODULE_SENSORS_DOOR
+#ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
@@ -53,7 +53,7 @@ void mDoorSensor::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mDoorSensor::MQTTHandler_Set_TelePeriod()
+void mDoorSensor::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

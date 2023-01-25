@@ -158,7 +158,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_basic
                           lib/lib_network
                           lib/lib_display
-                          lib/lib_dbx_test 
+                          lib/lib_onewire2023 
                           lib/lib_sensor
                           lib/libg_neopixel
 upload_protocol = espota
@@ -183,7 +183,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_basic
                           lib/lib_network
                           lib/lib_display
-                          lib/lib_dbx_test 
+                          lib/lib_onewire2023 
                           lib/lib_sensor
                           lib/libg_neopixel
 upload_protocol = espota
@@ -256,7 +256,7 @@ upload_port = COM11
 
 [env:wht_display_outbedroom]
 extends = env:tasmota32_base
-build_flags             = ${common32.build_flags} -D DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE -Wcpp -w
+build_flags             = ${common32.build_flags} -D DEVICE_RGBDISPLAY_BEDROOM_DOUBLE_DIGIT -Wcpp -w
 lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug

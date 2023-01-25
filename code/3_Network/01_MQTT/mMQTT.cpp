@@ -298,15 +298,22 @@ void mMQTT::init(void){
    
 }
 
+/**
+ * @brief Connected
+ * 
+ */
+void mMQTT::Send_LWT_Online()
+{
+
+  pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true); // onconnect message
+
+}
 
 
 
 
-
-void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
-
-// DEBUG_LINE_HERE;
-      //  AddLog(LOG_LEVEL_TEST, PSTR("!Mqtt.CheckConnection=%d Reconnecting"),Mqtt.retry_counter);
+void mMQTT::CheckConnection()
+{ DEBUG_PRINT_FUNCTION_NAME;
 
   if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
     if (!MqttIsConnected()) {
@@ -314,16 +321,12 @@ void mMQTT::CheckConnection(){ DEBUG_PRINT_FUNCTION_NAME;
       AddLog(LOG_LEVEL_TEST, PSTR("!MqttIsConnected"));
     #endif //  ENABLE_LOG_LEVEL_INFO
       pCONT_set->global_state.mqtt_down = 1;
-      if (!Mqtt.retry_counter) {        
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-    //     AddLog(LOG_LEVEL_TEST, PSTR("!Mqtt.retry_counter=%d Reconnecting"),Mqtt.retry_counter);
-    // #endif// ENABLE_LOG_LEVEL_INFO
+      if (!Mqtt.retry_counter) 
+      {
         MqttReconnect();
       } else {
         Mqtt.retry_counter--;
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-    //     AddLog(LOG_LEVEL_TEST, PSTR("Mqtt.retry_counter=%d"),Mqtt.retry_counter);
-    // #endif// ENABLE_LOG_LEVEL_INFO
+        ALOG_INF( PSTR("Mqtt.retry_counter=%d") ,Mqtt.retry_counter );
       }
     } else {
       pCONT_set->global_state.mqtt_down = 0;
@@ -373,28 +376,28 @@ void mMQTT::MqttConnected(void)
         // DEBUG_LINE;
       delay(100);
     #endif
-      // DEBUG_LINE;
-    pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic,WILLMESSAGE_ONCONNECT_CTR,true); // onconnect message
-  // DEBUG_LINE;
+    
+    Send_LWT_Online();
+    
     #ifdef USE_MQTT_RETAINED_VERSION_HISTORY_CHECK // for checking version history
       pubsub->subscribe(("TBD_firmware/set/settings/firmware")); //PSTR failure
     #endif
-// DEBUG_LINE;
+    
     // Group name for setting all devices
     pubsub->subscribe(("group_all/#"));//(PSTR("group_all/#"));
-// DEBUG_LINE;
+    
     //pubsub->subscribe("<devicename>/sync"); //namesake sync name
     psubscribe(PSTR(D_MQTT_SYNC "/#"));
-// DEBUG_LINE;
+    
     // //pubsub->subscribe("<devicename>/set/#");
     psubscribe(PSTR(D_MQTT_COMMAND "/#"));
-// DEBUG_LINE;
+    
     connection_maintainer.cConnectionAttempts = 0; // reset
 
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connection SUCCESS!\""));
     #endif// ENABLE_LOG_LEVEL_INFO
-// DEBUG_LINE;
+    
     // if succesful, clear flag
     connection_maintainer.flag_require_reconnection = false;
 
@@ -869,9 +872,9 @@ void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const cha
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
   snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix);  //PSTR may broke this?
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MQTT "topic_ctr=\"%s\""),topic_ctr);
-  #endif// ENABLE_LOG_LEVEL_INFO
+  #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+  ALOG_TRA( PSTR(D_LOG_MQTT "topic_ctr=\"%s\""), topic_ctr );
+  #endif
   
   ppublish(topic_ctr,payload_ctr,retain_flag);
 

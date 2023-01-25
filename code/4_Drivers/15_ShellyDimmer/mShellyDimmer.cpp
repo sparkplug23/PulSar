@@ -155,11 +155,10 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -267,7 +266,7 @@ void mShellyDimmer::RulesEvent_Set_Power(){
 #endif // USE_MODULE_CORE_RULES
 
 
-uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();  
 
@@ -285,7 +284,7 @@ uint8_t mShellyDimmer::ConstructJSON_Settings(uint8_t json_level, bool json_obje
 
 }
 
-uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mShellyDimmer::ConstructJSON_State(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();  
 
@@ -1186,7 +1185,7 @@ void mShellyDimmer::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mShellyDimmer::MQTTHandler_Set_TelePeriod()
+void mShellyDimmer::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -1,5 +1,5 @@
- #ifndef MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_TEMPORARY_H
-#define MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_TEMPORARY_H
+ #ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_TEMPORARY_TEMPLATES_H
+#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_TEMPORARY_TEMPLATES_H
 
 
 /*********************************************************************************************\
@@ -40,11 +40,12 @@
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
 // #define DEVICE_RGBCLOCK_BEDROOM_WALL                             // Make this into an alarm? flashing effect and buzzer/speaker with esp32
-// #define DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
+// #define DEVICE_RGBDISPLAY_BEDROOM_DOUBLE_DIGIT
 // #define DEVICE_BLACK_STAND_LIGHT
 // #define DEVICE_RGBCLOCK_TVROOM
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 // #define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
+// #define DEVICE_HVAC_OIL_RADIATOR
 
 
 
@@ -66,7 +67,7 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
 
-  // #define ENABLE_DEBUG_MESSAGE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
 
 
   #define ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
@@ -351,6 +352,162 @@
   
 #endif
 
+
+/**
+ * New heating controller, designed to work from single device to multizone system
+ * For development of hvac with pzem to monitor power
+ * 
+ * Taken from testbeds for insitu development and openhab integration, this will remain the primary hvac dev code (unless I use a 4 LED tester)
+ * Long USB will be used for always debugging
+ * 
+ * To include:
+ *  - BME? If I could place this on the plug into the wall, it would be elevated heat sensing? with 1m cable
+ *  - Optional Ds18 that can be added to oil heater
+ *  - Relay output (requiring level shifter)
+ *  - PZEM at 5v, via level shifter
+ *  - Power with mains internal? (possible danger with sensors?) -- 
+ *  - Since pzem, this needs to esp32, but good practive for house hvac
+ * 
+ * Use two zones, so second zone can be a remote tester
+ * 
+ * */
+#ifdef DEVICE_HVAC_OIL_RADIATOR 
+  #define DEVICENAME_CTR          "hvac_oil_radiator"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC Oil Radiator with Energy Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  //Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
+  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+  #define USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
+  #define ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS   
+  
+  #define USE_MODULE_SENSORS_INTERFACE  
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #define USE_MODULE_SENSORS_REMOTE_DEVICE
+
+  #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
+  #define REMOTE_SENSOR_JSON_NAME "Bedroom"
+  
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_PZEM004T_V3
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_CONTROLLER_HVAC
+    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+    #define HEATING_DEVICE_MAX 2
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
+      #endif
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"2\":\""  D_GPIO_FUNCTION_REL2_INV_CTR  "\""  // Using Builtin LED
+      #endif  
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "DriverZone0"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "DriverZone1"
+
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Zone0"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Zone1"
+
+  #define D_DEVICE_SENSOR_ZONE_0_NAME "BME0"
+  #define D_DEVICE_SENSOR_ZONE_1_NAME REMOTE_SENSOR_JSON_NAME // tESTING REMOTE SENSOR VIA MQTT (LATER OPTIONS SHOULD INCLUDE DIRECT udp) "BME0"
+
+  #define D_DEVICE_SENSOR_BME_0_NAME "BME0"
+  #define D_DEVICE_SENSOR_BME_1_NAME "BME1"
+
+  #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
+
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
+
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Power"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+      "],"      
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
+        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
+      "]"
+    "},"
+    "\"" D_JSON_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+      "}"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_ZONE_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_ZONE_1_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"" D_JSON_ENERGY "\":{"
+        "\"DeviceCount\":1"    
+    "}"
+  "}";
+  
+#endif
+
+
 #ifdef DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
   #define DEVICENAME_CTR          "bedroom_controller_buttons_01"
   #define DEVICENAME_FRIENDLY_CTR "Bedside Controller for Room 01"
@@ -425,13 +582,22 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  // Cat6 cable in immersion needs shortened
+  #define ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
+
+  // #define ENABLE_LOG_LEVEL__DEBUG_TRACE
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
+  
+  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
+  #define ENABLE_DEVFEATURE_DEVICELIST_DEBUG_WITH_COMMANDS
 
   #define DISABLE_SLEEP
 
   #define USE_MODULE_CORE_RULES
+    #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 5
+    #define ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE
 
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
@@ -444,12 +610,14 @@
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
     #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
     #define USE_MODULE_SENSORS_DHT
     #define USE_MODULE_SENSORS_BME
       #define ENABLE_DEVFEATURE_BME_DUAL_DEVICES
     #define USE_MODULE_SENSORS_BH1750
     #define USE_MODULE_SENSORS_SWITCHES
+    #define USE_MODULE_SENSORS_BUTTONS
     // #define USE_MODULE_SENSORS_MOTION
     #define USE_MODULE_SENSORS_LDR_BASIC
 
@@ -498,7 +666,7 @@
     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-  //   // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+  // //   // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
   //   // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
   // #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
@@ -506,8 +674,11 @@
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define SHOW_SPLASH
-    #define USE_MODULE_DISPLAYS_NEXTION_V2
-    #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  #define USE_MODULE_DISPLAYS_NEXTION
+    // Note from now on, the top few pages will also follow the exaxt same so logging/error pages will always be the same!! 
+    // Any special pages will follow
+    #define NEXTION_DEFAULT_PAGE_NUMBER 2   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
   //   #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
   //   #define ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
@@ -529,6 +700,7 @@
   // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
+
   
 
   // Actual
@@ -597,7 +769,7 @@
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
-      #ifdef USE_MODULE_DISPLAYS_NEXTION_V2
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
@@ -631,11 +803,12 @@
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       #endif
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
       // 14 (Debug Header 4)
       // 12 (Debug Header 5)
       // 13 (Debug Header 6)
       // Can I introduce a way that a comma at the end, does not make a broken json?
+      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -776,24 +949,34 @@
   
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    // "\"AddRuleDefault\":\"Motion0=0\","
-    // MOTION
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0," 
-        "\"State\":\"Follow\""
-      "}"
-    "}"
-  "}";
+  R"=====(
+  {
+    "AddRule": {
+      "Default":["Switch1Change->Relay1Follow"]
+    }
+  }
+  )=====";
+
+  // #define USE_RULES_TEMPLATE
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
+  // "{"
+  //   // "\"AddRuleDefault\":\"Motion0=0\","
+  //   // MOTION
+  //   "\"Rule0\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":\"On\""
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+  //       "\"DeviceName\":0," 
+  //       "\"State\":\"Follow\""
+  //     "}"
+  //   "}"
+  // "}";
 
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
@@ -2206,27 +2389,57 @@
 #endif
 
 
-#ifdef DEVICE_RGBDISPLAY_BEDROOM_OUTSIDE_TEMPERATURE
+#ifdef DEVICE_RGBDISPLAY_BEDROOM_DOUBLE_DIGIT
   #define DEVICENAME_CTR          "rgbdisplay_bedroom_outsidetemp"
   #define DEVICENAME_FRIENDLY_CTR "7-Segment White Display"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 93  
-  
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
+    #define STRIP_SIZE_MAX 93
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define ENABLE_DEVFEATURE_INTERFACELIGHT_NEW_UNIQUE_TIMEON
+    /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2246,25 +2459,23 @@
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","    
-    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
-    "\"" D_JSON_ANIMATIONMODE    "\":\"" D_JSON_EFFECTS "\"," 
-    "\"ColourPalette\":10," 
-    "\"Effects\":{"
-      "\"Function\":\"Clock Basic 01\""
-    "},"
-    "\"Hue\":10,\"Sat\":100,"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"BrightnessRGB\":1"
-  "}";
-
-
+  R"=====(
+  {
+    "HardwareType":"WS2812",
+    "ColourOrder":"grb",
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 01",
+    "Effects": {
+      "Function":1,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
 
 #endif
 
@@ -2479,4 +2690,4 @@
 
 
 
-#endif // MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H
+#endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_TEMPORARY_TEMPLATES_H

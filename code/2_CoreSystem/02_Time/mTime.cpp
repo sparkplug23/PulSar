@@ -81,12 +81,13 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       if(RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
       
       if(
-        (uptime.seconds_nonreset%5)==0
+        ((uptime.seconds_nonreset%5)==0)&&
+        (uptime.seconds_nonreset>20)
       ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
 
 
       if(
-        ((RtcTime.minute%5)==0)&&         //modulo on RTC time ERRORS when NTP stops updating (With network down), needs fixed
+        ((uptime.seconds_nonreset%300)==0)&&
         (uptime.seconds_nonreset>60)
       ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
 
@@ -1256,48 +1257,35 @@ if(buffer == nullptr){ return 0; }
 
 
 const char* mTime::GetBuildDateAndTime(char* buffer, uint8_t buflen)
-{
-  if(buffer == nullptr){ return 0; }
-  sprintf_P(buffer,PSTR("2017-03-07T11:08:02"));
-//   // "2017-03-07T11:08:02" - ISO8601:2004
-  //  char bdt[40];
-//   char *p;
-//   char mdate[] = __DATE__;  // "Mar  7 2017"
-//   char *smonth = mdate;
-//   int day = 0;
-//   int year = 0;
+{ 
+  // "2017-03-07T11:08:02" - ISO8601:2004  
+  char *p;
+  static const char mdate_P[] PROGMEM = __DATE__;  // "Mar  7 2017"
+  char mdate[strlen_P(mdate_P)+1];      // copy on stack first
+  strcpy_P(mdate, mdate_P);
+  char *smonth = mdate;
+  int day = 0;
+  int year = 0;
 
-//   // sscanf(mdate, "%s %d %d", bdt, &day, &year);  // Not implemented in 2.3.0 and probably too much code
-//   uint8_t i = 0;
-//   for (char *str = strtok_r(mdate, " ", &p); str && i < 3; str = strtok_r(nullptr, " ", &p)) {
-//     switch (i++) {
-//     case 0:  // Month
-//       smonth = str;
-//       break;
-//     case 1:  // Day
-//       day = atoi(str);
-//       break;
-//     case 2:  // Year
-//       year = atoi(str);
-//     }
-//   }
-//   int month = (strstr(kMonthNamesEnglish, smonth) -kMonthNamesEnglish) /3 +1;
-//   //snprintf?_P(bdt, sizeof(bdt),
-//   sprintf(bdt,
-//     PSTR("%d" D_YEAR_MONTH_SEPARATOR "%02d" D_MONTH_DAY_SEPARATOR "%02d" D_DATE_TIME_SEPARATOR "%s"),
-//     //year, month, day, __TIME__);
-//     1, 2, 3, __TIME__);
+  uint8_t i = 0;
+  for (char *str = strtok_r(mdate, " ", &p); str && i < 3; str = strtok_r(nullptr, " ", &p)) {
+    switch (i++) {
+    case 0:  // Month
+      smonth = str;
+      break;
+    case 1:  // Day
+      day = atoi(str);
+      break;
+    case 2:  // Year
+      year = atoi(str);
+    }
+  }
+  char MonthNamesEnglish[sizeof(kMonthNamesEnglish)];
+  strcpy_P(MonthNamesEnglish, kMonthNamesEnglish);
+  int month = (strstr(MonthNamesEnglish, smonth) -MonthNamesEnglish) /3 +1;
+  snprintf_P(buffer, buflen, PSTR("%d" D_YEAR_MONTH_SEPARATOR "%02d" D_MONTH_DAY_SEPARATOR "%02d" D_DATE_TIME_SEPARATOR "%s"), year, month, day, PSTR(__TIME__));
+  return buffer;  // 2017-03-07T11:08:02
 
-  // char mdate[] = "__DATE__";  // "Mar  7 2017"
-  // char mday[] = "__TIME__";  // "Mar  7 2017"
-
-
-
-  // sprintf(bdt, PSTR("%sT%s\0"),mdate,mday);
-  // AddLog(LOG_LEVEL_TEST,PSTR("bdt=%s"));
-
-  // return bdt;  // 2017-03-07T11:08:02
-  return buffer;//PSTR("bdt");  // 2017-03-07T11:08:02
 }
 
 
@@ -2172,9 +2160,9 @@ void mTime::RtcPreInit(void) {
 void mTime::WifiPollNtp() {
   static uint8_t ntp_sync_minute = 0;
 
-  ALOG_INF(PSTR("mTime::WifiPollNtp"));
+  // ALOG_INF(PSTR("mTime::WifiPollNtp"));
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   
   // if (TasmotaGlobal.global_state.network_down || Rtc.user_time_entry) { return; }
   if(pCONT_set->global_state.wifi_down){ 

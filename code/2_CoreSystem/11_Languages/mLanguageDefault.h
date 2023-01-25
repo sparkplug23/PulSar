@@ -379,6 +379,9 @@
 #define D_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_CTR "sidedoor_lights"
 #define D_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS_FRIENDLY_CTR "sidedoor_lights"
 
+#define D_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL_CTR "immersion_panel"
+#define D_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL_FRIENDLY_CTR "immersion_panel"
+
 
 /**
  * Time
@@ -1866,6 +1869,7 @@
 #define D_JSON_TIME_MS "TimeMs"
 #define D_JSON_TIME_SECS "TimeSecs"
 #define D_JSON_TIME_ON "TimeOn"
+#define D_JSON_ADD_TIME_ON "AddTimeOn"
 #define D_JSON_TIME_ON_SECS "TimeOnSecs"
 #define D_JSON_TIME_OFF_THEN_ON_SECS "TimeOffThenOnSecs"
 #define D_JSON_TIME_ON_MINUTES "TimeOnMins"

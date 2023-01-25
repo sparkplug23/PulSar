@@ -399,123 +399,379 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 // if unique_module_id is nullptr (default value), then ignore matching class first and return first instance of device name
 // if unique_module_id is passed, then limit matching results to include that class
 
-/**
- * @brief 
- * 
- * @note Searches the buffer for the matched name, counting each delimeter when checked, returning the correct delim position when found (also only counts when class should match)
- * 
- * @param name_tofind 
- * @param unique_module_id Should be unique value (ie 4*1000+list or 4002 for relay) and *NOT* the EM_LIST array value
- * @return int16_t 
- */
+
+
+// #if defined(ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3)
+
+char* DeviceNameList::GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack)
+{
+
+  // DEBUG_LINE_HERE;
+  // Returns empty string if not found
+  // Returns text of found
+  char* write = destination;
+  const char* read = haystack;
+
+      // Serial.println(index);
+      // Serial.println(destination_size);
+      // Serial.printf("destination_size=%d\n\r", destination_size);
+
+  index++;
+  while (index--) {
+    size_t size = destination_size -1;
+    write = destination;
+    char ch = '.';
+      // Serial.printf("index=%d\n\r", index);
+  // DEBUG_LINE_HERE;
+    while ((ch != '\0') && (ch != '|')) {
+
+  // DEBUG_LINE_HERE;
+      // (addr) (*(const uint8_t *)(addr))
+
+      ch = *read; //get vlaue from pointer
+      read++; // move pointer forward
+
+      // Serial.print(ch);
+
+      // ch = pgm_read_byte(read++);  //pads
+
+      if (size && (ch != '|'))  {
+  // DEBUG_LINE_HERE;
+        *write++ = ch;
+        size--;
+      }
+    }
+    if (0 == ch) {
+  // DEBUG_LINE_HERE;
+      if (index) {
+  // DEBUG_LINE_HERE;
+        write = destination;
+      }
+      break;
+    }
+  }
+  *write = '\0';
+  return destination;
+}
+
+
 int16_t DeviceNameList::GetDeviceIDbyName(const char* name_tofind, int16_t unique_module_id)
-{//}, int8_t device_id){
-//   return GetDeviceIDbyName(name_tofind, name_buffer.ptr, &device_id, &unique_module_id);
+{
+  char* buffer = name_buffer.ptr;  
+  char substring_buffer[100] = {0};
+
+  uint16_t substring_count = CountCharInCtr(buffer, '|');
+  substring_count += 1;
+
+  ALOG_DBM(PSTR("substring_count=%d"),substring_count);
+
+  for(uint16_t name_i=0;name_i<substring_count;name_i++)
+  {
+
+    GetTextIndexed(substring_buffer, sizeof(substring_buffer), name_i, buffer);
+    ALOG_DBM(PSTR("GetTextIndexed=%s"),substring_buffer);
+
+    // String Compare without Case Sensitivity
+    if(strcasecmp(name_tofind, substring_buffer)==0)
+    {
+      ALOG_DBM(PSTR("MATCH at name_i=%d"),name_i);
+      if(number_buffer.unique_group_ids[name_i] == unique_module_id)
+      {
+        ALOG_DBM(PSTR("MATCH unique_module_id=%d name_i=%d"), number_buffer.unique_group_ids[name_i], name_i);
+        return number_buffer.index_ids[name_i];
+      }
+    }
+
+  }
+
+  return -1;
+
+}
+
+// #elif defined(ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V2)
+
+// /**
+//  * @brief 
+//  * 
+//  * @note Searches the buffer for the matched name, counting each delimeter when checked, returning the correct delim position when found (also only counts when class should match)
+//  * 
+//  * @param name_tofind 
+//  * @param unique_module_id Should be unique value (ie 4*1000+list or 4002 for relay) and *NOT* the EM_LIST array value
+//  * @return int16_t 
+//  */
+// int16_t DeviceNameList::GetDeviceIDbyName(const char* name_tofind, int16_t unique_module_id)
+// {
+  
+//   //}, int8_t device_id){
+// //   return GetDeviceIDbyName(name_tofind, name_buffer.ptr, &device_id, &unique_module_id);
+// // }
+
+// // if(unique_module_id > ) //if larger than max of int16_t stop TODO
+
+// /**
+//  * @brief device_id is not needed here, and should be removed
+//  * 
+//  */
+
+// ALOG_INF( PSTR("const char* name_tofind, int16_t unique_module_id => %s %d"), name_tofind, unique_module_id);
+
+// // // if unique_module_id is nullptr (default value), then ignore matching class first and return first instance of device name
+// // // if unique_module_id is passed, then limit matching results to include that class
+// // int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* unique_module_id)
+// // {
+//   const char* haystack = name_buffer.ptr;
+//   const char* read = haystack;
+//   int16_t position = -1;
+
+//   char name_tofind_with_delimeter[50];
+//   snprintf(name_tofind_with_delimeter,sizeof(name_tofind_with_delimeter),"%s|",name_tofind);
+
+//   ALOG_DBM( PSTR("Name_tofind_with_delimeter = %s"),name_tofind_with_delimeter);
+
+//   // Search for substring
+//   char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);     //////////// This might be wrong, it is finding the first one and not the right one
+
+//   if(p_start_of_found == NULL){
+//     ALOG_ERR( PSTR("p_start_of_found == NOT FOUND") );
+//     return -1;
+//   }
+
+//   bool limit_result_to_unique_module_ids = true;
+//   // if((unique_module_id == nullptr)||
+//   if(unique_module_id == -1){
+//     limit_result_to_unique_module_ids = false;
+//   }
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+  
+//   ALOG_INF(PSTR("limit_result_to_unique_module_ids = %s"),limit_result_to_unique_module_ids?"YES":"NO");
+
+//     #endif// ENABLE_LOG_LEVEL_INFO
+
+//   uint8_t delimeter_count = 0;
+//   uint8_t delimeter_within_class_count = 0;
+//   uint16_t haystack_index = 0;
+//   uint16_t haystack_length = strlen(haystack);
+
+//   ALOG_DBM( PSTR("haystack_length=%d"), haystack_length );
+
+//   //search for delimeters between found index and start ie indexed list places
+//   // while((read != p_start_of_found) && (haystack_index++ < haystack_length)){
+
+//   while(haystack_index++ < haystack_length){
+//     // Count delimeters
+//     if(*read == '|')
+//     {
+//       if(limit_result_to_unique_module_ids){
+
+        
+//         // Search for substring
+//         // Need to research under each module group
+//         char *p_start_of_found_sub = strstr(read, name_tofind_with_delimeter);     //////////// This might be wrong, it is finding the first one and not the right one
+
+//         if(p_start_of_found_sub == NULL){
+//           ALOG_ERR( PSTR("p_start_of_found_sub == NOT FOUND") );
+//           return -1;
+//         }
+  
+
+//         // ALOG_INF( PSTR("unique_group_ids[delimeter_count] == unique_module_id Unique(s%d|%d) (d%d|cc%d)"), number_buffer.unique_group_ids[delimeter_count], unique_module_id, delimeter_count,delimeter_within_class_count );
+
+//         if(number_buffer.unique_group_ids[delimeter_count] == unique_module_id){
+//           delimeter_within_class_count++;
+//           #ifdef ENABLE_LOG_LEVEL_INFO
+//           // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,number_buffer.unique_group_ids[delimeter_count]);
+//           ALOG_INF( 
+//             PSTR(
+//               "Searching \"%s in Module %d\"\n\r"
+//               "Found \"%s\" @ index %d\n\r"
+//               "del count/index pos %d\n\r"
+//             ),         
+//             name_tofind, number_buffer.unique_group_ids[delimeter_count],
+//             p_start_of_found_sub,
+//             p_start_of_found_sub - read, // pointer distance
+//             delimeter_within_class_count
+//           );
+//           #endif // ENABLE_LOG_LEVEL_INFO
+
+           
+//           if(read == p_start_of_found_sub) // nested if, so already checked if this is valid for module_id
+//           {
+//             ALOG_INF(PSTR("DO care about matching modedule ID"));
+//             break;
+//           }
+
+
+//         }
+//         else{
+//           ALOG_INF( PSTR("Unwanted Unique ID=%d"), number_buffer.unique_group_ids[delimeter_count] );
+//         }
+        
+//         delimeter_count++;
+
+//       }else{
+//         delimeter_within_class_count++;  
+//         delimeter_count++;      
+//         if(read == p_start_of_found)
+//         {
+//           ALOG_INF(PSTR("Dont care about matching modedule ID"));
+//           break;
+//         }
+
+
+
+//       }
+//       #ifdef ENABLE_LOG_LEVEL_INFO
+//       // AddLog(LOG_LEVEL_INFO,PSTR("%s found %s %d"),haystack,read,delimeter_count);
+//       #endif // ENABLE_LOG_LEVEL_INFO
+
+//     }
+//     read++; //move pointer along
+//   }
+
+//   // #ifdef ENABLE_LOG_LEVEL_INFO
+//   // ALOG_INF(
+//   //   PSTR(
+//   //     "\n\rSearching \n\r===(\"%s\")===\n\r"
+//   //     "Found \"%s\" @ index %d\n\r"
+//   //     "delimeter_count %d\n\r"
+//   //     "delimeter_within_class_count %d\n\r"
+//   //   ),         
+//   //   name_tofind,
+//   //   p_start_of_found,
+//   //   p_start_of_found - haystack, // pointer distance
+//   //   delimeter_count,
+//   //   delimeter_within_class_count
+//   // );
+//   // #endif // ENABLE_LOG_LEVEL_INFO
+
+//   return delimeter_within_class_count;
 // }
 
-// if(unique_module_id > ) //if larger than max of int16_t stop TODO
+// #else
 
-/**
- * @brief device_id is not needed here, and should be removed
- * 
- */
 
-ALOG_DBM( PSTR("const char* name_tofind, int16_t unique_module_id => %s %d"), name_tofind, unique_module_id);
+// /**
+//  * @brief 
+//  * 
+//  * @note Searches the buffer for the matched name, counting each delimeter when checked, returning the correct delim position when found (also only counts when class should match)
+//  * 
+//  * @param name_tofind 
+//  * @param unique_module_id Should be unique value (ie 4*1000+list or 4002 for relay) and *NOT* the EM_LIST array value
+//  * @return int16_t 
+//  */
+// int16_t DeviceNameList::GetDeviceIDbyName(const char* name_tofind, int16_t unique_module_id)
+// {//}, int8_t device_id){
+// //   return GetDeviceIDbyName(name_tofind, name_buffer.ptr, &device_id, &unique_module_id);
+// // }
 
-// // if unique_module_id is nullptr (default value), then ignore matching class first and return first instance of device name
-// // if unique_module_id is passed, then limit matching results to include that class
-// int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* unique_module_id)
-// {
-  const char* haystack = name_buffer.ptr;
-  const char* read = haystack;
-  int16_t position = -1;
+// // if(unique_module_id > ) //if larger than max of int16_t stop TODO
 
-  char name_tofind_with_delimeter[50];
-  snprintf(name_tofind_with_delimeter,sizeof(name_tofind_with_delimeter),"%s|",name_tofind);
+// /**
+//  * @brief device_id is not needed here, and should be removed
+//  * 
+//  */
 
-  ALOG_DBM( PSTR("Name_tofind_with_delimeter = %s"),name_tofind_with_delimeter);
+// ALOG_DBM( PSTR("const char* name_tofind, int16_t unique_module_id => %s %d"), name_tofind, unique_module_id);
 
-  // Search for substring
-  char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);
+// // // if unique_module_id is nullptr (default value), then ignore matching class first and return first instance of device name
+// // // if unique_module_id is passed, then limit matching results to include that class
+// // int16_t mSettings::GetDeviceIDbyName(const char* name_tofind, const char* haystack, int8_t* device_id, int8_t* unique_module_id)
+// // {
+//   const char* haystack = name_buffer.ptr;
+//   const char* read = haystack;
+//   int16_t position = -1;
 
-  if(p_start_of_found == NULL){
-    ALOG_ERR( PSTR("p_start_of_found == NOT FOUND") );
-    return -1;
-  }
+//   char name_tofind_with_delimeter[50];
+//   snprintf(name_tofind_with_delimeter,sizeof(name_tofind_with_delimeter),"%s|",name_tofind);
 
-  bool limit_result_to_unique_module_ids = true;
-  // if((unique_module_id == nullptr)||
-  if(unique_module_id == -1){
-    limit_result_to_unique_module_ids = false;
-  }
-    #ifdef ENABLE_LOG_LEVEL_INFO
+//   ALOG_DBM( PSTR("Name_tofind_with_delimeter = %s"),name_tofind_with_delimeter);
+
+//   // Search for substring
+//   char *p_start_of_found = strstr(haystack,name_tofind_with_delimeter);
+
+//   if(p_start_of_found == NULL){
+//     ALOG_ERR( PSTR("p_start_of_found == NOT FOUND") );
+//     return -1;
+//   }
+
+//   bool limit_result_to_unique_module_ids = true;
+//   // if((unique_module_id == nullptr)||
+//   if(unique_module_id == -1){
+//     limit_result_to_unique_module_ids = false;
+//   }
+//     #ifdef ENABLE_LOG_LEVEL_INFO
   
-  ALOG_DBM( PSTR("limit_result_to_unique_module_ids = %s"),limit_result_to_unique_module_ids?"YES":"NO");
+//   ALOG_DBM( PSTR("limit_result_to_unique_module_ids = %s"),limit_result_to_unique_module_ids?"YES":"NO");
 
-    #endif// ENABLE_LOG_LEVEL_INFO
+//     #endif// ENABLE_LOG_LEVEL_INFO
 
-  uint8_t delimeter_count = 0;
-  uint8_t delimeter_within_class_count = 0;
-  uint16_t haystack_index = 0;
-  uint16_t haystack_length = strlen(haystack);
+//   uint8_t delimeter_count = 0;
+//   uint8_t delimeter_within_class_count = 0;
+//   uint16_t haystack_index = 0;
+//   uint16_t haystack_length = strlen(haystack);
 
-  ALOG_DBM( PSTR("haystack_length=%d"), haystack_length );
+//   ALOG_DBM( PSTR("haystack_length=%d"), haystack_length );
 
-  //search for delimeters between found index and start ie indexed list places
-  while((read != p_start_of_found) && (haystack_index++ < haystack_length)){
-    // Count delimeters
-    if(*read == '|'){
-      if(limit_result_to_unique_module_ids){
+//   //search for delimeters between found index and start ie indexed list places
+//   while((read != p_start_of_found) && (haystack_index++ < haystack_length)){
+//     // Count delimeters
+//     if(*read == '|'){
+//       if(limit_result_to_unique_module_ids){
 
-        ALOG_DBM( PSTR("unique_group_ids[delimeter_count] == unique_module_id %d,%d,%d"), number_buffer.unique_group_ids[delimeter_count],delimeter_count, unique_module_id );
+//         ALOG_DBM( PSTR("unique_group_ids[delimeter_count] == unique_module_id %d,%d,%d"), number_buffer.unique_group_ids[delimeter_count],delimeter_count, unique_module_id );
 
-        if(number_buffer.unique_group_ids[delimeter_count] == unique_module_id){
-          delimeter_within_class_count++;
-          #ifdef ENABLE_LOG_LEVEL_INFO
-          // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,number_buffer.unique_group_ids[delimeter_count]);
-          ALOG_DBM( 
-            PSTR(
-              "Searching \"%s\"\n\r"
-              "Found \"%s\" @ index %d\n\r"
-              "del count/index pos %d\n\r"
-            ),         
-            name_tofind,
-            p_start_of_found,
-            p_start_of_found - read, // pointer distance
-            delimeter_within_class_count
-          );
-          #endif // ENABLE_LOG_LEVEL_INFO
-        }
-      }else{
-        delimeter_within_class_count++;        
-      }
-      delimeter_count++;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      // AddLog(LOG_LEVEL_INFO,PSTR("%s found %s %d"),haystack,read,delimeter_count);
-    #endif // ENABLE_LOG_LEVEL_INFO
-    }
-    read++; //move pointer along
-  }
+//         if(number_buffer.unique_group_ids[delimeter_count] == unique_module_id){
+//           delimeter_within_class_count++;
+//           #ifdef ENABLE_LOG_LEVEL_INFO
+//           // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,number_buffer.unique_group_ids[delimeter_count]);
+//           ALOG_DBM( 
+//             PSTR(
+//               "Searching \"%s\"\n\r"
+//               "Found \"%s\" @ index %d\n\r"
+//               "del count/index pos %d\n\r"
+//             ),         
+//             name_tofind,
+//             p_start_of_found,
+//             p_start_of_found - read, // pointer distance
+//             delimeter_within_class_count
+//           );
+//           #endif // ENABLE_LOG_LEVEL_INFO
+//         }
+//       }else{
+//         delimeter_within_class_count++;        
+//       }
+//       delimeter_count++;
+//     #ifdef ENABLE_LOG_LEVEL_INFO
+//       // AddLog(LOG_LEVEL_INFO,PSTR("%s found %s %d"),haystack,read,delimeter_count);
+//     #endif // ENABLE_LOG_LEVEL_INFO
+//     }
+//     read++; //move pointer along
+//   }
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-          // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,number_buffer.unique_group_ids[delimeter_count]);
-          // AddLog(LOG_LEVEL_TEST,
-          //   PSTR(
-          //     "\n\rSearching \"%s\"\n\r"
-          //     "Found \"%s\" @ index %d\n\r"
-          //     "delimeter_count %d\n\r"
-          //     "delimeter_within_class_count %d\n\r"
-          //   ),         
-          //   name_tofind,
-          //   p_start_of_found,
-          //   p_start_of_found - haystack, // pointer distance
-          //   delimeter_count,
-          //   delimeter_within_class_count
-          // );
-          #endif // ENABLE_LOG_LEVEL_INFO
+//   #ifdef ENABLE_LOG_LEVEL_INFO
+//           // AddLog(LOG_LEVEL_TEST,PSTR("\n\r%s\n\r found wclass_count\n\r %s\n\r %d %d\n\r\n\r"),haystack,read,delimeter_within_class_count,number_buffer.unique_group_ids[delimeter_count]);
+//           // AddLog(LOG_LEVEL_TEST,
+//           //   PSTR(
+//           //     "\n\rSearching \"%s\"\n\r"
+//           //     "Found \"%s\" @ index %d\n\r"
+//           //     "delimeter_count %d\n\r"
+//           //     "delimeter_within_class_count %d\n\r"
+//           //   ),         
+//           //   name_tofind,
+//           //   p_start_of_found,
+//           //   p_start_of_found - haystack, // pointer distance
+//           //   delimeter_count,
+//           //   delimeter_within_class_count
+//           // );
+//           #endif // ENABLE_LOG_LEVEL_INFO
 
-  return delimeter_within_class_count;
-}
+//   return delimeter_within_class_count;
+// }
+
+
+
+
+// #endif // ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V2
 
 
 

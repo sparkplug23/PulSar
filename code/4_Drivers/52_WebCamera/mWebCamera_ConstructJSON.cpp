@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
 
 
-uint8_t mWebCamera::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mWebCamera::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
@@ -11,7 +11,7 @@ uint8_t mWebCamera::ConstructJSON_Settings(uint8_t json_level, bool json_object_
 
 }
 
-uint8_t mWebCamera::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mWebCamera::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 

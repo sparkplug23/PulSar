@@ -24,11 +24,10 @@
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 #ifdef D_USER_MICHAEL
-// #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
-#include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
+#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 #endif // D_USER_MICHAEL
 
 /*********************************************************************************************\
@@ -93,6 +92,8 @@
 // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 // #endif
+
+
 
 /*********************************************************************************************\
  *  Wifi
@@ -288,6 +289,12 @@
 #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 10
 #endif
 
+/*********************************************************************************************\
+ *  Rules
+\*********************************************************************************************/
+#ifndef D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND
+#define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 60
+#endif
 
 /*********************************************************************************************\
  * END OF SECTION 1

@@ -115,23 +115,23 @@ public:
     }    
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      value->type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
-      value->data.push_back(solar_position.azimuth);
-      value->type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
-      value->data.push_back(solar_position.elevation);
+      value->sensor_type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
+      value->data_f.push_back(solar_position.azimuth);
+      value->sensor_type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
+      value->data_f.push_back(solar_position.elevation);
       value->sensor_id = index;
     };
     #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 
   
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSolarLunar> mqtthandler_settings_teleperiod;

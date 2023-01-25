@@ -62,7 +62,7 @@
 //       MQTTHandler_Init();
 //     break;
 //     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-//       MQTTHandler_Set_TelePeriod();
+//       MQTTHandler_Set_DefaultPeriodRate();
 //     break;
 //     case FUNC_MQTT_SENDER:
 //       MQTTHandler_Sender();
@@ -296,7 +296,7 @@
 
 
 
-// uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -305,7 +305,7 @@
 // }
 
 
-// uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
@@ -321,7 +321,7 @@
 //  *  "GPS":{ minimal data, with 2 byte names}
 //  * }
 //  * */
-// uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_SDCard_Calibration_Frame(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mSerialCalibrationMeasurmentLogger::ConstructJSON_SDCard_Calibration_Frame(uint8_t json_level, bool json_appending){
 
 //   JsonBuilderI->Start();
     

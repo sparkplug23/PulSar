@@ -442,7 +442,7 @@ class mAnimatorLight :
 
     #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     void SubTask_Manual_SetPixel();
-    uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_appending = true);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
 
@@ -461,24 +461,24 @@ class mAnimatorLight :
    * ConstructJSON_Debug_Segments
    * */
   
-  uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-  uint8_t ConstructJSON_Animation_Active(uint8_t json_level = 0, bool json_object_start_end_required = true);
-  uint8_t ConstructJSON_Playlist(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+  uint8_t ConstructJSON_Animation_Active(uint8_t json_level = 0, bool json_appending = true);
+  uint8_t ConstructJSON_Playlist(uint8_t json_level = 0, bool json_appending = true);
   /**
    * @brief Each mode
    */
   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  uint8_t ConstructJSON_Mode_Ambilight(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Mode_Ambilight(uint8_t json_level = 0, bool json_appending = true);
   #endif
   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-  uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0, bool json_object_start_end_required = true); // probably falls into the E131 type, but here set my mqtt
+  uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0, bool json_appending = true); // probably falls into the E131 type, but here set my mqtt
   #endif
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_appending = true);
   #endif
 
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-  uint8_t ConstructJSON_Auto_Playlists(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Auto_Playlists(uint8_t json_level = 0, bool json_appending = true);
   #endif
 
   
@@ -486,19 +486,19 @@ class mAnimatorLight :
    * @brief Debug 
    */
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0, bool json_appending = true);
   #endif
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-  uint8_t ConstructJSON_Debug_Hardware(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Debug_Hardware(uint8_t json_level = 0, bool json_appending = true);
   #endif
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-  uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0, bool json_appending = true);
   #endif
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-  uint8_t ConstructJSON_Debug_Segments_New(uint8_t json_level = 0, bool json_object_start_end_required = true);
+  uint8_t ConstructJSON_Debug_Segments_New(uint8_t json_level = 0, bool json_appending = true);
   #endif
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-    uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_object_start_end_required = true);  
+    uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
     ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
     mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
   #endif
@@ -506,7 +506,7 @@ class mAnimatorLight :
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();  
+    void MQTTHandler_Set_DefaultPeriodRate();  
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
   
     // Are these really needed?? now I am use auto for loops

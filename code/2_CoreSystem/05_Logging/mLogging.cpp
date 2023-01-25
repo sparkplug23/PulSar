@@ -812,6 +812,7 @@ const char* mLogging::GetLogLevelNameShortbyID(uint8_t id, char* buffer){
   switch(id){
     default: 
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_SHORT_CTR, sizeof(PM_LOG_LEVEL_NONE_SHORT_CTR)); break;
+    case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_SHORT_CTR, sizeof(PM_LOG_LEVEL_ERROR_SHORT_CTR)); break;
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_SHORT_CTR, sizeof(PM_LOG_LEVEL_WARN_SHORT_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_SHORT_CTR, sizeof(PM_LOG_LEVEL_TEST_SHORT_CTR)); break;
@@ -830,6 +831,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id, char* buffer){ //"Name" as
   switch(id){ 
     default:
     case LOG_LEVEL_NONE:           memcpy_P(buffer, PM_LOG_LEVEL_NONE_LONG_CTR, sizeof(PM_LOG_LEVEL_NONE_LONG_CTR)); break;
+    case LOG_LEVEL_DEBUG_TRACE: memcpy_P(buffer, PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR, sizeof(PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR)); break;
     case LOG_LEVEL_ERROR:          memcpy_P(buffer, PM_LOG_LEVEL_ERROR_LONG_CTR, sizeof(PM_LOG_LEVEL_ERROR_LONG_CTR)); break;
     case LOG_LEVEL_WARN:           memcpy_P(buffer, PM_LOG_LEVEL_WARN_LONG_CTR, sizeof(PM_LOG_LEVEL_WARN_LONG_CTR)); break;
     case LOG_LEVEL_TEST:           memcpy_P(buffer, PM_LOG_LEVEL_TEST_LONG_CTR, sizeof(PM_LOG_LEVEL_TEST_LONG_CTR)); break;

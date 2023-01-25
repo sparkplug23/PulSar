@@ -37,9 +37,9 @@
  * */
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret_Christmas.h"
-#include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
+#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 /**
  * Temporary files
  * */
@@ -201,7 +201,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
     EM_MODULE_DISPLAYS_INTERFACE_ID,
   #endif
-  #if defined(USE_MODULE_DISPLAYS_NEXTION) || defined(USE_MODULE_DISPLAYS_NEXTION_V2)
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
     EM_MODULE_DISPLAYS_NEXTION_ID,
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -325,9 +325,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_BME
     EM_MODULE_SENSORS_BME_ID,
   #endif
-  #if defined(USE_MODULE_SENSORS_DS18X) || defined(USE_MODULE_SENSORS_DS18X_V2) || defined(USE_MODULE_SENSORS_DS18X_V3) || defined(USE_MODULE_SENSORS_DS18X_V4)
-    EM_MODULE_SENSORS_DB18S20_ID,
-  #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     EM_MODULE_SENSORS_ULTRASONIC_ID,
   #endif
@@ -374,10 +371,10 @@ enum MODULE_IDS{
     EM_MODULE_SENSORS_ROTARY_ENCODER_ID,
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-    EM_MODULE_SENSORS__DS18X20_ESP8266_2023__ID,
+    EM_MODULE_SENSORS__DS18X20__ID,
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID,
+    EM_MODULE_SENSORS__DS18X20__ID,
   #endif  
   // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -446,6 +443,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
     EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
+    EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID,
   #endif
 
 
@@ -532,10 +532,6 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
   #include "8_Displays/01_Nextion/mNextionPanel.h"
-  #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
-#endif
-#ifdef USE_MODULE_DISPLAYS_NEXTION_V2
-  #include "8_Displays/01v2_Nextion/mNextionPanel.h"
   #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -706,25 +702,6 @@ enum MODULE_IDS{
   #include "5_Sensors/02_Buttons/mButtons.h"
   #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
-
-#ifdef USE_MODULE_SENSORS_DS18X
-  #include "5_Sensors/03_DB18x20/mDS18X.h"
-  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_DS18X_V2
-  #include "5_Sensors/03b_DB18x20/mDS18X.h"
-  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_DS18X_V3
-  #include "5_Sensors/03c_DB18x20/mDS18X.h"
-  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
-#endif
-#ifdef USE_MODULE_SENSORS_DS18X_V4
-  #include "5_Sensors/03d_DB18x20/mDS18X.h"
-  #define pCONT_msdb18                          static_cast<mDS18X*>(pCONT->pModule[EM_MODULE_SENSORS_DB18S20_ID])
-#endif
-
-
 #ifdef USE_MODULE_SENSORS_BME
   #include "5_Sensors/04_BME/mBME.h"
   #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
@@ -785,7 +762,7 @@ enum MODULE_IDS{
   #define pCONT_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
-  #include "5_Sensors/RemoteDevice/mRemoteDevice.h"
+  #include "5_Sensors/20_RemoteDevice/mRemoteDevice.h"
   #define pCONT_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ADC_I2S_INTERNAL
@@ -815,11 +792,11 @@ enum MODULE_IDS{
 #endif
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
   #include "5_Sensors/40_ds18x20/mDB18x20.h"
-  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20_ESP8266_2023__ID])
+  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
 #endif
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
   #include "5_Sensors/41_ds18x20_esp32/mDB18x20_ESP32.h"
-  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID])
+  #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
 #endif
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
@@ -899,34 +876,38 @@ enum MODULE_IDS{
 
 // 10 Controller (Unique to one use case)
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
-  #include "10_Controller_Spec/00_RadiatorFan/mRadiatorFan.h"
+  #include "10_ConSpec/00_RadiatorFan/mRadiatorFan.h"
   #define pCONT_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-  #include "10_Controller_Spec/01_ImmersionTankColour/mImmersionTankColour.h"
+  #include "10_ConSpec/01_ImmersionTankColour/mImmersionTankColour.h"
   #define pCONT_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  #include "10_Controller_Spec/02_HeatingStripColour_Understairs/mStripColour.h"
+  #include "10_ConSpec/02_HeatingStripColour_Understairs/mStripColour.h"
   #define pCONT_controller_hvac_colourstrip_understairs      static_cast<mHeatingStripColour_Understairs*>(pCONT->pModule[EM_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
-  #include "10_Controller_Spec/03_FurnaceSensor/mFurnaceSensor.h"
+  #include "10_ConSpec/03_FurnaceSensor/mFurnaceSensor.h"
   #define pCONT_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
 #endif
 
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
-  #include "10_Controller_Spec/04_LouvoliteHub/mLouvoliteHub.h"
+  #include "10_ConSpec/04_LouvoliteHub/mLouvoliteHub.h"
   #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2
-  #include "10_Controller_Spec/04v2_LouvoliteHub/mLouvoliteHub.h"
+  #include "10_ConSpec/04v2_LouvoliteHub/mLouvoliteHub.h"
   #define pCONT_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
-  #include "10_Controller_Spec/05_SideDoorLight/mSideDoorLight.h"
+  #include "10_ConSpec/05_SideDoorLight/mSideDoorLight.h"
   #define pCONT_sdlight                static_cast<mSideDoorLight*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
+  #include "10_ConSpec/06_ImmersionPanel/mImmersionPanel.h"
+  #define pCONT_immersion_cont         static_cast<mImmersionPanel*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID])
 #endif
 
 

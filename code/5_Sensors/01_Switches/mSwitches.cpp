@@ -47,11 +47,10 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); 
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -502,7 +501,7 @@ uint8_t mSwitches::GetVirtual(uint8_t index)
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.switches_found);
@@ -518,7 +517,7 @@ uint8_t mSwitches::ConstructJSON_Settings(uint8_t json_level, bool json_object_s
 
 }
 
-uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   char buffer[50]; 
   
@@ -553,6 +552,146 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_object_sta
   return JsonBuilderI->End();
 
 }
+
+
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mSwitches::MQTTHandler_Init(){
+
+  struct handler<mSwitches>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
+
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
+  
+} //end "MQTTHandler_Init"
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mSwitches::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mSwitches::MQTTHandler_Set_DefaultPeriodRate()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mSwitches::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_SWITCHES_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
+
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+void mSwitches::WebAppend_Root_Draw_Table(){
+
+  const char kTitle_TableTitles_Root[] = 
+    "Switch 0" "|" 
+    "Switch 1" "|" 
+    "Switch 2" "|" 
+    "Switch 3" "|" 
+    "Switch 4" "|" 
+    "Switch 5" "|" 
+    "Switch 6" "|" 
+    "Switch 7" "|" 
+    "Switch 8" "|" ;
+
+ pCONT_web->WebAppend_Root_Draw_Table_dList(settings.switches_found,"switch_table", kTitle_TableTitles_Root); //add flag (or another function) that draws names with numbers after it
+
+}
+
+//append to internal buffer if any root messages table
+void mSwitches::WebAppend_Root_Status_Table(){
+
+  char buffer[50];
+  
+  JsonBuilderI->Array_Start("switch_table");// Class name
+  for(int row=0;row<settings.switches_found;row++){
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",row);
+      JsonBuilderI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
+      if(IsSwitchActive(row)){
+        JsonBuilderI->Add("fc","#00ff00");
+      }else{
+        JsonBuilderI->Add("fc","#ff0000");
+      }
+    
+    JsonBuilderI->Level_End();
+  }
+  JsonBuilderI->Array_End();
+  
+}
+
+
+#endif// USE_MODULE_NETWORK_WEBSERVER
+
+
+
 
 
 #endif

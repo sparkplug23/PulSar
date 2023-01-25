@@ -83,11 +83,10 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
       break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
       break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -287,7 +286,17 @@ void mBME::ShowSensor_AddLog()
 
 
 
-uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+
+uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
@@ -295,7 +304,7 @@ uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_
 
 }
 
-uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
 
@@ -326,6 +335,179 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_en
   return JsonBuilderI->End();
 
 }
+
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mBME::MQTTHandler_Init()
+{
+
+  struct handler<mBME>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mBME::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mBME::ConstructJSON_Sensor;
+
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mBME::ConstructJSON_Sensor;
+  
+} //end "MQTTHandler_Init"
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mBME::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mBME::MQTTHandler_Set_DefaultPeriodRate()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mBME::MQTTHandler_Sender(uint8_t id)
+{    
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_BME_ID, handle, id);
+  }
+}
+  
+#endif // USE_MODULE_NETWORK_MQTT
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
+// void mBME::WebAppend_Root_Status_Table_Draw(){
+
+//   char value_ctr[8];
+//   uint8_t sensor_counter = 0;
+    
+//   // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//   //   BufferWriterI->Append_P(PSTR("<td>BME%s Temperature</td>"), "280");
+//   //   BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr));   
+//   // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+//   // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//   //   BufferWriterI->Append_P(PSTR("<td>BME%s Humidity</td>"), "280");
+//   //   BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr));   
+//   // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+//   // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+//   //   BufferWriterI->Append_P(PSTR("<td>BME%s Pressure</td>"), "280");
+//   //   BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_bme",pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr));   
+//   // BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  
+// }
+
+
+// //append to internal buffer if any root messages table
+// void mBME::WebAppend_Root_Status_Table_Data(){
+  
+//   // uint8_t sensor_counter = 0;
+//   // char value_ctr[8];
+//   // char colour_ctr[10];
+
+//   // JsonBuilderI->Array_Start("tab_bme");// Class name
+//   // // BufferWriterI->Append_P(PSTR("\"%s\":["),PSTR("tab_bme")); 
+//   // for(int row=0;row<3;row++){
+//   //   JsonBuilderI->Level_Start();
+//   //     JsonBuilderI->Add("id",row);
+//   //     switch(row){
+//   //       default:
+//   //       case 0:
+        
+//   //         pCONT_sup->dtostrfd(sensor[sensor_counter].temperature,2,value_ctr);
+//   //         JsonBuilderI->Add_FV("ih",PSTR("\"%s&deg;%c\""),value_ctr,pCONT_sup->TempUnit());
+
+//   //         if(sensor[sensor_counter].temperature<=25){
+//   //           sprintf(colour_ctr,"%s","#00ff00"); //create variable/use webcolour ids
+//   //         }else
+//   //         if(sensor[sensor_counter].temperature>25){
+//   //           sprintf(colour_ctr,"%s","#fcba03");
+//   //         }else{
+//   //           sprintf(colour_ctr,"%s","#ffffff");
+//   //         }      
+//   //         JsonBuilderI->Add("fc",colour_ctr);
+
+//   //       break;
+//   //       case 1:    
+
+//   //         pCONT_sup->dtostrfd(sensor[sensor_counter].humidity,2,value_ctr);
+//   //         JsonBuilderI->Add_FV("ih",PSTR("\"%s%%\""),value_ctr);
+       
+//   //         if(sensor[sensor_counter].humidity>70){
+//   //           sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
+//   //         }else{
+//   //           sprintf(colour_ctr,"%s","#ffffff");
+//   //         }
+//   //         JsonBuilderI->Add("fc",colour_ctr);
+
+//   //       break;
+//   //       case 2:     
+          
+//   //         pCONT_sup->dtostrfd(sensor[sensor_counter].pressure,2,value_ctr);
+//   //         JsonBuilderI->Add_FV("ih",PSTR("\"%s hPa\""),value_ctr);
+          
+//   //         if(sensor[sensor_counter].pressure>1000){
+//   //           sprintf(colour_ctr,"%s","#ff0000"); //create variable/use webcolour ids
+//   //         }else{
+//   //           sprintf(colour_ctr,"%s","#ffffff");
+//   //         }
+//   //         JsonBuilderI->Add("fc",colour_ctr);
+
+//   //       break;
+//   //     }
+//   //     JsonBuilderI->Level_End();
+ 
+//   // }
+  
+//   // JsonBuilderI->Array_End();
+
+// }
+// #endif // USE_MODULE_NETWORK_WEBSERVER
+
+
 
 
 #endif

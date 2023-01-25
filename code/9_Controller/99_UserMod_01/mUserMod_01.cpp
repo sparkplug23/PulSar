@@ -328,7 +328,7 @@ void mUserMod_01::Pre_Init(){
 }
 
 
-uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -336,7 +336,7 @@ uint8_t mUserMod_01::ConstructJSON_Settings(uint8_t json_level, bool json_object
 
 }
 
-uint8_t mUserMod_01::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mUserMod_01::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
   JsonBuilderI->End();
@@ -393,7 +393,7 @@ void mUserMod_01::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mUserMod_01::MQTTHandler_Set_TelePeriod()
+void mUserMod_01::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

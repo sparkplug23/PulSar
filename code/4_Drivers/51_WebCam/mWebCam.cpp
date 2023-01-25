@@ -1225,7 +1225,7 @@ int8_t mWebCam::Tasker(uint8_t function, JsonParserObject obj)
     //   MQTTHandler_Sender(); //optional pass parameter
     // break;
     // case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-    //   MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+    //   MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     // break; 
     // case FUNC_MQTT_CONNECTED:
     //   MQTTHandler_Set_RefreshAll();
@@ -1827,7 +1827,7 @@ void mWebCam::Pre_Init(void){
 // }
 
 
-// uint8_t mWebCam::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mWebCam::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
 //   JsonBuilderI->Start();
 //     JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);

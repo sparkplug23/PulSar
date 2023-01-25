@@ -49,11 +49,10 @@ int8_t mBuzzer::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -331,7 +330,7 @@ void mBuzzer::parse_JSONCommand(JsonParserObject obj){
  * ConstructJson
 *******************************************************************************************************************/
 
-uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -340,7 +339,7 @@ uint8_t mBuzzer::ConstructJSON_Settings(uint8_t json_level, bool json_object_sta
 }
 
 
-uint8_t mBuzzer::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mBuzzer::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
@@ -399,12 +398,12 @@ void mBuzzer::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mBuzzer::MQTTHandler_Set_TelePeriod(){
+void mBuzzer::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mBuzzer::MQTTHandler_Sender(uint8_t mqtt_handler_id){

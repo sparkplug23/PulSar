@@ -1,6 +1,6 @@
 #include "mDB18x20.h"
 
-#ifdef USE_MODULE_SENSORS_DOOR
+#ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
 
 const char* mDS18X::PM_MODULE_SENSORS_DB18_CTR = D_MODULE_SENSORS_DB18S20_CTR;
 const char* mDS18X::PM_MODULE_SENSORS_DB18_FRIENDLY_CTR = D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR;
@@ -50,11 +50,10 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -203,7 +202,7 @@ void mDoorSensor::ShowSensor_AddLog()
 
 
 
-uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     //JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.);

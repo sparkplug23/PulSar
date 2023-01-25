@@ -1,5 +1,5 @@
-#ifndef MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_MIC4HAEL_CHRISTMAS_H
-#define MSYSTEMCONFIG_HARDWAREDEFAULTS_FIRMWAR_MIC4HAEL_CHRISTMAS_H
+#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_CHRISTMAS_H
+#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_CHRISTMAS_H
 
 /*********************************************************************************************\
  * Christmas 2022 - Stop using any in this file, phasing out Jan2023
@@ -2702,5 +2702,5 @@
 
 
 
-#endif // MSYSTEMCONFIG_HARDWAREDEFAULTS_H
+#endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_CHRISTMAS_H
 

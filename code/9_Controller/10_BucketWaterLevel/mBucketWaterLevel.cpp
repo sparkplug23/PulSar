@@ -44,11 +44,10 @@ int8_t mBucketWaterLevel::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -241,7 +240,7 @@ void mBucketWaterLevel::MeasureADCWithRelay()
 }
 
 
-uint8_t mBucketWaterLevel::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mBucketWaterLevel::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
   

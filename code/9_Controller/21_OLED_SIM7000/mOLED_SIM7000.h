@@ -64,13 +64,13 @@ class mOLED_SIM7000 :
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Status_Table();
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Power(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Power(uint8_t json_level = 0, bool json_appending = true);
 
   
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 

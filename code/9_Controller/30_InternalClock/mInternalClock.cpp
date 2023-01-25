@@ -65,7 +65,6 @@ int8_t mInternalClock::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
@@ -315,7 +314,7 @@ void mInternalClock::SpeedRefresh(void)
 
 
 
-uint8_t mInternalClock::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mInternalClock::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -323,7 +322,7 @@ uint8_t mInternalClock::ConstructJSON_Settings(uint8_t json_level, bool json_obj
 
 }
 
-uint8_t mInternalClock::ConstructJSON_Power(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mInternalClock::ConstructJSON_Power(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
@@ -384,7 +383,7 @@ void mInternalClock::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mInternalClock::MQTTHandler_Set_TelePeriod()
+void mInternalClock::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

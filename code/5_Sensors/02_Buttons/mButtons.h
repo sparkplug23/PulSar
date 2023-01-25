@@ -29,11 +29,6 @@
 
 #include "2_CoreSystem/02_Time/mTime.h"
 
-enum ButtonStates { 
-  BUTTON_PRESSED_ID, 
-  BUTTON_NOT_PRESSED_ID };
-
-
 
 
 
@@ -63,16 +58,20 @@ class mButtons :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_BUTTONS_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_BUTTONS_ID; }
-    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mButtons);
-    };
+    uint16_t GetClassSize(){       return sizeof(mButtons);     };
     #endif
 
 // /*********************************************************************************************\
 //  * Button support
 // \*********************************************************************************************/
+
+enum ButtonStates 
+{ 
+  BUTTON_PRESSED_ID, 
+  BUTTON_NOT_PRESSED_ID 
+};
+
 
 
     struct SETTINGS{
@@ -160,13 +159,13 @@ void WebAppend_Root_Status_Table();
 bool IsButtonActive(uint8_t id);
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
   #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mButtons> mqtthandler_settings_teleperiod;

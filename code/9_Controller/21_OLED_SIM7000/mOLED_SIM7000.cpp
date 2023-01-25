@@ -64,7 +64,6 @@ int8_t mOLED_SIM7000::Tasker(uint8_t function, JsonParserObject obj)
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
@@ -314,7 +313,7 @@ void mOLED_SIM7000::SpeedRefresh(void)
 
 
 
-uint8_t mOLED_SIM7000::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mOLED_SIM7000::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -322,7 +321,7 @@ uint8_t mOLED_SIM7000::ConstructJSON_Settings(uint8_t json_level, bool json_obje
 
 }
 
-uint8_t mOLED_SIM7000::ConstructJSON_Power(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mOLED_SIM7000::ConstructJSON_Power(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
@@ -383,7 +382,7 @@ void mOLED_SIM7000::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mOLED_SIM7000::MQTTHandler_Set_TelePeriod()
+void mOLED_SIM7000::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

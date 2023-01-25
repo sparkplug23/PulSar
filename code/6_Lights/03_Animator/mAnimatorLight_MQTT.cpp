@@ -9,7 +9,6 @@ void mAnimatorLight::MQTTHandler_Init()
 
   struct handler<mAnimatorLight>* ptr;
   
-
   ptr = &mqtthandler_settings_teleperiod;
   ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   ptr->tSavedLastSent = millis();
@@ -94,8 +93,6 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
   #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-    
-    
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
   ptr = &mqtthandler_debug_palette;
@@ -103,7 +100,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
@@ -116,7 +113,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_HARDWARE__CTR;
@@ -129,7 +126,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = 1; 
+  ptr->tRateSecs              = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level             = JSON_LEVEL_DETAILED;
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR;
@@ -142,13 +139,12 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = 1; 
+  ptr->tRateSecs              = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level             = JSON_LEVEL_DETAILED;
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS_NEW__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Segments_New;
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-
 
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   ptr = &mqtthandler_debug_animations_progress;
@@ -178,14 +174,14 @@ void mAnimatorLight::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mAnimatorLight::MQTTHandler_Set_TelePeriod()
+void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**

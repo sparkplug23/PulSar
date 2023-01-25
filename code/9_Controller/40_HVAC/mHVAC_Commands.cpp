@@ -32,7 +32,8 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
    * */
   if(jtok = obj[D_JSON_HVAC_DEVICE]){ 
     if(jtok.isStr()){
-      if((device_id = DLI->GetDeviceIDbyName(jtok.getStr()))>=0){ // D_JSON_DEVICE
+      if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(), GetModuleUniqueID()))>=0)
+      { // D_JSON_DEVICE
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
       }else{
         AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
@@ -51,26 +52,24 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
    *  @note Timer Commands
    * */
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-
-  if(jtok = obj["HVAC"].getObject()[D_JSON_TIME_ON])
-  { 
-    CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
-    data_buffer.isserviced++;
-    ALOG_COM( PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt() );
-  }
-
-  #else
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
   if(jtok = obj["HVAC"].getObject()[D_JSON_TIME_ON]){ 
-  #else
-  if(jtok = obj[D_JSON_TIME_ON]){ 
-  #endif
     CommandSet_ProgramTimer_TimeOn(device_id,jtok.getInt()); 
     data_buffer.isserviced++;
     // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), jtok.getInt());
     // #endif
   }
+
+  if(jtok = obj["HVAC"].getObject()[D_JSON_ADD_TIME_ON]){ 
+    CommandSet_ProgramTimer_AddTimeOn(device_id, jtok.getInt()); 
+    data_buffer.isserviced++;
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_ADD_TIME_ON)), jtok.getInt());
+    // #endif
+  }
+
+
+
   #endif // ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
 
   #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
@@ -151,7 +150,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
       AddLog(LOG_LEVEL_DEBUG, PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
 
-      int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr());
+      int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr(),GetModuleUniqueID());
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);
 
       if(device_id_found>=0)
@@ -189,7 +188,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
 
 
-void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value)
+void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint16_t value)
 {
 
   // check if zone id is valid
@@ -203,8 +202,48 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value)
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
   #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+}
+
+void mHVAC::CommandSet_ProgramTimer_AddTimeOn(uint8_t zone_id, uint16_t value)
+{
+
+  // check if zone id is valid
+  if(zone_id == -1){ return; }
+
+  zone[zone_id].program_timer_method->StartTimer_Minutes(zone[zone_id].program_timer_method->GetTimer_Minutes()+value);
+  
+  functionhandler_programs_timers.flags.run_now = true;
+  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
+  mqtthandler_program_timers_teleperiod.flags.SendNow = true;
+  // isanychanged_timers = true;
+  
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+}
+
+uint16_t mHVAC::CommandGet_ProgramTimer_TimeOn(uint8_t zone_id)
+{
+
+  // check if zone id is valid
+  // if(zone_id == -1){ return; }
+
+  return zone[zone_id].program_timer_method->GetTimer_Minutes();
+
+  // zone[zone_id].program_timer_method->StartTimer_Minutes(value);
+  
+  // functionhandler_programs_timers.flags.run_now = true;
+  // mqtthandler_program_timers_ifchanged.flags.SendNow = true;
+  // mqtthandler_program_timers_teleperiod.flags.SendNow = true;
+  // // isanychanged_timers = true;
+  
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_JSON_COMMAND_NVALUE_K(D_JSON_TIME_ON)), zone[zone_id].program_timer_method->GetTimer_Minutes());
+  // #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }
 

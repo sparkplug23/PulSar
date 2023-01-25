@@ -78,11 +78,10 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
       break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
       break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -358,7 +357,7 @@ void mEnergyINA219::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_comp
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mEnergyINA219::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
@@ -460,12 +459,12 @@ void mEnergyINA219::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mEnergyINA219::MQTTHandler_Set_TelePeriod(){
+void mEnergyINA219::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mEnergyINA219::MQTTHandler_Sender(uint8_t mqtt_handler_id){

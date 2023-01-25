@@ -49,11 +49,10 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -347,13 +346,11 @@ void mSR04::SubTask_UpdateAmbientTemperature()
    **/
 
   float temperature = 0;
-
-  uint16_t module_id_unique = D_UNIQUE_MODULE_SENSORS_DB18_ID;
-  uint8_t  device_id = 0;
+  uint8_t  device_id = 0; //ambient tank should be 0
 
   sensors_reading_t reading;
-  pCONT->GetModuleObjectbyUniqueID(module_id_unique)->GetSensorReading(&reading, device_id);
-  temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
+  pCONT->GetModuleObjectbyUniqueID(pCONT_db18->GetModuleUniqueID())->GetSensorReading(&reading, device_id);
+  temperature = reading.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
 
   Serial.printf("temperature=%f\n\r", temperature);
 
@@ -365,7 +362,7 @@ void mSR04::SubTask_UpdateAmbientTemperature()
 
 
 
-uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_TYPE, sr04_type);
@@ -385,7 +382,7 @@ uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_object_start
 }
 
 
-uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
   JsonBuilderI->Start();
     JsonBuilderI->Add("Ping", readings.raw.ping_value);

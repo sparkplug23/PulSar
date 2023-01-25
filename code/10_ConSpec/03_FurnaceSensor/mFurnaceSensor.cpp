@@ -56,11 +56,10 @@ int8_t mFurnaceSensor::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -265,7 +264,7 @@ void mFurnaceSensor::EveryLoop()
 // }
 
 
-uint8_t mFurnaceSensor::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mFurnaceSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
   
@@ -274,7 +273,7 @@ uint8_t mFurnaceSensor::ConstructJSON_Settings(uint8_t json_level, bool json_obj
 }
 
 
-uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level)
+uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level, bool json_appending)
 {
   char buffer[100];
 
@@ -288,9 +287,9 @@ uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level)
     // JBI->Add("furnace_on", digitalRead(14));//D5));
     // water temps
     #ifdef USE_MODULE_SENSORS_DS18X
-    JBI->Add("water0", pCONT_msdb18->sensor[0].reading.val);
-    JBI->Add("water1", pCONT_msdb18->sensor[1].reading.val);
-    JBI->Add("water2", pCONT_msdb18->sensor[2].reading.val);
+    JBI->Add("water0", pCONT_db18->sensor[0].reading.val);
+    JBI->Add("water1", pCONT_db18->sensor[1].reading.val);
+    JBI->Add("water2", pCONT_db18->sensor[2].reading.val);
     #endif // USE_MODULE_SENSORS_DS18X
     // ambient temp
     #ifdef USE_MODULE_SENSORS_BME
@@ -381,7 +380,7 @@ void mFurnaceSensor::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mFurnaceSensor::MQTTHandler_Set_TelePeriod()
+void mFurnaceSensor::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

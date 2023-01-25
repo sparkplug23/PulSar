@@ -58,7 +58,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
      * RULES SECTION * 
     *******************/
     #ifdef USE_MODULE_CORE_RULES
-    case FUNC_EVENT_SET_POWER_ID:
+    case FUNC_EVENT_SET_POWER_ID: 
       RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
@@ -67,14 +67,13 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     // #ifdef USE_MODULE_NETWORKS_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
@@ -222,6 +221,15 @@ void mRelays::RulesEvent_Set_Power(){
 
   uint8_t relay_state = pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0];
 
+  #ifdef ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE // This probably needs moved into RulesEngine to work everywhere
+  if(pCONT_rules->rules[pCONT_rules->rules_active_index].command.value.data[0] == STATE_NUMBER_FOLLOW_ID)
+  {
+    // Replace relay_state with event_triggered value
+    ALOG_INF(PSTR(" pCONT_rules->event_triggered.value.data[0] = %d"), pCONT_rules->event_triggered.value.data[0]);
+    relay_state = pCONT_rules->event_triggered.value.data[0]; // ie relay will follow the button state
+  }
+  #endif //  ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE
+
 
   #ifdef ENABLE_DEVFEATURE_RELAY_RULEEVENT_USES_COMMANDSET
   CommandSet_Relay_Power(relay_state, relay_index);
@@ -282,7 +290,7 @@ void mRelays::SubTask_Relay_Time_To_Remain_On_Seconds(){
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, relay_status[relay_id].timer_decounter.seconds);
       #endif
 
-      mqtthandler_state_ifchanged.flags.SendNow = true;
+      mqtthandler_state_ifchanged.flags.SendNow = true; // If active, send every second
 
     }else{
       //assumed off ie == 0
@@ -373,11 +381,7 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
 int8_t mRelays::GetRelayIDbyName(const char* c){
   if(*c=='\0'){ return -1; }  
 
-  // int8_t device_id; // not needed, to be phased out
-  int16_t class_id = GetModuleUniqueID();//E M_MODULE_DRIVERS_RELAY_ID;
-
-  // int16_t device_id_found = DLI->GetDeviceIDbyName(c,device_id,class_id);
-  int16_t device_id_found = DLI->GetDeviceIDbyName(c,class_id);
+  int16_t device_id_found = DLI->GetDeviceIDbyName(c, GetModuleUniqueID());
 
   AddLog(LOG_LEVEL_HIGHLIGHT,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
@@ -810,7 +814,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
 
 
-uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_object_start_end_required){
+uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_appending){
 
   JBI->Start();
     JBI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);
@@ -829,11 +833,11 @@ uint8_t mRelays::ConstructJSON_Settings(uint8_t json_method, bool json_object_st
 }
 
 
-uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[100];
 
-  if(json_object_start_end_required)
+  if(json_appending)
   {
     JBI->Start();
   }
@@ -888,7 +892,7 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_object_start_
     }
   }
   // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::ConstructJSON_State %d"),JBI->GetLength());
-  if(json_object_start_end_required)
+  if(json_appending)
   {
     return JBI->End();
   }
@@ -909,12 +913,12 @@ uint8_t mRelays::AppendJSONResponse_Drivers_Unified()
 }
 
 
-uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level, bool json_appending)
 {
 
   char buffer[50];
 
-  if(json_object_start_end_required)
+  if(json_appending)
   {
     JBI->Start();
   }
@@ -957,7 +961,7 @@ uint8_t mRelays::ConstructJSON_Scheduled(uint8_t json_level, bool json_object_st
     }
   }
 
-  if(json_object_start_end_required)
+  if(json_appending)
   {
     return JBI->End();
   }

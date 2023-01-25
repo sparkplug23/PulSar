@@ -62,11 +62,10 @@ int8_t mSDCardLogger::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -179,7 +178,7 @@ void mSDCardLogger::SubTask_UpdateOLED()
 
 
 
-uint8_t mSDCardLogger::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mSDCardLogger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -188,7 +187,7 @@ uint8_t mSDCardLogger::ConstructJSON_Settings(uint8_t json_level, bool json_obje
 }
 
 
-uint8_t mSDCardLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mSDCardLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
@@ -250,12 +249,12 @@ void mSDCardLogger::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mSDCardLogger::MQTTHandler_Set_TelePeriod(){
+void mSDCardLogger::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mSDCardLogger::MQTTHandler_Sender(uint8_t mqtt_handler_id){

@@ -226,6 +226,10 @@ DEFINE_PGM_CTR(PM_JSON_TIME_ON_MS)           D_JSON_TIME_ON_MS;
 DEFINE_PGM_CTR(PM_JSON_TEMPERATURE)           D_JSON_TEMPERATURE;
 DEFINE_PGM_CTR(PM_JSON_TYPE)              D_JSON_TYPE;
 
+DEFINE_PGM_CTR(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING) "TemperatureHeatmap";
+
+DEFINE_PGM_CTR(PM_JSON_TEMPERATURE_HEATMAP_ADJUSTED_BRIGHTNESS_RGBSTRING) "TemperatureHeatMap_AdjustedBrightness";
+
 
 
 
@@ -571,7 +575,7 @@ static const char kMonthNames[] PROGMEM = D_MONTH3LIST;
 
 DEFINE_PGM_CTR(kOptionOff)        "OFF|" "0|" D_OFF "|" D_FALSE "|" D_STOP "|" D_JSON_OFF ;
 DEFINE_PGM_CTR(kOptionOn)         "ON|"  "1|" D_ON "|" D_TRUE "|" D_START "|" D_JSON_ON "|" D_USER ;
-DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" "2|" D_TOGGLE "|" D_ADMIN ;
+DEFINE_PGM_CTR(kOptionToggle)     "TOGGLE|" "2|" D_TOGGLE "|" "OnChanged";
 DEFINE_PGM_CTR(kOptionBlink)      "BLINK|" D_BLINK ;
 DEFINE_PGM_CTR(kOptionBlinkOff)   "BLINKOFF|" D_BLINKOFF ;
 DEFINE_PGM_CTR(kOptionIncrement)        "Increment|" "Increase|+|plus|" D_CYCLE ;

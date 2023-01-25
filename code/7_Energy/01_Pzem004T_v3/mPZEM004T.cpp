@@ -63,11 +63,10 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -278,6 +277,199 @@ void mEnergyPZEM004T::ParseModbusBuffer(DATA_MODBUS* mod, uint8_t* buffer){
   mod->measured_time = millis();
 
 }
+
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+
+void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
+{
+
+  // AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::parse_JSONCommand"));
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+  
+  if(jtok = obj[D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR].getObject()["SearchForDevices"])
+  {
+
+// This should become its own command, which can internally be used to search for connected devices during init.
+
+      uint8_t found_address = 0;
+      uint8_t modbus_buffer[30] = {0}; 
+
+      for(uint8_t address_search=0;address_search<30;address_search++)
+      {
+
+        modbus->Send(address_search, 0x04, 0, 10);      
+        found_address = 0;
+        timeout = millis();
+        while(abs(millis()-timeout)<200)
+        {
+
+          // ESP.wdtFeed();
+
+          if(modbus->ReceiveReady())
+          { 
+            uint8_t error = modbus->ReceiveBuffer(modbus_buffer, 10);
+            found_address = modbus_buffer[2]; // addres byte
+            AddLog(LOG_LEVEL_TEST, PSTR("MODBUS Address =%d %d FOUND"),found_address,address_search);
+            break; // out of the while
+          }
+        }
+        
+        AddLog(LOG_LEVEL_TEST, PSTR("MODBUS Address =%d %d"),found_address,address_search);
+
+      }
+
+
+
+  }
+   
+}
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+
+
+uint8_t mEnergyPZEM004T::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+
+  JBI->Start();
+    JBI->Add(D_JSON_COUNT, settings.found);
+  return JBI->End();
+
+}
+
+uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
+
+  char buffer[40];
+
+  // AddLog(LOG_LEVEL_TEST, PSTR( DEBUG_INSERT_PAGE_BREAK "mEnergyInterface::ConstructJSON_Sensor %d"), pCONT_iEnergy->Energy.phase_count);
+  JBI->Start();
+  for(
+    int ii=0;
+    ii<pCONT_iEnergy->Energy.phase_count;
+    // ii<2;
+    ii++
+  ){
+    JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), ii, buffer, sizeof(buffer)));
+      JBI->Add(D_JSON_VOLTAGE,      data_modbus[ii].voltage);
+      JBI->Add(D_JSON_CURRENT,      data_modbus[ii].current);
+      JBI->Add(D_JSON_ACTIVE_POWER, data_modbus[ii].active_power);
+      // JBI->Add(D_JSON_FREQUENCY,    data_modbus[ii].frequency);
+      // JBI->Add(D_JSON_POWER_FACTOR, data_modbus[ii].power_factor);
+      // JBI->Add(D_JSON_ENERGY,       data_modbus[ii].energy);
+    JBI->Level_End();
+  }
+
+  // float error_rate_perc = (float)(stats.success_reads+stats.timeout_reads)/(float);
+  float errors = stats.timeout_reads;
+  float total = stats.success_reads;//+stats.timeout_reads;
+  float error_rate_perc = (errors/total)*100;
+
+  // JBI->Level_Start("stats");
+  //   JBI->Add("success", stats.success_reads);
+  //   JBI->Add("timeout", stats.timeout_reads);
+  //   JBI->Add("error_rate_perc", error_rate_perc);
+  //   JBI->Add("sample_time", stats.sample_time);
+  //   JBI->Add("start_time", stats.start_time);
+  //   JBI->Add("end_time", stats.end_time);
+  // JBI->Level_End();
+
+  return JBI->End();
+
+}
+
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mEnergyPZEM004T::MQTTHandler_Init(){
+
+  struct handler<mEnergyPZEM004T>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.configperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->handler_id = MQTT_HANDLER_SENSOR_TELEPERIOD_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
+
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->handler_id = MQTT_HANDLER_SENSOR_IFCHANGED_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60;//pCONT_set->Settings.sensors.ifchanged_secs;  // until redunction in when interface is reporting
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
+  
+} 
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mEnergyPZEM004T::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mEnergyPZEM004T::MQTTHandler_Set_DefaultPeriodRate()
+{
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
+}
+
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mEnergyPZEM004T::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_ENERGY_PZEM004T_V3_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+
 
 
 #endif

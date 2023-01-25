@@ -66,13 +66,13 @@ class mOLED_SH1106 :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
   
     #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mOLED_SH1106> mqtthandler_settings_teleperiod;

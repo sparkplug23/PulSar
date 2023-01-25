@@ -199,7 +199,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level){
 }
 
 
-uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   // return 0;
   // DEBUG_LINE_HERE;

@@ -950,6 +950,37 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
     #ifdef ENABLE_LOG_LEVEL_ERROR
     ALOG_DBM(PSTR("GetPalettePointerByID=%d DEFAULT"),id);
     #endif // ENABLE_LOG_LEVEL_INFO
+
+
+    
+    /**
+     * Variable User HSBID
+     * */
+    case PALETTELIST_VARIABLE_HSBID_01__ID: return &palettelist.hsbid_users[0];
+    case PALETTELIST_VARIABLE_HSBID_02__ID: return &palettelist.hsbid_users[1];
+    case PALETTELIST_VARIABLE_HSBID_03__ID: return &palettelist.hsbid_users[2];
+    case PALETTELIST_VARIABLE_HSBID_04__ID: return &palettelist.hsbid_users[3];
+    case PALETTELIST_VARIABLE_HSBID_05__ID: return &palettelist.hsbid_users[4];
+    case PALETTELIST_VARIABLE_HSBID_06__ID: return &palettelist.hsbid_users[5];
+    case PALETTELIST_VARIABLE_HSBID_07__ID: return &palettelist.hsbid_users[6];
+    case PALETTELIST_VARIABLE_HSBID_08__ID: return &palettelist.hsbid_users[7];
+    case PALETTELIST_VARIABLE_HSBID_09__ID: return &palettelist.hsbid_users[8];
+    case PALETTELIST_VARIABLE_HSBID_10__ID: return &palettelist.hsbid_users[9];
+    /**
+     * Variable User RGBCCT
+     * */
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID: return &palettelist.rgbcct_segment_colour_users[0];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID: return &palettelist.rgbcct_segment_colour_users[1];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID: return &palettelist.rgbcct_segment_colour_users[2];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID: return &palettelist.rgbcct_segment_colour_users[3];
+    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID: return &palettelist.rgbcct_segment_colour_users[4];
+    /**
+     * Variable User Encoded Generic
+     * */
+    case PALETTELIST_VARIABLE_GENERIC_01__ID:       return &palettelist.encoded_users;
+
+
+
     /**
      * Static Encoded Palettes
      * */
@@ -1028,32 +1059,6 @@ mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
     case PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
     case PALETTELIST_STATIC_CUSTOM_USER_01__ID: return &palettelist.custom_user_01;
     
-    /**
-     * Variable User HSBID
-     * */
-    case PALETTELIST_VARIABLE_HSBID_01__ID: return &palettelist.hsbid_users[0];
-    case PALETTELIST_VARIABLE_HSBID_02__ID: return &palettelist.hsbid_users[1];
-    case PALETTELIST_VARIABLE_HSBID_03__ID: return &palettelist.hsbid_users[2];
-    case PALETTELIST_VARIABLE_HSBID_04__ID: return &palettelist.hsbid_users[3];
-    case PALETTELIST_VARIABLE_HSBID_05__ID: return &palettelist.hsbid_users[4];
-    case PALETTELIST_VARIABLE_HSBID_06__ID: return &palettelist.hsbid_users[5];
-    case PALETTELIST_VARIABLE_HSBID_07__ID: return &palettelist.hsbid_users[6];
-    case PALETTELIST_VARIABLE_HSBID_08__ID: return &palettelist.hsbid_users[7];
-    case PALETTELIST_VARIABLE_HSBID_09__ID: return &palettelist.hsbid_users[8];
-    case PALETTELIST_VARIABLE_HSBID_10__ID: return &palettelist.hsbid_users[9];
-    /**
-     * Variable User RGBCCT
-     * */
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID: return &palettelist.rgbcct_segment_colour_users[0];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID: return &palettelist.rgbcct_segment_colour_users[1];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID: return &palettelist.rgbcct_segment_colour_users[2];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID: return &palettelist.rgbcct_segment_colour_users[3];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID: return &palettelist.rgbcct_segment_colour_users[4];
-    /**
-     * Variable User Encoded Generic
-     * */
-    case PALETTELIST_VARIABLE_GENERIC_01__ID:       return &palettelist.encoded_users;
-
   }
 
 }
@@ -1175,12 +1180,14 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
 
   for( // loops relative to exact palette id
     uint8_t ii=PALETTELIST_STATIC_PARTY_DEFAULT__ID;
-            ii<PALETTELIST_STATIC_LENGTH__ID;
+            ii<(PALETTELIST_STATIC_LENGTH__ID - PALETTELIST_STATIC_PARTY_DEFAULT__ID);
             ii++
   ){
     ptr = GetPalettePointerByID(ii);
 
-    ALOG_DBM( PSTR("Name \"%s\"=?\"%s\""), c, ptr->friendly_name_ctr );
+    DEBUG_LINE_HERE;
+
+    // ALOG_INF( PSTR("Name \"%s\"=?\"%S\""), c, ptr->friendly_name_ctr );
 
     if(ptr->friendly_name_ctr == nullptr)
     {
@@ -1189,10 +1196,11 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
 
     if(ptr->friendly_name_ctr != nullptr)
     { 
+      ALOG_DBM( PSTR("ptr->friendly_name_ctr == %d %s %S"), ii, c, ptr->friendly_name_ctr );
       if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr))
       {
         ALOG_DBM( PSTR("MATCH \"%c\" %d"), c, ii ); 
-        return ii+PALETTELIST_STATIC_PARTY_DEFAULT__ID;            
+        return ii;            
       }
     }
   }

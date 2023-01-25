@@ -91,11 +91,10 @@ int8_t mFona_Cellular::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -1225,7 +1224,7 @@ bool mFona_Cellular::CommandSet_Power()
 *******************************************************************************************************************/
 
 
-uint8_t mFona_Cellular::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mFona_Cellular::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
     // JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
@@ -1234,7 +1233,7 @@ uint8_t mFona_Cellular::ConstructJSON_Settings(uint8_t json_level, bool json_obj
 
 }
 
-uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 
@@ -1319,7 +1318,7 @@ void mFona_Cellular::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mFona_Cellular::MQTTHandler_Set_TelePeriod()
+void mFona_Cellular::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

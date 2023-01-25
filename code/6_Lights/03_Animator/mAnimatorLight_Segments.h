@@ -1272,7 +1272,7 @@
   void LCDDisplay_showDigit(byte digit, byte color, byte pos);
   void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
   void LCDDisplay_showDots(byte dots, byte color);
-  RgbcctColor ColorFromPaletteLCD(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
+  // RgbcctColor ColorFromPaletteLCD(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
   uint8_t tempcol = 0;
   uint16_t lcd_display_show_number = 0;
 

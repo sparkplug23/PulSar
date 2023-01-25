@@ -44,25 +44,14 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-    case FUNC_LOOP: 
-      // EveryLoop();
-    break;
-    case FUNC_EVERY_FIVE_SECOND:
-      // pCONT_set->Function_Template_Load();
-
-        // Ds18x20EverySecond();
-
-    break;
     case FUNC_EVERY_SECOND:
       // Ds18x20Init();
-        // AddLog_Array(LOG_LEVEL_COMMANDS, "address0", sensor_new[0].address, (uint8_t)8);
-        // AddLog_Array(LOG_LEVEL_COMMANDS, "address1", sensor_new[1].address, (uint8_t)8);
-        // ALOG_INF(PSTR("devices_pin1=%d"),devices_pin1);
-        // ALOG_INF(PSTR("devices_pin2=%d"),devices_pin2);
+      // AddLog_Array(LOG_LEVEL_COMMANDS, "address0", sensor_new[0].address, (uint8_t)8);
+      // AddLog_Array(LOG_LEVEL_COMMANDS, "address1", sensor_new[1].address, (uint8_t)8);
+      // ALOG_INF(PSTR("devices_pin1=%d"),devices_pin1);
+      // ALOG_INF(PSTR("devices_pin2=%d"),devices_pin2);
 
-        Ds18x20EverySecond();
-
-        // Serial.println();
+      Ds18x20EverySecond();
 
     break;
     /************
@@ -79,11 +68,10 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -97,8 +85,6 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-
-// https://www.analog.com/en/technical-articles/guidelines-for-reliable-long-line-1wire-networks.html
 void mDB18x20_ESP32::Scan_ReportAsJsonBuilder()
 {
   // For now, just re-init the process, but likely this should instead be subdivided into its own subfunction inside init
@@ -178,23 +164,21 @@ void mDB18x20_ESP32::Scan_ReportAsJsonBuilder()
 
 // }
 
-
-
 }
+
 
 void mDB18x20_ESP32::Pre_Init(void){
   
-  ALOG_INF (PSTR(D_LOG_DSB DEBUG_INSERT_PAGE_BREAK "mDB18x20_ESP32::Pre_Init"));
-  // delay(2000);
+  ALOG_DBG(PSTR(D_LOG_DSB "mDB18x20_ESP32::Pre_Init"));
 
-  DS18X20Data.gpios = 0;
+  DS18X20Data_gpios = 0;
   for (uint32_t pins = 0; pins < MAX_DSB_PINS; pins++) 
   {
     ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
     if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) {
       ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
-      ALOG_INF(PSTR("DS18X20Data.gpios=%d"),DS18X20Data.gpios);
-      DS18X20Data.gpios++;
+      ALOG_INF(PSTR("DS18X20Data_gpios=%d"), DS18X20Data_gpios);
+      DS18X20Data_gpios++;
     }
   }
 
@@ -203,89 +187,18 @@ void mDB18x20_ESP32::Pre_Init(void){
 }
 
 
-
-
-
-
-/********************************************************************************************/
-
 void mDB18x20_ESP32::Ds18x20Init(void) 
 {
   Ds18x20Search();
-  ALOG_INF (PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), DS18X20Data.sensors);
+  ALOG_INF (PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), settings.sensor_count);
 }
 
-#ifdef ENABLE_DEVFEATURE_DS18X20_DUAL_SEARCH
 
 void mDB18x20_ESP32::Ds18x20Search(void) {
   uint8_t num_sensors = 0;
   uint8_t sensor = 0;
 
-  for (uint8_t pins = 0; pins < DS18X20Data.gpios; pins++) 
-  {
-    ds = ds18x20_gpios[pins];
-    ds->reset_search();
-    for (num_sensors; num_sensors < DS18X20_MAX_SENSORS; num_sensors) {
-      if (!ds->search(sensor_new[num_sensors].address)) {
-        
-        ALOG_INF(PSTR("if (!ds->search(sensor_new[num_sensors].address))") );
-        ds->reset_search();
-        break;
-      }else{
-        
-        ALOG_INF(PSTR("ELSE (!ds->search(sensor_new[num_sensors].address))"));
-      }
-      // If CRC Ok and Type DS18S20, DS1822, DS18B20 or MAX31850
-      if ((OneWire::crc8(sensor_new[num_sensors].address, 7) == sensor_new[num_sensors].address[7]) &&
-        ((sensor_new[num_sensors].address[0] == DS18S20_CHIPID) ||
-          (sensor_new[num_sensors].address[0] == DS1822_CHIPID) ||
-          (sensor_new[num_sensors].address[0] == DS18B20_CHIPID) ||
-          (sensor_new[num_sensors].address[0] == MAX31850_CHIPID))
-      ){
-        sensor_new[num_sensors].alias_index = 0; // Reset
-        ALOG_INF (PSTR(D_LOG_DSB "pins %d"), pins);
-        sensor_new[num_sensors].pins_id = pins;
-        num_sensors++;
-
-        if(pins==0){devices_pin1++;}
-        if(pins==1){devices_pin2++;}
-
-      }
-    }
-  }
-
-  for (uint32_t i = 0; i < num_sensors; i++) {
-    sensor_new[i].index = i;
-  }
-
-  // Place ids into accending order
-  for (uint32_t i = 0; i < num_sensors; i++) {
-    for (uint32_t j = i + 1; j < num_sensors; j++) {
-      if (uint32_t(sensor_new[sensor_new[i].index].address) > uint32_t(sensor_new[sensor_new[j].index].address)) 
-      {
-        ALOG_INF(PSTR("Swap"));
-        std::swap(sensor_new[i].index, sensor_new[j].index);
-      }
-    }
-  }
-  DS18X20Data.sensors = num_sensors;
-  settings.fSensorCount = num_sensors;
-
-  // if(DS18X20Data.sensors==0){
-  //   ALOG_HGL(PSTR("Expected DB18 and found none"));
-  //   // delay(4000);
-  // }
-
-
-}
-
-#else // ENABLE_DEVFEATURE_DS18X20_DUAL_SEARCH
-
-void mDB18x20_ESP32::Ds18x20Search(void) {
-  uint8_t num_sensors = 0;
-  uint8_t sensor = 0;
-
-  for (uint8_t pins = 0; pins < DS18X20Data.gpios; pins++) 
+  for (uint8_t pins = 0; pins < DS18X20Data_gpios; pins++) 
   {
     ds = ds18x20_gpios[pins];
     ds->reset_search();
@@ -311,14 +224,10 @@ void mDB18x20_ESP32::Ds18x20Search(void) {
           (sensor_new[num_sensors].address[0] == DS18B20_CHIPID) ||
           (sensor_new[num_sensors].address[0] == MAX31850_CHIPID))
       ){
-        sensor_new[num_sensors].alias_index = 0; // Reset
+        sensor_new[num_sensors].device_name_index = -1; // Reset
         // ALOG_INF (PSTR(D_LOG_DSB "pins %d"), pins);
         sensor_new[num_sensors].pins_id = pins;
         num_sensors++;
-
-        if(pins==0){devices_pin1++;}
-        if(pins==1){devices_pin2++;}
-
       }
     }
   }
@@ -337,23 +246,21 @@ void mDB18x20_ESP32::Ds18x20Search(void) {
       }
     }
   }
-  DS18X20Data.sensors = num_sensors;
+  settings.sensor_count = num_sensors;
   // settings.fSensorCount = num_sensors;
 
-  // if(DS18X20Data.sensors==0){
+  // if(settings.sensor_count==0){
   //   ALOG_HGL(PSTR("Expected DB18 and found none"));
   //   // delay(4000);
   // }
 
-
 }
 
-#endif // ENABLE_DEVFEATURE_DS18X20_DUAL_SEARCH
 
 // Looks like I will have to tell everything on a pin to convert, then wait and request their values
 
 void mDB18x20_ESP32::Ds18x20Convert(void) {
-  for (uint32_t i = 0; i < DS18X20Data.gpios; i++) {
+  for (uint32_t i = 0; i < DS18X20Data_gpios; i++) {
     ds = ds18x20_gpios[i];
     ds->reset();
 #ifdef W1_PARASITE_POWER
@@ -431,42 +338,13 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t) {
   return false;
 }
 
-void mDB18x20_ESP32::Ds18x20Name(uint8_t sensor) {
-//   uint8_t index = sizeof(ds18x20_chipids);
-//   while (--index) {
-//     if (sensor_new[sensor_new[sensor].index].address[0] == ds18x20_chipids[index]) {
-//       break;
-//     }
-//   }
-//   GetTextIndexed(DS18X20Data.name, sizeof(DS18X20Data.name), index, kDs18x20Types);
-//   if (DS18X20Data.sensors > 1) {
-// #ifdef DS18x20_USE_ID_AS_NAME
-//     char address[17];
-//     for (uint32_t j = 0; j < 3; j++) {
-//       sprintf(address+2*j, "%02X", sensor_new[sensor_new[sensor].index].address[3-j]);  // Only last 3 bytes
-//     }
-//     snprintf_P(DS18X20Data.name, sizeof(DS18X20Data.name), PSTR("%s%c%s"), DS18X20Data.name, IndexSeparator(), address);
-// #else
-// uint8_t print_ind = sensor +1;
-// #ifdef DS18x20_USE_ID_ALIAS
-//     if (sensor_new[sensor].alias) {
-//       snprintf_P(DS18X20Data.name, sizeof(DS18X20Data.name), PSTR("DS18Sens"));
-//       print_ind = sensor_new[sensor].alias;
-//     }
-// #endif
-//     snprintf_P(DS18X20Data.name, sizeof(DS18X20Data.name), PSTR("%s%c%d"), DS18X20Data.name, IndexSeparator(), print_ind);
-// #endif
-//   }
-}
-
-/********************************************************************************************/
 
 void mDB18x20_ESP32::Ds18x20EverySecond(void) 
 {
 
-  ALOG_INF(PSTR("DS18X20Data.sensors=%d"),DS18X20Data.sensors);
+  ALOG_INF(PSTR("settings.sensor_count=%d"),settings.sensor_count);
 
-  if (!DS18X20Data.sensors) 
+  if (!settings.sensor_count) 
   {     
     Ds18x20Search();      // Check for changes in sensors number
     return; 
@@ -478,7 +356,7 @@ void mDB18x20_ESP32::Ds18x20EverySecond(void)
     Ds18x20Convert();     // Start Conversion, takes up to one second
   } else {
     float t;
-    for (uint32_t i = 0; i < DS18X20Data.sensors; i++) {
+    for (uint32_t i = 0; i < settings.sensor_count; i++) {
       // 12mS per device
       if (Ds18x20Read(i, t)) {   // Read temperature
         sensor_new[i].reading.val = t;
@@ -495,7 +373,7 @@ void mDB18x20_ESP32::Ds18x20EverySecond(void)
 
 
 #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_appending)
 {
 
   JsonBuilderI->Start();
@@ -520,15 +398,28 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_object
 #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
 
 
-uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
-    JsonBuilderI->Add_P("NumDevices", DS18X20Data.sensors);
+    JsonBuilderI->Add_P("NumDevices", settings.sensor_count);
 
     JBI->Array_Start("DeviceNameIndex");
-    for (uint32_t i = 0; i < DS18X20Data.sensors; i++) 
+    for (uint32_t i = 0; i < settings.sensor_count; i++) 
     {
       JBI->Add(sensor_new[i].device_name_index);
+    }
+    JBI->Array_End();
+
+
+    JBI->Array_Start("AddressList");
+    for (uint32_t i = 0; i < settings.sensor_count; i++) 
+    {
+      JBI->Array_Start();
+      for (uint32_t a = 0; a < 8; a++) 
+      {
+        JBI->Add(sensor_new[i].address[a]);
+      }
+      JBI->Array_End();
     }
     JBI->Array_End();
 
@@ -537,7 +428,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Settings(uint8_t json_level, bool json_obj
 }
 
 
-uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level , bool json_object_start_end_required)
+uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level , bool json_appending)
 {
   
   char buffer[40];
@@ -547,7 +438,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level , bool json_obje
 
   JsonBuilderI->Start();
 
-  for (uint32_t sensor_id = 0; sensor_id < DS18X20Data.sensors; sensor_id++) 
+  for (uint32_t sensor_id = 0; sensor_id < settings.sensor_count; sensor_id++) 
   {
 
     alias_i = sensor_new[sensor_id].device_name_index;
@@ -707,7 +598,7 @@ void mDB18x20_ESP32::SetDeviceNameID_WithAddress(const char* device_name, uint8_
   AddLog_Array("Searching Input", array_val, array_len);
 
   int8_t search_id = 0;
-  for (uint32_t i = 0; i < DS18X20Data.sensors; i++) 
+  for (uint32_t i = 0; i < settings.sensor_count; i++) 
   {
     // AddLog_Array("Searching Saved", sensor_new[i].address, 8);
 
@@ -738,7 +629,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -748,7 +639,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = 10; 
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -758,7 +649,7 @@ void mDB18x20_ESP32::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
@@ -791,14 +682,14 @@ void mDB18x20_ESP32::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mDB18x20_ESP32::MQTTHandler_Set_TelePeriod()
+void mDB18x20_ESP32::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**
@@ -807,7 +698,7 @@ void mDB18x20_ESP32::MQTTHandler_Set_TelePeriod()
 void mDB18x20_ESP32::MQTTHandler_Sender(uint8_t id)
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS__DS18X20__ID, handle, id);
   }
 }
 

@@ -19,7 +19,7 @@
 #ifndef MHEATING2_H
 #define MHEATING2_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_HVAC_ID   131  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE_CONTROLLER_HVAC_ID   ((9*1000)+40)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 #define D_GROUP_MODULE_CONTROLLER_HVAC_ID    1    // Numerical accesending order of module within a group
 
 /**
@@ -226,7 +226,7 @@ class mHVAC :
     uint8_t GetHeatingRelay(uint8_t device_id);
     uint8_t GetAnyHeatingRelay();
 
-    uint8_t ConstructJSON_HeatingRelays(uint8_t json_level = 0, bool json_object_start_end_required = false);
+    uint8_t ConstructJSON_HeatingRelays(uint8_t json_level = 0, bool json_appending = false);
     
     
     const char* GetActiveProgramNameCtrbyID(uint8_t activeprogram_id, char* buffer, uint8_t buflen);
@@ -235,7 +235,9 @@ class mHVAC :
     
     void parse_JSONCommand(JsonParserObject obj);
     
-    void CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value);
+    void CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint16_t value);
+    uint16_t CommandGet_ProgramTimer_TimeOn(uint8_t zone_id);
+    void CommandSet_ProgramTimer_AddTimeOn(uint8_t zone_id, uint16_t value);
 
     #ifdef ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
     void CommandSet_ProgramTemperature_Desired_Temperature(uint8_t zone_id, float value);
@@ -280,15 +282,15 @@ class mHVAC :
     const char* GetSensorNameByID(uint8_t sensor_id, char* buffer, uint8_t buflen);
     const char* GetSensorNameLongbyID(uint8_t sensor_id, char* buffer, uint8_t buflen);
 
-    uint8_t ConstructJSON_ProgramTimers(uint8_t json_level = 0, bool json_object_start_end_required = false);
-    uint8_t ConstructJSON_ProgramTemps(uint8_t json_level = 0, bool json_object_start_end_required = false);
+    uint8_t ConstructJSON_ProgramTimers(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_ProgramTemps(uint8_t json_level = 0, bool json_appending = false);
 
-    uint8_t ConstructJSON_ZoneSensors(uint8_t json_level = 0, bool json_object_start_end_required = false);
-    uint8_t ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level = 0, bool json_object_start_end_required = false);
-    uint8_t ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level = 0, bool json_object_start_end_required = false);
+    uint8_t ConstructJSON_ZoneSensors(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level = 0, bool json_appending = false);
 
-    uint8_t ConstructJSON_ProgramActive(uint8_t json_level = 0, bool json_object_start_end_required = false);
-    uint8_t ConstructJSON_HardwareInfo(uint8_t json_level = 0, bool json_object_start_end_required = false);
+    uint8_t ConstructJSON_ProgramActive(uint8_t json_level = 0, bool json_appending = false);
+    uint8_t ConstructJSON_HardwareInfo(uint8_t json_level = 0, bool json_appending = false);
 
     uint32_t tSavedSendRateOfChange10s;
 
@@ -299,7 +301,7 @@ class mHVAC :
     const char* GetClimateSensorNameLongbyIDCtr(uint8_t sensor_id, char* buffer, uint8_t buflen);
     float GetClimateTempsRawByID(uint8_t sensor_id);
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = false);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = false);
 
 
     void FunctionHandler_Init();
@@ -352,7 +354,7 @@ class mHVAC :
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     

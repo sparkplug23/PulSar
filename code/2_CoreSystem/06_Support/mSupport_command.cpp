@@ -32,14 +32,29 @@ void mSupport::parse_JSONCommand(JsonParserObject obj){
     ALOG_COM( PSTR("Restart %d"), jtok.getInt() );
     CommandSet_Restart(jtok.getInt());
       
+  }
 
+  #ifdef ENABLE_DEVFEATURE_DEVICELIST_DEBUG_WITH_COMMANDS
 
-
+  uint16_t module_id = 0;
+  if(jtok = obj["DeviceNameList"].getObject()["ModuleID"])
+  {
+    module_id = jtok.getInt();
+    ALOG_INF( PSTR("DeviceNameList ModuleID=%d"), module_id );
+  }
+  if(jtok = obj["DeviceNameList"].getObject()["SearchName"])
+  {
+    ALOG_INF( PSTR("DeviceNameList %s Result=%d ModuleID=%d"), jtok.getStr(), DLI->GetDeviceIDbyName(jtok.getStr(), module_id), module_id );
   }
 
 
 
 
+
+
+
+
+  #endif // ENABLE_DEVFEATURE_DEVICELIST_DEBUG_WITH_COMMANDS
 
 
   // StaticJsonDocument<300> doc;

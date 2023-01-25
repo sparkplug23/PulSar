@@ -160,31 +160,24 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   
   #endif
 
-  /*
-  
-//make mqtt commands to allow me to tweak and debug 
-  Settings.sensors.ifchanged_secs = 10;
-  Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
-  Settings.sensors.teleperiod_secs = 120;
-  Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
-  Settings.sensors.flags.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
-  Settings.sensors.configperiod_secs = SEC_IN_HOUR;
-
-
-*/
-
-
-
-  if(jtok = obj["MQTTUpdateSeconds"].getObject()["IfChanged"])
+  JsonParserToken jtok_sub = 0; 
+  if(jtok = obj["MQTTUpdateSeconds"])
   {
-    Settings.sensors.ifchanged_secs = jtok.getInt();
-    AddLog(LOG_LEVEL_TEST, PSTR("MQTTUpdateSeconds IfChanged %d"),Settings.sensors.ifchanged_secs);
-    pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
-  }
-
-  if(jtok = obj["MQTTUpdateSeconds"].getObject()["Teleperiod"])
-  {
-    Settings.sensors.teleperiod_secs = jtok.getInt();
+    if(jtok_sub = jtok.getObject()["IfChanged"])
+    {
+      Settings.sensors.ifchanged_secs = jtok_sub.getInt();
+      AddLog(LOG_LEVEL_TEST, PSTR("MQTTUpdateSeconds IfChanged %d"),Settings.sensors.ifchanged_secs);
+    }
+    if(jtok_sub = jtok.getObject()["TelePeriod"])
+    {
+      Settings.sensors.teleperiod_secs = jtok_sub.getInt();
+      AddLog(LOG_LEVEL_TEST, PSTR("MQTTUpdateSeconds TelePeriod %d"),Settings.sensors.teleperiod_secs);
+    }
+    if(jtok_sub = jtok.getObject()["ConfigPeriod"])
+    {
+      Settings.sensors.configperiod_secs = jtok_sub.getInt();
+      AddLog(LOG_LEVEL_TEST, PSTR("MQTTUpdateSeconds ConfigPeriod %d"),Settings.sensors.configperiod_secs);
+    }
     pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
   }
 

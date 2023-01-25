@@ -34,11 +34,10 @@ int8_t mRadiatorFan::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -69,7 +68,7 @@ void mRadiatorFan::Task_UseTemperatureToControlRelay()
    * */
   DeviceAddress known_address = {40,159,147,2,0,0,0,117};
 
-  state.temperature_current = pCONT_msdb18->sensor_group[0].dallas->getTempC(known_address);
+  state.temperature_current = pCONT_db18->sensor_group[0].dallas->getTempC(known_address);
 
   AddLog(LOG_LEVEL_INFO, PSTR("temperature = %d"), state.temperature_current);
 
@@ -91,7 +90,7 @@ void mRadiatorFan::Task_UseTemperatureToControlRelay()
 }
 
 
-uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required)
+uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("TemperatureControlEnabled", settings.enabled_temperature_control);
@@ -99,7 +98,7 @@ uint8_t mRadiatorFan::ConstructJSON_Settings(uint8_t json_level, bool json_objec
 }
 
 
-uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level)
+uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appending)
 {
   char buffer[100];
 
@@ -114,12 +113,12 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level)
       JsonBuilderI->Level_Start("InternalSensors");
         for(int sensor_id=0;sensor_id<3;sensor_id++)
         { 
-          // JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_msdb18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
-          JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_msdb18->GetModuleUniqueID() ,pCONT_msdb18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+          // JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
+          JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_new[sensor_id].address_id,buffer,sizeof(buffer)));         
 
 
           
-            JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_msdb18->sensor[sensor_id].reading.val);
+            JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_new[sensor_id].reading.val);
           JsonBuilderI->Level_End();  
         }
       JsonBuilderI->Level_End();  
@@ -203,7 +202,7 @@ void mRadiatorFan::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mRadiatorFan::MQTTHandler_Set_TelePeriod()
+void mRadiatorFan::MQTTHandler_Set_DefaultPeriodRate()
 {
   // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

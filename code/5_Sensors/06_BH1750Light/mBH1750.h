@@ -74,11 +74,11 @@ class mBH1750 :
     }    
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index > D_SENSOR_BH1750_MAX_COUNT-1) {value->type.push_back(0); return ;}
-      value->type.push_back(SENSOR_TYPE_LIGHT_LEVEL_ID);
-      value->data.push_back(device_data[index].level);
-      value->type.push_back(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);
-      value->data.push_back(device_data[index].illuminance);
+      if(index > D_SENSOR_BH1750_MAX_COUNT-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_LIGHT_LEVEL_ID);
+      value->data_f.push_back(device_data[index].level);
+      value->sensor_type.push_back(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);
+      value->data_f.push_back(device_data[index].illuminance);
       value->sensor_id = index;
     };
     #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
@@ -90,13 +90,13 @@ class mBH1750 :
     bool Get_SensorReading(uint32_t sensor_index);
     void SubTask_ReadSensor(void);
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
       
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     struct handler<mBH1750> mqtthandler_settings_teleperiod;

@@ -130,7 +130,6 @@ int8_t mFan::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
@@ -152,7 +151,7 @@ int8_t mFan::Tasker(uint8_t function, JsonParserObject obj){
 }
 
 
-uint8_t mFan::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mFan::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -160,7 +159,7 @@ uint8_t mFan::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_
 
 }
 
-uint8_t mFan::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mFan::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add_P(D_JSON_FANSPEED, GetFanspeed());  
@@ -217,7 +216,7 @@ void mFan::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mFan::MQTTHandler_Set_TelePeriod()
+void mFan::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -6,6 +6,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 {
 
 
+    DEBUG_LINE_HERE;
   // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int16_t tmp_id = 0;
@@ -37,7 +38,8 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
         ALOG_INF(PSTR("Creating new segment"));
 
         Segment_AppendNew(0, 0, segment_i+1);
-      Serial.println(SEGMENT_I(segment_i).hardware_element_colour_order.data);
+        
+        Serial.println(SEGMENT_I(segment_i).hardware_element_colour_order.data);
 
         DEBUG_LINE_HERE;
 

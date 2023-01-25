@@ -56,11 +56,10 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
       break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
       break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -607,7 +606,7 @@ void mSensorsLSM303D::CalculateOrientation(
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
@@ -735,7 +734,7 @@ void mSensorsLSM303D::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mSensorsLSM303D::MQTTHandler_Set_TelePeriod()
+void mSensorsLSM303D::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

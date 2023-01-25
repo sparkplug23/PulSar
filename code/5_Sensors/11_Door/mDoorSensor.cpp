@@ -50,11 +50,10 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -202,8 +201,18 @@ void mDoorSensor::ShowSensor_AddLog()
 
 
 
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
 
-uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+
+uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     //JsonBuilderI->Add_P(PM_JSON_SENSORCOUNT, settings.);
@@ -212,7 +221,7 @@ uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_object
 }
 
 
-uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
   
   char buffer[50];
 
@@ -240,6 +249,154 @@ uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level){
   return JsonBuilderI->End();
 
 }
+
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mDoorSensor::MQTTHandler_Init(){
+
+  struct handler<mDoorSensor>* ptr;
+
+  ptr = &mqtthandler_settings_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Sensor;
+
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Sensor;
+  
+} //end "MQTTHandler_Init"
+
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mDoorSensor::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
+
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mDoorSensor::MQTTHandler_Set_DefaultPeriodRate()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mDoorSensor::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_DOOR_ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
+
+/******************************************************************************************************************
+ * WebServer
+*******************************************************************************************************************/
+
+
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
+
+  char buffer[10];
+    
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
+    BufferWriterI->Append_P(PSTR("<td>Door Position</td>"));
+    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_door", IsDoorOpen_Ctr(buffer, sizeof(buffer)));   
+  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
+  
+}
+
+
+//append to internal buffer if any root messages table
+void mDoorSensor::WebAppend_Root_Status_Table_Data(){
+  
+  uint8_t sensor_counter = 0;
+  char value_ctr[8];
+  char colour_ctr[10];
+  char inner_html[100];
+  char door_pos_ctr[20];
+  char time_ctr[20];
+
+  JsonBuilderI->Array_Start("tab_door");// Class name
+  
+  for(int sensor_id=0;sensor_id<1;sensor_id++){
+    
+    JsonBuilderI->Level_Start();
+      JsonBuilderI->Add("id",sensor_id);
+
+      char colour_ctr[8];
+      uint32_t millis_elapsed = mTime::MillisElapsed(&door_detect.tEndedTime);
+      // Motion in progress
+      if(door_detect.isactive){
+        sprintf_P(colour_ctr,PSTR("#00ff00"));
+      }else
+      // If movement event has just finished
+      if(millis_elapsed<(1000*60)){
+        // Show colour as fading back to white over X seconds SINCE EVENT OVER
+        uint8_t colour_G = constrain(
+                              map(millis_elapsed,0,(1000*60),0,255)
+                              ,0,255 //increases with time
+                            );
+        pCONT_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
+      }
+      // no event show, just white
+      else{
+        sprintf(colour_ctr,"#ffffff");
+      }
+
+      // sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
+      //   mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
+    
+      JsonBuilderI->Add("ih",inner_html);
+      JsonBuilderI->Add("fc",colour_ctr);
+    
+    JsonBuilderI->Level_End();
+  }
+
+  JsonBuilderI->Array_End();
+
+}
+
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 #endif
 

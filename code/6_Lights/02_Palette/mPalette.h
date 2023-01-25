@@ -157,9 +157,47 @@ class mPalette
      * VARIABLE Encoded 
      */
     
+    /**
+     * @brief Variable lengths to be moved to end once things are stable
+     * 
+     */
+    enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
+      PALETTELIST_VARIABLE_HSBID_01__ID = 0,
+      PALETTELIST_VARIABLE_HSBID_02__ID,
+      PALETTELIST_VARIABLE_HSBID_03__ID,
+      PALETTELIST_VARIABLE_HSBID_04__ID,
+      PALETTELIST_VARIABLE_HSBID_05__ID,
+      PALETTELIST_VARIABLE_HSBID_06__ID,
+      PALETTELIST_VARIABLE_HSBID_07__ID,
+      PALETTELIST_VARIABLE_HSBID_08__ID,
+      PALETTELIST_VARIABLE_HSBID_09__ID,
+      PALETTELIST_VARIABLE_HSBID_10__ID,
+      PALETTELIST_VARIABLE_HSBID_LENGTH__ID  // Count of total handlers and starting point for other modules
+    };
+    
+    enum PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS{
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
+    };
+
+    
+    // One special buffer, block of memory allows any format of pallete (eg)
+    // This will also require encoding of type of palette into the buffer somehow
+    // shared, with overlapping memory
+    // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
+    enum PALETTELIST_VARIABLE_GENERIC__IDS{
+      PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID, // New scene colour, static
+      // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
+      PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
+    };
+    
     enum PALETTELIST_STATIC__IDS
     {
-      PALETTELIST_STATIC_PARTY_DEFAULT__ID = 0,  // Default
+      PALETTELIST_STATIC_PARTY_DEFAULT__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,
       PALETTELIST_STATIC_HOLLOWEEN_OP__ID,
       PALETTELIST_STATIC_HOLLOWEEN_OGP__ID,
       PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID,
@@ -338,45 +376,6 @@ class mPalette
       PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
     };
 
-    
-    /**
-     * @brief Variable lengths to be moved to end once things are stable
-     * 
-     */
-    enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
-      PALETTELIST_VARIABLE_HSBID_01__ID = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID,
-      PALETTELIST_VARIABLE_HSBID_02__ID,
-      PALETTELIST_VARIABLE_HSBID_03__ID,
-      PALETTELIST_VARIABLE_HSBID_04__ID,
-      PALETTELIST_VARIABLE_HSBID_05__ID,
-      PALETTELIST_VARIABLE_HSBID_06__ID,
-      PALETTELIST_VARIABLE_HSBID_07__ID,
-      PALETTELIST_VARIABLE_HSBID_08__ID,
-      PALETTELIST_VARIABLE_HSBID_09__ID,
-      PALETTELIST_VARIABLE_HSBID_10__ID,
-      PALETTELIST_VARIABLE_HSBID_LENGTH__ID  // Count of total handlers and starting point for other modules
-    };
-    
-    enum PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS{
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
-    };
-
-    
-    // One special buffer, block of memory allows any format of pallete (eg)
-    // This will also require encoding of type of palette into the buffer somehow
-    // shared, with overlapping memory
-    // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
-    enum PALETTELIST_VARIABLE_GENERIC__IDS{
-      PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID, // New scene colour, static
-      // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
-      PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
-    };
-    
 
     /**
      * @brief These below to become fully added into my methods as another encoding type
@@ -384,7 +383,7 @@ class mPalette
      * 
      */
     enum PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID,
       
       PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID,
       PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID,

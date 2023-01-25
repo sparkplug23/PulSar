@@ -104,6 +104,8 @@ bool JsonBuilder::End()
   return strlen(writer.buffer)>3?true:false; //isvalid
 }
 
+
+
 void JsonBuilder::Append(const char* buff)
 {
   if((writer.buffer == nullptr)) { return; }  
@@ -126,12 +128,6 @@ void JsonBuilder::Array_Start(const char* key)
     if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
     writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":[",key);
 }
-// void JsonBuilder::Array_Start_P(const char* key)
-// {
-//     if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }
-//     if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
-//     writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%S\":[",key);
-// }
 
 void JsonBuilder::Array_Start_P(const char* keyP, ...)
 {
@@ -155,9 +151,15 @@ void JsonBuilder::Array_Start_P(const char* keyP, ...)
 void JsonBuilder::Array_Start() // only add the bracket for manual building
 {
     if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }
-    if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
+    if(
+      ((writer.length>1)&&(writer.buffer[writer.length-1]!='{')) &&  
+      ((writer.length>1)&&(writer.buffer[writer.length-1]!='['))     // To permit Array of Arrays
+    ){ 
+      writer.length += sprintf_P(&writer.buffer[writer.length],","); 
+    }
     writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"[");
 }
+
 void JsonBuilder::Array_End()
 {
     if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }

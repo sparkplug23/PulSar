@@ -23,7 +23,7 @@
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
 
-uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level, bool json_appending){
 
   // DEBUG_LINE_HERE;
   char buffer[50];
@@ -46,7 +46,7 @@ uint8_t mHVAC::ConstructJSON_ProgramTimers(uint8_t json_level, bool json_object_
 }
 
 
-uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level, bool json_appending){
   
   // DEBUG_LINE_HERE;
   char buffer[50];
@@ -105,7 +105,7 @@ uint8_t mHVAC::ConstructJSON_ProgramTemps(uint8_t json_level, bool json_object_s
 }
 
 
-uint8_t mHVAC::ConstructJSON_ProgramActive(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_ProgramActive(uint8_t json_level, bool json_appending){
   JBI->Start();
   // DEBUG_LINE_HERE;
     JBI->Level_Start_P(D_JSON_RELAY);   
@@ -143,7 +143,7 @@ uint8_t mHVAC::ConstructJSON_ProgramActive(uint8_t json_level, bool json_object_
 }
 
 
-uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level, bool json_appending){
 
   // DEBUG_LINE_HERE;
   char buffer[50];
@@ -161,7 +161,7 @@ uint8_t mHVAC::ConstructJSON_HeatingRelays(uint8_t json_level, bool json_object_
 }
 
 
-uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level, bool json_appending){
 
   // DEBUG_LINE_HERE;
   char buffer[25];
@@ -182,7 +182,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level, bool json_object_st
 }
 
 
-uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level, bool json_appending){
 
   JBI->Start();
   // DEBUG_LINE_HERE;
@@ -191,7 +191,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level, bool json_obj
 }
 
 
-uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level, bool json_appending){
 
   JBI->Start();
   // DEBUG_LINE_HERE;
@@ -199,7 +199,7 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level, bool json_ob
 }
 
 
-uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   // return 0;
   // DEBUG_LINE_HERE;

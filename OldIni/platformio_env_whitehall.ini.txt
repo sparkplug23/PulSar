@@ -186,7 +186,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
               lib/lib_display
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/libg_neopixel
               lib/lib_irremote
@@ -410,7 +410,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
               lib/lib_display
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/libg_neopixel
               lib/lib_irremote
@@ -435,7 +435,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
               lib/lib_display
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/libg_neopixel
 ; monitor_filters = esp32_exception_decoder
@@ -454,7 +454,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_basic
                           lib/lib_network
                           lib/lib_display
-                          lib/lib_dbx_test 
+                          lib/lib_onewire2023 
                           lib/lib_sensor
                           lib/libg_neopixel
 ; monitor_filters = esp32_exception_decoder
@@ -466,13 +466,13 @@ upload_port = 192.168.0.35
 
 [env:wh_slp]
 extends = env:whitehall_32
-build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_IMMERSION_SENSOR_PANEL                       
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_IMMERSION_CONTROL_PANEL                       
 lib_extra_dirs          = ${common32.lib_extra_dirs}              
                           lib/libesp32
                           lib/lib_basic
                           lib/lib_network
                           lib/lib_display
-                          lib/lib_dbx_test 
+                          lib/lib_onewire2023 
                           lib/lib_sensor
                           lib/libg_neopixel
 ; monitor_filters = esp32_exception_decoder
@@ -511,7 +511,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
                           lib/lib_basic
                           lib/lib_network
                           lib/lib_display
-                          lib/lib_dbx_test 
+                          lib/lib_onewire2023 
                           lib/lib_sensor
                           lib/libg_neopixel
 ; upload_protocol = espota
@@ -573,7 +573,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
               lib/lib_display
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/libg_neopixel
               lib/lib_irremote
@@ -936,7 +936,7 @@ build_flags               = ${common.build_flags}
 lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/lib_rf_extended
 upload_protocol = espota
@@ -1015,7 +1015,7 @@ build_flags                 = ${esp32_defaults.build_flags}
 lib_extra_dirs          = ${common32.lib_extra_dirs}
                             lib/libesp32/network
                               lib/lib_filters
-                              lib/lib_dbx_test
+                              lib/lib_onewire2023
                               lib/lib_sensor
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1033,7 +1033,7 @@ build_flags                 = ${esp32_defaults.build_flags}
 lib_extra_dirs          = ${common32.lib_extra_dirs}
                             lib/libesp32/network
                               lib/lib_filters
-                              lib/lib_dbx_test
+                              lib/lib_onewire2023
                               lib/lib_sensor
 ; monitor_filters = esp32_exception_decoder
 ; build_type = debug
@@ -1080,7 +1080,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
               lib/lib_display
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/libg_neopixel
               lib/lib_irremote
@@ -1252,7 +1252,7 @@ lib_extra_dirs = ${common.lib_extra_dirs}
               lib/lib_basic
               lib/lib_network
               lib/lib_display
-              lib/lib_dbx_test 
+              lib/lib_onewire2023 
               lib/lib_sensor
               lib/libg_neopixel
               lib/lib_irremote

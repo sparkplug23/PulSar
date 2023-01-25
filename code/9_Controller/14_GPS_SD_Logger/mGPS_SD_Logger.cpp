@@ -69,11 +69,10 @@ int8_t mGPS_SD_Logger::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -206,7 +205,7 @@ void mGPS_SD_Logger::SubTask_UpdateOLED_Detailed_GPS()
 
 
 
-uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_CHANNELCOUNT, 0);
@@ -215,7 +214,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_Settings(uint8_t json_level, bool json_obj
 }
 
 
-uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(D_JSON_VOLTAGE, 0);
@@ -231,7 +230,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_Sensor(uint8_t json_level, bool json_objec
  *  "GPS":{ minimal data, with 2 byte names}
  * }
  * */
-uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     

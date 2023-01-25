@@ -66,21 +66,23 @@ class mSensorsInterface :
 
     const char* GetUnifiedSensor_NameByTypeID(uint8_t id);
 
-    // sensor_t
-
-    
+    #ifdef USE_MODULE_LIGHTS_INTERFACE
+    uint8_t flag_unified_sensor_colour_heatmap_type = 0;
+    RgbcctColor GetColourValueUsingMaps_ForUnifiedSensor(float temperature);
+    #endif // USE_MODULE_LIGHTS_INTERFACE
+        
     void CommandEvent_Motion(uint8_t event_type);
     
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_appending = true);
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     struct handler<mSensorsInterface> mqtthandler_settings_teleperiod;

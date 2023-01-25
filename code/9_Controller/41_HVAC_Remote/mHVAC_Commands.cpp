@@ -32,7 +32,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
    * */
   if(jtok = obj[D_JSON_HVAC_DEVICE]){ 
     if(jtok.isStr()){
-      if((device_id = DLI->GetDeviceIDbyName(jtok.getStr()))>=0){ // D_JSON_DEVICE
+      if((device_id = DLI->GetDeviceIDbyName(jtok.getStr(),GetModuleUniqueID()))>=0){ // D_JSON_DEVICE
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
       }else{
         AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
@@ -151,7 +151,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
 
       AddLog(LOG_LEVEL_DEBUG, PSTR( DEBUG_INSERT_PAGE_BREAK D_LOG_RELAYS "device_name_ctr1 = %s"),arr.getStr()); 
 
-      int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr());
+      int16_t device_id_found = DLI->GetDeviceIDbyName(arr.getStr(),GetModuleUniqueID());
       AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_RELAYS "device_id_found = %d"),device_id_found);
 
       if(device_id_found>=0)

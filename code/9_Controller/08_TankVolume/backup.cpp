@@ -364,7 +364,7 @@
 //       MQTTHandler_Init(); // Reset to the initial parameters
 //     break;
 //     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-//       MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+//       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
 //     break;
 //     case FUNC_MQTT_SENDER:
 //       MQTTHandler_Sender(); //optional pass parameter
@@ -706,7 +706,7 @@
 //   //   JSON_METHOD_ALL=0
 //   // };
 // // Send all litres calculations from all methods
-// uint8_t mTankVolumeUltrasonic::ConstructJSON_Litres(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mTankVolumeUltrasonic::ConstructJSON_Litres(uint8_t json_level, bool json_appending){
 
 //   JsonBuilderI->Start();
 
@@ -769,7 +769,7 @@
 
 
 
-// uint8_t mTankVolumeUltrasonic::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mTankVolumeUltrasonic::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
 //     // D_DATA_BUFFER_CLEAR();
 //     // StaticJsonDocument<400> doc;
@@ -789,7 +789,7 @@
 // }
 
 
-// uint8_t mTankVolumeUltrasonic::ConstructJSON_Furnace(uint8_t json_level, bool json_object_start_end_required){
+// uint8_t mTankVolumeUltrasonic::ConstructJSON_Furnace(uint8_t json_level, bool json_appending){
 
 // //     D_DATA_BUFFER_CLEAR();
 // //     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
@@ -799,11 +799,11 @@
   
 
 // //   // #ifdef USE_MODULE_SENSORS_DS18X
-// //   // for(int i=0;i<pCONT_msdb18->db18_sensors_active;i++){
-// //   //   if((pCONT_msdb18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
-// //   //     JsonObject sensorobj = root.createNestedObject(pCONT_msdb18->db18_sensor[i].name.ctr);
-// //   //     sensorobj["temp", pCONT_msdb18->db18_sensor[i].reading.val;
-// //   //     sensorobj["isvalid"]= pCONT_msdb18->db18_sensor[i].reading.isvalid;
+// //   // for(int i=0;i<pCONT_db18->db18_sensors_active;i++){
+// //   //   if((pCONT_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
+// //   //     JsonObject sensorobj = root.createNestedObject(pCONT_db18->db18_sensor[i].name.ctr);
+// //   //     sensorobj["temp", pCONT_db18->db18_sensor[i].reading.val;
+// //   //     sensorobj["isvalid"]= pCONT_db18->db18_sensor[i].reading.isvalid;
 // //   //   }
 // //   // }
 // //   // #endif
@@ -904,13 +904,13 @@
 // } //end "MQTTHandler_Init"
 
 
-// void mTankVolumeUltrasonic::MQTTHandler_Set_TelePeriod(){
+// void mTankVolumeUltrasonic::MQTTHandler_Set_DefaultPeriodRate(){
 
 //   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 //   mqtthandler_litres_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 //   mqtthandler_furnace_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-// } //end "MQTTHandler_Set_TelePeriod"
+// } //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 

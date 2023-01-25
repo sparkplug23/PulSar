@@ -66,7 +66,6 @@ int8_t mImmersionTankColour::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
@@ -196,7 +195,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
 {
 
 
-  uint8_t sensor_count = pCONT_msdb18->db18_sensors_active;
+  uint8_t sensor_count = pCONT_db18->db18_sensors_active;
 
   if((sensor_count>=DB18_SENSOR_MAX)||(sensor_count==0)){ return; }
 
@@ -218,27 +217,27 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
 
 
   // AddLog(LOG_LEVEL_TEST, PSTR("val=%d %d %d %d %d %d"),
-  //   (int)pCONT_msdb18->sensor[0].reading.val,
-  //   (int)pCONT_msdb18->sensor[1].reading.val,
-  //   (int)pCONT_msdb18->sensor[2].reading.val,
-  //   (int)pCONT_msdb18->sensor[3].reading.val,
-  //   (int)pCONT_msdb18->sensor[4].reading.val,
-  //   (int)pCONT_msdb18->sensor[5].reading.val);
+  //   (int)pCONT_db18->sensor[0].reading.val,
+  //   (int)pCONT_db18->sensor[1].reading.val,
+  //   (int)pCONT_db18->sensor[2].reading.val,
+  //   (int)pCONT_db18->sensor[3].reading.val,
+  //   (int)pCONT_db18->sensor[4].reading.val,
+  //   (int)pCONT_db18->sensor[5].reading.val);
 
   // AddLog(LOG_LEVEL_TEST, PSTR("add=%d %d %d %d %d %d"),
-  //   pCONT_msdb18->sensor[0].address[7],
-  //   pCONT_msdb18->sensor[1].address[7],
-  //   pCONT_msdb18->sensor[2].address[7],
-  //   pCONT_msdb18->sensor[3].address[7],
-  //   pCONT_msdb18->sensor[4].address[7],
-  //   pCONT_msdb18->sensor[5].address[7]);
+  //   pCONT_db18->sensor[0].address[7],
+  //   pCONT_db18->sensor[1].address[7],
+  //   pCONT_db18->sensor[2].address[7],
+  //   pCONT_db18->sensor[3].address[7],
+  //   pCONT_db18->sensor[4].address[7],
+  //   pCONT_db18->sensor[5].address[7]);
 
   for(uint8_t ii=0;ii<sensor_count;ii++){
 
-    // pCONT_msdb18->sensor[ii].reading.val = 20+(5*ii);
+    // pCONT_db18->sensor[ii].reading.val = 20+(5*ii);
     
     int8_t device_id = -1;
-    uint16_t unique_module_id = pCONT_msdb18->GetModuleUniqueID();// ->GetModuleUniqueIDbyVectorIndex(E M_MODULE_SENSORS_DB18S20_ID);
+    uint16_t unique_module_id = pCONT_db18->GetModuleUniqueID();// ->GetModuleUniqueIDbyVectorIndex(E M_MODULE_SENSORS_DB18S20_ID);
 
 
     //temp solution
@@ -254,7 +253,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
     int16_t device_id_found = DLI->GetDeviceIDbyName(name, unique_module_id);
 
     // AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %d"),device_id_found);
-    //AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %s %d %d"), name, device_id_found, (int)pCONT_msdb18->sensor[device_id_found].reading.val);
+    //AddLog(LOG_LEVEL_INFO,PSTR("device_id_found = %s %d %d"), name, device_id_found, (int)pCONT_db18->sensor[device_id_found].reading.val);
 
 
     // Check for matches with variables names  
@@ -264,13 +263,13 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
     //     ALOG_DBM( PSTR("index_found = %d"),index_found);    
     //     return index_found;
     // }
-    int8_t true_struct_id = pCONT_msdb18->FindStructIndexByAddressID(device_id_found);
+    int8_t true_struct_id = pCONT_db18->FindStructIndexByAddressID(device_id_found);
 
     // AddLog(LOG_LEVEL_TEST, PSTR("device_id_found true_struct_id %d %d"),device_id_found,true_struct_id);
 
     if(true_struct_id != -1){
       
-      // test_temp[ii] = (int)pCONT_msdb18->sensor[true_struct_id].reading.val;
+      // test_temp[ii] = (int)pCONT_db18->sensor[true_struct_id].reading.val;
       
       // switch(ii)
       // {
@@ -284,8 +283,8 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
       // }
 
 
-      colour = pCONT_iLight->GetColourValueUsingMaps(pCONT_msdb18->sensor[true_struct_id].reading.val,0);
-      // colour = pCONT_iLight->GetColourValueUsingMaps( map(ii, 0,5, 0,60)  ,0);
+      colour = pCONT_iLight->GetColourValueUsingMaps_FullBrightness(pCONT_db18->sensor[true_struct_id].reading.val,0);
+      // colour = pCONT_iLight->GetColourValueUsingMaps_FullBrightness( map(ii, 0,5, 0,60)  ,0);
 
       // colour = RgbColor( map(ii, 0,5, 0,255), 0 ,0);
 
@@ -311,7 +310,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
     // ALOG_INF( PSTR("%d> SensIndex=%d, Temp=%d,  SensName=%s, PixelIndex=%d, Rgb=(%d,%d,%d)"),
     //   ii,
     //   true_struct_id,
-    //   (int)pCONT_msdb18->sensor[true_struct_id].reading.val,
+    //   (int)pCONT_db18->sensor[true_struct_id].reading.val,
     //   name,
     //   map(ii, 0,5, 0,255),
     //   colour.R, colour.G, colour.B
@@ -387,7 +386,7 @@ void mImmersionTankColour::SubTask_StripSet_Showing()
 
 
 
-uint8_t mImmersionTankColour::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mImmersionTankColour::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -395,7 +394,7 @@ uint8_t mImmersionTankColour::ConstructJSON_Settings(uint8_t json_level, bool js
 
 }
 
-uint8_t mImmersionTankColour::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mImmersionTankColour::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     // JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
@@ -536,7 +535,7 @@ void mImmersionTankColour::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mImmersionTankColour::MQTTHandler_Set_TelePeriod()
+void mImmersionTankColour::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

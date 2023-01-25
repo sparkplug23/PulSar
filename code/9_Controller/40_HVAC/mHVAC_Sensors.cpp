@@ -33,8 +33,8 @@ void mHVAC::FunctionHandler_Update_Sensors()
         
         if(reading.Valid())
         {   
-          zone[zone_id].sensor.temperature = reading.GetValue(SENSOR_TYPE_TEMPERATURE_ID);
-          zone[zone_id].sensor.humidity    = reading.GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+          zone[zone_id].sensor.temperature = reading.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
+          zone[zone_id].sensor.humidity    = reading.GetFloat(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
           // Serial.println(zone[zone_id].sensor.temperature);
           // Serial.println(zone[zone_id].sensor.humidity);
         }

@@ -33,19 +33,22 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
         #endif //ENABLE_LOG_LEVEL_COMMANDS
         break;
       }
+      else{
+        // ALOG_INF(PSTR("JSON_SERIALIZATION"));
+      }
 
       for(uint8_t i=0;i<GetClassCount();i++)
       { 
         // switch_index = target_tasker ? target_tasker : i;
 
         
-    if(target_tasker){
-      switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
-    }else{
-      switch_index = i; // Normally index is synonomous with enum list
-    }
+        if(target_tasker){
+          switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
+        }else{
+          switch_index = i; // Normally index is synonomous with enum list
+        }
 
-          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
+        // ALOG_INF(PSTR("JSON_SERIALIZATION"));  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
 
 
         pModule[switch_index]->Tasker(function, obj);
@@ -293,7 +296,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
     pModule[EM_MODULE_DISPLAYS_INTERFACE_ID] = new mDisplaysInterface();
   #endif
-  #if defined(USE_MODULE_DISPLAYS_NEXTION) || defined(USE_MODULE_DISPLAYS_NEXTION_V2)
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
     pModule[EM_MODULE_DISPLAYS_NEXTION_ID] = new mNextionPanel();
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -465,8 +468,11 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
     pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID] = new mDB18x20_ESP32();
   #endif
+  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
+    pModule[EM_MODULE_SENSORS__DS18X20__ID] = new mDB18x20_ESP8266();
+  #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    pModule[EM_MODULE_SENSORS__DS18X20_ESP32_2023__ID] = new mDB18x20_ESP32();
+    pModule[EM_MODULE_SENSORS__DS18X20__ID] = new mDB18x20_ESP32();
   #endif
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -536,6 +542,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
     pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID] = new mSideDoorLight();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
+    pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID] = new mImmersionPanel();
   #endif
 };
 

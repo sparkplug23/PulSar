@@ -399,7 +399,7 @@ void changeBaud( const char *textCommand, unsigned long baud );
     int8_t CheckAndExecute_JSONCommands();
     void parse_JSONCommand(JsonParserObject obj);
 
-    uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_object_start_end_required);
+    uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_appending);
 
     void WebCommand_Parse(void);
 
@@ -408,18 +408,18 @@ void changeBaud( const char *textCommand, unsigned long baud );
     void WebAppend_Root_Status_Table();
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Required(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Minimal(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Debug(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_Micro(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_GPSPacket_All(uint8_t json_level = 0, bool json_appending = true);
   
   #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     struct handler<mGPS>* ptr;
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);

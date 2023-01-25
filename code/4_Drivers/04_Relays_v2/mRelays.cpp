@@ -81,14 +81,13 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     // #ifdef USE_MODULE_NETWORKS_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
@@ -387,11 +386,8 @@ const char* mRelays::GetRelayNameWithStateLongbyIDCtr(uint8_t device_id, char* b
 int8_t mRelays::GetRelayIDbyName(const char* c){
   if(*c=='\0'){ return -1; }  
 
-  // int8_t device_id; // not needed, to be phased out
-  int16_t class_id = GetModuleUniqueID();//E M_MODULE_DRIVERS_RELAY_ID;
-
   // int16_t device_id_found = DLI->GetDeviceIDbyName(c,device_id,class_id);
-  int16_t device_id_found = DLI->GetDeviceIDbyName(c,class_id);
+  int16_t device_id_found = DLI->GetDeviceIDbyName(c, GetModuleUniqueID());
 
   AddLog(LOG_LEVEL_HIGHLIGHT,PSTR("\n\r\n\rdevice_id_found = %d"),device_id_found);
 
@@ -824,7 +820,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
 
 
 
-uint8_t mRelays::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mRelays::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     JsonBuilderI->Add(PM_JSON_DEVICES_CONNECTED, settings.relays_connected);

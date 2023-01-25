@@ -600,11 +600,10 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -846,6 +845,11 @@ uint32_t mInterfaceLight::RgbColorto32bit(RgbColor rgb){
 /**
  * @brief future global way to map colours using palette
  * 
+ * Option in the future to apply different colours to the map.
+ * 
+ * Global temp colours reporting should have flag otpion to pick between full/adjusted brightness inside primary unified sensor.
+ * I should still produce them all for the sub mqtt colours
+ * 
  * @param value 
  * @param map_style_id 
  * @param value_min 
@@ -853,7 +857,7 @@ uint32_t mInterfaceLight::RgbColorto32bit(RgbColor rgb){
  * @param map_is_palette_id 
  * @return RgbColor 
  */
-RgbColor mInterfaceLight::GetColourValueUsingMaps(float value, 
+RgbColor mInterfaceLight::GetColourValueUsingMaps_AdjustedBrightness(float value, 
                                             uint8_t map_style_id,
                                             float value_min, float value_max, //not need for some mappings
                                             bool map_is_palette_id
@@ -906,7 +910,7 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps(float value,
  * @param map_is_palette_id 
  * @return RgbColor 
  */
-RgbColor mInterfaceLight::GetColourValueUsingMapsMaximumBrightness(float value, 
+RgbColor mInterfaceLight::GetColourValueUsingMaps_FullBrightness(float value, 
                                             uint8_t map_style_id,
                                             float value_min, float value_max, //not need for some mappings
                                             bool map_is_palette_id
@@ -1376,12 +1380,6 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   {
     // pCONT_lAni->segment_animation_override.time_ms = 100;
   }
-
-#ifdef USE_MODULE_NETWORK_MQTT
-  // mqtthandler_debug_teleperiod.flags.SendNow = true;
-  // mqtthandler_scene_teleperiod.flags.SendNow = true;
-  MQTTHandler_Set_RefreshAll();
-#endif //ifdef USE_MODULE_NETWORK_MQTT
   
   if(isserviced_start_count != data_buffer.isserviced) //ie something was parsed inside this function
   {
@@ -3048,7 +3046,7 @@ void mInterfaceLight::WebCommand_Parse(void)
 *******************************************************************************************************************/
 
 
-uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   char buffer[30];
   
@@ -3072,7 +3070,7 @@ uint8_t mInterfaceLight::ConstructJSON_Settings(uint8_t json_level, bool json_ob
  * @param json_method 
  * @return uint8_t 
  */
-uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   // Active rgbcct palette used as scene
 
@@ -3107,7 +3105,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_objec
 
 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, bool json_appending){
 
   char buffer[30];
   
@@ -3206,13 +3204,12 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_State;
-   
-
+  
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
   ptr = &mqtthandler__debug_module_config__teleperiod;
   ptr->handler_id = MQTT_HANDLER_MODULE__DEBUG_MODULE_CONFIG__TELEPERIOD_ID;
@@ -3241,14 +3238,14 @@ void mInterfaceLight::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mInterfaceLight::MQTTHandler_Set_TelePeriod()
+void mInterfaceLight::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**

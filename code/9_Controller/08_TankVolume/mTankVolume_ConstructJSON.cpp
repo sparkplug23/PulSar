@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
 
 
-uint8_t mTankVolume::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mTankVolume::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
@@ -12,7 +12,7 @@ uint8_t mTankVolume::ConstructJSON_Settings(uint8_t json_level, bool json_object
 
 }
 
-uint8_t mTankVolume::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mTankVolume::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 
@@ -46,7 +46,7 @@ uint8_t mTankVolume::ConstructJSON_State(uint8_t json_level, bool json_object_st
   //   JSON_METHOD_ALL=0
   // };
 // Send all litres calculations from all methods
-uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
 
@@ -59,7 +59,7 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_object_s
 
     JBI->Level_End();
 
-  if(json_method >= JSON_LEVEL_SHORT){
+  if(json_level >= JSON_LEVEL_SHORT){
 
     // JsonBuilderI->Add("isvalid", oiltank.smooth_1hr.isvalid);
     // JsonBuilderI->Add("litres_in_tank", oiltank.smooth_1hr.final.litres_in_tank);
@@ -117,7 +117,7 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_object_s
 }
 
 
-uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_appending){
 
 //     D_DATA_BUFFER_CLEAR();
 //     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
@@ -127,11 +127,11 @@ uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_object_
   
 
 //   // #ifdef USE_MODULE_SENSORS_DS18X
-//   // for(int i=0;i<pCONT_msdb18->db18_sensors_active;i++){
-//   //   if((pCONT_msdb18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
-//   //     JsonObject sensorobj = root.createNestedObject(pCONT_msdb18->db18_sensor[i].name.ctr);
-//   //     sensorobj["temp", pCONT_msdb18->db18_sensor[i].reading.val;
-//   //     sensorobj["isvalid"]= pCONT_msdb18->db18_sensor[i].reading.isvalid;
+//   // for(int i=0;i<pCONT_db18->db18_sensors_active;i++){
+//   //   if((pCONT_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
+//   //     JsonObject sensorobj = root.createNestedObject(pCONT_db18->db18_sensor[i].name.ctr);
+//   //     sensorobj["temp", pCONT_db18->db18_sensor[i].reading.val;
+//   //     sensorobj["isvalid"]= pCONT_db18->db18_sensor[i].reading.isvalid;
 //   //   }
 //   // }
 //   // #endif

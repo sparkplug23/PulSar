@@ -57,7 +57,6 @@ int8_t mTreadmill::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_SENDER:
@@ -282,7 +281,7 @@ float mTreadmill::GetSpeed_Mph(uint8_t calibration_method){
 
 
 
-uint8_t mTreadmill::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mTreadmill::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();
     JsonBuilderI->Add_P("test",0);  
@@ -290,7 +289,7 @@ uint8_t mTreadmill::ConstructJSON_Settings(uint8_t json_level, bool json_object_
 
 }
 
-uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JsonBuilderI->Start();
     // JsonBuilderI->Add_P(D_JSON_LIGHTPOWER, GetLightState());
@@ -398,12 +397,12 @@ void mTreadmill::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mTreadmill::MQTTHandler_Set_TelePeriod(){
+void mTreadmill::MQTTHandler_Set_DefaultPeriodRate(){
 
   // mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
 
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mTreadmill::MQTTHandler_Sender(uint8_t mqtt_handler_id){

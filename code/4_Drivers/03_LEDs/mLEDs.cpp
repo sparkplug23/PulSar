@@ -55,11 +55,10 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();
@@ -166,6 +165,10 @@ void mLEDs::SubTask_Status_LEDs()
      * @brief digital 0 = off, 1> then ON
      * 
      */
+    int8_t pin_v = leds[index].pin;
+    uint8_t state2 = state;
+
+    ALOG_INF(PSTR("pin_v=%d,state=%d"), pin_v, state);
 
     /**
      * @brief 
@@ -173,7 +176,7 @@ void mLEDs::SubTask_Status_LEDs()
      * 
      */
     
-        digitalWrite(leds[index].pin, bitRead(led_inverted, index)?0:1); // inverted, ON when low
+        digitalWrite(pin_v, state);//bitRead(led_inverted, state)?0:1); // inverted, ON when low
   };
 
 
@@ -424,9 +427,12 @@ uint16_t state_value = 0;
   //   CommandSet_Timer_Decounter(jtok.getInt()*60, relay_id);
   // }
 
-  if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.fEnableSensor)){
+ALOG_INF(PSTR("HER1"));
+  if(IsWithinRange(state, 0,10) && IsWithinRange(relay_id, 0,settings.leds_found)){
+ALOG_INF(PSTR("HER2"));
     CommandSet_LED_Power(state,relay_id);
   }
+ALOG_INF(PSTR("HER3"));
 
 
 // 	if(jtok = obj["LED"].getObject()["Name"])
@@ -492,16 +498,16 @@ uint16_t state_value = 0;
  * ConstructJson
 *******************************************************************************************************************/
 
-uint8_t mLEDs::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mLEDs::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
+    JBI->Add(D_JSON_COUNT, settings.leds_found);
     // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
   return JBI->End();
 
 }
 
-uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 
@@ -578,7 +584,7 @@ void mLEDs::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mLEDs::MQTTHandler_Set_TelePeriod()
+void mLEDs::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

@@ -86,7 +86,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
-     parse_JSONCommand(obj);
+      parse_JSONCommand(obj);
     break;
     case FUNC_WIFI_CONNECTED:
       #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
@@ -106,11 +106,10 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     *******************/   
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();

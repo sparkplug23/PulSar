@@ -28,8 +28,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #ifdef D_USER_MICHAEL
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_Testbeds.h"
-#include "0_ConfigUser/02_mFirmwareCustom_Secret_Dev.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
+#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 #endif // D_USER_MICHAEL
 
 /*********************************************************************************************\
@@ -51,10 +51,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
 
 #ifndef DISABLE_NETWORK
-// #define USE_MODULE_NETWORK_WIFI
-      // #ifndef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 #define USE_MODULE_NETWORK_MQTT
-      // #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
 #endif // DISABLE_NETWORK
 
 #if !defined(USE_MODULE_NETWORK_WIFI_V2) && !defined(DISABLE_NETWORK)
@@ -88,17 +85,5 @@ void WifiWpsStatusCallback(wps_cb_status status);
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-#ifdef USE_DEFAULT_FIRMWARE_SENSORS
-  #define USE_MODULE_SENSORS_INTERFACE // Base interface
-  // #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP8266
-  #define USE_MODULE_SENSORS_BH1750
-  #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS_BUTTONS
-  #define USE_MODULE_SENSORS_DS18X
-  #define USE_MODULE_SENSORS_DHT
-  #define USE_MODULE_SENSORS_DOOR
 
-#endif // USE_DEFAULT_FIRMWARE_SENSORS
-
-#endif 
-//#endif
+#endif

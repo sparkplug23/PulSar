@@ -1172,7 +1172,12 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
     case GPIO_KEY7_INV_ID: return PM_GPIO_FUNCTION_KEY7_INV_CTR;
     case GPIO_KEY8_INV_ID: return PM_GPIO_FUNCTION_KEY8_INV_CTR;
 
-      // case  GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR;            // User connected external switches
+    case GPIO_SWT1_ID: return PM_GPIO_FUNCTION_SWT1_CTR; 
+    case GPIO_SWT2_ID: return PM_GPIO_FUNCTION_SWT2_CTR; 
+    case GPIO_SWT3_ID: return PM_GPIO_FUNCTION_SWT3_CTR; 
+
+
+
       case  GPIO_SWT1_NP_ID: return PM_GPIO_FUNCTION_SWT1_NP_CTR;        
 //   GPIO_SWT1_NP_ID,
 //   GPIO_SWT2_ID,

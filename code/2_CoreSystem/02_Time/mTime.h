@@ -120,6 +120,9 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 
 #include "2b_Internal_TaskerSystems/01_SolarLunar/mSolarLunar.h"
 
+static const uint8_t kDaysInMonth[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
+static const char kMonthNamesEnglish[] PROGMEM = "JanFebMarAprMayJunJulAugSepOctNovDec";
+
 class mTime :
   public mTaskerInterface
 {

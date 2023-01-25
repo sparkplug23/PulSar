@@ -1,5 +1,5 @@
-#ifndef MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H
-#define MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H
+#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_LONGTERM_TEMPLATES_H
+#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_LONGTERM_TEMPLATES_H
 
 /***
  * - CrashDump needs to be saved and transmitted over mqtt on request in a json message, that can copy and pasted into decoder
@@ -160,7 +160,7 @@ Hallway + Understairs
   - dht
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
-#define DEVICE_IMMERSION_CONTROL_PANEL
+// #define DEVICE_IMMERSION_CONTROL_PANEL
 
 /**
 Outside + Garage
@@ -1226,7 +1226,8 @@ Bathroom
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
-  #define NEXTION_DEFAULT_PAGE_NUMBER 1
+  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   
@@ -1839,75 +1840,9 @@ Bathroom
 
 #endif
 
-/**
- * @brief Using ESP32 due to length of pixels in strip. Also useful as long term esp32 neopixel testbed
- **/
-#ifdef DEVICE_RGBLAMP_CYLINDER
-  #define DEVICENAME_CTR            "rgblamp_cylinder"
-  #define DEVICENAME_FRIENDLY_CTR   "Crystal Light Cylinder Utility"
-  #define DEVICENAME_ROOMHINT_CTR   "Utility"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-  
-  #define DISABLE_WEBSERVER
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-    #define STRIP_SIZE_MAX 210
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-
-    
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"AnimationMode\": \"Effects\","
-    "\"ColourOrder\": \"grb\","
-    "\"ColourPalette\":\"Pastel\","
-    "\"Effects\":{"
-      "\"Function\":\"Shimmering Palette\","
-      "\"Intensity\":255,"
-      "\"Speed\":10"
-    "},"
-    "\"Transition\":{"
-      "\"TimeMs\":0,"
-      "\"RateMs\":23"
-    "},"    
-    "\"BrightnessRGB\":100"
-  "}";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
-  
-#endif
-
-
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Downstairs Toilet ****************************************************************************************************************************************************
+****** ROOM: Downstairs Toilet ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -2161,7 +2096,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Attic ****************************************************************************************************************************************************
+****** ROOM: Attic ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -2249,7 +2184,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Livingroom ****************************************************************************************************************************************************
+****** ROOM: Livingroom ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -2394,11 +2329,9 @@ Bathroom
 
 
 
-
-
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Hallway ****************************************************************************************************************************************************
+****** ROOM: Hallway ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -2574,7 +2507,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Understairs ****************************************************************************************************************************************************
+****** ROOM: Understairs ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -3027,8 +2960,10 @@ Bathroom
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
   
-  // #define USE_MODULE_DISPLAYS_NEXTION
-  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+    #define SHOW_SPLASH
+    #define USE_MODULE_DISPLAYS_NEXTION
+    #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+
 
   // Actual
   #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
@@ -3240,7 +3175,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Outside ****************************************************************************************************************************************************
+****** ROOM: Outside ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -3609,6 +3544,12 @@ Bathroom
 #endif
 
 
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** ROOM: Gazebo ****************************************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
 #ifdef DEVICE_GAZEBO_SONOFF_4CHPRO
   #define DEVICENAME_CTR          "gazebo_sonoff_4chpro"
   #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
@@ -3879,7 +3820,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Garage ****************************************************************************************************************************************************
+****** ROOM: Garage ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -3898,7 +3839,7 @@ Bathroom
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_DS18X  
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023  
   #define USE_MODULE_SENSORS_SR04
     // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
     // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
@@ -3925,8 +3866,12 @@ Bathroom
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   
-  #define D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "AmbientTank"
-  #define D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "OutsideGarage"
+
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME "AmbientTank"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS "[40,226,218,149,240,1,60,142]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME "OutsideGarage"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS "[40,255,169,120,53,22,4,240]"
+
   #define D_DEVICE_SR04_FRIENDLY_NAME_LONG "LevelSensor"
   
   #define D_DEVICE_BUTTON_1_CTR "FurnaceActive"
@@ -3936,18 +3881,18 @@ Bathroom
   "{"
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\""
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_SR04_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SR04_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
     "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "[40,226,218,149,240,1,60,142],"
-        "[40,255,169,120,53,22,4,240]"
-      "]"  
+      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ""
+      "}"  
     "}"
   "}";
 
@@ -4402,7 +4347,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** TV Room / Spareroom ****************************************************************************************************************************************************
+****** ROOM: TV Room ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -4607,7 +4552,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Masterbedroom ****************************************************************************************************************************************************
+****** ROOM: Masterbedroom ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -4926,86 +4871,114 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Ensuite ****************************************************************************************************************************************************
+****** ROOM: Ensuite ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
 /**
- * @brief Above the door light downstairs toilet with google mini
+ * @brief 
+ * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
  * 
- * wires needed
+ * Ethernet      Function       ESP32         6P/2P Connector        
  * 
- * 8 core to 3d printed box
- * 4 core to led strip
- * mini wires up 
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           PIR            5             Yellow
+ * bl/w          I2D            18            Green      // check i2c 
+ * w/bl          I2C            19            Orange
+ * g/w           3V3            3V3           White
+ * w/br           -                           Black     // Button? Led?
+ * br/w           -                           Red
  * 
- */
-
+ * 
+ * 4CORE to RGBW Strip
+ * Red          5v
+ * Black        Gnd
+ * Green        RGB Strip 1
+ * White        ??
+ * 
+ * 
+ **/
 #ifdef DEVICE_ENSUITESENSOR
-  #define DEVICENAME_CTR          "ensuitesensor"
+  #define DEVICENAME_CTR          "ensuite_sensor"
   #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Ensuite"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-     
-  #define USE_MODULE_SENSORS_MOTION
+    
+  #define ESP32
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+       
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
-  #define DISABLE_WEBSERVER
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
+  #define USE_MODULE_SENSORS_BH1750
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
+    #define STRIP_SIZE_MAX 40
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_JSON_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       #ifdef USE_MODULE_SENSORS_MOTION
-      "\"D6\":\"" D_GPIO_FUNCTION_PIR_1_INV_CTR     "\","
-      #endif      
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":8"
-    "},"
-    "\"" D_JSON_CCT_TEMP "\":300,"
-    "\"" D_JSON_HUE "\":25,"
-    "\"" D_JSON_SAT "\":100,"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\"," //ie 10
-    "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":1"
-  "}";
-
-  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Ensuite"
-  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Ensuite"
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Kitchen"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Kitchen"
   
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -5014,14 +4987,70 @@ Bathroom
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
       "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+
+  "}";
+
+
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_SK6812_METHOD_DEFAULT
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "AnimationMode":"Effects",
+    "ColourOrder":"grbw",
+    "ColourPalette":"Christmas 01",
+    "Effects": {
+      "Function":1,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "SegColour": {
+      "Hue": 120,
+      "Sat": 100,
+      "SubType":3
+    },
+    "BrightnessRGB_255": 255,
+    "BrightnessCCT_255": 255
+  }
+  )=====";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"// for PIR to follow
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
     "}"
   "}";
 
 #endif
-
 
 
 #ifdef DEVICE_SHELLYDIMMER_ENSUITE_CEILING
@@ -5133,8 +5162,6 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
    
-  #define DEVICE_DEFAULT_CONFIGURATION_MODE_C_OUTPUT_FOLLOWS_SWITCH_ON_CHANGE
-
   #define USE_MODULE_NETWORKS_MQTT
 
   #define USE_MODULE_CORE_RULES
@@ -5172,38 +5199,68 @@ Bathroom
       "]"
     "}"
   "}";
-
-  #ifdef DEVICE_DEFAULT_CONFIGURATION_MODE_C_OUTPUT_FOLLOWS_SWITCH_ON_CHANGE
   
   #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  DEFINE_PGM_CTR(RULES_TEMPLATE)  
+  // "{"
+  //   // Switch0 ON = Relay0 Power ON for Timed seconds
+  //   "\"Rule0\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":1"
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":20}}\""
+  //     "}"
+  //   "},"
+  //   // Switch0 OFF = Relay0 Reset to OFF
+  //   "\"Rule1\":{"
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":0"      // 2 meaning either low or high, 1 would be high only
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
+  //       "\"Function\":\"" D_FUNC_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"State\":0" // Started
+  //     "}"
+  //   "}"
+  // "}";
+
+
   R"=====(
   {
     "AddRule": {
-      "Default":["Switch1Change->Relay1Follow"]
+      "Default":["Switch1ON->Relay1On2Hrs?Switch1OFF->Relay1Off"]
     }
   }
   )=====";
-  #endif // DEVICE_DEFAULT_CONFIGURATION_MODE_C_OUTPUT_FOLLOWS_SWITCH_ON_CHANGE
 
 #endif
 
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Main bathroom ****************************************************************************************************************************************************
+****** ROOM: Main bathroom ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// Create the "above door light and mini set up"
+// Create the "above door light and mini set up" 
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Landing ****************************************************************************************************************************************************
+****** ROOM: Landing ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// Cant be merged with generic as buttons are unique
 #ifdef DEVICE_SHELLYDIMMER_LANDING_CEILING
   #define DEVICENAME_CTR          "ceiling_landing_light"
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
@@ -5480,14 +5537,8 @@ Bathroom
 
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-    #define NEXTION_DEFAULT_PAGE_NUMBER 1
-
-    
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SH1106
-    #define SHOW_SPLASH
-    #define USE_MODULE_DISPLAYS_NEXTION_V2
-    #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
   
   #define USE_MODULE_DISPLAYS_INTERFACE
@@ -5803,7 +5854,7 @@ Bathroom
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Bedroom (Long term only ie can remain when I leave home) ****************************************************************************************************************************************************
+****** ROOM: Bedroom (Long term only ie can remain when I leave home) ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
@@ -6173,49 +6224,9 @@ Bathroom
 
 #endif
 
-
-
-/**
- * @brief Currently its own device, but try integrate into bedroomsensor in attic 
- * 
- */
-#ifdef DEVICE_BEDROOM_LOUVOLITE_HUB
-  #define DEVICENAME_CTR          "bedroom_louvolite_hub"
-  #define DEVICENAME_FRIENDLY_CTR "Bedroom Louvolite Blind Hub"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  // #define USE_MODULE_DRIVERS_INTERFACE
-
-  // #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-  //   #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
-
-  //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
-
-  #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
-      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
-      #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-#endif
-
-
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** Roaming devices ****************************************************************************************************************************************************
+****** ROOM: Roaming devices ****************************************************************************************************************************************************
 ********
 
 HVAC controllers here
@@ -6320,4 +6331,4 @@ HVAC controllers here
 
 
 
-#endif // MFIRMWARECUSTOM_SECRET_HOME_LONGTERM_H
+#endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_HOME_LONGTERM_TEMPLATES_H

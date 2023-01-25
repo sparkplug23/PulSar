@@ -1765,7 +1765,7 @@ void mAnimatorLight::LCDDisplay_displayTime(time_t t, byte color, byte colorSpac
   lastSecond = pCONT_time->second(t);
 }
 
-void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color, byte segDisplay) {
+void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, byte segDisplay) {
   
   // This shows the segments from top of the sketch on a given position (segDisplay).
   // pos 0 is the most right one (seen from the front) where data in is connected to the arduino
@@ -1779,14 +1779,20 @@ void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color, byte segDi
 
     pixel_index = ( segGroups[segment][0] + ( segDisplay / 2 ) * ( LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS ) ) + i;
 
-    RgbcctColor colour = ColorFromPaletteLCD(SEGMENT_I(0).palette.id, color);//RgbColor(255,0,0);
+    RgbcctColor colour = RgbcctColor();
+    colour = SEGMENT.GetColourFromPalette(color_index);      
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_type, colour);
 
-    // RgbcctColor colour = RgbwColor(1,2,3,4);
 
-    uint8_t segment_index = 0;
+    // RgbcctColor colour = ColorFromPaletteLCD(SEGMENT_I(0).palette.id, color);//RgbColor(255,0,0);
+
+    // // RgbcctColor colour = RgbwColor(1,2,3,4);
+
+    // uint8_t segment_index = 0;
 
 
-    SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_index, SEGMENT.colour_type, colour);
+    // SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), pixel_index, SEGMENT.colour_type, colour);
   
 
 
@@ -1808,35 +1814,35 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
   }
 }
 
-/**
- * @brief Temporary method: Normal getcolour should work, but needs to include wrap functionality ie when index exceeds size then repeat pattern
- * 
- * @param palette_id 
- * @param desired_index 
- * @param apply_global_brightness 
- * @return RgbcctColor 
- */
-RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness)
-{
+// /**
+//  * @brief Temporary method: Normal getcolour should work, but needs to include wrap functionality ie when index exceeds size then repeat pattern
+//  * 
+//  * @param palette_id 
+//  * @param desired_index 
+//  * @param apply_global_brightness 
+//  * @return RgbcctColor 
+//  */
+// RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness)
+// {
   
-  mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+//   mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
 
-  uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(ptr);
+//   uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(ptr);
 
-  if(desired_index >= pixels_max){
-    desired_index %= pixels_max;
-    // ALOG_INF(PSTR("desired_index2 = %d"), desired_index);
-  }
+//   if(desired_index >= pixels_max){
+//     desired_index %= pixels_max;
+//     // ALOG_INF(PSTR("desired_index2 = %d"), desired_index);
+//   }
   
-  RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(palette_id), desired_index);
+//   RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(palette_id), desired_index);
 
-  if(apply_global_brightness){
-    pCONT_iLight->ApplyGlobalBrightnesstoColour(&colour);
-  }
+//   if(apply_global_brightness){
+//     colour = ApplyBrightnesstoRgbcctColour( colour, SEGMENT.getBrightnessRGB(), SEGMENT.getBrightnessCCT() );
+//   }
 
-  return colour;
+//   return colour;
 
-}
+// }
 
 
 
@@ -1888,13 +1894,15 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01()
   }
 
   // So colour region does not need to change each loop to prevent colour crushing
-  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   // Will only work with first segment
   uint8_t segment_index=0;
 
   for(int i=0;i<SEGLEN;i++){
-    SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), i, SEGMENT.colour_type, RgbwColor(0,0,0,0));
+    // SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), i, SEGMENT.colour_type, RgbwColor(0,0,0,0));
+    
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_type, RgbcctColor(0));
   }
 
   // if(tempcol++>5){
@@ -1991,7 +1999,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
 //   UpdateDesiredColourFromPaletteSelected();
   pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_SK6812;
     
-  SEGMENT.colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGBW__ID;
+  SEGMENT.colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID;
   
   AddLog(LOG_LEVEL_TEST, PSTR("02    SEGMENT.colour_type = %d"), SEGMENT.colour_type);
 
@@ -2008,7 +2016,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
 
   
   // So colour region does not need to change each loop to prevent colour crushing
-  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   
   // for(int i=0;i<93;i++){animation_colours[i].DesiredColour = RgbcctColor(0);}
@@ -2017,7 +2025,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02()
   for(int i=0;i<93;i++){
     // animation_colours[i].DesiredColour = RgbcctColor(0);
     // }
-  SetTransitionColourBuffer_DesiredColour(_segment_runtimes[segment_index].Data(), _segment_runtimes[segment_index].DataLength(), i, SEGMENT.colour_type, RgbwColor(0,0,0,0));
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_type, RgbwColor(0,0,0,0));
+  
   }
 
   // Pick new colours
@@ -2209,7 +2218,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
   
 
-  SEGMENT.colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+  SEGMENT.colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
     
 
 
@@ -2225,7 +2234,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
   }
   
   // So colour region does not need to change each loop to prevent colour crushing
-  SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  // SEGMENT.flags.brightness_applied_during_colour_generation = true;
   
   /**
    * @brief Reset all new colours so only new sections of clock are lit

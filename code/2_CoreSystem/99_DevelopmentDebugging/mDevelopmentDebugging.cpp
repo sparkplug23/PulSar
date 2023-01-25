@@ -165,3 +165,29 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
 
 
 }
+
+
+/**
+ * @brief DEBUG_NOTES
+ * 
+ * Describing planned unified define methods to be used everywhere
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+/**
+ * @brief 
+ * "DEBUG_TRACE"
+ * Debug via serial that should only be active when needed
+ * 
+ * ENABLE_DEBUG_TRACE__##
+ * 
+ * eg
+ * ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+ * ENABLE_DEBUG_MESSAGE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+ */

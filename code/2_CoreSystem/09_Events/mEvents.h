@@ -49,15 +49,15 @@ class mEvent
       /**
        * Buttons, Relays
        * */
-      uint16_t module_id; //temporary rename until I can verify all module_ids use Unique and not ENUM codes
+      uint16_t module_id = 0; //temporary rename until I can verify all module_ids use Unique and not ENUM codes
       /**
        * InputChange, Timer
        */
-      uint16_t function_id;
+      uint16_t function_id = 0;
       /**
        * ?? or buffer[0]
        * */
-      uint8_t device_id;
+      uint8_t device_id = 0;
       /**
        * Values
        * */

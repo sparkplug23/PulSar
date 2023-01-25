@@ -25,7 +25,7 @@ class mRelays :
     mRelays(){};
 
     #ifndef MAX_RELAYS
-      #define MAX_RELAYS 4
+      #define MAX_RELAYS 4 // Phase out, should be detected with pin set
     #endif
 
     static const char* PM_MODULE_DRIVERS_RELAY_CTR;
@@ -42,7 +42,6 @@ class mRelays :
     #endif
     
     void Pre_Init(void);
-
 
     typedef union {
       uint16_t data; // allows full manipulating
@@ -71,11 +70,9 @@ class mRelays :
     int8_t CheckAndExecute_JSONCommands();
     void   parse_JSONCommand(JsonParserObject obj);
 
-#ifdef USE_MODULE_CORE_RULES
+    #ifdef USE_MODULE_CORE_RULES
     void RulesEvent_Set_Power();
-
-#endif// USE_MODULE_CORE_RULES
-
+    #endif// USE_MODULE_CORE_RULES
 
     #define RELAYS_MAX_COUNT 4
 
@@ -197,7 +194,7 @@ class mRelays :
      
       uint8_t ischanged = false;
 
-    }relay_status[MAX_RELAYS];
+    }relay_status[MAX_RELAYS]; // Change to dynamic, vectors?
     
     bool IsRelayTimeWindowAllowed(uint8_t relay_id, uint8_t range_id=255);
 
@@ -231,15 +228,15 @@ uint16_t CommandGet_SecondsToRemainOff(uint8_t relay_id);
     int8_t GetRelayIDbyName(const char* c);
     int8_t GetDeviceIDbyName(const char* c);
 
-    uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_State(uint8_t json_method = 0, bool json_object_start_end_required = true); //default is true
-    uint8_t ConstructJSON_Scheduled(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_State(uint8_t json_method = 0, bool json_appending = true); //default is true
+    uint8_t ConstructJSON_Scheduled(uint8_t json_level = 0, bool json_appending = true);
 
     uint8_t AppendJSONResponse_Drivers_Unified();
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 

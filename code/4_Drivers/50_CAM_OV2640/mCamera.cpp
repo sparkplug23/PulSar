@@ -1052,7 +1052,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("mCameraOV2640::Pre_Init"));
 
 
 
-uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   // Active rgbcct palette used as scene
 
@@ -1088,7 +1088,7 @@ uint8_t mCameraOV2640::ConstructJSON_Settings(uint8_t json_level, bool json_obje
 
 }
 
-uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mCameraOV2640::ConstructJSON_State(uint8_t json_level, bool json_appending){
   
   JsonBuilderI->Start();  
 
@@ -1147,14 +1147,14 @@ void mCameraOV2640::MQTTHandler_Set_RefreshAll(){
 } //end "MQTTHandler_Init"
 
 
-void mCameraOV2640::MQTTHandler_Set_TelePeriod(){
+void mCameraOV2640::MQTTHandler_Set_DefaultPeriodRate(){
 
   mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
   // // mqtthandler_animation_teleperiod.tRateSecs = pCONT_set->pCONT_set->Settings.sensors.teleperiod_secs;
   // // mqtthandler_ambilight_teleperiod.tRateSecs = pCONT_set->pCONT_set->Settings.sensors.teleperiod_secs;
 //   mqtthandler_scene_teleperiod.tRateSecs = pCONT_set->pCONT_set->Settings.sensors.teleperiod_secs;
   
-} //end "MQTTHandler_Set_TelePeriod"
+} //end "MQTTHandler_Set_DefaultPeriodRate"
 
 
 void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
@@ -1933,11 +1933,10 @@ AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod();
+      MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender();

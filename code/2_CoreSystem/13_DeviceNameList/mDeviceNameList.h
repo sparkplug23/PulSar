@@ -47,6 +47,9 @@ class DeviceNameList{
     /* Here will be the instance stored. */
     static DeviceNameList* instance;
 
+    
+    char* GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack);
+
     uint8_t GetLengthIndexMax(){ return  number_buffer.length; }
     uint8_t GetLengthIndexUsed(){ return  number_buffer.currently_used_indexed; }
 

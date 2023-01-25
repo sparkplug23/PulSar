@@ -143,7 +143,7 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   // }
 
 
-  mqtthandler_scheduled_teleperiod.flags.SendNow = true;
+  // mqtthandler_scheduled_teleperiod.flags.SendNow = true;
 
 }
 

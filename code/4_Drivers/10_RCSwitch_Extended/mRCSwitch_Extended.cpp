@@ -278,14 +278,13 @@ int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORKS_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-    case FUNC_MQTT_HANDLERS_RESET:
       MQTTHandler_Init(); //make a FUNC_MQTT_INIT and group mqtt togather
     break;
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
-      MQTTHandler_Set_TelePeriod(); // Load teleperiod setting into local handlers
+      MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
       MQTTHandler_Set_RefreshAll();
@@ -1062,7 +1061,7 @@ void mRCSwitch::parse_JSONCommand(JsonParserObject obj)
 *******************************************************************************************************************/
 
   
-uint8_t mRCSwitch::ConstructJSON_Settings(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mRCSwitch::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.fEnableSensor);
@@ -1071,7 +1070,7 @@ uint8_t mRCSwitch::ConstructJSON_Settings(uint8_t json_level, bool json_object_s
 
 }
 
-uint8_t mRCSwitch::ConstructJSON_State(uint8_t json_level, bool json_object_start_end_required){
+uint8_t mRCSwitch::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 
@@ -1142,7 +1141,7 @@ void mRCSwitch::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mRCSwitch::MQTTHandler_Set_TelePeriod()
+void mRCSwitch::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)

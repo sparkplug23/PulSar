@@ -24,6 +24,7 @@
 #endif
 
 enum LoggingLevels {LOG_LEVEL_NONE, 
+                    LOG_LEVEL_DEBUG_TRACE, // Highest level of trace debug that will always be shown when called, but should always be disabled via ifdef calls ie "ENABLE_DEBUG_TRACE__##"
                     LOG_LEVEL_ERROR, 
                     LOG_LEVEL_WARN, 
                     /**
@@ -162,6 +163,12 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #define ALOG_DBM(...)
 #endif
 
+#ifdef ENABLE_LOG_LEVEL__DEBUG_TRACE
+#define ALOG_TRA(...) AddLog(LOG_LEVEL_DEBUG_TRACE, __VA_ARGS__)
+#else
+#define ALOG_TRA(...)
+#endif
+
 #ifdef ENABLE_LOG_LEVEL_COMMANDS
 #define ALOG_COM(...) AddLog(LOG_LEVEL_COMMANDS, __VA_ARGS__)
 #else
@@ -173,6 +180,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 #else
 #define ALOG_HGL(...)
 #endif
+
 
 
 
@@ -289,6 +297,7 @@ extern "C" {
 
 
   #define D_LOG_LEVEL_NONE_SHORT_CTR            "NON"
+  #define D_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR  "DTR"
   #define D_LOG_LEVEL_ERROR_SHORT_CTR           "ERR"
   #define D_LOG_LEVEL_WARN_SHORT_CTR            "WRN"
   #define D_LOG_LEVEL_TEST_SHORT_CTR            "TST"
@@ -300,6 +309,7 @@ extern "C" {
   #define D_LOG_LEVEL_ALL_SHORT_CTR             "ALL"
 
   DEFINE_PGM_CTR(PM_LOG_LEVEL_NONE_SHORT_CTR)            D_LOG_LEVEL_NONE_SHORT_CTR;
+  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR)  D_LOG_LEVEL_DEBUG_TRACE_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_ERROR_SHORT_CTR)           D_LOG_LEVEL_ERROR_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_WARN_SHORT_CTR)            D_LOG_LEVEL_WARN_SHORT_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_TEST_SHORT_CTR)            D_LOG_LEVEL_TEST_SHORT_CTR;
@@ -312,6 +322,7 @@ extern "C" {
   DEFINE_PGM_CTR(PM_LOG_LEVEL_ALL_SHORT_CTR)             D_LOG_LEVEL_ALL_SHORT_CTR;
 
   #define D_LOG_LEVEL_NONE_LONG_CTR            "NON"
+  #define D_LOG_LEVEL_DEBUG_TRACE_LONG_CTR  "DTR"
   #define D_LOG_LEVEL_ERROR_LONG_CTR           "ERR"
   #define D_LOG_LEVEL_WARN_LONG_CTR            "WRN"
   #define D_LOG_LEVEL_TEST_LONG_CTR            "TST"
@@ -323,6 +334,7 @@ extern "C" {
   #define D_LOG_LEVEL_ALL_LONG_CTR             "ALL"
 
   DEFINE_PGM_CTR(PM_LOG_LEVEL_NONE_LONG_CTR)            D_LOG_LEVEL_NONE_LONG_CTR;
+  DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_TRACE_LONG_CTR)  D_LOG_LEVEL_DEBUG_TRACE_LONG_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_ERROR_LONG_CTR)           D_LOG_LEVEL_ERROR_LONG_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_WARN_LONG_CTR)            D_LOG_LEVEL_WARN_LONG_CTR;
   DEFINE_PGM_CTR(PM_LOG_LEVEL_TEST_LONG_CTR)            D_LOG_LEVEL_TEST_LONG_CTR;

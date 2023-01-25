@@ -25,6 +25,7 @@
 #define W1_CONVERT_TEMP      0x44
 #define W1_READ_SCRATCHPAD   0xBE
 
+// https://www.analog.com/en/technical-articles/guidelines-for-reliable-long-line-1wire-networks.html
 
 class mDB18x20_ESP32 :
   public mTaskerInterface
@@ -40,16 +41,13 @@ class mDB18x20_ESP32 :
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS__DS18X20_ESP32_2023__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mDB18x20_ESP32);
-    };
+    uint16_t GetClassSize(){      return sizeof(mDB18x20_ESP32); };
     #endif
 
     struct SETTINGS{
       uint8_t fEnableSensor = false;
-      // uint8_t fSensorCount = 0;
+      uint8_t sensor_count = 0;
     }settings;
 
     void EveryLoop();
@@ -81,11 +79,8 @@ class mDB18x20_ESP32 :
         uint32_t captureupsecs; //sensor age
       }reading;
     } sensor_new[DS18X20_MAX_SENSORS];
-
-    uint8_t devices_pin1 = 0;
-    uint8_t devices_pin2 = 0;
-
-
+  
+    uint8_t DS18X20Data_gpios;    // Count of GPIO found
 
     void Scan_ReportAsJsonBuilder();
 
@@ -94,31 +89,20 @@ class mDB18x20_ESP32 :
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
-      return DS18X20Data.sensors;
+      return settings.sensor_count;
     }
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index > DS18X20_MAX_SENSORS-1) {value->type.push_back(0); return ;}
-      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-      value->data.push_back(sensor_new[index].reading.val);
-      value->sensor_id = index;
+      if(index > DS18X20_MAX_SENSORS-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      value->data_f.push_back(sensor_new[index].reading.val);
+      value->sensor_id = sensor_new[index].device_name_index;
       value->resolution = 123;
     };
     #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
-
     OneWire *ds = nullptr;
     OneWire *ds18x20_gpios[MAX_DSB_PINS];
-
-    struct {
-      char name[17];
-      uint8_t sensors;
-      uint8_t gpios;    // Count of GPIO found
-    } DS18X20Data;
-
-
-
-
 
     void Ds18x20Init(void);
     void Ds18x20Search(void);
@@ -129,14 +113,14 @@ class mDB18x20_ESP32 :
     void Ds18x20Show(bool json);
 
 
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_object_start_end_required = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
     #ifdef USE_MODULE_NETWORK_MQTT
 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_TelePeriod();
+    void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mDB18x20_ESP32>* ptr;
@@ -146,7 +130,7 @@ class mDB18x20_ESP32 :
 
     #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
     struct handler<mDB18x20_ESP32> mqtthandler_debug;
-    uint8_t ConstructJSON_Debug(uint8_t json_level = 0, bool json_object_start_end_required = true);
+    uint8_t ConstructJSON_Debug(uint8_t json_level = 0, bool json_appending = true);
     #endif
 
     // No specialised payload therefore use system default instead of enum
