@@ -38,7 +38,6 @@
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret_Christmas.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 /**
  * Temporary files
@@ -325,6 +324,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_BME
     EM_MODULE_SENSORS_BME_ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_BMP
+    EM_MODULE_SENSORS_BMP_ID,
+  #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     EM_MODULE_SENSORS_ULTRASONIC_ID,
   #endif
@@ -447,6 +449,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
     EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID,
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
+    EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID,
+  #endif
 
 
   
@@ -535,7 +540,7 @@ enum MODULE_IDS{
   #define pCONT_nex                                 static_cast<mNextionPanel*>(pCONT->pModule[EM_MODULE_DISPLAYS_NEXTION_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
-  #include "8_Displays/OLED_SSD1606/mOLED_SSD1306.h"
+  #include "8_Displays/02_OLED_SSD1606/mOLED_SSD1306.h"
   #define pCONT_oled1306                            static_cast<mOLED_SSD1306*>(pCONT->pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
@@ -706,7 +711,10 @@ enum MODULE_IDS{
   #include "5_Sensors/04_BME/mBME.h"
   #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
 #endif
-
+#ifdef USE_MODULE_SENSORS_BMP
+  #include "5_Sensors/03_BMP/mBMP.h"
+  #define pCONT_bmp                             static_cast<mBMP*>(pCONT->pModule[EM_MODULE_SENSORS_BMP_ID])
+#endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/05_DHT/mSensorsDHT.h"
   #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
@@ -908,6 +916,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
   #include "10_ConSpec/06_ImmersionPanel/mImmersionPanel.h"
   #define pCONT_immersion_cont         static_cast<mImmersionPanel*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
+  #include "10_ConSpec/07_TempSensorOnOLED/mTempSensorOLEDBath.h"
+  #define pCONT_immersion_cont         static_cast<mTempSensorOLEDBath*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID])
 #endif
 
 

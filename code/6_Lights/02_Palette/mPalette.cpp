@@ -28,7 +28,7 @@ void mPalette::Init_Palettes()
 void mPalette::init_PresetColourPalettes()
 {
   
-  ALOG_HGL( PSTR("init_PresetColourPalettes") );
+  ALOG_DBM( PSTR("init_PresetColourPalettes") );
   
   /**
    *  Static 
@@ -1185,7 +1185,7 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
   ){
     ptr = GetPalettePointerByID(ii);
 
-    DEBUG_LINE_HERE;
+    // DEBUG_LINE_HERE;
 
     // ALOG_INF( PSTR("Name \"%s\"=?\"%S\""), c, ptr->friendly_name_ctr );
 

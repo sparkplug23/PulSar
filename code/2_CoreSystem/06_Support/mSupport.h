@@ -596,6 +596,7 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
     int TextToInt(char *str);
     // char* ulltoa(unsigned long long value, char *str, int radix);
     char* dtostrfd(double number, unsigned char prec, char *s);
+    static char* Float2CString(float number, unsigned char prec, char *s);
     char* Unescape(char* buffer, uint16_t* size);
     char* RemoveSpace(char* p);
     char* LowerCase(char* dest, const char* source);

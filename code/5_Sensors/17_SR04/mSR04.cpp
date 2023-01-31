@@ -51,7 +51,7 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
@@ -291,6 +291,30 @@ float mSR04::GetDistanceFromPing(uint32_t ping_value)
 {
   if(ping_value==0){ return 0; }
   float distance_cm = 0;
+
+  // if(settings.flag_distance_conversion_method == EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_DEFAULT__ID)
+  // {
+  //   readings.conversion_settings.speed_of_sound = 343.0f;
+  //   float speed_of_sound_cm_per_us = readings.conversion_settings.speed_of_sound/10000.0f;
+  //   distance_cm = (float)(ping_value)*(speed_of_sound_cm_per_us/2.0f);
+  //   return 
+  // }
+
+
+  // switch(readings.conversion_settings.flag_distance_conversion_method)
+  // {
+  //   default:
+  //   case EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID:
+  //     distance_cm = (float)(ping_value)/ US_ROUNDTRIP_CM;
+  //   break;
+  //   case EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_DEFAULT__ID:
+  //   {
+  //     readings.conversion_settings.speed_of_sound = 343.0f;
+  //     float speed_of_sound_cm_per_us = readings.conversion_settings.speed_of_sound/10000.0f;
+  //     distance_cm = (float)(ping_value)*(speed_of_sound_cm_per_us/2.0f);
+
+
+
 
 // // this should be last to always return it
 //   if(settings.flag_distance_conversion_method == EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID)

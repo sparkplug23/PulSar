@@ -188,15 +188,8 @@ void mWiFi::WifiConnectAP(uint8_t ap_index){
 //checked
 void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 {
-  
-    #ifdef ENABLE_LOG_LEVEL_INFO
-AddLog(LOG_LEVEL_INFO, PSTR("mWiFi::WifiBegin %d:%d"), flag,channel);
 
-// delay(2000);
-
-  AddLog(LOG_LEVEL_DEBUG, PSTR("F::%s"),__FUNCTION__);
-  
-    #endif// ENABLE_LOG_LEVEL_INFO
+  ALOG_INF(PSTR("mWiFi::WifiBegin %d:%d"), flag, channel);
 
   const char kWifiPhyMode[] = " BGN";
 
@@ -216,10 +209,6 @@ AddLog(LOG_LEVEL_INFO, PSTR("mWiFi::WifiBegin %d:%d"), flag,channel);
 //  #endif
   if (!WiFi.getAutoConnect()) { WiFi.setAutoConnect(true); }
   // WiFi.setAutoReconnect(true);
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_WIFI "flag=%d"),flag);
-    #endif// ENABLE_LOG_LEVEL_INFO
 
 //  SetSSIDofAPwithIndex();
   switch (flag) {
@@ -264,7 +253,6 @@ AddLog(LOG_LEVEL_INFO, PSTR("mWiFi::WifiBegin %d:%d"), flag,channel);
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_ssid[pCONT_set->Settings.sta_active]);
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"),pCONT_set->Settings.sta_active,pCONT_set->Settings.sta_pwd[pCONT_set->Settings.sta_active]);
-
     #endif// ENABLE_LOG_LEVEL_INFO
 
   if (channel) {
@@ -796,38 +784,36 @@ void mWiFi::WifiCheckIp(void)
 
     if (connection.retry) {
       
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "connection.retry %d"),connection.retry);
-    #endif// ENABLE_LOG_LEVEL_INFO
+      ALOG_INF(PSTR(D_LOG_WIFI "connection retry %d"), connection.retry_init - connection.retry);
 
-      if (pCONT_set->Settings.flag_network.use_wifi_scan) {
-        if (connection.retry_init == connection.retry) {
+      if (pCONT_set->Settings.flag_network.use_wifi_scan) 
+      {
+        if (connection.retry_init == connection.retry) 
+        {
           connection.scan_state = 1;    // Select scanned SSID
-    #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select scanned SSID"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-        }else{
-    #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "connection.retry_init == connection.retry %d=%d"),connection.retry_init,connection.retry);
-    #endif// ENABLE_LOG_LEVEL_INFO
+          ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select scanned SSID"));          
+        }
+        else
+        {
+          ALOG_INF(PSTR(D_LOG_WIFI "connection.retry_init == connection.retry %d=%d"), connection.retry_init, connection.retry);
         }
       } else {
-        if (connection.retry_init == connection.retry) {
-          // WifiBegin(WIFIBEGIN_FLAG_SSID0_ID, 0);        // Select default SSID
+        if (connection.retry_init == connection.retry) 
+        {
           
           WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, pCONT_set->Settings.wifi_channel);        // Select alternate SSID
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select default SSID"));
-    #endif// ENABLE_LOG_LEVEL_INFO
+          ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select default SSID"));
+          
         }
-        if ((pCONT_set->Settings.sta_config != WIFI_WAIT) && ((connection.retry_init / 2) == connection.retry)) {
+        if ((pCONT_set->Settings.sta_config != WIFI_WAIT) && ((connection.retry_init / 2) == connection.retry)) 
+        {
+
           WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, 0);        // Select alternate SSID
-    #ifdef ENABLE_LOG_LEVEL_INFO
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "here Select alternate SSID"));
-    #endif// ENABLE_LOG_LEVEL_INFO
+          ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select alternate SSID"));
+          
         }
       }
+
       /*
       if (Settings.flag3.use_connection.scan) {  // SetOption56 - Scan wifi network at restart for configured AP's
         if (Wifi.retry_init == Wifi.retry) {
@@ -896,12 +882,11 @@ void mWiFi::WifiCheck(uint8_t param)
       /**
        * config_counter updates config
        * */
-      if (connection.config_counter) {
-        
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_WIFI "WifiCheck " "config_counter=%d"), connection.config_counter);
-    #endif// ENABLE_LOG_LEVEL_INFO
+      if (connection.config_counter) 
+      {
 
+        ALOG_INF( PSTR(D_LOG_WIFI "WifiCheck " "config_counter=%d"), connection.config_counter);
+    
         connection.config_counter--;
         connection.counter = connection.config_counter +5;
         if (connection.config_counter) {
@@ -922,7 +907,8 @@ void mWiFi::WifiCheck(uint8_t param)
 
         }
         // Delayed by the above code by 5 seconds
-        if (!connection.config_counter) {        
+        if (!connection.config_counter) 
+        {
           // pCONT_set->restart_flag = 2;
     #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI "WifiCheck " "restart_flag = 2"));
@@ -1415,7 +1401,7 @@ void mWiFi::StartMdns(void) {
     Mdns.begun = (uint8_t)MDNS.begin(pCONT_set->Settings.system_name.device);
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s" "with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),pCONT_set->Settings.system_name.device);
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MDNS "%s" " with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), pCONT_set->Settings.system_name.device);
   
   
     #endif // ENABLE_LOG_LEVEL_INFO

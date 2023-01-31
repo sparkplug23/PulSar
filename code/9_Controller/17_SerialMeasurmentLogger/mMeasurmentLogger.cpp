@@ -61,7 +61,7 @@
 //     case FUNC_MQTT_HANDLERS_RESET:
 //       MQTTHandler_Init();
 //     break;
-//     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+//     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Set_DefaultPeriodRate();
 //     break;
 //     case FUNC_MQTT_SENDER:

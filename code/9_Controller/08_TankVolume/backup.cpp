@@ -363,7 +363,7 @@
 //     case FUNC_MQTT_HANDLERS_RESET:
 //       MQTTHandler_Init(); // Reset to the initial parameters
 //     break;
-//     case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+//     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
 //     break;
 //     case FUNC_MQTT_SENDER:

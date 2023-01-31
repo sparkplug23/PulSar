@@ -526,7 +526,7 @@ lib_extra_dirs          = ${common32.lib_extra_dirs}
 extends = env:whitehall_32
 build_unflags               = ${esp32_defaults.build_unflags}
 build_flags                 = ${esp32_defaults.build_flags}
-                                    -D DEVICE_HEATING__MODULE__HEATING_2023_NUMBER1_TIMERS_ONLY_AND_DEFAULT_BACKUP
+                                    -D DEVICE_HVAC_HEATING_MAIN
                                     -w                                     
 lib_extra_dirs          = ${common32.lib_extra_dirs}              
                           lib/libesp32

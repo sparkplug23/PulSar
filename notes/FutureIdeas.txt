@@ -449,3 +449,7 @@ Add sunelevation palette that is actually left on overnight, and is black when i
     Main "Setup" will have a threadsafe RTC read/write of fastboot times, and if something is wrong, use this to switch into optional boot code that
         1) Connects to default SSID "DEBUG_SSID_AP", connect to my wifi, and wait for OTA
         2) Create its own wifi, so desktop etc can connect directly (if no AP connection) so OTA can be recovered directly
+
+ * Ideas:
+ * Create two basic LCD numbers, one for outside and one for bedroom temperature
+ * Create world map (like I said to jess) that lights to show where the sun is, and day/night land-mass light up with cities being bright spots.

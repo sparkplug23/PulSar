@@ -103,7 +103,7 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
@@ -1330,6 +1330,10 @@ leave energy in its own module, not telemetry here
 uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   // Serial.println("mEnergyInterface::ConstructJSON_Sensor"); Serial.flush();
+
+
+// Instead of this way, it should take in via GetSensor like sensor_interface to accumulate all present and future energy devices
+
 
   JsonBuilderI->Start();
 

@@ -406,6 +406,13 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
 template<typename T, typename U>
 void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 {
+
+  // if(
+  //   (loglevel>pCONT_set->Settings.seriallog_level)&&
+  //   (loglevel>pCONT_set->Settings.weblog_level)
+  //   ){
+  //   return;
+  // }  
   
   #ifndef DISABLE_SERIAL_LOGGING
   SERIAL_DEBUG.printf("%s = ",name_ctr);

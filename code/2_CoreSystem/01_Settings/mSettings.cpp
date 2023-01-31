@@ -257,7 +257,7 @@ const char* mSettings::GetTaskName(uint8_t task, char* buffer){
     case FUNC_MQTT_COMMAND:                           return PM_FUNC_MQTT_COMMAND_CTR;
     case FUNC_MQTT_SENDER:                            return PM_FUNC_MQTT_SENDER_CTR;
     case FUNC_MQTT_HANDLERS_INIT:                     return PM_FUNC_MQTT_HANDLERS_INIT_CTR;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:       return PM_FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
     case FUNC_SET_POWER:                              return PM_FUNC_SET_POWER_CTR;
     case FUNC_SET_DEVICE_POWER:                       return PM_FUNC_SET_DEVICE_POWER_CTR;
     case FUNC_SHOW_SENSOR:                            return PM_FUNC_SHOW_SENSOR_CTR;
@@ -324,7 +324,7 @@ void mSettings::Function_Template_Load(){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  AddLog(LOG_LEVEL_DEBUG, PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);

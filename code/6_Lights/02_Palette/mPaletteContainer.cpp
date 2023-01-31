@@ -8,7 +8,7 @@ void mPaletteContainer::LoadPaletteI()
 
 
 
- Serial.println("mPaletteContainer::LoadPaletteI()");
+//  Serial.println("mPaletteContainer::LoadPaletteI()");
  
 
 

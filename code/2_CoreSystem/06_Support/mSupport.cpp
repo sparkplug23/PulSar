@@ -652,7 +652,7 @@ void mSupport::ArduinoOTAInit(void)
     }
     
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_OTA "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
     #endif // ENABLE_LOG_LEVEL_INFO
   
     if(error != OTA_BEGIN_ERROR)
@@ -670,10 +670,9 @@ void mSupport::ArduinoOTAInit(void)
 
   ArduinoOTA.begin();
   ota_init_success = true;
-  
-   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_UPLOAD "Arduino OTA mSUPPORT METHOD " D_ENABLED " " D_PORT " 8266"));
-  #endif
+
+  ALOG_INF(PSTR(D_LOG_OTA "Started"));
+
 }
 
 void mSupport::ArduinoOtaLoop(void)
@@ -713,6 +712,16 @@ char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
   } else {
     return dtostrf(number, 1, prec, s);
   }
+}
+
+char* mSupport::Float2CString(float number, unsigned char prec, char *s)
+{
+  // if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
+  //   strcpy(s, "null");
+  //   return s;
+  // } else {
+    return dtostrf(number, 1, prec, s);
+  // }
 }
 
 

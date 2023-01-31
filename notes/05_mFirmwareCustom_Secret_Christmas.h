@@ -2,7 +2,8 @@
 #define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_CHRISTMAS_H
 
 /*********************************************************************************************\
- * Christmas 2022 - Stop using any in this file, phasing out Jan2023
+ * Christmas 2022
+ *  ** devices used in the 2022 season
 \*********************************************************************************************/
 
 #include "2_CoreSystem/mGlobalMacros.h"

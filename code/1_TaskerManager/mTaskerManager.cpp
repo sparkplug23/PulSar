@@ -417,6 +417,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_BME
     pModule[EM_MODULE_SENSORS_BME_ID] = new mBME();
   #endif
+  #ifdef USE_MODULE_SENSORS_BMP
+    pModule[EM_MODULE_SENSORS_BMP_ID] = new mBMP();
+  #endif
   #if defined(USE_MODULE_SENSORS_DS18X) || defined(USE_MODULE_SENSORS_DS18X_V2) || defined(USE_MODULE_SENSORS_DS18X_V3) || defined(USE_MODULE_SENSORS_DS18X_V4)
     pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mDS18X();
   #endif
@@ -545,6 +548,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
     pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID] = new mImmersionPanel();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
+    pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID] = new mTempSensorOLEDBath();
   #endif
 };
 

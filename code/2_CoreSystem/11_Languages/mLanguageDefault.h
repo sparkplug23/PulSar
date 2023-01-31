@@ -1407,6 +1407,7 @@
   #define D_LOG_UPNP "UPP: "         // UPnP
   #define D_LOG_WIFI "WIF: "         // Wifi
   #define D_LOG_NEO "NEO: "         // Neopixels
+  #define D_LOG_OTA "OTA: "
   #define D_LOG_PIXEL         // Neopixels
   #define D_LOG_LIGHT "LGT: "         // Light interface
   #define D_LOG_DOORBELL "DRB: "         // Neopixels
@@ -1634,8 +1635,8 @@
 #define D_JSON_SYNC "Sync"
 #define D_JSON_SYSTEM "System"
 #define D_JSON_SYSTEM_RESTART "SystemRestart"
-#define D_JSON_SUN_AZIMUTH "Sun Azimuth"
-#define D_JSON_SUN_ELEVATION "Sun Elevation"
+#define D_JSON_SUN_AZIMUTH "SolarAzimuth"
+#define D_JSON_SUN_ELEVATION "SolarElevation"
 #define D_JSON_TEMPERATURE "Temperature"
 #define D_JSON_TEMPERATURE_UNIT "TempUnit"
 #define D_JSON_TEMPLATE_USED "TemplateUsed"

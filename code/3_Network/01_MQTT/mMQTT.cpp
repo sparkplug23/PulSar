@@ -70,6 +70,9 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
         //DiscoverServer();
         //pCONT->Tasker_Interface(FUNC_MQTT_CHECK_REDUNCTION_LEVEL);
       break;
+      case FUNC_EVERY_HOUR:
+        Send_LWT_Online();
+      break;
       case FUNC_UPTIME_10_MINUTES:
         flag_uptime_reached_reduce_frequency = true;
       break;

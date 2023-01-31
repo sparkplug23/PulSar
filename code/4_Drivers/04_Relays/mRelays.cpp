@@ -72,7 +72,7 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
@@ -891,7 +891,7 @@ uint8_t mRelays::ConstructJSON_State(uint8_t json_level, bool json_appending){
       
     }
   }
-  // AddLog(LOG_LEVEL_INFO, PSTR("mRelays::ConstructJSON_State %d"),JBI->GetLength());
+  
   if(json_appending)
   {
     return JBI->End();

@@ -109,12 +109,17 @@ class mSR04 :
       struct TEMPERATURE_ADJUSTMENT{
         bool flag_enabled = false;
         float ambient_temperature = 0;
-      }temp_adj;
+      // }temp_adj;
+      // struct CONVERSION_SETTINGS{
+      //   float speed_of_sound = 0;
+      //   uint8_t flag_distance_conversion_method = EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID;
+      // }conversion_settings;
+      #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+      
       struct CONVERSION_SETTINGS{
         float speed_of_sound = 0;
         uint8_t flag_distance_conversion_method = EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID;
       }conversion_settings;
-      #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
     }readings;
 
     // doubleEMAFilter(0.025, 0.1);

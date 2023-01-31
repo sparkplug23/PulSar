@@ -5,8 +5,6 @@
 void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 {
 
-
-    DEBUG_LINE_HERE;
   // AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand"));
   JsonParserToken jtok = 0; 
   int16_t tmp_id = 0;
@@ -40,8 +38,6 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
         Segment_AppendNew(0, 0, segment_i+1);
         
         Serial.println(SEGMENT_I(segment_i).hardware_element_colour_order.data);
-
-        DEBUG_LINE_HERE;
 
         if(pCONT_lAni->segments.size()!=0)
         {
@@ -78,7 +74,8 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   parsesub_Notifications(obj);
   #endif // ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION
 
-      // Serial.println(SEGMENT_I(0).hardware_element_colour_order.data);
+  // Serial.println(SEGMENT_I(0).hardware_element_colour_order.data);
+
 }
 
 
@@ -152,7 +149,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         SEGMENT_I(segment_index).palette.id--;
       }else
       if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-        ALOG_HGL(PSTR("tmp_id=%d"),tmp_id);
+        ALOG_DBM(PSTR("tmp_id=%d"),tmp_id);
         CommandSet_PaletteID(tmp_id, segment_index);
         data_buffer.isserviced++;
       }
@@ -1499,7 +1496,7 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
 
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR("segment_index%d == R=%d, G=%d, B=%d, CW=%d, WW=%d \n\r dec%d \n\r %X"),
+  ALOG_DBM( PSTR("segment_index%d == R=%d, G=%d, B=%d, CW=%d, WW=%d \n\r dec%d \n\r %X"),
     segment_index,
     SEGMENT_I(segment_index).hardware_element_colour_order.red,
     SEGMENT_I(segment_index).hardware_element_colour_order.green,
@@ -1509,7 +1506,7 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
     SEGMENT_I(segment_index).hardware_element_colour_order.data,
     SEGMENT_I(segment_index).hardware_element_colour_order.data
   );
-  Serial.println(SEGMENT_I(segment_index).hardware_element_colour_order.data, BIN);
+  // Serial.println(SEGMENT_I(segment_index).hardware_element_colour_order.data, BIN);
   #endif
 
 }

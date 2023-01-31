@@ -1977,8 +1977,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   segments[segment_index].aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
   segments[segment_index].flags.animator_first_run= true; // first run, so do extra things
 
-  ALOG_INF(PSTR("segments[segment_index].effect_id=%d"),segments[segment_index].effect_id);
-
+  ALOG_DBM(PSTR("segments[segment_index].effect_id=%d"),segments[segment_index].effect_id);
   
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset

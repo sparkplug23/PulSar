@@ -214,59 +214,46 @@ bool mSupport::I2cDevice(uint8_t addr) // This checks ALL, not just the desired 
 {
 
   
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
 
   for (uint8_t address = 1; address <= 127; address++) {
       // AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x|%x)=for"),address,addr);
     wire->beginTransmission(address);
-    if (!wire->endTransmission() && (address == addr)) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=true"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    if (!wire->endTransmission() && (address == addr)) 
+    {
+      ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
       return true;
     }else
-    if (!wire->endTransmission() && (address != addr)){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x) also found %x"),address,addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+    if (!wire->endTransmission() && (address != addr))
+    {
+      ALOG_DBM( PSTR("I2cDevice(%x) also found %x"),address,addr);
     }
   }
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=FALSE"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  
+  ALOG_ERR(PSTR("I2cDevice(%x)=FALSE"),addr);
+  
   return false;
 }
 
 bool mSupport::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
 {
 
-  
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
 
-  // for (
-    uint8_t address = addr;
-  //  address <= 127; address++) {
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=for"),addr);
-    wire->beginTransmission(address);
-    if (!wire->endTransmission() && (address == addr)) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=true"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
-      return true;
-    }else
-    if (!wire->endTransmission() && (address != addr)){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x) also found %x"),address,addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    }
-  // }
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_TEST, PSTR("I2cDevice(%x)=FALSE"),addr);
-    #endif// ENABLE_LOG_LEVEL_INFO
+  uint8_t address = addr;
+  ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
+  wire->beginTransmission(address);
+  if (!wire->endTransmission() && (address == addr)) 
+  {
+    ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
+    return true;
+  }else
+  if (!wire->endTransmission() && (address != addr))
+  {
+    ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
+  }
+  ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
+  
   return false;
 }
 

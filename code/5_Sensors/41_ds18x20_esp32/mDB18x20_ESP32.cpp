@@ -70,7 +70,7 @@ int8_t mDB18x20_ESP32::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:
@@ -342,7 +342,7 @@ bool mDB18x20_ESP32::Ds18x20Read(uint8_t sensor, float &t) {
 void mDB18x20_ESP32::Ds18x20EverySecond(void) 
 {
 
-  ALOG_INF(PSTR("settings.sensor_count=%d"),settings.sensor_count);
+  ALOG_DBG(PSTR("settings.sensor_count=%d"),settings.sensor_count);
 
   if (!settings.sensor_count) 
   {     
@@ -361,7 +361,7 @@ void mDB18x20_ESP32::Ds18x20EverySecond(void)
       if (Ds18x20Read(i, t)) {   // Read temperature
         sensor_new[i].reading.val = t;
         // Serial.println(t);
-        ALOG_INF(PSTR("Read i%d a%d Alias%d =-> %d"), i, sensor_new[i].address[7], sensor_new[i].device_name_index, (int)t);
+        ALOG_DBG(PSTR("Read i%d a%d Alias%d =-> %d"), i, sensor_new[i].address[7], sensor_new[i].device_name_index, (int)t);
       } else {
         // Ds18x20Name(i);
         // AddLogMissed(DS18X20Data.name, sensor_new[sensor_new[i].index].valid);

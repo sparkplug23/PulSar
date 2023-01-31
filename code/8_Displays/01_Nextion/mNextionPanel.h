@@ -244,8 +244,6 @@ std::string& replace(std::string& s, const std::string& from, const std::string&
 
     void EveryLoop();
 
-    // String debugPrintln(String str);
-
     uint8_t otatransfererror = false;
 
     void wifiDisconnected();
@@ -254,112 +252,6 @@ std::string& replace(std::string& s, const std::string& from, const std::string&
 void Show_ConnectionWorking();
 void Show_ConnectionNotWorking();
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// These defaults may be overwritten with values saved by the web interface
-char wifiSSID[32] = "";
-char wifiPass[64] = "";
-char mqttServer[128] = "";
-char mqttPort[6] = "1883";
-char mqttUser[128] = "";
-char mqttPassword[128] = "";
-char mqttFingerprint[60] = "";
-char haspNode[16] = "plate01";
-char groupName[16] = "plates";
-char hassDiscovery[128] = "homeassistant";
-char configUser[32] = "admin";
-char configPassword[32] = "";
-char motionPinConfig[3] = "0";
-char nextionBaud[7] = "115200";
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const float haspVersion = 1.05;                       // Current HASPone software release version
-const uint16_t mqttMaxPacketSize = 2048;              // Size of buffer for incoming MQTT message
-byte nextionReturnBuffer[128];                        // Byte array to pass around data coming from the panel
-uint8_t nextionReturnIndex = 0;                       // Index for nextionReturnBuffer
-int8_t nextionActivePage = -1;                        // Track active LCD page
-bool lcdConnected = false;                            // Set to true when we've heard something from the LCD
-const char wifiConfigPass[9] = "hasplate";            // First-time config WPA2 password
-const char wifiConfigAP[14] = "HASwitchPlate";        // First-time config SSID
-bool shouldSaveConfig = false;                        // Flag to save json config to SPIFFS
-bool nextionReportPage0 = false;                      // If false, don't report page 0 sendme
-const unsigned long updateCheckInterval = 43200000;   // Time in msec between update checks (12 hours)
-unsigned long updateCheckTimer = updateCheckInterval; // Timer for update check
-unsigned long updateCheckFirstRun = 60000;            // First-run check offset
-bool updateEspAvailable = false;                      // Flag for update check to report new ESP FW version
-float updateEspAvailableVersion;                      // Float to hold the new ESP FW version number
-bool updateLcdAvailable = false;                      // Flag for update check to report new LCD FW version
-unsigned long debugTimer = 0;                         // Clock for debug performance profiling
-bool debugSerialEnabled = true;                       // Enable USB serial debug output
-const unsigned long debugSerialBaud = 115200;         // Desired baud rate for serial debug output
-bool debugTelnetEnabled = false;                      // Enable telnet debug output
-bool nextionBufferOverrun = false;                    // Set to true if an overrun error was encountered
-bool nextionAckEnable = false;                        // Wait for each Nextion command to be acked before continuing
-bool nextionAckReceived = false;                      // Ack was received
-bool rebootOnp0b1 = false;                            // When true, reboot device on button press of p[0].b[1]
-const unsigned long nextionAckTimeout = 1000;         // Timeout to wait for an ack before throwing error
-unsigned long nextionAckTimer = 0;                    // Timer to track Nextion ack
-const unsigned long telnetInputMax = 128;             // Size of user input buffer for user telnet session
-bool motionEnabled = false;                           // Motion sensor is enabled
-bool mdnsEnabled = true;                              // mDNS enabled
-bool ignoreTouchWhenOff = false;                      // Ignore touch events when backlight is off and instead send mqtt msg
-bool beepEnabled = false;                             // Keypress beep enabled
-unsigned long beepOnTime = 1000;                      // milliseconds of on-time for beep
-unsigned long beepOffTime = 1000;                     // milliseconds of off-time for beep
-unsigned int beepCounter;                             // Count the number of beeps
-uint8_t beepPin = 14;                                 // define beep pin output
-uint8_t motionPin = 0;                                // GPIO input pin for motion sensor if connected and enabled
-bool motionActive = false;                            // Motion is being detected
-const unsigned long motionLatchTimeout = 1000;        // Latch time for motion sensor
-const unsigned long motionBufferTimeout = 100;        // Trigger threshold time for motion sensor
-unsigned long lcdVersion = 0;                         // Int to hold current LCD FW version number
-unsigned long updateLcdAvailableVersion;              // Int to hold the new LCD FW version number
-bool lcdVersionQueryFlag = false;                     // Flag to set if we've queried lcdVersion
-const String lcdVersionQuery = "p[0].b[2].val";       // Object ID for lcdVersion in HMI
-uint8_t lcdBacklightDim = 0;                          // Backlight dimmer value
-bool lcdBacklightOn = 0;                              // Backlight on/off
-bool lcdBacklightQueryFlag = false;                   // Flag to set if we've queried lcdBacklightDim
-bool startupCompleteFlag = false;                     // Startup process has completed
-const unsigned long statusUpdateInterval = 300000;    // Time in msec between publishing MQTT status updates (5 minutes)
-unsigned long statusUpdateTimer = 0;                  // Timer for status update
-const unsigned long connectTimeout = 300;             // Timeout for WiFi and MQTT connection attempts in seconds
-const unsigned long reConnectTimeout = 60;            // Timeout for WiFi reconnection attempts in seconds
-byte espMac[6];                                       // Byte array to store our MAC address
-bool mqttTlsEnabled = false;                          // Enable MQTT client TLS connections
-bool mqttPingCheck = false;                           // MQTT broker ping check result
-bool mqttPortCheck = false;                           // MQTT broke port check result
-String mqttClientId;                                  // Auto-generated MQTT ClientID
-String mqttGetSubtopic;                               // MQTT subtopic for incoming commands requesting .val
-String mqttStateTopic;                                // MQTT topic for outgoing panel interactions
-String mqttStateJSONTopic;                            // MQTT topic for outgoing panel interactions in JSON format
-String mqttCommandTopic;                              // MQTT topic for incoming panel commands
-String mqttGroupCommandTopic;                         // MQTT topic for incoming group panel commands
-String mqttStatusTopic;                               // MQTT topic for publishing device connectivity state
-String mqttSensorTopic;                               // MQTT topic for publishing device information in JSON format
-String mqttLightCommandTopic;                         // MQTT topic for incoming panel backlight on/off commands
-String mqttLightStateTopic;                           // MQTT topic for outgoing panel backlight on/off state
-String mqttLightBrightCommandTopic;                   // MQTT topic for incoming panel backlight dimmer commands
-String mqttLightBrightStateTopic;                     // MQTT topic for outgoing panel backlight dimmer state
-String mqttMotionStateTopic;                          // MQTT topic for outgoing motion sensor state
-String nextionModel;                                  // Record reported model number of LCD panel
-// const byte nextionSuffix[] = {0xFF, 0xFF, 0xFF};      // Standard suffix for Nextion commands
-uint8_t nextionMaxPages = 11;                         // Maximum number of pages in Nextion project
-uint32_t tftFileSize = 0;                             // Filesize for TFT firmware upload
-const uint8_t nextionResetPin = 16;                   // Pin for Nextion power rail switch (GPIO12/D6)
-// const unsigned long nextionSpeeds[] = {2400,
-//                                        4800,
-//                                        9600,
-//                                        19200,
-//                                        31250,
-//                                        38400,
-//                                        57600,
-//                                        115200,
-//                                        230400,
-//                                        250000,
-//                                        256000,
-//                                        512000,
-//                                        921600};                                       // Valid serial speeds for Nextion communication
-// const uint8_t nextionSpeedsLength = sizeof(nextionSpeeds) / sizeof(nextionSpeeds[0]); // Size of our list of speeds
 
 // WiFiClientSecure mqttClientSecure;        // TLS-enabled WiFiClient for MQTT
 // WiFiClient wifiClient;                    // Standard WiFiClient
@@ -371,67 +263,69 @@ const uint8_t nextionResetPin = 16;                   // Pin for Nextion power r
 // MDNSResponder::hMDNSService hMDNSService; // mDNS
 // EspSaveCrash SaveCrash;                   // Save crash details to flash
 
-    // OPTIONAL: Assign default values here.
-    // char wifiSSID[32];// = ""; // Leave unset for wireless autoconfig. Note that these values will be lost
-    // char wifiPass[64];// = ""; // when updating, but that's probably OK because they will be saved in EEPROM.
-
-    // ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // // These defaults may be overwritten with values saved by the web interface
-    // char mqttServer[64];// = "192.168.1.65";
-    // char mqttPort[6];// = "1883";
-    // char mqttUser[32];// = "";
-    // char mqttPassword[32];//;//] = "";
-    // char nextionNode[16];// = DEVICENAME_CTR;
-    // char groupName[16];// = "plates";
-    // char configUser[32];// = "admin";
-    // char configPassword[32];// = "";
-    //char motionPinConfig[3] = "0";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // These defaults may be overwritten with values saved by the web interface
+    char mqttServer[64];// = "192.168.1.65";
+    char mqttPort[6];// = "1883";
+    char mqttUser[32];// = "";
+    char mqttPassword[32];//;//] = "";
+    char nextionNode[16];// = DEVICENAME_CTR;
+    char groupName[16];// = "plates";
+    char configUser[32];// = "admin";
+    char configPassword[32];// = "";
+    char motionPinConfig[3] = "0";
+char nextionBaud[7] = "115200";
+char mqttFingerprint[60] = "";
+char haspNode[16] = "plate01";
+char hassDiscovery[128] = "homeassistant";
+char wifiSSID[32] = "";
+char wifiPass[64] = "";
+    //////////////////////////////////////////////////////////////////////////////////////////////////
 
     char* ConvertBytetoASCII(byte* data, uint8_t len);
     // const float nextionVersion = 0.38;                     // Current NEXTION software release version
-    // byte nextionReturnBuffer[128];                      // Byte array to pass around data coming from the panel
-    // uint8_t nextionReturnIndex = 0;                     // Index for nextionReturnBuffer
-    // uint8_t nextionActivePage = 1;                      // Track active LCD page
-    // bool lcdConnected = false;                          // Set to true when we've heard something from the LCD
+    byte nextionReturnBuffer[128];                      // Byte array to pass around data coming from the panel
+    uint8_t nextionReturnIndex = 0;                     // Index for nextionReturnBuffer
+    uint8_t nextionActivePage = 1;                      // Track active LCD page
+    bool lcdConnected = false;                          // Set to true when we've heard something from the LCD
     // // char wifiConfigPass[9];                             // AP config password, always 8 chars + NUL
     // // char wifiConfigAP[19];                              // AP config SSID, nextionNode + 3 chars
-    // bool shouldSaveConfig = false;                      // Flag to save json config to SPIFFS
-    // bool nextionReportPage0 = false;                    // If false, don't report page 0 sendme
-    // const unsigned long updateCheckInterval = 43200000; // Time in msec between update checks (12 hours)
-    // unsigned long updateCheckTimer = 0;                 // Timer for update check
+    bool shouldSaveConfig = false;                      // Flag to save json config to SPIFFS
+    bool nextionReportPage0 = false;                    // If false, don't report page 0 sendme
+    const unsigned long updateCheckInterval = 43200000; // Time in msec between update checks (12 hours)
+    unsigned long updateCheckTimer = 0;                 // Timer for update check
     // const unsigned long nextionCheckInterval = 5000;    // Time in msec between nextion connection checks
     // unsigned long nextionCheckTimer = 10;                // Timer for nextion connection checks
     // unsigned int nextionRetryMax = 50;                   // Attempt to connect to panel this many times
-    // bool updateEspAvailable = false;                    // Flag for update check to report new ESP FW version
-    // float updateEspAvailableVersion;                    // Float to hold the new ESP FW version number
-    // bool updateLcdAvailable = false;                    // Flag for update check to report new LCD FW version
-    // bool debugSerialEnabled = true;                     // Enable USB serial debug output
-    // //bool debugTelnetEnabled = false;                    // Enable telnet debug output
+    bool updateEspAvailable = false;                    // Flag for update check to report new ESP FW version
+    float updateEspAvailableVersion;                    // Float to hold the new ESP FW version number
+    bool updateLcdAvailable = false;                    // Flag for update check to report new LCD FW version
+    bool debugSerialEnabled = true;                     // Enable USB serial debug output
+    bool debugTelnetEnabled = false;                    // Enable telnet debug output
     // bool debugSerialD8Enabled = true;                   // Enable hardware serial debug output on pin D8
     // //const unsigned long telnetInputMax = 128;           // Size of user input buffer for user telnet session
     // //bool motionEnabled = false;                         // Motion sensor is enabled
-    // bool mdnsEnabled = true;                            // mDNS enabled
-    // //uint8_t motionPin = 0;                              // GPIO input pin for motion sensor if connected and enabled
+    bool mdnsEnabled = true;                            // mDNS enabled
+    uint8_t motionPin = 0;                              // GPIO input pin for motion sensor if connected and enabled
     // //bool motionActive = false;                          // Motion is being detected
     // // const unsigned long motionLatchTimeout = 30000;     // Latch time for motion sensor
     // // const unsigned long motionBufferTimeout = 1000;     // Latch time for motion sensor
-    // unsigned long lcdVersion = 0;                       // Int to hold current LCD FW version number
+    unsigned long lcdVersion = 0;                       // Int to hold current LCD FW version number
     // unsigned long updateLcdAvailableVersion;            // Int to hold the new LCD FW version number
-    // bool lcdVersionQueryFlag = false;                   // Flag to set if we've queried lcdVersion
-    // char lcdVersionQuery[20];// = "p[0].b[2].val";     // Object ID for lcdVersion in HMI
-    // bool startupCompleteFlag = false;                   // Startup process has completed
-    // const long statusUpdateInterval = 300000;           // Time in msec between publishing MQTT status updates (5 minutes)
-    // long statusUpdateTimer = 0;                         // Timer for update check
+    bool lcdVersionQueryFlag = false;                   // Flag to set if we've queried lcdVersion
+    const String lcdVersionQuery = "p[0].b[2].val";       // Object ID for lcdVersion in HMI
+// bool startupCompleteFlag = false;                   // Startup process has completed
+    const long statusUpdateInterval = 300000;           // Time in msec between publishing MQTT status updates (5 minutes)
+    long statusUpdateTimer = 0;                         // Timer for update check
     // const unsigned long connectTimeout = 300;           // Timeout for WiFi and MQTT connection attempts in seconds
     // const unsigned long reConnectTimeout = 15;          // Timeout for WiFi reconnection attempts in seconds
-    // // byte espMac[6];                                     // Byte array to store our MAC address
+    byte espMac[6];                                     // Byte array to store our MAC address
     // // // const uint16_t mqttMaxPacketSize = 4096;            // Size of buffer for incoming MQTT message
-    // // String mqttClientId;                                // Auto-generated MQTT ClientID
-    // // String mqttGetSubtopic;                             // MQTT subtopic for incoming commands requesting .val
+    String mqttClientId;                                // Auto-generated MQTT ClientID
+    String mqttGetSubtopic;                             // MQTT subtopic for incoming commands requesting .val
     String mqttGetSubtopicJSON;                         // MQTT object buffer for JSON status when requesting .val
-    // // String mqttStateTopic;                              // MQTT topic for outgoing panel interactions
-    // // String mqttStateJSONTopic;                          // MQTT topic for outgoing panel interactions in JSON format
+    String mqttStateTopic;                              // MQTT topic for outgoing panel interactions
+    String mqttStateJSONTopic;                          // MQTT topic for outgoing panel interactions in JSON format
 
     // // // Includes my edits
     // // String mqttStateJSONTopic2;                          // MQTT topic for outgoing panel interactions in JSON format
@@ -439,18 +333,32 @@ const uint8_t nextionResetPin = 16;                   // Pin for Nextion power r
     // // String mqttCommandTopic;                            // MQTT topic for incoming panel commands
     // // String mqttGroupCommandTopic;                       // MQTT topic for incoming group panel commands
     // // String mqttStatusTopic;                             // MQTT topic for publishing device connectivity state
-    // // String mqttSensorTopic;                             // MQTT topic for publishing device information in JSON format
+    String mqttSensorTopic;                             // MQTT topic for publishing device information in JSON format
     // // String mqttLightCommandTopic;                       // MQTT topic for incoming panel backlight on/off commands
     // // String mqttLightStateTopic;                         // MQTT topic for outgoing panel backlight on/off state
     // // String mqttLightBrightCommandTopic;                 // MQTT topic for incoming panel backlight dimmer commands
     // // String mqttLightBrightStateTopic;                   // MQTT topic for outgoing panel backlight dimmer state
     // //String mqttMotionStateTopic;                        // MQTT topic for outgoing motion sensor state
-    // // String nextionModel;                                // Record reported model number of LCD panel
+    String nextionModel;                                // Record reported model number of LCD panel
     byte nextionSuffix[3];// = {0xFF, 0xFF, 0xFF};    // Standard suffix for Nextion commands
-    // // uint32_t tftFileSize = 0;                           // Filesize for TFT firmware upload
+    uint32_t tftFileSize = 0;                           // Filesize for TFT firmware upload
     // //uint8_t nextionResetPin = D6;                       // Pin for Nextion power rail switch (GPIO12/D6)
+unsigned long nextionAckTimer = 0;                    // Timer to track Nextion ack
+bool nextionBufferOverrun = false;                    // Set to true if an overrun error was encountered
+bool nextionAckEnable = false;                        // Wait for each Nextion command to be acked before continuing
+bool nextionAckReceived = false;                      // Ack was received
+bool beepEnabled = false;                             // Keypress beep enabled
+ bool mqttTlsEnabled = false;                          // Enable MQTT client TLS connections
+uint8_t nextionMaxPages = 11;                         // Maximum number of pages in Nextion project
+bool mqttPingCheck = false;                           // MQTT broker ping check result
+ bool ignoreTouchWhenOff = false;                      // Ignore touch events when backlight is off and instead send mqtt msg
 
+ bool mqttPortCheck = false;                           // MQTT broke port check result
+const float haspVersion = 1.05;                       // Current HASPone software release version
+ bool lcdBacklightQueryFlag = false;                   // Flag to set if we've queried lcdBacklightDim
+unsigned long updateCheckFirstRun = 60000;            // First-run check offset
 
+ const unsigned long nextionAckTimeout = 1000;         // Timeout to wait for an ack before throwing error
 
     void MQTTSend_LongPressEvent();
 
@@ -515,7 +423,7 @@ const uint8_t nextionResetPin = 16;                   // Pin for Nextion power r
     void webHandleResetConfig();
     void webHandleNextionFirmware();
     void webHandleNextionFirmware_PhaseOut();
-    void webHandleEspFirmware();
+    
     void webHandleLcdUpload();
     void webHandleLcdUpdateSuccess();
     void webHandleLcdUpdateFailure();
@@ -524,7 +432,7 @@ const uint8_t nextionResetPin = 16;                   // Pin for Nextion power r
     void webHandleReboot();
     void webHandleResetBacklight();
     void webHandleFirmware();
-
+    void webHandleEspFirmware();
     void WebPage_LCD_Update_TFT();
     
     void nextionOtaStartDownload(const String &lcdOtaUrl);
@@ -533,7 +441,7 @@ const uint8_t nextionResetPin = 16;                   // Pin for Nextion power r
 
 #endif // ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
-
+    void CommandSet_Baud(uint32_t baud);
 
 
     bool updateCheck();

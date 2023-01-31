@@ -2,27 +2,9 @@
 #define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_DEV_TESTBEDS_H
 
 /*********************************************************************************************\
- * Developing for home only: 
- *  - Devices to be put into home, but not yet ready for install. These are NOT "Devboards" (examples) but meant for actual developing of devices
+ * Developing/Testbeds: 
+ *  ** New code under test, not yet ready to be used as a template (ie may not work yet)
 \*********************************************************************************************/
-
-/*********************************************************************************************\
- * This file is one of two user configurable files
- * 
- * "mFirmwareCustom.h" allows advanced users to create a custom build of firmware tailored to a specefic tasks 
- * For example, using a device to control heating, which includes numorous sensors, relays and controls that are unique.
- * This can also include lights or displays as notification/information systems. 
- * Although all sensors/drivers are accesible through default builds, this allows users to config and add their own controllers.
- * Ideally, when possible, templates can be used to replicate the custom firmware options performed here.
- * 
- * Ideas:
- * Create two basic LCD numbers, one for outside and one for bedroom temperature
- * Create world map (like I said to jess) that lights to show where the sun is, and day/night land-mass light up with cities being bright spots.
-\*********************************************************************************************/
-
-// #define DEVICE_FORCED_TO_BE_TESTER
-// #define DISABLE_WEBSERVER
-// //#define FORCE_TEMPLATE_LOADING
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"

@@ -324,7 +324,7 @@ void mHardwarePins::GpioInit(void)
     }
   }
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
   /**
    * @brief Part D: Read any template GPIO values. Function name needs changed!
@@ -333,14 +333,14 @@ void mHardwarePins::GpioInit(void)
   myio def_gp;
   TemplateGPIOs(&def_gp); // Get template values
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "ARRAY_SIZE%d"),ARRAY_SIZE(pCONT_set->Settings.module_pins.io));
   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CONFIG "def_gp[%d]=%d"),20,def_gp.io[20]);
   #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
 
   /**
    * @brief For all possible GPIO physical pins, populate gpio function if desired from TEMPLATE
@@ -360,16 +360,12 @@ void mHardwarePins::GpioInit(void)
     // If out of range, reset to none
     if(!ValidUserGPIOFunction(pCONT_set->Settings.module_pins.io,i)){
       pCONT_set->Settings.module_pins.io[i] = GPIO_NONE_ID;             // Fix not supported sensor ids in module
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
-    #endif // ENABLE_LOG_LEVEL_INFO
+      ALOG_DBM(PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
     }
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
       pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
-      #endif // ENABLE_LOG_LEVEL_INFO
+      ALOG_DBM(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
     }
 
     // Set any pins set in template
@@ -379,7 +375,7 @@ void mHardwarePins::GpioInit(void)
       if(pCONT_set->my_module.io[i] > GPIO_NONE_ID){
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
       #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
+      ALOG_DBM(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
         pCONT_set->my_module.io[i],
         def_gp.io[i],
         i,
@@ -392,7 +388,7 @@ void mHardwarePins::GpioInit(void)
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
     }
     else{
-      DEBUG_LOG_CORE(PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
+      ALOG_DBM(PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
     // #ifdef ENABLE_LOG_LEVEL_ERROR
     //   AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
     // #endif // ENABLE_LOG_LEVEL_COMMANDS
@@ -411,7 +407,7 @@ void mHardwarePins::GpioInit(void)
   
   
   // DEBUG_LINE_HERE;
-  AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
+  // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
 
   // DEBUG_LINE_HERE;
   /**
@@ -603,10 +599,7 @@ void mHardwarePins::GpioInit(void)
     
     uint32_t mgpio = ValidPin_AdjustGPIO(i, pCONT_set->my_module.io[i]);
     
-    DEBUG_LINE;
-    #ifdef ENABLE_LOG_LEVEL_INFO
     ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
-    #endif // ENABLE_LOG_LEVEL_INFO
     
     if (((i < 6) || (i > 11)) && (0 == mgpio))
     {  // Skip SPI flash interface
@@ -640,18 +633,18 @@ void mHardwarePins::GpioInit(void)
       #else
       pCONT_sup->wire = new TwoWire(0);
       // pCONT_sup->wire->setPins(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID));
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("Trying to start i2c 2-wire"));
+      ALOG_DBM( PSTR("Trying to start i2c 2-wire"));
       #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID)))//, 100000))
       #else
       if(pCONT_sup->wire->begin(GetPin(GPIO_I2C_SDA_ID), GetPin(GPIO_I2C_SCL_ID), 100000))
       #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
-        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("STARTED to start i2c 2-wire sda%d scl%d"),GetPin(GPIO_I2C_SDA_ID),GetPin(GPIO_I2C_SCL_ID));
+        ALOG_DBM( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),GetPin(GPIO_I2C_SDA_ID),GetPin(GPIO_I2C_SCL_ID));
       }
       else
       {
-        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("NOT STARTED to start i2c 2-wire"));
+        ALOG_DBM( PSTR("NOT STARTED to start i2c 2-wire"));
       }
       #endif
 
@@ -786,5 +779,4 @@ void mHardwarePins::GpioInit(void)
   // #endif // USE_MODULE_DRIVERS_LEDS
 
 
-  DEBUG_LINE_HERE;
 }

@@ -115,9 +115,7 @@ bool mInterfaceLight::Pre_Init(void)
 void mInterfaceLight::Template_Load()
 {
 
-  // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-  AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("mInterfaceLight::Template_Load()"));
-  // #endif
+  ALOG_DBM(PSTR("mInterfaceLight::Template_Load()"));
 
   #ifdef USE_LIGHTING_TEMPLATE
   // load from progmem into local
@@ -380,7 +378,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
   switch(function){
     case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:{
-      ALOG_INF(PSTR("Disabled from conversion to vector segments, not sure if it is needed here"));
+      ALOG_DBM(PSTR("Disabled from conversion to vector segments, not sure if it is needed here"));
     };
     break;
     case FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
@@ -602,7 +600,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("colour %d %d,%d,%d"),paletteIndex,colour.R,colour.G
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:

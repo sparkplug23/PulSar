@@ -125,7 +125,7 @@
 #define SYS_LOG_PORT                  514                     // [LogPort] default syslog UDP port
 #define SYS_LOG_LEVEL                 LOG_LEVEL_DEBUG_MORE    // [SysLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define SERIAL_LOG_LEVEL              LOG_LEVEL_DEBUG         // [SerialLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
-#define SERIAL_LOG_LEVEL_DURING_BOOT  LOG_LEVEL_DEBUG         // [SerialLogBoot] LOG_LEVEL_TEST//LOG_LEVEL_ALL
+#define SERIAL_LOG_LEVEL_DURING_BOOT  LOG_LEVEL_INFO         // [SerialLogBoot] LOG_LEVEL_TEST//LOG_LEVEL_ALL
 #define WEB_LOG_LEVEL                 LOG_LEVEL_INFO          // [WebLog] (LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE)
 #define TELNET_LOG_LEVEL              LOG_LEVEL_DEBUG
 #define LOGTIME_DEFAULT_FORMAT        1                       //  true == short

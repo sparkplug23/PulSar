@@ -178,7 +178,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
       Settings.sensors.configperiod_secs = jtok_sub.getInt();
       AddLog(LOG_LEVEL_TEST, PSTR("MQTTUpdateSeconds ConfigPeriod %d"),Settings.sensors.configperiod_secs);
     }
-    pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
+    pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
 

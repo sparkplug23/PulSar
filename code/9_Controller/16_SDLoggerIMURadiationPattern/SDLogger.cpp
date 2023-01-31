@@ -63,7 +63,7 @@ int8_t mSDLoggerIMURadiationPattern::Tasker(uint8_t function, JsonParserObject o
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
     break;
     case FUNC_MQTT_SENDER:

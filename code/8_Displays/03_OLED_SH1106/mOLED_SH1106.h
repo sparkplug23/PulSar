@@ -10,7 +10,7 @@
 
 #define OLED_RESET 4
 
-#define SPRINT(A) char str[32];sprintf(str,"val: %d ",A);Serial.println((char*)str);
+// #define SPRINT(A) char str[32];sprintf(str,"val: %d ",A);Serial.println((char*)str);
 
 #define XI2C_04                4            // See I2CDEVICES.md
 

@@ -265,18 +265,6 @@ pCONT_sup->CmndCrash();
   pCONT->Instance_Init();
   
 /********************************************************************************************
- ** Init Pointers ***************************************************************************
- ********************************************************************************************/
- 
-  ALOG_INF(PSTR("AddLog Started"));
-
-/********************************************************************************************
- ** Splash boot reason ***************************************************************************
- ********************************************************************************************/
-
-  ALOG_INF(PSTR("ResetReason=%d"), ResetReason_g());
-
-/********************************************************************************************
  ** Set boottime values *********************************************************************
  ********************************************************************************************/
 
@@ -285,6 +273,19 @@ pCONT_sup->CmndCrash();
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
   
   RESET_BOOT_STATUS();
+
+/********************************************************************************************
+ ** Init Pointers ***************************************************************************
+ ********************************************************************************************/
+ 
+  ALOG_DBM(PSTR("AddLog Started"));
+
+/********************************************************************************************
+ ** Splash boot reason ***************************************************************************
+ ********************************************************************************************/
+
+  ALOG_INF(PSTR("ResetReason=%d"), ResetReason_g());
+
 
 /********************************************************************************************
  ** Show PSRAM Present **********************************************************************
@@ -362,11 +363,11 @@ pCONT_sup->CmndCrash();
   // pCONT_set->TestSettingsLoad();
   // pCONT_set->TestSettings_ShowLocal_Header();
 
-  ALOG_INF(PSTR("Loading minimal defaults"));
+  ALOG_DBM(PSTR("Loading minimal defaults"));
 
   pCONT_set->SettingsDefault(); //preload minimal required
 
-  ALOG_INF(PSTR("Loading settings from saved memory"));
+  ALOG_DBM(PSTR("Loading settings from saved memory"));
   
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
@@ -415,7 +416,7 @@ pCONT_sup->CmndCrash();
   ********************************************************************************************/
   #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   
-    AddLog(LOG_LEVEL_INFO, PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
+    ALOG_DBM( PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
 
     if (pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) // SetOption36
     {         
@@ -428,27 +429,27 @@ pCONT_sup->CmndCrash();
             uint32_t i = 0; //i < MAX_RULE_SETS; i++) {
           //   if (bitRead(Settings->rule_stop, i)) {
           //     bitWrite(Settings->rule_enabled, i, 0);  // Disable rules causing boot loop
-          ALOG_INF( PSTR("Fastboot: Disable Rule %d"), i );
+          ALOG_DBM( PSTR("Fastboot: Disable Rule %d"), i );
           //   }
           // }
         }
         if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
           // Settings->rule_enabled = 0;                  // Disable all rules
           // TasmotaGlobal.no_autoexec = true;
-          ALOG_INF( PSTR("Fastboot: Disable All Rules") );
+          ALOG_DBM( PSTR("Fastboot: Disable All Rules") );
         }
         if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
           // for (uint32_t i = 0; i < nitems(Settings->my_gp.io); i++) {
           //   Settings->my_gp.io[i] = GPIO_NONE;         // Reset user defined GPIO disabling sensors
           // }
-          ALOG_INF( PSTR("Fastboot: Disable GPIO Functions") );
+          ALOG_DBM( PSTR("Fastboot: Disable GPIO Functions") );
         }
         if (RtcFastboot.fast_reboot_count > pCONT_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
           // Settings->module = Settings->fallback_module;  // Reset module to fallback module
           // Settings->last_module = Settings->fallback_module;
-          ALOG_INF( PSTR("Fastboot: Reset Module") );
+          ALOG_DBM( PSTR("Fastboot: Reset Module") );
         }
-        AddLog(LOG_LEVEL_INFO, PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
+        ALOG_DBM( PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
       }
     }
 
@@ -487,7 +488,7 @@ pCONT_sup->CmndCrash();
   // need to if template not provided, load defaults else use settings -- add protection in settings defaults to use templates instead (progmem or user desired)
   // Load template before init
   
-  ALOG_INF(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
+  ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
   
   pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
   // load
@@ -529,7 +530,7 @@ pCONT_sup->CmndCrash();
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
   // Init the refresh periods for mqtt
-  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD);
+  pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif

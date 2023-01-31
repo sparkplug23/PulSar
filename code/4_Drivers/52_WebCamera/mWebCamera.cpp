@@ -1427,7 +1427,7 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_MQTT_SENDER:
       MQTTHandler_Sender(); //optional pass parameter
     break;
-    case FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD:
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate(); // Load teleperiod setting into local handlers
     break; 
     case FUNC_MQTT_CONNECTED:
