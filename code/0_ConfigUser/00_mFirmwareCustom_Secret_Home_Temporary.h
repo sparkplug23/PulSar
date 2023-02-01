@@ -35,8 +35,7 @@
 // #define DEVICE_H801_BEDROOM_UNDERDESK
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_HVAC_HAIRDRYER
-// #define DEVICE_DESKSENSOR
-// #define DEVICE_DESKSENSOR_SLAVE_01
+// #define DEVICE_DESKSENSORf
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
@@ -46,7 +45,7 @@
 // #define DEVICE_RGBCLOCK_TVROOM
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 // #define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
-// #define DEVICE_HVAC_OIL_RADIATOR
+#define DEVICE_HVAC_OIL_RADIATOR
 // #define DEVICE_PORTABLE_TEMPERATURE_SENSOR
 // #define DEVICE_TESTBED_SR04
 
@@ -585,13 +584,16 @@
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   #define ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
 
   // #define ENABLE_LOG_LEVEL__DEBUG_TRACE
   // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
   // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
   
   #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
   #define ENABLE_DEVFEATURE_DEVICELIST_DEBUG_WITH_COMMANDS
@@ -668,9 +670,6 @@
     // #define ENABLE_LOG_LEVEL_DEBUG
     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-  // //   // #define ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-  //   // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
   // #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
 
@@ -850,22 +849,10 @@
   #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
   #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,205,202,237,231]"
   #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
-  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,255,100,29,195,135,126,242]"
+  #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,237,161,47,0,0,0,105]"
   #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
-  #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,100,29,195,135,215,193]"
-  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
-  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[1,2,3,4]"//,255,100,29,194,124,254,111]"
-  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "DB_02"
-  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[5,6,7,8]"//,255,100,29,205,206,170,25]"
-  // #define D_DEVICE_SENSOR_DB18S20_2_NAME        "DB_03"
-  // #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[9,10,11,12]"//,255,100,29,195,134,175,63]"
-  // #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
-  // #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[13,14,15,16]"//40,255,100,29,205,202,237,231]"
-  // #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
-  // #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[17,18,19,20]"//,255,100,29,195,135,126,242]"
-  // #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
-  // #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[21,22,23,24]"//,255,100,29,195,135,215,193]"
-  
+  #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,135,47,0,0,0,56]"
+
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
@@ -1009,97 +996,6 @@
   }
   )=====";
   #endif // USE_MODULE_LIGHTS_INTERFACE
-
-
-//   {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": "Static"
-//   },
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 1000
-//   },
-//   "ColourPalette": 15,
-//   "PaletteEdit": {
-//     "ColourPalette": 15,
-//     "Data": [
-//       4,6,0,0,0,
-//       255,      0,      0,
-//       0,      255,      0,
-//       0,      0,      255,
-//       255,      255,      0
-//     ]
-//   },
-//   "BrightnessRGB": 100,
-//   "BrightnessCCT": 100
-// }
-
-// {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": "Solid"
-//   },
-//   "ColourPalette": 10,
-//   "BrightnessRGB": 10,
-//   "Hue": 120,
-//   "Sat": 100,
-//   "CCT_TempPercentage": 100,
-//   "BrightnessCCT": 0,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 5000
-//   },
-//   "Light":{"TimeOn":10}
-// }
-
-
-// {
-//   "Segment0":{
-//   "PixelRange":[0,3],
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": 2
-//   },
-//   "ColourPalette": 0,
-//   "BrightnessRGB": 10,
-//   "BrightnessCCT": 10,
-//   "Hue":0,"Sat":100,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 1000
-//   }
-//   },
-//   "Segment1":{
-//   "PixelRange":[5,8],
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": 2
-//   },
-//   "ColourPalette": 16,
-//   "BrightnessRGB": 100,
-//   "BrightnessCCT": 10,
-//   "Hue":0,"Sat":100,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 10000
-//   }
-//   }
-// }
-// {
-//   "AnimationMode": "Effects",
-//   "Effects": {
-//     "Function": 0
-//   },
-//   "ColourPalette": 10,
-//   "BrightnessRGB": 10,
-//   "BrightnessCCT": 10,
-//   "Hue":0,"Sat":100,
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 1000
-//   }
-// }                
 
 
 

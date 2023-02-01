@@ -24,7 +24,7 @@ typedef struct event_motion_s{
 #include "1_TaskerManager/mTaskerManager.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "sensors/colours";
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)                 "sensors/unified";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)                 "unified";
   
 
 #ifdef USE_MODULE_SENSORS_INTERFACE

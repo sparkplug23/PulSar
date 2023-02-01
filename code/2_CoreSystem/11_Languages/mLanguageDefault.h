@@ -71,8 +71,8 @@
 
 // Displays (30-39
 //#ifdef USE_MODULE_DISPLAYS_INTERFACE
-  #define D_MODULE_DISPLAYS_INTERFACE_CTR              "displays_interface"
-  #define D_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR              "displays_interface"
+  #define D_MODULE_DISPLAYS_INTERFACE_CTR              "interface_displays"
+  #define D_MODULE_DISPLAYS_INTERFACE_FRIENDLY_CTR              "interface_displays"
 //#endif
 //#ifdef USE_MODULE_DISPLAYS_NEXTION
   #define D_MODULE_DISPLAYS_NEXTION_CTR              "mNextionPanel"
@@ -87,8 +87,9 @@
   #define D_MODULE_DISPLAYS_OLED_SH1106_FRIENDLY_CTR              "display_sh1106"
 
 
-#define D_MODULE_DRIVERS_INTERFACE_FRIENDLY_CTR "drivers_interface"
-#define D_MODULE_DRIVERS_INTERFACE_CTR "drivers_interface"
+#define D_MODULE_DRIVERS_INTERFACE_FRIENDLY_CTR "interface_drivers"
+#define D_MODULE_DRIVERS_INTERFACE_CTR          "interface_drivers"
+
 // Drivers (Range 40-129
 //#ifdef USE_MODULE_DRIVERS_INTERFACE
   // #define D_MODULE_DRIVERS_HBRIDGE_CTR              "mHBridge"
@@ -159,16 +160,16 @@
 //#endif
 // Energy (Range 130-139
 //#ifdef USE_MODULE_ENERGY_INTERFACE
-  #define D_MODULE_ENERGY_INTERFACE_CTR              "mEnergyInterface"
-  #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "energy_interface"
+  #define D_MODULE_ENERGY_INTERFACE_CTR              "interface_energy"
+  #define D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR     "interface_energy"
 
   #define D_MODULE_ENERGY_ADE7953_CTR              "ADE7953"
   #define D_MODULE_ENERGY_ADE7953_FRIENDLY_CTR     "ade7953"
 //#endif
 // Lights (Range 140-169
 //#ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
-  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lightinterface"
+  #define D_MODULE_LIGHTS_INTERFACE_CTR              "interface_lights"
+  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "interface_lights"
 //#endif
 //#ifdef USE_MODULE_LIGHTS_ANIMATOR
   #define D_MODULE_LIGHTS_ADDRESSABLE_CTR              "mRGBAnimator"
@@ -190,14 +191,11 @@
 
 
 
-
-  #define D_MODULE_LIGHTS_INTERFACE_CTR              "mInterfaceLight"
-  #define D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR              "lights_interface"
 //#endif
 // Sensors (Range 120-169
 
   #define D_MODULE_SENSORS_INTERFACE_CTR              "mSensorsInterface"
-  #define D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR              "sensors_interface"
+  #define D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR              "interface_sensors"
 //#ifdef USE_MODULE_SENSORS_BUTTONS
   #define D_MODULE_SENSORS_BUTTONS_CTR              "mButtons"
   #define D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR              "buttons"

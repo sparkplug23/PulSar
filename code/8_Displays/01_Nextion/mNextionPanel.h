@@ -80,6 +80,292 @@ class mNextionPanel :
     #endif
     void parse_JSONCommand(JsonParserObject obj);
 
+    // https://nextion.tech/instruction-set/
+    /********************************************************************************************************************
+     * @brief Return Codes dependent on bkcmd value being greater than 0
+     * 
+     *********************************************************************************************************************/
+    /**
+     * @NO:          1
+     * @BYTE:        0x00
+     * @BKCMD:       2,3
+     * @LENGTH:      4
+     * @MEANING:     Invalid Instruction
+     * @FORMAT:      0x00 0xFF 0xFF 0xFF
+     * @DESCRIPTION: Returned when instruction sent by user has failed
+     */
+    #define D_INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTION 0x00
+    /**
+     * @NO:          2
+     * @BYTE:        0x01
+     * @LENGTH:      4
+     * @MEANING:     Instruction Successful
+     * @FORMAT:      0x01 0xFF 0xFF 0xFF
+     * @DESCRIPTION: Returned when instruction sent by user was successful
+     */
+    #define D_INSTRUCTION_SET_RETURN_CODE__INSTRUCTION_SUCCESSFUL 0x01
+    /**
+     * @NO:          3
+     * @BYTE:        0x02
+     * @LENGTH:      4
+     * @MEANING:     Invalid Component ID
+     * @FORMAT:      0x02 0xFF 0xFF 0xFF
+     * @DESCRIPTION: Returned when invalid Component ID or name was used
+     */
+    #define D_INSTRUCTION_SET_RETURN_CODE__INVALID_COMPONENT_ID 0x02
+    /**
+     * @NO:          4
+     * @BYTE:        0x03
+     * @LENGTH:      4
+     * @MEANING:     Invalid Page ID
+     * @FORMAT:      0x03 0xFF 0xFF 0xFF
+     * @DESCRIPTION: Returned when invalid Page ID or name was used
+     */
+    #define D_INSTRUCTION_SET_RETURN_CODE__INVALID_PAGE_ID 0x03
+    
+    
+
+
+    //   5	0x04
+    //     2,3	4	Invalid Picture ID	0x04 0xFF 0xFF 0xFF
+    //   Returned when invalid Picture ID was used
+
+
+    //   6	0x05
+    //     2,3	4	Invalid Font ID	0x05 0xFF 0xFF 0xFF
+    //   Returned when invalid Font ID was used
+
+
+    //   7	0x06
+    //     2,3	4	Invalid File Operation	0x06 0xFF 0xFF 0xFF
+    //   Returned when File operation fails
+
+
+    //   8	0x09
+    //     2,3	4	Invalid CRC	0x09 0xFF 0xFF 0xFF
+    //   Returned when Instructions with CRC validation fails their CRC check
+
+
+    //   9	0x11
+    //     2,3	4	Invalid Baud rate Setting	0x11 0xFF 0xFF 0xFF
+    //   Returned when invalid Baud rate was used
+
+
+    //   10	0x12
+    //     2,3	4	Invalid Waveform ID or Channel #	0x12 0xFF 0xFF 0xFF
+    //   Returned when invalid Waveform ID or Channel # was used
+
+
+    //   11	0x1A
+    //     2,3	4	Invalid Variable name or attribute	0x1A 0xFF 0xFF 0xFF
+    //   Returned when invalid Variable name or invalid attribute was used
+
+
+    //   12	0x1B
+    //     2,3	4	Invalid Variable Operation	0x1B 0xFF 0xFF 0xFF
+    //   Returned when Operation of Variable is invalid. ie: Text assignment t0.txt=abc or t0.txt=23, Numeric assignment j0.val=”50″ or j0.val=abc
+
+
+    //   13	0x1C
+    //     2,3	4	Assignment failed to assign	0x1C 0xFF 0xFF 0xFF
+    //   Returned when attribute assignment failed to assign
+
+
+    //   14	0x1D
+    //     2,3	4	EEPROM Operation failed	0x1D 0xFF 0xFF 0xFF
+    //   Returned when an EEPROM Operation has failed
+
+
+    //   15	0x1E
+    //     2,3	4	Invalid Quantity of Parameters	0x1E 0xFF 0xFF 0xFF
+    //   Returned when the number of instruction parameters is invalid
+
+
+    //   16	0x1F
+    //     2,3	4	IO Operation failed	0x1F 0xFF 0xFF 0xFF
+    //   Returned when an IO operation has failed
+
+
+    //   17	0x20
+    //     2,3	4	Escape Character Invalid	0x20 0xFF 0xFF 0xFF
+    //   Returned when an unsupported escape character is used
+
+
+    //   18	0x23
+    //     2,3	4	Variable name too long	0x23 0xFF 0xFF 0xFF
+    //   Returned when variable name is too long. Max length is 29 characters: 14 for page + “.” + 14 for component.
+
+
+      
+
+    //   /**
+    //    * @brief Return Codes not affected by bkcmd value, valid in all cases
+    //    * 
+    //    */      
+
+    //   /**
+    //    * @NO:          19
+    //    * @BYTE:        0x00
+    //    * @LENGTH:      6
+    //    * @MEANING:     Nextion Startup
+    //    * @FORMAT:      0x00 0x00 0x00 0xFF 0xFF 0xFF
+    //    * @DESCRIPTION: Returned when Nextion has started or reset. Since Nextion Editor v1.65.0, the Startup preamble is not at the firmware level but has been moved to a 
+    //    *               printh statement in Program.s allowing a user to keep, modify or remove as they choose.
+    //    */
+    //   #define D_INSTRUCTION_SET_RETURN_CODE__NEXTION_STARTUP 0x00
+    //   /**
+    //    * @NO:          20
+    //    * @BYTE:        0x00
+    //    * @LENGTH:      6
+    //    * @MEANING:     Nextion Startup
+    //    * @FORMAT:      0x00 0x00 0x00 0xFF 0xFF 0xFF
+    //    * @DESCRIPTION: Returned when Nextion has started or reset. Since Nextion Editor v1.65.0, the Startup preamble is not at the firmware level but has been moved to a 
+    //    *               printh statement in Program.s allowing a user to keep, modify or remove as they choose.
+    //    */
+    //   #define D_INSTRUCTION_SET_RETURN_CODE__NEXTION_STARTUP 0x00
+      
+      
+      
+      
+      
+    //   20	0x24
+    //     4	Serial Buffer Overflow	0x24 0xFF 0xFF 0xFF
+    //   Returned when a Serial Buffer overflow occurs
+    //   Buffer will continue to receive the current instruction, all previous instructions are lost.
+
+
+    //   21	0x65
+    //     7	Touch Event	0x65 0x00 0x01 0x01 0xFF 0xFF 0xFF
+    //   Returned when Touch occurs and component’s
+    //   corresponding Send Component ID is checked
+    //   in the users HMI design.
+    //   0x00 is page number, 0x01 is component ID,
+    //   0x01 is event (0x01 Press and 0x00 Release)
+    //   data: Page 0, Component 1, Pressed
+
+    /**
+     * @NO:          21
+     * @BYTE:        0x65
+     * @LENGTH:      7
+     * @MEANING:     Touch Event
+     * @FORMAT:      0x65 0x00 0x01 0x01 0xFF 0xFF 0xFF
+     * @DESCRIPTION: Returned when Touch occurs and component’s corresponding Send Component ID is checked in the users HMI design.
+     *               0x00 is page number, 0x01 is component ID,
+     *               0x01 is event (0x01 Press and 0x00 Release)
+     *               data: Page 0, Component 1, Pressed
+     */
+    #define D_INSTRUCTION_SET_RETURN_CODE__TOUCH_EVENT 0x65
+    /**
+     * @NO:          22
+     * @BYTE:        0x66
+     * @LENGTH:      7
+     * @MEANING:     Current Page Number
+     * @FORMAT:      0x66 0x01 0xFF 0xFF 0xFF
+     * @DESCRIPTION: Returned when the sendme command is used.
+     *               0x01 is current page number
+     *               data: page 1
+     */
+    #define D_INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER 0x66
+
+
+
+    //   22	0x66
+    //     5	Current Page Number	0x66 0x01 0xFF 0xFF 0xFF
+    //   Returned when the sendme command is used.
+    //   0x01 is current page number
+    //   data: page 1
+
+
+    //   23	0x67
+    //     9	Touch Coordinate (awake)	0x67 0x00 0x7A 0x00 0x1E 0x01 0xFF 0xFF 0xFF
+    //   Returned when sendxy=1 and not in sleep mode
+    //   0x00 0x7A is x coordinate in big endian order,
+    //   0x00 0x1E is y coordinate in big endian order,
+    //   0x01 is event (0x01 Press and 0x00 Release)
+    //   (0x00*256+0x71,0x00*256+0x1E)
+    //   data: (122,30) Pressed
+
+
+    //   24	0x68
+    //     9	Touch Coordinate (sleep)	0x68 0x00 0x7A 0x00 0x1E 0x01 0xFF 0xFF 0xFF
+    //   Returned when sendxy=1 and exiting sleep
+    //   0x00 0x7A is x coordinate in big endian order,
+    //   0x00 0x1E is y coordinate in big endian order,
+    //   0x01 is event (0x01 Press and 0x00 Release)
+    //   (0x00*256+0x71,0x00*256+0x1E)
+    //   data: (122,30) Pressed
+
+
+    //   25	0x70
+    //     Varied	String Data Enclosed	0x70 0x61 0x62 0x31 0x32 0x33 0xFF 0xFF 0xFF
+    //   Returned when using get command for a string.
+    //   Each byte is converted to char.
+    //   data: ab123
+
+
+    //   26	0x71
+    //     8	Numeric Data Enclosed	0x71 0x01 0x02 0x03 0x04 0xFF 0xFF 0xFF
+    //   Returned when get command to return a number
+    //   4 byte 32-bit value in little endian order.
+    //   (0x01+0x02*256+0x03*65536+0x04*16777216)
+    //   data: 67305985
+
+
+    //   27	0x86
+    //     4	Auto Entered Sleep Mode	0x86 0xFF 0xFF 0xFF
+    //   Returned when Nextion enters sleep automatically
+    //   Using sleep=1 will not return an 0x86
+
+
+    //   28	0x87
+    //     4	Auto Wake from Sleep	0x87 0xFF 0xFF 0xFF
+    //   Returned when Nextion leaves sleep automatically
+    //   Using sleep=0 will not return an 0x87
+
+
+    //   29	0x88
+    //     4	Nextion Ready	0x88 0xFF 0xFF 0xFF
+    //   Returned when Nextion has powered up and is now initialized successfully. Since Nextion Editor v1.65.0, the Nextion Ready is not at the firmware level but has been moved to a printh statement in Program.s allowing a user to keep, modify or remove as they choose.
+    
+    
+    //   30	0x89
+    //     4	Start microSD Upgrade	0x89 0xFF 0xFF 0xFF
+    //   Returned when power on detects inserted microSD
+    //   and begins Upgrade by microSD process
+
+
+    //   31	0xFD
+    //     4	Transparent Data Finished	0xFD 0xFF 0xFF 0xFF
+    //   Returned when all requested bytes of Transparent
+    //   Data mode have been received, and is now leaving transparent data mode (see 1.16)
+
+
+    //   32	0xFE
+    //     4	Transparent Data Ready	0xFE 0xFF 0xFF 0xFF
+    //   Returned when requesting Transparent Data
+    //   mode, and device is now ready to begin receiving
+    //   the specified quantity of data (see 1.16)
+
+
+
+
+    //   INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTION__ID = 0x00,
+    //   INSTRUCTION_SET_RETURN_CODE__SERIAL_BUFFER_OVERFLOW__ID = 0x24,
+    //   INSTRUCTION_SET_RETURN_CODE__TOUCH_EVENT__ID = 0x65,
+    //   INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER__ID = 0x66,
+    //   INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_AWAKE__ID = 0x67,
+    //   INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_SLEEP__ID = 0x68,
+    //   INSTRUCTION_SET_RETURN_CODE__STRING_DATA_ENCLOSED__ID = 0x70,
+    //   INSTRUCTION_SET_RETURN_CODE__NUMERIC_DATA_ENCLODED__ID = 0x71,
+    //   INSTRUCTION_SET_RETURN_CODE__AUTO_ENTERED_SLEEP_MODE__ID = 0x86,
+    //   INSTRUCTION_SET_RETURN_CODE__AUTO_WAKE_FROM_SLEEP__ID = 0x87,
+    //   INSTRUCTION_SET_RETURN_CODE__NEXTION_READY__ID = 0x88,
+    //   INSTRUCTION_SET_RETURN_CODE__START_MICROSD_UPGRADE__ID = 0x89,
+    //   INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_FINISHED__ID = 0xFD,
+    //   INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_READY__ID = 0x00,
+    //   INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTIONID = 0x00,
+
+    // };
 
 
   //#define USE_NEXTION_SOFTWARE_SERIAL

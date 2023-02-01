@@ -1787,7 +1787,11 @@ void mNextionPanel::nextionProcessInput()
   // Command reference: https://www.itead.cc/wiki/Nextion_Instruction_Set#Format_of_Device_Return_Data
   // tl;dr, command byte, command data, 0xFF 0xFF 0xFF
 
-  Serial.println("nextionProcessInput");
+  // Serial.printf("nextionProcessInput Instruction= %d\n\r", nextionReturnBuffer[0]);
+
+  ALOG_INF(PSTR("nextionProcessInput = %d, %d, %d, %d, %d"), nextionReturnBuffer[0], nextionReturnBuffer[1], nextionReturnBuffer[2], nextionReturnBuffer[3], nextionReturnBuffer[4] );
+
+
   DEBUG_LINE_HERE;
   
   char event_ctr[30];
@@ -1802,7 +1806,7 @@ void mNextionPanel::nextionProcessInput()
   }
   
 
-  if (nextionReturnBuffer[0] == 0x65)
+  if (nextionReturnBuffer[0] == D_INSTRUCTION_SET_RETURN_CODE__TOUCH_EVENT)
   { // Handle incoming touch command
     // 0x65+Page ID+Component ID+TouchEvent+End
     // Return this data when the touch event created by the user is pressed.
@@ -1818,7 +1822,6 @@ void mNextionPanel::nextionProcessInput()
 
     if (nextionButtonAction == 0x01) // ON=PRESSED
     {
-  DEBUG_LINE_HERE;
   
       screen_press.tSavedButtonONEvent = millis();
       screen_press.fEnableImmediateButtonTime = true; 
@@ -1839,7 +1842,6 @@ void mNextionPanel::nextionProcessInput()
     }
     if (nextionButtonAction == 0x00) // OFF - LET_GO
     {
-  DEBUG_LINE_HERE;
   
       screen_press.tSavedButtonOFFEvent = millis();
       screen_press.fEnableImmediateButtonTime = false; //start timer
@@ -1875,7 +1877,7 @@ void mNextionPanel::nextionProcessInput()
       // nextionGetAttr("p[" + nextionPage + "].b[" + nextionButtonID + "].val");
     }
   }
-  else if (nextionReturnBuffer[0] == 0x66)
+  else if (nextionReturnBuffer[0] == D_INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER)
   { 
   DEBUG_LINE_HERE;
   // Handle incoming "sendme" page number
