@@ -27,6 +27,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MINOR    114 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
+ * #06 : New BME680 added, bme/p 180/280 manual without library
  * #02 : immersion controller added, more bug fixes pushes throughout more devices
  * #01 : db18 esp32 working
  * #00 : Restarting for 2023
@@ -36,7 +37,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  *       Set WDT to 60 seconds on esp32
  * #26 : Enabled fastboot detection, OTA fallback and WDT on ESP32 devices as default
  */
-#define FIRMWARE_VERSION_CORE     2
+#define FIRMWARE_VERSION_CORE     6
 
 /**@@@@@ Module changes
  * #02 : db18 esp32 working
@@ -48,7 +49,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #30 : Added ultrasonic to unified sensor
  * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
  */
-#define FIRMWARE_VERSION_MODULE   2
+#define FIRMWARE_VERSION_MODULE   3
 
 
 #define FIRMWARE_BRANCH_NAME_STRING "development" // Additions from colorado and for december 2022, to be merged into main dev branch and then deleted

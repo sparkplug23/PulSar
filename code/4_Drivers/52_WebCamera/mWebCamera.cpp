@@ -17,6 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
+// Arduino Core example, 52 becomes 60
+
 #include "mWebCamera.h"
 
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
@@ -329,6 +331,9 @@ void enable_led(bool en)
 
 static esp_err_t bmp_handler(httpd_req_t *req)
 {
+
+    ALOG_INF(PSTR("bmp_handler"));
+
     camera_fb_t *fb = NULL;
     esp_err_t res = ESP_OK;
 #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
@@ -337,7 +342,7 @@ static esp_err_t bmp_handler(httpd_req_t *req)
     fb = esp_camera_fb_get();
     if (!fb)
     {
-        ESP_LOGE(TAG, "Camera capture failed");
+        ALOG_ERR(PSTR("Camera capture failed"));
         httpd_resp_send_500(req);
         return ESP_FAIL;
     }
@@ -356,7 +361,7 @@ static esp_err_t bmp_handler(httpd_req_t *req)
     bool converted = frame2bmp(fb, &buf, &buf_len);
     esp_camera_fb_return(fb);
     if(!converted){
-        ESP_LOGE(TAG, "BMP Conversion failed");
+        ALOG_ERR(PSTR("BMP Conversion failed"));
         httpd_resp_send_500(req);
         return ESP_FAIL;
     }
@@ -371,6 +376,8 @@ static esp_err_t bmp_handler(httpd_req_t *req)
 
 static size_t jpg_encode_stream(void *arg, size_t index, const void *data, size_t len)
 {
+    ALOG_INF(PSTR("jpg_encode_stream"));
+
     jpg_chunking_t *j = (jpg_chunking_t *)arg;
     if (!index)
     {
@@ -386,6 +393,8 @@ static size_t jpg_encode_stream(void *arg, size_t index, const void *data, size_
 
 static esp_err_t capture_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("capture_handler"));
+
     camera_fb_t *fb = NULL;
     esp_err_t res = ESP_OK;
 #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
@@ -403,7 +412,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
 
     if (!fb)
     {
-        ESP_LOGE(TAG, "Camera capture failed");
+        ALOG_ERR(PSTR("Camera capture failed"));
         httpd_resp_send_500(req);
         return ESP_FAIL;
     }
@@ -498,7 +507,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
         out_height = fb->height;
         out_buf = (uint8_t*)malloc(out_len);
         if (!out_buf) {
-            ESP_LOGE(TAG, "out_buf malloc failed");
+            ALOG_ERR(PSTR("out_buf malloc failed");
             httpd_resp_send_500(req);
             return ESP_FAIL;
         }
@@ -506,7 +515,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
         esp_camera_fb_return(fb);
         if (!s) {
             free(out_buf);
-            ESP_LOGE(TAG, "to rgb888 failed");
+            ALOG_ERR(PSTR("to rgb888 failed");
             httpd_resp_send_500(req);
             return ESP_FAIL;
         }
@@ -549,7 +558,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
     }
 
     if (!s) {
-        ESP_LOGE(TAG, "JPEG compression failed");
+        ALOG_ERR(PSTR("JPEG compression failed");
         httpd_resp_send_500(req);
         return ESP_FAIL;
     }
@@ -563,6 +572,8 @@ static esp_err_t capture_handler(httpd_req_t *req)
 
 static esp_err_t stream_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("stream_handler"));
+
     camera_fb_t *fb = NULL;
     struct timeval _timestamp;
     esp_err_t res = ESP_OK;
@@ -624,7 +635,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
         fb = esp_camera_fb_get();
         if (!fb)
         {
-            ESP_LOGE(TAG, "Camera capture failed");
+            ALOG_ERR(PSTR("Camera capture failed"));
             res = ESP_FAIL;
         }
         else
@@ -649,7 +660,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
                     fb = NULL;
                     if (!jpeg_converted)
                     {
-                        ESP_LOGE(TAG, "JPEG compression failed");
+                        ALOG_ERR(PSTR("JPEG compression failed"));
                         res = ESP_FAIL;
                     }
                 }
@@ -702,7 +713,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
                     esp_camera_fb_return(fb);
                     fb = NULL;
                     if (!s) {
-                        ESP_LOGE(TAG, "fmt2jpg failed");
+                        ALOG_ERR(PSTR("fmt2jpg failed");
                         res = ESP_FAIL;
                     }
 #if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
@@ -715,7 +726,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
                     out_height = fb->height;
                     out_buf = (uint8_t*)malloc(out_len);
                     if (!out_buf) {
-                        ESP_LOGE(TAG, "out_buf malloc failed");
+                        ALOG_ERR(PSTR("out_buf malloc failed");
                         res = ESP_FAIL;
                     } else {
                         s = fmt2rgb888(fb->buf, fb->len, fb->format, out_buf);
@@ -723,7 +734,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
                         fb = NULL;
                         if (!s) {
                             free(out_buf);
-                            ESP_LOGE(TAG, "to rgb888 failed");
+                            ALOG_ERR(PSTR("to rgb888 failed");
                             res = ESP_FAIL;
                         } else {
 #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
@@ -766,7 +777,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
                             s = fmt2jpg(out_buf, out_len, out_width, out_height, PIXFORMAT_RGB888, 90, &_jpg_buf, &_jpg_buf_len);
                             free(out_buf);
                             if (!s) {
-                                ESP_LOGE(TAG, "fmt2jpg failed");
+                                ALOG_ERR(PSTR("fmt2jpg failed");
                                 res = ESP_FAIL;
                             }
 #if CONFIG_ESP_FACE_DETECT_ENABLED && ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
@@ -804,7 +815,7 @@ static esp_err_t stream_handler(httpd_req_t *req)
         }
         if (res != ESP_OK)
         {
-            ESP_LOGE(TAG, "send frame failed failed");
+            ALOG_ERR(PSTR("send frame failed failed"));
             break;
         }
         int64_t fr_end = esp_timer_get_time();
@@ -848,6 +859,8 @@ static esp_err_t stream_handler(httpd_req_t *req)
 
 static esp_err_t parse_get(httpd_req_t *req, char **obuf)
 {
+    ALOG_INF(PSTR("parse_get"));
+
     char *buf = NULL;
     size_t buf_len = 0;
 
@@ -870,6 +883,8 @@ static esp_err_t parse_get(httpd_req_t *req, char **obuf)
 
 static esp_err_t cmd_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("cmd_handler"));
+
     char *buf = NULL;
     char variable[32];
     char value[32];
@@ -990,6 +1005,8 @@ static int print_reg(char * p, sensor_t * s, uint16_t reg, uint32_t mask){
 
 static esp_err_t status_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("status_handler"));
+
     static char json_response[1024];
 
     sensor_t *s = esp_camera_sensor_get();
@@ -1072,6 +1089,8 @@ static esp_err_t status_handler(httpd_req_t *req)
 
 static esp_err_t xclk_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("xclk_handler"));
+
     char *buf = NULL;
     char _xclk[32];
 
@@ -1100,6 +1119,8 @@ static esp_err_t xclk_handler(httpd_req_t *req)
 
 static esp_err_t reg_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("reg_handler"));
+
     char *buf = NULL;
     char _reg[32];
     char _mask[32];
@@ -1134,6 +1155,8 @@ static esp_err_t reg_handler(httpd_req_t *req)
 
 static esp_err_t greg_handler(httpd_req_t *req)
 {
+    ALOG_INF(PSTR("greg_handler"));
+
     char *buf = NULL;
     char _reg[32];
     char _mask[32];
@@ -1249,114 +1272,226 @@ static esp_err_t index_handler(httpd_req_t *req)
             return httpd_resp_send(req, (const char *)index_ov2640_html_gz, index_ov2640_html_gz_len);
         }
     } else {
-        ESP_LOGE(TAG, "Camera sensor not found");
+        ALOG_ERR(PSTR("Camera sensor not found"));
         return httpd_resp_send_500(req);
     }
 }
 
 void startCameraServer()
 {
-  httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-  config.max_uri_handlers = 16;
+     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
-  httpd_uri_t index_uri = {
-      .uri = "/",
-      .method = HTTP_GET,
-      .handler = index_handler,
-      .user_ctx = NULL};
+    httpd_uri_t index_uri = {
+        .uri       = "/",
+        .method    = HTTP_GET,
+        .handler   = index_handler,
+        .user_ctx  = NULL
+    };
 
-  httpd_uri_t status_uri = {
-      .uri = "/status",
-      .method = HTTP_GET,
-      .handler = status_handler,
-      .user_ctx = NULL};
+    httpd_uri_t status_uri = {
+        .uri       = "/status",
+        .method    = HTTP_GET,
+        .handler   = status_handler,
+        .user_ctx  = NULL
+    };
 
-  httpd_uri_t cmd_uri = {
-      .uri = "/control",
-      .method = HTTP_GET,
-      .handler = cmd_handler,
-      .user_ctx = NULL};
+    httpd_uri_t cmd_uri = {
+        .uri       = "/control",
+        .method    = HTTP_GET,
+        .handler   = cmd_handler,
+        .user_ctx  = NULL
+    };
 
-  httpd_uri_t capture_uri = {
-      .uri = "/capture",
-      .method = HTTP_GET,
-      .handler = capture_handler,
-      .user_ctx = NULL};
+    httpd_uri_t capture_uri = {
+        .uri       = "/capture",
+        .method    = HTTP_GET,
+        .handler   = capture_handler,
+        .user_ctx  = NULL
+    };
 
-  httpd_uri_t stream_uri = {
-      .uri = "/stream",
-      .method = HTTP_GET,
-      .handler = stream_handler,
-      .user_ctx = NULL};
+   httpd_uri_t stream_uri = {
+        .uri       = "/stream",
+        .method    = HTTP_GET,
+        .handler   = stream_handler,
+        .user_ctx  = NULL
+    };
 
-  httpd_uri_t bmp_uri = {
-      .uri = "/bmp",
-      .method = HTTP_GET,
-      .handler = bmp_handler,
-      .user_ctx = NULL};
 
-  httpd_uri_t xclk_uri = {
-      .uri = "/xclk",
-      .method = HTTP_GET,
-      .handler = xclk_handler,
-      .user_ctx = NULL};
+    // ra_filter_init(&ra_filter, 20);
+    
+    // mtmn_config.type = FAST;
+    // mtmn_config.min_face = 80;
+    // mtmn_config.pyramid = 0.707;
+    // mtmn_config.pyramid_times = 4;
+    // mtmn_config.p_threshold.score = 0.6;
+    // mtmn_config.p_threshold.nms = 0.7;
+    // mtmn_config.p_threshold.candidate_number = 20;
+    // mtmn_config.r_threshold.score = 0.7;
+    // mtmn_config.r_threshold.nms = 0.7;
+    // mtmn_config.r_threshold.candidate_number = 10;
+    // mtmn_config.o_threshold.score = 0.7;
+    // mtmn_config.o_threshold.nms = 0.7;
+    // mtmn_config.o_threshold.candidate_number = 1;
+    
+    // face_id_init(&id_list, FACE_ID_SAVE_NUMBER, ENROLL_CONFIRM_TIMES);
+    
+    Serial.printf("Starting web server on port: '%d'\n", config.server_port);
+    if (httpd_start(&camera_httpd, &config) == ESP_OK) {
+        httpd_register_uri_handler(camera_httpd, &index_uri);
+        httpd_register_uri_handler(camera_httpd, &cmd_uri);
+        httpd_register_uri_handler(camera_httpd, &status_uri);
+        httpd_register_uri_handler(camera_httpd, &capture_uri);
+    }
 
-  httpd_uri_t reg_uri = {
-      .uri = "/reg",
-      .method = HTTP_GET,
-      .handler = reg_handler,
-      .user_ctx = NULL};
+    config.server_port += 1;
+    config.ctrl_port += 1;
+    Serial.printf("Starting stream server on port: '%d'\n", config.server_port);
+    if (httpd_start(&stream_httpd, &config) == ESP_OK) {
+        httpd_register_uri_handler(stream_httpd, &stream_uri);
+    }
 
-  httpd_uri_t greg_uri = {
-      .uri = "/greg",
-      .method = HTTP_GET,
-      .handler = greg_handler,
-      .user_ctx = NULL};
+//     return;
+//   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+//   config.max_uri_handlers = 16;
 
-  httpd_uri_t pll_uri = {
-      .uri = "/pll",
-      .method = HTTP_GET,
-      .handler = pll_handler,
-      .user_ctx = NULL};
+//   httpd_uri_t index_uri = {
+//       .uri = "/",
+//       .method = HTTP_GET,
+//       .handler = index_handler,
+//       .user_ctx = NULL};
 
-  httpd_uri_t win_uri = {
-      .uri = "/resolution",
-      .method = HTTP_GET,
-      .handler = win_handler,
-      .user_ctx = NULL};
+//   httpd_uri_t status_uri = {
+//       .uri = "/status",
+//       .method = HTTP_GET,
+//       .handler = status_handler,
+//       .user_ctx = NULL};
 
-  ra_filter_init(&ra_filter, 20);
+//   httpd_uri_t cmd_uri = {
+//       .uri = "/control",
+//       .method = HTTP_GET,
+//       .handler = cmd_handler,
+//       .user_ctx = NULL};
 
-#if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-  recognizer.set_partition(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "fr");
-  // load ids from flash partition
-  recognizer.set_ids_from_flash();
-#endif
+//   httpd_uri_t capture_uri = {
+//       .uri = "/capture",
+//       .method = HTTP_GET,
+//       .handler = capture_handler,
+//       .user_ctx = NULL};
 
-  ESP_LOGI(TAG, "Starting web server on port: '%d'", config.server_port);
-  if (httpd_start(&camera_httpd, &config) == ESP_OK)
-  {
-    httpd_register_uri_handler(camera_httpd, &index_uri);
-    httpd_register_uri_handler(camera_httpd, &cmd_uri);
-    httpd_register_uri_handler(camera_httpd, &status_uri);
-    httpd_register_uri_handler(camera_httpd, &capture_uri);
-    httpd_register_uri_handler(camera_httpd, &bmp_uri);
+//   httpd_uri_t stream_uri = {
+//       .uri = "/stream",
+//       .method = HTTP_GET,
+//       .handler = stream_handler,
+//       .user_ctx = NULL};
 
-    httpd_register_uri_handler(camera_httpd, &xclk_uri);
-    httpd_register_uri_handler(camera_httpd, &reg_uri);
-    httpd_register_uri_handler(camera_httpd, &greg_uri);
-    httpd_register_uri_handler(camera_httpd, &pll_uri);
-    httpd_register_uri_handler(camera_httpd, &win_uri);
-  }
+//   httpd_uri_t bmp_uri = {
+//       .uri = "/bmp",
+//       .method = HTTP_GET,
+//       .handler = bmp_handler,
+//       .user_ctx = NULL};
 
-  config.server_port += 1;
-  config.ctrl_port += 1;
-  ESP_LOGI(TAG, "Starting stream server on port: '%d'", config.server_port);
-  if (httpd_start(&stream_httpd, &config) == ESP_OK)
-  {
-    httpd_register_uri_handler(stream_httpd, &stream_uri);
-    flag_stream_started = true;
-  }
+//   httpd_uri_t xclk_uri = {
+//       .uri = "/xclk",
+//       .method = HTTP_GET,
+//       .handler = xclk_handler,
+//       .user_ctx = NULL};
+
+//   httpd_uri_t reg_uri = {
+//       .uri = "/reg",
+//       .method = HTTP_GET,
+//       .handler = reg_handler,
+//       .user_ctx = NULL};
+
+//   httpd_uri_t greg_uri = {
+//       .uri = "/greg",
+//       .method = HTTP_GET,
+//       .handler = greg_handler,
+//       .user_ctx = NULL};
+
+//   httpd_uri_t pll_uri = {
+//       .uri = "/pll",
+//       .method = HTTP_GET,
+//       .handler = pll_handler,
+//       .user_ctx = NULL};
+
+//   httpd_uri_t win_uri = {
+//       .uri = "/resolution",
+//       .method = HTTP_GET,
+//       .handler = win_handler,
+//       .user_ctx = NULL};
+
+//   ra_filter_init(&ra_filter, 20);
+
+// #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
+//   recognizer.set_partition(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "fr");
+//   // load ids from flash partition
+//   recognizer.set_ids_from_flash();
+// #endif
+
+//   ALOG_INF(PSTR("Starting web server on port: %d"), config.server_port);
+//   if (httpd_start(&camera_httpd, &config) == ESP_OK)
+//   {
+//     if(httpd_register_uri_handler(camera_httpd, &index_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"index_uri\":\"%s\"}"), index_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &cmd_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"cmd_uri\":\"%s\"}"), cmd_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &status_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"status_uri\":\"%s\"}"), status_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &capture_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"capture_uri\":\"%s\"}"), capture_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &bmp_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"bmp_uri\":\"%s\"}"), bmp_uri.uri);
+//     }
+
+//     if(httpd_register_uri_handler(camera_httpd, &xclk_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"xclk_uri\":\"%s\"}"), xclk_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &reg_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"reg_uri\":\"%s\"}"), reg_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &greg_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"greg_uri\":\"%s\"}"), greg_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &pll_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"pll_uri\":\"%s\"}"), pll_uri.uri);
+//     }
+//     if(httpd_register_uri_handler(camera_httpd, &win_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"win_uri\":\"%s\"}"), win_uri.uri);
+//     }
+    
+//   ALOG_ERR(PSTR("(httpd_start(&camera_httpd, &config) == ESP_OK) started"));
+//   }
+//   else
+//   {
+//   ALOG_ERR(PSTR("(httpd_start(&camera_httpd, &config) == ESP_OK) failed"));
+//   }
+
+//   ALOG_INF(PSTR("Starting stream server on port: %d"), config.server_port);
+//   config.server_port += 1;
+//   config.ctrl_port += 1;
+//   ALOG_INF(PSTR("Starting stream server on port: %d"), config.server_port);
+//   if (httpd_start(&stream_httpd, &config) == ESP_OK)
+//   {
+//     if(httpd_register_uri_handler(stream_httpd, &stream_uri) == ESP_OK)
+//     {
+//         ALOG_ERR(PSTR("Started {\"stream_uri\":\"%s\"}"), stream_uri.uri);
+//     }
+//     flag_stream_started = true;
+//   }
   //https://randomnerdtutorials.com/esp32-cam-video-streaming-face-recognition-arduino-ide/
 }
 
@@ -1410,6 +1545,7 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
       Serial.print(WiFi.localIP());
       Serial.println("' to connect");
 
+    
     break;
     /************
      * COMMANDS SECTION * 

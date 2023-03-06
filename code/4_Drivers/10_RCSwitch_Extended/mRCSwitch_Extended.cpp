@@ -703,10 +703,6 @@ void mRCSwitch::Pre_Init(void)
 void mRCSwitch::Init(void)
 {
 
-  if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_TX_ID)) {
-    mySwitch->enableTransmit(pCONT_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
-    settings.fEnableSensor = true;
-  }
   if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_RX_ID)) 
   {
     if (pCONT_set->Settings.rf_duplicate_time < 10) {
@@ -714,7 +710,12 @@ void mRCSwitch::Init(void)
     }
     pinMode( pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID), INPUT);
 
-    mySwitch = new RCSwitch();
+    if(mySwitch==nullptr)
+    {
+      mySwitch = new RCSwitch();
+    }
+
+    ALOG_INF(PSTR("mRCSwitch RX: %d"), pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID));
 
     mySwitch->enableReceive(pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID));
     // if (!pCONT_set->Settings.rf_protocol_mask) {
@@ -731,14 +732,29 @@ void mRCSwitch::Init(void)
     settings.fEnableSensor = true;
   }
 
+  if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_TX_ID)) 
+  {
+    
+    if(mySwitch==nullptr)
+    {
+      mySwitch = new RCSwitch();
+    }
+
+    mySwitch->enableTransmit(pCONT_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
+    settings.fEnableSensor = true;
+  }
+
 //   pinMode(22, OUTPUT);
 // digitalWrite(22, LOW); // set low first, header will toggle high again
 
 }
 
 
-void mRCSwitch::ReceiveCheck(void) {
-  if (mySwitch->available()) {
+void mRCSwitch::ReceiveCheck(void) 
+{
+
+  if (mySwitch->available())
+  {
 
     unsigned long data = mySwitch->getReceivedValue();
     unsigned int bits = mySwitch->getReceivedBitlength();

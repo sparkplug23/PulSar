@@ -2,6 +2,8 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+// unknown source
+
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
 
 
@@ -804,12 +806,12 @@ uint32_t WcSetup(int32_t fsiz) {
 
 void mCameraOV2640::HandleWebcamMjpeg(void) {
   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Handle camserver"));
-//  if (!Wc.stream_active) {
+ if (!Wc.stream_active) {
 // always restart stream
     Wc.stream_active = 1;
     Wc.client = Wc.CamServer->client();
     AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Create client"));
-//  }
+ }
 }
 
 void mCameraOV2640::HandleWebcamMjpegTask(void) {
@@ -888,12 +890,13 @@ void mCameraOV2640::HandleWebcamMjpegTask(void) {
   }
 }
 
-// void HandleWebcamRoot(void) {
-//   //CamServer->redirect("http://" + String(ip) + ":81/cam.mjpeg");
-//   Wc.CamServer->sendHeader("Location", WiFi.localIP().toString() + ":81/cam.mjpeg");
-//   Wc.CamServer->send(302, "", "");
-//   AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Root called"));
-// }
+void mCameraOV2640::HandleWebcamRoot(void) 
+{
+  //CamServer->redirect("http://" + String(ip) + ":81/cam.mjpeg");
+  Wc.CamServer->sendHeader("Location", WiFi.localIP().toString() + ":81/cam.mjpeg");
+  Wc.CamServer->send(302, "", "");
+  AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Root called"));
+}
 
 // /*********************************************************************************************/
 
@@ -908,15 +911,11 @@ if (pCONT_set->global_state.network_down) { return 0; }
   if (flag) {
     if (!Wc.CamServer) {
       Wc.CamServer = new ESP8266WebServer(81);
-      // Wc.CamServer->on("/", HandleWebcamRoot);
-
-      // Wc.CamServer->on("/cam.mjpeg",HandleWebcamMjpeg);
+      Wc.CamServer->on("/", [this](){HandleWebcamRoot();});
       Wc.CamServer->on("/cam.mjpeg", [this](){HandleWebcamMjpeg();});
-
-
-
       // Wc.CamServer->on("/cam.jpg", HandleWebcamMjpeg);
       // Wc.CamServer->on("/stream", HandleWebcamMjpeg);
+      Wc.CamServer->on("/stream", [this](){HandleWebcamMjpeg();});
       AddLog(LOG_LEVEL_DEBUG, PSTR("CAM: Stream init"));
       Wc.CamServer->begin();
     }
@@ -942,7 +941,7 @@ void mCameraOV2640::WcStreamControl() {
 void mCameraOV2640::EveryLoop(void) {
   if (Wc.CamServer) {
     
-// AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
+AddLog(LOG_LEVEL_TEST, PSTR("if (Wc.CamServer) "));
     Wc.CamServer->handleClient();
     if (Wc.stream_active) { HandleWebcamMjpegTask(); }
   }
@@ -1474,16 +1473,8 @@ void handleJPGSstream(void)
   Serial.println("handleJPGSstream1"); Serial.flush();
 
   //  Create a new WiFi Client object to keep track of this one
-  // WiFiClient* client = new WiFiClient();
-  // *client = server.client();
-
-  WiFiClient client;// = new WiFiClient();
+  WiFiClient client;
   client = server.client();
-
-  //  Immediately send this client a header
-  // client->write(HEADER, hdrLen);
-  // client->write(BOUNDARY, bdrLen);
-
   client.write(HEADER, hdrLen);
   client.write(BOUNDARY, bdrLen);
 
@@ -1651,69 +1642,12 @@ void SubTask_StartServerHandlerTask1(void* pvParameters) {
   xLastWakeTime = xTaskGetTickCount();
   for (;;) {
     server.handleClient();
-
     //  After every server client handling request, we let other tasks run and then pause
     taskYIELD();
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
+
 }
-
-/**
- * New init method, which removes the need for create
- * */ 
-// ======== Server Connection Handler Task ==========================
-// void SubTask_StartServerHandlerTask2(void* pvParameters) {
-//   TickType_t xLastWakeTime;
-//   const TickType_t xFrequency = pdMS_TO_TICKS(WSINTERVAL);
-
-//   // Creating frame synchronization semaphore and initializing it
-//   frameSync = xSemaphoreCreateBinary();
-//   xSemaphoreGive( frameSync );
-
-//   // Creating a queue to track all connected clients
-//   streamingClients = xQueueCreate( 10, sizeof(WiFiClient*) );
-
-//   //=== setup section  ==================
-
-//   //  Creating RTOS task for grabbing frames from the camera
-//   xTaskCreatePinnedToCore(
-//     SubTask_GrabCameraFrames,        // callback
-//     "cam",        // name
-//     4096,         // stacj size
-//     NULL,         // parameters
-//     2,            // priority
-//     &tCam,        // RTOS task handle
-//     APP_CPU);     // core
-
-//   //  Creating task to push the stream to all connected clients
-//   xTaskCreatePinnedToCore(
-//     SubTask_StreamCameraFrames,
-//     "strmCB",
-//     4 * 1024,
-//     NULL,
-//     2,
-//     &tStream,
-//     APP_CPU);
-
-//   //  Registering webserver handling routines
-//   server.on("/vid", handleJPGSstream);
-//   server.on("/pic", handleJPG);
-//   server.onNotFound(handleNotFound);
-
-//   //  Starting webserver
-//   server.begin();
-
-//   //=== loop() section  ===================
-//   xLastWakeTime = xTaskGetTickCount();
-//   for (;;) {
-//     server.handleClient();
-
-//     //  After every server client handling request, we let other tasks run and then pause
-//     taskYIELD();
-//     vTaskDelayUntil(&xLastWakeTime, xFrequency);
-//   }
-// }
-
 
 
 
@@ -1770,15 +1704,15 @@ void mCameraOV2640::setup_cam()
     settings.caminit = true;
 
     // Start mainstreaming RTOS task
-    // xTaskCreatePinnedToCore(
-    //   SubTask_StartServerHandlerTask1,
-    //   "mjpeg",
-    //   4 * 1024,
-    //   NULL,
-    //   2,
-    //   &tMjpeg,
-    //   APP_CPU
-    // );
+    xTaskCreatePinnedToCore(
+      SubTask_StartServerHandlerTask1,
+      "mjpeg",
+      4 * 1024,
+      NULL,
+      2,
+      &tMjpeg,
+      APP_CPU
+    );
 
     TickType_t xLastWakeTime;
     const TickType_t xFrequency = pdMS_TO_TICKS(WSINTERVAL);
@@ -1822,34 +1756,7 @@ void mCameraOV2640::setup_cam()
 
   }
 
-
-  }
-
-
-//   //  Configure and connect to WiFi
-//   IPAddress ip;
-
-//   WiFi.mode(WIFI_STA);
-//   WiFi.begin(SSID1, PWD1);
-//   Serial.print("Connecting to WiFi");
-//   while (WiFi.status() != WL_CONNECTED)
-//   {
-//     delay(500);
-//     Serial.print(F("."));
-//   }
-//   ip = WiFi.localIP();
-//   Serial.println(F("WiFi connected"));
-//   Serial.println("");
-//   Serial.print("Stream Link: http://");
-//   Serial.print(ip);
-//   Serial.println("/mjpeg/1");
-
-
-
-
-// void loop() {
-//   vTaskDelay(1000);
-// }
+}
 
 
 int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
@@ -1872,34 +1779,24 @@ int8_t mCameraOV2640::Tasker(uint8_t function, JsonParserObject obj){
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
-//  EveryLoop();
+      EveryLoop();
 
-if(settings.caminit){
-  
-    server.handleClient();
-}
-
+      if(settings.caminit)
+      {
+        server.handleClient();
+      }
     break;
     case FUNC_EVERY_SECOND:  
       // Poll();    
-// WcStreamControl();
+      // WcStreamControl();
       // WcSetStreamserver(1);
-
-
-AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
-
+      AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
       // setup_cam();
-
     break;
     case FUNC_EVERY_MINUTE:
-
       if(!settings.caminit && (pCONT_time->uptime.seconds_nonreset>60)){
         setup_cam();
       }
-
-
-
-
     break;
     case FUNC_WIFI_CONNECTED:
       setup_cam();
@@ -1908,7 +1805,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
+      // parse_JSONCommand(obj);
     break;
     // case FUNC_SET_DEVICE_POWER:
     //   SetPower();
@@ -1918,7 +1815,7 @@ AddLog(LOG_LEVEL_TEST, PSTR("caminit = %d"),  settings.caminit);
     *******************/
     #ifdef USE_MODULE_CORE_RULES
     case FUNC_EVENT_SET_POWER_ID:
-      RulesEvent_Set_Power();
+      // RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
 

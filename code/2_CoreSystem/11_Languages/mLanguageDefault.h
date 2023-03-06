@@ -154,6 +154,13 @@
   #define D_MODULE_DRIVERS__CELLULAR_SIM7000__CTR          "CellularSIM7000"
   #define D_MODULE_DRIVERS__CELLULAR_SIM7000__FRIENDLY_CTR "CellularSIM7000"
 
+  #define D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR          "camera_arduino"
+  #define D_MODULE_DRIVERS__CAMERA_ARDUINO__FRIENDLY_CTR "camera_arduino"
+  #define D_MODULE_DRIVERS__CAMERA_TASMOTA__CTR          "camera_tas"
+  #define D_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR "camera_tas"
+  #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR          "camera_mulitclient"
+  #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__FRIENDLY_CTR "camera_multiclient"
+
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"
@@ -195,7 +202,7 @@
 // Sensors (Range 120-169
 
   #define D_MODULE_SENSORS_INTERFACE_CTR              "mSensorsInterface"
-  #define D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR              "interface_sensors"
+  #define D_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR              "interface_sensor"
 //#ifdef USE_MODULE_SENSORS_BUTTONS
   #define D_MODULE_SENSORS_BUTTONS_CTR              "mButtons"
   #define D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR              "buttons"
@@ -1659,6 +1666,7 @@
 #define D_JSON_UV_LEVEL "UvLevel"
 #define D_JSON_UV_POWER "UvPower"
 #define D_JSON_VCC "Vcc"
+#define D_JSON_VALID "Valid"
 #define D_JSON_VERSION "Version"
 #define D_JSON_VERSIONNAME "VersionName"
 #define D_JSON_VERSIONNUMBER "VersionNumber"
@@ -1880,6 +1888,7 @@
 #define D_JSON_TEMP "Temp"
 #define D_JSON_TRANSITION "Transition"
 #define D_JSON_TYPE "Type"
+#define D_JSON_TIME_ELASPED "TimeElapsed"
 #define D_JSON_RELAY "Relay"
 
 #define D_JSON_SUBTYPE "SubType"
@@ -1985,6 +1994,7 @@
 #define D_JSON_LOGHOST "LogHost"
 #define D_JSON_LOGPORT "LogPort"
 #define D_JSON_LOWER "Lower"
+#define D_JSON_ID "ID"
 #define D_JSON_IPADDRESS "IPAddress"
 #define D_JSON_NTPSERVER "NtpServer"
 // #define D_JSON_AP "Ap"
@@ -2034,6 +2044,7 @@
   #define D_JSON_GPIOC "GPIOC"
   #define D_JSON_FLAG "FLAG"
 #define D_JSON_BASE "Base"
+#define D_JSON_GAS_RESISTANCE "GasResistance"
 
 // Commands xdrv_01_mqtt.ino
 #define D_JSON_MQTTHOST "MqttHost"

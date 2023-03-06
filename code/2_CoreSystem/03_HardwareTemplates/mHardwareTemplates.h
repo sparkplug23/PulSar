@@ -204,6 +204,7 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   GPIO_WEBCAM_SIOD_ID,     // 26      IO                  GPIO26, CAM_SIOD
   GPIO_WEBCAM_SIOC_ID,     // 27      IO                  GPIO27, CAM_SIOC
   GPIO_WEBCAM_PWDN_ID,     // 32      IO                  GPIO32, CAM_PWDN
+  GPIO_WEBCAM_RESET_ID,
   // GPS Serial1 and 2 available on esp32 (2 of 3 ports)
   GPIO_GPS_SERIAL1_TX_ID, GPIO_GPS_SERIAL1_RX_ID,
   GPIO_GPS_SERIAL2_TX_ID, GPIO_GPS_SERIAL2_RX_ID,

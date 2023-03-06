@@ -66,8 +66,8 @@ class mRemoteDevice :
       // Serial.printf("OVERRIDE ACCESSED REMOTE DEVICE %d\n\r",index);//Serial.println(sensor[index].instant.temperature);
       
       // Need to copy each part
-      value->type = sensor_data.type;
-      value->data = sensor_data.data;
+      value->sensor_type = sensor_data.sensor_type;
+      value->data_f = sensor_data.data_f;
       value->sensor_id = sensor_data.sensor_id;
       value->max_value = sensor_data.max_value;
       value->min_value = sensor_data.min_value;

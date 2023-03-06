@@ -256,6 +256,9 @@ uint8_t mEnergyInterface::GetAddressWithID(uint8_t address_id)//, uint8_t* addre
   }
     // address.insert(address_id, 2);//*address_to_save);
     // address.push_back(*address_to_save);
+
+  ALOG_ERR(PSTR("Not address size"));
+
 return 0;
   // }
 

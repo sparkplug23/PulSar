@@ -116,6 +116,12 @@ void EmergencySerial_SettingsReset(void) {
 void setup(void)
 { 
 
+  // Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
+  // while(1)
+  // { 
+  //   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
+  // }
+
 /********************************************************************************************
  ** Brownout ********************************************************************************
  ********************************************************************************************/

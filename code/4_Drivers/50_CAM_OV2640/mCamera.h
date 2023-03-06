@@ -46,6 +46,7 @@ class mCameraOV2640 :
     
 uint32_t WcSetStreamserver(uint32_t flag);
 void WcStreamControl();
+void HandleWebcamRoot();
 void HandleWebcamMjpeg(void);
 
 void setup_cam();

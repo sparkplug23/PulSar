@@ -164,7 +164,7 @@ uint8_t mSR04::ModeDetect(void)
     if (-1 == sr04_trig_pin) {
       sr04_trig_pin = pCONT_pins->GetPin(GPIO_SR04_ECHO_ID);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
     }
-    sonar = new NewPing(sr04_trig_pin, sr04_echo_pin, 300);
+    sonar = new NewPing(sr04_trig_pin, sr04_echo_pin, 100);
     
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SR04 "NewPing %d %d"), sr04_trig_pin, sr04_echo_pin);
 
@@ -267,7 +267,7 @@ void mSR04::MeasureSensor()
       // readings.distance_cm = (float)(MiddleValue(Mode2Distance(),Mode2Distance(),Mode2Distance()))/10;
       break;
     case 1:
-      readings.raw.ping_value = sonar->ping_median(5);
+      readings.raw.ping_value = sonar->ping_median(1);
       readings.raw.distance_cm = GetDistanceFromPing(readings.raw.ping_value);
       break;
     default:

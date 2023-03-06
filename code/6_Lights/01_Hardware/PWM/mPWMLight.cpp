@@ -5,61 +5,45 @@
 const char* mPWMLight::PM_MODULE_DRIVERS_PWM_CTR = D_MODULE_DRIVERS_PWM_CTR;
 const char* mPWMLight::PM_MODULE_DRIVERS_PWM_FRIENDLY_CTR = D_MODULE_DRIVERS_PWM_FRIENDLY_CTR;
 
+int8_t mPWMLight::Tasker(uint8_t function, JsonParserObject obj){}
+void mPWMLight::parse_JSONCommand(JsonParserObject obj){}
 
 /**********************************************************************************************************************************
  * ********************************************************************************************************************************
  * **** Hardware interfacing ******************************************************************************************************
  * ********************************************************************************************************************************
  * ********************************************************************************************************************************/
-// SetPixelHardware
-/**
- * colour_hardware will already have colour_order mapped
- * */
-//flip parameters around so I can leave the index off
-void mPWMLight::SetPixelColorHardware(uint16_t index, RgbcctColor colour_hardware){
 
-//addressible will put the colour into the bus
+void mPWMLight::SetPixelColorHardware(uint16_t index, RgbcctColor colour_hardware)
+{
 
-if(index > 0) { return; } //ignore higher colour indexs
-
-output_colour = colour_hardware;
-
-
-//Serial.printf("red=%d\n\r",output_colour.R);
-
-// pwm will put it into an array (so I can get it back) and set via pwm code
-
-
-  // pCONT_lAni->stripbus->SetPixelColor(index,colour_hardware);
+  if(index > 0) 
+  {  
+    return; 
+  } 
+  output_colour = colour_hardware;
+  // ALOG_INF(PSTR("SetPixelColorHardware index[%d]=> %d,%d,%d,%d,%d"),index,output_colour.R,output_colour.G,output_colour.B,output_colour.WC,output_colour.WW);
 
 }
 
 
-RgbcctColor mPWMLight::GetPixelColorHardware(uint16_t index){
+RgbcctColor mPWMLight::GetPixelColorHardware(uint16_t index)
+{
 
-//addressible will put the colour into the bus
+  // ALOG_INF(PSTR("===============GetPixelColorHardware index[%d]=> %d,%d,%d,%d,%d"),index,output_colour.R,output_colour.G,output_colour.B,output_colour.WC,output_colour.WW);
 
-return output_colour;
-
-// pwm will put it into an array (so I can get it back) and set via pwm code
-
-
-  // return pCONT_lAni->stripbus->GetPixelColor(index);
+  return output_colour;
 
 }
 
-void mPWMLight::ShowHardware(){
+void mPWMLight::ShowHardware()
+{
 
-  // pCONT_lAni->stripbus->Show();
   LightSetPWMOutputsRgbcctColor(output_colour);
 
-
-
 }
 
 
-int8_t mPWMLight::Tasker(uint8_t function, JsonParserObject obj){}
-void mPWMLight::parse_JSONCommand(JsonParserObject obj){}
 
 
 /**********************************************************************************************************************************
@@ -80,7 +64,6 @@ void mPWMLight::LightSetPWMOutputsRgbcctColor(RgbcctColor colour){
   tmp_colour[4] = pCONT_iLight->change8to10(colour.WW); 
 
   // ALOG_INF(PSTR("LightSetPWMOutputsRgbcctColor"));
-
   // AddLog_Array(LOG_LEVEL_TEST,PSTR("tmp_colour"),tmp_colour,(uint16_t)5);
 
   LightSetPWMOutputsArray10bit(tmp_colour);
@@ -95,51 +78,39 @@ void mPWMLight::LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10) {
   uint16_t cur_col;
   uint16_t pin_num;
   uint16_t pwm_value;
-  //uint16_t val_1=0,val_2=0;
+  
+  // ALOG_INF(PSTR("subtype %d, pwm_offset %d"), pCONT_iLight->subtype, pCONT_iLight->settings.pwm_offset);
+  // ALOG_INF(PSTR("output_colour %d,%d,%d,%d,%d"), output_colour.R,output_colour.G,output_colour.B,output_colour.W1,output_colour.W2);
 
   // now apply the actual PWM values, adjusted and remapped 10-bits range
-  if (pCONT_set->Settings.light_settings.type < LT_PWM6) {
-    for (uint8_t i = 0; i < (pCONT_iLight->subtype - pCONT_iLight->settings.pwm_offset); i++) {
-      if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) {
+  if (pCONT_set->Settings.light_settings.type < LT_PWM6) 
+  {
+    for (uint8_t i = 0; i < (pCONT_set->Settings.light_settings.type - pCONT_iLight->settings.pwm_offset); i++) 
+    {
+      if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) 
+      {
         // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
         cur_col = cur_col_10[i + pCONT_iLight->settings.pwm_offset]; //leak chance
-        // if(!pCONT_iLight->rgbcct_controller.isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max..
-
-
         
-/**
- * @brief 
- * H801 will always assume 1 segment only
- * 
- */
-
-if(!pCONT_lAni->_segment_runtimes->rgbcct_controller->isChannelCCT(i)) {   // if CT don't use pwm_min and pwm_max
-
-
-         //val_1 = cur_col;
-          cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0;   // shrink to the range of pwm_min..pwm_max
-          //val_2 = cur_col;
-         
-        
-        }
+        cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0;   // shrink to the range of pwm_min..pwm_max
+                
         pin_num = pCONT_pins->Pin(GPIO_PWM1_ID, i);
         pwm_value = bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - cur_col : cur_col;
-        //Serial.printf("%d pin_num=%d, %d/%d, %d\n\r", i, pin_num, cur_col, pCONT_set->Settings.pwm_range, pwm_value);
+        
+        // if(i==0){
+        //   ALOG_INF(PSTR("output_colour %d \tcur_col %d\t pwm_value %d"), output_colour.R, cur_col, pwm_value);
+        // }
 
-         /*Serial.printf("%d pin_num=%d, %d/%d, %d    %d,%d    min/ax %d,%d\n\r", i, pin_num, 
-          cur_col, pCONT_set->Settings.pwm_range, 
-          pwm_value,
-          val_1,val_2,
-          pCONT_iLight->pwm_min,pCONT_iLight->pwm_max);*/
-
+        // ALOG_INF(PSTR("pin_num %d, pwm_value %d"), pin_num, pwm_value);
 
         analogWrite(pin_num, pwm_value);
-      } //pin used
-    } //subtype
-  } //light type
+
+      } // Pin used
+    } // Subtype
+  } // Light type
 
 }
 
 
 
-#endif // USE_DRIVER
+#endif // USE_MODULE_LIGHTS_PWM

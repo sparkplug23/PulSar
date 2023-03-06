@@ -1363,6 +1363,34 @@ typedef union {
 
 
 #ifdef ESP32
+// typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+//   uint32_t data;
+//   struct {
+//     uint32_t stream : 1;
+//     uint32_t mirror : 1;
+//     uint32_t flip : 1;
+//     uint32_t rtsp : 1;
+//     uint32_t spare4 : 1;
+//     uint32_t spare5 : 1;
+//     uint32_t spare6 : 1;
+//     uint32_t spare7 : 1;
+//     uint32_t spare8 : 1;
+//     uint32_t spare9 : 1;
+//     uint32_t spare10 : 1;
+//     uint32_t spare11 : 1;
+//     uint32_t spare12 : 1;
+//     uint32_t spare13 : 1;
+//     uint32_t spare14 : 1;
+//     uint32_t spare15 : 1;
+//     uint32_t spare16 : 1;
+//     uint32_t spare17 : 1;
+//     uint32_t spare18 : 1;
+//     uint32_t contrast : 3;
+//     uint32_t brightness : 3;
+//     uint32_t saturation : 3;
+//     uint32_t resolution : 4;
+//   };
+// } WebCamCfg;
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint32_t data;
   struct {
@@ -1370,27 +1398,43 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t mirror : 1;
     uint32_t flip : 1;
     uint32_t rtsp : 1;
-    uint32_t spare4 : 1;
-    uint32_t spare5 : 1;
-    uint32_t spare6 : 1;
-    uint32_t spare7 : 1;
-    uint32_t spare8 : 1;
-    uint32_t spare9 : 1;
-    uint32_t spare10 : 1;
-    uint32_t spare11 : 1;
-    uint32_t spare12 : 1;
-    uint32_t spare13 : 1;
-    uint32_t spare14 : 1;
+    uint32_t awb : 1;
+    uint32_t awb_gain : 1;
+    uint32_t aec : 1;
+    uint32_t aec2 : 1;
+    uint32_t agc : 1;
+    uint32_t raw_gma : 1;
+    uint32_t lenc : 1;
+    uint32_t colorbar : 1;
+    uint32_t wpc : 1;
+    uint32_t dcw : 1;
+    uint32_t bpc : 1;
     uint32_t spare15 : 1;
     uint32_t spare16 : 1;
-    uint32_t spare17 : 1;
-    uint32_t spare18 : 1;
+    uint32_t feature : 2;
     uint32_t contrast : 3;
     uint32_t brightness : 3;
     uint32_t saturation : 3;
     uint32_t resolution : 4;
   };
 } WebCamCfg;
+
+typedef union {
+  uint32_t data;
+  struct {
+    uint32_t wb_mode : 3;
+    uint32_t ae_level : 3;
+    uint32_t aec_value : 11;
+    uint32_t gainceiling : 3;
+    uint32_t agc_gain: 5;
+    uint32_t special_effect : 3;
+    uint32_t auth : 1;
+    uint32_t spare29 : 1;
+    uint32_t spare30 : 1;
+    uint32_t upgraded : 1;
+  };
+} WebCamCfg2;
+
 #endif // esp32
 
 
@@ -1562,6 +1606,7 @@ struct SYSCFG {
 #ifdef ESP32
 
   WebCamCfg     webcam_config;             // 44C
+  WebCamCfg2     webcam_config2;             // 460
 
 #endif
 
@@ -1875,7 +1920,12 @@ bool blinkstate = false;                    // LED state
 // bool latest_uptime_flag = true;             // Signal latest uptime
 bool pwm_present = false;                   // Any PWM channel configured with SetOption15 0
 // bool dht_flg = false;                       // DHT configured
+
 bool i2c_enabled = false;                       // I2C configured
+#ifdef ESP32
+bool i2c_enabled_2 = false;                       // I2C configured, second controller on ESP32, Wire1
+#endif
+
 bool spi_flg = false;                       // SPI configured
 bool soft_spi_flg = false;                  // Software SPI configured
 bool ntp_force_sync = false;                // Force NTP sync

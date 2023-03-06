@@ -227,7 +227,7 @@ Fix multiple repos "git push -f origin master"
     Create "operators" that allow me to assign datetime/weektime etc to each other and convert them
 
 #Idea 77
-    Create an 8 bit map for each GPIO pin/module which shows what a pin can/cannot do, boot limitations, change on boot etc (maybe just a documentation intead for memory reasons?)
+    Create an 8 bit map for each GPIO pin/module which shows what a pin can/cannot do, boot limitations, change on boot etc (maybe just a documentation instead for memory reasons?)
 
 #Idea 78
     Create command list method, the ability to pass around a command as a number_id instead of a string
@@ -453,3 +453,15 @@ Add sunelevation palette that is actually left on overnight, and is black when i
  * Ideas:
  * Create two basic LCD numbers, one for outside and one for bedroom temperature
  * Create world map (like I said to jess) that lights to show where the sun is, and day/night land-mass light up with cities being bright spots.
+
+#FI-129
+    MultiPin Support
+    Test Case #1
+     - No PWM type
+     - ESP32 
+     - WS2812/SK6812 RGB, RGBW on 4 different pins
+    Test Case #2
+     - Use a H801
+     - Segment0: RGB PWM
+     - Segment1: WW/CW as CCT Channel PWM
+     - Segment2: pin 2 on program header as 3 led RGBW SK6812 type

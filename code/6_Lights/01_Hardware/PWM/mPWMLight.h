@@ -15,6 +15,7 @@ class mPWMLight :
 {
   private:
     RgbcctColor output_colour;
+    RgbcctColor transition_colour;
     void LightSetPWMOutputsRgbcctColor(RgbcctColor colour);
     void LightSetPWMOutputsArray10bit(const uint16_t *cur_col_10);
     

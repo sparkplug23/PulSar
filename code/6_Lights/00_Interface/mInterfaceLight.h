@@ -7,6 +7,13 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
+
+  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+#include "6_Lights/03_Animator/pin_manager.h"
+  #include "6_Lights/03_Animator/bus_manager.h"
+  #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
 // New sections of code that should be enabled by default
 // #define ENABLE_CRGBPALETTES_IN_PROGMEM
 // #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES

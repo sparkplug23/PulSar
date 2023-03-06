@@ -165,6 +165,7 @@ const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_TEMPERATURE_ID:            return PM_JSON_TEMPERATURE;
     case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:      return PM_JSON_HUMIDITY;
     case SENSOR_TYPE_PRESSURE_ID:               return PM_JSON_PRESSURE;
+    case SENSOR_TYPE_GAS_RESISTANCE_ID:               return PM_JSON_GAS_RESISTANCE;
     case SENSOR_TYPE_LIGHT_LEVEL_ID:            return PM_JSON_LIGHT_LEVEL;
     case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return PM_JSON_LIGHT_LUMINANCE_LUX;
     case SENSOR_TYPE_SUN_AZIMUTH_ID:            return PM_JSON_SUN_AZIMUTH;

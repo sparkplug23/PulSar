@@ -2,6 +2,7 @@
 #define WLED_PIN_MANAGER_H
 
 
+#include "1_TaskerManager/mTaskerManager.h"
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 /*
@@ -10,10 +11,12 @@
 #include <Arduino.h>
 #include "const.h" // for USERMOD_* values
 
-typedef struct PinManagerPinType {
+typedef struct PinManagerPinType 
+{
   int8_t pin;
   bool   isOutput;
-} managed_pin_type;
+} 
+managed_pin_type;
 
 /*
  * Allows PinManager to "lock" an allocation to a specific
@@ -123,7 +126,10 @@ class PinManagerClass {
 };
 
 extern PinManagerClass pinManager;
-#endif
+
 
 
 #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+
+#endif // header guard

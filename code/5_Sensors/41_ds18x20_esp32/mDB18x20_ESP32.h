@@ -7,14 +7,13 @@
 
 #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
 
-#include "1_TaskerManager/mTaskerInterface.h"
-
 #include <OneWire.h>
 
 #define MAX_DSB_PINS          2
 #ifndef DS18X20_MAX_SENSORS
   #define DS18X20_MAX_SENSORS 12
 #endif
+#define D_SENSOR_VALID_TIMEOUT_SECS 10
 
 #define DS18S20_CHIPID       0x10  // +/-0.5C 9-bit
 #define DS1822_CHIPID        0x22  // +/-2C 12-bit
@@ -45,46 +44,37 @@ class mDB18x20_ESP32 :
     uint16_t GetClassSize(){      return sizeof(mDB18x20_ESP32); };
     #endif
 
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /**
+     * @brief All module generic settings
+     **/
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t sensor_count = 0;
+      uint8_t pins_used;    // Count of GPIO found
     }settings;
 
-    void EveryLoop();
-    
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-
-    void SubTasker_MQTTSender();
-    
-    void SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len);
-
-    struct 
+    /**
+     * @brief Data in this module
+     **/
+    struct SENS
     { 
       uint8_t address[8] = {0};
       uint8_t index;
-      uint8_t valid;
       int8_t pins_id;
-      // uint8_t alias_index;
-      int8_t device_name_index = -1; // -1 for unknown
-      // uint8_t address_stored[8];
-      int8_t sensor_group_id = -1; // which pin it comes from 
-      /**
-       * @brief method is not right, I need to align this with devicename ids, so sensor[id] where id matches devicename should be configured
-       * */
-      int8_t address_id = -1; //set this manually with template, else, as 0 (check for any -1, set incremented and name "sens01")
+      uint8_t resolution = 12;
+      int8_t device_name_index = -1;
       struct READING{
         float val;
-        uint8_t isvalid;
-        uint8_t ischanged;
-        uint32_t captureupsecs; //sensor age
+        uint8_t isvalid   = D_SENSOR_VALID_TIMEOUT_SECS;
+        uint8_t ischanged = false;
+        uint32_t capture_time_millis = 0;
       }reading;
-    } sensor_new[DS18X20_MAX_SENSORS];
-  
-    uint8_t DS18X20Data_gpios;    // Count of GPIO found
-
-    void Scan_ReportAsJsonBuilder();
-
-    void parse_JSONCommand(JsonParserObject obj);
+    }
+    sensors_t;
+    std::vector<SENS> sensor_vector; // Using vector for dynamic memory
 
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
@@ -93,25 +83,23 @@ class mDB18x20_ESP32 :
     }
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index > DS18X20_MAX_SENSORS-1) {value->sensor_type.push_back(0); return ;}
+      if(index > sensor_vector.size()-1) {value->sensor_type.push_back(0); return ;}
       value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-      value->data_f.push_back(sensor_new[index].reading.val);
-      value->sensor_id = sensor_new[index].device_name_index;
-      value->resolution = 123;
+      value->data_f.push_back(sensor_vector[index].reading.val);
+      value->sensor_id = sensor_vector[index].device_name_index;
+      value->resolution = sensor_vector[index].resolution;
     };
     #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
     OneWire *ds = nullptr;
     OneWire *ds18x20_gpios[MAX_DSB_PINS];
-
+    void SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len);
+    void Scan_ReportAsJsonBuilder();
     void Ds18x20Init(void);
     void Ds18x20Search(void);
     void Ds18x20Convert(void);
     bool Ds18x20Read(uint8_t sensor, float &t);
-    void Ds18x20Name(uint8_t sensor);
-    void Ds18x20EverySecond(void);
-    void Ds18x20Show(bool json);
-
+    void EverySecond(void);
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);

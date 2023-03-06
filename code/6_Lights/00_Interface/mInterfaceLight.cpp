@@ -702,7 +702,7 @@ RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
     case LT_PWM4:
     case LT_PWM5:
       #ifdef USE_MODULE_LIGHTS_PWM
-      pCONT_lPWM->GetPixelColorHardware(index);
+      return pCONT_lPWM->GetPixelColorHardware(index);
       #endif // USE_MODULE_LIGHTS_PWM
     break;
   }
@@ -727,7 +727,7 @@ void mInterfaceLight::ShowInterface(){
     case LT_PWM4:
     case LT_PWM5:
       #ifdef USE_MODULE_LIGHTS_PWM
-      pCONT_lPWM->ShowHardware();
+      return pCONT_lPWM->ShowHardware();
       #endif // USE_MODULE_LIGHTS_PWM
     break;
   }

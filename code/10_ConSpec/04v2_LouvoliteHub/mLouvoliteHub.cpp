@@ -25,6 +25,10 @@ const char* mLouvoliteHub::PM_MODULE_CONTROLLER_LOUVOLITE_HUB_CTR = D_MODULE_CON
 const char* mLouvoliteHub::PM_MODULE_CONTROLLER_LOUVOLITE_HUB_FRIENDLY_CTR = D_MODULE_CONTROLLER_LOUVOLITE_HUB_FRIENDLY_CTR;
 
 
+  //  { 20,  16, { 14, 30 }, 1, { 510,  30 }, { 14,  30 }, { 30, 14 }, false,  230 }  // 36 (Louvolite) with premable
+
+  // #define USE_MODULE_CONTROLLER__LOUVOLITE_HUB // my room only
+  
 int8_t mLouvoliteHub::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){

@@ -1097,7 +1097,7 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 //   "<br/>";
 
 //delee these
-const char HTTP_FORM_END[] PROGMEM =
+const char HTTP_FORM_END_MINE[] PROGMEM =
   "<br/>"
   "<button name='save' type='submit' class='buttonh bgrn'>" D_SAVE "</button>"
   "</form></fieldset>";

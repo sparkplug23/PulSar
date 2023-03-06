@@ -111,28 +111,28 @@ void mRemoteDevice::parse_JSONCommand(JsonParserObject obj){
     
     sensors_reading_t* value = &sensor_data;
     // Reset as the incoming data will replace everything to have one instance of each value
-    value->type.clear();
-    value->data.clear();
+    value->sensor_type.clear();
+    value->data_f.clear();
 
     if(jtok2 = sensor_obj[D_JSON_TEMPERATURE])
     {
-      value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-      value->data.push_back(jtok2.getFloat());
+      value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
+      value->data_f.push_back(jtok2.getFloat());
     }
     
     if(jtok2 = sensor_obj[D_JSON_HUMIDITY])
     {
-      value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-      value->data.push_back(jtok2.getFloat());
+      value->sensor_type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
+      value->data_f.push_back(jtok2.getFloat());
     }
 
     if(jtok2 = sensor_obj[D_JSON_PRESSURE])
     {
-      value->type.push_back(SENSOR_TYPE_PRESSURE_ID);
-      value->data.push_back(jtok2.getFloat());
+      value->sensor_type.push_back(SENSOR_TYPE_PRESSURE_ID);
+      value->data_f.push_back(jtok2.getFloat());
     }
 
-    ALOG_DBM( PSTR("Remote Read %d" ), (int)value->data[0]);
+    ALOG_DBM( PSTR("Remote Read %d" ), (int)value->data_f[0]);
     //  
     //   #ifdef ENABLE_LOG_LEVEL_DEBUG
     //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette.id, buffer, sizeof(buffer)));
@@ -215,9 +215,9 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
 
   sensors_reading_t* data = &sensor_data;
   
-  JBI->Add(D_JSON_TEMPERATURE, data->GetValue(SENSOR_TYPE_TEMPERATURE_ID));
-  JBI->Add(D_JSON_HUMIDITY,    data->GetValue(SENSOR_TYPE_RELATIVE_HUMIDITY_ID));
-  JBI->Add(D_JSON_PRESSURE,    data->GetValue(SENSOR_TYPE_PRESSURE_ID));
+  JBI->Add(D_JSON_TEMPERATURE, data->GetFloat(SENSOR_TYPE_TEMPERATURE_ID));
+  JBI->Add(D_JSON_HUMIDITY,    data->GetFloat(SENSOR_TYPE_RELATIVE_HUMIDITY_ID));
+  JBI->Add(D_JSON_PRESSURE,    data->GetFloat(SENSOR_TYPE_PRESSURE_ID));
 
   // for(uint8_t sensor_id=0;sensor_id<settings.sensor_active_count;sensor_id++){
   //   if((sensor[sensor_id].instant.ischanged || (json_level>JSON_LEVEL_IFCHANGED))

@@ -270,5 +270,22 @@ ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supp
 ## Controller
 
 
+# Development Plans
+
+## Release 1.0
+Current code stages planned to complete before releasing code as first 1.0 stage.
+- File System
+- Settings saving to enable users without building to configure device with basic WebUI
+- Multipin support of lighting
+- Basic webpage for uploading recovery firmware to device that uses, either; hardcoded SSID/PW to connect to expected fallback network, or, creation of its own network that a computer can connect directly to update new software.
+- All code must be either at release level and tested, or suppressed by `#define` to gaurentee code is stable
+
+## Release 2.0
+Longer term planned features.
+- Ethernet support with POE on ESP32
+- Full webpage support 
+- ESP32 Camera working as new "Camera Sensor Node" that will use the camera, PIR and host of other sensors to save images on the filesystem and push images via Email and other methods. (e.g., Can motion triggering a 10 second video sent to the phone?)
+- GSM support (e.g., Enabling data logging with GPS and 9-axis gyro to the local file system. GSM/LTE will enable the ability to connect remotely and pull the data as needed with wifi uploads when available)
+
 
 

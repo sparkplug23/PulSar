@@ -181,7 +181,7 @@ void mWebServer::WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_c
 
 void mWebServer::WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...)
 {
-  char* buff = BufferWriterI->GetPtr();
+  char* buff = BufferWriterI->GetBufferPtr();
   uint16_t* len = BufferWriterI->GetLengthPtr();
   uint16_t size = BufferWriterI->GetBufferSize();
 
@@ -1099,34 +1099,38 @@ enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRES
 
 int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj){
 
-  switch(function){
-    case FUNC_INIT:
-      init();
-    break;
-    case FUNC_LOOP:
-      PollDnsWebserver();
-    break; 
-    case FUNC_EVERY_SECOND:
+DEBUG_LINE_HERE;
+
+//   switch(function){
+//     case FUNC_INIT:
+//       init();
+//     break;
+//     case FUNC_LOOP:
+//       PollDnsWebserver();
+//     break; 
+//     case FUNC_EVERY_SECOND:
+
+// DEBUG_LINE_HERE;
+
+//     break;
+//     case FUNC_WEB_ADD_HANDLER:
+//       WebPage_Root_AddHandlers();
+//     break;
+//     case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
+//         JsonBuilderI->Add("/module_draw.json",-1); 
+//         // JsonBuilderI->Add("/web_top_bar.json",1000); 
+//         JsonBuilderI->Add("/root_status_any.json",1100);
+//     break;
+//     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:
+//       //set value to force sending all below
+//     //no break
+//     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
 
-    break;
-    case FUNC_WEB_ADD_HANDLER:
-      WebPage_Root_AddHandlers();
-    break;
-    case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
-        JsonBuilderI->Add("/module_draw.json",-1); 
-        // JsonBuilderI->Add("/web_top_bar.json",1000); 
-        JsonBuilderI->Add("/root_status_any.json",1100);
-    break;
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:
-      //set value to force sending all below
-    //no break
-    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
+//     break;
+//   }
 
-
-    break;
-  }
-
+DEBUG_LINE_HERE;
 }
 
 

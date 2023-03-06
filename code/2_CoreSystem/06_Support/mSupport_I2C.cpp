@@ -301,18 +301,28 @@ bool mSupport::I2cActive(uint32_t addr)
 
 bool mSupport::I2cSetDevice(uint32_t addr)
 {
+
+  ALOG_INF(PSTR("I2cSetDevice(%02X)"),addr);
+
   addr &= 0x7F;         // Max I2C address is 127
   if (I2cActive(addr)) {
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR("I2cSetDevice already active"));
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    AddLog(LOG_LEVEL_INFO, PSTR("I2cSetDevice already active"));
+    // #endif // ENABLE_LOG_LEVEL_INFO
     return false;       // If already active report as not present;
   }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-ALOG_DBM( PSTR("I2cSetDevice beginning"));
-    #endif //  ENABLE_LOG_LEVEL_INFO
+
+  // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+  ALOG_DBM( PSTR("I2cSetDevice beginning"));
+  // #endif //  ENABLE_LOG_LEVEL_INFO
+
   wire->beginTransmission((uint8_t)addr);
-  return (0 == wire->endTransmission());
+
+  bool result = (0 == wire->endTransmission());
+
+  ALOG_INF(PSTR("result=%d 0 is successful"),result);
+  return result;
+
 }
 
 bool mSupport::I2cEnabled(uint32_t i2c_index)

@@ -276,6 +276,17 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
     EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID,
   #endif
+  
+  #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO 
+    EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
+    EM_MODULE_DRIVERS__CAMERA_TASMOTA__ID,
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT 
+    EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID,
+  #endif
+
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
     EM_MODULE_ENERGY_INTERFACE_ID,
@@ -323,9 +334,6 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_SENSORS_BME
     EM_MODULE_SENSORS_BME_ID,
-  #endif
-  #ifdef USE_MODULE_SENSORS_BMP
-    EM_MODULE_SENSORS_BMP_ID,
   #endif
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     EM_MODULE_SENSORS_ULTRASONIC_ID,
@@ -628,7 +636,7 @@ enum MODULE_IDS{
   #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-  #include "4_Drivers/CAM_OV2640/mCamera.h"
+  #include "4_Drivers/50_CAM_OV2640/mCamera.h"
   #define pCONT_mdhbridge                           static_cast<mCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_ID])
 #endif
 
@@ -644,6 +652,22 @@ enum MODULE_IDS{
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
 #endif
+
+
+#ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
+  #include "4_Drivers/60_WebCam_Arduino/camera_index.h"
+  #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
+#endif
+#ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
+  #include "4_Drivers/61_WebCam_Tas/mWebCam.h"
+  #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_TASMOTA__ID])
+#endif
+#ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
+  #include "4_Drivers/52_WebCamera/mWebCamera.h"
+  #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
+#endif
+
+
 
 
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
@@ -708,13 +732,10 @@ enum MODULE_IDS{
   #define pCONT_sbutton                         static_cast<mButtons*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_BME
-  #include "5_Sensors/04_BME/mBME.h"
+  #include "5_Sensors/03_BME/mBME.h"
   #define pCONT_bme                             static_cast<mBME*>(pCONT->pModule[EM_MODULE_SENSORS_BME_ID])
 #endif
-#ifdef USE_MODULE_SENSORS_BMP
-  #include "5_Sensors/03_BMP/mBMP.h"
-  #define pCONT_bmp                             static_cast<mBMP*>(pCONT->pModule[EM_MODULE_SENSORS_BMP_ID])
-#endif
+
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/05_DHT/mSensorsDHT.h"
   #define pCONT_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])

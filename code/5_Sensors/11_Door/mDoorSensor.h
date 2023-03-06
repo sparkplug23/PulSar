@@ -98,12 +98,12 @@ class mDoorSensor :
     }
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index > 1) {value->type.push_back(0); return ;}
-      value->type.push_back(SENSOR_TYPE_DOOR_POSITION_ID);
-      value->data.push_back(door_detect.isactive);
+      if(index > 1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_DOOR_POSITION_ID);
+      value->data_f.push_back(door_detect.isactive);
       // #ifdef DOORLOCK_SWITCH_PIN
-      value->type.push_back(SENSOR_TYPE_DOOR_LOCKED_ID);
-      value->data.push_back(lock_detect.isactive);
+      value->sensor_type.push_back(SENSOR_TYPE_DOOR_LOCKED_ID);
+      value->data_f.push_back(lock_detect.isactive);
       // #endif // DOORLOCK_SWITCH_PIN
       value->sensor_id = index;
     };

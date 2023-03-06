@@ -678,7 +678,6 @@ unsigned long updateCheckFirstRun = 60000;            // First-run check offset
     void mqttDisconnected();
     void mqttCallback(String &strTopic, String &strPayload);
     void mqttStatusUpdate();
-    // bool nextionHandleInput();
     void nextionHandleInput();
     void nextionProcessInput();
     void nextionSetAttr(const char* hmiAttribute, const char* hmiValue);
@@ -732,7 +731,7 @@ unsigned long updateCheckFirstRun = 60000;            // First-run check offset
 
     bool updateCheck();
     void debugPrintln(const String &debugText);
-    void debugPrint(const String &debugText);
+    // void debugPrint(const String &debugText);
     byte utf8ascii(byte ascii);
     String utf8ascii(String s); // to be converted to working char*
     // void utf8ascii(char *s);
@@ -856,11 +855,74 @@ super short term, for one page with heating, just manually create it all
 
 
 
+ 
+ {
+  "commands": [
+    "page 5",
+    "p[5].b[7].txt=\"Heating is working\"",
+    "p[5].b[7].pco=2047",
+    "p[5].b[7].bco=0",
+    "p[5].b[11].txt=\"12.3\"",
+    "p[5].b[11].pco=65500",
+    "p[5].b[11].bco=0"
+  ]
+}
 
+{
+  "commands": [
+    "page 1",
+    "p[9].b[1].txt=\"hello\"",
+    "p[9].b[1].bco=200"
+  ]
+}
 
+{
+  "commands": [
+    "page 1",
+    "p0.pic=1",
+    "p[1].b[1].txt=\"Heating is working\"",
+    "p[1].b[1].pco=2047",
+    "p[1].b[1].bco=0",
+    "p[1].b[7].txt=\"12.3\"",
+    "p[1].b[7].pco=65500",
+    "p[1].b[7].bco=0",
+    "p[1].b[8].txt=\"12.3\"",
+    "p[1].b[8].pco=65500",
+    "p[1].b[8].bco=0",
+    "p[1].b[9].txt=\"12.3\"",
+    "p[1].b[9].pco=65500",
+    "p[1].b[9].bco=0",
+    "p[1].b[10].txt=\"12.3\"",
+    "p[1].b[10].pco=65500",
+    "p[1].b[10].bco=0",
+    "p[1].b[11].txt=\"12.3\"",
+    "p[1].b[11].pco=65500",
+    "p[1].b[11].bco=0",
+    "p[1].b[12].txt=\"12.3\"",
+    "p[1].b[12].pco=65500",
+    "p[1].b[12].bco=0",
+    "p[1].b[13].txt=\"12.3\"",
+    "p[1].b[13].pco=65500",
+    "p[1].b[13].bco=0",
+    "p[1].b[14].txt=\"12.3\"",
+    "p[1].b[14].pco=65500",
+    "p[1].b[14].bco=0",
+    "p[1].b[2].txt=\"12.3\"",
+    "p[1].b[13].pco=65500",
+    "p[1].b[13].bco=0"
+  ]
+}
 
+developing conversion of colours
 
-
+{
+  "commands": [
+    "page 1",
+    "p[1].b[1].txt=\"Heating is working\"",
+    "p[1].b[1].pco=h120",
+    "p[1].b[1].bco=0"
+  ]
+}
 
  * 
  */

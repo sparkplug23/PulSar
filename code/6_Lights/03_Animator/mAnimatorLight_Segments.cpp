@@ -9,81 +9,12 @@ void mAnimatorLight::Init_Segments()
 { 
 
   //reset segment runtimes
+  ALOG_ERR(PSTR("Phase out: duplicate code"));
   for (segment_new &seg : segments) 
   {
     seg.markForReset();
     seg.resetIfRequired();    
   }
-
-  
-  // // for the lack of better place enumerate ledmaps here
-  // // if we do it in json.cpp (serializeInfo()) we are getting flashes on LEDs
-  // // unfortunately this means we do not get updates after uploads
-  // enumerateLedmaps();
-
-  // _hasWhiteChannel = _isOffRefreshRequired = false;
-
-  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-  // if busses failed to load, add default (fresh install, FS issue, ...)
-  if (busses->getNumBusses() == 0) {
-    DEBUG_PRINTLN(F("No busses, init default"));
-    const uint8_t defDataPins[] = {DATA_PINS};
-    const uint16_t defCounts[] = {PIXEL_COUNTS};
-    const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
-    const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
-    uint16_t prevLen = 0;
-    for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
-      uint8_t defPin[] = {defDataPins[i]};
-      uint16_t start = prevLen;
-      uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
-      prevLen += count;
-      BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-      busses->add(defCfg);
-    }
-  }
-
-  _length = 0; // Is sstrip already set?
-  for (uint8_t i=0; i<busses->getNumBusses(); i++) {
-    Bus *bus = busses->getBus(i);
-    if (bus == nullptr) continue;
-    if (bus->getStart() + bus->getLength() > MAX_LEDS) break;
-    //RGBW mode is enabled if at least one of the strips is RGBW
-    _hasWhiteChannel |= bus->isRgbw();
-    //refresh is required to remain off if at least one of the strips requires the refresh.
-    _isOffRefreshRequired |= bus->isOffRefreshRequired();
-    uint16_t busEnd = bus->getStart() + bus->getLength();
-    if (busEnd > _length) _length = busEnd;
-    #ifdef ESP8266
-    if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
-    uint8_t pins[5];
-    if (!bus->getPins(pins)) continue;
-    BusDigital* bd = static_cast<BusDigital*>(bus);
-    if (pins[0] == 3) bd->reinit();
-    #endif
-  }
-
-  //initialize leds array. TBD: realloc if nr of leds change
-  // if (Segment::_globalLeds) {
-  //   purgeSegments(true);
-  //   free(Segment::_globalLeds);
-  //   Segment::_globalLeds = nullptr;
-  // }
-  // if (useLedsArray) {
-  //   #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
-  //   if (psramFound())
-  //     Segment::_globalLeds = (CRGB*) ps_malloc(sizeof(CRGB) * _length);
-  //   else
-  //   #endif
-  //     Segment::_globalLeds = (CRGB*) malloc(sizeof(CRGB) * _length);
-  //   memset(Segment::_globalLeds, 0, sizeof(CRGB) * _length);
-  // }
-
-  // //segments are created in makeAutoSegments();
-  // loadCustomPalettes(); // (re)load all custom palettes
-  // deserializeMap();     // (re)load default ledmap
-
-
-  #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
   resetSegments1();
   
@@ -930,7 +861,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
   
   updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
   
-  ALOG_DBM( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
+  // ALOG_INF( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
 
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
@@ -939,6 +870,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
                 pixel < SEGLEN; 
                 pixel++
   ){  
+    // ALOG_INF(PSTR("SEGMENT.pixel =%d"), pixel);
     SEGMENT.SetPixelColor(pixel, updatedColor, false);
   }
   
@@ -3069,11 +3001,10 @@ void mAnimatorLight::setupEffectData() {
 //do not call this method from system context (network callback)
 void mAnimatorLight::finalizeInit(void)
 {
-  //reset segment runtimes
-  for (segment_new &seg : segments) {
-    seg.markForReset();
-    seg.resetIfRequired();
-  }
+
+  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+  DEBUG_LINE_HERE;
 
   // // for the lack of better place enumerate ledmaps here
   // // if we do it in json.cpp (serializeInfo()) we are getting flashes on LEDs
@@ -3082,23 +3013,33 @@ void mAnimatorLight::finalizeInit(void)
 
   // _hasWhiteChannel = _isOffRefreshRequired = false;
 
-  // //if busses failed to load, add default (fresh install, FS issue, ...)
-  // if (busses.getNumBusses() == 0) {
-  //   DEBUG_PRINTLN(F("No busses, init default"));
-  //   const uint8_t defDataPins[] = {DATA_PINS};
-  //   const uint16_t defCounts[] = {PIXEL_COUNTS};
-  //   const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
-  //   const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
-  //   uint16_t prevLen = 0;
-  //   for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
-  //     uint8_t defPin[] = {defDataPins[i]};
-  //     uint16_t start = prevLen;
-  //     uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
-  //     prevLen += count;
-  //     BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-  //     busses.add(defCfg);
-  //   }
-  // }
+  if(busses == nullptr)
+  {
+    ALOG_INF(PSTR("busses null"));
+    return;
+  }
+
+  //if busses failed to load, add default (fresh install, FS issue, ...)
+  if (busses->getNumBusses() == 0) {
+    DEBUG_PRINTLN(F("No busses, init default"));
+    const uint8_t defDataPins[] = {DATA_PINS_BUSSES};
+    const uint16_t defCounts[] = {PIXEL_COUNTS};
+    const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+    const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+
+
+    DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
+
+    uint16_t prevLen = 0;
+    for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
+      uint8_t defPin[] = {defDataPins[i]};
+      uint16_t start = prevLen;
+      uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+      prevLen += count;
+      BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
+      busses->add(defCfg);
+    }
+  }
 
   // _length = 0;
   // for (uint8_t i=0; i<busses.getNumBusses(); i++) {
@@ -3119,6 +3060,7 @@ void mAnimatorLight::finalizeInit(void)
   //   if (pins[0] == 3) bd->reinit();
   //   #endif
   // }
+    #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
   //initialize leds array. TBD: realloc if nr of leds change
   if (mAnimatorLight::Segment_New::_globalLeds) {
@@ -3822,8 +3764,8 @@ void mAnimatorLight::deserializeMap(uint8_t n) {
 
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 //Bus static member definition, would belong in bus_manager.cpp
-int16_t Bus::_cct = -1;
-uint8_t Bus::_cctBlend = 0;
+// int16_t Bus::_cct = -1;
+// uint8_t Bus::_cctBlend = 0;
 uint8_t Bus::_gAWM = 255;
 #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 

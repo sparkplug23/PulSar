@@ -5,7 +5,19 @@ mTaskerManager* mTaskerManager::instance = nullptr;
 int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
+// DEBUG_LINE_HERE;
   int8_t result = 0;
+
+/**
+ * @brief Construct a new if object
+ * Add debug functions that can be called to highlight 
+ * 
+ * 
+ * DebugTasker__ExactIDMAtch()
+ * DebugTasker__RangedMinMaxIDs()
+ * 
+ */
+
 
   if(target_tasker){
     ALOG_INF(PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
@@ -160,7 +172,15 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
         //   case EM_MODULE_CORE_TIME_ID:
         //   case EM_MODULE_CORE_RULES_ID:
         //   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
-        pModule[switch_index]->Tasker(function, obj);
+        // if(EM_MODULE_NETWORK_WEBSERVER_ID!=switch_index)
+        // {
+          pModule[switch_index]->Tasker(function, obj);
+        // }else{
+        //   DEBUG_LINE_HERE;
+        //   delay(2000);
+        //   DEBUG_LINE_HERE;
+        // }
+
         //   break;
         //   default:
         //   //nothing
@@ -366,6 +386,19 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
     pModule[EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID] = new mCellular_SIM7000();
   #endif
+  
+  #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
+    pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID] = new mWebCamera();
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
+    pModule[EM_MODULE_DRIVERS__CAMERA_TASMOTA__ID] = new mWebCamera();
+  #endif
+  #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
+    pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID] = new mWebCamera();
+  #endif
+
+
+
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
     pModule[EM_MODULE_ENERGY_INTERFACE_ID] = new mEnergyInterface();
@@ -417,12 +450,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_BME
     pModule[EM_MODULE_SENSORS_BME_ID] = new mBME();
   #endif
-  #ifdef USE_MODULE_SENSORS_BMP
-    pModule[EM_MODULE_SENSORS_BMP_ID] = new mBMP();
-  #endif
-  #if defined(USE_MODULE_SENSORS_DS18X) || defined(USE_MODULE_SENSORS_DS18X_V2) || defined(USE_MODULE_SENSORS_DS18X_V3) || defined(USE_MODULE_SENSORS_DS18X_V4)
-    pModule[EM_MODULE_SENSORS_DB18S20_ID] = new mDS18X();
-  #endif
+
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     pModule[EM_MODULE_SENSORS_ULTRASONIC_ID] = new mUltraSonicSensor();
   #endif

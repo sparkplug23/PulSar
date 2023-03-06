@@ -212,6 +212,7 @@ const char* mSettings::GetTaskName(uint8_t task, char* buffer){
 
   switch(task){
     default:
+                                                      return PM_SEARCH_NOMATCH;
     case FUNC_POINTER_INIT:                           return PM_FUNC_POINTER_INIT_CTR;
     case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:                          return PM_FUNC_TEMPLATE_LOAD_CTR;
     // case FUNC_MODULE_INIT:                            return PM_FUNC_MODULE_INIT_CTR;
