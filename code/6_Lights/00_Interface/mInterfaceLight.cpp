@@ -668,6 +668,30 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16
    ALOG_INF( PSTR("SetPixelColor: %d\t(%d,%d,%d,%d,%d) pal%d"), index, colour.R, colour.G, colour.B, colour.W1, colour.W2, pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette.id );
   #endif
 
+  
+  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+  switch(pCONT_set->Settings.light_settings.type){
+    case LT_ADDRESSABLE_WS281X:
+    case LT_ADDRESSABLE_SK6812:
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      pCONT_ladd->SetPixelColorHardware(index, colour, flag_replicate_for_total_pixel_length);
+      pCONT_lAni->bus_manager->busses[0]->setPixelColorNew(index, colour);
+      #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+    break;
+    case LT_PWM1:
+    case LT_PWM2:
+    case LT_PWM3:
+    case LT_PWM4:
+    case LT_PWM5:
+      #ifdef USE_MODULE_LIGHTS_PWM
+      pCONT_lPWM->SetPixelColorHardware(index, colour);
+      #endif // USE_MODULE_LIGHTS_PWM
+    break;
+  }
+
+  #else
+
   switch(pCONT_set->Settings.light_settings.type){
     case LT_ADDRESSABLE_WS281X:
     case LT_ADDRESSABLE_SK6812:
@@ -686,6 +710,8 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16
     break;
   }
   
+  #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
 }
 RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 

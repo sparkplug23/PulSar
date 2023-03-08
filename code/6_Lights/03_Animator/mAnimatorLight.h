@@ -10,6 +10,7 @@
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
+  // #include "6_Lights/03_Animator/bus_manager.h"
 #include "pin_manager.h"
   #include "bus_manager.h"
   #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
@@ -57,7 +58,7 @@
 #ifndef DATA_PINS
   #define DATA_PINS LEDPIN
 #endif
-#define DATA_PINS_BUSSES 16
+#define DATA_PINS_BUSSES 23
 
 #ifndef DEFAULT_LED_TYPE
   #define DEFAULT_LED_TYPE TYPE_WS2812_RGB
@@ -359,7 +360,7 @@ class mAnimatorLight :
 
     #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-    BusManager* busses = nullptr; //BusManager();
+    BusManager* bus_manager = nullptr; //BusManager();
 
 
 

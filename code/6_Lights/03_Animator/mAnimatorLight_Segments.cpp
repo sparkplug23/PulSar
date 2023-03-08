@@ -1641,11 +1641,34 @@ void mAnimatorLight::EveryLoop()
     ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
     #endif
 
+    #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // some buses send asynchronously and this method will return before
+    // all of the data has been sent.
+    // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+    if(bus_manager)
+    {
+      bus_manager->show();
+    }
+
     if(stripbus->IsDirty()){    // Only update if LEDs have changed
       if(stripbus->CanShow()){  
         pCONT_iLight->ShowInterface();
       }
     }
+
+    #else // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+    if(stripbus->IsDirty()){    // Only update if LEDs have changed
+      if(stripbus->CanShow()){  
+        pCONT_iLight->ShowInterface();
+      }
+    }
+
+
+    #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+
+
     
 //     #ifndef ENABLE_DEVFEATURE_FORCED_REMOVE_091122
 //     /**
@@ -3013,14 +3036,14 @@ void mAnimatorLight::finalizeInit(void)
 
   // _hasWhiteChannel = _isOffRefreshRequired = false;
 
-  if(busses == nullptr)
+  if(bus_manager == nullptr)
   {
     ALOG_INF(PSTR("busses null"));
     return;
   }
 
   //if busses failed to load, add default (fresh install, FS issue, ...)
-  if (busses->getNumBusses() == 0) {
+  if (bus_manager->getNumBusses() == 0) {
     DEBUG_PRINTLN(F("No busses, init default"));
     const uint8_t defDataPins[] = {DATA_PINS_BUSSES};
     const uint16_t defCounts[] = {PIXEL_COUNTS};
@@ -3037,29 +3060,49 @@ void mAnimatorLight::finalizeInit(void)
       uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
       prevLen += count;
       BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-      busses->add(defCfg);
+      if(bus_manager->add(defCfg) == -1) break;
     }
   }
 
-  // _length = 0;
-  // for (uint8_t i=0; i<busses.getNumBusses(); i++) {
-  //   Bus *bus = busses.getBus(i);
-  //   if (bus == nullptr) continue;
-  //   if (bus->getStart() + bus->getLength() > MAX_LEDS) break;
-  //   //RGBW mode is enabled if at least one of the strips is RGBW
-  //   _hasWhiteChannel |= bus->isRgbw();
-  //   //refresh is required to remain off if at least one of the strips requires the refresh.
-  //   _isOffRefreshRequired |= bus->isOffRefreshRequired();
-  //   uint16_t busEnd = bus->getStart() + bus->getLength();
-  //   if (busEnd > _length) _length = busEnd;
-  //   #ifdef ESP8266
-  //   if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
-  //   uint8_t pins[5];
-  //   if (!bus->getPins(pins)) continue;
-  //   BusDigital* bd = static_cast<BusDigital*>(bus);
-  //   if (pins[0] == 3) bd->reinit();
-  //   #endif
-  // }
+    DEBUG_PRINTF("busses->getNumBusses() %d\n\r", bus_manager->getNumBusses());
+
+  _length = 0;
+  for (uint8_t i=0; i<bus_manager->getNumBusses(); i++) 
+  {
+    
+    DEBUG_PRINTF("getNumBusses %d\n\r", i);
+
+    Bus *bus = bus_manager->getBus(i);
+    if (bus == nullptr)
+    {
+      DEBUG_PRINTF("bus == nullptr\n\r");
+      continue; // continue breaks one loop occurance only (unlike break)
+    }
+
+    if (bus->getStart() + bus->getLength() > MAX_LEDS)
+    {
+      DEBUG_PRINTF("bus->getStart() + bus->getLength() > MAX_LEDS\n\r");
+      break;
+    }
+    //RGBW mode is enabled if at least one of the strips is RGBW
+    // _hasWhiteChannel |= bus->isRgbw();
+    //refresh is required to remain off if at least one of the strips requires the refresh.
+    _isOffRefreshRequired |= bus->isOffRefreshRequired();
+    uint16_t busEnd = bus->getStart() + bus->getLength();
+    
+    DEBUG_PRINTF("_hasWhiteChannel %d, _isOffRefreshRequired %d, busEnd %d\n\r", _hasWhiteChannel, _isOffRefreshRequired, busEnd);
+
+    if (busEnd > _length) _length = busEnd;
+    #ifdef ESP8266
+    if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
+    uint8_t pins[5];
+    if (!bus->getPins(pins)) continue;
+    BusDigital* bd = static_cast<BusDigital*>(bus);
+    if (pins[0] == 3) bd->reinit();
+    #endif
+  }
+
+
     #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
   //initialize leds array. TBD: realloc if nr of leds change
@@ -3762,12 +3805,12 @@ void mAnimatorLight::deserializeMap(uint8_t n) {
 
 // //Bus static member definition, would belong in bus_manager.cpp
 
-#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//Bus static member definition, would belong in bus_manager.cpp
+// #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+// //Bus static member definition, would belong in bus_manager.cpp
 // int16_t Bus::_cct = -1;
 // uint8_t Bus::_cctBlend = 0;
-uint8_t Bus::_gAWM = 255;
-#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+// uint8_t Bus::_gAWM = 255;
+// #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 
 // const char JSON_mode_names[] PROGMEM = R"=====(["FX names moved"])=====";

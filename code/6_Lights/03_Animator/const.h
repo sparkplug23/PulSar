@@ -1,7 +1,7 @@
 #ifndef WLED_CONST_H
 #define WLED_CONST_H
 
-#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+// #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 /*
  * Readability defines and their associated numerical values + compile-time constants
@@ -124,12 +124,21 @@
 #define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
 #define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
 
+// //RGB to RGBW conversion mode
+// #define RGBW_MODE_MANUAL_ONLY     0            //No automatic white channel calculation. Manual white channel slider
+// #define RGBW_MODE_AUTO_BRIGHTER   1            //New algorithm. Adds as much white as the darkest RGBW channel
+// #define RGBW_MODE_AUTO_ACCURATE   2            //New algorithm. Adds as much white as the darkest RGBW channel and subtracts this amount from each RGB channel
+// #define RGBW_MODE_DUAL            3            //Manual slider + auto calculation. Automatically calculates only if manual slider is set to off (0)
+// #define RGBW_MODE_LEGACY          4            //Old floating algorithm. Too slow for realtime and palette support
+
 //RGB to RGBW conversion mode
-#define RGBW_MODE_MANUAL_ONLY     0            //No automatic white channel calculation. Manual white channel slider
-#define RGBW_MODE_AUTO_BRIGHTER   1            //New algorithm. Adds as much white as the darkest RGBW channel
-#define RGBW_MODE_AUTO_ACCURATE   2            //New algorithm. Adds as much white as the darkest RGBW channel and subtracts this amount from each RGB channel
-#define RGBW_MODE_DUAL            3            //Manual slider + auto calculation. Automatically calculates only if manual slider is set to off (0)
-#define RGBW_MODE_LEGACY          4            //Old floating algorithm. Too slow for realtime and palette support
+#define RGBW_MODE_MANUAL_ONLY     0    // No automatic white channel calculation. Manual white channel slider
+#define RGBW_MODE_AUTO_BRIGHTER   1    // New algorithm. Adds as much white as the darkest RGBW channel
+#define RGBW_MODE_AUTO_ACCURATE   2    // New algorithm. Adds as much white as the darkest RGBW channel and subtracts this amount from each RGB channel
+#define RGBW_MODE_DUAL            3    // Manual slider + auto calculation. Automatically calculates only if manual slider is set to off (0)
+#define RGBW_MODE_MAX             4    // Sets white to the value of the brightest RGB channel (good for white-only LEDs without any RGB)
+//#define RGBW_MODE_LEGACY        4    // Old floating algorithm. Too slow for realtime and palette support (unused)
+#define AW_GLOBAL_DISABLED      255    // Global auto white mode override disabled. Per-bus setting is used
 
 //realtime modes
 #define REALTIME_MODE_INACTIVE    0
@@ -168,10 +177,121 @@
 //                                              - 0b111 (dec. 112-127) unused/reserved
 //bit 7 is reserved and set to 0
 
+// #define TYPE_NONE                 0            //light is not configured
+// #define TYPE_RESERVED             1            //unused. Might indicate a "virtual" light
+// //Digital types (data pin only) (16-31)
+// #define TYPE_WS2812_1CH          20            //white-only chips
+// #define TYPE_WS2812_WWA          21            //amber + warm + cold white
+// #define TYPE_WS2812_RGB          22
+// #define TYPE_GS8608              23            //same driver as WS2812, but will require signal 2x per second (else displays test pattern)
+// #define TYPE_WS2811_400KHZ       24            //half-speed WS2812 protocol, used by very old WS2811 units
+// #define TYPE_TM1829              25
+// #define TYPE_SK6812_RGBW         30
+// #define TYPE_TM1814              31
+// //"Analog" types (PWM) (32-47)
+// #define TYPE_ONOFF               40            //binary output (relays etc.)
+// #define TYPE_ANALOG_1CH          41            //single channel PWM. Uses value of brightest RGBW channel
+// #define TYPE_ANALOG_2CH          42            //analog WW + CW
+// #define TYPE_ANALOG_3CH          43            //analog RGB
+// #define TYPE_ANALOG_4CH          44            //analog RGBW
+// #define TYPE_ANALOG_5CH          45            //analog RGB + WW + CW
+// //Digital types (data + clock / SPI) (48-63)
+// #define TYPE_WS2801              50
+// #define TYPE_APA102              51
+// #define TYPE_LPD8806             52
+// #define TYPE_P9813               53
+// #define TYPE_LPD6803             54
+// //Network types (master broadcast) (80-95)
+// #define TYPE_NET_DDP_RGB         80            //network DDP RGB bus (master broadcast bus)
+// #define TYPE_NET_E131_RGB        81            //network E131 RGB bus (master broadcast bus, unused)
+// #define TYPE_NET_ARTNET_RGB      82            //network ArtNet RGB bus (master broadcast bus, unused)
+// #define TYPE_NET_DDP_RGBW        88            //network DDP RGBW bus (master broadcast bus)
+
+// #define IS_DIGITAL(t) ((t) & 0x10) //digital are 16-31 and 48-63
+// #define IS_PWM(t)     ((t) > 40 && (t) < 46)
+// #define NUM_PWM_PINS(t) ((t) - 40) //for analog PWM 41-45 only
+// #define IS_2PIN(t)      ((t) > 47)
+
+// //Color orders
+// #define COL_ORDER_GRB             0           //GRB(w),defaut
+// #define COL_ORDER_RGB             1           //common for WS2811
+// #define COL_ORDER_BRG             2
+// #define COL_ORDER_RBG             3
+// #define COL_ORDER_BGR             4
+// #define COL_ORDER_GBR             5
+// #define COL_ORDER_MAX             5
+
+//Color orders
+#define COL_ORDER_GRB             0           //GRB(w),defaut
+#define COL_ORDER_RGB             1           //common for WS2811
+#define COL_ORDER_BRG             2
+#define COL_ORDER_RBG             3
+#define COL_ORDER_BGR             4
+#define COL_ORDER_GBR             5
+#define COL_ORDER_MAX             5
+
+
+#ifndef WLED_MAX_BUSSES
+  #ifdef ESP8266
+    #define WLED_MAX_BUSSES 3
+    #define WLED_MIN_VIRTUAL_BUSSES 2
+  #else
+    #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
+      #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
+      #define WLED_MIN_VIRTUAL_BUSSES 3
+    #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
+      #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
+        #define WLED_MAX_BUSSES 6             // will allow 4 digital & 2 analog
+        #define WLED_MIN_VIRTUAL_BUSSES 4
+      #else
+        #define WLED_MAX_BUSSES 7             // will allow 5 digital & 2 analog
+        #define WLED_MIN_VIRTUAL_BUSSES 3
+      #endif
+    #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
+      #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog
+      #define WLED_MIN_VIRTUAL_BUSSES 4
+    #else
+      #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
+        #define WLED_MAX_BUSSES 8
+        #define WLED_MIN_VIRTUAL_BUSSES 2
+      #else
+        #define WLED_MAX_BUSSES 10
+        #define WLED_MIN_VIRTUAL_BUSSES 0
+      #endif
+    #endif
+  #endif
+#else
+  #ifdef ESP8266
+    #if WLED_MAX_BUSES > 5
+      #error Maximum number of buses is 5.
+    #endif
+    #define WLED_MIN_VIRTUAL_BUSSES (5-WLED_MAX_BUSSES)
+  #else
+    #if WLED_MAX_BUSES > 10
+      #error Maximum number of buses is 10.
+    #endif
+    #define WLED_MIN_VIRTUAL_BUSSES (10-WLED_MAX_BUSSES)
+  #endif
+#endif
+
+//Light capability byte (unused) 0bRCCCTTTT
+//bits 0/1/2/3: specifies a type of LED driver. A single "driver" may have different chip models but must have the same protocol/behavior
+//bits 4/5/6: specifies the class of LED driver - 0b000 (dec. 0-15)  unconfigured/reserved
+//                                              - 0b001 (dec. 16-31) digital (data pin only)
+//                                              - 0b010 (dec. 32-47) analog (PWM)
+//                                              - 0b011 (dec. 48-63) digital (data + clock / SPI)
+//                                              - 0b100 (dec. 64-79) unused/reserved
+//                                              - 0b101 (dec. 80-95) virtual network busses
+//                                              - 0b110 (dec. 96-111) unused/reserved
+//                                              - 0b111 (dec. 112-127) unused/reserved
+//bit 7 is reserved and set to 0
+
 #define TYPE_NONE                 0            //light is not configured
 #define TYPE_RESERVED             1            //unused. Might indicate a "virtual" light
 //Digital types (data pin only) (16-31)
-#define TYPE_WS2812_1CH          20            //white-only chips
+#define TYPE_WS2812_1CH          18            //white-only chips (1 channel per IC) (unused)
+#define TYPE_WS2812_1CH_X3       19            //white-only chips (3 channels per IC)
+#define TYPE_WS2812_2CH_X3       20            //CCT chips (1st IC controls WW + CW of 1st zone and CW of 2nd zone, 2nd IC controls WW of 2nd zone and WW + CW of 3rd zone)
 #define TYPE_WS2812_WWA          21            //amber + warm + cold white
 #define TYPE_WS2812_RGB          22
 #define TYPE_GS8608              23            //same driver as WS2812, but will require signal 2x per second (else displays test pattern)
@@ -211,7 +331,6 @@
 #define COL_ORDER_BGR             4
 #define COL_ORDER_GBR             5
 #define COL_ORDER_MAX             5
-
 
 //Button type
 #define BTN_TYPE_NONE             0
@@ -433,6 +552,6 @@
   #define HW_PIN_CSSPI SS
 #endif
 
-#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+// #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 #endif // guard

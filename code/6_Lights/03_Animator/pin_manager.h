@@ -27,7 +27,8 @@ managed_pin_type;
  *     17 bytes on ESP8266
  *     40 bytes on ESP32
  */
-enum struct PinOwner : uint8_t {
+enum struct PinOwner : uint8_t 
+{
   None          = 0,      // default == legacy == unspecified owner
   // High bit is set for all built-in pin owners
   Ethernet      = 0x81,
