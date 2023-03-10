@@ -58,7 +58,7 @@
 #ifndef DATA_PINS
   #define DATA_PINS LEDPIN
 #endif
-#define DATA_PINS_BUSSES 23
+#define DATA_PINS_BUSSES 23, 22
 
 #ifndef DEFAULT_LED_TYPE
   #define DEFAULT_LED_TYPE TYPE_WS2812_RGB
@@ -72,6 +72,7 @@
 // #define ENABLE_MODULE_DEBUG__ANIMATOR_LIGHT_EFFECTS_HIGH_LEVEL //ie not time sensitive
 // #define ENABLE_MODULE_DEBUG__ANIMATOR_LIGHT_EFFECTS_LOW_LEVEL  // will be detailed, and slow timing down
 
+#define MAX_PIXELBUS_DIGITAL_PINS 20
 
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"

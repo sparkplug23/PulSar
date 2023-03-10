@@ -671,24 +671,26 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16
   
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-  switch(pCONT_set->Settings.light_settings.type){
-    case LT_ADDRESSABLE_WS281X:
-    case LT_ADDRESSABLE_SK6812:
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      pCONT_ladd->SetPixelColorHardware(index, colour, flag_replicate_for_total_pixel_length);
-      pCONT_lAni->bus_manager->busses[0]->setPixelColorNew(index, colour);
-      #endif // USE_MODULE_LIGHTS_ADDRESSABLE
-    break;
-    case LT_PWM1:
-    case LT_PWM2:
-    case LT_PWM3:
-    case LT_PWM4:
-    case LT_PWM5:
-      #ifdef USE_MODULE_LIGHTS_PWM
-      pCONT_lPWM->SetPixelColorHardware(index, colour);
-      #endif // USE_MODULE_LIGHTS_PWM
-    break;
-  }
+  pCONT_lAni->bus_manager->setPixelColorNew(index, colour);
+
+  // switch(pCONT_set->Settings.light_settings.type){
+  //   case LT_ADDRESSABLE_WS281X:
+  //   case LT_ADDRESSABLE_SK6812:
+  //     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  //     pCONT_ladd->SetPixelColorHardware(index, colour, flag_replicate_for_total_pixel_length);
+  //     pCONT_lAni->bus_manager->busses[0]->setPixelColorNew(index, colour);
+  //     #endif // USE_MODULE_LIGHTS_ADDRESSABLE
+  //   break;
+  //   case LT_PWM1:
+  //   case LT_PWM2:
+  //   case LT_PWM3:
+  //   case LT_PWM4:
+  //   case LT_PWM5:
+  //     #ifdef USE_MODULE_LIGHTS_PWM
+  //     pCONT_lPWM->SetPixelColorHardware(index, colour);
+  //     #endif // USE_MODULE_LIGHTS_PWM
+  //   break;
+  // }
 
   #else
 
@@ -715,6 +717,13 @@ void mInterfaceLight::SetPixelColourHardwareInterface(RgbcctColor colour, uint16
 }
 RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
 
+  
+  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+  return pCONT_lAni->bus_manager->getPixelColorNew(index);
+
+  #else
+
   switch(pCONT_set->Settings.light_settings.type){
     case LT_ADDRESSABLE_WS281X:  
     case LT_ADDRESSABLE_SK6812:
@@ -733,6 +742,7 @@ RgbcctColor mInterfaceLight::GetPixelColourHardwareInterface(uint16_t index){
     break;
   }
 
+  #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 }
 
 void mInterfaceLight::ShowInterface(){

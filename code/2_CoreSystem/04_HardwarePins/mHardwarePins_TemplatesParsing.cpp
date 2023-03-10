@@ -79,13 +79,22 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
     //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
   }
 
-  if(jtok = obj[PM_JSON_GPIOC]){ 
-
+  /**
+   * @brief If either GPIO method is configured then clear the previous
+   * 
+   * @param obj 
+   */
+  if((obj[PM_JSON_GPIOC])||(obj[D_JSON_GPIO_FUNCTION]))
+  {
     pCONT_set->boot_status.module_template_parse_success = true;
-    // clear pins to none
     for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
       pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
     }
+  }
+
+
+  if(jtok = obj[PM_JSON_GPIOC])
+  {
     
     int8_t  real_pin = -1;
     int16_t gpio_number = -1;
@@ -138,6 +147,75 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
     }
 
   }
+
+  // New method that assumes the function is the key, and the pin(s) are the values
+  // pins may be represented as single ints, or array of ints (e.g. Lighting pins)
+  if(jtok = obj[D_JSON_GPIO_FUNCTION])
+  { 
+
+    ALOG_INF(PSTR("Found %s"), D_JSON_GPIO_FUNCTION);
+    
+    int8_t  real_pin = -1;
+    int16_t gpio_function_id = -1;
+
+    uint8_t jsonpair_count = jtok.size();
+    
+    AddLog(LOG_LEVEL_INFO, PSTR("jsonpair_count=%d"), jsonpair_count);
+
+    for(int pair_index = 0; pair_index < jsonpair_count; pair_index++)
+    {
+      jtok.nextOne(); //skip start of object
+      const char* key = jtok.getStr();
+      
+      // ALOG_INF(PSTR("KEY%d %s\n\r"), pair_index, key);
+
+      gpio_function_id = pCONT_pins->GetGPIOFunctionIDbyName(key);
+
+      ALOG_INF(PSTR("KEY%d %s GPIO_ID %d\n\r"), pair_index, key, gpio_function_id);
+      
+      
+      if(gpio_function_id>=0)
+      {
+    
+        jtok.nextOne();
+        const char* value = jtok.getStr();
+        
+        real_pin = GetRealPinNumberFromName(value);
+        ALOG_INF(PSTR("value %d %s %d\n\r"), pair_index, value, real_pin);
+
+        int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
+        ALOG_INF( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+
+        if(index_pin != -1){
+          // only template pins
+          pCONT_set->Settings.user_template2.hardware.gp.io[index_pin] = gpio_function_id; // non adjusted pin_number
+          // FULL pin list
+          // pCONT_set->Settings.module_pins.io[pin_num_count] = gpio_function_id; 
+          
+          #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+          AddLog(LOG_LEVEL_INFO, PSTR("hardware.gp.io[real%d/index%d] = gpio function %d SET"), 
+            real_pin, 
+            index_pin,
+            pCONT_set->Settings.user_template2.hardware.gp.io[index_pin]
+          );
+          #endif
+          // AddLog(LOG_LEVEL_INFO, PSTR("pin_number/indexed=%d %d, gpio_function_id=%d"), pin_number, pin_number_array_index, gpio_function_id);
+        }
+        else
+        {
+          #ifdef ENABLE_LOG_LEVEL_ERROR
+          AddLog(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\" %d"),value, gpio_function_id);
+          #endif // ENABLE_LOG_LEVEL_COMMANDS
+        }
+
+      }// end
+
+    }
+
+    delay(3000);
+
+  }
+    
     
     
   if(jtok = obj[PM_JSON_BASE]){

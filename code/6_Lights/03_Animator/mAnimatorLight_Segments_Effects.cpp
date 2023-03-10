@@ -2222,7 +2222,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
   
 
-  SEGMENT.colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
+//  SEGMENT.colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
     
 
 
@@ -2258,15 +2258,44 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
   // pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;
   // SEGMENT.colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
 
+  uint8_t digit_count = mSupport::NumDigits(lcd_display_show_number);
+
+  // 2 digits only
+  // if(digit_count <= 2)
+  // {
+    LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+    LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  // }
+  // else
+  // if(
+  //   (digit_count <= 4) ||
+  //   (digit_count >= 3)
+  // ){ 
+    
+  //   printf("%d\n", score % 10);
+  //   score /= 10;
+
+  //   uint16_t num = lcd_display_show_number;
+
+
+
+
+  //   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  //   LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
+  //   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  //   LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
+
+
+  // }
+
 
   // LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
   // LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
   
   // lcd_display_show_number = 67;
 
-  LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
-  LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
-  
 
 
   // Get starting positions already on show
@@ -2283,6 +2312,131 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01()
 
 
 
+
+/****
+ * Changes pixels randomly to new colour, with slow blending
+ * Requires new colour calculation each call
+ * 02 trying lib method with mapping
+ */
+void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
+{
+  
+  AddLog(LOG_LEVEL_TEST, PSTR("Numbers_Basic    _segments[].colour_type = %d"), SEGMENT.colour_type);
+  AddLog(LOG_LEVEL_TEST, PSTR("lcd_display_show_number = %d"), lcd_display_show_number);
+
+
+  
+
+//  SEGMENT.colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
+    
+
+
+  
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
+
+  AddLog(LOG_LEVEL_TEST, PSTR("dataSize = %d"), dataSize);
+
+  if (!SEGMENT.allocateData(dataSize))
+  {
+    AddLog(LOG_LEVEL_TEST, PSTR("Not Enough Memory"));
+    SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID; // Default
+  }
+  
+  // So colour region does not need to change each loop to prevent colour crushing
+  // SEGMENT.flags.brightness_applied_during_colour_generation = true;
+  
+  /**
+   * @brief Reset all new colours so only new sections of clock are lit
+   **/
+  for(int i=0;i<SEGLEN;i++){
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), i, SEGMENT.colour_type, RgbwColor(0,0,0,0));
+  }
+
+
+  // Pick new colours
+  //DynamicBuffer_Segments_UpdateDesiredColourFromPaletteSelected(SEGMENT.palette.id, SEGIDX);
+
+/**
+ * @brief Temporary force until handled in code
+ * 
+ */
+  // pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;
+  // SEGMENT.colour_type = RgbcctColor_Controller::LightSubType::LIGHT_TYPE__RGB__ID;
+
+  uint8_t digit_count = strlen(lcd_display_show_string);
+
+  if(digit_count > 4)
+  {
+    ALOG_ERR(PSTR("too big"));
+  }
+
+  uint8_t pos = 0;
+  uint8_t number_show = 0;
+
+  for(int i=0;i<digit_count;i++)
+  {
+    pos = digit_count - 1 - i;
+    if(lcd_display_show_string[i] != ' ')
+    {
+      LCDDisplay_showDigit(lcd_display_show_string[i]-48, 0, pos ); 
+    }
+  }
+  
+  
+  
+  
+
+
+
+  // 2 digits only
+  // if(digit_count <= 2)
+  // // {
+  //   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  //   LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  // // }
+  // else
+  // if(
+  //   (digit_count <= 4) ||
+  //   (digit_count >= 3)
+  // ){ 
+    
+  //   printf("%d\n", score % 10);
+  //   score /= 10;
+
+  //   uint16_t num = lcd_display_show_number;
+
+
+
+
+  //   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  //   LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
+  //   LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  //   LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
+
+
+  // }
+
+
+  // LCDDisplay_showDigit((lcd_display_show_number / 10), 0+1, 1 );                   // minutes thankfully don't differ between 12h/24h, so this can be outside the above if/else
+  // LCDDisplay_showDigit((lcd_display_show_number % 10),   0, 0 );                   // each digit is drawn with an increasing color (*2, *3, *4, *5) (*6 and *7 for seconds only in HH:MM:SS)
+  
+  // lcd_display_show_number = 67;
+
+
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+    }
+  );
+
+}
 
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK

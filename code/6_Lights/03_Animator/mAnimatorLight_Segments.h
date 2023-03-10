@@ -704,6 +704,7 @@
     EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
     EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID,
     EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID,
+    EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID,
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
     /**
@@ -1266,6 +1267,7 @@
   void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
   void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
   void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+  void SubTask_Flasher_Animate_LCD_Display_Show_String_01();
   void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
   void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
   void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
@@ -1275,6 +1277,7 @@
   // RgbcctColor ColorFromPaletteLCD(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
   uint8_t tempcol = 0;
   uint16_t lcd_display_show_number = 0;
+  char lcd_display_show_string[5] = {0}; //temporary solution, will be removed once newer commend to save effect runtime struct works
 
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
@@ -2051,6 +2054,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       printSize(),
 #endif
       finalizeInit(),
+      finalizeInit_PreInit(),
       service(void),
       setMode(uint8_t segid, uint8_t m),
       setColor(uint8_t slot, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0),

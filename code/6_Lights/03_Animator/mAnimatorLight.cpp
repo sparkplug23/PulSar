@@ -181,76 +181,119 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
+// Nothing is needed in "Pre_Init"
+#ifdef ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+void mAnimatorLight::Pre_Init(void){
+  ALOG_INF(PSTR("Init will handle everything going forward"));
+}
+#else
 void mAnimatorLight::Pre_Init(void){ 
   
   // Allow runtime changes of animation size
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX; 
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
 
-  /**
-   * @brief Get pins here
-   **/
-  #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
-    int8_t pin_data = -1, pin_clock = -1;
+                /**
+                 * @brief Get pins here
+                 **/
+                #ifdef ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
-    // for(
-      uint8_t ii=0; 
-      // ii<1; ii++)
-    // {
-      if(pCONT_pins->PinUsed(GPIO_RGB_DATA_ID, ii))
-      {
-        pin_data = pCONT_pins->GetPin(GPIO_RGB_DATA_ID, ii);
-      }
+                  int8_t pin_data = -1, pin_clock = -1;
 
-      // if(pCONT_pins->PinUsed(GPIO_RGB_CLOCK1_ID, ii))
-      // {
-      //   pin_clock = pCONT_pins->GetPin(GPIO_RGB_DATA1_ID, ii);
-      // }
+                  // for(
+                    uint8_t ii=0; 
+                    // ii<1; ii++)
+                  // {
+                    if(pCONT_pins->PinUsed(GPIO_RGB_DATA_ID, ii))
+                    {
+                      pin_data = pCONT_pins->GetPin(GPIO_RGB_DATA_ID, ii);
+                    }
 
-      // Stripbus
-      if(pin_data != -1)
-      {
-        AddLog(LOG_LEVEL_INFO, PSTR("NeoPixelBus: Segment[%d] Pin[%d]"), 0, pin_data);
-        stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, pin_data);
-      }
+                    // if(pCONT_pins->PinUsed(GPIO_RGB_CLOCK1_ID, ii))
+                    // {
+                    //   pin_clock = pCONT_pins->GetPin(GPIO_RGB_DATA1_ID, ii);
+                    // }
 
-    // }
+                    // Stripbus
+                    if(pin_data != -1)
+                    {
+                      AddLog(LOG_LEVEL_INFO, PSTR("NeoPixelBus: Segment[%d] Pin[%d]"), 0, pin_data);
+                      stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, pin_data);
+                    }
 
-  #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
+                  // }
+
+                #endif // ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    pCONT_ladd->neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
-    // constexpr
-    // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
-    uint8_t kTaskRunnerCore = 1;//ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
-    pCONT_ladd->neopixel_runner->begin(
-        [this]() {
-            stripbus->Show();
-        },
-        kTaskRunnerCore
-    );
-    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+                  #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+                  pCONT_ladd->neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
+                  // constexpr
+                  // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
+                  uint8_t kTaskRunnerCore = 1;//ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+                  pCONT_ladd->neopixel_runner->begin(
+                      [this]() {
+                          stripbus->Show();
+                      },
+                      kTaskRunnerCore
+                  );
+                  #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
     
     
     #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    DEBUG_LINE_HERE;
-    bus_manager = new BusManager();
-    DEBUG_LINE_HERE;
-    ALOG_INF(PSTR("This needs a better location to be defined"));
+                    DEBUG_LINE_HERE;
+                    bus_manager = new BusManager();
+                    DEBUG_LINE_HERE;
+                    ALOG_INF(PSTR("This needs a better location to be defined"));
+
+
+
+                    /**
+                     * @brief Search for Digital pins
+                     **/
+                    for (uint8_t pins = 0; pins < MAX_PIXELBUS_DIGITAL_PINS; pins++) 
+                    {
+                      // ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+                      // if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
+                      // {
+                      //   ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+                      //   ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), settings.pins_used);
+                      //   settings.pins_used++;
+                      // }
+                    }
+
+
     #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 
+
+
+
+
+  #ifndef ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+
     ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
     Init_SegmentWS2812FxStrip();
-    finalizeInit();
+
+    /**
+     * @brief Called the first time to ensure the minimal default version is started
+     * Busses must be reconfigured with lighting_template. This process of calling should be optimising later with better integration
+     **/
+    ALOG_INF(PSTR("Preloading a default single neopixel bus until LIGHTING_TEMPLATE is loaded: This can be changed as flag so this is called in the main loop at runtime"));
+    finalizeInit_PreInit();
+
+
     makeAutoSegments();
     
   
+  #endif //  ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
   
 
 }
+#endif // ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+
+
 
 
 void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
@@ -355,6 +398,59 @@ void mAnimatorLight::Init(void){
     
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
+  // Allow runtime changes of animation size
+  pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX; 
+  pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
+
+  /**
+   * @brief Check if any pin is set
+   * Note: this is going to clash with PWM types in Lighting and should probably be moved into there, leaving here to check in both
+   * 
+   */
+  bool flag_any_pin_set = false;
+  for(uint16_t gpio = GPIO_PIXELBUS_01_A_ID; gpio < GPIO_PIXELBUS_10_E_ID; gpio++)
+  {
+    if(pCONT_pins->PinUsed(gpio))
+    {
+      flag_any_pin_set = true;
+      break;
+    }
+  }
+
+  if(!flag_any_pin_set)
+  {
+    ALOG_ERR(PSTR("NO PIN FOUND: STOPPING ANIMATOR"));
+    return;
+  }
+
+
+    #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    DEBUG_LINE_HERE;
+    bus_manager = new BusManager();
+    DEBUG_LINE_HERE;
+    ALOG_INF(PSTR("This needs a better location to be defined"));
+
+
+
+    /**
+     * @brief Search for Digital pins
+     **/
+    for (uint8_t pins = 0; pins < MAX_PIXELBUS_DIGITAL_PINS; pins++) 
+    {
+      // ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+      // if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
+      // {
+      //   ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+      //   ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), settings.pins_used);
+      //   settings.pins_used++;
+      // }
+    }
+
+
+    #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+
+
   // stripbus->NeoRgbCurrentSettings(1,2,3);
   
   /**
@@ -393,6 +489,25 @@ void mAnimatorLight::Init(void){
     // stripbus->ClearTo(0);
     pCONT_iLight->ShowInterface();
   }
+
+
+  ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
+  Init_SegmentWS2812FxStrip();
+
+  /**
+   * @brief Called the first time to ensure the minimal default version is started
+   * Busses must be reconfigured with lighting_template. This process of calling should be optimising later with better integration
+   **/
+  ALOG_INF(PSTR("Preloading a default single neopixel bus until LIGHTING_TEMPLATE is loaded: This can be changed as flag so this is called in the main loop at runtime"));
+  finalizeInit_PreInit();
+
+
+  makeAutoSegments();
+  
+
+
+
+
 
   /**
    * @brief Start PaletteContainer

@@ -5,6 +5,12 @@
 
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
+#include <Arduino.h>
+#include <IPAddress.h>
+#include "const.h"
+#include "pin_manager.h"
+#include "bus_wrapper.h"
+
 #include "const.h"
 #include "pin_manager.h"
 #include "bus_wrapper.h"
@@ -137,8 +143,11 @@ class Bus {
     virtual void     show() = 0;
     virtual bool     canShow() { return true; }
     virtual void     setStatusPixel(uint32_t c) {}
+    
+    #ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
     virtual void     setPixelColor(uint16_t pix, uint32_t c) = 0;
     virtual uint32_t getPixelColor(uint16_t pix) { return 0; }
+    #endif //DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
     virtual void     setPixelColorNew(uint16_t pix, RgbcctColor c) = 0;
     virtual RgbcctColor getPixelColorNew(uint16_t pix) { return 0; }
@@ -217,8 +226,10 @@ class BusDigital : public Bus {
     void setBrightness(uint8_t b);
     void setStatusPixel(uint32_t c);
 
+    #ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
     void setPixelColor(uint16_t pix, uint32_t c);
     uint32_t getPixelColor(uint16_t pix);
+    #endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
     void setPixelColorNew(uint16_t pix, RgbcctColor c);
     RgbcctColor getPixelColorNew(uint16_t pix);
@@ -264,8 +275,10 @@ class BusPwm : public Bus {
   public:
     BusPwm(BusConfig &bc);
 
+    #ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
     void setPixelColor(uint16_t pix, uint32_t c);
     uint32_t getPixelColor(uint16_t pix); //does no index check
+    #endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
     void setPixelColorNew(uint16_t pix, RgbcctColor c);
     RgbcctColor getPixelColorNew(uint16_t pix);
@@ -297,8 +310,10 @@ class BusOnOff : public Bus {
   public:
     BusOnOff(BusConfig &bc);
 
+    #ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
     void setPixelColor(uint16_t pix, uint32_t c);
     uint32_t getPixelColor(uint16_t pix);
+    #endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
     void setPixelColorNew(uint16_t pix, RgbcctColor c);
     RgbcctColor getPixelColorNew(uint16_t pix);
@@ -328,8 +343,10 @@ class BusNetwork : public Bus {
     bool hasRGB() { return true; }
     bool hasWhite() { return _rgbw; }
 
+    #ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
     void setPixelColor(uint16_t pix, uint32_t c);
     uint32_t getPixelColor(uint16_t pix);
+    #endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
     void setPixelColorNew(uint16_t pix, RgbcctColor c);
     RgbcctColor getPixelColorNew(uint16_t pix);
@@ -379,14 +396,20 @@ class BusManager {
 
     void setStatusPixel(uint32_t c);
 
+    #ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
     void IRAM_ATTR setPixelColor(uint16_t pix, uint32_t c, int16_t cct=-1);
+    uint32_t getPixelColor(uint16_t pix);
+    #endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
+
     void IRAM_ATTR setPixelColorNew(uint16_t index, RgbcctColor c, int16_t cct=-1);
+    RgbcctColor getPixelColorNew(uint16_t pix);
+
+
 
     void setBrightness(uint8_t b);
 
     void setSegmentCCT(int16_t cct, bool allowWBCorrection = false);
 
-    uint32_t getPixelColor(uint16_t pix);
 
     bool canAllShow();
 

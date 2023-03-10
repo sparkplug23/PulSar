@@ -16,7 +16,8 @@
 /**
  * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
  * */
-#define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+// #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+// #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
 
 
 
@@ -1062,7 +1063,14 @@
 
 
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
+    #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
 
+    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
 
   #define USE_MODULE_TEMPLATE
@@ -1070,18 +1078,25 @@
   "{"
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_JSON_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"," //13,14,27,4
+      "\"2\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      #endif
+    "},"
+    "\"" D_JSON_GPIO_FUNCTION "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":[22],"     // Digital SK6812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":[23],"     // Digital SK6812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":4,"      // PWM Single White
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":[18, 19]" // PWM Dual CCT
+
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":22,"     // Digital SK6812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":23,"     // Digital SK6812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":4,"      // PWM Single White
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":[18, 19]" // PWM Dual CCT
+      #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-      #endif 
-      #ifdef USE_MODULE_LIGHTS_PWM
-      "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"22\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","      
-      #endif 
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1091,7 +1106,7 @@
  * @brief The issue is template loading is not boot safe.
  * I need to move this to init() and have it configure after boot has happened using the new segment method
  * */
-  #define STRIP_SIZE_MAX 100
+  #define STRIP_SIZE_MAX 36
   #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   #endif // USE_MODULE_LIGHTS_INTERFACE
@@ -1109,7 +1124,7 @@
     "Segment0":{
       "PixelRange": [
         0,
-        100
+        18
       ],
       "ColourPalette":"Christmas 01",
       "Effects": {
@@ -1120,7 +1135,7 @@
         "TimeMs": 0,
         "RateMs": 1000
       },
-      "BrightnessRGB": 100
+      "BrightnessRGB": 10
     }
   }
   )=====";
@@ -8991,6 +9006,102 @@
 
 #endif
 
+
+
+#ifdef DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
+  #define DEVICENAME_CTR          "rgbdisplay_weight"
+  #define DEVICENAME_FRIENDLY_CTR "RGBW Clock 01"
+  #define DEVICENAME_ROOMHINT_CTR "TVRoom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define USE_SK6812_METHOD_DEFAULT
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    #define ENABLE_DEVFEATURE_INTERFACELIGHT_NEW_UNIQUE_TIMEON
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+
+  #define DISABLE_WEBSERVER
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define STRIP_SIZE_MAX 94
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "ColourOrder":"grbw",
+    "AnimationMode":"Effects",
+    "ColourPalette":2,
+    "Effects": {
+      "Function":"Clock Basic 01",
+      "Intensity":50,
+      "Grouping":1
+    },
+    "Transition": {
+      "TimeMs": 1000,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+
+#endif
 
 
 #ifdef DEVICE_TESTBED_SR04

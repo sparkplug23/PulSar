@@ -112,6 +112,7 @@ void BusDigital::setStatusPixel(uint32_t c) {
   }
 }
 
+#ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 void IRAM_ATTR BusDigital::setPixelColor(uint16_t pix, uint32_t c) {
   if (_type == TYPE_SK6812_RGBW || _type == TYPE_TM1814 || _type == TYPE_WS2812_1CH_X3) c = autoWhiteCalc(c);
 //   if (_cct >= 1900) c = colorBalanceFromKelvin(_cct, c); //color correction from CCT
@@ -130,7 +131,6 @@ void IRAM_ATTR BusDigital::setPixelColor(uint16_t pix, uint32_t c) {
   }
   PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
 }
-
 uint32_t BusDigital::getPixelColor(uint16_t pix) {
   if (reversed) pix = _len - pix -1;
   else pix += _skip;
@@ -148,6 +148,7 @@ uint32_t BusDigital::getPixelColor(uint16_t pix) {
   }
   return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
 }
+#endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
 
 void IRAM_ATTR BusDigital::setPixelColorNew(uint16_t pix, RgbcctColor c) {
@@ -173,18 +174,18 @@ RgbcctColor BusDigital::getPixelColorNew(uint16_t pix) {
   if (reversed) pix = _len - pix -1;
   else pix += _skip;
   uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-  if (_type == TYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs
-    uint16_t pOld = pix;
-    pix = IC_INDEX_WS2812_1CH_3X(pix);
-    uint32_t c = PolyBus::getPixelColor(_busPtr, _iType, pix, co);
-    switch (pOld % 3) { // get only the single channel
-      case 0: c = RGBW32(G(c), G(c), G(c), G(c)); break;
-      case 1: c = RGBW32(R(c), R(c), R(c), R(c)); break;
-      case 2: c = RGBW32(B(c), B(c), B(c), B(c)); break;
-    }
-    return c;
-  }
-  return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
+  // if (_type == TYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs
+  //   uint16_t pOld = pix;
+  //   pix = IC_INDEX_WS2812_1CH_3X(pix);
+  //   uint32_t c = PolyBus::getPixelColor(_busPtr, _iType, pix, co);
+  //   switch (pOld % 3) { // get only the single channel
+  //     case 0: c = RGBW32(G(c), G(c), G(c), G(c)); break;
+  //     case 1: c = RGBW32(R(c), R(c), R(c), R(c)); break;
+  //     case 2: c = RGBW32(B(c), B(c), B(c), B(c)); break;
+  //   }
+  //   return c;
+  // }
+  return PolyBus::getPixelColorNew(_busPtr, _iType, pix, co);
 }
 
 
@@ -247,6 +248,7 @@ BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) {
   _valid = true;
 }
 
+#ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 void BusPwm::setPixelColor(uint16_t pix, uint32_t c) {
   if (pix != 0 || !_valid) return; //only react to first pixel
   if (_type != TYPE_ANALOG_3CH) c = autoWhiteCalc(c);
@@ -299,12 +301,12 @@ void BusPwm::setPixelColor(uint16_t pix, uint32_t c) {
       break;
   }
 }
-
 //does no index check
 uint32_t BusPwm::getPixelColor(uint16_t pix) {
   if (!_valid) return 0;
   return RGBW32(_data[0], _data[1], _data[2], _data[3]);
 }
+#endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
 
 void BusPwm::setPixelColorNew(uint16_t pix, RgbcctColor c) {
@@ -420,6 +422,7 @@ BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) {
   _valid = true;
 }
 
+#ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 void BusOnOff::setPixelColor(uint16_t pix, uint32_t c) {
   if (pix != 0 || !_valid) return; //only react to first pixel
   c = autoWhiteCalc(c);
@@ -430,11 +433,11 @@ void BusOnOff::setPixelColor(uint16_t pix, uint32_t c) {
 
   _data = bool((r+g+b+w) && _bri) ? 0xFF : 0;
 }
-
 uint32_t BusOnOff::getPixelColor(uint16_t pix) {
   if (!_valid) return 0;
   return RGBW32(_data, _data, _data, _data);
 }
+#endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
 void BusOnOff::setPixelColorNew(uint16_t pix, RgbcctColor c) {
   // if (pix != 0 || !_valid) return; //only react to first pixel
@@ -494,6 +497,7 @@ BusNetwork::BusNetwork(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) {
   _valid = true;
 }
 
+#ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 void BusNetwork::setPixelColor(uint16_t pix, uint32_t c) {
   if (!_valid || pix >= _len) return;
   if (hasWhite()) c = autoWhiteCalc(c);
@@ -504,12 +508,12 @@ void BusNetwork::setPixelColor(uint16_t pix, uint32_t c) {
   _data[offset+2] = B(c);
   if (_rgbw) _data[offset+3] = W(c);
 }
-
 uint32_t BusNetwork::getPixelColor(uint16_t pix) {
   if (!_valid || pix >= _len) return 0;
   uint16_t offset = pix * _UDPchannels;
   return RGBW32(_data[offset], _data[offset+1], _data[offset+2], _rgbw ? (_data[offset+3] << 24) : 0);
 }
+#endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
 void BusNetwork::setPixelColorNew(uint16_t pix, RgbcctColor c) {
 //   if (!_valid || pix >= _len) return;
@@ -574,21 +578,30 @@ uint32_t BusManager::memUsage(BusConfig &bc)
   return len*3; //RGB
 }
 
-int BusManager::add(BusConfig &bc) {
+int BusManager::add(BusConfig &bc) 
+{
 
   uint8_t bus_count = getNumBusses() - getNumVirtualBusses();
   if (bus_count >= WLED_MAX_BUSSES) return -1;
 
-  if (bc.type >= TYPE_NET_DDP_RGB && bc.type < 96) {
+  if (bc.type >= TYPE_NET_DDP_RGB && bc.type < 96) 
+  {
     busses[numBusses] = new BusNetwork(bc);   // IP
-  } else if (IS_DIGITAL(bc.type)) {
+  } 
+  else if (IS_DIGITAL(bc.type)) 
+  {
     busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap);  // Neopixel
-  } else if (bc.type == TYPE_ONOFF) {
+  } 
+  else if (bc.type == TYPE_ONOFF) 
+  {
     busses[numBusses] = new BusOnOff(bc);  // Relays
-  } else {
+  } 
+  else 
+  {
     busses[numBusses] = new BusPwm(bc); // H801
   }
   return numBusses++;
+
 }
 
 //do not call this method from system context (network callback)
@@ -601,36 +614,66 @@ void BusManager::removeAll() {
 }
 
 void BusManager::show() {
-  for (uint8_t i = 0; i < numBusses; i++) {
-    
-    // busses[i]->setPixelColor(0, RGBW32(0,255,0,0));
+  for (uint8_t i = 0; i < numBusses; i++) 
+  {
     busses[i]->show();
   }
 }
 
-void BusManager::setStatusPixel(uint32_t c) {
-  for (uint8_t i = 0; i < numBusses; i++) {
+void BusManager::setStatusPixel(uint32_t c) 
+{
+  for (uint8_t i = 0; i < numBusses; i++) 
+  {
     busses[i]->setStatusPixel(c);
   }
 }
 
-void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, uint32_t c, int16_t cct) {
-  for (uint8_t i = 0; i < numBusses; i++) {
+#ifndef DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
+void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, uint32_t c, int16_t cct) 
+{
+  for (uint8_t i = 0; i < numBusses; i++) 
+  {
     Bus* b = busses[i];
     uint16_t bstart = b->getStart();
     if (pix < bstart || pix >= bstart + b->getLength()) continue;
     busses[i]->setPixelColor(pix - bstart, c);
   }
 }
+uint32_t BusManager::getPixelColor(uint16_t pix) {
+  for (uint8_t i = 0; i < numBusses; i++) {
+    Bus* b = busses[i];
+    uint16_t bstart = b->getStart();
+    if (pix < bstart || pix >= bstart + b->getLength()) continue;
+    return b->getPixelColor(pix - bstart);
+  }
+  return 0;
+}
+#endif // DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
 
 void IRAM_ATTR BusManager::setPixelColorNew(uint16_t pix, RgbcctColor c, int16_t cct) {
   for (uint8_t i = 0; i < numBusses; i++) {
     Bus* b = busses[i];
     uint16_t bstart = b->getStart();
     if (pix < bstart || pix >= bstart + b->getLength()) continue;
+    ALOG_INF(PSTR("busses %d pix %d"), i, pix);
     busses[i]->setPixelColorNew(pix - bstart, c);
   }
 }
+RgbcctColor BusManager::getPixelColorNew(uint16_t pix) {
+  for (uint8_t i = 0; i < numBusses; i++) {
+    Bus* b = busses[i];
+    uint16_t bstart = b->getStart();
+    if (pix < bstart || pix >= bstart + b->getLength()) continue;
+    return b->getPixelColorNew(pix - bstart);
+  }
+  return 0;
+}
+
+
+
+
+
+
 
 
 
@@ -649,16 +692,6 @@ void BusManager::setSegmentCCT(int16_t cct, bool allowWBCorrection) {
   Bus::setCCT(cct);
 }
 
-//?
-uint32_t BusManager::getPixelColor(uint16_t pix) {
-  for (uint8_t i = 0; i < numBusses; i++) {
-    Bus* b = busses[i];
-    uint16_t bstart = b->getStart();
-    if (pix < bstart || pix >= bstart + b->getLength()) continue;
-    return b->getPixelColor(pix - bstart);
-  }
-  return 0;
-}
 
 bool BusManager::canAllShow() {
   for (uint8_t i = 0; i < numBusses; i++) {

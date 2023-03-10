@@ -743,6 +743,9 @@ void mAnimatorLight::SubTask_Segments_Animation()
         case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
           SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
         break;
+        case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:
+          SubTask_Flasher_Animate_LCD_Display_Show_String_01();
+        break;
         #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
         case EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__ID:
@@ -3021,8 +3024,13 @@ void mAnimatorLight::setupEffectData() {
 }
 
 
-//do not call this method from system context (network callback)
-void mAnimatorLight::finalizeInit(void)
+/**
+ * @brief From WLED as finalizeInit
+ * 
+ * Temporary solution to keep as original, but can't really be called until bus information is read from LIGHTING_TEMPLATE
+ * 
+ */
+void mAnimatorLight::finalizeInit_PreInit(void)
 {
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
@@ -3042,11 +3050,13 @@ void mAnimatorLight::finalizeInit(void)
     return;
   }
 
+  ALOG_INF(PSTR("TEMPORARY:\n\r Creating minimal bus solution in case template is missing"));
+
   //if busses failed to load, add default (fresh install, FS issue, ...)
   if (bus_manager->getNumBusses() == 0) {
     DEBUG_PRINTLN(F("No busses, init default"));
-    const uint8_t defDataPins[] = {DATA_PINS_BUSSES};
-    const uint16_t defCounts[] = {PIXEL_COUNTS};
+    const uint8_t defDataPins[] = {4};
+    const uint16_t defCounts[] = {30};
     const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
     const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
 
@@ -3092,7 +3102,129 @@ void mAnimatorLight::finalizeInit(void)
     
     DEBUG_PRINTF("_hasWhiteChannel %d, _isOffRefreshRequired %d, busEnd %d\n\r", _hasWhiteChannel, _isOffRefreshRequired, busEnd);
 
-    if (busEnd > _length) _length = busEnd;
+    if (busEnd > _length)
+    {
+      _length = busEnd;
+      DEBUG_PRINTF("_length = busEnd;\n\r");
+    }
+
+
+
+    #ifdef ESP8266
+    if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
+    uint8_t pins[5];
+    if (!bus->getPins(pins)) continue;
+    BusDigital* bd = static_cast<BusDigital*>(bus);
+    if (pins[0] == 3) bd->reinit();
+    #endif
+  }
+
+
+    #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+  //initialize leds array. TBD: realloc if nr of leds change
+  if (mAnimatorLight::Segment_New::_globalLeds) {
+    purgeSegments(true);
+    free(mAnimatorLight::Segment_New::_globalLeds);
+    mAnimatorLight::Segment_New::_globalLeds = nullptr;
+  }
+  if (useLedsArray) {
+    #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
+    if (psramFound())
+      mAnimatorLight::Segment_New::_globalLeds = (CRGB*) ps_malloc(sizeof(CRGB) * _length);
+    else
+    #endif
+      mAnimatorLight::Segment_New::_globalLeds = (CRGB*) malloc(sizeof(CRGB) * _length);
+    memset(mAnimatorLight::Segment_New::_globalLeds, 0, sizeof(CRGB) * _length);
+  }
+
+  //segments are created in makeAutoSegments();
+  loadCustomPalettes(); // (re)load all custom palettes
+  // deserializeMap();     // (re)load default ledmap
+}
+
+
+
+
+//do not call this method from system context (network callback)
+void mAnimatorLight::finalizeInit(void)
+{
+
+  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+  DEBUG_LINE_HERE;
+
+  // // for the lack of better place enumerate ledmaps here
+  // // if we do it in json.cpp (serializeInfo()) we are getting flashes on LEDs
+  // // unfortunately this means we do not get updates after uploads
+  // enumerateLedmaps();
+
+  // _hasWhiteChannel = _isOffRefreshRequired = false;
+
+  if(bus_manager == nullptr)
+  {
+    ALOG_INF(PSTR("busses null"));
+    return;
+  }
+
+  //if busses failed to load, add default (fresh install, FS issue, ...)
+  if (bus_manager->getNumBusses() == 0) {
+    DEBUG_PRINTLN(F("No busses, init default"));
+    const uint8_t defDataPins[] = {DATA_PINS_BUSSES};
+    const uint16_t defCounts[] = {18,18};
+    const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+    const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+
+
+    DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
+
+    uint16_t prevLen = 0;
+    for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
+      uint8_t defPin[] = {defDataPins[i]};
+      uint16_t start = prevLen;
+      uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+      prevLen += count;
+      BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
+      if(bus_manager->add(defCfg) == -1) break;
+    }
+  }
+
+    DEBUG_PRINTF("busses->getNumBusses() %d\n\r", bus_manager->getNumBusses());
+
+  _length = 0;
+  for (uint8_t i=0; i<bus_manager->getNumBusses(); i++) 
+  {
+    
+    DEBUG_PRINTF("getNumBusses %d\n\r", i);
+
+    Bus *bus = bus_manager->getBus(i);
+    if (bus == nullptr)
+    {
+      DEBUG_PRINTF("bus == nullptr\n\r");
+      continue; // continue breaks one loop occurance only (unlike break)
+    }
+
+    if (bus->getStart() + bus->getLength() > MAX_LEDS)
+    {
+      DEBUG_PRINTF("bus->getStart() + bus->getLength() > MAX_LEDS\n\r");
+      break;
+    }
+    //RGBW mode is enabled if at least one of the strips is RGBW
+    // _hasWhiteChannel |= bus->isRgbw();
+    //refresh is required to remain off if at least one of the strips requires the refresh.
+    _isOffRefreshRequired |= bus->isOffRefreshRequired();
+    uint16_t busEnd = bus->getStart() + bus->getLength();
+    
+    DEBUG_PRINTF("_hasWhiteChannel %d, _isOffRefreshRequired %d, busEnd %d\n\r", _hasWhiteChannel, _isOffRefreshRequired, busEnd);
+
+    if (busEnd > _length)
+    {
+      _length = busEnd;
+      DEBUG_PRINTF("_length = busEnd;\n\r");
+    }
+
+
+
     #ifdef ESP8266
     if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
     uint8_t pins[5];

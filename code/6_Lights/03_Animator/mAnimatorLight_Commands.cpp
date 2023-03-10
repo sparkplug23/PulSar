@@ -464,6 +464,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()["ManualString"]){
+    strcpy(lcd_display_show_string, jtok.getStr());
+    // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
+    ALOG_COM(PSTR(D_LOG_PIXEL  D_JSON_COMMAND_SVALUE_K("ManualString")), lcd_display_show_string);
+  }
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+
 
 // Hue
 // Sat
