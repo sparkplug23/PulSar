@@ -1,5 +1,7 @@
 #include "mInterfaceLight.h"
 
+// multipin
+
 #ifdef USE_MODULE_LIGHTS_INTERFACE // interface is the gateway
 
 
@@ -3256,6 +3258,7 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug_Module_Config;
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+
 
 } //end "MQTTHandler_Init"
 
