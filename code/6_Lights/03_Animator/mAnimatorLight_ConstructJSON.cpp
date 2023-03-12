@@ -7,7 +7,7 @@ uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_app
 
   JBI->Start();
 
-    JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
+    JBI->Add("light_size_count", settings.light_size_count);
 
   return JBI->End();
 
@@ -239,7 +239,7 @@ JBI->Start();
 
   JBI->Add("EnableAnimation",SEGMENT_I(0).flags.fEnable_Animation);
   JBI->Add("SEGMENT_I(0).flags.fRunning", SEGMENT_I(0).flags.fRunning);
-  JBI->Add("CanShow",stripbus->CanShow());
+  // JBI->Add("CanShow",stripbus->CanShow());
   JBI->Add("StripSize", STRIP_SIZE_MAX);
 
 

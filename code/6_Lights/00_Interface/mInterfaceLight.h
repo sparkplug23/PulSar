@@ -10,7 +10,6 @@
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-#include "6_Lights/03_Animator/pin_manager.h"
   #include "6_Lights/03_Animator/bus_manager.h"
   #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
@@ -132,6 +131,16 @@ enum LightTypes_IDS{
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";
   
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
+
+    enum LIHGT_POWER_STATE_IDS{
+      LIGHT_POWER_STATE_OFF_ID=0,
+      LIGHT_POWER_STATE_ON_ID,
+      LIGHT_POWER_STATE_TOGGLE_ID,
+      LIGHT_POWER_STATE_PAUSED,
+      LIGHT_POWER_STATE_ANIMATING_ID,
+      LIGHT_POWER_STATE_LENGTH_ID
+    };
+    // void SetAnimationProfile(uint8_t profile_id);
 
 
 #define WEB_CLASS_RGB_LIVE "rgb_live"
@@ -260,15 +269,13 @@ enum RGB_VIEW_SHOW_TYPE_IDS{
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-// #define mPaletteI (pCONT_iLight->mpalette)
-// class mPalette;
 
 class mInterfaceLight :
   public mTaskerInterface
 {
   public:
     mInterfaceLight(){};
-    bool Pre_Init(void);
+    void Pre_Init(void);
 
     
     static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
@@ -288,27 +295,27 @@ class mInterfaceLight :
     /**
      * Module settings other tasks/module may need
      * */
-    typedef union {
-      uint8_t data; // allows full manipulating
-      struct { 
-        // enable animations (pause)
-        uint8_t enable_cct_channel_sliders : 1;
+    // typedef union {
+    //   uint8_t data; // allows full manipulating
+    //   struct { 
+    //     // enable animations (pause)
+    //     uint8_t enable_cct_channel_sliders : 1;
 
-        // Reserved
-        uint8_t reserved : 7;
-      };
-    } SETTINGS_FLAGS;
+    //     // Reserved
+    //     uint8_t reserved : 7;
+    //   };
+    // } SETTINGS_FLAGS;
 
     struct SETTINGS{
-      SETTINGS_FLAGS flags;
+      // SETTINGS_FLAGS flags;
       
       //phase out
       // uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
 
 
       // uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
-      uint16_t light_size_count = 1;
-      uint8_t pwm_offset = 0;                 // Offset in color buffer
+      // uint16_t light_size_count = 1;
+      // uint8_t pwm_offset = 0;                 // Offset in color buffer
     }settings;
 
 
@@ -316,9 +323,6 @@ class mInterfaceLight :
     const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
     int8_t GetHardwareColourTypeIDbyName(const char* c);
 
-
-    NeoPixelAnimator* animator_controller = nullptr;
-    void Init_NeoPixelAnimator(uint16_t size, uint8_t timebase);  
 
     // Values not ever saved
     struct RUNTIME_VALUES{
@@ -328,103 +332,27 @@ class mInterfaceLight :
     void LightCalcPWMRange();
 
   
-    enum LIHGT_POWER_STATE_IDS{
-      LIGHT_POWER_STATE_OFF_ID=0,
-      LIGHT_POWER_STATE_ON_ID,
-      LIGHT_POWER_STATE_TOGGLE_ID,
-      LIGHT_POWER_STATE_PAUSED,
-      LIGHT_POWER_STATE_ANIMATING_ID,
-      LIGHT_POWER_STATE_LENGTH_ID
-    };
-    // void SetAnimationProfile(uint8_t profile_id);
-
     
-
-    /******************************************************************************************************************************
-    ****************** CommandSet_x *************************************************************************************************************
-    ******************************************************************************************************************************/
-
-    void CommandSet_PixelHardwareTypeID(uint8_t value);
-
-    void CommandSet_LightPowerState(uint8_t value);
-    bool CommandGet_LightPowerState();
-
-    // void CommandSet_ActiveSolidPalette_RGB_Ctr(const char* rgb);
-    void CommandSet_Brt_255(uint8_t value);
-    void CommandSet_Global_BrtRGB_255(uint8_t bri);
-    void CommandSet_Global_BrtCCT_255(uint8_t bri);
-    // void CommandSet_ActiveSolidPalette_Hue_360(uint16_t value);
-    // void CommandSet_ActiveSolidPalette_Sat_255(uint8_t value);
-    // void CommandSet_ActiveSolidPalette_ColourTemp(uint16_t ct);
-    // bool CommandSet_ActiveSolidPalette_RGBCT_Linked(uint16_t ct_rgb_linked);
-    // void CommandSet_ActiveSolidPalette_Raw(uint8_t* values);
-    // void CommandSet_ActiveSolidPalette_Raw(uint8_t r,uint8_t g,uint8_t b,uint8_t ww,uint8_t wc);
-    // void CommandSet_ActiveSolidPalette_ColourTemp_Percentage(uint8_t percentage);
-    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    // void CommandSet_PaletteID(uint8_t value);
-    
-    void CommandSet_LightSizeCount(uint16_t value);
-    void CommandSet_EnabledAnimation_Flag(uint8_t value);
-    void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
-    // void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
-    
-    /******************************************************************************************************************************
-    ****************** CommandGet_x *************************************************************************************************************
-    ******************************************************************************************************************************/
-
-    uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
-    uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number);
-
-    void CheckHardwareElementColourOrder();
-
-    int8_t GetPixelHardwareTypeIDbyName(const char* c);
-    const char* GetPixelHardwareTypeName(char* buffer);
-    const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
-
-    void SetPixelColourHardwareInterface(RgbcctColor colour_hardware, uint16_t index = 0, bool flag_replicate_for_total_pixel_length = false);
-    RgbcctColor GetPixelColourHardwareInterface(uint16_t index = 0);
-    void ShowInterface();
-
 
     /******************************************************************************************************************************
     ****************** unsorted *************************************************************************************************************
     ******************************************************************************************************************************/
 
-
-
-#ifdef USE_MODULE_CORE_RULES
-void RulesEvent_Set_Power();
-#endif // rules
+// void ShowInterface();
 
     
-    void Settings_Default();  
-
-    void BootMessage();
 
     void EveryLoop();
 
-    void EverySecond_AutoOff();
-    struct AUTO_OFF_SETTINGS{
-      uint16_t time_decounter_secs = 0;
-      // uint32_t tSaved = 0;
-    }auto_off_settings;
     
     uint32_t RgbColorto32bit(RgbColor rgb);
     
-    RgbcctColor GetActiveFirstColourFromCurrentPalette();
+    // RgbcctColor GetActiveFirstColourFromCurrentPalette();
         
     #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
         void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
     #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
 
-    void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
-    void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
-
-//     // need multiple controllers per segment, but only when needed, so it should be a segment buffer device
-//     RgbcctColor_Controller rgbcct_controller = RgbcctColor_Controller();
-
-//     RgbcctColor* active_rgbcct_colour_p = nullptr; //what is this then? internal conversions to output? (ie can I leave this as private)
-    
 
     void Template_Load();
 
@@ -455,47 +383,6 @@ void RulesEvent_Set_Power();
  * WebServer
 *******************************************************************************************************************/
 
-
-    int8_t Tasker_Web(uint8_t function);
-    // #include "6_Lights/00_Interface/mInterfaceLight_Web.h"
-    
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-
-
-#ifdef ESP32
-#include <WiFi.h>
-#ifndef DISABLE_NETWORK
-#include <AsyncTCP.h>
-//?#include <ESPAsyncWebServer.h>
-#endif // DISABLE_NETWORK
-#elif defined(ESP8266)
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-//?#include <ESPAsyncWebServer.h>
-#endif
-
-
-
-void WebPage_Root_AddHandlers();
-void GetPixelColor(uint16_t indexPixel, uint8_t* _r,uint8_t* _g, uint8_t* _b,uint8_t* _w1, uint8_t* _w2);
-void WebSend_JSON_RootPage_LiveviewPixels(AsyncWebServerRequest *request);
-
-
-void WebAppend_Root_Sliders();
-
-void WebAppend_Root_ControlUI();
-
-
-void WebAppend_Root_Draw_RGBPalette();
-void WebAppend_Root_Draw_PaletteSelect();
-void WebAppend_Root_Draw_PaletteSelect_Placeholder();
-
-void Web_Root_Draw_PaletteSelect(AsyncWebServerRequest *request);
-
-void WebAppend_Root_RGBPalette();
-
-#endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER
-
 /******************************************************************************************************************
  * 
 *******************************************************************************************************************/
@@ -508,44 +395,14 @@ void WebAppend_Root_RGBPalette();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Init(void);
     
-
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    void WebAppend_Root_Buttons();
-    void WebAppend_Root_Draw_Table();
-    void WebCommand_Parse();
-    void WebAppend_Root_Draw_RGBLive();
-    void WebAppend_Root_Draw_RGBTable(uint8_t rows = 8);
-    
-    struct LIVEVIEW_SETTINGS{
-      uint8_t show_type = RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID;
-      uint8_t height_as_percentage = 15;
-      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
-      uint16_t refresh_rate = 250;
-    }liveview;
-    struct PALETTE_VIEW_SETTINGS{
-      uint8_t show_type = 2;//RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID;
-      uint8_t height_as_percentage = 15;
-      uint8_t pixel_resolution_percentage = 100; //100% is send all, 0-99 is percentage of all
-    }palette_view;
-    uint32_t WebColorFromColourMap(uint8_t i);
-    uint32_t WebColorFromColourType(RgbColor rgb);
-    #endif // USE_MODULE_NETWORK_WEBSERVER
-
- 
-    uint8_t light_power_state = 0;
-    uint8_t light_power_Saved = 0;
-    uint8_t subtype = 0;                    // LST_ subtype
-    uint8_t device = 0;
-    bool pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
-    bool     fade_initialized = false;      // dont't fade at startup
-    uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
-    uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
-
-
-    void init_Animations();
     void changeChannels(uint8_t *channels);
     uint16_t change8to10(uint8_t v);
     uint8_t change10to8(uint16_t v);
+
+   uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
+    uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
+
+
 
 
     #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -620,70 +477,6 @@ void WebAppend_Root_RGBPalette();
 
 
     #endif
-
-  
-    uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
-      return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;
-    }
-    uint8_t getBriRGB_Global(){
-      return _briRGB_Global;
-    }
-    uint8_t getBriCCT_Global(){
-      return _briCT_Global;
-    }
-
-    void setBriRGB_Global(uint8_t bri_rgb) {
-      _briRGB_Global = bri_rgb;
-    }
-    void setBriCT_Global(uint8_t bri_ct) {
-      _briCT_Global = bri_ct;
-    }
-
-
-    
-    uint16_t get_CTRangeMin(void)
-    {
-      return _ct_min_range;
-    }
-    uint16_t get_CTRangeMax(void)
-    {
-      return _ct_max_range;
-    }
-
-    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
-    uint16_t _ct_min_range = 153;   // the minimum CT rendered range
-    uint16_t _ct_max_range = 500;   // the maximum CT rendered range
-
-
-  // I need to keep brightness on its own, with functions for it  
-    uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
-    uint8_t  _briCT_Global = 255;
-
-
-private:
-
-// #ifndef ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
-//     // CT min and max
-//     const uint16_t CT_MIN = 153;          // 6500K
-//     const uint16_t CT_MAX = 500;          // 2000K
-//     // Ranges used for Alexa
-//     const uint16_t CT_MIN_ALEXA = 200;    // also 5000K
-//     const uint16_t CT_MAX_ALEXA = 380;    // also 2600K
-
-//     uint16_t _hue = 0;  // 0..359
-//     uint8_t  _sat = 255;  // 0..255
-//     // are RGB and CT linked, i.e. if we set CT then RGB channels are off
-//     bool     _ct_rgb_linked = true;
-//     bool     _pwm_multi_channels = false;    // treat each channel as independant dimmer
-//     uint8_t  _subtype = 0;  // local copy of Light.subtype, if we need multiple lights
-//     uint16_t _ct = CT_MIN;  // 153..500, default to 153 (cold white)
-//     uint8_t  _color_mode = LCM_RGB; // RGB by default
-// #endif // ENABLE_DEVFEATURE_PHASING_TAS_CCT_OUT
-
-
-
-
-
 
 
 };

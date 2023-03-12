@@ -16,7 +16,7 @@
 /**
  * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
  * */
-// #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+#define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 // #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
 
 
@@ -1080,8 +1080,8 @@
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"," //13,14,27,4
-      "\"2\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" //13,14,27,4
+      // "\"19\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
       #endif
     "},"
     "\"" D_JSON_GPIO_FUNCTION "\":{"
@@ -1092,11 +1092,11 @@
       // "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":[18, 19]" // PWM Dual CCT
 
       "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":22,"     // Digital SK6812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":23,"     // Digital SK6812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":23"     // Digital SK6812
       // "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":4,"      // PWM Single White
       // "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":[18, 19]" // PWM Dual CCT
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      // "\"18\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1106,40 +1106,34 @@
  * @brief The issue is template loading is not boot safe.
  * I need to move this to init() and have it configure after boot has happened using the new segment method
  * */
-  #define STRIP_SIZE_MAX 36
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define STRIP_SIZE_MAX 50
+  // #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
-  #endif // USE_MODULE_LIGHTS_INTERFACE
+  // #endif // USE_MODULE_LIGHTS_INTERFACE
 
-  #define USE_LIGHTING_TEMPLATE__SINGLE
+  // #define USE_LIGHTING_TEMPLATE__SINGLE
   // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
   // #define USE_LIGHTING_TEMPLATE_3
 
-  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
+  // #ifdef USE_LIGHTING_TEMPLATE__SINGLE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
     "HardwareType":"WS28XX",
     "AnimationMode":"Effects",
-    "Segment0":{
-      "PixelRange": [
-        0,
-        18
-      ],
-      "ColourPalette":"Christmas 01",
-      "Effects": {
-        "Function":1,
-        "Intensity":50
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 10
-    }
+    "ColourPalette":"Christmas 01",
+    "Effects": {
+      "Function":1,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 10
   }
   )=====";
-  #endif // USE_LIGHTING_TEMPLATE__SINGLE
+  // #endif // USE_LIGHTING_TEMPLATE__SINGLE
 
 // {
 //   "ColourPalette": 11,

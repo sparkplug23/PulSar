@@ -384,6 +384,37 @@
     #define IR_RCV_TOLERANCE        25           // Base tolerance percentage for matching incoming IR messages (default 25, max 100)
 
 
+#ifndef WLED_MAX_BUSSES
+  #ifdef ESP8266
+    #define WLED_MAX_BUSSES 3
+  #else
+    #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
+      #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
+    #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
+      #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
+        #define WLED_MAX_BUSSES 6             // will allow 4 digital & 2 analog
+      #else
+        #define WLED_MAX_BUSSES 7             // will allow 5 digital & 2 analog
+      #endif
+    #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
+      #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog
+    #else
+      #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
+        #define WLED_MAX_BUSSES 8
+      #else
+        #define WLED_MAX_BUSSES 10
+      #endif
+    #endif
+  #endif
+#endif
+
+#ifdef ESP8266
+#define WLED_MAX_COLOR_ORDER_MAPPINGS 5
+#else
+#define WLED_MAX_COLOR_ORDER_MAPPINGS 10
+#endif
+
+
 // Anything added by this file must "undef" then "ifdef" to replace it
 #ifdef USE_CONFIG_OVERRIDE
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"

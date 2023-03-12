@@ -419,15 +419,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
     pModule[EM_MODULE_LIGHTS_ANIMATOR_ID] = new mAnimatorLight();
   #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    pModule[EM_MODULE_LIGHTS_ADDRESSABLE_ID] = new mAddressableLight();
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    pModule[EM_MODULE_LIGHTS_PWM_ID] = new mPWMLight();
-  #endif
-  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  //   pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new mWLEDEffects();
-  // #endif
   // Sensors
   #ifdef USE_MODULE_SENSORS_INTERFACE
     pModule[EM_MODULE_SENSORS_INTERFACE_ID] = new mSensorsInterface();

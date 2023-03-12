@@ -394,7 +394,7 @@ class PolyBus {
   static void show(void* busPtr, uint8_t busType) 
   {
     
-    DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
+    // DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
     
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
@@ -546,7 +546,7 @@ class PolyBus {
   static void setPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint32_t c, uint8_t co) 
   {
     
-    DEBUG_PRINTF("PolyBus::setPixelColor busType %d, pix %d, c %d, co %d\n\r", busType, pix, c, co);
+    // DEBUG_PRINTF("PolyBus::setPixelColor busType %d, pix %d, c %d, co %d\n\r", busType, pix, c, co);
 
     uint8_t r = c >> 16;
     uint8_t g = c >> 8;
@@ -644,7 +644,7 @@ class PolyBus {
   static void setPixelColorNew(void* busPtr, uint8_t busType, uint16_t pix, RgbcctColor color, uint8_t co = 0) 
   {
     
-    DEBUG_PRINTF("PolyBus::setPixelColor busType %d, pix %d, c %d, co %d\n\r", busType, pix, color.R, co);
+    // DEBUG_PRINTF("PolyBus::setPixelColor busType %d, pix %d, c %d, co %d\n\r", busType, pix, color.R, co);
 
     // uint8_t r = c.R >> 16;
     // uint8_t g = c >> 8;
@@ -742,7 +742,7 @@ class PolyBus {
   static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8_t co) 
   {
 
-    DEBUG_PRINTF("PolyBus::getPixelColor busType %d, pix %d, co %d\n\r", busType, pix, co);
+    // DEBUG_PRINTF("PolyBus::getPixelColor busType %d, pix %d, co %d\n\r", busType, pix, co);
 
     RgbwColor col(0,0,0,0); 
     switch (busType) {
@@ -837,7 +837,7 @@ class PolyBus {
   static RgbcctColor getPixelColorNew(void* busPtr, uint8_t busType, uint16_t pix, uint8_t co) 
   {
 
-    DEBUG_PRINTF("PolyBus::getPixelColor busType %d, pix %d, co %d\n\r", busType, pix, co);
+    // DEBUG_PRINTF("PolyBus::getPixelColor busType %d, pix %d, co %d\n\r", busType, pix, co);
 
     RgbcctColor col(0); 
     switch (busType) {
@@ -909,6 +909,9 @@ class PolyBus {
       case BUSTYPE__SS_P98_3__ID: col = (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->GetPixelColor(pix); break;
     }
     
+    // THIS WILL NEED ADDED, COLOUR ORDER MUST BE ADDED AT BUS LEVEL, SO TO BE REMOVED FROM SEGMENT
+
+
     // // upper nibble contains W swap information
     // uint8_t w = col.W;
     // switch (co >> 4) {
@@ -1010,7 +1013,7 @@ class PolyBus {
   static uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0) 
   {
     
-    DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
+    // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
 
     if (!IS_DIGITAL(busType)) return BUSTYPE__NONE__ID;
     if (IS_2PIN(busType)) { //SPI LED chips
