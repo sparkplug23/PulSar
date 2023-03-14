@@ -2,9 +2,9 @@
 
 Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity is intended to allow easy integration of additional sensors or drivers as the project grows. 
 
-*The current release of this project into the public domain is to allow easy sharing with early adopters, who are helping to test and debug this project for future public release.*
+*The current release of this project into the public domain is to allow easy sharing with early adopters, who are helping to test and debug this project for future official public release.*
 
-Note: The documentation on this project is sparse, as there are still significant changes being made to the firmware. I will strive to credit all libraries used and to those I owe my inspiration from, and eventually write a detailed documentation on how to install, use and maintain this project. I am still learning as a programmer so improvements are always being made as I improve my knowledge base.
+Note: The documentation on this project is currently sparse and not maintained as significant changes are ongoing to the firmware. Credit to the developers who have inspired and contributed to this code will be added when documentation is added.
 
 ## Credits
 
