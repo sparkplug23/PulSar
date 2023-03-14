@@ -139,6 +139,7 @@ enum FUNCTION_RESULT_IDS{
 
 #include "2_CoreSystem/01b_RtcMemory/mRtcSettings.h"
 
+
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
   MODULE_SUBTYPE_NETWORK_ID,

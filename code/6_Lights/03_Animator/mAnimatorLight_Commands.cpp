@@ -47,7 +47,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
         Segment_AppendNew(0, 0, segment_i+1);
         
       DEBUG_LINE_HERE;
-        Serial.println(SEGMENT_I(segment_i).hardware_element_colour_order.data);
+        // Serial.println(SEGMENT_I(segment_i).hardware_element_colour_order.data);
 
         if(pCONT_lAni->segments.size()!=0)
         {
@@ -56,7 +56,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
       }
 
-      delay(1000);
+      // delay(1000);
 
       DEBUG_LINE_HERE;
 
@@ -432,7 +432,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   // }
 
-
+  #ifndef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER]){
     if(jtok.isStr()){
       CommandSet_HardwareColourOrderTypeByStr(jtok.getStr(), segment_index);
@@ -443,6 +443,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     #endif // ENABLE_LOG_LEVEL_DEBUG
     
   }
+  #endif // ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
 
 
   if(jtok = obj["paletteBlend"]){
@@ -452,23 +453,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
    
 
-
-  if(jtok = obj[PM_JSON_COLOUR_TYPE]){
-    // if(jtok.isStr()){
-    //   if((tmp_id=mPaletteI->GetColourTypeIDbyName(jtok.getStr()))>=0){
-    //     CommandSet_ColourTypeID(tmp_id, segment_index);
-    //     data_buffer.isserviced++;
-    //   }
-    // }else
-    if(jtok.isNum()){
-      CommandSet_ColourTypeID(jtok.getInt(), segment_index);
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  
   
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
@@ -940,6 +924,30 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SUBTYPE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getSubType());
         data_buffer.isserviced++;
       }
+      
+
+      /**
+       * @brief Kinda duplicate of what is stored inside rgbcctcontroller, but both must exist somehow, needs perfecting
+       * OR, maybe it does not, as "colourtype" is part of bus? or maybe all 3 is needed?? yes, likely
+       * 
+       */
+      if(jtok = seg_obj[PM_JSON_COLOUR_TYPE]){
+        // if(jtok.isStr()){
+        //   if((tmp_id=mPaletteI->GetColourTypeIDbyName(jtok.getStr()))>=0){
+        //     CommandSet_ColourTypeID(tmp_id, segment_index);
+        //     data_buffer.isserviced++;
+        //   }
+        // }else
+        if(jtok.isNum()){
+          CommandSet_ColourTypeID(jtok.getInt(), segment_index);
+          data_buffer.isserviced++;
+        }
+        #ifdef ENABLE_LOG_LEVEL_DEBUG
+        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
+        #endif // ENABLE_LOG_LEVEL_DEBUG
+      }
+      
+
 
 
       if(jtok = seg_obj["Manual"]){ // Assume range 0-359
@@ -1575,8 +1583,10 @@ void mAnimatorLight::TestCode_AddBus1()
   uint8_t defPin[] = {4};
   uint16_t start = 0;
   uint16_t length = 10;
+  COLOUR_ORDER_T ColourOrder;
+  ColourOrder.red = 0; ColourOrder.green = 1; ColourOrder.blue = 2; ColourOrder.white_warm = 7; ColourOrder.white_cold = 7;
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  busConfigs[bus_index] = new BusConfig(TYPE_WS2812_RGB, defPin, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);    
+  busConfigs[bus_index] = new BusConfig(TYPE_WS2812_RGB, defPin, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY, ColourOrder);    
   bus_index++;
 
   defPin[0] = 13;
@@ -1767,6 +1777,8 @@ void mAnimatorLight::TestCode_AddBus1()
 // #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 
 
+#ifndef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+
 /******************************************************************************************************************************
 *******************************************************************************************************************************
 ****************** HardwareColourType (RGB) *****************************************************************************************
@@ -1858,22 +1870,14 @@ void mAnimatorLight::CommandSet_HardwareColourOrderTypeByStr(const char* c, uint
 
 }
 
+#endif // ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+
 
 
 void mAnimatorLight::CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index)
 {
-
-  // switch(id)
-  // {
-  //   default:
-
-  //   case 4:SEGMENT_I(segment_index).colour_type = 
-
-  //   case 4:SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
-  //   case 4:SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID;
-  // }
   
- SEGMENT_I(segment_index).colour_type = (RgbcctColor::LightSubType)id;
+  SEGMENT_I(segment_index).colour_type = (RgbcctColor::LightSubType)id;
 
   ALOG_INF(PSTR("ColourType = %d"),SEGMENT_I(segment_index).colour_type);
 

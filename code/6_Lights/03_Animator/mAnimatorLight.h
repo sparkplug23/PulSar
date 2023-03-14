@@ -7,7 +7,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#include "bus_manager.h"
+#include "6_Lights/00_Interface/mBusManager.h"
 
 /**
  * @brief List of planned changes and the order to be done (change as needed)
@@ -2372,7 +2372,8 @@ typedef struct Segment_New {
       };
     };
 
-    HARDWARE_ELEMENT_COLOUR_ORDER hardware_element_colour_order;// = {32392}; // R,G,B,unset,unset
+    // I dont need this as it is encoded inside the rgbcct colour, BUT, if not using that, I will still need it, so both must be updated!!!!
+    //default needs set back to RGB only later
     RgbcctColor::LightSubType colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
 
     std::vector<RgbcctColor> rgbcctcolors; // new way of holding colours that will perhaps also replace WLED colors
@@ -2674,13 +2675,6 @@ typedef struct Segment_New {
       // rgbcctcolors.push_back(RgbcctColor(1,2,3,4,5));
       // rgbcctcolors.push_back(RgbcctColor(6,7,8,9,10));
       // rgbcctcolors.push_back(RgbcctColor(11,12,13,14,15));
-
-      
-      hardware_element_colour_order.red        = 0; // R,G,B,WC,WW // Default ColourOrder
-      hardware_element_colour_order.green      = 1; // R,G,B,WC,WW // Default ColourOrder
-      hardware_element_colour_order.blue       = 2; // R,G,B,WC,WW // Default ColourOrder
-      hardware_element_colour_order.white_cold = 7; // R,G,B,WC,WW // Default ColourOrder
-      hardware_element_colour_order.white_warm = 7; // R,G,B,WC,WW // Default ColourOrder
 
     }
 

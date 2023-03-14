@@ -28,7 +28,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       break;
     case FUNC_INIT:
       Init();
-  pinMode(2, OUTPUT);
       break;
   }
   
@@ -1297,7 +1296,7 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
 
     if (seg_index >= getSegmentsNum()) {
 
-      Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
+      // Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
 
 
       DEBUG_LINE_HERE;
@@ -1319,7 +1318,7 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
       SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
       DEBUG_LINE_HERE;
       
-      Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
+      // Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
     
     }
 
@@ -2101,6 +2100,8 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
   RgbcctColor updatedColor = RgbcctColor(0);
   TransitionColourPairs colour_pairs;
 
+  // SEGMENT.colour_type = (RgbcctColor::LightSubType)4;
+
   for (uint16_t pixel = 0; 
                 pixel < SEGMENT.virtualLength();
                 pixel++
@@ -2110,9 +2111,9 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
     updatedColor = RgbTypeColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);  
 
 
-    AddLog(LOG_LEVEL_TEST, PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(), 
-    pixel, 
-    updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
+    // AddLog(LOG_LEVEL_TEST, PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(), 
+    // pixel, 
+    // updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
 
 //wrong in here!
     SEGMENT.SetPixelColor(pixel, updatedColor);
@@ -2138,7 +2139,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
   
   updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
   
-  // ALOG_INF( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
+  ALOG_INF( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
 
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
@@ -2167,19 +2168,19 @@ RgbcctColor mAnimatorLight::GetSegmentColour(uint8_t colour_index, uint8_t segme
 void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light_type)
 {
 
-  switch(light_type)
-  {
-    case LT_PWM5:
-      SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
-    break;
-    case LT_ADDRESSABLE_SK6812:
-      SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID; 
-    break;
-    default:
-    case LT_ADDRESSABLE_WS281X:
-      SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
-    break;
-  }
+  // switch(light_type)
+  // {
+  //   case LT_PWM5:
+  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
+  //   break;
+  //   case LT_ADDRESSABLE_SK6812:
+  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID; 
+  //   break;
+  //   default:
+  //   case LT_ADDRESSABLE_WS281X:
+  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
+  //   break;
+  // }
 
 }
 
@@ -4308,9 +4309,12 @@ void mAnimatorLight::BusManager_Create_DefaultSingleNeoPixel()
       uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
       prevLen += count;
       BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-      if(bus_manager->add(defCfg) == -1) break;
+      if(bus_manager->add(defCfg) == -1) 
+      {
+        ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
+        break;
+      }
     }
-
 
     // const uint8_t defDataPins[] = {22,23};
     // const uint16_t defCounts[] = {10,10};
@@ -4341,10 +4345,7 @@ void mAnimatorLight::finalizeInit(void)
 
   ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), bus_manager->getNumBusses());
 
-
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-
-  DEBUG_LINE_HERE;
 
   // // for the lack of better place enumerate ledmaps here
   // // if we do it in json.cpp (serializeInfo()) we are getting flashes on LEDs
@@ -4432,10 +4433,8 @@ void mAnimatorLight::finalizeInit(void)
   //segments are created in makeAutoSegments();
   loadCustomPalettes(); // (re)load all custom palettes
   // deserializeMap();     // (re)load default ledmap
-
   
   ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), bus_manager->getNumBusses());
-
 
 }
 
@@ -5181,7 +5180,6 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
 
   int vStrip = indexPixel>>16; // hack to allow running on virtual strips (2D segment columns/rows)
   indexPixel &= 0xFFFF;
-
   if (indexPixel >= virtualLength() || indexPixel<0) return;  // if pixel would fall out of segment just exit
 
   #ifndef WLED_DISABLE_2D
@@ -5257,13 +5255,8 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
   /**
    * @brief Apply Pixel hardware colour mapping from internal to hardware order
    **/
-  RgbcctColor color_hardware = color_internal; // Copy
-  if(hardware_element_colour_order.red        != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.red]         = color_internal.R;  }
-  if(hardware_element_colour_order.green      != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.green]       = color_internal.G;  }
-  if(hardware_element_colour_order.blue       != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.blue]        = color_internal.B;  }
-  if(hardware_element_colour_order.white_cold != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.white_cold]  = color_internal.WC; }
-  if(hardware_element_colour_order.white_warm != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ color_hardware.raw[hardware_element_colour_order.white_warm]  = color_internal.WW; }
-
+  RgbcctColor colour_hardware = color_internal; // Copy
+    
   uint16_t physical_indexPixel = indexPixel; // Going from virtual/internal index to physical/external index
   uint16_t segment_length      = length();
 
@@ -5304,14 +5297,16 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
         indexMir += offset; // offset/phase
 
         if (indexMir >= pixel_range.stop) indexMir -= segment_length; // Wrap
-        pCONT_lAni->bus_manager->setPixelColorNew(indexMir, color_hardware);
+        pCONT_lAni->bus_manager->setPixelColor(indexMir, colour_hardware);
 
       }
       indexSet += offset; // offset/phase
 
       if (indexSet >= pixel_range.stop) indexSet -= segment_length; // Wrap
-      pCONT_lAni->bus_manager->setPixelColorNew(indexSet, color_hardware);
+      pCONT_lAni->bus_manager->setPixelColor(indexSet, colour_hardware);
     }
+  
+    // ALOG_INF(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
 
   }
 
@@ -5364,19 +5359,11 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment_New::GetPixelColor(uint16_t indexP
   physical_indexPixel += offset;
   if (physical_indexPixel >= pixel_range.stop) physical_indexPixel -= length();
   
-  RgbcctColor colour_hardware = pCONT_lAni->bus_manager->getPixelColorNew(physical_indexPixel);
-  RgbcctColor colour_internal = colour_hardware;
+  RgbcctColor colour_hardware = pCONT_lAni->bus_manager->getPixelColor(physical_indexPixel);
+  
+  // ALOG_INF(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
 
-  /**
-   * @brief Convert from external colour back into internal colour (This step is not required when using WLED busses, as it is set by the neopixel method)
-   **/
-  if(hardware_element_colour_order.red        != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.red]         = colour_hardware.R;  }
-  if(hardware_element_colour_order.green      != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.green]       = colour_hardware.G;  }
-  if(hardware_element_colour_order.blue       != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.blue]        = colour_hardware.B;  }
-  if(hardware_element_colour_order.white_cold != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.white_cold]  = colour_hardware.WC; }
-  if(hardware_element_colour_order.white_warm != D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE){ colour_internal.raw[hardware_element_colour_order.white_warm]  = colour_hardware.WW; }
-
-  return colour_internal;
+  return colour_hardware;
 
 }
 

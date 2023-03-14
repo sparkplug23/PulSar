@@ -1125,7 +1125,7 @@ struct LightSettings{
   // uint8_t ws_color[4][3];      // 475
   // uint8_t ws_width[3];         // 481
   // uint8_t       rgbwwTable[5];             // 71A
-  uint8_t type;
+  uint8_t type; //phase out now with multipin?
   uint16_t size;
 };
 

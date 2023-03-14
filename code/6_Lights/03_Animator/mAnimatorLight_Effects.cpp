@@ -37,8 +37,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Colour()
   SetTransitionColourBuffer_DesiredColour (SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type, desired_colour); 
   SetTransitionColourBuffer_StartingColour(SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type, starting_colour);
 
-  // ALOG_INF( PSTR("startin_colour =%d,%d,%d,%d,%d"), starting_colour.R,starting_colour.G,starting_colour.B,starting_colour.WC,starting_colour.WW);
-  // ALOG_INF( PSTR("desired_colour =%d,%d,%d,%d,%d" DEBUG_INSERT_PAGE_BREAK), desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+  ALOG_INF( PSTR("startin_colour =%d,%d,%d,%d,%d"), starting_colour.R,starting_colour.G,starting_colour.B,starting_colour.WC,starting_colour.WW);
+  ALOG_INF( PSTR("desired_colour =%d,%d,%d,%d,%d" DEBUG_INSERT_PAGE_BREAK), desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
 
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(param); } );
 

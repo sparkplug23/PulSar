@@ -209,6 +209,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level, bool js
   {
     JBI->Level_Start_F("Segment%d", seg_i);
 
+    #ifndef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
       JBI->Add("ColourOrderHex", SEGMENT_I(seg_i).hardware_element_colour_order.data);
     
       JBI->Array_Start("ColourOrder");
@@ -218,6 +219,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level, bool js
         JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.white_cold);
         JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.white_warm);
       JBI->Array_End();
+    #endif // ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
 
     JBI->Level_End();
   }
@@ -293,6 +295,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level, boo
       JBI->Add("Stop", segments[seg_i].pixel_range.stop);
       JBI->Add("SEGLEN", SEGLEN);
       JBI->Add("virtualLength", segments[seg_i].virtualLength());
+      JBI->Add("ColourType", (uint8_t)segments[seg_i].colour_type);
       JBI->Level_Start("Transition");
         JBI->Add("rate", SEGMENT_I(seg_i).transition.rate_ms);
         JBI->Add("time", SEGMENT_I(seg_i).transition.time_ms);

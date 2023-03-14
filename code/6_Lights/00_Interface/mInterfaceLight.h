@@ -10,7 +10,7 @@
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-  #include "6_Lights/03_Animator/bus_manager.h"
+  #include "6_Lights/00_Interface/mBusManager.h"
   #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 // New sections of code that should be enabled by default
@@ -41,46 +41,7 @@
 #include "6_Lights/02_Palette/mPalette.h"
 
 //Required as defualt for now
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-// TRANSITION_METHOD
-// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_NONE_NAME_CTR)    "None";   
-// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_BLEND_NAME_CTR)    "Blend";      
-// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_INSTANT_NAME_CTR)  "Instant";      
-// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_TWINKLE_NAME_CTR)  "Twinkle";     
-// DEFINE_PGM_CTR(PM_TRANSITION_METHOD_GLIMMER_NAME_CTR)  "Glimmer";
-
-
-// order is maybe becoming flasher? mode ie applied animations          //new flasher name
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_NONE_NAME_CTR) "None";
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_BLEND_NAME_CTR)      "Blend";   //slow_glow
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_RANDOM_NAME_CTR)      D_JSON_RANDOM;  //random
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_CENTRE_OUT_NAME_CTR) "Centre Out" ;   // work out flasher for half, then mirror image  
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_INORDER_NAME_CTR)    D_JSON_INORDER;   //none
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_ROTATE_NAME_CTR)     "Rotate";  //rotate
-DEFINE_PGM_CTR(PM_TRANSITION_ORDER_FIXED_NAME_CTR)     "Fixed";  //rotate
-    
-
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR)  
-  "{o1}%d'>%s{o2}";   
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM)
-  "{o1}%d'>%d{o2}";
-
-
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_NUM)  
-  "{o1}%d'>%d{o2}";  
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_NUM_CTR)  
-  "{o1}%d'>%s{o2}";   
-DEFINE_PGM_CTR(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR)  
-  "{o1}%s'>%s{o2}";   
-
-
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR)        D_PIXEL_HARDWARE_COLOR_ORDER_GRB_CTR;
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR)                      "RGB";
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_BRG_CTR)                      "BRG";
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_COLOR_ORDER_RBG_CTR)                      "RBG";
-
-
+#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 #define D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "RGBCCT_PWM"
 #define D_PIXEL_HARDWARE_TYPE_WS28XX_CTR "WS28XX"
@@ -94,6 +55,7 @@ DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)       D_PIXEL_HARDWARE_TYPE_SK
 
 // #define CLEAR_PALETTELIST_WITH_PTR(x) memset(x,0,sizeof(PALETTELIST::PALETTE));
 
+// These should be removed in favour of busses method!
 enum LightTypes_IDS{
   LT_BASIC, //relay?
   // PWM types gives the amount of channels, but not the type of led, thats handled by rgbcw order
@@ -106,60 +68,28 @@ enum LightTypes_IDS{
   LT_RGBW,  LT_RGBWC, // This are not needed, as they are either ADD or PWM
 };
 
-
-// enum LightSubtypes{ 
-//   LST_NONE, 
-//   LST_SINGLE, 
-//   LST_COLDWARM, 
-//   LST_RGB,   
-//   LST_RGBW, 
-//   LST_RGBWC, 
-//   LST_RGBCCT, 
-//   LST_RGBCW
-// };
-
-
-
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/02_Time/mTime.h"
-
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 
 #define LST_MAX 5
 
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";
-  
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";  
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
 
-    enum LIHGT_POWER_STATE_IDS{
-      LIGHT_POWER_STATE_OFF_ID=0,
-      LIGHT_POWER_STATE_ON_ID,
-      LIGHT_POWER_STATE_TOGGLE_ID,
-      LIGHT_POWER_STATE_PAUSED,
-      LIGHT_POWER_STATE_ANIMATING_ID,
-      LIGHT_POWER_STATE_LENGTH_ID
-    };
-    // void SetAnimationProfile(uint8_t profile_id);
+enum LIHGT_POWER_STATE_IDS{
+  LIGHT_POWER_STATE_OFF_ID=0,
+  LIGHT_POWER_STATE_ON_ID,
+  LIGHT_POWER_STATE_TOGGLE_ID,
+  LIGHT_POWER_STATE_PAUSED,
+  LIGHT_POWER_STATE_ANIMATING_ID,
+  LIGHT_POWER_STATE_LENGTH_ID
+};
 
-
-#define WEB_CLASS_RGB_LIVE "rgb_live"
-
-// Arrays to hold palettes, called via pointer
-// Variable user maps need to be variable  
-// #ifndef D_PALETTE_HSBID_NAME_CTR
-// #define D_PALETTE_HSBID_NAME_CTR        "User"   
-// #endif
-// #ifndef D_PALETTE_RGBCCT_COLOURS_NAME_CTR
-// #define D_PALETTE_RGBCCT_COLOURS_NAME_CTR        "RGBCCTColour"   THESE ARE WRONG
-// #endif
 #define PALETTELIST_COLOUR_HSBID_AMOUNT_MAX PALETTELIST_COLOUR_AMOUNT_MAX
 
-
-//#define DEBUG_LIGHT
-
 typedef unsigned long power_t;              // Power (Relay) type
-
 
 #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 // New version of Gamma correction compute
@@ -242,29 +172,12 @@ const gamma_table_t gamma_table_fast[] = {
 
 
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_CHANGE_POWER_NAME_CTR )   "Change Power"     ;    
-// DEFINE_PGM_CTR(PM_ANIMATION_MODE_TURN_OFF_NAME_CTR )   "Turn Off"     ;    
+DEFINE_PGM_CTR(PM_ANIMATION_MODE_CHANGE_POWER_NAME_CTR )   "Change Power"     ;   
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_AMBILIGHT_NAME_CTR   )      "Ambilight"  ;                
-// DEFINE_PGM_CTR(PM_ANIMATION_MODE_SCENE_NAME_CTR   )          "Scene"      ;             
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_EFFECTS_NAME_CTR  )         D_JSON_EFFECTS;
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_WLED_NAME_CTR) "WLED";
-#ifdef ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION       
-DEFINE_PGM_CTR(PM_ANIMATION_MODE_NOTIFICATIONS_NAME_CTR)   D_JSON_NOTIFICATIONS;      
-#endif   
 #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_MANUAL_SETPIXEL_NAME_CTR) "Manual SetPixel";
 #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-
-#define WEB_HANDLE_LIVEPIXELS_SHARED_JSON "/shared/rgb_livepixels.json"
-
-enum RGB_VIEW_SHOW_TYPE_IDS{
-  RGB_VIEW_SHOW_TYPE_NONE_ID=0,
-  RGB_VIEW_SHOW_TYPE_ALWAYS_GRADIENT_ID,
-  RGB_VIEW_SHOW_TYPE_ALWAYS_BLOCKS_ID,
-  RGB_VIEW_SHOW_TYPE_FOLLOW_PALETTE_ID,
-
-  RGB_VIEW_SHOW_TYPE_LENGTH_ID
-};
 
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -290,44 +203,15 @@ class mInterfaceLight :
     };
     #endif
 
-    // mPalette* mpalette = nullptr;//new mPalette();
-
-    /**
-     * Module settings other tasks/module may need
-     * */
-    // typedef union {
-    //   uint8_t data; // allows full manipulating
-    //   struct { 
-    //     // enable animations (pause)
-    //     uint8_t enable_cct_channel_sliders : 1;
-
-    //     // Reserved
-    //     uint8_t reserved : 7;
-    //   };
-    // } SETTINGS_FLAGS;
-
-    struct SETTINGS{
-      // SETTINGS_FLAGS flags;
+    struct SETTINGS
+    {
       
-      //phase out
-      // uint8_t pixel_hardware_color_order_id = PIXEL_HARDWARE_COLOR_ORDER_RGB_ID;
-
-
-      // uint16_t strip_size = STRIP_SIZE_MAX; //allow variable control of size
-      // uint16_t light_size_count = 1;
-      // uint8_t pwm_offset = 0;                 // Offset in color buffer
     }settings;
 
 
     const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen);
     const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
     int8_t GetHardwareColourTypeIDbyName(const char* c);
-
-
-    // Values not ever saved
-    struct RUNTIME_VALUES{
-      uint32_t animation_changed_millis = 0;
-    }runtime;
 
     void LightCalcPWMRange();
 
