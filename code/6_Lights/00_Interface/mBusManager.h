@@ -48,26 +48,25 @@ struct BusConfig {
     uint8_t busType, 
     uint8_t* ppins, 
     uint16_t pstart, 
-    uint16_t len = 1, 
-    uint8_t pcolorOrder = COL_ORDER_GRB, 
+    uint16_t length = 1,
+    COLOUR_ORDER_T _ColourOrder = {COLOUR_ORDER_INIT_DISABLED},
     bool rev = false, 
     uint8_t skip = 0, 
-    byte aw=RGBW_MODE_MANUAL_ONLY,
-    COLOUR_ORDER_T _ColourOrder = {0}
+    byte aw = RGBW_MODE_MANUAL_ONLY
   ){
-    
-    
+        
     refreshReq = (bool) GET_BIT(busType,7);
     type = busType & 0x7F;  // bit 7 may be/is hacked to include refresh info (1=refresh in off state, 0=no refresh)
-    count = len; start = pstart; 
-    reversed = rev; skipAmount = skip; autoWhite = aw;
+    count = length; 
+    start = pstart; 
+    reversed = rev; 
+    skipAmount = skip; 
+    autoWhite = aw;
+
     uint8_t nPins = 1;
-
-    Serial.printf("BusConfig(uint8_t busType   %d~%d\n\r",busType, type);
-
-    if (type >= TYPE_NET_DDP_RGB && type < 96) nPins = 4; //virtual network bus. 4 "pins" store IP address
+    if (type >= BUSTYPE_NET_DDP_RGB && type < 96) nPins = 4; //virtual network bus. 4 "pins" store IP address
     else if (type > 47) nPins = 2;
-    else if (type > 40 && type < 46) nPins = NUM_PWM_PINS(type);
+    else if (type > 40 && type < 46) nPins = NUM_BUSTYPE_PWM_PINS(type);
     for (uint8_t i = 0; i < nPins; i++) pins[i] = ppins[i];
 
     colorOrder = _ColourOrder;
@@ -165,19 +164,19 @@ class Bus {
             bool     containsPixel(uint16_t pix) { return pix >= _start && pix < _start+_len; }
 
     virtual bool hasRGB() {
-      if ((_type >= TYPE_WS2812_1CH && _type <= TYPE_WS2812_WWA) || _type == TYPE_ANALOG_1CH || _type == TYPE_ANALOG_2CH || _type == TYPE_ONOFF) return false;
+      if ((_type >= BUSTYPE_WS2812_1CH && _type <= BUSTYPE_WS2812_WWA) || _type == BUSTYPE_ANALOG_1CH || _type == BUSTYPE_ANALOG_2CH || _type == BUSTYPE_ONOFF) return false;
       return true;
     }
     virtual bool hasWhite() { return Bus::hasWhite(_type); }
     static  bool hasWhite(uint8_t type) {
-      if ((type >= TYPE_WS2812_1CH && type <= TYPE_WS2812_WWA) || type == TYPE_SK6812_RGBW || type == TYPE_TM1814) return true; // digital types with white channel
-      if (type > TYPE_ONOFF && type <= TYPE_ANALOG_5CH && type != TYPE_ANALOG_3CH) return true; // analog types with white channel
-      if (type == TYPE_NET_DDP_RGBW) return true; // network types with white channel
+      if ((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_SK6812_RGBW || type == BUSTYPE_TM1814) return true; // digital types with white channel
+      if (type > BUSTYPE_ONOFF && type <= BUSTYPE_ANALOG_5CH && type != BUSTYPE_ANALOG_3CH) return true; // analog types with white channel
+      if (type == BUSTYPE_NET_DDP_RGBW) return true; // network types with white channel
       return false;
     }
     virtual bool hasCCT() {
-      if (_type == TYPE_WS2812_2CH_X3 || _type == TYPE_WS2812_WWA ||
-          _type == TYPE_ANALOG_2CH    || _type == TYPE_ANALOG_5CH) return true;
+      if (_type == BUSTYPE_WS2812_2CH_X3 || _type == BUSTYPE_WS2812_WWA ||
+          _type == BUSTYPE_ANALOG_2CH    || _type == BUSTYPE_ANALOG_5CH) return true;
       return false;
     }
     static void setCCT(uint16_t cct) {
@@ -423,7 +422,7 @@ class BusManager
       int j = 0;
       for (int i=0; i<numBusses; i++) 
       {
-        if (busses[i]->getType() >= TYPE_NET_DDP_RGB && busses[i]->getType() < 96)
+        if (busses[i]->getType() >= BUSTYPE_NET_DDP_RGB && busses[i]->getType() < 96)
         { 
           j++;
         }

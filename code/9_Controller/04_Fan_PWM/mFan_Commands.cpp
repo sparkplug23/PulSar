@@ -62,12 +62,6 @@ void mFan::CommandSet_FanSpeed_Manual(uint16_t value){
 AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 
 
-
-//   char buffer[20];
-//   pCONT_set->Settings.light_settings.type = value;
-//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
-//   #endif // ENABLE_LOG_LEVEL_COMMANDS
 } 
 
 #endif // USE_MODULE_LIGHTS_INTERFACE

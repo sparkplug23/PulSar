@@ -886,52 +886,52 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   #ifdef ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_A_CTR)==0){   return GPIO_PIXELBUS_01_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_B_CTR)==0){   return GPIO_PIXELBUS_01_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_B_CTR)==0){   return GPIO_PIXELBUS_01_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_C_CTR)==0){   return GPIO_PIXELBUS_01_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_D_CTR)==0){   return GPIO_PIXELBUS_01_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_01_E_CTR)==0){   return GPIO_PIXELBUS_01_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_A_CTR)==0){   return GPIO_PIXELBUS_02_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_B_CTR)==0){   return GPIO_PIXELBUS_02_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_B_CTR)==0){   return GPIO_PIXELBUS_02_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_C_CTR)==0){   return GPIO_PIXELBUS_02_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_D_CTR)==0){   return GPIO_PIXELBUS_02_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_02_E_CTR)==0){   return GPIO_PIXELBUS_02_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_A_CTR)==0){   return GPIO_PIXELBUS_03_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_B_CTR)==0){   return GPIO_PIXELBUS_03_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_B_CTR)==0){   return GPIO_PIXELBUS_03_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_C_CTR)==0){   return GPIO_PIXELBUS_03_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_D_CTR)==0){   return GPIO_PIXELBUS_03_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_03_E_CTR)==0){   return GPIO_PIXELBUS_03_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_A_CTR)==0){   return GPIO_PIXELBUS_04_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_B_CTR)==0){   return GPIO_PIXELBUS_04_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_B_CTR)==0){   return GPIO_PIXELBUS_04_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_C_CTR)==0){   return GPIO_PIXELBUS_04_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_D_CTR)==0){   return GPIO_PIXELBUS_04_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_04_E_CTR)==0){   return GPIO_PIXELBUS_04_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_A_CTR)==0){   return GPIO_PIXELBUS_05_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_B_CTR)==0){   return GPIO_PIXELBUS_05_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_B_CTR)==0){   return GPIO_PIXELBUS_05_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_C_CTR)==0){   return GPIO_PIXELBUS_05_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_D_CTR)==0){   return GPIO_PIXELBUS_05_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_05_E_CTR)==0){   return GPIO_PIXELBUS_05_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_A_CTR)==0){   return GPIO_PIXELBUS_06_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_B_CTR)==0){   return GPIO_PIXELBUS_06_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_B_CTR)==0){   return GPIO_PIXELBUS_06_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_C_CTR)==0){   return GPIO_PIXELBUS_06_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_D_CTR)==0){   return GPIO_PIXELBUS_06_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_06_E_CTR)==0){   return GPIO_PIXELBUS_06_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_A_CTR)==0){   return GPIO_PIXELBUS_07_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_B_CTR)==0){   return GPIO_PIXELBUS_07_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_B_CTR)==0){   return GPIO_PIXELBUS_07_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_C_CTR)==0){   return GPIO_PIXELBUS_07_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_D_CTR)==0){   return GPIO_PIXELBUS_07_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_07_E_CTR)==0){   return GPIO_PIXELBUS_07_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_A_CTR)==0){   return GPIO_PIXELBUS_08_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_B_CTR)==0){   return GPIO_PIXELBUS_08_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_B_CTR)==0){   return GPIO_PIXELBUS_08_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_C_CTR)==0){   return GPIO_PIXELBUS_08_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_D_CTR)==0){   return GPIO_PIXELBUS_08_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_08_E_CTR)==0){   return GPIO_PIXELBUS_08_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_A_CTR)==0){   return GPIO_PIXELBUS_09_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_B_CTR)==0){   return GPIO_PIXELBUS_09_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_B_CTR)==0){   return GPIO_PIXELBUS_09_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_C_CTR)==0){   return GPIO_PIXELBUS_09_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_D_CTR)==0){   return GPIO_PIXELBUS_09_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_09_E_CTR)==0){   return GPIO_PIXELBUS_09_E_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_A_CTR)==0){   return GPIO_PIXELBUS_10_A_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_B_CTR)==0){   return GPIO_PIXELBUS_10_B_ID; }
-  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_B_CTR)==0){   return GPIO_PIXELBUS_10_C_ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_C_CTR)==0){   return GPIO_PIXELBUS_10_C_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_D_CTR)==0){   return GPIO_PIXELBUS_10_D_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_PIXELBUS_10_E_CTR)==0){   return GPIO_PIXELBUS_10_E_ID; }
   #endif // ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS

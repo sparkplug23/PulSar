@@ -1018,6 +1018,8 @@
 
   #define  ENABLE_DEBUG_MULTIPIN
 
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
@@ -1061,6 +1063,8 @@
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
 
+    // #define ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
+
 
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
@@ -1078,32 +1082,34 @@
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_NUMBER "\":{"
+    "\"" D_JSON_GPIO_NUMBER  "\":{"
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\"" //13,14,27,4
-      // "\"19\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"2\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
       #endif
     "},"
-    "\"" D_JSON_GPIO_FUNCTION "\":{"
+    "\"" D_JSON_GPIO_FUNCTION "\":{" //hmm, what about moving this into the template for busconfig, settings the pins there??
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":[22],"     // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":[23],"     // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":4,"      // PWM Single White
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":[18, 19]" // PWM Dual CCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":[16,17,5,21,22],"  // PWM RGBCCT // needs fixing
 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":22,"     // Digital SK6812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":23"     // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":4,"      // PWM Single White
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":[18, 19]" // PWM Dual CCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":16,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_05_B_CTR "\":17,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_05_C_CTR "\":5,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_05_D_CTR "\":21,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_05_E_CTR "\":22,"  // PWM RGBCCT
+
+      "\"" D_GPIO_FUNCTION_PIXELBUS_06_A_CTR "\":23"                // PWM CCT
       #endif
-      // "\"18\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
-
 
 
   #define USE_FUNCTION_TEMPLATE
@@ -1122,14 +1128,69 @@
   #define USE_LIGHTING_TEMPLATE
   // #endif // USE_MODULE_LIGHTS_INTERFACE
 
-  // #define USE_LIGHTING_TEMPLATE__SINGLE
-  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
+  #define USE_LIGHTING_TEMPLATE__DEFAULT
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED
   // #define USE_LIGHTING_TEMPLATE_3
 
-  // #ifdef USE_LIGHTING_TEMPLATE__SINGLE
+  #ifdef USE_LIGHTING_TEMPLATE__DEFAULT
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
+    "ColourPalette":"Christmas 24",
+    "Effects": {
+      "Function":2,
+      "Intensity":255
+    },
+    "Transition": {
+      "TimeMs": 2000,
+      "RateMs": 3000
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__DEFAULT
+
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":10
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":10,
+        "Length":10
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":20,
+        "Length":2
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":30,
+        "Length":2
+      },
+      {
+        "Pin":[16,17,5,21,22],
+        "ColourOrder":"RGBCW",
+        "BusType":"ANALOG_5CH",
+        "Start":41,
+        "Length":1
+      }
+    ],
     "HardwareType":"WS28XX",
     "AnimationMode":"Effects",
     "ColourPalette":"Christmas 01",
@@ -1138,13 +1199,13 @@
       "Intensity":50
     },
     "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
+      "TimeMs": 2000,
+      "RateMs": 2100
     },
     "BrightnessRGB": 10
   }
   )=====";
-  // #endif // USE_LIGHTING_TEMPLATE__SINGLE
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED
 
 // {
 //   "ColourPalette": 11,
@@ -1164,6 +1225,17 @@
 //   }
 // }
 
+
+
+    // ALOG_COM(PSTR("isObject %d"), jtok.isObject());
+    // ALOG_COM(PSTR("isArray %d"), jtok.isArray());
+    // ALOG_COM(PSTR("isStr %d"), jtok.isStr());
+    // ALOG_COM(PSTR("isNum %d"), jtok.isNum());
+
+    // ALOG_COM(PSTR("BusConfig match jtok.isArrayA() %d"), jtok.isArray());
+    //   ALOG_INF(PSTR("BusConfig **************A  \t%d"), jtok.getType());
+    // ALOG_COM(PSTR("BusConfig match jtok.isArrayB() %d"), jtok.isArray());
+    
 
 
 // {

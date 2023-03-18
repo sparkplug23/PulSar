@@ -22,7 +22,7 @@ class mPaletteContainer
 	uint8_t palette_id = 0;
 
 // public:
-    mPaletteContainer(uint16_t buffer_size)
+    mPaletteContainer(uint16_t buffer_size = 0)
 	{
 
 		// allocateData(buffer_size);

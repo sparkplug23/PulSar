@@ -45,46 +45,42 @@ bool mHardwarePins::ReadModuleTemplateFromProgmem(){
  * */
 void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
 
-  JsonParser parser(buffer);
-  JsonParserObject obj = parser.getRootObject();   
-  if (!obj) { 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationError with \"%s\""),buffer);
-    #endif// ENABLE_LOG_LEVEL_INFO
-    return;
-  } else{
-    // AddLog(LOG_LEVEL_ERROR, PSTR("DeserializationSuccess with \"%s\""),buffer);
-  }
   JsonParserToken jtok = 0; 
+
+  JsonParser parser(buffer);
+  JsonParserObject rootObj = parser.getRootObject();   
+  if (!rootObj) 
+  {
+    ALOG_ERR(PSTR("DeserializationError with \"%s\""), buffer);
+    return;
+  } 
+  else
+  {
+    ALOG_DBG(PSTR("Deserialization Success with \"%s\""), buffer);
+  }
   
-  if(jtok = obj[PM_JSON_NAME]){
+
+  if(jtok = rootObj[PM_JSON_NAME])
+  {
     const char* name_ctr = jtok.getStr();
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "system_name %s"),name_ctr);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-    // snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr); 
+    ALOG_COM(PSTR(D_LOG_CONFIG "system_name %s"), name_ctr);
     snprintf(pCONT_set->Settings.system_name.device,sizeof(pCONT_set->Settings.system_name.device),"%s",name_ctr);  
   }
 
-  // delay(5000);
 
-  // Name means friendly name (max 20 chars)
-  if(jtok = obj[PM_JSON_FRIENDLYNAME]){
+  if(jtok = rootObj[PM_JSON_FRIENDLYNAME])
+  {
     const char* name_ctr = jtok.getStr();
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template NAME %s"),name_ctr);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
+    ALOG_COM(PSTR(D_LOG_CONFIG "Template NAME %s"), name_ctr);
     snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
-    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
-    //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
   }
 
   /**
    * @brief If either GPIO method is configured then clear the previous
    * 
-   * @param obj 
+   * @param rootObj 
    */
-  if((obj[PM_JSON_GPIOC])||(obj[D_JSON_GPIO_FUNCTION]))
+  if((rootObj[PM_JSON_GPIOC])||(rootObj[D_JSON_GPIO_FUNCTION]))
   {
     pCONT_set->boot_status.module_template_parse_success = true;
     for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
@@ -93,15 +89,11 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
   }
 
 
-  if(jtok = obj[PM_JSON_GPIOC])
+  if(jtok = rootObj[PM_JSON_GPIOC])
   {
     
     int8_t  real_pin = -1;
     int16_t gpio_number = -1;
-          // AddLog(LOG_LEVEL_INFO, PSTR("jtok.size()=%d"),jtok.size());
-
-          // debug_debug_delay(3000); 
-
 
     uint8_t jsonpair_count = jtok.size();
 
@@ -150,7 +142,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
 
   // New method that assumes the function is the key, and the pin(s) are the values
   // pins may be represented as single ints, or array of ints (e.g. Lighting pins)
-  if(jtok = obj[D_JSON_GPIO_FUNCTION])
+  if(jtok = rootObj[D_JSON_GPIO_FUNCTION])
   { 
 
     ALOG_INF(PSTR("Found %s"), D_JSON_GPIO_FUNCTION);
@@ -167,24 +159,26 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
       jtok.nextOne(); //skip start of object
       const char* key = jtok.getStr();
       
-      // ALOG_INF(PSTR("KEY%d %s\n\r"), pair_index, key);
+      // ALOG_INF(PSTR("KEY%d %s"), pair_index, key);
 
       gpio_function_id = pCONT_pins->GetGPIOFunctionIDbyName(key);
 
-      ALOG_INF(PSTR("KEY%d %s GPIO_ID %d\n\r"), pair_index, key, gpio_function_id);
+      ALOG_INF(PSTR("KEY%d>> %s GPIO_ID %d"), pair_index, key, gpio_function_id);
       
       
       if(gpio_function_id>=0)
       {
     
-        jtok.nextOne();
+        jtok.nextOne(); // Arrays not working with this, need a new function in parser myself
         const char* value = jtok.getStr();
+
+        ALOG_INF(PSTR("getType %d"), jtok.getType());
         
         real_pin = GetRealPinNumberFromName(value);
-        ALOG_INF(PSTR("value %d %s %d\n\r"), pair_index, value, real_pin);
+        ALOG_INF(PSTR("Value%d>> \"%s\" %d #%d"), pair_index, value, real_pin, jtok.getInt());
 
         int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
-        ALOG_INF( PSTR("real_pin%d->index_pin%d\n\r"), real_pin, index_pin);
+        ALOG_INF( PSTR("\t\t\treal_pin%d->index_pin%d"), real_pin, index_pin);
 
         if(index_pin != -1){
           // only template pins
@@ -209,54 +203,44 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
         }
 
       }// end
+      else{
+        ALOG_ERR(PSTR("KEY%d>> %s GPIO_ID %d"), pair_index, key, gpio_function_id);
+
+      }
 
     }
 
     delay(3000);
 
   }
+  
     
-    
-    
-  if(jtok = obj[PM_JSON_BASE]){
-    
+  if(jtok = rootObj[PM_JSON_BASE])
+  {    
     const char* base_ctr = jtok.getStr();
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_DBM( PSTR(D_LOG_CONFIG "Template BASE %s"),base_ctr);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-    pCONT_set->Settings.module = GetModuleIDbyName(base_ctr);
-    char buffer[40];
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR("Settings.module=%s"),GetModuleNameByID(pCONT_set->Settings.module, buffer));
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-    //snprintf(pCONT_set->Settings.system_name.friendly,sizeof(pCONT_set->Settings.system_name.friendly),"%s",name_ctr);
-  }else{
+    ALOG_COM(PSTR(D_LOG_CONFIG "Template BASE Searching \"%s\""), base_ctr);
+    int16_t module_result = GetModuleIDbyName(base_ctr);
+    if(module_result >= -1)
+    {
+      pCONT_set->Settings.module = module_result;
+      ALOG_COM(PSTR(D_LOG_CONFIG "Template BASE Found %d"), pCONT_set->Settings.module);
+    }
+  }
+  else
+  {
     pCONT_set->Settings.module = USER_MODULE;
   }
 
   
-  // Name means friendly name (max 20 chars)
-  if(jtok = obj["RoomHint"]){
+  if(jtok = rootObj["RoomHint"])
+  {
     const char* name_ctr = jtok.getStr();
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template RoomHint %s"),name_ctr);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
-
-    snprintf(pCONT_set->Settings.room_hint,sizeof(pCONT_set->Settings.room_hint),"%s",name_ctr);
-
-
-    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Template Name %s"),name_ctr);
-    //snprintf(pCONT_set->Settings.user_template2.hardware.name,sizeof(pCONT_set->Settings.user_template2.hardware.name),"%s",name_ctr);
+    ALOG_COM(PSTR(D_LOG_CONFIG "Template RoomHint %s"), name_ctr);
+    snprintf(pCONT_set->Settings.room_hint, sizeof(pCONT_set->Settings.room_hint), "%s", name_ctr);
   }
 
-
-
-
-  // ModuleSettings_FlashSerial();
-
-// ParseModuleTemplate();
-
 }
+
 
 /**
  * @brief Reads any template GPIOs then reads any user set GPIOs
@@ -361,18 +345,7 @@ void mHardwarePins::GpioInit(void)
     uint8_t module = MODULE;
     if (!ValidModule(MODULE))
     { 
-      module = MODULE_WEMOS_ID; 
-
-      //esp32 ad esp8266 have different defaults
-
-      // #ifdef ESP8266
-      // module = SONOFF_BASIC;
-      // #endif  // ESP8266
-      // #ifdef ESP32
-      //       module = WEMOS;
-      // #endif  // ESP32
-
-
+      module = MODULE_WEMOS_ID;
     }
     pCONT_set->Settings.module = module;
     pCONT_set->Settings.last_module = module;
@@ -488,7 +461,8 @@ void mHardwarePins::GpioInit(void)
   // AddLog_Array(LOG_LEVEL_DEBUG_MORE, "my_module.io", pCONT_set->my_module.io, ARRAY_SIZE(pCONT_set->my_module.io));
 
   // DEBUG_LINE_HERE;
-  /**
+  /** 
+   * PArt E: Checking for bitSet/Inverted etc, but I am expecting this to move into submodules
    *  Take module io and configure pins
    * Unlike Tas, each pin function has its unique name maintained (ie SWT_INV for switch inverted maintained its ID, and it not saved simply as INV then shifted back to standard SWT. Internal classes must handle this)
    * */
@@ -548,17 +522,18 @@ void mHardwarePins::GpioInit(void)
     //new way
     if(mgpio){ SetPin(real_pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
     
-  }//end fof
+  }//end for
 
   // DEBUG_LINE_HERE;
 
   #ifdef ESP8266
   /**
    * @brief The check for H801 should be phased out here, as its hardware specific, really the template should force this to happen anyway as TX==2
+   * 2023: Just check if the HWSerial is set to 2 then do it here
    * 
    */
     if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { 
-  DEBUG_LINE_HERE;
+      DEBUG_LINE_HERE;
       Serial.set_tx(2); 
       flag_serial_set_tx_set = true;
       
@@ -581,6 +556,15 @@ void mHardwarePins::GpioInit(void)
  * @brief Configure SPI if needed
  * 
  */
+
+
+
+  // uint32_t sspi_mosi = (PinUsed(GPIO_SSPI_SCLK) && PinUsed(GPIO_SSPI_MOSI)) ? SPI_MOSI : SPI_NONE;
+  // uint32_t sspi_miso = (PinUsed(GPIO_SSPI_SCLK) && PinUsed(GPIO_SSPI_MISO)) ? SPI_MISO : SPI_NONE;
+  // TasmotaGlobal.soft_spi_enabled = sspi_mosi + sspi_miso;
+  // AddLogSpi(0, Pin(GPIO_SSPI_SCLK), Pin(GPIO_SSPI_MOSI), Pin(GPIO_SSPI_MISO));
+
+
 // #ifdef USE_SPI
 
 //   spi_flg = ((((GetPin(GPIO_SPI_CS] < 99) && (GetPin(GPIO_SPI_CS] > 14)) || (GetPin(GPIO_SPI_CS] < 12)) || (((GetPin(GPIO_SPI_DC] < 99) && (GetPin(GPIO_SPI_DC] > 14)) || (GetPin(GPIO_SPI_DC] < 12)));
@@ -666,6 +650,9 @@ void mHardwarePins::GpioInit(void)
 /**
  * @brief Configure digital pin
  * 
+ * 
+ * Tsamota phased this out, maybe I should?
+ * 
  */
 //new
 // Set any non-used GPIO to INPUT - Related to resetPins() in support_legacy_cores.ino
@@ -697,6 +684,9 @@ void mHardwarePins::GpioInit(void)
 
 /**
  * @brief Configure I2C
+ * 
+ * 
+ * This section should change "I2CBegin()" so esp8266/esp32 cna be handled with compat header
  * 
  */
 #ifdef USE_I2C
@@ -792,10 +782,12 @@ void mHardwarePins::GpioInit(void)
   //   Settings.light_settings.type = LT_RGBWC;
   // }
   // else {
-    if (!pCONT_set->Settings.light_settings.type) { pCONT_set->devices_present = 0; }
+    // if (!pCONT_set->Settings.light_settings.type) { pCONT_set->devices_present = 0; }
 
   /**
    *  Set PWM immediately to limit unknown states
+   * 
+   * GpioInitPwm Change to function so esp32/esp826 can be different
    * **/
   #ifdef USE_PWM
   for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
@@ -805,15 +797,16 @@ void mHardwarePins::GpioInit(void)
       #ifdef ESP32
       analogAttach(Pin(GPIO_PWM1_ID, i),i);
       // analogWriteFreqRange(i,pCONT_set->Settings.pwm_frequency,pCONT_set->Settings.pwm_range);
+      pCONT_set->pwm_present = true;
       #endif
 
       #ifdef ESP8266
-      if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
+      // if (pCONT_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
         analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range : 0);
-      } else {
-        pCONT_set->pwm_present = true;
-        analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
-      }
+      // } else {
+      //   pCONT_set->pwm_present = true;
+      //   analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
+      // }
       #endif // ESP8266
     
     }
@@ -829,27 +822,6 @@ void mHardwarePins::GpioInit(void)
  * 
  */
 
-/**
- * @brief Configure and set pwm levels
- * 
- */
-  // Basic PWM controls (PWM1-6)
-  if (!pCONT_set->Settings.light_settings.type) {
-    for (uint8_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
-      if (PinUsed(GPIO_PWM1_ID,i)) {
-        pCONT_set->pwm_present = true;
-        pinMode(GetPin(GPIO_PWM1_ID,i), OUTPUT);
-        #ifdef ESP8266
-        analogWrite(GetPin(GPIO_PWM1_ID,i), bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - pCONT_set->Settings.pwm_value[i] : pCONT_set->Settings.pwm_value[i]);
-        Serial.println(F("Setting analogWrite with basic light type"));
-        #endif // ESP8266
-      }
-    }
-  }
-
-  #ifndef DISABLE_SERIAL_LOGGING
-  //DEBUG_PRINTF("Settings.light_settings.type=%d\n\r",pCONT_set->Settings.light_settings.type);
-  #endif
 
   // #ifdef USE_MODULE_DRIVERS_LEDS
   // pCONT_led->SetLedPower(pCONT_set->Settings.ledstate &8);
@@ -858,3 +830,24 @@ void mHardwarePins::GpioInit(void)
 
 
 }
+
+
+
+// void GpioInitPwm(void) {
+//   for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
+//     if (PinUsed(GPIO_PWM1, i)) {
+//       pinMode(Pin(GPIO_PWM1, i), OUTPUT);
+//       if (i < TasmotaGlobal.light_type) {
+//         // force PWM GPIOs to low or high mode if belongs to the light (always <5), see #7165
+//         analogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range : 0);
+//       } else {
+//         TasmotaGlobal.pwm_present = true;
+//         if (i < MAX_PWMS_LEGACY) {
+//           analogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range - Settings->pwm_value[i] : Settings->pwm_value[i]);
+//         } else {
+//           analogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range - Settings->pwm_value_ext[i] : Settings->pwm_value_ext[i]);
+//         }
+//       }
+//     }
+//   }
+// }

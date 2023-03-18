@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #define COLOUR_ORDER_DISABLED 7
+#define COLOUR_ORDER_INIT_DISABLED 0b0111111111111111 //7,7,7,7,7
 typedef union {
   uint16_t data; // allows full manipulating using union memory overlap
   struct { 
@@ -23,7 +24,7 @@ typedef union {
     uint16_t blue : 3;
     uint16_t white_cold : 3;      // Cold will take the FIRST white, as it is most likely as the 4th colour, warm_white will likely only exist when both whites do
     uint16_t white_warm : 3;
-    uint16_t reserved : 1;
+    uint16_t reserved : 1; //amber? which cant exist as 1 bit
   };
 } 
 COLOUR_ORDER_T;

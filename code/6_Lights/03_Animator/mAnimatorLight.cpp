@@ -74,15 +74,15 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     doInitBusses = false;
     DEBUG_PRINTLN(F("Re-init busses."));
     bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
-    bus_manager->removeAll();
+    pCONT_iLight->bus_manager->removeAll();
     uint32_t mem = 0;
     for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
-      if (busConfigs[i] == nullptr) break;
-      mem += BusManager::memUsage(*busConfigs[i]);
+      if (pCONT_iLight->busConfigs[i] == nullptr) break;
+      mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
       if (mem <= MAX_LED_MEMORY) {
-        bus_manager->add(*busConfigs[i]);
+        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
       }
-      delete busConfigs[i]; busConfigs[i] = nullptr;
+      delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
     }
     finalizeInit(); // also loads default ledmap if present
     if (aligned) makeAutoSegments();
@@ -236,54 +236,8 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
 
 
 
-
-void mAnimatorLight::Init(void){ 
-
-
-  DEBUG_LINE_HERE;
-  pCONT_set->Settings.light_settings.type = LT_BASIC;                    // Use basic PWM control if SetOption15 = 0
-
-  if (pCONT_set->Settings.flag_system.pwm_control) {          // SetOption15 - Switch between commands PWM or COLOR/DIMMER/CT/CHANNEL
-    for (uint32_t i = 0; i < MAX_PWMS; i++) {
-      if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) { 
-        pCONT_set->Settings.light_settings.type++; 
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog(LOG_LEVEL_DEBUG,PSTR("Pre_Init PWM%d"),i);    
-      #endif // ENABLE_LOG_LEVEL_COMMANDS    
-      }  // Use Dimmer/Color control for all PWM as SetOption15 = 1
-    }
-  }
-
-    
-  //temp fix
-  if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
-    // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
-    pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;  // NEEDS METHOD HERE OF SETTING SK6812
-  }
-
-  if (pCONT_set->Settings.light_settings.type > LT_BASIC) {
-    pCONT_set->devices_present++;
-  }
-
-  //  DEBUG_LINE_HERE;
-  // return (pCONT_set->Settings.light_settings.type > LT_BASIC);
-
-
-  DEBUG_LINE_HERE;
-  device = pCONT_set->devices_present;
-  
-  //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
-  subtype = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID;
-  
-  pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
-
-  pCONT_set->Settings.pwm_range = PWM_RANGE; //tmp
-
-  pCONT_set->Settings.light_settings.light_fade = 1;
-  pCONT_set->Settings.light_settings.light_speed = 5*2;
-  pCONT_set->power = 1;
-
-  auto_off_settings.time_decounter_secs = 0;
+void mAnimatorLight::Init__Palettes()
+{
 
   DEBUG_LINE_HERE;
   ALOG_DBM(PSTR("mPaletteI->init_PresetColourPalettes(); to be made internal to class"));
@@ -309,7 +263,58 @@ void mAnimatorLight::Init(void){
     DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID);
   }
 
+}
+
+
+void mAnimatorLight::Init(void){ 
+
+
+  // DEBUG_LINE_HERE;
+  // pCONT_set->Settings.light_settings.type = LT_BASIC;                    // Use basic PWM control if SetOption15 = 0
+
+  // if (pCONT_set->Settings.flag_system.pwm_control) {          // SetOption15 - Switch between commands PWM or COLOR/DIMMER/CT/CHANNEL
+  //   for (uint32_t i = 0; i < MAX_PWMS; i++) {
+  //     if (pCONT_pins->PinUsed(GPIO_PWM1_ID, i)) { 
+  //       pCONT_set->Settings.light_settings.type++; 
+  //     #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //       AddLog(LOG_LEVEL_DEBUG,PSTR("Pre_Init PWM%d"),i);    
+  //     #endif // ENABLE_LOG_LEVEL_COMMANDS    
+  //     }  // Use Dimmer/Color control for all PWM as SetOption15 = 1
+  //   }
+  // }
+
+    
+  // //temp fix
+  // if (pCONT_pins->PinUsed(GPIO_RGB_DATA_ID)) { 
+  //   // AddLog(LOG_LEVEL_TEST,PSTR("pCONT_set->Settings.light_settings.type=%d"),pCONT_set->Settings.light_settings.type);
+  //   pCONT_set->Settings.light_settings.type = LT_ADDRESSABLE_WS281X;  // NEEDS METHOD HERE OF SETTING SK6812
+  // }
+
+  // if (pCONT_set->Settings.light_settings.type > LT_BASIC) {
+  //   pCONT_set->devices_present++;
+  // }
+
+  //  DEBUG_LINE_HERE;
+  // return (pCONT_set->Settings.light_settings.type > LT_BASIC);
+
+
   DEBUG_LINE_HERE;
+  device = pCONT_set->devices_present;
+  
+  //subtype = (pCONT_set->Settings.light_settings.type & 7) > LST_MAX ? LST_MAX : (pCONT_set->Settings.light_settings.type & 7); // Always 0 - LST_MAX (5)
+  subtype = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID;
+  
+  pwm_multi_channels = 0;//pCONT_set->Settings.flag3.pwm_multi_channels;  // SetOption68 - Enable multi-channels PWM instead of Color PWM
+
+  pCONT_set->Settings.pwm_range = PWM_RANGE; //tmp
+
+  pCONT_set->Settings.light_settings.light_fade = 1;
+  pCONT_set->Settings.light_settings.light_speed = 5*2;
+  pCONT_set->power = 1;
+
+  auto_off_settings.time_decounter_secs = 0;
+
+  Init__Palettes();
   
 
   // Allow runtime changes of animation size
@@ -318,41 +323,40 @@ void mAnimatorLight::Init(void){
 
 
     
-    #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-                    DEBUG_LINE_HERE;
-                    bus_manager = new BusManager();
-                    DEBUG_LINE_HERE;
-                    ALOG_INF(PSTR("This needs a better location to be defined"));
+    DEBUG_LINE_HERE;
+    pCONT_iLight->bus_manager = new BusManager();
+    DEBUG_LINE_HERE;
+    ALOG_INF(PSTR("This needs a better location to be defined"));
 
 
 
-                    /**
-                     * @brief Search for Digital pins
-                     **/
-                    for (uint8_t pins = 0; pins < MAX_PIXELBUS_DIGITAL_PINS; pins++) 
-                    {
-                      // ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
-                      // if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
-                      // {
-                      //   ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
-                      //   ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), settings.pins_used);
-                      //   settings.pins_used++;
-                      // }
-                    }
-
-DEBUG_LINE_HERE;
-  
-  
-    #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-
-
+    /**
+     * @brief Search for Digital pins
+     * I could search for how many pins within each type and configure defaults for them. eg.
+     * A channel only: Assume Ws2812 GRB
+     * A+(B/C/D/E): PWM type of single for just A and RGBCCT for ABCDE
+     **/
+    for (uint8_t pins = 0; pins < MAX_PIXELBUS_DIGITAL_PINS; pins++) 
+    {
+      // ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins), pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+      // if (pCONT_pins->PinUsed(GPIO_DSB_1OF2_ID, pins)) 
+      // {
+      //   ds18x20_gpios[pins] = new OneWire(pCONT_pins->GetPin(GPIO_DSB_1OF2_ID, pins));
+      //   ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), settings.pins_used);
+      //   settings.pins_used++;
+      // }
+    }
 
 DEBUG_LINE_HERE;
   
   
 
 
-  // #ifndef ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+
+DEBUG_LINE_HERE;
+  
+  
+
 
     ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
     Init_SegmentWS2812FxStrip();
@@ -368,33 +372,12 @@ DEBUG_LINE_HERE;
     makeAutoSegments();
     
   
-  // #endif //  ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-  
-//================
-
-
-  // DEBUG_LINE_HERE;
-  // delay(10000);
     
   settings.light_size_count = STRIP_SIZE_MAX;
 
   // Allow runtime changes of animation size
   settings.light_size_count = STRIP_SIZE_MAX; 
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
-
-    // ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
-    // Init_SegmentWS2812FxStrip();
-
-    // /**
-    //  * @brief Called the first time to ensure the minimal default version is started
-    //  * Busses must be reconfigured with lighting_template. This process of calling should be optimising later with better integration
-    //  **/
-    // ALOG_INF(PSTR("Preloading a default single neopixel bus until LIGHTING_TEMPLATE is loaded: This can be changed as flag so this is called in the main loop at runtime"));
-    // finalizeInit_PreInit();
-
-
-    // makeAutoSegments();
-
 
 //ohasing out, only keeping so runtime works for now
 
@@ -421,15 +404,6 @@ DEBUG_LINE_HERE;
   }
 
 
-  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-  DEBUG_LINE_HERE;
-  // bus_manager = new BusManager();
-  DEBUG_LINE_HERE;
-  ALOG_INF(PSTR("This needs a better location to be defined"));
-  #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-
-  // stripbus->NeoRgbCurrentSettings(1,2,3);
-  
   
 
   // ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
@@ -454,8 +428,11 @@ DEBUG_LINE_HERE;
    * @brief Start PaletteContainer
    * 
    */
-  ALOG_WRN(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced"));
+  
+  #ifndef ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
+  ALOG_WRN(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced. Must happen AFTER segment is created"));
   SEGMENT_I(0).palette_container = new mPaletteContainer(100);
+  #endif// ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
 
   DEBUG_LINE_HERE;
 
@@ -483,14 +460,6 @@ DEBUG_LINE_HERE;
   #endif
 
   settings.flags.EnableModule = true;
-
-
-  SEGMENT_I(0).flags.fEnable_Animation = true;
-
-
-
-
-
 
 } //end "init"
 
@@ -2060,7 +2029,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
       {
         // pCONT_iLight->ShowInterface();    // I cant do doShow here, since direct method (no callback) needs to happen now, whereas AnimUpdate will need to call show later. So call them when needed (though, still worth working out a better/unified show/solution)     
         
-    if(bus_manager){ bus_manager->show(); }
+    if(pCONT_iLight->bus_manager){ pCONT_iLight->bus_manager->show(); }
     
     seg.flags.animator_first_run = false; // CHANGE to function: reset here for all WLED methods
         ALOG_DBM(PSTR("Calling"));
@@ -2793,78 +2762,58 @@ uint16_t pixel_start_i = 0;
 void mAnimatorLight::EveryLoop()
 {
 
-  // Move below into function
-  /**
-   * @brief All addressible style things, if it really is other types, call them from interface
-   * 
-   */
-  if(
-    (pCONT_set->Settings.light_settings.type < LT_LIGHT_INTERFACE_END)||
-     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_WS281X)||
-     (pCONT_set->Settings.light_settings.type == LT_ADDRESSABLE_SK6812)
-  ){
-
-    #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    
-    switch(pCONT_lAni->SEGMENT_I(0).animation_mode_id)    // needs to know the id 
-    {
-      #ifdef ENABLE_ANIMATION_MODE__EFFECTS
-      case ANIMATION_MODE__EFFECTS:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MQTT_SETPIXEL
-      case ANIMATION_MODE__MQTT_SETPIXEL:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_REALTIME_UDP
-      case ANIMATION_MODE__REALTIME_UDP:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MODE__REALTIME_HYPERION
-      case ANIMATION_MODE__REALTIME_HYPERION:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MODE__REALTIME_E131
-      case ANIMATION_MODE__REALTIME_E131:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MODE__REALTIME_ADALIGHT
-      case ANIMATION_MODE__REALTIME_ADALIGHT:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MODE__REALTIME_ARTNET
-      case ANIMATION_MODE__REALTIME_ARTNET:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MODE__REALTIME_TPM2NET
-      case ANIMATION_MODE__REALTIME_TPM2NET:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      #ifdef ENABLE_ANIMATION_MODE__REALTIME_DDP
-      case ANIMATION_MODE__REALTIME_DDP:
-        SubTask_Segments_Animation();
-      break;
-      #endif
-      case ANIMATION_MODE__DISABLED: default: return; // Leave function
-    }
-    #endif
-      
-  }
-  else
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR  
+  switch(pCONT_lAni->SEGMENT_I(0).animation_mode_id)    // needs to know the id 
   {
-    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-    ALOG_DBM( PSTR("Invalid Light Type"));
+    #ifdef ENABLE_ANIMATION_MODE__EFFECTS
+    case ANIMATION_MODE__EFFECTS:
+      SubTask_Segments_Animation();
+    break;
     #endif
+    #ifdef ENABLE_ANIMATION_MQTT_SETPIXEL
+    case ANIMATION_MODE__MQTT_SETPIXEL:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_REALTIME_UDP
+    case ANIMATION_MODE__REALTIME_UDP:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_MODE__REALTIME_HYPERION
+    case ANIMATION_MODE__REALTIME_HYPERION:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_MODE__REALTIME_E131
+    case ANIMATION_MODE__REALTIME_E131:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_MODE__REALTIME_ADALIGHT
+    case ANIMATION_MODE__REALTIME_ADALIGHT:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_MODE__REALTIME_ARTNET
+    case ANIMATION_MODE__REALTIME_ARTNET:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_MODE__REALTIME_TPM2NET
+    case ANIMATION_MODE__REALTIME_TPM2NET:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    #ifdef ENABLE_ANIMATION_MODE__REALTIME_DDP
+    case ANIMATION_MODE__REALTIME_DDP:
+      SubTask_Segments_Animation();
+    break;
+    #endif
+    case ANIMATION_MODE__DISABLED: default: return; // Leave function
   }
-
+  #endif
+  
 
   uint8_t flag_animations_needing_updated = 0;
     
@@ -2922,9 +2871,9 @@ void mAnimatorLight::EveryLoop()
     // some buses send asynchronously and this method will return before
     // all of the data has been sent.
     // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
-    if(bus_manager)
+    if(pCONT_iLight->bus_manager)
     {
-      bus_manager->show();
+      pCONT_iLight->bus_manager->show();
     }
 
 
@@ -3461,7 +3410,7 @@ mAnimatorLight::Segment_New& mAnimatorLight::Segment_New::operator= (mAnimatorLi
 }
 
 bool mAnimatorLight::Segment_New::allocateData(size_t len) {
-      DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE;
   if (data && _dataLen == len) return true; //already allocated
   deallocateData();
   if (mAnimatorLight::Segment_New::getUsedSegmentData() + len > MAX_SEGMENT_DATA){ 
@@ -4292,58 +4241,12 @@ void mAnimatorLight::setupEffectData() {
 
 
 
-void mAnimatorLight::BusManager_Create_DefaultSingleNeoPixel()
-{
-
-    const uint8_t defDataPins[] = {4};
-    const uint16_t defCounts[] = {STRIP_SIZE_MAX};
-    const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
-    const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
-
-    DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
-
-    uint16_t prevLen = 0;
-    for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
-      uint8_t defPin[] = {defDataPins[i]};
-      uint16_t start = prevLen;
-      uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
-      prevLen += count;
-      BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-      if(bus_manager->add(defCfg) == -1) 
-      {
-        ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
-        break;
-      }
-    }
-
-    // const uint8_t defDataPins[] = {22,23};
-    // const uint16_t defCounts[] = {10,10};
-    // const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
-    // const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
-
-    // DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
-
-    // uint16_t prevLen = 0;
-    // for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
-    //   uint8_t defPin[] = {defDataPins[i]};
-    //   uint16_t start = prevLen;
-    //   uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
-    //   prevLen += count;
-    //   BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-    //   if(bus_manager->add(defCfg) == -1) break;
-    // }
-
-
-
-}
-
-
 
 //do not call this method from system context (network callback)
 void mAnimatorLight::finalizeInit(void)
 {
 
-  ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), bus_manager->getNumBusses());
+  ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() C%d"), pCONT_iLight->bus_manager->getNumBusses());
 
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
@@ -4354,27 +4257,27 @@ void mAnimatorLight::finalizeInit(void)
 
   // _hasWhiteChannel = _isOffRefreshRequired = false;
 
-  if(bus_manager == nullptr)
+  if(pCONT_iLight->bus_manager == nullptr)
   {
     ALOG_INF(PSTR("busses null"));
     return;
   }
 
   //if busses failed to load, add default (fresh install, FS issue, ...)
-  if (bus_manager->getNumBusses() == 0) {
+  if (pCONT_iLight->bus_manager->getNumBusses() == 0) {
     DEBUG_PRINTLN(F("No busses, init default"));
-    BusManager_Create_DefaultSingleNeoPixel();
+    pCONT_iLight->BusManager_Create_DefaultSingleNeoPixel();
   }
 
-    DEBUG_PRINTF("busses->getNumBusses() %d\n\r", bus_manager->getNumBusses());
+    DEBUG_PRINTF("busses->getNumBusses() %d\n\r", pCONT_iLight->bus_manager->getNumBusses());
 
   _length = 0;
-  for (uint8_t i=0; i<bus_manager->getNumBusses(); i++) 
+  for (uint8_t i=0; i<pCONT_iLight->bus_manager->getNumBusses(); i++) 
   {
     
     DEBUG_PRINTF("getNumBusses %d\n\r", i);
 
-    Bus *bus = bus_manager->getBus(i);
+    Bus *bus = pCONT_iLight->bus_manager->getBus(i);
     if (bus == nullptr)
     {
       DEBUG_PRINTF("bus == nullptr\n\r");
@@ -4434,7 +4337,7 @@ void mAnimatorLight::finalizeInit(void)
   loadCustomPalettes(); // (re)load all custom palettes
   // deserializeMap();     // (re)load default ledmap
   
-  ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), bus_manager->getNumBusses());
+  ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), pCONT_iLight->bus_manager->getNumBusses());
 
 }
 
@@ -5297,13 +5200,13 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
         indexMir += offset; // offset/phase
 
         if (indexMir >= pixel_range.stop) indexMir -= segment_length; // Wrap
-        pCONT_lAni->bus_manager->setPixelColor(indexMir, colour_hardware);
+        pCONT_iLight->bus_manager->setPixelColor(indexMir, colour_hardware);
 
       }
       indexSet += offset; // offset/phase
 
       if (indexSet >= pixel_range.stop) indexSet -= segment_length; // Wrap
-      pCONT_lAni->bus_manager->setPixelColor(indexSet, colour_hardware);
+      pCONT_iLight->bus_manager->setPixelColor(indexSet, colour_hardware);
     }
   
     // ALOG_INF(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
@@ -5359,7 +5262,7 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment_New::GetPixelColor(uint16_t indexP
   physical_indexPixel += offset;
   if (physical_indexPixel >= pixel_range.stop) physical_indexPixel -= length();
   
-  RgbcctColor colour_hardware = pCONT_lAni->bus_manager->getPixelColor(physical_indexPixel);
+  RgbcctColor colour_hardware = pCONT_iLight->bus_manager->getPixelColor(physical_indexPixel);
   
   // ALOG_INF(PSTR("colour_hardware[%d] = %d,%d,%d,%d,%d"),physical_indexPixel, colour_hardware.R, colour_hardware.G, colour_hardware.B, colour_hardware.W1, colour_hardware.W2);
 

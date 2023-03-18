@@ -55,7 +55,7 @@
 #define DATA_PINS_BUSSES 23, 22
 
 #ifndef DEFAULT_LED_TYPE
-  #define DEFAULT_LED_TYPE TYPE_WS2812_RGB
+  #define DEFAULT_LED_TYPE BUSTYPE_WS2812_RGB
 #endif
 
 #ifndef DEFAULT_LED_COLOR_ORDER
@@ -208,12 +208,12 @@ class mAnimatorLight :
     void Init(void);        
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
+
+    // Splitting into into subsections for easier reading
+    void Init__Palettes();
     
 
-    BusManager* bus_manager = nullptr;
-    BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
     
-    void BusManager_Create_DefaultSingleNeoPixel();
 
     void Settings_Load();
     void Settings_Save();
@@ -234,8 +234,7 @@ class mAnimatorLight :
       uint8_t pwm_offset = 0;
     }settings;
 
-    void     TestCode_AddBus1();
-
+    void TestCode_AddBus1();
 
     bool doInitBusses = false; // debug
 
@@ -285,9 +284,9 @@ class mAnimatorLight :
 
 
 
-    int8_t GetPixelHardwareTypeIDbyName(const char* c);
-    const char* GetPixelHardwareTypeName(char* buffer);
-    const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
+    // int8_t GetPixelHardwareTypeIDbyName(const char* c);
+    // const char* GetPixelHardwareTypeName(char* buffer);
+    // const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
 
 
 
@@ -296,7 +295,7 @@ class mAnimatorLight :
     ****************** CommandSet_x *************************************************************************************************************
     ******************************************************************************************************************************/
 
-    void CommandSet_PixelHardwareTypeID(uint8_t value);
+    // void CommandSet_PixelHardwareTypeID(uint8_t value);
 
     void CommandSet_LightPowerState(uint8_t value);
     bool CommandGet_LightPowerState();
@@ -2669,6 +2668,10 @@ typedef struct Segment_New {
       
       // // Init
       // palette_container = new mPaletteContainer(0);//nullptr;
+
+      #ifdef ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
+      palette_container = new mPaletteContainer(); 
+      #endif // ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
 
       DEBUG_LINE_HERE;
 

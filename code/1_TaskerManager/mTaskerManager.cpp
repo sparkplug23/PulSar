@@ -40,9 +40,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       obj = parser.getRootObject();   
       if (!obj)
       {
-        #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-        #endif //ENABLE_LOG_LEVEL_COMMANDS
+        ALOG_ERR(PSTR(D_JSON_DESERIALIZATION_ERROR));
         break;
       }
       else{

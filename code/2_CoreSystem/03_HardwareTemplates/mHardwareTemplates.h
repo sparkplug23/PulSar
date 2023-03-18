@@ -100,7 +100,7 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
   // Relays
   GPIO_REL1_ID, GPIO_REL2_ID, GPIO_REL3_ID, GPIO_REL4_ID, GPIO_REL5_ID, GPIO_REL6_ID, GPIO_REL7_ID, GPIO_REL8_ID,
   GPIO_REL1_INV_ID, GPIO_REL2_INV_ID, GPIO_REL3_INV_ID, GPIO_REL4_INV_ID, GPIO_REL5_INV_ID, GPIO_REL6_INV_ID, GPIO_REL7_INV_ID, GPIO_REL8_INV_ID,
-  // PWM (Red   or C  Cold White, Green or CW Warm White, Blue, RGBW  (Cold) White, RGBCW Warm White)
+  // PWM 2023: PWM Channels are no longer part of lighting
   GPIO_PWM1_ID, GPIO_PWM2_ID, GPIO_PWM3_ID, GPIO_PWM4_ID, GPIO_PWM5_ID,
   GPIO_PWM1_INV_ID, GPIO_PWM2_INV_ID, GPIO_PWM3_INV_ID, GPIO_PWM4_INV_ID, GPIO_PWM5_INV_ID,
   // LEDs
@@ -853,7 +853,7 @@ DEFINE_PGM_CTR(PM_GPIO_FUNCTION_CC1110_SYNC_PULSE_SIGNAL_CTR)   D_GPIO_FUNCTION_
 
 // Supported hardware modules. Leave completed list
 enum SupportedModules_8266_StaticCompleteList {
-  MODULE_WEMOS_ID,
+  MODULE_WEMOS_ID,    //should be renamed as generic so esp32/esp8266 can fallback this
   MODULE_SONOFF_BASIC_ID,
   MODULE_SONOFF_BASIC_EXTERNAL_ID, // tmp solution until both fixed modules can also have extra gpio added on top of default templates eg adding key2 to basic
   MODULE_H801_ID,

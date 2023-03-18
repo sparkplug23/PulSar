@@ -1,3 +1,7 @@
+
+Should become my own libraries
+
+
 These do not have any tasker, and are used by other tasker/modules as helpers.
 
 A group of self contained functions (so can be made into libaries later),

@@ -141,6 +141,11 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    
   }
 
+  /**
+   * @brief 
+   * 
+   */
+
   // DEBUG_LINE_HERE;
 
   /**
@@ -1318,20 +1323,22 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    * */
   int val = 0;
 
-  if(jtok = obj[PM_JSON_HARDWARE_TYPE]){
-    if(jtok.isStr()){
-      if((tmp_id=GetPixelHardwareTypeIDbyName(jtok.getStr()))>=0){
-        CommandSet_PixelHardwareTypeID(tmp_id);
-        data_buffer.isserviced++;
-      }
-    }else
-    if(jtok.isNum()){
-      CommandSet_PixelHardwareTypeID(jtok.getInt());
-      data_buffer.isserviced++;
-    }
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+  if(jtok = obj[PM_JSON_HARDWARE_TYPE])
+  {
+    ALOG_HGL(PSTR("Replaced by bus methods"));
+    // if(jtok.isStr()){
+    //   if((tmp_id=GetPixelHardwareTypeIDbyName(jtok.getStr()))>=0){
+    //     CommandSet_PixelHardwareTypeID(tmp_id);
+    //     data_buffer.isserviced++;
+    //   }
+    // }else
+    // if(jtok.isNum()){
+    //   CommandSet_PixelHardwareTypeID(jtok.getInt());
+    //   data_buffer.isserviced++;
+    // }
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
   // if(jtok = obj[PM_JSON_RGB]){ // Must accept "RRGGBBCC" and "RR,GG,BB,CC"
@@ -1564,6 +1571,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
 
 
+
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI)
   {
@@ -1577,51 +1585,49 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
 void mAnimatorLight::TestCode_AddBus1()
 {
-  // busConfigs
+  // pCONT_iLight->busConfigs
   uint8_t bus_index = 0;
 
   uint8_t defPin[] = {4};
   uint16_t start = 0;
   uint16_t length = 10;
-  COLOUR_ORDER_T ColourOrder;
-  ColourOrder.red = 0; ColourOrder.green = 1; ColourOrder.blue = 2; ColourOrder.white_warm = 7; ColourOrder.white_cold = 7;
-  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  busConfigs[bus_index] = new BusConfig(TYPE_WS2812_RGB, defPin, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY, ColourOrder);    
+  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
+  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
   bus_index++;
 
   defPin[0] = 13;
   start = 10;
   length = 10;
-  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  busConfigs[bus_index] = new BusConfig(TYPE_WS2812_RGB, defPin, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);    
+  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
+  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
   bus_index++;
 
   defPin[0] = 14;
   start = 20;
   length = 10;
-  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  busConfigs[bus_index] = new BusConfig(TYPE_WS2812_RGB, defPin, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);    
+  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
+  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_WS2812_RGB, defPin, start, length);    
   bus_index++;
 
   defPin[0] = 27;
   start = 30;
   length = 10;
-  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  busConfigs[bus_index] = new BusConfig(TYPE_SK6812_RGBW, defPin, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);    
+  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
+  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_SK6812_RGBW, defPin, start, length);    
   bus_index++;
 
   uint8_t defPin_pwm[] = {16, 17, 5, 21, 22};
   start = 41;
   length = 1;
-  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  busConfigs[bus_index] = new BusConfig(TYPE_ANALOG_5CH, defPin_pwm, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);    
+  if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
+  pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_5CH, defPin_pwm, start, length);    
   bus_index++;
 
   // uint8_t defPin_pwm2[] = {23};
   // start = 42;
   // length = 1;
-  // if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
-  // busConfigs[bus_index] = new BusConfig(TYPE_ANALOG_1CH, defPin_pwm2, start, length, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);    
+  // if (pCONT_iLight->busConfigs[bus_index] != nullptr) delete pCONT_iLight->busConfigs[bus_index];
+  // pCONT_iLight->busConfigs[bus_index] = new BusConfig(BUSTYPE_ANALOG_1CH, defPin_pwm2, start, length, DEFAULT_LED_COLOR_ORDER);    
   // bus_index++;
 
   //13,14,27,4
@@ -2489,31 +2495,31 @@ void mAnimatorLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_i
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mAnimatorLight::CommandSet_PixelHardwareTypeID(uint8_t value){
-  char buffer[20];
-  pCONT_set->Settings.light_settings.type = value;
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-} 
-int8_t mAnimatorLight::GetPixelHardwareTypeIDbyName(const char* c){
-  if(*c=='\0') return -1;
-  if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE_WS281X; }
-  else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)==0){       return LT_ADDRESSABLE_SK6812; }
-  return -1;
-}
-const char* mAnimatorLight::GetPixelHardwareTypeName(char* buffer){
-  return GetPixelHardwareTypeNamebyID(pCONT_set->Settings.light_settings.type, buffer);
-}
-const char* mAnimatorLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer){
-  switch(id){
-    case LT_PWM5:   memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)); break;
-    case LT_ADDRESSABLE_WS281X: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR));         break;
-    case LT_ADDRESSABLE_SK6812: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_SK6812_CTR));         break;
-  }
-  return buffer;
-}
+// void mAnimatorLight::CommandSet_PixelHardwareTypeID(uint8_t value){
+//   char buffer[20];
+//   pCONT_set->Settings.light_settings.type = value;
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
+// } 
+// int8_t mAnimatorLight::GetPixelHardwareTypeIDbyName(const char* c){
+//   if(*c=='\0') return -1;
+//   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
+//   else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE_WS281X; }
+//   else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)==0){       return LT_ADDRESSABLE_SK6812; }
+//   return -1;
+// }
+// const char* mAnimatorLight::GetPixelHardwareTypeName(char* buffer){
+//   return GetPixelHardwareTypeNamebyID(pCONT_set->Settings.light_settings.type, buffer);
+// }
+// const char* mAnimatorLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer){
+//   switch(id){
+//     case LT_PWM5:   memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)); break;
+//     case LT_ADDRESSABLE_WS281X: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR));         break;
+//     case LT_ADDRESSABLE_SK6812: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_SK6812_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_SK6812_CTR));         break;
+//   }
+//   return buffer;
+// }
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************

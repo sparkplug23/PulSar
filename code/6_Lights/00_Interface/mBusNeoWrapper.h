@@ -795,8 +795,8 @@ class PolyBus {
     
     // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
 
-    if (!IS_DIGITAL(busType)) return BUSTYPE__NONE__ID;
-    if (IS_2PIN(busType)) { //SPI LED chips
+    if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
+    if (IS_BUSTYPE_2PIN(busType)) { //SPI LED chips
       bool isHSPI = false;
       #ifdef ESP8266
       if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
@@ -807,11 +807,11 @@ class PolyBus {
       #endif
       uint8_t t = BUSTYPE__NONE__ID;
       switch (busType) {
-        case TYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
-        case TYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
-        case TYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
-        case TYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
-        case TYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
+        case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
+        case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
+        case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
+        case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
+        case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
         default: t=BUSTYPE__NONE__ID;
       }
       if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
@@ -821,16 +821,16 @@ class PolyBus {
       uint8_t offset = pins[0] -1; //for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
       if (offset > 3) offset = 3;
       switch (busType) {
-        case TYPE_WS2812_RGB:
-        case TYPE_WS2812_WWA:
+        case BUSTYPE_WS2812_RGB:
+        case BUSTYPE_WS2812_WWA:
           return BUSTYPE__8266_U0_NEO_3__ID + offset;
-        case TYPE_SK6812_RGBW:
+        case BUSTYPE_SK6812_RGBW:
           return BUSTYPE__8266_U0_NEO_4__ID + offset;
-        case TYPE_WS2811_400KHZ:
+        case BUSTYPE_WS2811_400KHZ:
           return BUSTYPE__8266_U0_400_3__ID + offset;
-        case TYPE_TM1814:
+        case BUSTYPE_TM1814:
           return BUSTYPE__8266_U0_TM1_4__ID + offset;
-        case TYPE_TM1829:
+        case BUSTYPE_TM1829:
           return BUSTYPE__8266_U0_TM2_3__ID + offset;
       }
       #else //ESP32
@@ -853,16 +853,16 @@ class PolyBus {
       if (num > 7) offset = num -7;
       #endif
       switch (busType) {
-        case TYPE_WS2812_RGB:
-        case TYPE_WS2812_WWA:
+        case BUSTYPE_WS2812_RGB:
+        case BUSTYPE_WS2812_WWA:
           return BUSTYPE__32_RN_NEO_3__ID + offset;
-        case TYPE_SK6812_RGBW:
+        case BUSTYPE_SK6812_RGBW:
           return BUSTYPE__32_RN_NEO_4__ID + offset;
-        case TYPE_WS2811_400KHZ:
+        case BUSTYPE_WS2811_400KHZ:
           return BUSTYPE__32_RN_400_3__ID + offset;
-        case TYPE_TM1814:
+        case BUSTYPE_TM1814:
           return BUSTYPE__32_RN_TM1_4__ID + offset;
-        case TYPE_TM1829:
+        case BUSTYPE_TM1829:
           return BUSTYPE__32_RN_TM2_3__ID + offset;
       }
       #endif

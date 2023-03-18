@@ -25,6 +25,9 @@ void mInterfaceLight::Template_Load()
   ALOG_DBM( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  DEBUG_DELAY(5000);
+
   #endif // USE_LIGHTING_TEMPLATE
 
 }
@@ -510,6 +513,238 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
 #endif // ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 
+void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
+{
+
+    const uint8_t defDataPins[] = {4};
+    const uint16_t defCounts[] = {STRIP_SIZE_MAX};
+    const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+    const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+
+    DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
+
+    uint16_t prevLen = 0;
+    for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
+      uint8_t defPin[] = {defDataPins[i]};
+      uint16_t start = prevLen;
+      uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+      prevLen += count;
+      BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count);
+      if(bus_manager->add(defCfg) == -1) 
+      {
+        ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
+        break;
+      }
+    }
+
+    // const uint8_t defDataPins[] = {22,23};
+    // const uint16_t defCounts[] = {10,10};
+    // const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+    // const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+
+    // DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
+
+    // uint16_t prevLen = 0;
+    // for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
+    //   uint8_t defPin[] = {defDataPins[i]};
+    //   uint16_t start = prevLen;
+    //   uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+    //   prevLen += count;
+    //   BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
+    //   if(bus_manager->add(defCfg) == -1) break;
+    // }
+
+
+
+}
+
+
+/**
+ * @brief Testing that each object passed into here is a new busconfig
+ * 
+ * @param obj 
+ */
+void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
+{
+  JsonParserToken jtok = 0;
+  JsonParserToken jtok2 = 0;
+
+  // busConfigs
+  uint8_t bus_count = 0;//bus_manager->getNumBusses();
+  for(uint8_t ii=0;ii<(WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES);ii++)
+  {
+    if (busConfigs[ii] != nullptr)
+    {
+      bus_count++;
+    }
+  }
+  ALOG_INF(PSTR("getNumBusses %d"), bus_count);
+
+  uint16_t start = 0;
+  uint16_t length = 10;
+  int8_t bus_type = BUSTYPE_NONE;
+  COLOUR_ORDER_T ColourOrder = {COLOUR_ORDER_INIT_DISABLED};
+  uint8_t pins[5] = {255}; // 255 is unset
+  
+  if(jtok2 = obj["Pin"])
+  {
+    if(jtok2.isNum())
+    {
+      pins[0] = jtok2.getInt();
+    }
+    else
+    if(jtok2.isArray())
+    {
+      uint8_t ii = 0;
+      JsonParserArray arrobj = jtok2;
+      for(auto value : arrobj) 
+      {
+        pins[ii++] = value.getInt();
+      }
+    }
+    else
+    {
+      ALOG_ERR(PSTR("Invalid pin type A"));
+    }  
+    ALOG_COM(PSTR("pins %d,%d,%d,%d,%d"), pins[0], pins[1], pins[2], pins[3], pins[4]);  
+  }
+
+
+  if(jtok = obj["Start"])
+  {
+    start = jtok.getInt();
+    ALOG_COM(PSTR("start %d"), start);
+  }
+
+  if(jtok = obj["Length"])
+  {
+    length = jtok.getInt();
+    ALOG_COM(PSTR("length %d"), length);
+  }
+
+  if(jtok = obj["BusType"])
+  {
+    if(jtok.isInt())
+    {
+      bus_type = jtok.getInt();
+    }
+    else
+    if(jtok.isStr())
+    {
+      bus_type = Get_BusTypeID_FromName(jtok.getStr());
+    }
+    ALOG_COM(PSTR("bus_type %d"), bus_type);
+  }
+
+  if(jtok = obj["ColourOrder"])
+  {
+    if(jtok.isStr())
+    {
+      ColourOrder = GetColourOrder_FromName(jtok.getStr());
+    }    
+  }
+
+
+  uint8_t bus_index = bus_count; // next bus space 
+  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
+
+  busConfigs[bus_index] = new BusConfig(
+    bus_type, 
+    pins, 
+    start, 
+    length,
+    ColourOrder,
+    false, 
+    0, 
+    RGBW_MODE_MANUAL_ONLY
+  );    
+  
+  pCONT_lAni->doInitBusses = true; // adds checks
+
+}
+
+
+COLOUR_ORDER_T mInterfaceLight::GetColourOrder_FromName(const char* c)
+{
+
+  COLOUR_ORDER_T colour_order = {COLOUR_ORDER_INIT_DISABLED};
+
+  if(!c){ return colour_order; }
+  if(strlen(c)<=5){
+    ALOG_DBM( PSTR("Valid Length"));
+  }else{
+    ALOG_INF(PSTR("INVALID Length"));
+    return colour_order;
+  }
+
+  for(uint8_t index=0;index<strlen(c);index++)
+  {
+    if((c[index]=='R')||(c[index]=='r')){
+      colour_order.red = index;
+    }else
+    if((c[index]=='G')||(c[index]=='g')){
+      colour_order.green = index;
+    }else
+    if((c[index]=='B')||(c[index]=='b')){
+      colour_order.blue = index;
+    }else
+    if((c[index]=='C')||(c[index]=='c')){
+      colour_order.white_cold = index;
+    }else
+    if((c[index]=='W')||(c[index]=='w')){
+      colour_order.white_warm = index;
+    }
+  }
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  ALOG_INF( PSTR("colour_order == R=%d, G=%d, B=%d, CW=%d, WW=%d \n\r dec%d \n\r %X"),
+    colour_order.red,
+    colour_order.green,
+    colour_order.blue,
+    colour_order.white_cold,
+    colour_order.white_warm,
+    colour_order.data,
+    colour_order.data
+  );
+  #endif  
+
+}
+
+
+int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
+{
+
+  //nodemcu/wemos named
+  if     (strcmp(c,"WS2812_1CH")==0){ return BUSTYPE_WS2812_1CH; }
+  else if(strcmp(c,"WS2812_1CH_X3")==0){ return BUSTYPE_WS2812_1CH; }
+  else if(strcmp(c,"WS2812_2CH_X3")==0){ return BUSTYPE_WS2812_2CH_X3; }
+  else if(strcmp(c,"WS2812_WWA")==0){ return BUSTYPE_WS2812_WWA; }
+  else if(strcmp(c,"WS2812_RGB")==0){ return BUSTYPE_WS2812_RGB; }
+  else if(strcmp(c,"GS8608")==0){ return BUSTYPE_GS8608; }
+  else if(strcmp(c,"WS2811_400KHZ")==0){ return BUSTYPE_WS2811_400KHZ; }
+  else if(strcmp(c,"TM1829")==0){ return BUSTYPE_TM1829; }
+  else if(strcmp(c,"SK6812_RGBW")==0){ return BUSTYPE_SK6812_RGBW; }
+  else if(strcmp(c,"TM1814")==0){ return BUSTYPE_TM1814; }
+  else if(strcmp(c,"ONOFF")==0){ return BUSTYPE_ONOFF; }
+  else if(strcmp(c,"ANALOG_1CH")==0){ return BUSTYPE_ANALOG_1CH; }
+  else if(strcmp(c,"ANALOG_2CH")==0){ return BUSTYPE_ANALOG_2CH; }
+  else if(strcmp(c,"ANALOG_3CH")==0){ return BUSTYPE_ANALOG_3CH; }
+  else if(strcmp(c,"ANALOG_4CH")==0){ return BUSTYPE_ANALOG_4CH; }
+  else if(strcmp(c,"ANALOG_5CH")==0){ return BUSTYPE_ANALOG_5CH; }
+  else if(strcmp(c,"WS2801")==0){ return BUSTYPE_WS2801; }
+  else if(strcmp(c,"APA102")==0){ return BUSTYPE_APA102; }
+  else if(strcmp(c,"LPD8806")==0){ return BUSTYPE_LPD8806; }
+  else if(strcmp(c,"P9813")==0){ return BUSTYPE_P9813; }
+  else if(strcmp(c,"LPD6803")==0){ return BUSTYPE_LPD6803; }
+  else if(strcmp(c,"NET_DDP_RGB")==0){ return BUSTYPE_NET_DDP_RGB; }
+  else if(strcmp(c,"NET_E131_RGB")==0){ return BUSTYPE_NET_E131_RGB; }
+  else if(strcmp(c,"NET_ARTNET_RGB")==0){ return BUSTYPE_NET_ARTNET_RGB; }
+  else if(strcmp(c,"NET_DDP_RGBW")==0){ return BUSTYPE_NET_DDP_RGBW; }
+  else if(strcmp(c,"RESERVED")==0){ return BUSTYPE_RESERVED; }
+  
+  return BUSTYPE_NONE;
+  
+}
 
 
 
@@ -525,12 +760,31 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 
   char buffer[50];
   JsonParserToken jtok = 0; 
+  JsonParserToken jtok2 = 0; 
   int8_t tmp_id = 0;
 
   // uint16_t isserviced_start_count = data_buffer.isserviced;
   
-}
 
+  
+  /**
+   * @brief Bus needs to be configured first, and probably built immediately from within here so plattes etc next are added properly, otherwise EVERY_LOOP would have to happen
+   * 
+   */
+  if(jtok = obj["BusConfig"])
+  { 
+    if(jtok.isArray())
+    {      
+      ALOG_INF(PSTR("BusConfig **************  \t%d"), jtok.getType());
+      JsonParserArray arrobj = jtok;      
+      for(auto value : arrobj) 
+      {
+        parseJSONObject__BusConfig(value.getObject());
+      }
+    }
+  }
+
+}
 
 
 
@@ -580,7 +834,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
 
     JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette.id);
 
-    JBI->Add("Type", pCONT_set->Settings.light_settings.type);
+    // JBI->Add("Type", pCONT_set->Settings.light_settings.type);
 
     JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->SEGMENT_I(0).transition.time_ms/1000));
     JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->SEGMENT_I(0).transition.time_ms);

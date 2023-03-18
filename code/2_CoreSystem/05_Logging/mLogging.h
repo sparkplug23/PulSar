@@ -62,6 +62,23 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 
 // Can only be used when hardware serial is enabled
+// #if defined(ENABLE_DEBUG_MANUAL_DELAYS)
+//   #define DEBUG_MANUAL_DELAY(X)    delay(X)
+// #else
+//   #define DEBUG_MANUAL_DELAY   //nothing, no code
+// #endif
+/**
+ * Use this macro to turn on delays that I can easily turn off again (in case I forget about one). Stoped using "delay" directly, do with macros
+ * */
+// #define ENABLE_DEBUG_DELAYS
+#if defined(ENABLE_DEBUG_MANUAL_DELAYS)
+#define DEBUG_DELAY(x) delay(x)
+#else
+#define DEBUG_DELAY(x)
+#endif
+
+
+// Can only be used when hardware serial is enabled
 // #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_CHECK_AND_PRINT_NULLPTR(X)    if(X==nullptr){ \
                         SERIAL_DEBUG.printf("nullptr true"); }else{  SERIAL_DEBUG.printf("nullptr false"); }\

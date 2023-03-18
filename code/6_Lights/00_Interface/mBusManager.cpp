@@ -60,20 +60,20 @@ uint32_t Bus::autoWhiteCalc(uint32_t c)
 
 BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com) : Bus(bc.type, bc.start, bc.autoWhite), _colorOrderMap(com) 
 {
-  if (!IS_DIGITAL(bc.type) || !bc.count) return;
+  if (!IS_BUSTYPE_DIGITAL(bc.type) || !bc.count) return;
   _pins[0] = bc.pins[0];
-  if (IS_2PIN(bc.type)) 
+  if (IS_BUSTYPE_2PIN(bc.type)) 
   {
     _pins[1] = bc.pins[1];
   }
   reversed = bc.reversed;
-  _needsRefresh = bc.refreshReq || bc.type == TYPE_TM1814;
+  _needsRefresh = bc.refreshReq || bc.type == BUSTYPE_TM1814;
   _skip = bc.skipAmount;    //sacrificial pixels
   _len = bc.count + _skip;
   _iType = PolyBus::getI(bc.type, _pins, nr);
   if (_iType == BUSTYPE__NONE__ID) return;
   uint16_t lenToCreate = _len;
-  if (bc.type == TYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus 
+  if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus 
   _busPtr = PolyBus::create(_iType, _pins, lenToCreate, nr);
   _valid = (_busPtr != nullptr);
   _colorOrder = bc.colorOrder;
@@ -119,7 +119,7 @@ RgbcctColor BusDigital::getPixelColor(uint16_t pix)
 
 uint8_t BusDigital::getPins(uint8_t* pinArray) 
 {
-  uint8_t numPins = IS_2PIN(_type) ? 2 : 1;
+  uint8_t numPins = IS_BUSTYPE_2PIN(_type) ? 2 : 1;
   for (uint8_t i = 0; i < numPins; i++) 
   {
     pinArray[i] = _pins[i];
@@ -222,8 +222,8 @@ BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
   DEBUG_PRINTF("BusPwm bc.type %d\n\r", bc.type);
 
   _valid = false;
-  if (!IS_PWM(bc.type)) return;
-  uint8_t numPins = NUM_PWM_PINS(bc.type);
+  if (!IS_BUSTYPE_PWM(bc.type)) return;
+  uint8_t numPins = NUM_BUSTYPE_PWM_PINS(bc.type);
 
   #ifdef ESP8266
   analogWriteRange(255);  //same range as one RGB channel
@@ -392,7 +392,7 @@ void BusPwm::show()
    * ** Shrink into desired PWM range limits
    */
   uint16_t cur_col;
-  uint8_t numPins = NUM_PWM_PINS(_type);
+  uint8_t numPins = NUM_BUSTYPE_PWM_PINS(_type);
   for(uint8_t ii=0;ii<numPins;ii++)
   {
     colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
@@ -408,7 +408,7 @@ void BusPwm::show()
 uint8_t BusPwm::getPins(uint8_t* pinArray) 
 {
   if (!_valid) return 0;
-  uint8_t numPins = NUM_PWM_PINS(_type);
+  uint8_t numPins = NUM_BUSTYPE_PWM_PINS(_type);
   for (uint8_t i = 0; i < numPins; i++) {
     pinArray[i] = _pins[i];
   }
@@ -417,7 +417,7 @@ uint8_t BusPwm::getPins(uint8_t* pinArray)
 
 void BusPwm::deallocatePins() 
 {
-  uint8_t numPins = NUM_PWM_PINS(_type);
+  uint8_t numPins = NUM_BUSTYPE_PWM_PINS(_type);
   for (uint8_t i = 0; i < numPins; i++) {
     #ifdef ESP8266
     digitalWrite(_pins[i], LOW); //turn off PWM interrupt
@@ -441,7 +441,7 @@ void BusPwm::deallocatePins()
 BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) 
 {
   _valid = false;
-  if (bc.type != TYPE_ONOFF) return;
+  if (bc.type != BUSTYPE_ONOFF) return;
   uint8_t currentPin = bc.pins[0];
   _pin = currentPin; //store only after allocatePin() succeeds
   pinMode(_pin, OUTPUT);
@@ -486,20 +486,20 @@ uint8_t BusOnOff::getPins(uint8_t* pinArray)
 BusNetwork::BusNetwork(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) {
   _valid = false;
 //      switch (bc.type) {
-//        case TYPE_NET_ARTNET_RGB:
+//        case BUSTYPE_NET_ARTNET_RGB:
 //          _rgbw = false;
 //          _UDPtype = 2;
 //          break;
-//        case TYPE_NET_E131_RGB:
+//        case BUSTYPE_NET_E131_RGB:
 //          _rgbw = false;
 //          _UDPtype = 1;
 //          break;
-//        case TYPE_NET_DDP_RGB:
+//        case BUSTYPE_NET_DDP_RGB:
 //          _rgbw = false;
 //          _UDPtype = 0;
 //          break;
-//        default: // TYPE_NET_DDP_RGB / TYPE_NET_DDP_RGBW
-      _rgbw = bc.type == TYPE_NET_DDP_RGBW;
+//        default: // BUSTYPE_NET_DDP_RGB / BUSTYPE_NET_DDP_RGBW
+      _rgbw = bc.type == BUSTYPE_NET_DDP_RGBW;
       _UDPtype = 0;
 //          break;
 //      }
@@ -591,15 +591,15 @@ int BusManager::add(BusConfig &bc)
     return -1;
   }
 
-  if (bc.type >= TYPE_NET_DDP_RGB && bc.type < 96) 
+  if (bc.type >= BUSTYPE_NET_DDP_RGB && bc.type < 96) 
   {
     busses[numBusses] = new BusNetwork(bc);   // IP
   } 
-  else if (IS_DIGITAL(bc.type)) 
+  else if (IS_BUSTYPE_DIGITAL(bc.type)) 
   {
     busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap);  // Neopixel
   } 
-  else if (bc.type == TYPE_ONOFF) 
+  else if (bc.type == BUSTYPE_ONOFF) 
   {
     busses[numBusses] = new BusOnOff(bc);  // Relays
   } 

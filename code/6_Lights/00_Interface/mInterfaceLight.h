@@ -208,30 +208,17 @@ class mInterfaceLight :
       
     }settings;
 
-
-    const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen);
-    const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
-    int8_t GetHardwareColourTypeIDbyName(const char* c);
+    int8_t Get_BusTypeID_FromName(const char* c);
+    COLOUR_ORDER_T GetColourOrder_FromName(const char* c);
+    
 
     void LightCalcPWMRange();
-
-  
-    
-
-    /******************************************************************************************************************************
-    ****************** unsorted *************************************************************************************************************
-    ******************************************************************************************************************************/
-
-// void ShowInterface();
-
-    
+    void parseJSONObject__BusConfig(JsonParserObject obj); 
 
     void EveryLoop();
-
     
     uint32_t RgbColorto32bit(RgbColor rgb);
     
-    // RgbcctColor GetActiveFirstColourFromCurrentPalette();
         
     #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
         void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
@@ -286,6 +273,11 @@ class mInterfaceLight :
    uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
     uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
 
+    BusManager* bus_manager = nullptr;
+    BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    void BusManager_Create_DefaultSingleNeoPixel();
+
+    // int8_t Get
 
 
 

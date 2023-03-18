@@ -319,6 +319,7 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   Settings.light_settings.light_pixels = WS2812_LEDS;
   
   Settings.light_settings.type = 0;//LT_ADDRESSABLE_WS281X; //default for now
+  
   for (uint8_t i = 0; i < MAX_PWMS; i++) {
     // Settings.light_settings.light_color[i] = 0;
     Settings.pwm_value[i] = 0;
