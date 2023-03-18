@@ -1191,7 +1191,6 @@
         "Length":1
       }
     ],
-    "HardwareType":"WS28XX",
     "AnimationMode":"Effects",
     "ColourPalette":"Christmas 01",
     "Effects": {
