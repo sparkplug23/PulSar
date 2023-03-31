@@ -149,10 +149,11 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_FIVE_SECOND:
 
-
-      #ifndef DISABLE_NETWORK
+      if(pCONT_interface_network->Connected(mInterfaceNetwork::NETWORK_TYPE_WIFI))
+      {
         WifiPollNtp();
-      #endif // DISABLE_NETWORK
+      }
+
 
     break;
     case FUNC_EVERY_MINUTE:

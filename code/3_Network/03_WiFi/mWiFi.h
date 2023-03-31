@@ -1,7 +1,7 @@
 #ifndef _MWIFI_H
 #define _MWIFI_H
 
-#define D_UNIQUE_MODULE_NETWORK_WIFI_ID 20
+#define D_UNIQUE_MODULE_NETWORK_WIFI_ID  ((3*1000)+03)
 
 #include "1_TaskerManager/mTaskerManager.h"
 

@@ -4,7 +4,7 @@
 
 // #include "bus_manager.h"
 
-// #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 #include <Arduino.h>
 #include <IPAddress.h>
@@ -1312,4 +1312,4 @@ uint8_t Bus::_gAWM = 255;
 // uint8_t Bus::_cctBlend = 0;
 // uint8_t Bus::_gAWM = 255;
 
-// #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT

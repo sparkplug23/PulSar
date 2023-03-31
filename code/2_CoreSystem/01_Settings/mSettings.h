@@ -301,7 +301,12 @@ const uint32_t HLW_PREF_PULSE = 12530;      // was 4975us = 201Hz = 1000W
 const uint32_t HLW_UREF_PULSE = 1950;       // was 1666us = 600Hz = 220V
 const uint32_t HLW_IREF_PULSE = 3500;       // was 1666us = 600Hz = 4.545A
 
+
 const uint8_t MQTT_RETRY_SECS = 10;         // Minimum seconds to retry MQTT connection
+
+
+
+
 // const uint32_t GLOBAL_VALUES_VALID = 300;   // Max number of seconds to keep last received values
 // const power_t APP_POWER = 0;                // Default saved power state Off
 //const uint16_t WS2812_MAX_LEDS = 512;       // Max number of ledout.index
@@ -330,6 +335,10 @@ const uint8_t BOOT_LOOP_TIME = 10;         // Number of seconds to stop detectin
 // const uint8_t OTA_ATTEMPTS = 5;             // Number of times to try fetching the new firmware
 
 const uint16_t FLOATSZ = 16;                // Max number of characters in float result from dtostrfd (max 32)
+const uint16_t TBUFFER_SIZE_FLOAT = 16; // TBUFFER are (T)emporary Buffers that are used for conversions
+
+#define STANDARD_SMS_CHAR_LENGTH 160
+
 // // const uint16_t INPUT_BUFFER_SIZE = 520;     // Max number of characters in (serial and http) command buffer
 // const uint16_t CMDSZ = 2;                  // Max number of characters in command
 // const uint16_t TOPSZ = 2;                 // Max number of characters in topic string

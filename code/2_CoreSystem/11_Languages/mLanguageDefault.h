@@ -59,10 +59,25 @@
 
 
   
+#define D_MODULE__NETWORK_INTERFACE__CTR "interface_network"
+#define D_MODULE__NETWORK_INTERFACE__FRIENDLY_CTR "interface_network"
+
+
 #define D_MODULE_NETWORK_WIFI_CTR              "mWiFi"
 #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
 #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
+
+#define D_MODULE_NETWORK_MQTT_CELLULAR_CTR              "mMQTT_CELLULAR"
+#define D_MODULE_NETWORK_MQTT_FRIENDLY_CELLULAR_CTR              "mqtt_cellular"
+
+#define D_MODULE__NETWORK_CELLULAR__CTR "Cellular"
+#define D_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR "cellular"
+
+
+
+
+
 //#ifdef USE_MODULE_NETWORK_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
@@ -148,11 +163,6 @@
   #define D_MODULE_DRIVERS_IRREMOTE_CTR "irremote"
   #define D_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR "irremote"
 
-  #define D_MODULE_DRIVERS_FONA_CELLULAR_CTR "mFona_Cellular"
-  #define D_MODULE_DRIVERS_FONA_CELLULAR_FRIENDLY_CTR "fona"
-
-  #define D_MODULE_DRIVERS__CELLULAR_SIM7000__CTR          "CellularSIM7000"
-  #define D_MODULE_DRIVERS__CELLULAR_SIM7000__FRIENDLY_CTR "CellularSIM7000"
 
   #define D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR          "camera_arduino"
   #define D_MODULE_DRIVERS__CAMERA_ARDUINO__FRIENDLY_CTR "camera_arduino"
@@ -160,6 +170,9 @@
   #define D_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR "camera_tas"
   #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR          "camera_mulitclient"
   #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__FRIENDLY_CTR "camera_multiclient"
+
+  #define D_MODULE_DRIVERS__TINYGSM__CTR          "tinygsm"
+  #define D_MODULE_DRIVERS__TINYGSM__FRIENDLY_CTR "tinygsm"
 
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
@@ -299,6 +312,9 @@
 
   #define D_MODULE_SENSORS__DS18X20_ESP8266_2023__CTR "db18_esp82_2023"
   #define D_MODULE_SENSORS__DS18X20_ESP8266_2023__FRIENDLY_CTR "db18_esp82_2023"
+
+  #define D_MODULE__SENSORS_GPS_MODEM__CTR "gps_modem"
+  #define D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "gps_modem"
 
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_BLINDS

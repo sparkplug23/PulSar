@@ -38,6 +38,27 @@
 #undef  STA_PASS3
 #define STA_PASS3            "af4d8bc9ab"                // [Password1] Wifi password
 
+#elif defined(USE_SSIDS_NONE_DEBUGGING)
+
+// BT box, phasing out
+// Dedicated SSID for home controllers
+#undef  STA_SSID1
+#define STA_SSID1            ""                // [Ssid2] Optional alternate AP Wifi SSID
+#undef  STA_PASS1
+#define STA_PASS1            ""                // [Password2] Optional alternate AP Wifi password
+
+// Garage wifi for devices in there or garden
+#undef  STA_SSID2
+#define STA_SSID2            ""                // [Ssid2] Optional alternate AP Wifi SSID
+#undef  STA_PASS2
+#define STA_PASS2            ""                // [Password2] Optional alternate AP Wifi password
+
+// Will remain unpowered, and will only be used if failsafe SSID is needed when primary does not work
+#undef  STA_SSID3
+#define STA_SSID3            ""                // [Ssid1] Wifi SSID
+#undef  STA_PASS3
+#define STA_PASS3            ""                // [Password1] Wifi password
+
 #else // garage or other
 
 // Dedicated SSID for home controllers

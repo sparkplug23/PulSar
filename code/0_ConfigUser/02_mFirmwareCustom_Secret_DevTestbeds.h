@@ -18,6 +18,7 @@
  * */
 // #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 // #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
+#define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 
 
 
@@ -1565,6 +1566,134 @@
 //   #endif // USE_LIGHTING_TEMPLATE_1
 
 #endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+  #define DEVICENAME_CTR          "testbed_sim7000g"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+  #define DISABLE_NETWORK_WIFI
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+
+  #define USE_MODULE_SENSORS_INTERFACE
+
+  #define ESP32
+  #undef ESP8266
+
+  #define  ENABLE_DEBUG_MULTIPIN
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_DRIVERS_TINYGSM
+
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+
+  #define USE_MODULE_NETWORK_CELLULAR
+
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_NETWORK_MQTT_CELLULAR
+
+  #define USE_MODULE_DRIVERS_TINYGSM2
+
+  #define ENABLE_DEVFEATUER_SWITCH_MQTT_PRIMARY_TO_CELLULAR_ONLY
+
+  #define USE_MODULE_SENSORS_GPS_MODEM
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"2\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      #endif
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+
 
 
 
@@ -8385,7 +8514,6 @@
    */
 
   // #define DISABLE_WEBSERVER
-  //   #define USE_MODULE_NETWORK_WIFI_V2
   //   #define USE_DEVFEATURE_NETWORK_WIFI_VERSION2
 /**
  * @brief 

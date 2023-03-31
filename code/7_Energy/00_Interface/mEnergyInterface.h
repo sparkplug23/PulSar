@@ -35,7 +35,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_ENERGY_STATS_CTR) "energystats";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_THRESHOLDLIMITS_CTR) "thresholdlimits";
 
 
-#include "3_Network/01_MQTT/mMQTT.h"
+#include "3_Network/10_MQTT/mMQTT.h"
 
 class mEnergyInterface :
   public mTaskerInterface

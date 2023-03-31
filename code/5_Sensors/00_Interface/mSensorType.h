@@ -87,6 +87,18 @@ typedef enum
    * @brief Distance
    **/
   SENSOR_TYPE_PROXIMITY_ID,
+
+
+
+  SENSOR_TYPE_LATITUDE_ID,
+  SENSOR_TYPE_LONGITUDE_ID,
+  SENSOR_TYPE_ALTITUDE_ID,
+
+
+  /**
+   * @brief Speed
+   **/
+  SENSOR_TYPE_SPEED_ID,
   
   
   SENSOR_TYPE_GRAVITY_ID,

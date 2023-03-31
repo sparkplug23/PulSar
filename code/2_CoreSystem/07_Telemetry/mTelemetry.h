@@ -11,7 +11,7 @@
 
 #include "2_CoreSystem/08_JSON/mJSON.h"
 
-#include "3_Network/01_MQTT/mMQTT.h"
+#include "3_Network/10_MQTT/mMQTT.h"
 
 
 #include "2_CoreSystem/05_Logging/mLogging.h"
@@ -29,7 +29,7 @@
 
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-#include "3_Network/02_WebServer/mWebServer.h"
+#include "3_Network/20_WebServer/mWebServer.h"
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
 #ifdef ESP32

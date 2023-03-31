@@ -259,6 +259,8 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
   JBI->Start();
 
     JBI->Add(PM_JSON_CLIENT_NAME, pCONT_set->Settings.mqtt.client_name);
+
+    JBI->Add("RetrySecs", pCONT_set->Settings.mqtt_retry);
     // JBI->Level_Start(PM_JSON_PACKETS);
     //   JBI->Add(PM_JSON_SENTCOUNT,      pCONT_mqtt->pubsub->stats.packets_sent_counter);
     //   JBI->Add(PM_JSON_SENTPERMINUTE,  pCONT_mqtt->pubsub->stats.packets_sent_per_minute);

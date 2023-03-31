@@ -187,12 +187,27 @@ enum MODULE_IDS{
     EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID,
   #endif 
   // Network
-  #if defined(USE_MODULE_NETWORK_WIFI) || defined(USE_MODULE_NETWORK_WIFI_V2)
+  #ifdef USE_MODULE_NETWORK_INTERFACE
+    EM_MODULE__NETWORK_INTERFACE__ID,
+  #endif
+  #ifdef USE_MODULE_NETWORK_WIFI
     EM_MODULE_NETWORK_WIFI_ID,
   #endif 
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+    EM_MODULE_NETWORK_ETHERNET_ID,
+  #endif 
+  #ifdef USE_MODULE_NETWORK_CELLULAR
+    EM_MODULE__NETWORK_CELLULAR__ID,
+  #endif
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
+  #ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
+    EM_MODULE_NETWORK_MQTT_CELLULAR_ID,
+  #endif 
+  // #ifdef USE_MODULE_DRIVERS_TINYGSM
+  //   EM_MODULE_DRIVERS_TINYGSM_ID,
+  // #endif
   #ifdef USE_MODULE_NETWORK_WEBSERVER
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
@@ -386,6 +401,13 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     EM_MODULE_SENSORS__DS18X20__ID,
   #endif  
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
+  EM_MODULE__SENSORS_GPS_SERIAL__ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_GPS_MODEM
+  EM_MODULE__SENSORS_GPS_MODEM__ID,
+  #endif
+
   // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -509,16 +531,20 @@ enum MODULE_IDS{
   #define   pCONT_mDevelopmentDebugging             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
 #endif 
 
-// Subsystems (x-x)
+// Subsystems
 #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
   #include "2b_Internal_TaskerSystems/01_SolarLunar/mSolarLunar.h"
   #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
 #endif
 
 
-// Network (20-29)
+// Network
+#ifdef USE_MODULE_NETWORK_INTERFACE
+  #include "3_Network/00_Interface/mInterface.h"
+  #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(pCONT->pModule[EM_MODULE__NETWORK_INTERFACE__ID])
+#endif 
 #ifdef USE_MODULE_NETWORK_MQTT
-  #include "3_Network/01_MQTT/mMQTT.h"
+  #include "3_Network/10_MQTT/mMQTT.h"
   #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
@@ -529,12 +555,14 @@ enum MODULE_IDS{
   #include "3_Network/03_WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_WIFI_V2
-  #include "3_Network/03_WiFi_v2/mWiFi.h"
-  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
+#ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
+  #include "3_Network/05_MQTT_Cellular/mMQTT_Cellular.h"
+  #define pCONT_mqtt_cellular                                static_cast<mMQTT_Cellular*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_CELLULAR_ID])
 #endif 
-
-
+#ifdef USE_MODULE_NETWORK_CELLULAR
+#include "3_Network/05_Cellular/mCellular.h"
+  #define pCONT_cell                               static_cast<mCellular*>(pCONT->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
+#endif
 
 
 
@@ -566,7 +594,6 @@ enum MODULE_IDS{
   #include "4_Drivers/00_Interface/mDriverInterface.h"
   #define pCONT_iDrivers                           static_cast<mDriverInterface*>(pCONT->pModule[EM_MODULE_DRIVERS_INTERFACE_ID])
 #endif
-
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/03_LEDs/mLEDs.h"
   #define pCONT_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
@@ -597,16 +624,6 @@ enum MODULE_IDS{
   #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
   #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-  #include "4_Drivers/16_Fona_Cellular/mFona_Cellular.h"
-  #define pCONT_fona                                static_cast<mFona_Cellular*>(pCONT->pModule[EM_MODULE_DRIVERS_FONA_CELLULAR_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
-  #include "4_Drivers/17_Cellular_SIM/mCellular_SIM.h"
-  #define pCONT_sim                                static_cast<mCellular_SIM7000*>(pCONT->pModule[EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID])
-#endif
-
-
 
 
 
@@ -626,10 +643,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
   #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_GPS
-  #include "4_Drivers/20_GPS_UBX/mGPS.h"
-  #define pCONT_gps                                 static_cast<mGPS*>(pCONT->pModule[EM_MODULE_DRIVERS_GPS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SERIAL_UART
   #include "4_Drivers/SerialUART/mSerialUART.h"
@@ -827,6 +840,21 @@ enum MODULE_IDS{
   #include "5_Sensors/41_ds18x20_esp32/mDB18x20_ESP32.h"
   #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
 #endif
+
+
+
+#ifdef USE_MODULE_SENSORS_GPS_SERIAL
+  #include "5_Sensors/50_GPS_Serial/mGPS.h"
+  #define pCONT_gps                                 static_cast<mGPS_Serial*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID])
+#endif
+#ifdef USE_MODULE_SENSORS_GPS_MODEM
+  #include "5_Sensors/51_GPS_Modem/mGPS_Modem.h"
+  #define pCONT_gps                                 static_cast<mGPS_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
+#endif
+
+
+
+
 
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 

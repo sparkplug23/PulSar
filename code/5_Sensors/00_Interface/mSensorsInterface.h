@@ -21,6 +21,24 @@ typedef struct event_motion_s{
   }device_name;
 }event_motion_t;
 
+typedef struct sensorset_location_s
+{   
+  bool isvalid = false;
+  float latitude = 54.5;// Latitude
+  float longitude = -6.0;// Longitude
+  float speed = 0;// Speed Over Ground. Unit is knots.
+  float altitude = 0;// MSL Altitude. Unit is meters
+  int vsat = 0;// GNSS Satellites in View
+  int usat = 0;// GNSS Satellites Used
+  float accuracy = 0;// Horizontal Dilution Of Precision
+  int year = 0; // Four digit year
+  int month = 0;// Two digit month
+  int day = 0;// Two digit day
+  int hour = 0;// Two digit hour
+  int minute = 0;// Two digit minute
+  int second = 0;// 6 digit second with subseconds
+}sensorset_location_t;
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "sensors/colours";
@@ -61,6 +79,12 @@ class mSensorsInterface :
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void EveryLoop();
+
+    /**
+     * @brief Should I create a copy in here of all sensor types ? 
+    *   At least the internal ones only, and IMU. Thus, a single struct can be used to know everything about the esp32 (IMU, Climate, GPS)
+     * 
+     */
 
     void MQTT_Report_Event_Button();
 

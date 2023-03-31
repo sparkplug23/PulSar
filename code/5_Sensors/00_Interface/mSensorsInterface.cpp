@@ -172,7 +172,11 @@ const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_SUN_ELEVATION_ID:          return PM_JSON_SUN_ELEVATION;
     case SENSOR_TYPE_DOOR_POSITION_ID:          return PM_JSON_DOOR_POSITION;
     case SENSOR_TYPE_DOOR_LOCKED_ID:            return PM_JSON_DOOR_LOCKED;    
-    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;    
+    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;  
+    case SENSOR_TYPE_SPEED_ID:            return PM_JSON_SPEED;  
+    case SENSOR_TYPE_LATITUDE_ID:            return PM_JSON_LATITUDE;  
+    case SENSOR_TYPE_LONGITUDE_ID:            return PM_JSON_LONGITUDE;  
+    case SENSOR_TYPE_ALTITUDE_ID:            return PM_JSON_ALTITUDE;  
     // Strings
     case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING;
   }
@@ -315,9 +319,6 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_level, bool json_
   return JBI->End();
 
 }
-
-
-#ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 /**
  * @brief 
@@ -809,19 +810,6 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
     
 }
 
-
-#else // until devfeature is fixed
-
-uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-    JBI->Add("ToBeRemoved");
-  return JBI->End();
-    
-}
-
-#endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 
 

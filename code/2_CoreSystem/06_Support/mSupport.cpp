@@ -42,6 +42,9 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
     // Serial.println("WDT_Reset");
   }
 #endif // ESP32
+#else
+void WDT_Init(){};
+void WDT_Reset(){};
 #endif // WATCHDOG_TIMER_SECTION_GUARD_H
 
 #ifdef ESP32
@@ -704,17 +707,25 @@ bool mSupport::JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level
 
 }
 
-char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
-{
-  if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
-    strcpy(s, "null");
-    return s;
-  } else {
-    return dtostrf(number, 1, prec, s);
-  }
-}
+// /**
+//  * @brief FloatToCString FloatToString
+//  * 
+//  * @param number 
+//  * @param prec 
+//  * @param s 
+//  * @return char* 
+//  */
+// char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
+// {
+//   if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
+//     strcpy(s, "null");
+//     return s;
+//   } else {
+//     return dtostrf(number, 1, prec, s);
+//   }
+// }
 
-char* mSupport::Float2CString(float number, unsigned char prec, char *s)
+char* mSupport::float2CString(float number, unsigned char prec, char *s)
 {
   // if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
   //   strcpy(s, "null");

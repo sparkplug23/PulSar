@@ -27,6 +27,10 @@
 // #include "2_CoreSystem/05_Logging/mLogging.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
+#ifndef JSON_VARIABLE_FLOAT_PRECISION_LENGTH
+#define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 3
+#endif
+
 // #define DEBUG_JSON_BUILDER
 
 enum IDENTIFIER_IDS{
@@ -242,9 +246,10 @@ class JsonBuilder{
         }else
         if (is_float_type<T>::value){ 
           float f = 0;     memcpy(&f,&value,sizeof(f));
-          char fvalue[20]; dtostrfd2(f,3,fvalue);
+          char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
           writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
         }
+
 
         /**
          * @brief debug size

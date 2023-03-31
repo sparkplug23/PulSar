@@ -303,15 +303,26 @@ uint8_t mTaskerManager::Instance_Init(){
   pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID] = new mSolarLunar();
   #endif
   // Network
-  #if defined(USE_MODULE_NETWORK_WIFI) || defined(USE_MODULE_NETWORK_WIFI_V2)
+  
+  #ifdef USE_MODULE_NETWORK_INTERFACE
+  pModule[EM_MODULE__NETWORK_INTERFACE__ID] = new mInterfaceNetwork();
+  #endif 
+  #ifdef USE_MODULE_NETWORK_WIFI
   pModule[EM_MODULE_NETWORK_WIFI_ID] = new mWiFi();
   #endif 
+  #ifdef USE_MODULE_NETWORK_CELLULAR
+    pModule[EM_MODULE__NETWORK_CELLULAR__ID] = new mCellular();
+  #endif
   #ifdef USE_MODULE_NETWORK_MQTT
   pModule[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
+  #endif 
+  #ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
+  pModule[EM_MODULE_NETWORK_MQTT_CELLULAR_ID] = new mMQTT_Cellular();
   #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   pModule[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebServer();
   #endif
+
   // Displays
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
     pModule[EM_MODULE_DISPLAYS_INTERFACE_ID] = new mDisplaysInterface();
@@ -343,9 +354,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
     pModule[EM_MODULE_DRIVERS_SDCARD_ID] = new mSDCard();
-  #endif
-  #ifdef USE_MODULE_DRIVERS_GPS
-    pModule[EM_MODULE_DRIVERS_GPS_ID] = new mGPS();
   #endif
   #ifdef USE_MODULE_DRIVERS_SERIAL_UART
     pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new mSerialUART();
@@ -504,7 +512,14 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     pModule[EM_MODULE_SENSORS__DS18X20__ID] = new mDB18x20_ESP32();
+  #endif  
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
+    pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID] = new mGPS_Serial();
   #endif
+  #ifdef USE_MODULE_SENSORS_GPS_MODEM
+    pModule[EM_MODULE__SENSORS_GPS_MODEM__ID] = new mGPS_Modem();
+  #endif
+
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
