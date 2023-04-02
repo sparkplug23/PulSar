@@ -11,6 +11,9 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   JsonParserToken jtok_level = 0; 
   JsonParserObject obj_sub = 0;
   int8_t tmp_id = 0;
+  
+
+  bool flag_drivers_needs_reinitialised = false;
 
   /**
    * @brief New method
@@ -34,24 +37,27 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     // if(jtok = obj["DisplayRefresh"]){
     //   pCONT_set->Settings.display.refresh = jtok.getInt();
     // }
-    // if(jtok = obj["DisplayRows"]){
-    //   pCONT_set->Settings.display.rows = jtok.getInt();
-    // }
-    // if(jtok = obj["DisplayCols"])
-    // {
-    //   JsonParserArray arr_pos = jtok;
-    //   if(arr_pos.size() == 2)
-    //   {
-    //     pCONT_set->Settings.display.cols[0] = arr_pos[0].getInt();
-    //     pCONT_set->Settings.display.cols[1] = arr_pos[1].getInt();
-    //   }
-    // }
+    if(jtok = obj_sub["DisplayRows"]){
+      pCONT_set->Settings.display.rows = jtok.getInt();
+      ALOG_INF(PSTR("DisplayRows=%d"), pCONT_set->Settings.display.rows);
+      // ALOG_COM( PM_JSON_COMMAND_PM_SVALUE_NVALUE, PM_JSON_DISPLAY, PM_JSON_MODEL, pCONT_set->Settings.display.model );
+    }
+    if(jtok = obj_sub["DisplayCols"])
+    {
+      JsonParserArray arr_pos = jtok;
+      if(arr_pos.size() == 2)
+      {
+        pCONT_set->Settings.display.cols[0] = arr_pos[0].getInt();
+        pCONT_set->Settings.display.cols[1] = arr_pos[1].getInt();
+      }
+      flag_drivers_needs_reinitialised = true;
+    }
     // if(jtok = obj["DisplayDimmer"]){
     //   pCONT_set->Settings.display.dimmer = jtok.getInt();
     // }
-    // if(jtok = obj["DisplaySize"]){
-    //   pCONT_set->Settings.display.size = jtok.getInt();
-    // }
+    if(jtok = obj_sub["DisplaySize"]){
+      pCONT_set->Settings.display.size = jtok.getInt();
+    }
     // if(jtok = obj["DisplayFont"]){
     //   pCONT_set->Settings.display.font = jtok.getInt();
     // }
@@ -209,6 +215,14 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj[PM_JSON_DISPLAY_MODE]){
     SetDisplayMode(jtok.getInt());
+  }
+
+
+  if(flag_drivers_needs_reinitialised)
+  {
+    //restart driver
+    Pre_Init();
+
   }
 
 

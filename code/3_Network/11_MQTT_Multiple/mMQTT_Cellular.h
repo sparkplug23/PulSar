@@ -68,7 +68,6 @@ class mMQTT_Cellular :
       // uint32_t tSavedReconnectAttempt = millis()+30000;
       // uint32_t rSavedReconnectAttempt = 0;
       uint8_t cConnectionAttempts = 0; 
-      uint8_t flag_require_reconnection = false;
     }connection_maintainer;
 
     const char* state_ctr(void);

@@ -421,8 +421,8 @@ void mMQTT_Cellular::MqttConnected(void)
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connection SUCCESS!\""));
     #endif// ENABLE_LOG_LEVEL_INFO
     
-    // if succesful, clear flag
-    connection_maintainer.flag_require_reconnection = false;
+    // if succesful, clear flag_start_reconnect
+    connection_maintainer.flag_start_reconnect = false;
 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -954,7 +954,7 @@ boolean mMQTT_Cellular::ppublish(const char* topic, const char* payload, boolean
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
       #endif// ENABLE_LOG_LEVEL_INFO
-      connection_maintainer.flag_require_reconnection = true;
+      connection_maintainer.flag_start_reconnect = true;
       return false;
     }
 
@@ -1044,7 +1044,7 @@ boolean mMQTT_Cellular::ppublish_device_name_prefix_P(const char* topic, const c
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
       #endif// ENABLE_LOG_LEVEL_INFO
-      connection_maintainer.flag_require_reconnection = true;
+      connection_maintainer.flag_start_reconnect = true;
       return false;
     }
 

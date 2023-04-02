@@ -1581,11 +1581,15 @@
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
   // #define USE_SSIDS_NONE_DEBUGGING
   // #define DISABLE_DEVFEATURE_NETWORK_WIFI
 
   // #define DISABLE_NETWORK
-  #define DISABLE_NETWORK_WIFI
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
@@ -1594,33 +1598,34 @@
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-
-  #define USE_MODULE_SENSORS_INTERFACE
-
-  #define ESP32
-  #undef ESP8266
-
-  #define  ENABLE_DEBUG_MULTIPIN
-
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_MODULE_DRIVERS_TINYGSM
-
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_CELLULAR
-
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
   #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-  // #define USE_MODULE_NETWORK_MQTT_CELLULAR
-
-  #define USE_MODULE_DRIVERS_TINYGSM2
-
-  #define ENABLE_DEVFEATUER_SWITCH_MQTT_PRIMARY_TO_CELLULAR_ONLY
-
   #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+    #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
 
 
   #define USE_MODULE_TEMPLATE
@@ -1629,10 +1634,10 @@
     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_JSON_GPIO_NUMBER "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-      #endif
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1646,8 +1651,23 @@
     "\"" D_JSON_DEVICENAME "\":{"
       "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
     "},"    
+
+
+
+
+
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";

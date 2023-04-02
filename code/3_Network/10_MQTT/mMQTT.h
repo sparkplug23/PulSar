@@ -139,16 +139,6 @@ class mSupport;
 #include <WiFiUdp.h>
 
 
-#ifdef ENABLE_DEVFEATUER_SWITCH_MQTT_PRIMARY_TO_CELLULAR_ONLY
-#define TINY_GSM_MODEM_SIM7000
-#include <TinyGsmClient.h>   //wifi/gsm/ethernet should all be raised to higher unique ID number so they are all called before mqtt in tasker_interface
-typedef TinyGsmClient MQTT_Network_Client;
-#else
-typedef WiFiClient MQTT_Network_Client;
-#endif // ENABLE_DEVFEATUER_SWITCH_MQTT_PRIMARY_TO_CELLULAR_ONLY
-
-
-
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "1_TaskerManager/mTaskerInterface.h"
@@ -193,7 +183,22 @@ class mMQTT :
     void DiscoverServer(void);
     void Send_LWT_Online();
 
-    struct CONNECTION_MAINTAINER_PARAMETERS{
+
+    enum CONNECTION_CLIENT_TYPE{
+      CLIENT_TYPE_WIFI_ID = 0,
+      CLIENT_TYPE_ETHERNET_ID,
+      CLIENT_TYPE_CELLULAR_ID
+    };
+
+    struct CONNECTION_MAINTAINER_PARAMETERS
+    {
+      #ifdef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+      uint8_t mqtt_client_type = CLIENT_TYPE_CELLULAR_ID; //default wifi, 1 ethernet, 2 cellular
+      #else
+      uint8_t mqtt_client_type = CLIENT_TYPE_WIFI_ID; //default wifi, 1 ethernet, 2 cellular
+      #endif
+
+      bool flag_start_reconnect = false;
 
       // #ifndef ENABLE_DEVFEATURE_MQTT_CONNECTION_EDIT1
       // uint32_t tSavedLoop = millis();
@@ -201,7 +206,6 @@ class mMQTT :
       // uint32_t tSavedReconnectAttempt = millis()+30000;
       // uint32_t rSavedReconnectAttempt = 0;
       uint8_t cConnectionAttempts = 0; 
-      uint8_t flag_require_reconnection = false;
     }connection_maintainer;
 
     const char* state_ctr(void);
@@ -240,18 +244,9 @@ class mMQTT :
 
     void MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, const char* postfix_topic_ctr);
 
-    mPubSubClient* pubsub = nullptr;
+    mPubSubClient* pubsub = nullptr;   
     
-    
-    #ifdef ENABLE_DEVFEATUER_SWITCH_MQTT_PRIMARY_TO_CELLULAR_ONLY
-    // TinyGsmClient* client = nullptr;
-    bool SetPubSubClient(MQTT_Network_Client* client = nullptr);
-    bool SetPubSubClient_Cellular(TinyGsmClient* client);
-    #else
-    WiFiClient* client = nullptr;
-    bool SetPubSubClient(WiFiClient* client);
-    #endif // ENABLE_DEVFEATUER_SWITCH_MQTT_PRIMARY_TO_CELLULAR_ONLY
-
+    void SetPubSubClient(Client* client);
 
     
     void parse_JSONCommand();

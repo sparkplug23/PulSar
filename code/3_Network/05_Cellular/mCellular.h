@@ -118,7 +118,8 @@ class mCellular :
     {
       timereached_t tReached_Update;
       bool enabled = 0; // 0 disabled, 1 enabled     
-      uint32_t connected_seconds = 0;       
+      uint32_t connected_seconds = 0;      
+      uint32_t last_comms_millis_updated = 0; 
     }gprs;
     void GPRS_Enable();
     void GPRS_Disable();

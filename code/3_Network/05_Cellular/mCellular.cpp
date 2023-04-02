@@ -22,9 +22,6 @@ const char* mCellular::PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR = D_MODULE__NET
 
 //https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
   
-const char apn[]  = "giffgaff.com";     //SET TO YOUR APN
-const char gprsUser[] = "gg";
-const char gprsPass[] = "p";
 
 int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
 {
@@ -57,14 +54,11 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       ModemUpdate_GPS();
 
       ModemUpdate_GPRS();
-
-      ModemUpdate_BatteryStatus();
       
       ModemUpdate_SMS();
       
-      if(sms.enabled)
+      if(modem)
       {
-        // ALOG_INF(PSTR("Maintain"));
         modem->maintain();
       }
 
@@ -73,6 +67,11 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
 
       ALOG_INF(PSTR("Network connected? %d"), modem->isNetworkConnected());
     
+    break;
+    case FUNC_EVERY_MINUTE:
+
+      ModemUpdate_BatteryStatus();
+
     break;
     /************
      * COMMANDS SECTION * 
@@ -153,11 +152,12 @@ void mCellular::Init(void)
 
   DEBUG_LINE_HERE;
 
+  GPRS_Enable();
+  DEBUG_LINE_HERE;
+
   GPS_Enable();
   DEBUG_LINE_HERE;
 
-  GPRS_Enable();
-  DEBUG_LINE_HERE;
 
 }
 
@@ -258,17 +258,35 @@ void mCellular::SendATCommand_SMSFormatAscii()
   // Enable SMS always send to serial when they arrive, move to function later
   modem->sendAT("+CMGF=1 "); // Set the ascii messages (not HEX)
   if (modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT) != 1) {
-    ALOG_INF(PSTR(" +CNMI= 2,2,0,0,0  false "));
+    ALOG_INF(PSTR("SMSFormatAscii"));
   }
 }
 
 
+/**
+ * @brief Make it so new SMS messages are send over serial automatically
+ * +CNMI: <mode>,<mt>,<bm>,<ds>,<bfr>
+ * The read command parameters and their defined values are the following:
+  <mode>
+    0 – Do not forward unsolicited result codes to the Terminal Equipment (TE) (default)
+    3 – Forward unsolicited result codes directly to the TE
+  <mt>
+    0 – No received message notifications, the modem acts as an SMS client
+    2 – SMS-DELIVERs (except class 2 and message waiting indication group) are routed directly to the TE
+  <bm>
+    No CBM notifications are routed to the TE
+  <ds>
+    0 – No SMS-STATUS-REPORTs are routed to the TE
+    1 – SMS-STATUS-REPORTs are routed to the TE using unsolicited result code: +CDS: <length><CR><LF><pdu>
+  <bfr>
+    1 – The buffer of unsolicited result codes is cleared when <mode> 1 to 3 is entered
+**/
 void mCellular::SendATCommand_SMSImmediateForwardOverSerial()
 {
   // Enable SMS always send to serial when they arrive, move to function later
   modem->sendAT("+CNMI= 2,2,0,0,0 ");
   if (modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT) != 1) {
-    ALOG_INF(PSTR(" +CNMI= 2,2,0,0,0  false "));
+    ALOG_INF(PSTR("SMSImmediateForwardOverSerial"));
   }
 }
 
@@ -312,6 +330,10 @@ void mCellular::ModemUpdate_BatteryStatus()
 
   ALOG_DBM(PSTR("{\"Volts_mv\":%d,\"Percent\":%d,\"Charging\":%d}"),
     modem_status.battery.volts_mv,modem_status.battery.percentage,modem_status.battery.charge_state);
+
+  pCONT_batt_modem->readings.battery.volts_mv = modem_status.battery.volts_mv;
+  pCONT_batt_modem->readings.battery.percentage = modem_status.battery.percentage;
+
 
 }
 
@@ -397,6 +419,22 @@ void mCellular::ModemUpdate_GPS()
       )) 
       {
         ALOG_INF(PSTR("GPS Fix (%d cm)"), (int)(gps.accuracy*100));
+        
+        #ifdef USE_MODULE_SENSORS_GPS_MODEM
+        pCONT_gps->readings.update_seconds = millis();
+        pCONT_gps->location.latitude  = gps.latitude;
+        pCONT_gps->location.longitude = gps.longitude;
+        pCONT_gps->location.speed = gps.speed;
+        pCONT_gps->location.altitude = gps.altitude;
+        pCONT_gps->location.accuracy = gps.accuracy;
+
+
+
+
+
+        #endif // USE_MODULE_SENSORS_GPS_MODEM
+        
+
       }else{
         ALOG_ERR(PSTR("GPS NO FIX"));
 
@@ -404,17 +442,6 @@ void mCellular::ModemUpdate_GPS()
       }
 
             
-      #ifdef USE_MODULE_SENSORS_GPS_MODEM
-      pCONT_gps->location.latitude  = gps.latitude;
-      pCONT_gps->location.longitude = gps.longitude;
-      pCONT_gps->location.speed = gps.speed;
-      pCONT_gps->location.altitude = gps.altitude;
-
-
-
-
-
-      #endif // USE_MODULE_SENSORS_GPS_MODEM
         
     }
   }
@@ -442,9 +469,8 @@ void mCellular::GPRS_Connect()
     }
 
 
-    ALOG_INF(PSTR("\n---Starting GPRS TEST---\n"));
-    ALOG_INF(PSTR("Connecting to: %s"), apn);
-    if (!modem->gprsConnect(apn, gprsUser, gprsPass)) 
+    ALOG_INF(PSTR("Connecting to: %s"), CELLULAR_APN);
+    if (!modem->gprsConnect(CELLULAR_APN, CELLULAR_GPRS_USERNAME, CELLULAR_GPRS_PASSWORD)) 
     {
       return;
     }
@@ -453,15 +479,8 @@ void mCellular::GPRS_Connect()
     if (modem->isGprsConnected()) 
     {
       ALOG_INF(PSTR("connected"));
-
-      // pCONT_mqtt->SetPubSubClient();//new TinyGsmClient(modem));
-
-DEBUG_LINE_HERE;
       gsm_client = new TinyGsmClient(*modem);
-DEBUG_LINE_HERE;
-      pCONT_mqtt->SetPubSubClient_Cellular(gsm_client);
-DEBUG_LINE_HERE;
-
+      pCONT_mqtt->SetPubSubClient(gsm_client);
     } 
     else 
     {
@@ -511,8 +530,6 @@ void mCellular::GPRS_Enable()
     }
     ALOG_INF(PSTR("\nModem is online"));
 
-  DEBUG_LINE_HERE;
-
     //test sim card is online ?
     timeout = millis();
     Serial.print("> Get SIM card status");
@@ -520,30 +537,15 @@ void mCellular::GPRS_Enable()
         Serial.print(".");
         if (millis() - timeout > 60000 ) {
             ALOG_INF(PSTR("It seems that your SIM card has not been detected. Has it been inserted?"));
-            ALOG_INF(PSTR("If you have inserted the SIM card, please remove the power supply again and try again!"));
             return;
         }
 
     }
     
-
-    DEBUG_LINE_HERE;
-    String res = modem->getIMEI();
-    Serial.print("IMEI:");
-    ALOG_INF(PSTR("%s"),res.c_str());
-
-    DEBUG_LINE_HERE;
-    /*
-    * Tips:
-    * When you are not sure which method of network access is supported by the network you use,
-    * please use the automatic mode. If you are sure, please change the parameters to speed up the network access
-    * * * * */
-
     //Set mobile operation band
     modem->sendAT("+CBAND=ALL_MODE");
     modem->waitResponse();
 
-    DEBUG_LINE_HERE;
     // Args:
     // 1 CAT-M
     // 2 NB-IoT
@@ -552,11 +554,6 @@ void mCellular::GPRS_Enable()
     uint8_t perferred = 3;
     modem->setPreferredMode(perferred);
 
-    if (perferred == 2) {
-      ALOG_INF(PSTR("When you select 2, please ensure that your SIM card operator supports NB-IOT"));
-    }
-    DEBUG_LINE_HERE;
-
     // Args:
     // 2 Automatic
     // 13 GSM only
@@ -564,9 +561,6 @@ void mCellular::GPRS_Enable()
     // 51 GSM and LTE only
     // Set network mode to auto
     modem->setNetworkMode(2);
-
-  DEBUG_LINE_HERE;
-
 
     // Check network signal and registration information
     ALOG_INF(PSTR("> SIM7000/SIM7070 uses automatic mode to access the network. The access speed may be slow. Please wait patiently"));
@@ -587,9 +581,7 @@ void mCellular::GPRS_Enable()
 
       if (millis() - timeout > 360000 ) {
         if (sq == 99) {
-          ALOG_INF(PSTR("> It seems that there is no signal. Please check whether the"\
-                          "LTE antenna is connected. Please make sure that the location has 2G/NB-IOT signal\n"\
-                          "SIM7000G does not support 4G network. Please ensure that the USIM card you use supports 2G/NB access"));
+          ALOG_INF(PSTR("It seems that there is no signal."));
           return;
         }
         timeout = millis();
@@ -599,6 +591,8 @@ void mCellular::GPRS_Enable()
     } while (status != REG_OK_HOME && status != REG_OK_ROAMING);
 
   DEBUG_LINE_HERE;
+
+    String res;
 
     ALOG_INF(PSTR("Obtain the APN issued by the network"));
     modem->sendAT("+CGNAPN");
@@ -633,66 +627,7 @@ void mCellular::GPRS_Enable()
       ALOG_INF(PSTR("The current network IP address is: %s"), res.c_str());
     }
 
-  DEBUG_LINE_HERE;
-
-
-
-    ALOG_INF(PSTR("\n\n\nWaiting for network..."));
-    if (!modem->waitForNetwork(DEFAULT_AT_COMMAND_RESPONSE_WAIT)) 
-    {
-      return;
-    }
-
-    if (modem->isNetworkConnected()) 
-    {
-      ALOG_INF(PSTR("Network connected"));
-    }
-
-  DEBUG_LINE_HERE;
-
-
-    ALOG_INF(PSTR("\n---Starting GPRS TEST---\n"));
-    ALOG_INF(PSTR("Connecting to: %s"), apn);
-    if (!modem->gprsConnect(apn, gprsUser, gprsPass)) 
-    {
-      return;
-    }
-
-    ALOG_INF(PSTR("GPRS status: "));
-    if (modem->isGprsConnected()) 
-    {
-      ALOG_INF(PSTR("connected"));
-
-DEBUG_LINE_HERE;
-      gsm_client = new TinyGsmClient(*modem);
-DEBUG_LINE_HERE;
-      pCONT_mqtt->SetPubSubClient_Cellular(gsm_client);
-DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-
-      // pCONT_mqtt->SetPubSubClient();//new TinyGsmClient(modem));
-  DEBUG_LINE_HERE;
-
-    } 
-    else 
-    {
-      ALOG_INF(PSTR("not connected"));
-    }
-
-    String ccid = modem->getSimCCID();
-    ALOG_INF(PSTR("CCID: %s"), ccid.c_str());
-
-    String imei = modem->getIMEI();
-    ALOG_INF(PSTR("IMEI: %s"), imei.c_str());
-
-    String cop = modem->getOperator();
-    ALOG_INF(PSTR("Operator: %s"), cop.c_str());
-
-    IPAddress local = modem->localIP();
-    ALOG_INF(PSTR("Local IP: %s"), String(local).c_str());
-
-    int csq = modem->getSignalQuality();
-    ALOG_INF(PSTR("Signal quality: %d"), csq);
+    GPRS_Connect();
 
     modem->sendAT("+CPSI?");
     if (modem->waitResponse("+CPSI: ") == 1) 
@@ -742,6 +677,7 @@ void mCellular::ModemUpdate_GPRS()
             ALOG_INF(PSTR("Signal quality: %d"), csq);
 
             gprs.connected_seconds++;
+            gprs.last_comms_millis_updated = millis();
 
 
         } 
@@ -763,19 +699,11 @@ void mCellular::ModemUpdate_GPRS()
 
 //https://cplusplus.com/reference/cstdio/sscanf/
 
-// Set phone number, if you want to test SMS
-// Set a recipient phone number to test sending SMS (it must be in international format including the "+" sign)
-#define SMS_TARGET  "+447515358597"
-
 void mCellular::SMS_Enable()
 {
   if(modem)
   {
       
-    const char apn[]  = "giffgaff.com";     //SET TO YOUR APN
-    const char gprsUser[] = "gg";
-    const char gprsPass[] = "p";
-
     String name = modem->getModemName();
     ALOG_INF(PSTR("Modem Name: %s"),name.c_str());
 
@@ -825,187 +753,7 @@ void mCellular::SMS_Enable()
 
     SendATCommand_FunctionalityMode_Full();    
 
-    /**
-     * @brief Make it so new SMS messages are send over serial automatically
-     * +CNMI: <mode>,<mt>,<bm>,<ds>,<bfr>
-     * The read command parameters and their defined values are the following:
-      <mode>
-        0 – Do not forward unsolicited result codes to the Terminal Equipment (TE) (default)
-        3 – Forward unsolicited result codes directly to the TE
-      <mt>
-        0 – No received message notifications, the modem acts as an SMS client
-        2 – SMS-DELIVERs (except class 2 and message waiting indication group) are routed directly to the TE
-      <bm>
-        No CBM notifications are routed to the TE
-      <ds>
-        0 – No SMS-STATUS-REPORTs are routed to the TE
-        1 – SMS-STATUS-REPORTs are routed to the TE using unsolicited result code: +CDS: <length><CR><LF><pdu>
-      <bfr>
-        1 – The buffer of unsolicited result codes is cleared when <mode> 1 to 3 is entered
-    **/
-    modem->sendAT("+CNMI= 2,2,0,0,0 "); 
-    if (modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT) != 1) 
-    {
-      ALOG_INF(PSTR(" +CNMI= 2,2,0,0,0  false "));
-    }
-
-
-      
-
-  // =============================================================================
-
-    /**
-     * @brief The +CGDCONT command defines Packet Data Protocol (PDP) Context.
-
-      Response syntax:
-      +CGDCONT: <cid>,<PDP_type>,<APN>,<PDP_addr>,<d_comp>,<h_comp>
-      The read command parameters and their defined values are the following:
-
-      <cid>
-        Integer, 0–10.
-      <PDP_type>
-        String
-        IP – Internet Protocol
-        IPV6 – Internet Protocol version 6
-        IPV4V6 – Virtual type of dual IP stack
-        Non-IP – Transfer of non-IP data to external packet data network (see 3GPP TS 23.401 [82])
-      <APN>
-        String. Access Point Name (APN).
-      <PDP_addr>
-        String. IP address.
-      <d_comp>
-        0 – Compression not supported
-      <h_comp>
-        0 – Compression not supported
-        
-      The following command example reads configured default bearers:
-
-      AT+CGDCONT?
-        +CGDCONT: 0,"IP","internet","10.0.1.1",0,0
-        +CGDCONT: 1,"IP","IOT_apn","10.0.1.2",0,0
-        OK
-                                                      
-        +CGDCONT: 1,"IP","giffgaff.com","0.0.0.0",0,0,0,0
-        +CGDCONT: 13,"IP","giffgaff.com","0.0.0.0",0,0,0,0                                                                                
-        OK
-    **/
-
-    // Command
-    SerialAT.println("AT+CGDCONT?");
-    delay(500);
-    // Response
-    if (SerialAT.available()) 
-    {
-
-      input = SerialAT.readString();
-      ALOG_INF(PSTR("Response ==(%s)=="), input.c_str());
-
-      /**
-       * @brief Splitting multiline messages into single messages
-       * 
-       */
-      for (int i = 0; i < input.length(); i++) 
-      {        
-        if (input.substring(i, i + 1) == "\n") 
-        {
-          ALOG_INF(PSTR("counter = %d"), counter);
-          pieces[counter] = input.substring(lastIndex, i);
-          lastIndex = i + 1;
-          counter++;
-        }
-        if (i == input.length() - 1) 
-        {
-          pieces[counter] = input.substring(lastIndex, i);
-        }
-      }
-
-      // Reset for reuse
-      input = "";
-      counter = 0;
-      lastIndex = 0;
-
-      for ( int y = 0; y < numberOfPieces; y++) 
-      {
-        for ( int x = 0; x < pieces[y].length(); x++) 
-        {
-          char c = pieces[y][x];  //gets one byte from buffer
-          if (c == ',') 
-          {
-            if (input.indexOf(": ") >= 0) 
-            {
-              String data = input.substring((input.indexOf(": ") + 1));
-              if ( data.toInt() > 0 && data.toInt() < 25) 
-              {
-                modem->sendAT("+CGDCONT=" + String(data.toInt()) + ",\"IP\",\"" + String(apn) + "\",\"0.0.0.0\",0,0,0,0");
-              }
-              input = "";
-              break;
-            }
-            // Reset for reuse
-            input = "";
-          } 
-          else 
-          {
-            input += c;
-          }
-        }
-      }
-    } 
-    else 
-    {
-      ALOG_INF(PSTR("Failed to get PDP!"));
-    }
-
-
-    ALOG_INF(PSTR("\n\n\nWaiting for network..."));
-    if (!modem->waitForNetwork(DEFAULT_AT_COMMAND_RESPONSE_WAIT)) 
-    {
-      return;
-    }
-
-    if (modem->isNetworkConnected()) 
-    {
-      ALOG_INF(PSTR("Network connected"));
-    }
-
-    ALOG_INF(PSTR("\n---Starting GPRS TEST---\n"));
-    ALOG_INF(PSTR("Connecting to: %s"), apn);
-    if (!modem->gprsConnect(apn, gprsUser, gprsPass)) 
-    {
-      return;
-    }
-
-    ALOG_INF(PSTR("GPRS status: "));
-    if (modem->isGprsConnected()) 
-    {
-      ALOG_INF(PSTR("connected"));
-    } 
-    else 
-    {
-      ALOG_INF(PSTR("not connected"));
-    }
-
-    String ccid = modem->getSimCCID();
-    ALOG_INF(PSTR("CCID: %s"), ccid.c_str());
-
-    String imei = modem->getIMEI();
-    ALOG_INF(PSTR("IMEI: %s"), imei.c_str());
-
-    String cop = modem->getOperator();
-    ALOG_INF(PSTR("Operator: %s"), cop.c_str());
-
-    IPAddress local = modem->localIP();
-    ALOG_INF(PSTR("Local IP: %s"), String(local).c_str());
-
-    int csq = modem->getSignalQuality();
-    ALOG_INF(PSTR("Signal quality: %d"), csq);
-
-    SerialAT.println("AT+CPSI?");     //Get connection type and band
-    delay(500);
-    if (SerialAT.available()) {
-      String r = SerialAT.readString();
-      ALOG_INF(PSTR("r=%s"),r.c_str());
-    }
+    SendATCommand_SMSImmediateForwardOverSerial();      
 
     sms.enabled = true;
   }
@@ -1147,12 +895,6 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
     {
       
       ModemUpdate_BatteryStatus();
-
-      modem_status.battery.isvalid = modem->getBattStats(
-        modem_status.battery.charge_state, 
-        modem_status.battery.percentage, 
-        modem_status.battery.volts_mv
-      );
 
       ALOG_INF(PSTR("{\"volts_mv\":%d,\"percent\":%d,\"milliVolts\":%d}"),
         modem_status.battery.volts_mv,modem_status.battery.percentage,modem_status.battery.charge_state);
@@ -1329,12 +1071,12 @@ void mCellular::MQTTHandler_Set_RefreshAll()
  * */
 void mCellular::MQTTHandler_Set_DefaultPeriodRate()
 {
-//   for(auto& handle:mqtthandler_list){
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-//   }
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
 }
 
 /**

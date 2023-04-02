@@ -407,6 +407,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS_GPS_MODEM
   EM_MODULE__SENSORS_GPS_MODEM__ID,
   #endif
+  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+  EM_MODULE__SENSORS_BATTERY_MODEM__ID,
+  #endif
 
   // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -481,6 +484,9 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
     EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+    EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID,
   #endif
 
 
@@ -852,6 +858,11 @@ enum MODULE_IDS{
   #define pCONT_gps                                 static_cast<mGPS_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
 #endif
 
+#ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+  #include "5_Sensors/52_Battery_Modem/mBattery_Modem.h"
+  #define pCONT_batt_modem                                 static_cast<mBattery_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
+#endif
+
 
 
 
@@ -969,6 +980,10 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
   #include "10_ConSpec/07_TempSensorOnOLED/mTempSensorOLEDBath.h"
   #define pCONT_immersion_cont         static_cast<mTempSensorOLEDBath*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+  #include "10_ConSpec/08_CellularBlackBox/mCellularBlackBox.h"
+  #define pCONT_immersion_cont         static_cast<mCellularBlackBox*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID])
 #endif
 
 

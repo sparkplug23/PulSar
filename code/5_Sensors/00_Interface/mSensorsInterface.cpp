@@ -177,6 +177,7 @@ const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_LATITUDE_ID:            return PM_JSON_LATITUDE;  
     case SENSOR_TYPE_LONGITUDE_ID:            return PM_JSON_LONGITUDE;  
     case SENSOR_TYPE_ALTITUDE_ID:            return PM_JSON_ALTITUDE;  
+    case SENSOR_TYPE_VOLTAGE_ID:            return PM_JSON_VOLTAGE;
     // Strings
     case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING;
   }

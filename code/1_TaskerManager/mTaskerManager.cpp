@@ -519,6 +519,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_GPS_MODEM
     pModule[EM_MODULE__SENSORS_GPS_MODEM__ID] = new mGPS_Modem();
   #endif
+  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+    pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID] = new mBattery_Modem();
+  #endif
 
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -594,6 +597,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
     pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID] = new mTempSensorOLEDBath();
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+    pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID] = new mCellularBlackBox();
   #endif
 };
 

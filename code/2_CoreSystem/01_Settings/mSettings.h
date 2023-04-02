@@ -1200,44 +1200,18 @@ struct SensorSettings{
 };
 
 struct DisplaySettings{
-  uint8_t       model;             // 2D2
-  uint8_t       mode;              // 2D3
-  uint8_t       refresh;           // 2D4
-  uint8_t       rows;              // 2D5
-  uint8_t       cols[2];           // 2D6
-  uint8_t       address[8];        // 2D8
-  uint8_t       dimmer;            // 2E0
-  uint8_t       size;              // 2E1
-  uint8_t       font;              // 312
-  uint8_t       rotate;            // 2FA
-
-  uint16_t      width;             // 774
-  uint16_t      height;            // 776
-   // End of single char array of 698 chars max ****************
-  // uint8_t       display_model;             // 2D2
-  // uint8_t       display_mode;              // 2D3
-  // uint8_t       display_refresh;           // 2D4
-  // uint8_t       display_rows;              // 2D5
-  // uint8_t       display_cols[2];           // 2D6
-  // uint8_t       display_address[8];        // 2D8
-  // uint8_t       display_dimmer;            // 2E0
-  // uint8_t       display_size;              // 2E1
-  // TimeRule      tflag[2];                  // 2E2
-  // uint16_t      pwm_frequency;             // 2E6
-  // power_t       power;                     // 2E8
-  // uint16_t      pwm_value[MAX_PWMS];       // 2EC
-  // int16_t       altitude;                  // 2F6
-  // uint16_t      tele_period;               // 2F8
-  // uint8_t       display_rotate;            // 2FA
-  // uint8_t       ledstate;                  // 2FB
-  // uint8_t       param[PARAM8_SIZE];        // 2FC  SetOption32 .. SetOption49
-  // int16_t       toffset[2];                // 30E
-  // uint8_t       display_font;              // 312
-  // DisplayOptions  display_options;         // 313
-
-  
-
-
+  uint8_t       model; 
+  uint8_t       mode;
+  uint8_t       refresh;
+  uint8_t       rows;
+  uint8_t       cols[2];
+  uint8_t       address[8];
+  uint8_t       dimmer;
+  uint8_t       size;
+  uint8_t       font;
+  uint8_t       rotate;
+  uint16_t      width;
+  uint16_t      height;
 };
 
 

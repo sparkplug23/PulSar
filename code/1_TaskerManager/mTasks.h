@@ -26,6 +26,11 @@ enum XsnsFunctions {
 // "FUNC_MODULE_INIT" is phasing out, as its going to be included within PRE_INIT, which is furthermore going to be INIT_PINS
 
 // "PRE_INIT" should be changed to PIN_INIT, and "MODULE_POINTER" should be possibly removed as its either PIN_INIT or INIT
+  
+  /**
+   * @brief "PRE_INIT" as FUNC_INIT_GPIO_POINTERS?
+   * 
+   */
   FUNC_PRE_INIT,     // Configure sub modules and classes as needed
   
   

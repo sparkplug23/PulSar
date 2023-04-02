@@ -1,31 +1,31 @@
-#ifndef _MODULE__SENSORS_GPS_MODEM__H
-#define _MODULE__SENSORS_GPS_MODEM__H
+#ifndef _MODULE__SENSORS_BATTERY_MODEM__H
+#define _MODULE__SENSORS_BATTERY_MODEM__H
 
-#define D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID   ((5*1000)+51)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
+#define D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID   ((5*1000)+52)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_GPS_MODEM
+#ifdef USE_MODULE_SENSORS_BATTERY_MODEM
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-class mGPS_Modem :
+class mBattery_Modem :
   public mTaskerInterface
 {
   public:
-	  mGPS_Modem(){};
+	  mBattery_Modem(){};
     void Pre_Init(void);
     void Init(void);
     
-    static const char* PM_MODULE__SENSORS_GPS_MODEM__CTR;
-    static const char* PM_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE__SENSORS_GPS_MODEM__CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID; }
+    static const char* PM_MODULE__SENSORS_BATTERY_MODEM__CTR;
+    static const char* PM_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE__SENSORS_BATTERY_MODEM__CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
-      return sizeof(mGPS_Modem);
+      return sizeof(mBattery_Modem);
     };
     #endif
 
@@ -38,11 +38,27 @@ class mGPS_Modem :
 
     struct READINGS{
       uint32_t update_seconds = 0;
+      // uint16_t battery_millivolts = 0;
+      // float battery_percentage = 0;
+      //   uint8_t  charge_state = 0;
+      //   bool isvalid = false;
+
+        
+      struct batt_status
+      {
+        uint16_t volts_mv    = 0;
+        int8_t   percentage = 0;
+        uint8_t  charge_state = 0;
+        bool isvalid = false;
+      }
+      battery;
+
+
     }readings;
 
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    sensorset_location_t location;
+
 
     
     
@@ -53,21 +69,8 @@ class mGPS_Modem :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
       if(index > settings.sensor_count-1) {value->sensor_type.push_back(0); return ;}
-      value->sensor_type.push_back(SENSOR_TYPE_LATITUDE_ID);
-      value->data_f.push_back(location.latitude);
-      value->sensor_type.push_back(SENSOR_TYPE_LONGITUDE_ID);
-      value->data_f.push_back(location.longitude);
-      value->sensor_type.push_back(SENSOR_TYPE_SPEED_ID);
-      value->data_f.push_back(location.speed);
-      value->sensor_type.push_back(SENSOR_TYPE_ALTITUDE_ID);
-      value->data_f.push_back(location.altitude);
-
-
-
-
-
-      // value->sensor_type.push_back(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);
-      // value->data_f.push_back(device_data[index].illuminance);
+      value->sensor_type.push_back(SENSOR_TYPE_VOLTAGE_ID);
+      value->data_f.push_back(readings.battery.volts_mv);
       value->sensor_id = index;
     };
     
@@ -81,17 +84,17 @@ class mGPS_Modem :
     void MQTTHandler_Set_DefaultPeriodRate();
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-    struct handler<mGPS_Modem> mqtthandler_settings_teleperiod;
+    struct handler<mBattery_Modem> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mGPS_Modem> mqtthandler_sensor_ifchanged;
-    struct handler<mGPS_Modem> mqtthandler_sensor_teleperiod;
+    struct handler<mBattery_Modem> mqtthandler_sensor_ifchanged;
+    struct handler<mBattery_Modem> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers example
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     //with extra handlers example
     
-    struct handler<mGPS_Modem>* mqtthandler_list[3] = {
+    struct handler<mBattery_Modem>* mqtthandler_list[3] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_sensor_ifchanged,
       &mqtthandler_sensor_teleperiod

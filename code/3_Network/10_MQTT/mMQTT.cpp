@@ -382,6 +382,15 @@ void mMQTT::CheckConnection()
 
   } // mqtt_enabled
 
+  /**
+   * @brief Restart connection e.g. client changed
+   * 
+   */
+  if(connection_maintainer.flag_start_reconnect)
+  {
+    MqttReconnect();
+  }
+
 }
 
 
@@ -464,7 +473,7 @@ void mMQTT::MqttConnected(void)
     #endif// ENABLE_LOG_LEVEL_INFO
     
     // if succesful, clear flag
-    connection_maintainer.flag_require_reconnection = false;
+    connection_maintainer.flag_start_reconnect = false;
 
 
     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -581,130 +590,15 @@ void mMQTT::MqttDisconnected(int state)
 
 }
 
-
-// void mMQTT::SetPubSubClient(WiFiClient* client)
-// {
-//   // Create again if needed
-//   if(pubsub == nullptr){
-//     if(client != nullptr){
-//       client->stop(); // force off before starting again
-//       delay(20);      // Allow wifi to clear
-//     }
-//     client = new WiFiClient(); // Wifi Client reconnect issue 4497 ie memory leak on each attempt without this (https://github.com/esp8266/Arduino/issues/4497)
-//     pubsub = new mPubSubClient(*client);
-//   }
-
-// }
-
 /**
- * @brief Function must be called after a network has been configured
+ * @brief 
  * 
- * @param _client 
- * @return if successful
+ * @param client_in 
  */
-bool mMQTT::SetPubSubClient(MQTT_Network_Client* _client)
+void mMQTT::SetPubSubClient(Client* client_in)
 {
-
-  // DEBUG_LINE_HERE;
-
-  // // Create again if needed
-  // // if(pubsub == nullptr)
-  // // {
-  //   if(client != nullptr) 
-  //   {
-  //     client->stop(); // force off before starting again
-  //     delay(20);      // Allow wifi to clear
-  //   }
-  // DEBUG_LINE_HERE;
-
-
-  //   // if(_client != nullptr)
-  //   // {
-  //   //   client = _client;
-
-  //   // }
-
-  //   if(pCONT_cell->modem == nullptr)
-  //   {
-  // DEBUG_LINE_HERE;
-
-  //   }else{
-  // DEBUG_LINE_HERE;
-
-  //   }
-
-  // DEBUG_LINE_HERE;
-
-  // // delay(1000);
-  // // DEBUG_LINE_HERE;
-
-  // // delay(1000);
-
-  //   #ifdef ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-
-  //     if(pCONT_cell->modem != nullptr)
-  //     {
-  //       if(client != nullptr)
-  //       {
-  //         client = new TinyGsmClient(*pCONT_cell->modem); //pass by pointer
-  //       }
-  //     }
-
-  //   #else // wifi
-  //   client = new WiFiClient(); 
-  //   #endif
-
-  // DEBUG_LINE_HERE;
-
-  // // delay(1000);
-  // // DEBUG_LINE_HERE;
-
-  //   ALOG_INF(PSTR("void mMQTT::SetPubSubClient(MQTT_Network_Client* _client)"));
-
-  //   // client = new MQTT_Network_Client(); // Wifi Client reconnect issue 4497 ie memory leak on each attempt without this (https://github.com/esp8266/Arduino/issues/4497)
-  //   pubsub = new mPubSubClient(*client);
-  // // }
-  // DEBUG_LINE_HERE;
-
-  // if(client && pubsub)
-  // {
-  //   return true; // if both are configured
-  // }
-
-
-  return false;
-
-
-}
-
-
-/**
- * @brief Function must be called after a network has been configured
- * 
- * @param _client 
- * @return if successful
- */
-bool mMQTT::SetPubSubClient_Cellular(TinyGsmClient* client_in) //MQTT_Network_Client* _client)
-{
-
-  // if(client_in == nullptr)
-  // {
-  //   return false;
-  // }
-  
-  ALOG_INF(PSTR("void mMQTT::SetPubSubClient(MQTT_Network_Client* _client)"));
-
   pubsub = new mPubSubClient(*client_in);
- 
- DEBUG_LINE_HERE;
-
-  // if(pubsub)
-  // {
-    return true; // if both are configured
-  // }
-
-  // return false;
-
+  connection_maintainer.flag_start_reconnect = true;
 }
 
 
@@ -774,8 +668,6 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   // IPAddress mqqtserver(192,168,1,65); //desktop
   // IPAddress mqqtserver(192,168,1,65); //desktop
 
-
-  IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
     
   /**
    * using mdns instead of just IP
@@ -805,6 +697,7 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
     #else
 
+    IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
     pubsub->setServer(mqqtserver, 1883);
 
     #endif // ENABLE_DEVFEATURE_DDNS_MQTT_TEST
@@ -812,9 +705,6 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
   #endif
     
-    // 192,168,1,65); //desktop
-
-
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
@@ -836,6 +726,8 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
     AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Connected"));
     #endif // ENABLE_LOG_LEVEL_INFO
     MqttConnected();
+    
+    connection_maintainer.flag_start_reconnect = false;
 
     
         Mqtt.downtime_counter = 0; //reset
@@ -1105,7 +997,7 @@ boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained
   if (!pubsub->connected()) 
   {    
     ALOG_ERR(PSTR(D_LOG_PUBSUB "Unable to publish, No Broker connection"));
-    connection_maintainer.flag_require_reconnection = true;
+    connection_maintainer.flag_start_reconnect = true;
     return false;
   }
 
@@ -1142,7 +1034,7 @@ boolean mMQTT::ppublish_device_name_prefix_P(const char* topic, const char* payl
       #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
       #endif// ENABLE_LOG_LEVEL_INFO
-      connection_maintainer.flag_require_reconnection = true;
+      connection_maintainer.flag_start_reconnect = true;
       return false;
     }
 

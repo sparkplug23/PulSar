@@ -85,6 +85,8 @@ class mWiFi :
     uint32_t tSavedWiFiCheckIP;
     uint32_t tSavedWiFiReconnect;
 
+    WiFiClient* mqtt_client = nullptr;
+    
     uint16_t wifi_counter_tester = 0;
     
     bool WifiCheckIpConnected();

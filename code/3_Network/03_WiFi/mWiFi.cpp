@@ -86,6 +86,12 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
         StartMdns();
       #endif  // USE_NETWORK_MDNS
 
+      if(pCONT_mqtt->connection_maintainer.mqtt_client_type == mMQTT::CLIENT_TYPE_WIFI_ID)
+      {
+        mqtt_client = new WiFiClient();
+        pCONT_mqtt->SetPubSubClient(mqtt_client);
+      }
+
     break;
   }
 

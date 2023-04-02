@@ -1,6 +1,6 @@
 #include "mCellular.h"
 
-#ifdef USE_MODULE_DRIVERS_TINYGSM
+#ifdef USE_MODULE_NETWORK_CELLULAR
 
 
 

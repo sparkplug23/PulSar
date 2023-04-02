@@ -104,6 +104,7 @@ void mInterfaceNetwork::EveryLoop()
 bool mInterfaceNetwork::Connected(uint8_t type)
 {
 
+  #ifdef USE_MODULE_NETWORK_CELLULAR
   if(
     (type == NETWORK_TYPE_CELLULAR) ||
     (type == NETWORK_TYPE_ANY)
@@ -116,6 +117,7 @@ bool mInterfaceNetwork::Connected(uint8_t type)
       }
     }
   }
+  #endif // USE_MODULE_NETWORK_CELLULAR
 
   #ifdef USE_MODULE_NETWORK_WIFI
   if(

@@ -102,6 +102,16 @@
 
 #define D_FLEXI_O2_PHONE_NUMBER_CTR "07515358597"
 
+
+// Set phone number, if you want to test SMS
+// Set a recipient phone number to test sending SMS (it must be in international format including the "+" sign)
+#define SMS_TARGET  "+447515358597"
+
+#define CELLULAR_APN "giffgaff.com"
+#define CELLULAR_GPRS_USERNAME "gg"
+#define CELLULAR_GPRS_PASSWORD "p"
+
+
 #endif // MUSERCONFIG_SECRET_HEADER
 
 

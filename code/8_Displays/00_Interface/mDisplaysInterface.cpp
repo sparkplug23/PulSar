@@ -85,7 +85,7 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
 
 void mDisplaysInterface::Pre_Init(void)
 {
-  InitDriver();
+  InitDriver();                                  //probaby needs moved into Init, "Pre_Init" should be renamed. 
   settings.fEnableSensor = true;
 }
 
