@@ -96,8 +96,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       switch_index = i; // Normally index is synonomous with enum list
     }
 
-
-
     // switch_index = target_tasker ? target_tasker : i;
     // #ifdef ENABLE_ADVANCED_DEBUGGING
     // Serial.printf("switch_index=%d\n\r",switch_index);
@@ -161,7 +159,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
       // DEBUG_LINE_HERE;
       
-          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
+          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d (f%d)"), switch_index, function);  
+          // WDT_Reset();
         // switch(switch_index)
         // {
         //   case EM_MODULE_CORE_HARDWAREPINS_ID:
@@ -172,13 +171,15 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
         //   case EM_MODULE_CORE_TIME_ID:
         //   case EM_MODULE_CORE_RULES_ID:
         //   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
+        // DEBUG_LINE_HERE;
         // if(EM_MODULE_NETWORK_WEBSERVER_ID!=switch_index)
         // {
           pModule[switch_index]->Tasker(function, obj);
         // }else{
         //   DEBUG_LINE_HERE;
-        //   delay(2000);
-        //   DEBUG_LINE_HERE;
+        //   // return;
+        //   // delay(2000);
+        //   // DEBUG_LINE_HERE;
         // }
 
         //   break;
@@ -191,6 +192,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     }
 // DEBUG_PIN6_SET(HIGH);
 
+          // DEBUG_LINE_HERE;
     #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t end_millis = millis(); // Remember start millis
     uint32_t this_millis = end_millis - start_millis; // Get this execution time 
@@ -215,12 +217,16 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       }
     #endif
 
+          // DEBUG_LINE_HERE;
     if(target_tasker!=0){
       #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
       #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
+    
+          // DEBUG_LINE_HERE;
+
     // Special flag that can be set to end interface ie event handled, no need to check others
     if(fExitTaskerWithCompletion){
       fExitTaskerWithCompletion=false;
@@ -232,6 +238,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   
   } //end for
 
+          // DEBUG_LINE_HERE;
   #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
   if(!pCONT_set->flag_boot_complete){
     char buffer_taskname[50];
@@ -256,13 +263,16 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   }//flag_boot_complete
   #endif // ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
 
+          // DEBUG_LINE_HERE;
   if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
   
+          // DEBUG_LINE_HERE;
   DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
 
+          // DEBUG_LINE_HERE;
   return result;
 
 }
@@ -298,12 +308,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID] = new mDevelopmentDebugging();
   #endif
-  // Subsystems
-  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID] = new mSolarLunar();
-  #endif
-  // Network
   
+  // Network  
   #ifdef USE_MODULE_NETWORK_INTERFACE
   pModule[EM_MODULE__NETWORK_INTERFACE__ID] = new mInterfaceNetwork();
   #endif 
@@ -316,8 +322,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_NETWORK_MQTT
   pModule[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
   #endif 
-  #ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
-  pModule[EM_MODULE_NETWORK_MQTT_CELLULAR_ID] = new mMQTT_Cellular();
+  #ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
+  pModule[EM_MODULE_NETWORK_MQTT_MULTIPLE_ID] = new mMQTT();
   #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   pModule[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebServer();
@@ -513,6 +519,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     pModule[EM_MODULE_SENSORS__DS18X20__ID] = new mDB18x20_ESP32();
   #endif  
+  #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+  pModule[EM_MODULE_SENSORS_SOLAR_LUNAR_ID] = new mSolarLunar();
+  #endif
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
     pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID] = new mGPS_Serial();
   #endif
