@@ -44,6 +44,12 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
 
   switch(function){
     /************
+     * COMMANDS SECTION * 
+    *******************/
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
@@ -57,6 +63,7 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Sender();
       break;
     case FUNC_MQTT_CONNECTED:
+    case FUNC_MQTT_STATUS_REFRESH_SEND_ALL:
       MQTTHandler_Set_RefreshAll();
       break;
     #endif //USE_MODULE_NETWORK_MQTT

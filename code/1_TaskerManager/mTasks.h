@@ -126,6 +126,7 @@ enum XsnsFunctions {
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,
   // Mqtt
   FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,
+  FUNC_MQTT_STATUS_REFRESH_SEND_ALL,
   //FUNC_MQTT_HANDLERS_RESET, 
   FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD,
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, 
@@ -141,6 +142,14 @@ enum XsnsFunctions {
    **/
   FUNC_RULES_LOAD_FROM_PROGMEM_ID,
   FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID,
+
+
+  /**
+   * @brief NNew set of alert messages that can be created depending on the type of driver
+   * e.g., via STATUS_LED, STATUS_BEEPER, STATUS_DISPLAY
+   */
+  FUNC_STATUS_ALERT__NETWORK_CONNECTION_LOST,
+
 
 
   // Events (new internal triggers, if something happens trigger another... this will become rules)

@@ -28,6 +28,8 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
+// #include <Averaging_Data.h>
+
 class mCellularBlackBox :
   public mTaskerInterface
 {
@@ -47,6 +49,9 @@ class mCellularBlackBox :
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){      return sizeof(mCellularBlackBox); };
     #endif
+
+    
+    // Averaging_Data<float>* x;
     
 
     struct SETTINGS{

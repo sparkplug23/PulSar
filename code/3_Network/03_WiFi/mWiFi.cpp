@@ -14,36 +14,9 @@ const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_F
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
-//   DEBUG_PRINT_FUNCTION_NAME_TEST;
-  #ifdef DISABLE_NETWORK
-    return 0;
-  #endif
-
-
-      // AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
-// Serial.println("wifi");
-//   DEBUG_PRINT_FUNCTION_NAME_TEST;
   switch(function){
     case FUNC_INIT:
       WifiConnect();
-
-    //   #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-    //   WiFi.mode(WIFI_STA);
-    //   WiFi.begin("Skynet2400", "af4d8bc9ab");
-
-    //   while (WiFi.status() != WL_CONNECTED) {
-    //     delay(500);
-    //     Serial.print(".");
-    //   }
-
-    //   Serial.println("");
-    //   Serial.println("WiFi connected");
-    //   Serial.println("IP address: ");
-    //   Serial.println(WiFi.localIP());
-    //   WifiSetState(0);
-
-    // #endif
-
     break;
     case FUNC_LOOP: 
     
@@ -70,17 +43,15 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
     break;
     case FUNC_EVERY_MINUTE:
-
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-      // AddLog(LOG_LEVEL_TEST, PSTR("IP = %s"), WiFi.localIP().toString().c_str());
-    // #endif// ENABLE_LOG_LEVEL_INFO
     
 
     break;
     case FUNC_EVERY_FIVE_MINUTE:
-      ALOG_INF( PSTR("FUNC_EVERY_FIVE_MINUTE WL_CONNECTED %s"),WiFi.localIP().toString().c_str() );
+      ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
     break;
     case FUNC_WIFI_CONNECTED:
+
+      DEBUG_LINE_HERE;
     
       #ifdef USE_NETWORK_MDNS
         StartMdns();
@@ -156,14 +127,14 @@ void mWiFi::WifiConfig(uint8_t type)
       AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
     #endif// ENABLE_LOG_LEVEL_INFO
     }
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    else if (WIFI_MANAGER == connection.config_type || WIFI_MANAGER_RESET_ONLY == connection.config_type) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-     AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
-    #endif// ENABLE_LOG_LEVEL_INFO
-     pCONT_web->WifiManagerBegin(WIFI_MANAGER_RESET_ONLY == connection.config_type);
-    }
-    #endif  // USE_MODULE_NETWORK_WEBSERVER
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // else if (WIFI_MANAGER == connection.config_type || WIFI_MANAGER_RESET_ONLY == connection.config_type) {
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //  AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
+    // #endif// ENABLE_LOG_LEVEL_INFO
+    //  pCONT_web->WifiManagerBegin(WIFI_MANAGER_RESET_ONLY == connection.config_type);
+    // }
+    // #endif  // USE_MODULE_NETWORK_WEBSERVER
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR("else connection.config_type"));
@@ -988,13 +959,13 @@ void mWiFi::WifiCheck(uint8_t param)
             }
 
             
-            #ifdef USE_MODULE_NETWORK_WEBSERVER
-              if (pCONT_set->Settings.webserver) {
-                pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
-              } else {
-                pCONT_web->StopWebserver();
-              }
-            #endif  // USE_MODULE_NETWORK_WEBSERVER
+            // #ifdef USE_MODULE_NETWORK_WEBSERVER
+            //   if (pCONT_set->Settings.webserver) {
+            //     pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
+            //   } else {
+            //     pCONT_web->StopWebserver();
+            //   }
+            // #endif  // USE_MODULE_NETWORK_WEBSERVER
 
 
           } else {
@@ -1033,10 +1004,8 @@ void mWiFi::WifiConnect(void)
   
   // if (!Settings.flag4.network_wifi) { return; } //probably for when ethernet is used instead
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DEBUG "%s"),__FUNCTION__);
-    #endif // ENABLE_LOG_LEVEL_INFO
+  ALOG_INF(PSTR(D_LOG_DEBUG "%s"),__FUNCTION__);
+  
   WifiSetState(0);
   // WifiSetOutputPower(); //new
   WiFi.persistent(false);     // Solve possible wifi init errors
@@ -1052,21 +1021,6 @@ void mWiFi::WifiConnect(void)
 //   memcpy((void*) &Wifi.bssid, (void*) Settings.wifi_bssid, sizeof(Wifi.bssid));
   
 }
-
-// Enable from 6.0.0a until 6.1.0a - disabled due to possible cause of bad wifi connect on core 2.3.0
-// Re-enabled from 6.3.0.7 with ESP.restart replaced by ESP.reset
-// void mWiFi::WifiDisconnect(bool option = false)//WifiDisconnect(void) // to be replaced with below function
-
-// {
-//   #ifdef ESP8266
-//   // Courtesy of EspEasy
-//   WiFi.persistent(true);      // use SDK storage of SSID/WPA parameters
-//   ETS_UART_INTR_DISABLE();
-//   wifi_station_disconnect();  // this will store empty ssid/wpa into sdk storage
-//   ETS_UART_INTR_ENABLE();
-//   WiFi.persistent(false);     // Do not use SDK storage of SSID/WPA parameters
-//   #endif
-// }
 
 
 void mWiFi::WifiShutdown(bool option)

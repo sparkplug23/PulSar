@@ -1,3 +1,6 @@
+#ifndef DATA_SMOOTHING_H
+#define DATA_SMOOTHING_H
+
 /*-------------------------------------------------------------------------
 mDataBlend provides blend timing support.
 -------------------------------------------------------------------------*/
@@ -299,3 +302,7 @@ private:
 
 
 };
+
+
+#endif
+

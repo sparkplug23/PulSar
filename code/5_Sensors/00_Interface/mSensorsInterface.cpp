@@ -341,6 +341,8 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
   JBI->Start();
 
+    JBI->Add("Redunction", mqtthandler_sensor_ifchanged.flags.FrequencyRedunctionLevel);
+    JBI->Add("Rate", mqtthandler_sensor_ifchanged.tRateSecs);
   // return 0;
   
   float sensor_data = -1;
@@ -856,6 +858,8 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
 
   JBI->Start();
+
+
 
   // return 0;
   

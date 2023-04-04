@@ -259,6 +259,7 @@ pCONT_sup->CmndCrash();
   Serial.setDebugOutput(true);
   #endif 
   
+
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
@@ -405,8 +406,6 @@ pCONT_sup->CmndCrash();
 // #endif
 //   }
 
-
-
 /********************************************************************************************
  ** OsWatch ********************************************************************************
  ********************************************************************************************/
@@ -529,6 +528,8 @@ pCONT_sup->CmndCrash();
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
   // load
+  
+
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
    * */
@@ -537,16 +538,30 @@ pCONT_sup->CmndCrash();
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
+  
+
+  WDT_Reset();
+
+// DEBUG_LINE_HERE_SHORT_PAUSE;
+
   // Init the refresh periods for mqtt
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif
+
+  
+
+
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
   // For debugging, allow method to override init/loaded values
   #ifdef ENABLE_BOOT_OVERRIDE_INIT
   pCONT->Tasker_Interface(FUNC_OVERRIDE_BOOT_INIT);
+  #endif
+
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
   #endif
 
   #ifdef USE_MODULE_CORE_RULES
@@ -565,6 +580,14 @@ pCONT_sup->CmndCrash();
 void LoopTasker()
 {
   
+// while(1)
+// {
+//   Serial.println("test");
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
+  #endif
+// }
+
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif
@@ -619,6 +642,8 @@ void loop(void)
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif
+
+  ESP.wdtFeed();
 
   LoopTasker();
       

@@ -1,4 +1,4 @@
-
+# Averaging_Data
 
 Different smoothing options will be investigated here.
 

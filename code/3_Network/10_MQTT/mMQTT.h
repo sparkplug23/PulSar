@@ -249,7 +249,6 @@ class mMQTT :
     void SetPubSubClient(Client* client);
 
     
-    void parse_JSONCommand();
     void parsesub_MQTTSettingsCommand();
 
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);

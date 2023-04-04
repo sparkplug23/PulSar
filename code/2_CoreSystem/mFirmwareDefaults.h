@@ -52,6 +52,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 
 #ifndef DISABLE_NETWORK
 #define USE_MODULE_NETWORK_MQTT
+// #define USE_MODULE_NETWORK_MQTT_MULTIPLE
 #endif // DISABLE_NETWORK
 
 #ifndef DISABLE_NETWORK_WIFI

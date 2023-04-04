@@ -54,8 +54,8 @@
 #define D_MODULE_CORE_UPDATES_CTR            "Updates"
 #define D_MODULE_CORE_UPDATES_FRIENDLY_CTR   "update"
 
-#define D_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR            "solarlunar"
-#define D_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR   "solarlunar"
+#define D_MODULE_SENSORS_SOLAR_LUNAR_CTR            "solarlunar"
+#define D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR   "solarlunar"
 
 
   

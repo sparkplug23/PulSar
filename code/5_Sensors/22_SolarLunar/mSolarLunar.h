@@ -1,13 +1,13 @@
 #ifndef MSOLARLUNAR_H
-#define MSOLARLUNAR_H 0.21
+#define MSOLARLUNAR_H
 
-#define D_UNIQUE_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID 19
+#define D_UNIQUE_MODULE_SENSORS_SOLAR_LUNAR_ID ((5*1000)+22)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+#ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
 
-#include "3_Network/01_MQTT/mMQTT.h"
+#include "3_Network/10_MQTT/mMQTT.h"
 
 #include <cmath> 
 /* fmod example */
@@ -26,8 +26,8 @@ class mSolarLunar :
   
   private:
   /* data */
-public:
-  mSolarLunar(/* args */){};
+  public:
+    mSolarLunar(/* args */){};
 
   
     void Init(void);
@@ -35,16 +35,13 @@ public:
     
     int8_t Tasker(uint8_t function, JsonParserObject obj);
     
-    static const char* PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR;
-    static const char* PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID; }
-
+    static const char* PM_MODULE_SENSORS_SOLAR_LUNAR_CTR;
+    static const char* PM_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SOLAR_LUNAR_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SOLAR_LUNAR_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSolarLunar);
-    };
+    uint16_t GetClassSize(){      return sizeof(mSolarLunar);    };
     #endif
 
     
@@ -93,22 +90,11 @@ public:
     float elevation_adjusted_for_debugging = 0;
 
 
-  // ~mSolarLunar();
+    void SolarAzEl(time_t utc_time_point, double Lat, double Lon, double Alt, double* Az, double* El);
 
-    
-  // double lat = 52.975;
-  // double lon = -6.0494;
-  // double altitude = 0;
-  
-  // double Az = 0.0;
-  // double El = 0.0;
+    double julian_day(time_t utc_time_point);
 
 
-  void SolarAzEl(time_t utc_time_point, double Lat, double Lon, double Alt, double* Az, double* El);
-
-  double julian_day(time_t utc_time_point);
-
-    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return 1;
@@ -121,7 +107,7 @@ public:
       value->data_f.push_back(solar_position.elevation);
       value->sensor_id = index;
     };
-    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    
 
 
   
@@ -152,15 +138,7 @@ public:
 
 };
 
-// mSolarLunar::mSolarLunar(/* args */)
-// {
-// }
-
-// mSolarLunar::~mSolarLunar()
-// {
-// }
-
-#endif // USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+#endif // USE_MODULE_SENSORS_SOLAR_LUNAR
 
 #endif // HEADER GUARD
 

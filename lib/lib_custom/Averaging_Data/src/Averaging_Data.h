@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DATA_SMOOTHING_H
+#define DATA_SMOOTHING_H
 
 /**
  * Helper class that stores data, returning the mean value.
@@ -18,7 +19,7 @@
  * */
 
 template<typename TYPE>
-class AVERAGING_DATA{
+class Averaging_Data{
   public:
 
     uint16_t window_size = 1;
@@ -41,9 +42,9 @@ class AVERAGING_DATA{
 
     std::vector<float> data_v;
 
-    AVERAGING_DATA(){};
+    Averaging_Data(){};
 
-    AVERAGING_DATA(uint16_t _window_size){
+    Averaging_Data(uint16_t _window_size){
       window_size = _window_size;
       // bool result = allocateData(_window_size);
       limit.enabled = false;
@@ -63,7 +64,7 @@ class AVERAGING_DATA{
 
     };
 
-    ~AVERAGING_DATA(){
+    ~Averaging_Data(){
       // deallocateData();
       data_v.clear();
     }
@@ -231,4 +232,7 @@ private:
     uint16_t _dataLen = 0;
 
 };
+
+
+#endif
 

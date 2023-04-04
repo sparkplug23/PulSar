@@ -1,5 +1,6 @@
+#ifndef DATA_SMOOTHING_H
+#define DATA_SMOOTHING_H
 
-#pragma once
 
 #include<limits>
 
@@ -72,3 +73,7 @@ class Decounter{
     }
 
 };
+
+
+#endif
+

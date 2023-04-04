@@ -18,7 +18,9 @@
  * */
 // #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 // #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
-#define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM800L
 
 
 
@@ -130,6 +132,10 @@
 **/
 
 
+// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
+// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+
+
 // #define DEVICE_TESTBED_DS18XX
 // #define DEVICE_TESTBED_RGBCLOCK
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
@@ -146,8 +152,6 @@
 // #define DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC_WITH_WEBUI
 // #define DEVICE_TESTBED_MOTION_CLIMATE_SENSOR
 // #define DEVICE_TESTBED_HVAC_HEAT_ONLY_WITH_ENERGY_SENSOR
-// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
-// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
 // #define DEVICE_TESTBED_WEBUI_FIRMWARE_UPDATE
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS
@@ -1586,6 +1590,9 @@
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
   // #define USE_SSIDS_NONE_DEBUGGING
   // #define DISABLE_DEVFEATURE_NETWORK_WIFI
 
@@ -1602,7 +1609,7 @@
    * @brief WiFi MQTT
    * 
    */
-  #define USE_MODULE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
   // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
@@ -1709,6 +1716,299 @@
 
 
 #endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
+  #define DEVICENAME_CTR          "testbed_sim7000g_v2"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+    // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker02"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM800L
+  #define DEVICENAME_CTR          "testbed_sim800l"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  //   #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
 
 
 
@@ -2234,10 +2534,10 @@
 /**
  * This will become the final version of a panel, but requires animation fixing first
  * */
-#ifdef DEVICE_TESTBED_USING_WEBSERVER_WEBUI_ESP32
-  #define DEVICENAME_CTR            "testbed_nextion_display"
-  #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+  #define DEVICENAME_CTR            "testbed_webui_esp32"
+  #define DEVICENAME_FRIENDLY_CTR   "Testbed webui_esp32"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_NETWORK_WEBSERVER
@@ -2260,13 +2560,21 @@
 /**
  * This will become the final version of a panel, but requires animation fixing first
  * */
-#ifdef DEVICE_TESTBED_USING_WEBSERVER_WEBUI_ESP82
-  #define DEVICENAME_CTR            "testbed_nextion_display"
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
+  #define DEVICENAME_CTR            "testbed_webui_82"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2277,7 +2585,8 @@
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -4364,87 +4673,6 @@
 
 
 
-/**
- * @brief Used to develop the core webui again, no extra functions/buttons, minimal page with console etc
- * 
- */
-#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
-  #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
-  #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  #define DEVICENAME_ROOMHINT_CTR "Testbed"                             // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  // #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 3
-  #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define USE_DEFAULT_FIRMWARE_SENSORS
-
-  // Step 1: Gaining ability to HTTP flash
-
-  // Step 2: Debug screen, really just print json messages from all templates out onto the window so I can view them
-             // LAter, introduce parsing of json for web html, so each key/valye pair becomes a line, and each json level becomes another indent ie "JsonPretty"
-
-  // Step 3: view module template configured, as if I am going to change it (this requires settings saving first)
-
-  // #define DISABLE_SLEEP
-
-  #undef ESP32
-  #define ESP8266
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    // "\"" D_JSON_GPIOC "\":{"
-    // #ifdef ESP8266 
-    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #else
-    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #endif
-    // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-#endif
-
-
-
-#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
-  #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
-  #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  #define DISABLE_SLEEP
-
-  // #define ESP32
-  // #undef ESP8266
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    // "\"" D_JSON_GPIOC "\":{"
-    // #ifdef ESP8266 
-    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #else
-    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #endif
-    // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-#endif
 
 
 #ifdef DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
@@ -11959,263 +12187,6 @@
 #endif
 
 
-#ifdef DEVICE_RGBESP32_1_TESTER
-  #define DEVICENAME_CTR          "rgbesp32_1_tester"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Fire Place 32"
-
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  // #define DISABLE_WEBSERVER 
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  
-  // #define DISABLE_NETWORK
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING2
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  #define STRIP_SIZE_MAX 50//100//256
-  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      // "\"" D_JSON_TIME_MS "\":300,"
-      // "\"" D_JSON_RATE_MS "\":100,"
-      "\"" D_JSON_TIME_MS "\":4000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
-      // "\"" D_JSON_FUNCTION "\":"  "1"
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    // "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-    // "\"Brightness\":1"
-
-    
-
-    // command to enable random brightness from palette on generation
-    // command to set the max and min of those
-    // disable by defaultThanks
-  "}";
-
-#endif
-
-#ifdef DEVICE_RGBGAZEBO_ROOF
-  #define DEVICENAME_CTR          "rgbgazeboroof"
-  #define DEVICENAME_FRIENDLY_CTR "rgbgazeboroof"
-
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  // #define DISABLE_WEBSERVER 
-
-  #define ESP32
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  
-  // #define DISABLE_NETWORK
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING2
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  // #define STRIP_SIZE_MAX 50//100//256
-  // // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   #ifdef STRIP_SIZE_MAX
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   #else
-  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
-  //   #endif //STRIP_SIZE_MAX
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     // "\"" D_JSON_TIME_MS "\":300,"
-  //     // "\"" D_JSON_RATE_MS "\":100,"
-  //     "\"" D_JSON_TIME_MS "\":4000,"
-  //     "\"" D_JSON_RATE_MS "\":1000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-  //   "},"
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
-  //     // "\"" D_JSON_FUNCTION "\":"  "1"
-  //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-  //   "},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-  //   // "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-  //   // "\"Brightness\":1"
-
-    
-
-  //   // command to enable random brightness from palette on generation
-  //   // command to set the max and min of those
-  //   // disable by defaultThanks
-  // "}";
-
-
-  #define STRIP_SIZE_MAX 100
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":2000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":66,"
-    "\"" D_JSON_BRIGHTNESS_RGB_255 "\":255"
-  "}";
-
-
-#endif
-
-
-
-#ifdef DEVICE_RGBMICRO4 //gazebo
-  #define DEVICENAME_CTR          "rgbmicro4"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Micro LED Lights 4"
-
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  #define DISABLE_WEBSERVER
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  #define STRIP_SIZE_MAX 256
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":10"
-  "}";
-
-#endif
-
 
 #ifdef DEVICE_ENSUITEFAN_SENSOR
   #define DEVICENAME_CTR          "ensuitefan_sensor"
@@ -12331,149 +12302,6 @@
 
 #endif
 
-
-//rgbmicro2/set/light///Scene
-//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
-#ifdef DEVICE_RGBOUTSIDETREE_TESTER
-  #define DEVICENAME_CTR          "rgboutsidetree_tester"
-  #define DEVICENAME_FRIENDLY_CTR "Outside Tree Tester"
-
-// #define ENABLE_BUG_TRACING
-// #define ENABLE_DEVFEATURE_FLICKER_TESTING
-// #define ENABLE_DEVFEATURE_FLICKERING_TEST2
-// #define ENABLE_DEVFEATURE_FLICKERING_TEST3
-#define ENABLE_DEVFEATURE_FLICKERING_TEST5
-
-
-/*
-
-
-  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-
-  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
-
-  */
-
-#define USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
-DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
-{  // trans method, flasher, colours,   rate/time, mutlipler
-  "Static/InOrder, SlowGlow, Few Colour, %d/%d, Single" "|" // 1
-  "Medium/Random, SlowGlow, Few Colour, %d/%d, Single" "|" // 2
-  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Single" "|" // 3
-  "Slow/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 4
-  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 5
-  "Static/InOrder, SlowGlow, Few Colour 9, %d/%d, Rows" "|" // 6
-  "Rotate/InOrder, Sequential, Many Colour 10, %d/%d, Rows" "|" // 7
-  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Rows" "|" // 8
-  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Single" "|" // 9
-  "Fast/InOrder, TwinkleColour, Many Colour 10, %d/%d, Single" "|" // 10
-  "Slow/Random, SlowGlow, Partial Colours 5, %d/%d, Single" "|" // 11
-};
-
-
-
-#define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-#define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
-
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
-  // #define ENABLE_BUG_TRACING
-  #define DEBUG_PRINT_FUNCTION_NAME
-
-
-  //#define ENABLE_LOG_FILTERING_TEST_ONLY
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-  #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
-  
-  #define ENABLE_PIXEL_FUNCTION_MIXER
-  
-
-  #define STRIP_SIZE_MAX 1000// 750   *15 //changing gazebo to be 12v
-
-  #define DISABLE_WEBSERVER
-  #define DISABLE_NETWORK
-  // #define DISABLE_FOR_FAULTY_ESP32_FLICKERING
-
-
-  // Memory reduction techniques
-  // #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 10 
-  // #define WEB_LOG_SIZE 1
-  // #define LOG_BUFFER_SIZE 500
-
-  // #define DISABLE_SLEEP
-
-  // #define USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
-
-  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES STRIP_SIZE_MAX
-  //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
-  //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-
-
-  #define USE_INTERFACE_NEW
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-
-  #define DISBALE_TEST_SECTION
-
-  // #define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
-  // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
-  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE)   
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
-    // "\"" D_JSON_BRIGHTNESS       "\":0,"
-    // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
-
-    // new commands I want to run during boot
-
-    "\"AnimationMode\":\"Flasher\","
-    // "\"Flasher\":{"
-    //   "\"Function\":11,"
-    //   "\"AgedColouring\":0"
-    // "},"
-    "\"Mixer\":{"
-      "\"Enabled\":1,"
-      // "\"" D_JSON_RUNNING_ID "\":7,"
-      "\"" D_JSON_TIME_SCALER_AS_PERCENTAGE "\":10"
-    "},"
-    "\"PixelGrouping\":{"
-      // "\"Enabled\":\"Off\","
-      "\"Mode\":3"
-    "},"
-    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-
-  "}";
-
-#endif
 
 
 #ifdef DEVICE_RGBDININGROOMTREE 

@@ -26,7 +26,7 @@
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
 // Optional user configs, which override defaults
 
-#include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
+// #include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
 
 #ifndef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
@@ -47,7 +47,7 @@
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
 #include "2_CoreSystem/09_Events/mEvents.h"
 
-#include "2c_Internal_IsolatedNoTaskerSystems/Decounter/decounter.h"
+#include <DeCounter.h>
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
@@ -182,10 +182,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
     EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID,
   #endif 
-  // Additional Internal Subsytems
-  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-    EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID,
-  #endif 
   // Network
   #ifdef USE_MODULE_NETWORK_INTERFACE
     EM_MODULE__NETWORK_INTERFACE__ID,
@@ -202,8 +198,8 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
-  #ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
-    EM_MODULE_NETWORK_MQTT_CELLULAR_ID,
+  #ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
+    EM_MODULE_NETWORK_MQTT_MULTIPLE_ID,
   #endif 
   // #ifdef USE_MODULE_DRIVERS_TINYGSM
   //   EM_MODULE_DRIVERS_TINYGSM_ID,
@@ -401,6 +397,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     EM_MODULE_SENSORS__DS18X20__ID,
   #endif  
+  #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+    EM_MODULE_SENSORS_SOLAR_LUNAR_ID,
+  #endif 
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   EM_MODULE__SENSORS_GPS_SERIAL__ID,
   #endif
@@ -489,9 +488,6 @@ enum MODULE_IDS{
     EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID,
   #endif
 
-
-  
-
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
   #endif
@@ -537,13 +533,6 @@ enum MODULE_IDS{
   #define   pCONT_mDevelopmentDebugging             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
 #endif 
 
-// Subsystems
-#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  #include "2b_Internal_TaskerSystems/01_SolarLunar/mSolarLunar.h"
-  #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
-#endif
-
-
 // Network
 #ifdef USE_MODULE_NETWORK_INTERFACE
   #include "3_Network/00_Interface/mInterface.h"
@@ -554,23 +543,21 @@ enum MODULE_IDS{
   #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include "3_Network/02_WebServer/mWebServer.h"
+  #include "3_Network/20_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
 #ifdef USE_MODULE_NETWORK_WIFI
   #include "3_Network/03_WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
-  #include "3_Network/05_MQTT_Cellular/mMQTT_Cellular.h"
-  #define pCONT_mqtt_cellular                                static_cast<mMQTT_Cellular*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_CELLULAR_ID])
+#ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
+  #include "3_Network/11_MQTT_Multiple/mMQTT.h"
+  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_MULTIPLE_ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_CELLULAR
 #include "3_Network/05_Cellular/mCellular.h"
   #define pCONT_cell                               static_cast<mCellular*>(pCONT->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
 #endif
-
-
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
@@ -847,6 +834,10 @@ enum MODULE_IDS{
   #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
 #endif
 
+#ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+  #include "5_Sensors/22_SolarLunar/mSolarLunar.h"
+  #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SENSORS_SOLAR_LUNAR_ID])
+#endif
 
 
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
@@ -1015,8 +1006,6 @@ class mTaskerManager{
       }
       return instance;
     };
-
-    // mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
 
     int16_t GetModuleIndexbyFriendlyName(const char* c);
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);

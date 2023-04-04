@@ -70,6 +70,7 @@ int8_t mCellularBlackBox::Tasker(uint8_t function, JsonParserObject obj){
       MQTTHandler_Set_DefaultPeriodRate();
     break; 
     case FUNC_MQTT_CONNECTED:
+    case FUNC_MQTT_STATUS_REFRESH_SEND_ALL:
       MQTTHandler_Set_RefreshAll();
     break;
     #endif  
@@ -260,8 +261,8 @@ void mCellularBlackBox::MQTTHandler_Init()
 
   ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;

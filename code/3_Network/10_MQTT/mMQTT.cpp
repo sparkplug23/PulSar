@@ -71,7 +71,7 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
         if(pCONT_interface_network->Connected())
         {
           AddLog(LOG_LEVEL_TEST, PSTR("IS Connected"));
-           CheckConnection();
+          CheckConnection();
         }else{
           AddLog(LOG_LEVEL_TEST, PSTR("NOT Connected"));
 
@@ -98,6 +98,8 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
   }//enabled mqtt_enabled
 
 } // END function
+
+
 
 
 void mMQTT::Load_New_Subscriptions_From_Function_Template()
@@ -268,6 +270,11 @@ void mMQTT::parse_JSONCommand(JsonParserObject obj){
 
   // }
 
+  if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
+  {
+    
+    pCONT->Tasker_Interface(FUNC_MQTT_STATUS_REFRESH_SEND_ALL);
+  }
 
 
 
@@ -858,6 +865,10 @@ void mMQTT::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 
 //,(animation_override.fRefreshAllPixels?"Set":"UNSET")
 void mMQTT::parsesub_MQTTSettingsCommand(){
+
+
+    
+
 
   // int8_t tmp_id = 0;
 

@@ -56,35 +56,29 @@ class mSensorsInterface :
 	  mSensorsInterface(){};
     void Pre_Init(void);
     void Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void EveryLoop();
+
     
     static const char* PM_MODULE_SENSORS_INTERFACE_CTR;
     static const char* PM_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_INTERFACE_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_INTERFACE_ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSensorsInterface);
-    };
+    uint16_t GetClassSize(){      return sizeof(mSensorsInterface);    };
     #endif
+
     void parse_JSONCommand(JsonParserObject obj);
 
-    struct SETTINGS{
+    struct SETTINGS
+    {
       uint8_t fEnableSensor = false;
-      // move this into settings so all devices can share it
       uint8_t tTicker_Splash_Sensors_To_Logs = 30;
       float sealevel_pressure; 
-    }settings;
+    }
+    settings;
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void EveryLoop();
-
-    /**
-     * @brief Should I create a copy in here of all sensor types ? 
-    *   At least the internal ones only, and IMU. Thus, a single struct can be used to know everything about the esp32 (IMU, Climate, GPS)
-     * 
-     */
 
     void MQTT_Report_Event_Button();
 
@@ -117,20 +111,10 @@ class mSensorsInterface :
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    //No extra handlers example
-    // const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    //with extra handlers exampleenum
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
       MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
-    
-    // uint8_t list_ids[4] = {
-    //   MQTT_HANDLER_SETTINGS_ID, 
-    //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
-    //   MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID
-    // };
     
     struct handler<mSensorsInterface>* mqtthandler_list[5] = {
       &mqtthandler_settings_teleperiod,
@@ -140,7 +124,6 @@ class mSensorsInterface :
       &mqtthandler_motion_event_ifchanged
     };
     #endif // USE_MODULE_NETWORK_MQTT
-
 
 };
 

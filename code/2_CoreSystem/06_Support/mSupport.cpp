@@ -8,40 +8,40 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
  * Watchdog related
 \*********************************************************************************************/
 #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-#ifdef ESP8266
-  void WDT_Init(){ ESP.wdtEnable(0);}
-  void WDT_Reset(){ESP.wdtFeed();}
-#endif // ESP8266
-#ifdef ESP32
-  #include "esp_system.h"
-  #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
-  #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
-  #endif
-  const int wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
-  hw_timer_t *timerwdt = NULL;
-  #ifndef ARDUINO_ISR_ATTR
-  #define ARDUINO_ISR_ATTR IRAM_ATTR 
-  #endif
-  void ARDUINO_ISR_ATTR resetModule() {
-    ets_printf("reboot\n");
-    Serial.println("WDT REBOOTING!!"); Serial.flush();
-    esp_restart();
-  }
-  // hw_timer_t *timerwdt = NULL;
-  // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
-  void WDT_Init(){
-    timerwdt = timerBegin(0, 80, true);                  //timer 0, div 80
-    timerAttachInterrupt(timerwdt, &resetModule, true);  //attach callback
-    timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  //set time in us
-    timerAlarmEnable(timerwdt);                          //enable interrupt
-  }
-  void WDT_Reset(){
-  // DEBUG_LINE_HERE;
-  if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
-    timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
-    // Serial.println("WDT_Reset");
-  }
-#endif // ESP32
+  #ifdef ESP8266
+    void WDT_Init(){ ESP.wdtEnable(0);}
+    void WDT_Reset(){ESP.wdtFeed();}
+  #endif // ESP8266
+  #ifdef ESP32
+    #include "esp_system.h"
+    #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
+    #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+    #endif
+    const int wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
+    hw_timer_t *timerwdt = NULL;
+    #ifndef ARDUINO_ISR_ATTR
+    #define ARDUINO_ISR_ATTR IRAM_ATTR 
+    #endif
+    void ARDUINO_ISR_ATTR resetModule() {
+      ets_printf("reboot\n");
+      Serial.println("WDT REBOOTING!!"); Serial.flush();
+      esp_restart();
+    }
+    // hw_timer_t *timerwdt = NULL;
+    // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
+    void WDT_Init(){
+      timerwdt = timerBegin(0, 80, true);                  //timer 0, div 80
+      timerAttachInterrupt(timerwdt, &resetModule, true);  //attach callback
+      timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  //set time in us
+      timerAlarmEnable(timerwdt);                          //enable interrupt
+    }
+    void WDT_Reset(){
+    // DEBUG_LINE_HERE;
+    if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
+      timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
+      // Serial.println("WDT_Reset");
+    }
+  #endif // ESP32
 #else
 void WDT_Init(){};
 void WDT_Reset(){};

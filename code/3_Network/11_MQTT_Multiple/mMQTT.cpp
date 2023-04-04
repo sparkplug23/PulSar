@@ -1,19 +1,26 @@
-#include "mMQTT_Cellular.h"
+#include "mMQTT.h"
 
-#ifdef USE_MODULE_NETWORK_MQTT_CELLULAR
-
-
-const char* mMQTT_Cellular::PM_MODULE_NETWORK_MQTT_CELLULAR_CTR = D_MODULE_NETWORK_MQTT_CELLULAR_CTR;
-const char* mMQTT_Cellular::PM_MODULE_NETWORK_MQTT_FRIENDLY_CELLULAR_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CELLULAR_CTR;
+#ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
 
 
-int8_t mMQTT_Cellular::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
+const char* mMQTT::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
+const char* mMQTT::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
+
+
+int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
 
   // DEBUG_PRINT_FUNCTION_NAME_TEST;
 
   // #ifdef DISABLE_NETWORK
-    // return 0;
+  //   return 0;
   // #endif
+
+  // if(pubsub==nullptr)
+  // {
+  //   ALOG_INF(PSTR("PUBSUB\t\t\t ERROR"));
+  // }else{    
+  //   ALOG_INF(PSTR("PUBSUB\t\t\t safe"));
+  // }
 
   switch(function){
     /************
@@ -40,7 +47,10 @@ int8_t mMQTT_Cellular::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRI
       break;
       case FUNC_EVERY_50_MSECOND:
         if(Mqtt.connected){
-          pubsub->loop();
+          if(pubsub)
+          {
+            pubsub->loop();
+          }
         }
       break;
       case FUNC_EVERY_SECOND:{
@@ -56,28 +66,17 @@ int8_t mMQTT_Cellular::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRI
   // sprintf_P(pCONT_set->Settings.mqtt.client_name,PSTR("%s-%s"),pCONT_set->Settings.system_name.device,WiFi.macAddress().c_str());
 
 
-
+//needs changed to if "network" (wifi/ethernet/gsm)
         // if(pCONT_wif->WifiCheckIpConnected()){
-
-        if(pCONT_gsm->modem)
+        if(pCONT_interface_network->Connected())
         {
+          AddLog(LOG_LEVEL_TEST, PSTR("IS Connected"));
+           CheckConnection();
+        }else{
+          AddLog(LOG_LEVEL_TEST, PSTR("NOT Connected"));
 
-          if(pCONT_gsm-> gprs.enabled==false)
-          { 
-            AddLog(LOG_LEVEL_TEST, PSTR("gprs.enabled FALSE")); 
-
-            return 1;  
-          }
-
-          if(pCONT_gsm->modem->isNetworkConnected())
-          {
-
-            AddLog(LOG_LEVEL_TEST, PSTR("mMQTT_Cellular pCONT_gsm->modem->isNetworkConnected() IS connceted"));
-            CheckConnection();
-          }else{
-            AddLog(LOG_LEVEL_TEST, PSTR("mMQTT_Cellular pCONT_gsm->modem->isNetworkConnected() NOT connceted"));
-          }
         }
+
       }
       break;
       case FUNC_EVERY_MINUTE:
@@ -101,7 +100,7 @@ int8_t mMQTT_Cellular::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRI
 } // END function
 
 
-void mMQTT_Cellular::Load_New_Subscriptions_From_Function_Template()
+void mMQTT::Load_New_Subscriptions_From_Function_Template()
 {
 
   #ifdef USE_FUNCTION_TEMPLATE  
@@ -144,14 +143,14 @@ void mMQTT_Cellular::Load_New_Subscriptions_From_Function_Template()
   //   //   relay_id  = jtok.getInt();
   //   // }
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand MQTTSend"));
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend"));
   //   #endif //
   //   JsonParserToken jtok_topic = jtok.getObject()["Topic"];
   //   JsonParserToken jtok_payload = jtok.getObject()["Payload"];
 
   //   #ifdef ENABLE_LOG_LEVEL_INFO
-  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
-  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
   //   #endif // 
 
   //   char topic_ctr[100] = {0};
@@ -192,7 +191,7 @@ void mMQTT_Cellular::Load_New_Subscriptions_From_Function_Template()
 }
 
 
-void mMQTT_Cellular::parse_JSONCommand(JsonParserObject obj){
+void mMQTT::parse_JSONCommand(JsonParserObject obj){
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -211,14 +210,14 @@ void mMQTT_Cellular::parse_JSONCommand(JsonParserObject obj){
     //   relay_id  = jtok.getInt();
     // }
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand MQTTSend"));
+    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend"));
     #endif //
     JsonParserToken jtok_topic = jtok.getObject()["Topic"];
     JsonParserToken jtok_payload = jtok.getObject()["Payload"];
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
-    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+    AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
     #endif // 
 
     char topic_ctr[100] = {0};
@@ -257,7 +256,7 @@ void mMQTT_Cellular::parse_JSONCommand(JsonParserObject obj){
   }
   // else{
 
-  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT_Cellular::parse_JSONCommand !MQTTSend"));
+  //   AddLog(LOG_LEVEL_TEST,PSTR("mMQTT::parse_JSONCommand !MQTTSend"));
   
   // }
 
@@ -288,7 +287,7 @@ void mMQTT_Cellular::parse_JSONCommand(JsonParserObject obj){
 
 
 
-void mMQTT_Cellular::init(void){
+void mMQTT::init(void){
 
   memset(pCONT_set->Settings.mqtt.client_name,0,sizeof(pCONT_set->Settings.mqtt.client_name));
   snprintf_P(pCONT_set->Settings.mqtt.client_name,sizeof(pCONT_set->Settings.mqtt.client_name)-1,PSTR("%s-%s"),pCONT_set->Settings.system_name.device,WiFi.macAddress().c_str());
@@ -313,13 +312,16 @@ void mMQTT_Cellular::init(void){
   snprintf_P(pCONT_set->Settings.mqtt.lwt_topic,sizeof(pCONT_set->Settings.mqtt.lwt_topic)-1,PSTR("%s/status/LWT"),pCONT_set->Settings.system_name.device);
 
    
+   
+  // bool init_success = SetPubSubClient_Cellular(new TinyGsmClient(modem));
+   
 }
 
 /**
  * @brief Connected
  * 
  */
-void mMQTT_Cellular::Send_LWT_Online()
+void mMQTT::Send_LWT_Online()
 {
 
   pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true); // onconnect message
@@ -329,57 +331,106 @@ void mMQTT_Cellular::Send_LWT_Online()
 
 
 
-void mMQTT_Cellular::CheckConnection()
+void mMQTT::CheckConnection()
 { DEBUG_PRINT_FUNCTION_NAME;
 
-  // if (pCONT_set->Settings.flag_system.mqtt_enabled) {  // SetOption3 - Enable MQTT
-    if (!MqttIsConnected()) {
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("========================================!MqttIsConnected"));
-    #endif //  ENABLE_LOG_LEVEL_INFO
+  if(pubsub==nullptr)
+  {// tmp fix, currently showing nullptr every other Tasker
+    return;
+  }
 
 
-      // pCONT_set->global_state.mqtt_down = 1;
-      if (!Mqtt.retry_counter) 
+  if (pCONT_set->Settings.flag_system.mqtt_enabled) 
+  {
+    
+    if (MqttIsConnected()==false) 
+    {
+      // ALOG_INF(PSTR("MqttIsConnected == FALSE"));
+
+      pCONT_set->global_state.mqtt_down = 1;
+
+      if (Mqtt.retry_counter==0) 
       {
+        ALOG_INF(PSTR("Mqtt.retry_counter==0"));
         MqttReconnect();
-      } else {
+      } 
+      else 
+      {
         Mqtt.retry_counter--;
-        ALOG_INF( PSTR("Mqtt.retry_counter=%d") ,Mqtt.retry_counter );
+        ALOG_INF( PSTR("Mqtt.retry_counter=%d"), Mqtt.retry_counter );
       }
 
 
-
-    } else {
+    } 
+    else 
+    {
+      // ALOG_INF(PSTR("MqttIsConnected == TRUE"));
       pCONT_set->global_state.mqtt_down = 0;
+      Mqtt.downtime_counter = 0;
     }
-  // } else {
-  //   pCONT_set->global_state.mqtt_down = 0;
-  //   if (Mqtt.initial_connection_state) {
-  //     MqttReconnect();
-  //   }
-  // } // mqtt_enabled
+
+  } 
+  else 
+  {
+      
+    // AddLog(LOG_LEVEL_TEST, PSTR("========================================= NOT pCONT_set->Settings.flag_system.mqtt_enabled"));
+    pCONT_set->global_state.mqtt_down = 0;
+    if (Mqtt.initial_connection_state) 
+    {
+      MqttReconnect();
+    }
+
+  } // mqtt_enabled
+
+  /**
+   * @brief Restart connection e.g. client changed
+   * 
+   */
+  if(connection_maintainer.flag_start_reconnect)
+  {
+    MqttReconnect();
+  }
 
 }
 
 
 
-bool mMQTT_Cellular::MqttIsConnected(){
+bool mMQTT::MqttIsConnected(){
   DEBUG_PRINT_FUNCTION_NAME;
 
   // if pubsub is null, then its also not been set
-  if(pubsub == nullptr){
-    return false;
-  }
-  return pubsub->connected();
+  // if(pubsub == nullptr){
+  //   DEBUG_LINE_HERE;
+  //   return false;
+  // }
+  
+  // if(pubsub==nullptr)
+  // {
+  //   ALOG_ERR(PSTR("Wifi or GSM must set client first depending on network connection type"));
+  //   return false;
+  // }
+
+  /**
+   * @brief 
+   * 
+   * 
+   * Cellular this only returns if data is available, not actual connection status?
+   * 
+   */
+  //   DEBUG_LINE_HERE;
+
+  // bool result = pubsub->connected(); 
+
+  // ALOG_INF(PSTR("result = %d"), result);
+
+  return pubsub->connected(); ;
 
 }
 
-void mMQTT_Cellular::MqttConnected(void)
+void mMQTT::MqttConnected(void)
 {
   
-    // AddLog(LOG_LEVEL_INFO, PSTR("mMQTT_Cellular::MqttConnected %s %d"), D_CONNECTED, Mqtt.connected);
+    // AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttConnected %s %d"), D_CONNECTED, Mqtt.connected);
     Mqtt.connected = true;
     
     // AddLog(LOG_LEVEL_WARN, S_LOG_MQTT, PSTR("Mqtt.retry_counter = 0; disabled"));
@@ -421,7 +472,7 @@ void mMQTT_Cellular::MqttConnected(void)
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connection SUCCESS!\""));
     #endif// ENABLE_LOG_LEVEL_INFO
     
-    // if succesful, clear flag_start_reconnect
+    // if succesful, clear flag
     connection_maintainer.flag_start_reconnect = false;
 
 
@@ -522,7 +573,7 @@ void mMQTT_Cellular::MqttConnected(void)
 //   }
 }
 
-void mMQTT_Cellular::MqttDisconnected(int state)
+void mMQTT::MqttDisconnected(int state)
 {
   DEBUG_PRINT_FUNCTION_NAME;
   
@@ -539,14 +590,22 @@ void mMQTT_Cellular::MqttDisconnected(int state)
 
 }
 
+/**
+ * @brief 
+ * 
+ * @param client_in 
+ */
+void mMQTT::SetPubSubClient(Client* client_in)
+{
+  pubsub = new mPubSubClient(*client_in);
+  connection_maintainer.flag_start_reconnect = true;
+}
 
 
-
-
-
-void mMQTT_Cellular::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
+void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
-  DEBUG_LINE;
+  ALOG_HGL(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION));
+  
  
   // Mqtt.allowed = Settings.flag.mqtt_enabled;  // SetOption3 - Enable MQTT
   // if (Mqtt.allowed) {
@@ -559,10 +618,7 @@ void mMQTT_Cellular::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   //   return;
   // }
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION));
-  #endif// ENABLE_LOG_LEVEL_INFO
-
+  
   DEBUG_LINE;
   Mqtt.connected = false;
   Mqtt.retry_counter = pCONT_set->Settings.mqtt_retry;
@@ -586,21 +642,14 @@ void mMQTT_Cellular::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   if(pubsub!=nullptr){
     if (pubsub->connected()) { pubsub->disconnect(); }
   }  
-  
-    DEBUG_LINE_HERE;
-  // Create again if needed
-  if(pubsub == nullptr){
-    // if(client != nullptr){
-    //   client->stop(); // force off before starting again
-    //   delay(20);      // Allow wifi to clear
-    // }
-    // if(pCONT_gsm->modem == nullptr)
-    // TinyGsm* modem2; //(Serial);// = pCONT_gsm->modem;
-    client = new TinyGsmClient(*pCONT_gsm->modem); // Wifi Client reconnect issue 4497 ie memory leak on each attempt without this (https://github.com/esp8266/Arduino/issues/4497)
-    pubsub = new mPubSubClient(*client);
 
-    DEBUG_LINE_HERE;
+  if(pubsub==nullptr)
+  {
+    ALOG_ERR(PSTR("Wifi or GSM must set client first depending on network connection type"));
+    return ;
   }
+  
+  DEBUG_LINE;
 
   if (2 == Mqtt.initial_connection_state) {  // Executed once just after power on and wifi is connected
     Mqtt.initial_connection_state = 1;
@@ -615,12 +664,10 @@ void mMQTT_Cellular::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
   // pubsub->setServer(SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
   //pubsub->setServer(mdns_mqtt_hostname_ctr, 1883);
-  //Serial.print("mMQTT_Cellular:setServer> \""); Serial.print(mdns_mqtt_hostname_ctr); Serial.println("\"");
+  //Serial.print("mMQTT:setServer> \""); Serial.print(mdns_mqtt_hostname_ctr); Serial.println("\"");
   // IPAddress mqqtserver(192,168,1,65); //desktop
   // IPAddress mqqtserver(192,168,1,65); //desktop
 
-
-  IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
     
   /**
    * using mdns instead of just IP
@@ -644,26 +691,20 @@ void mMQTT_Cellular::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   #else
 
 
-  // pubsub->setServer(mqqtserver, 1883);
+    #ifdef ENABLE_DEVFEATURE_DDNS_MQTT_TEST
 
+    pubsub->setServer("sparkequinox.ddns.net", 51883);
 
-  // #ifdef ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #else
 
-  pubsub->setServer("sparkequinox.ddns.net", 51883);
-    DEBUG_LINE_HERE;
+    IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
+    pubsub->setServer(mqqtserver, 1883);
 
-  // #else
-
-  // pubsub->setServer(mqqtserver, 1883);
-
-  // #endif // ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #endif // ENABLE_DEVFEATURE_DDNS_MQTT_TEST
 
 
   #endif
     
-    // 192,168,1,65); //desktop
-
-
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
@@ -679,34 +720,32 @@ void mMQTT_Cellular::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   AddLog(loglevel, PSTR("lwt_message_ondisconnect_ctr = %s"),lwt_message_ondisconnect_ctr);
   #endif// ENABLE_LOG_LEVEL_INFO
 
-    DEBUG_LINE_HERE;
   if(pubsub->connect(pCONT_set->Settings.mqtt.client_name,pCONT_set->Settings.mqtt.lwt_topic,WILLQOS_CTR,WILLRETAIN_CTR,lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
     
-    DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT_Cellular::MqttReconnect Connected"));
+    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Connected"));
     #endif // ENABLE_LOG_LEVEL_INFO
     MqttConnected();
+    
+    connection_maintainer.flag_start_reconnect = false;
 
-    DEBUG_LINE_HERE;
+    
+        Mqtt.downtime_counter = 0; //reset
+
   }
   else
   {
-    DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT_Cellular::MqttReconnect Failed %d"),pubsub->state());
+    AddLog(LOG_LEVEL_INFO, PSTR("mMQTT::MqttReconnect Failed %d"),pubsub->state());
     #endif // 
     MqttDisconnected(pubsub->state());  // status codes are documented here http://pubsubclient.knolleary.net/api.html#state
-    
-    DEBUG_LINE_HERE;
   }
 
-    DEBUG_LINE_HERE;
 } // END function
 
 
 
-void mMQTT_Cellular::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
+void mMQTT::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
 
   // #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog(LOG_LEVEL_TEST, PSTR("MqttDataHandler"));
@@ -750,24 +789,24 @@ void mMQTT_Cellular::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
 }
 
 
-void mMQTT_Cellular::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
+void mMQTT::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
 
 
   // Send mqtt from all modules
-  // pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
+  pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
 
 }
 
 
 
-void mMQTT_Cellular::setprefixtopic(const char* _prefixtopic){
+void mMQTT::setprefixtopic(const char* _prefixtopic){
   memset(pCONT_set->Settings.mqtt.prefixtopic,0,sizeof(pCONT_set->Settings.mqtt.prefixtopic));
   strncpy(pCONT_set->Settings.mqtt.prefixtopic,_prefixtopic,strlen(_prefixtopic));
 }
 
 
 // Send packet with payload using va_list
-void mMQTT_Cellular::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
+void mMQTT::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 {
 
   va_list arg;
@@ -788,7 +827,7 @@ void mMQTT_Cellular::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 
 //<devicename>/set/<function>/<subfunction>
 //<devicename>/status/<function>/<subfunction>
-// void mMQTT_Cellular::parse_JSONCommand(){
+// void mMQTT::parse_JSONCommand(){
 
 //   // // Check if instruction is for me
 //   // if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/mqtt")>=0){
@@ -818,7 +857,7 @@ void mMQTT_Cellular::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 
 
 //,(animation_override.fRefreshAllPixels?"Set":"UNSET")
-void mMQTT_Cellular::parsesub_MQTTSettingsCommand(){
+void mMQTT::parsesub_MQTTSettingsCommand(){
 
   // int8_t tmp_id = 0;
 
@@ -859,7 +898,7 @@ void mMQTT_Cellular::parsesub_MQTTSettingsCommand(){
 
 
 
-void mMQTT_Cellular::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, const char* postfix_topic_ctr){
+void mMQTT::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t module_id, const char* postfix_topic_ctr){
 
   if(pubsub==nullptr)
   {
@@ -901,7 +940,7 @@ void mMQTT_Cellular::MQTTHandler_Send_Formatted(uint8_t topic_type, uint8_t modu
 
 
 //formatted topic
-void mMQTT_Cellular::publish_ft(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){
+void mMQTT::publish_ft(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){
 
   char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
   
@@ -928,7 +967,7 @@ void mMQTT_Cellular::publish_ft(const char* module_name, uint8_t topic_type_id, 
 }
 
  
-void mMQTT_Cellular::publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){
+void mMQTT::publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){
 
   char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
   char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
@@ -940,8 +979,8 @@ void mMQTT_Cellular::publish_status_module(const char* module_name, const char* 
 }
 
 // My function for adding prefix by device name
-boolean mMQTT_Cellular::ppublish(const char* topic, const char* payload, boolean retained){
-
+boolean mMQTT::ppublish(const char* topic, const char* payload, boolean retained)
+{
 
   if(pubsub == nullptr)
   {
@@ -949,84 +988,35 @@ boolean mMQTT_Cellular::ppublish(const char* topic, const char* payload, boolean
     return false;
   }
 
-  //// AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
-    if (!pubsub->connected()) {
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
-      #endif// ENABLE_LOG_LEVEL_INFO
-      connection_maintainer.flag_start_reconnect = true;
-      return false;
-    }
-
-    // DEBUG_LINE_HERE;
-
-    if(strlen(payload)<1){
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "strlen(payload)<1"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-    }
-
-// Serial.println(WiFi.localIP());
-// Serial.println(static_cast<uint32_t>(WiFi.localIP())); 
-
-    if (!pCONT_wif->WifiCheckIpConnected()) {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early pp"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-        return false;
-    }else{
-        //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "WiFi.status()=%d"),WiFi.status());
-    }
-
-    //if(prefixtopic[0]!=0){}
-//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Exiting early?"));
-//     // delay(2500); ESP.wdtFeed();
-// Serial.print("HERE1");
-// Serial.flush();
-    // delay(2500); ESP.wdtFeed();
-DEBUG_LINE;
-
-if(WiFi.status() != WL_CONNECTED){ 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early"));
-    #endif// ENABLE_LOG_LEVEL_INFO
-  return false;
-}
-
-DEBUG_LINE;
-
-//return 0;//
-
-    char convctr[100]; memset(convctr,0,sizeof(convctr));
-    //Serial.println(pCONT_set->Settings.mqtt.prefixtopic); Serial.flush();
-    // Serial.println(topic); Serial.flush();
-    snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
-    
-    // Serial.println(convctr); Serial.flush();
-DEBUG_LINE;
-//TRACE();
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
-    ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
-    #endif// ENABLE_LOG_LEVEL_INFO
-
-DEBUG_LINE;
-// //TRACE();
-//     #ifdef SERIAL_DEBUG_LOW_LEVEL
-//     if(strstr(payload,"{}")){
-//         ALOG_DBM( PSTR(D_LOG_PUBSUB D_ERROR "> {}"));
-//     }
-//     #endif
-
-DEBUG_LINE;
-if(pubsub!=nullptr){
-  DEBUG_LINE;
-    return pubsub->publish(convctr,(const uint8_t*)payload,strlen(payload),retained);
+  if(!pCONT_interface_network->Connected())
+  {
+    ALOG_ERR(PSTR(D_LOG_PUBSUB "Unable to publish, No Network connection"));
+    return false;
   }
-  DEBUG_LINE;
-  return 0;
-  //TRACE();
+
+  if (!pubsub->connected()) 
+  {    
+    ALOG_ERR(PSTR(D_LOG_PUBSUB "Unable to publish, No Broker connection"));
+    connection_maintainer.flag_start_reconnect = true;
+    return false;
+  }
+
+  if(strlen(payload)<1)
+  {
+    ALOG_ERR(PSTR(D_LOG_PUBSUB "Unable to publish, empty payload"));
+    return false;
+  }
+
+  char convctr[100]; memset(convctr,0,sizeof(convctr));
+  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+  
+  ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_TOPIC " [%s] %d"),convctr,strlen(convctr));
+  ALOG_DBM( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD " [%s] %d"),payload,strlen(payload));
+
+  return pubsub->publish(convctr,(const uint8_t*)payload,strlen(payload),retained);
+
 }
+
 
 /**
  * @brief progmem payload version 
@@ -1037,7 +1027,7 @@ if(pubsub!=nullptr){
  * @return boolean 
  */
 // My function for adding prefix by device name
-boolean mMQTT_Cellular::ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained){
+boolean mMQTT::ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained){
 
   //// AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
     if (!pubsub->connected()) {
@@ -1057,6 +1047,8 @@ boolean mMQTT_Cellular::ppublish_device_name_prefix_P(const char* topic, const c
 // Serial.println(WiFi.localIP());
 // Serial.println(static_cast<uint32_t>(WiFi.localIP())); 
 
+#ifdef USE_MODULE_NETWORK_WIFI
+#ifndef DISABLE_DEVFEATURE_NETWORK_WIFI
     if (!pCONT_wif->WifiCheckIpConnected()) {
     #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early pp"));
@@ -1081,6 +1073,8 @@ if(WiFi.status() != WL_CONNECTED){
   return false;
 }
 
+#endif // DISABLE_DEVFEATURE_NETWORK_WIFI
+#endif // USE_MODULE_NETWORK_WIFI
 DEBUG_LINE;
 
 //return 0;//
@@ -1120,7 +1114,7 @@ if(pubsub!=nullptr){
 }
 
 
-boolean mMQTT_Cellular::psubscribe(const char* topic) {
+boolean mMQTT::psubscribe(const char* topic) {
   char ttopic[70];
   memset(ttopic,0,sizeof(ttopic));
   sprintf(ttopic,PSTR("%s/%s"),pCONT_set->Settings.mqtt.prefixtopic,topic);
@@ -1136,10 +1130,10 @@ boolean mMQTT_Cellular::psubscribe(const char* topic) {
  * 
  * @return const char* 
  */
-const char* mMQTT_Cellular::state_ctr(void)
+const char* mMQTT::state_ctr(void)
 {
 
-  ALOG_ERR( PSTR("mMQTT_Cellular::state_ctr - Not thread safe") );
+  ALOG_ERR( PSTR("mMQTT::state_ctr - Not thread safe") );
 
   DEBUG_PRINT_FUNCTION_NAME;
     switch(pubsub->state()){
@@ -1158,4 +1152,4 @@ const char* mMQTT_Cellular::state_ctr(void)
 
 
 
-#endif // USE_MODULE_NETWORK_MQTT
+#endif // USE_MODULE_NETWORK_MQTT_MULTIPLE
