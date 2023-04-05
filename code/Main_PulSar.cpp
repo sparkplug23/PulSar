@@ -540,7 +540,9 @@ pCONT_sup->CmndCrash();
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
   
 
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
+  #endif
 
 // DEBUG_LINE_HERE_SHORT_PAUSE;
 
@@ -642,8 +644,6 @@ void loop(void)
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif
-
-  ESP.wdtFeed();
 
   LoopTasker();
       
