@@ -116,14 +116,6 @@ void EmergencySerial_SettingsReset(void) {
 void setup(void)
 { 
 
-  // Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
-  // while(1)
-  // { 
-  //   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
-  // }
-
-  // delay(10000);
-
 /********************************************************************************************
  ** Brownout ********************************************************************************
  ********************************************************************************************/
@@ -134,16 +126,16 @@ void setup(void)
   #endif  // DISABLE_ESP32_BROWNOUT
 
   #ifdef CONFIG_IDF_TARGET_ESP32
-    // restore GPIO16/17 if no PSRAM is found
-    // if (!FoundPSRAM()) {
-    //   // test if the CPU is not pico
-    //   uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
-    //   uint32_t pkg_version = chip_ver & 0x7;
-    //   if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
-    //     gpio_reset_pin(GPIO_NUM_16);
-    //     gpio_reset_pin(GPIO_NUM_17);
-    //   }
-    // }
+  // restore GPIO16/17 if no PSRAM is found
+  if (!SupportESP32::FoundPSRAM()) {
+    // test if the CPU is not pico
+    uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
+    uint32_t pkg_version = chip_ver & 0x7;
+    if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
+      gpio_reset_pin(GPIO_NUM_16);
+      gpio_reset_pin(GPIO_NUM_17);
+    }
+  }
   #endif  // CONFIG_IDF_TARGET_ESP32
   #endif  // ESP32
 
@@ -300,19 +292,18 @@ pCONT_sup->CmndCrash();
  ** Show PSRAM Present **********************************************************************
  ********************************************************************************************/
 
-//  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
-// #ifdef ESP32
-//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
-//             FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-//   AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
-//   #if !defined(HAS_PSRAM_FIX)
-//   if (FoundPSRAM() && !CanUsePSRAM()) {
-//     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
-//   }
-//   #endif
-// #else // ESP32
-//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
-// #endif // ESP32
+  #ifdef ESP32
+    // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
+    //           SupportESP32::FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
+    // #if !defined(HAS_PSRAM_FIX)
+    // if (FoundPSRAM() && !CanUsePSRAM()) {
+    //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+    // }
+    // #endif
+  #else // ESP32
+    AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+  #endif // ESP32
 
 /********************************************************************************************
  ** Internal RTC Time PreInit ***************************************************************
@@ -539,8 +530,9 @@ pCONT_sup->CmndCrash();
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
   
-
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
+  #endif
 
 // DEBUG_LINE_HERE_SHORT_PAUSE;
 
@@ -579,14 +571,6 @@ pCONT_sup->CmndCrash();
 
 void LoopTasker()
 {
-  
-// while(1)
-// {
-//   Serial.println("test");
-  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-  WDT_Reset();
-  #endif
-// }
 
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
@@ -642,8 +626,6 @@ void loop(void)
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif
-
-  ESP.wdtFeed();
 
   LoopTasker();
       

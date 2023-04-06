@@ -685,10 +685,10 @@ void mCellular::ModemUpdate_GPRS()
         {
             ALOG_INF(PSTR("GPRS status: NOT connected"));
 
-            if(gprs.connected_seconds>1) //previously connected
-            {
-              pCONT->Tasker_Interface(FUNC_ALERT_NETWORK_CONNECTION_LOST);
-            }            
+            // if(gprs.connected_seconds>1) //previously connected
+            // {
+            //   pCONT->Tasker_Interface(FUNC_ALERT_NETWORK_CONNECTION_LOST);
+            // }            
 
             gprs.connected_seconds = 0;
             GPRS_Connect();

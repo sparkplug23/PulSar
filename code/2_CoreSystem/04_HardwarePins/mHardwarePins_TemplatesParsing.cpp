@@ -557,12 +557,11 @@ void mHardwarePins::GpioInit(void)
    * @brief The check for H801 should be phased out here, as its hardware specific, really the template should force this to happen anyway as TX==2
    * 
    */
-    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { 
-  DEBUG_LINE_HERE;
-      Serial.set_tx(2); 
-      flag_serial_set_tx_set = true;
-      
-      }
+  if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) 
+  { 
+    Serial.set_tx(2); 
+    flag_serial_set_tx_set = true;
+  }
   #endif
 
   // DEBUG_LINE_HERE;
