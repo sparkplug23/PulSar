@@ -384,6 +384,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
   #endif
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM2
+    pModule[EM_MODULE_DRIVERS_FILESYSTEM2_ID] = new mFileSystem2();
+  #endif
   #ifdef USE_MODULE_DRIVERS_BUZZER
     pModule[EM_MODULE_DRIVERS_BUZZER_ID] = new mBuzzer();
   #endif

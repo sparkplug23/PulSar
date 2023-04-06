@@ -12,22 +12,43 @@
 #include <strings.h>
 
 
+// #ifdef ESP8266
+//   #include <LittleFS.h>
+//   #include <SPI.h>
+//   #ifdef USE_SDCARD
+//     #include <SD.h>
+//     #include <SDFAT.h>
+//   #endif  // USE_SDCARD
+// #endif  // ESP8266
+// #ifdef ESP32
+//   #include <LittleFS.h>
+//   #ifdef USE_SDCARD
+//     #include <SD.h>
+//   #endif  // USE_SDCARD
+//   #include "FFat.h"
+//   #include "FS.h"
+// #endif  // ESP32
+
+  
 #ifdef ESP8266
-  #include <LittleFS.h>
-  #include <SPI.h>
-  #ifdef USE_SDCARD
-    #include <SD.h>
-    #include <SDFAT.h>
-  #endif  // USE_SDCARD
+#include <LittleFS.h>
+#include <SPI.h>
+#ifdef USE_SDCARD
+#include <SD.h>
+#include <SdFat.h>
+#endif  // USE_SDCARD
 #endif  // ESP8266
 #ifdef ESP32
-  #include <LITTLEFS.h>
-  #ifdef USE_SDCARD
-    #include <SD.h>
-  #endif  // USE_SDCARD
-  #include "FFat.h"
-  #include "FS.h"
+#include <LittleFS.h>
+#ifdef USE_SDCARD
+#include <SD.h>
+#include <SD_MMC.h>
+#endif  // USE_SDCARD
+#include "FFat.h"
+#include "FS.h"
 #endif  // ESP32
+
+
 
 /*
  * Connect the SD card to the following pins:

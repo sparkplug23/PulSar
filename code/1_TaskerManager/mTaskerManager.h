@@ -269,6 +269,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     EM_MODULE_DRIVERS_FILESYSTEM_ID,
   #endif
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM2
+    EM_MODULE_DRIVERS_FILESYSTEM2_ID,
+  #endif
   #ifdef USE_MODULE_DRIVERS_BUZZER
     EM_MODULE_DRIVERS_BUZZER_ID,
   #endif
@@ -677,8 +680,12 @@ enum MODULE_IDS{
 
 
 #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  #include "4_Drivers/FileSystem/mFileSystem.h"
+  #include "4_Drivers/02_FileSystem/mFileSystem.h"
   #define pCONT_mfile                               static_cast<mFileSystem*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID])
+#endif
+#ifdef USE_MODULE_DRIVERS_FILESYSTEM2
+  #include "4_Drivers/02b_FileSystem/mFileSystem2.h"
+  #define pCONT_mfile2                               static_cast<mFileSystem2*>(pCONT->pModule[EM_MODULE_DRIVERS_FILESYSTEM2_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
 #include "4_Drivers/IRRemote/mIRRemote.h"
