@@ -228,6 +228,10 @@ class mInterfaceLight :
     void Template_Load();
 
     void parse_JSONCommand(JsonParserObject obj);
+
+    void ShowInterface();
+
+  
   
 
 

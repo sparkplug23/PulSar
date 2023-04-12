@@ -26,7 +26,7 @@ Change option to make all palettes gradient mode or node, or how to use it
 #include "1_TaskerManager/mTaskerManager.h"
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/98_FastLED_Modified/FastLED.h"
+#include "6_Lights/00_Interface/FastLED/FastLED.h"
 
 #include "mPalette_Encoding_Options.h"
 

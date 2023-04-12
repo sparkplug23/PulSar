@@ -190,27 +190,27 @@ enum EM_BUS_TYPE
 #define NEOPIXELBUS_HS_LPO_3 NeoPixelBus<Lpd6803GrbFeature, Lpd6803SpiMethod>
 #define NEOPIXELBUS_SS_LPO_3 NeoPixelBus<Lpd6803GrbFeature, Lpd6803Method>
 
-//WS2801
-#if defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==40000
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi40MhzMethod>    // fastest bus speed (not existing method?)
-#elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==20000
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi20MhzMethod>    // 20MHz
-#elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==10000
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801SpiMethod>         // 10MHz
-#elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==2000
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi2MhzMethod>     //slower, more compatible
-#elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==1000
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi1MhzMethod>     //slower, more compatible
-#elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==500
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi500KhzMethod>   //slower, more compatible
-#else
-#define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi2MhzMethod>     // 2MHz; slower, more compatible
-#endif
-#define NEOPIXELBUS_SS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Method>
+// //WS2801
+// #if defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==40000
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi40MhzMethod>    // fastest bus speed (not existing method?)
+// #elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==20000
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi20MhzMethod>    // 20MHz
+// #elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==10000
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801SpiMethod>         // 10MHz
+// #elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==2000
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi2MhzMethod>     //slower, more compatible
+// #elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==1000
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi1MhzMethod>     //slower, more compatible
+// #elif defined(WLED_WS2801_SPEED_KHZ) && WLED_WS2801_SPEED_KHZ==500
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi500KhzMethod>   //slower, more compatible
+// #else
+// #define NEOPIXELBUS_HS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Spi2MhzMethod>     // 2MHz; slower, more compatible
+// #endif
+// #define NEOPIXELBUS_SS_WS1_3 NeoPixelBus<NeoRbgFeature, NeoWs2801Method>
 
-//P9813
-#define NEOPIXELBUS_HS_P98_3 NeoPixelBus<P9813BgrFeature, P9813SpiMethod>
-#define NEOPIXELBUS_SS_P98_3 NeoPixelBus<P9813BgrFeature, P9813Method>
+// //P9813
+// #define NEOPIXELBUS_HS_P98_3 NeoPixelBus<P9813BgrFeature, P9813SpiMethod>
+// #define NEOPIXELBUS_SS_P98_3 NeoPixelBus<P9813BgrFeature, P9813Method>
 
 //handles pointer type conversion for all possible bus types
 class PolyBus {
@@ -290,17 +290,17 @@ class PolyBus {
       case BUSTYPE__32_I1_TM2_3__ID: (static_cast<NEOPIXELBUS_32_I1_TM2_3*>(busPtr))->Begin(); break;
       #endif
       // ESP32 can (and should, to avoid inadvertantly driving the chip select signal) specify the pins used for SPI, but only in begin()
-      case BUSTYPE__HS_DOT_3__ID: (static_cast<NEOPIXELBUS_HS_DOT_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
-      case BUSTYPE__HS_LPD_3__ID: (static_cast<NEOPIXELBUS_HS_LPD_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
-      case BUSTYPE__HS_LPO_3__ID: (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
-      case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
-      case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
+      // case BUSTYPE__HS_DOT_3__ID: (static_cast<NEOPIXELBUS_HS_DOT_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
+      // case BUSTYPE__HS_LPD_3__ID: (static_cast<NEOPIXELBUS_HS_LPD_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
+      // case BUSTYPE__HS_LPO_3__ID: (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
+      // case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
+      // case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Begin(pins[1], -1, pins[0], -1); break;
     #endif
-      case BUSTYPE__SS_DOT_3__ID: (static_cast<NEOPIXELBUS_SS_DOT_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__SS_LPD_3__ID: (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__SS_LPO_3__ID: (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__SS_WS1_3__ID: (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__SS_DOT_3__ID: (static_cast<NEOPIXELBUS_SS_DOT_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__SS_LPD_3__ID: (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__SS_LPO_3__ID: (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__SS_WS1_3__ID: (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->Begin(); break;
     }
   };
   static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channel) 
@@ -372,10 +372,10 @@ class PolyBus {
       case BUSTYPE__SS_LPD_3__ID: busPtr = new NEOPIXELBUS_SS_LPD_3(len, pins[1], pins[0]); break;
       case BUSTYPE__HS_LPO_3__ID: busPtr = new NEOPIXELBUS_HS_LPO_3(len, pins[1], pins[0]); break;
       case BUSTYPE__SS_LPO_3__ID: busPtr = new NEOPIXELBUS_SS_LPO_3(len, pins[1], pins[0]); break;
-      case BUSTYPE__HS_WS1_3__ID: busPtr = new NEOPIXELBUS_HS_WS1_3(len, pins[1], pins[0]); break;
-      case BUSTYPE__SS_WS1_3__ID: busPtr = new NEOPIXELBUS_SS_WS1_3(len, pins[1], pins[0]); break;
-      case BUSTYPE__HS_P98_3__ID: busPtr = new NEOPIXELBUS_HS_P98_3(len, pins[1], pins[0]); break;
-      case BUSTYPE__SS_P98_3__ID: busPtr = new NEOPIXELBUS_SS_P98_3(len, pins[1], pins[0]); break;
+      // case BUSTYPE__HS_WS1_3__ID: busPtr = new NEOPIXELBUS_HS_WS1_3(len, pins[1], pins[0]); break;
+      // case BUSTYPE__SS_WS1_3__ID: busPtr = new NEOPIXELBUS_SS_WS1_3(len, pins[1], pins[0]); break;
+      // case BUSTYPE__HS_P98_3__ID: busPtr = new NEOPIXELBUS_HS_P98_3(len, pins[1], pins[0]); break;
+      // case BUSTYPE__SS_P98_3__ID: busPtr = new NEOPIXELBUS_SS_P98_3(len, pins[1], pins[0]); break;
     }
     begin(busPtr, busType, pins);
     return busPtr;
@@ -448,10 +448,10 @@ class PolyBus {
       case BUSTYPE__SS_LPD_3__ID: (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr))->Show(); break;
       case BUSTYPE__HS_LPO_3__ID: (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->Show(); break;
       case BUSTYPE__SS_LPO_3__ID: (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr))->Show(); break;
-      case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->Show(); break;
-      case BUSTYPE__SS_WS1_3__ID: (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->Show(); break;
-      case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Show(); break;
-      case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->Show(); break;
+      // case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->Show(); break;
+      // case BUSTYPE__SS_WS1_3__ID: (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->Show(); break;
+      // case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Show(); break;
+      // case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->Show(); break;
     }
   };
   static bool canShow(void* busPtr, uint8_t busType) 
@@ -522,10 +522,10 @@ class PolyBus {
       case BUSTYPE__SS_LPD_3__ID: return (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr))->CanShow(); break;
       case BUSTYPE__HS_LPO_3__ID: return (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->CanShow(); break;
       case BUSTYPE__SS_LPO_3__ID: return (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr))->CanShow(); break;
-      case BUSTYPE__HS_WS1_3__ID: return (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->CanShow(); break;
-      case BUSTYPE__SS_WS1_3__ID: return (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->CanShow(); break;
-      case BUSTYPE__HS_P98_3__ID: return (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->CanShow(); break;
-      case BUSTYPE__SS_P98_3__ID: return (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__HS_WS1_3__ID: return (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__SS_WS1_3__ID: return (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__HS_P98_3__ID: return (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__SS_P98_3__ID: return (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->CanShow(); break;
     }
     return true;
   };
@@ -606,10 +606,10 @@ class PolyBus {
       case BUSTYPE__SS_LPD_3__ID: (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       case BUSTYPE__HS_LPO_3__ID: (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       case BUSTYPE__SS_LPO_3__ID: (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
-      case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
-      case BUSTYPE__SS_WS1_3__ID: (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
-      case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
-      case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__SS_WS1_3__ID: (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
     }
   };
 
@@ -683,10 +683,10 @@ class PolyBus {
       case BUSTYPE__SS_LPD_3__ID: col = (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr))->GetPixelColor(pix); break;
       case BUSTYPE__HS_LPO_3__ID: col = (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->GetPixelColor(pix); break;
       case BUSTYPE__SS_LPO_3__ID: col = (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__HS_WS1_3__ID: col = (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__SS_WS1_3__ID: col = (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__HS_P98_3__ID: col = (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__SS_P98_3__ID: col = (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__HS_WS1_3__ID: col = (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__SS_WS1_3__ID: col = (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__HS_P98_3__ID: col = (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__SS_P98_3__ID: col = (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->GetPixelColor(pix); break;
     }
     
     // THIS WILL NEED ADDED, COLOUR ORDER MUST BE ADDED AT BUS LEVEL, SO TO BE REMOVED FROM SEGMENT
@@ -782,10 +782,10 @@ class PolyBus {
       case BUSTYPE__SS_LPD_3__ID: delete (static_cast<NEOPIXELBUS_SS_LPD_3*>(busPtr)); break;
       case BUSTYPE__HS_LPO_3__ID: delete (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr)); break;
       case BUSTYPE__SS_LPO_3__ID: delete (static_cast<NEOPIXELBUS_SS_LPO_3*>(busPtr)); break;
-      case BUSTYPE__HS_WS1_3__ID: delete (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr)); break;
-      case BUSTYPE__SS_WS1_3__ID: delete (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr)); break;
-      case BUSTYPE__HS_P98_3__ID: delete (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr)); break;
-      case BUSTYPE__SS_P98_3__ID: delete (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr)); break;
+      // case BUSTYPE__HS_WS1_3__ID: delete (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr)); break;
+      // case BUSTYPE__SS_WS1_3__ID: delete (static_cast<NEOPIXELBUS_SS_WS1_3*>(busPtr)); break;
+      // case BUSTYPE__HS_P98_3__ID: delete (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr)); break;
+      // case BUSTYPE__SS_P98_3__ID: delete (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr)); break;
     }
   }
 

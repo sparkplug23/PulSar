@@ -26,7 +26,7 @@ void mInterfaceLight::Template_Load()
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
-  DEBUG_DELAY(5000);
+  // DEBUG_DELAY(5000);
 
   #endif // USE_LIGHTING_TEMPLATE
 
@@ -103,31 +103,13 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-// void mInterfaceLight::ShowInterface(){
-
-//   // ALOG_INF(PSTR("t=%d"),pCONT_set->Settings.light_settings.type);
-
-//   switch(pCONT_set->Settings.light_settings.type)
-//   {
-//     case LT_ADDRESSABLE_WS281X:  
-//     case LT_ADDRESSABLE_SK6812:
-//       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-//       return pCONT_ladd->ShowHardware();
-//       #endif // USE_MODULE_LIGHTS_ADDRESSABLE
-//     break;
-//     case LT_PWM1:
-//     case LT_PWM2:
-//     case LT_PWM3:
-//     case LT_PWM4:
-//     case LT_PWM5:
-//       #ifdef USE_MODULE_LIGHTS_PWM
-//       return pCONT_lPWM->ShowHardware();
-//       #endif // USE_MODULE_LIGHTS_PWM
-//     break;
-//   }
-
-// } 
-
+void mInterfaceLight::ShowInterface()
+{ 
+  if(bus_manager)
+  {
+    bus_manager->show();
+  }
+}
 
 
 void mInterfaceLight::EveryLoop()
@@ -136,23 +118,6 @@ void mInterfaceLight::EveryLoop()
   ALOG_DBM(PSTR("mInterfaceLight::EveryLoop()"));
         
 } // END everyloop
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 float mInterfaceLight::HueN2F(uint16_t hue){
@@ -191,16 +156,10 @@ RgbcctColor mInterfaceLight::GetRandomColour(RgbcctColor colour1, RgbcctColor co
 
 RgbcctColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
   RgbcctColor rgb;
-  // #if RgbTypeColor == RgbwColor
     rgb.R = colour32bit >> 24; //RGB
     rgb.G = colour32bit >> 16; //RGB
     rgb.B = colour32bit >> 8 & 0xFF; //RGB
-  //   rgb.W = colour32bit & 0xFF; //RGB
-  // #else
-  //   rgb.R = colour32bit >> 16; //RGB
-  //   rgb.G = colour32bit >> 8 & 0xFF; //RGB
-  //   rgb.B = colour32bit & 0xFF; //RGB
-  // #endif
+    // rgb.W = colour32bit & 0xFF; //RGB
   return rgb;
 }
 
@@ -516,45 +475,27 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
 void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
 {
 
-    const uint8_t defDataPins[] = {4};
-    const uint16_t defCounts[] = {STRIP_SIZE_MAX};
-    const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
-    const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+  const uint8_t defDataPins[] = {4};
+  const uint16_t defCounts[] = {STRIP_SIZE_MAX};
+  const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+  const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
 
-    DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
+  DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
 
-    uint16_t prevLen = 0;
-    for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
-      uint8_t defPin[] = {defDataPins[i]};
-      uint16_t start = prevLen;
-      uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
-      prevLen += count;
-      BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count);
-      if(bus_manager->add(defCfg) == -1) 
-      {
-        ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
-        break;
-      }
+  uint16_t prevLen = 0;
+  for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) 
+  {
+    uint8_t defPin[] = {defDataPins[i]};
+    uint16_t start = prevLen;
+    uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+    prevLen += count;
+    BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count);
+    if(bus_manager->add(defCfg) == -1) 
+    {
+      ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
+      break;
     }
-
-    // const uint8_t defDataPins[] = {22,23};
-    // const uint16_t defCounts[] = {10,10};
-    // const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
-    // const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
-
-    // DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
-
-    // uint16_t prevLen = 0;
-    // for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) {
-    //   uint8_t defPin[] = {defDataPins[i]};
-    //   uint16_t start = prevLen;
-    //   uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
-    //   prevLen += count;
-    //   BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count, DEFAULT_LED_COLOR_ORDER, false, 0, RGBW_MODE_MANUAL_ONLY);
-    //   if(bus_manager->add(defCfg) == -1) break;
-    // }
-
-
+  }
 
 }
 

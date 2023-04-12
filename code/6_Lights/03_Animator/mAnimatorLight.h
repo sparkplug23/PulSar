@@ -9,19 +9,6 @@
 
 #include "6_Lights/00_Interface/mBusManager.h"
 
-/**
- * @brief List of planned changes and the order to be done (change as needed)
- * 
- * ** x) Figure out how to merge WLED/PulSar colour palettes, so a single GetColour can be used universally
- * ** x) 
- * ** x) Rewrite Segment runtime/SEG to be together
- * ** x) Figure out how to effectively store active palettes in memory, so each segment can be unique
-
-
-
-
- */
-
 
 //color mangling macros
 #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
@@ -35,9 +22,9 @@
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
@@ -108,30 +95,15 @@ class mPaletteContainer;
 
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/98_FastLED_Modified/FastLED.h"
+#include "6_Lights/00_Interface/FastLED/FastLED.h"
 
-#if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
-  typedef RgbColor RgbTypeColor;
-#elif defined(USE_WS28XX_FEATURE_4_PIXEL_TYPE)
-  typedef RgbwColor RgbTypeColor;
-#else
-  typedef RgbColor RgbTypeColor;
-#endif
 
-#if   defined(USE_WS28XX_FEATURE_3_PIXEL_TYPE)
-  typedef NeoRgbFeature selectedNeoFeatureType;
-#elif defined(USE_WS28XX_FEATURE_4_PIXEL_TYPE)   
-  typedef NeoRgbwFeature selectedNeoFeatureType;
-#else
-  typedef NeoRgbFeature selectedNeoFeatureType;
-#endif
-
-// When no callback is needed for animator and effect function (e.g. WLED) must be called
+/**
+ * @brief For integrated effects on each frame, disable animation callback
+ */
 #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
 #define SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR()  \
                                   SEGMENT.anim_function_callback = nullptr; 
-                                  // \
-                                  // SEGMENT_I(strip->_segment_index_primary).transitional = true;
 #else
 #define SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR()  SEGMENT.anim_function_callback = nullptr 
 #endif
@@ -171,7 +143,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
 #endif 
 
 #define D_EFFECTS_REGION__COLOUR_SELECT__NAME_CTR "Colour Select"
-#define D_EFFECTS_REGION__ANIMATE__NAME_CTR "Animate"
+#define D_EFFECTS_REGION__ANIMATE__NAME_CTR       "Animate"
 
 /**
  * Effect Names
@@ -211,9 +183,6 @@ class mAnimatorLight :
 
     // Splitting into into subsections for easier reading
     void Init__Palettes();
-    
-
-    
 
     void Settings_Load();
     void Settings_Save();
@@ -283,51 +252,31 @@ class mAnimatorLight :
     void CommandSet_AnimationModeID(uint8_t value);
 
 
-
-    // int8_t GetPixelHardwareTypeIDbyName(const char* c);
-    // const char* GetPixelHardwareTypeName(char* buffer);
-    // const char* GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer);
-
-
-
-
     /******************************************************************************************************************************
     ****************** CommandSet_x *************************************************************************************************************
     ******************************************************************************************************************************/
 
-    // void CommandSet_PixelHardwareTypeID(uint8_t value);
-
     void CommandSet_LightPowerState(uint8_t value);
     bool CommandGet_LightPowerState();
-
     void CommandSet_Brt_255(uint8_t value);
-    // void CommandSet_Global_BrtRGB_255(uint8_t bri);
-    // void CommandSet_Global_BrtCCT_255(uint8_t bri);
-    void CommandSet_Auto_Time_Off_Secs(uint16_t value);
-    
+    void CommandSet_Auto_Time_Off_Secs(uint16_t value);    
     void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
     void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
-
-
-
-    // void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id);
     
     /******************************************************************************************************************************
     ****************** CommandGet_x *************************************************************************************************************
     ******************************************************************************************************************************/
 
     uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage);
-
     void CheckHardwareElementColourOrder();
-
  
     uint8_t light_power_state = 0;
     uint8_t light_power_Saved = 0;
     uint8_t subtype = 0;                    // LST_ subtype
     uint8_t device = 0;
-    bool pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
-    bool     fade_initialized = false;      // dont't fade at startup
+    bool    pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
+    bool    fade_initialized = false;      // dont't fade at startup
    
 
     #ifdef USE_MODULE_CORE_RULES
@@ -366,24 +315,18 @@ class mAnimatorLight :
     // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
     uint16_t _ct_min_range = 153;   // the minimum CT rendered range
     uint16_t _ct_max_range = 500;   // the maximum CT rendered range
-
-
-  // I need to keep brightness on its own, with functions for it  
     uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
     uint8_t  _briCT_Global = 255;
-
 
     void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
     void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
    
     void EverySecond_AutoOff();
-      void BootMessage();
+    void BootMessage();
 
     struct AUTO_OFF_SETTINGS{
       uint16_t time_decounter_secs = 0;
-      // uint32_t tSaved = 0;
     }auto_off_settings;
-
 
     void StartAnimation_AsAnimUpdateMemberFunction();
     
@@ -404,11 +347,6 @@ class mAnimatorLight :
     #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 
-    /**
-     * @brief 
-     Confirmed as needed variables
-     * 
-     */
     uint16_t fAnyLEDsOnOffCount = 0;
     uint8_t blocking_force_animate_to_complete = true;
     uint8_t fPixelsUpdated = false;
@@ -481,9 +419,6 @@ class mAnimatorLight :
 
 
     void LoadPalette(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer = nullptr, uint16_t palette_buflen = 0);
-
-
-
 
   /**
    * @brief 
@@ -696,20 +631,13 @@ class mAnimatorLight :
   #endif // USE_MODULE_NETWORK_MQTT
  
 
-/*************************************************************************************************************************************************************************************
+/*****************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-***********************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** Subtask:   Mixer (for changing animations)   ***************************************************************************************************************************************************************************
-**  @note:     to be renamed, "profiles?"  **************************************************************************************************************************************************************************
-*******************************************************************************************************************************************************************************************
+*** Subtask:   Mixer (for changing animations)   *****************************************************************************************************************************
+**  @note:     to be renamed, "profiles?"  ***********************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*****************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
 
 #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
@@ -719,16 +647,10 @@ class mAnimatorLight :
 #include "mAnimatorLight_Auto_Presets.h"
 #endif
 
-/*********************************************************************************************************************************************************************************
+/*****************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-***************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** Animation Effect:   Notifications   ***************************************************************************************************************************************************************************
+*** Animation Effect:   Notifications   **************************************************************************************************************************************
 **  @note:     This is highly specialised effect, and will unlikely ever run next to "animated segment effect"
                It makes sense to keep this as its own effect type
 To be phased into normal segment effect

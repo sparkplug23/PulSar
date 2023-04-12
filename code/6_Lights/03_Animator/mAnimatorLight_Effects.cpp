@@ -109,7 +109,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
   uint16_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(SEGMENT.palette.id);
 
   uint16_t pixel_index = 0;
-  RgbTypeColor colour = RgbcctColor(0);
+  RgbcctColor colour;
 
   /**
    * @brief On first run, all leds need set once
@@ -826,7 +826,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
 
   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"), shared_flasher_parameters_segments.indexes.active,index_1,index_2);
 
-  RgbTypeColor colour;
+  RgbcctColor colour;
 
   for(uint16_t index=SEGMENT.pixel_range.start;
                 index<=SEGMENT.pixel_range.stop;
@@ -981,7 +981,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
   uint16_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 
   uint16_t pixel_index = 0;
-  RgbTypeColor colour = RgbcctColor(0);
+  RgbcctColor colour = RgbcctColor(0);
 
   /**
    * @brief On first run, all leds need set once
@@ -7347,7 +7347,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Dissolve(uint32_t color)
 {
 
 //tmp added
-uint8_t _brightness = pCONT_iLight->getBriRGB_Global();
+uint8_t _brightness = getBriRGB_Global();
 
 // void mAnimatorLight::dissolve(uint32_t color) {
   bool wa = (SEGCOLOR(1) != 0 && _brightness < 255); //workaround, can't compare getPixel to color if not full brightness

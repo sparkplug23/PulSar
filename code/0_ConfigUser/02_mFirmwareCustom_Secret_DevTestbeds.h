@@ -1084,18 +1084,16 @@
   "{"
     "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_NUMBER  "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-      #endif
-    "},"
-    "\"" D_JSON_GPIO_FUNCTION "\":{" //hmm, what about moving this into the template for busconfig, settings the pins there??
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
       // "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":[16,17,5,21,22],"  // PWM RGBCCT // needs fixing
 
       "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":16,"  // PWM RGBCCT
@@ -1128,27 +1126,28 @@
   #define USE_LIGHTING_TEMPLATE
   // #endif // USE_MODULE_LIGHTS_INTERFACE
 
-  #define USE_LIGHTING_TEMPLATE__DEFAULT
+  #define USE_LIGHTING_TEMPLATE__SINGLE
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED
   // #define USE_LIGHTING_TEMPLATE_3
 
-  #ifdef USE_LIGHTING_TEMPLATE__DEFAULT
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "ColourPalette":"Christmas 24",
-    "Effects": {
-      "Function":2,
-      "Intensity":255
-    },
-    "Transition": {
-      "TimeMs": 2000,
-      "RateMs": 3000
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
-  #endif // USE_LIGHTING_TEMPLATE__DEFAULT
+  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "ColourPalette":"Christmas 24",
+      "Effects": {
+        "Function":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "ColourOrder":"rgb",
+      "BrightnessRGB": 100
+    }
+    )=====";
+  #endif // USE_LIGHTING_TEMPLATE__SINGLE
 
   #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1160,34 +1159,34 @@
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":10
+        "Length":50
       },
       {
         "Pin":13,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":10,
+        "Start":50,
         "Length":10
       },
       {
         "Pin":14,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":20,
-        "Length":2
+        "Start":60,
+        "Length":10
       },
       {
         "Pin":27,
-        "ColourOrder":"RGBW",
-        "BusType":"SK6812_RGBW",
-        "Start":30,
-        "Length":2
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":70,
+        "Length":10
       },
       {
         "Pin":[16,17,5,21,22],
         "ColourOrder":"RGBCW",
         "BusType":"ANALOG_5CH",
-        "Start":41,
+        "Start":80,
         "Length":1
       }
     ],
@@ -1235,46 +1234,49 @@
     //   ALOG_INF(PSTR("BusConfig **************A  \t%d"), jtok.getType());
     // ALOG_COM(PSTR("BusConfig match jtok.isArrayB() %d"), jtok.isArray());
     
+/*
+
+{
+  "HardwareType": "WS28XX",
+  "AnimationMode": "Effects",
+  "BrightnessRGB": 100,
+  "Segment0": {
+    "PixelRange": [
+      0,
+      5
+    ],
+    "ColourPalette": 10,
+    "Effects": {
+      "Function": 0,
+      "Intensity": 255
+    },
+    "SegColour":{"Hue":120,"Sat":100},
+    "Transition": {
+      "TimeMs": 900,
+      "RateMs": 1000
+    }
+  },
+  "Segment1": {
+    "PixelRange": [
+      5,
+      10
+    ],
+    "ColourPalette": "Christmas 01",
+    "Effects": {
+      "Function": 24,
+      "Speed": 255,
+      "Intensity": 255,
+      "SegBrightness":255
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 23
+    }
+  }
+}
 
 
-// {
-//   "HardwareType": "WS28XX",
-//   "AnimationMode": "Effects",
-//   "BrightnessRGB": 100,
-//   "Segment0": {
-//     "PixelRange": [
-//       0,
-//       5
-//     ],
-//     "ColourPalette": 10,
-//     "Effects": {
-//       "Function": 0,
-//       "Intensity": 255
-//     },
-//     "SegColour":{"Hue":120,"Sat":100},
-//     "Transition": {
-//       "TimeMs": 900,
-//       "RateMs": 1000
-//     }
-//   },
-//   "Segment1": {
-//     "PixelRange": [
-//       5,
-//       10
-//     ],
-//     "ColourPalette": "Christmas 01",
-//     "Effects": {
-//       "Function": 24,
-//       "Speed": 255,
-//       "Intensity": 255,
-//       "SegBrightness":255
-//     },
-//     "Transition": {
-//       "TimeMs": 0,
-//       "RateMs": 23
-//     }
-//   }
-// }
+*/
 
   #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1438,7 +1440,7 @@
 //     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
 //   "}";
 
-// /**
+/**
 //  * @brief The issue is template loading is not boot safe.
 //  * I need to move this to init() and have it configure after boot has happened using the new segment method
 //  * */
@@ -1461,27 +1463,27 @@
 //   #ifdef USE_LIGHTING_TEMPLATE__SINGLE_SK
 //   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
 //   R"=====(
-//   {
-//     "HardwareType":"SK6812",
-//     "ColourOrder":"grbw",
-//     "AnimationMode":"Effects",
-//     "Segment0":{
-//       "PixelRange": [
-//         0,
-//         100
-//       ],
-//       "ColourPalette":0,
-//       "Effects": {
-//         "Function":1,
-//         "Intensity":50
-//       },
-//       "Transition": {
-//         "TimeMs": 800,
-//         "RateMs": 1000
-//       },
-//       "BrightnessRGB": 10
-//     }
-//   }
+  // {
+  //   "HardwareType":"SK6812",
+  //   "ColourOrder":"grbw",
+  //   "AnimationMode":"Effects",
+  //   "Segment0":{
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":0,
+  //     "Effects": {
+  //       "Function":1,
+  //       "Intensity":50
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 800,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 10
+  //   }
+  // }
 //   )=====";
 //   #endif // USE_LIGHTING_TEMPLATE__SINGLE
 
