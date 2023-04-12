@@ -62,7 +62,7 @@ struct HsbColor;
 // component values and an extra White component.  It contains helpful color 
 // routines to manipulate the color.
 // ------------------------------------------------------------------------
-struct RgbcctColor
+struct RgbcctColor : RgbColorBase
 {
     typedef NeoRgbcctCurrentSettings SettingsObject;
 

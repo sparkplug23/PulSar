@@ -24,6 +24,7 @@ License along with NeoPixel.  If not, see
 <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------*/
 
+#include "RgbColorBase.h"
 #include "RgbColor.h"
 #include "RgbwColor.h"
 #include "HslColor.h"
