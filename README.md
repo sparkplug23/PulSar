@@ -287,5 +287,22 @@ Longer term planned features.
 - ESP32 Camera working as new "Camera Sensor Node" that will use the camera, PIR and host of other sensors to save images on the filesystem and push images via Email and other methods. (e.g., Can motion triggering a 10 second video sent to the phone?)
 - GSM support (e.g., Enabling data logging with GPS and 9-axis gyro to the local file system. GSM/LTE will enable the ability to connect remotely and pull the data as needed with wifi uploads when available)
 
+# Branch Descriptions
 
+# development_multipin (short term)
+For merging WLED multiple methods and light types across multiple output gpio
 
+# development_home (long term)
+To become the primary home (whitehall) active branch, so any additions from other branches must be tested before merging into this
+
+# development_blackbox (phased out)
+Temporary branch to develop LTE enabled mqtt device,to be renamed "development_cellular" 
+
+# development_cellular (long term)
+Branch to include anything LTE related, including making network/mqtt work via both LTE and WiFi (including some Ethernet testing)
+
+# development_filesystem (long term)
+Testing filesystem, including internal memory and external SD cards. Ideally enabling data logging to SDs (json format) and later a webui to download those files with possible python script to convert into kml files for opening in google earth
+
+# development_webui (long term)
+Making webpages work fully on ESP32 and ESP8266. This will require significant rewrite and testing.
