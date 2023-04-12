@@ -367,7 +367,7 @@ bool mHardwarePins::UsuableGPIOPin(uint8_t pin)
 }
 
 
-int8_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
+int16_t mHardwarePins::GetPinWithGPIO(uint16_t gpio, uint8_t index) {
   return Pin(gpio, index);
 }
 uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think this should be returning uint32_t here? #D10APR22
@@ -382,8 +382,12 @@ uint32_t mHardwarePins::GetPin(uint32_t gpio, uint32_t index) {  // I dont think
  * @param index if more than one gpio was set (eg Relay1, Relay2)
  * @return -1 if none found, or the pin number real_pin
  */
-int8_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
+int16_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
 {
+  //  AddLog(LOG_LEVEL_TEST, PSTR("mHardwarePins::Pin(uint32_t gpio, uint32_t index)(%d,%d)"),gpio,index);
+   
+
+
   uint16_t real_gpio = gpio + index;
 
 // DEBUG_LINE_HERE;
@@ -411,8 +415,8 @@ int8_t IRAM_ATTR mHardwarePins::Pin(uint32_t gpio, uint32_t index)
 // Serial.printf("%d %d %d\n\r", ARRAY_SIZE(pin_attached_gpio_functions), ARRAY_SIZE(gpio_pin_by_index), index_pin);
 
 // DEBUG_LINE_HERE;
-      return (int8_t)gpio_pin_by_index[index_pin]; // real_pin
-      // AddLog(LOG_LEVEL_TEST, PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d"),gpio,index,real_pin);
+//       AddLog(LOG_LEVEL_TEST, PSTR("Pin(%d,%d)pin_attached_gpio_functions[i] == real_gpio%d %d"),gpio,index,real_gpio, gpio_pin_by_index[index_pin]);
+      return gpio_pin_by_index[index_pin]; // real_pin
     }
   }
 
@@ -476,17 +480,15 @@ void mHardwarePins::SetPin(uint32_t real_pin, uint32_t gpio) {
   // if((internal_pin_index < MAX_USER_PINS) && (internal_pin_index>=0))
   // {
     if(internal_pin_index != -1) // -1 means unset pin
-{
+    {
   
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
-    #endif // ENABLE_LOG_LEVEL_COMMANDS
+      ALOG_DBM( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
   
-  
-  // // Check if valid gpio
-  // if(lpin<MAX_USER_PINS)
-  // {
-    pin_attached_gpio_functions[internal_pin_index] = gpio;
+      pin_attached_gpio_functions[internal_pin_index] = gpio;
+
+      // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
+
+
   }
   else{
     #ifdef ENABLE_LOG_LEVEL_ERROR
@@ -732,9 +734,16 @@ void mHardwarePins::SetModuleType()
   pCONT_set->my_module_type = (USER_MODULE == pCONT_set->Settings.module) ? pCONT_set->Settings.user_template2.base : pCONT_set->Settings.module;
 }
 
-uint8_t mHardwarePins::ValidPin_AdjustGPIO(uint8_t pin, uint8_t gpio)
+/**
+ * @brief Fixed GPIO to U16 range
+ * 
+ * @param pin 
+ * @param gpio 
+ * @return uint16_t 
+ */
+uint16_t mHardwarePins::ValidPin_AdjustGPIO(uint8_t pin, uint16_t gpio)
 {
-  uint8_t result = gpio;
+  uint16_t result = gpio;
 
   // #ifdef ESP8266
 
@@ -754,7 +763,7 @@ uint8_t mHardwarePins::ValidPin_AdjustGPIO(uint8_t pin, uint8_t gpio)
   return result;
 }
 
-bool mHardwarePins::ValidGPIO(uint8_t pin, uint8_t gpio)
+bool mHardwarePins::ValidGPIO(uint8_t pin, uint16_t gpio)
 {
   return (GPIO_USER_ID == ValidPin_AdjustGPIO(pin, gpio));  // Only allow GPIO_USER pins
 }
@@ -1013,6 +1022,16 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION_CHIME_INPUT_CTR)==0){  return GPIO_CHIME_INPUT_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_CHIME_RINGER_CTR)==0){  return GPIO_CHIME_RINGER_ID; }
 
+
+  else if(strcmp_P(c,PM_GPIO_FUNCTION_BUZZER_CTR)==0){  return GPIO_BUZZER_ID; }
+
+
+
+  
+
+
+
+
   else if(strcmp_P(c,PM_GPIO_FUNCTION_IRSEND_CTR)==0){  return GPIO_IRSEND_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_FAN_IRSEND_CTR)==0){  return GPIO_FAN_IRSEND_ID; }
 
@@ -1186,7 +1205,7 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
 
 
 // actually use buffer and return it
-const char* mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id, char* buffer){
+const char* mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id, char* buffer){
 
   if(buffer == nullptr){ return 0; }
 
@@ -1195,7 +1214,7 @@ const char* mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id, char* buffer){
 
 }
 
-PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
+PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
   switch(id){
     default:           return PM_SEARCH_NOMATCH;
     case GPIO_NONE_ID: return PM_GPIO_FUNCTION_NONE_CTR;
@@ -1378,6 +1397,9 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint8_t id){
   case GPIO_LDR_BASIC_DIGITAL2_ID: return PM_GPIO_FUNCTION_LDR_BASIC_DIGITAL2_CTR;
   case GPIO_LDR_BASIC_ANALOG2_ID:  return PM_GPIO_FUNCTION_LDR_BASIC_ANALOG2_CTR;
   #endif // USE_MODULE_SENSORS_LDR_BASIC
+
+  
+  case GPIO_BUZZER_ID: return PM_GPIO_FUNCTION_BUZZER_CTR;
 
 
 // #ifdef USE_WS2812

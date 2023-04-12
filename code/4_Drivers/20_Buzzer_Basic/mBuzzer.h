@@ -5,7 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_DRIVERS_BUZZER
+#ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
 
 class mBuzzer :
   public mTaskerInterface

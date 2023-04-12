@@ -525,26 +525,18 @@ void mHardwarePins::GpioInit(void)
   //   // SetPinFunction(gpio_pin_number, pin_function);  
   // #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    ALOG_DBM( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
-
-    #endif //  ENABLE_LOG_LEVEL_INFO
-  //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   // if(mgpio){
-  //   // AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: io %02d, mgpio %d"), i, mgpio);
-  //   // }
-  //   // #endif // ENABLE_LOG_LEVEL_DEBUG
-
-// Phasing section out : moving into their modules
-    if (mgpio) {    
-      
+    ALOG_DBG( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
+    
+    // Phasing section out : moving into their modules
+    if (mgpio) {         
       //PWM
       if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
         bitSet(pCONT_set->pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
         mgpio -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
       } 
-
     }    
+
+    
     //new way
     if(mgpio){ SetPin(real_pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
     

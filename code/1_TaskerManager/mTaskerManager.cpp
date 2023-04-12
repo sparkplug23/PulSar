@@ -384,8 +384,11 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
   #endif
-  #ifdef USE_MODULE_DRIVERS_BUZZER
-    pModule[EM_MODULE_DRIVERS_BUZZER_ID] = new mBuzzer();
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+    pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID] = new mBuzzer();
+  #endif
+  #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
+    pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID] = new mBuzzer();
   #endif
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID] = new mRCSwitch();

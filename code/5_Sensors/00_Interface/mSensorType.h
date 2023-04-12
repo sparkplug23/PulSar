@@ -136,6 +136,13 @@ typedef enum
   SENSOR_TYPE_DOOR_POSITION_ID,
   SENSOR_TYPE_DOOR_LOCKED_ID,
 
+  /**
+   * @brief Basic logic
+   * 
+   */
+
+  SENSOR_TYPE_STATE_ACTIVE_ID, //ie on/off
+
 
 
   SENSOR_TYPE_FLOATS_LENGTH_ID // 256 max types

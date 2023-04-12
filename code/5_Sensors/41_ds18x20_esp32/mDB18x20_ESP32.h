@@ -76,7 +76,7 @@ class mDB18x20_ESP32 :
     sensors_t;
     std::vector<SENS> sensor_vector; // Using vector for dynamic memory
 
-    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return settings.sensor_count;
@@ -89,7 +89,7 @@ class mDB18x20_ESP32 :
       value->sensor_id = sensor_vector[index].device_name_index;
       value->resolution = sensor_vector[index].resolution;
     };
-    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
     OneWire *ds = nullptr;
     OneWire *ds18x20_gpios[MAX_DSB_PINS];

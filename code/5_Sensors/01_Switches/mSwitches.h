@@ -91,6 +91,24 @@ class mSwitches :
 
     bool IsSwitchActive(uint8_t id);
 
+    
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.switches_found;
+    }
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > MAX_SWITCHES-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_STATE_ACTIVE_ID);
+      value->data_f.push_back(IsSwitchActive(index));
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
+
+
     Ticker* TickerSwitch = nullptr;
 
     #ifdef USE_MODULE_NETWORK_WEBSERVER

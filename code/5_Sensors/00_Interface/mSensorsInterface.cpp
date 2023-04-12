@@ -178,6 +178,7 @@ const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_LONGITUDE_ID:            return PM_JSON_LONGITUDE;  
     case SENSOR_TYPE_ALTITUDE_ID:            return PM_JSON_ALTITUDE;  
     case SENSOR_TYPE_VOLTAGE_ID:            return PM_JSON_VOLTAGE;
+    case SENSOR_TYPE_STATE_ACTIVE_ID: return PM_JSON_STATE_ACTIVE;
     // Strings
     case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING;
   }
@@ -1179,7 +1180,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
 //   JBI->Start();
 
-//   // #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+//   // #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 //   char buffer[50];
 

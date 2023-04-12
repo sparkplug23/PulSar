@@ -801,7 +801,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 // // //       if (action != GetFanspeed()) {
 // // //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 // // //         ExecuteCommand(svalue, SRC_REMOTE);
-// // // #ifdef USE_MODULE_DRIVERS_BUZZER
+// // // #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
 // // //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // // // #endif
 // // //       }

@@ -93,6 +93,7 @@
 // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 // #endif
 
+#define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
 
 /*********************************************************************************************\

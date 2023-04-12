@@ -269,8 +269,11 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     EM_MODULE_DRIVERS_FILESYSTEM_ID,
   #endif
-  #ifdef USE_MODULE_DRIVERS_BUZZER
-    EM_MODULE_DRIVERS_BUZZER_ID,
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+    EM_MODULE__DRIVERS_BUZZER_BASIC__ID,
+  #endif
+  #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
+    EM_MODULE__DRIVERS_BUZZER_TONES__ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     EM_MODULE_DRIVERS_RF433_RCSWITCH_ID,
@@ -599,9 +602,13 @@ enum MODULE_IDS{
   #include "4_Drivers/04_Relays_v2/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_BUZZER
+#ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
   #include "4_Drivers/05_Buzzer/mBuzzer.h"
   #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
+#endif
+#ifdef USE_MODULE__DRIVERS_BUZZER_TONES
+  #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
+  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
   #include "4_Drivers/09_RCSwitch/mRCSwitch.h"

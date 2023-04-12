@@ -101,7 +101,7 @@ void mSonoffIFan::RulesEvent_Set_Speed(){
     if(current_speed>3){
       current_speed = 0;
     }
-    #ifdef USE_MODULE_DRIVERS_BUZZER
+    #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
       pCONT_buzzer->BuzzerBeep(current_speed);
     #endif
     AddLog(LOG_LEVEL_TEST, PSTR("MATCHED Increment %d"),current_speed);
@@ -201,7 +201,7 @@ void mSonoffIFan::SetFanSpeed(uint8_t fanspeed, bool sequence)
 //       if (action != GetFanspeed()) {
 //         snprintf_P(svalue, sizeof(svalue), PSTR(D_CMND_FANSPEED " %d"), action);
 //         ExecuteCommand(svalue, SRC_REMOTE);
-// #ifdef USE_MODULE_DRIVERS_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
 //         BuzzerEnabledBeep((action) ? action : 1, (action) ? 1 : 4);  // Beep action times
 // #endif
 //       }
@@ -216,7 +216,7 @@ void mSonoffIFan::SetFanSpeed(uint8_t fanspeed, bool sequence)
 //   }
 //   if (7 == mode) {
 //     // AA 55 01 07 00 01 01 0A - Rf long press - forget RF codes
-// #ifdef USE_MODULE_DRIVERS_BUZZER
+// #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
 //     BuzzerEnabledBeep(4, 1);                       // Beep four times
 // #endif
 //   }

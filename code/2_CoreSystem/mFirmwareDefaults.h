@@ -76,6 +76,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #warning "USE_MODULE_NETWORK_MQTT" has not been defined -- NO MQTT!
 #endif
 
+
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
 #endif
