@@ -149,7 +149,7 @@ Hallway + Understairs
 // #define DEVICE_CANDLE_ELECTRIC_HALLWAY  // Socket_SocketNumber16_Power
 // #define DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
 // #define DEVICE_HVAC_HEATING_MAIN
-#define DEVICE_HVAC_HEATING_MAIN_2023V2
+// #define DEVICE_HVAC_HEATING_MAIN_2023V2
 
 /**
  *  Landing + Hotpress

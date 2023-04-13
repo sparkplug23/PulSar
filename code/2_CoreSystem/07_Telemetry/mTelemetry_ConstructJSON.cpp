@@ -114,6 +114,7 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
   
     JBI->Add(PM_JSON_VERSION_NAME,     pCONT_set->firmware_version.current.name_ctr);
     JBI->Add(PM_JSON_BUILDDATE,       __DATE__);
+    JBI->Add("Branch", FIRMWARE_BRANCH_NAME_STRING);
     
     JBI->Add(PM_JSON_SERIAL,          pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer));
     JBI->Add(PM_JSON_BOOTCOUNT,       pCONT_set->Settings.bootcount);
