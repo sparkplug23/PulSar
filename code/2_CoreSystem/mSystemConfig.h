@@ -52,7 +52,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MODULE   3
 
 
-#define FIRMWARE_BRANCH_NAME_STRING "development" // Additions from colorado and for december 2022, to be merged into main dev branch and then deleted
+#define FIRMWARE_BRANCH_NAME_STRING "development_home"
 
 
 #ifndef SETTINGS_HOLDER
