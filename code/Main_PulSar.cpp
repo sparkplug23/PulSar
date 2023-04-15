@@ -52,9 +52,6 @@
 
 
 
-
-
-
 /*********************************************************************************************
  * Hardware related
 \*********************************************************************************************/
@@ -236,7 +233,7 @@ pCONT_sup->CmndCrash();
   Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
   #endif // DISABLE_SERIAL0_CORE
   #ifdef USE_SERIAL_ALTERNATE_TX
-    Serial.set_tx(2);
+    Serial.set_tx(2); // Doing this here so setup logging can be shown on H801
   #endif // USE_SERIAL_ALTERNATE_TX
   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
   #ifndef DISABLE_SERIAL_LOGGING
@@ -352,6 +349,7 @@ pCONT_sup->CmndCrash();
   #endif  // USE_EMERGENCY_RESET
 
   pCONT_sup->init_FirmwareVersion();
+
 
   /**
    * @brief Before getting settings to work, I need to first get UFS working and understand it, as its the future of settings saving. 
