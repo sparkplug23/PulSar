@@ -315,12 +315,9 @@ pCONT_sup->CmndCrash();
  ** File System *****************************************************************************
  ********************************************************************************************/
 
-// #ifdef USE_UFILESYS
-//   UfsInit();  // xdrv_50_filesystem.ino
-// #endif
-  // #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  // pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
-  // #endif
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
+  #endif
 
 
 //  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
@@ -336,10 +333,6 @@ pCONT_sup->CmndCrash();
 // #else // ESP32
 //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str()); // This function GetDeviceHardware needs added and supporting functions
 // #endif // ESP32
-
-#ifdef USE_UFILESYS
-  UfsInit();  // xdrv_50_filesystem.ino
-#endif
 
 /********************************************************************************************
  ** Settings ********************************************************************************
@@ -519,7 +512,6 @@ pCONT_sup->CmndCrash();
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
   // load
-  
 
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
@@ -534,16 +526,11 @@ pCONT_sup->CmndCrash();
   WDT_Reset();
   #endif
 
-// DEBUG_LINE_HERE_SHORT_PAUSE;
-
   // Init the refresh periods for mqtt
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif
-
-  
-
 
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
@@ -565,8 +552,7 @@ pCONT_sup->CmndCrash();
  ********************************************************************************************/
 
   pCONT->Tasker_Interface(FUNC_ON_BOOT_COMPLETE);
-
-
+  
 }
 
 void LoopTasker()

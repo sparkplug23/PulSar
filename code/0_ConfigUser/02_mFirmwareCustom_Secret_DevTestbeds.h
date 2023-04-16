@@ -21,7 +21,8 @@
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM800L
-#define DEVICE_TESTBED_SDCARD_STORAGE
+// #define DEVICE_TESTBED_SDCARD_STORAGE
+#define DEVICE_TESTBED_INTERNAL_STORAGE
 
 
 
@@ -9014,6 +9015,62 @@
 
 
 #endif // DEVICE_GPS_SDCARD_LOGGER
+
+
+
+/**
+ * Primary code development of using external SD Card for storing and logging data 
+ * - Storing for slow call back
+ * - Logging/Appending for larger data files that will append a data entry (json format) for each new data block
+ *    -- this might require ovverriding the end of the data file, appending a block, then reclosing the json data
+ 
+ Figure out has tas foes filesystem, then merge sdcard into this (phasing it out, I may want it for a while)
+ 
+ * */
+#ifdef DEVICE_TESTBED_INTERNAL_STORAGE
+  #define DEVICENAME_CTR          "testbed_filesystem_internal"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
+  #define DEVICENAME_ROOMHINT_CTR "Kitchen"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      /** 6P small - SD Card
+       * Green       15, CS
+       * Orange      14, SCK
+       * Yellow      13, MOSI
+       * White       12, MISO
+       * Red         3V3
+       * Black       GND
+       * */
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_SDCARD_VSPI_MISO_CTR  "\","
+      /** 2P small
+       * Red        Button Logging Toggle
+       * Black      GND
+       * */
+      "\"23\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+#endif // DEVICE_GPS_SDCARD_LOGGER
+
 
 
 /**
