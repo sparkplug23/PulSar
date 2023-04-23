@@ -81,6 +81,23 @@ struct {
   bool download_busy;
 } UfsData;
 
+
+
+  // /**
+  //  * @brief Move into SDCard code later
+  //  * 
+  //  */
+  // SPI.begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+  // if (!SD.begin(SD_CS)) {
+  //   ALOG_INF(PSTR("SDCard MOUNT FAIL"));
+  // } else {
+  //   uint32_t cardSize = SD.cardSize() / (1024 * 1024);
+  //   String str = "SDCard Size: " + String(cardSize) + "MB";
+  //   ALOG_INF(PSTR("%s"),str.c_str());
+  // }
+
+
+
 /*********************************************************************************************/
 
 // // Init flash file system

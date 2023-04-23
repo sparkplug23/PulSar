@@ -177,6 +177,10 @@
   #define D_MODULE_DRIVERS__TINYGSM__CTR          "tinygsm"
   #define D_MODULE_DRIVERS__TINYGSM__FRIENDLY_CTR "tinygsm"
 
+
+  #define D_MODULE__DRIVERS_MAVLINK__CTR          "mavlink"
+  #define D_MODULE__DRIVERS_MAVLINK__FRIENDLY_CTR "mavlink"
+
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
   // DEFINE_PGM_CTR(MODULE_CORE_SETTINGS_FRIENDLY_CTR              "rcswitch"

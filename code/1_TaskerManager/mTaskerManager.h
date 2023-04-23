@@ -301,6 +301,10 @@ enum MODULE_IDS{
     EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID,
   #endif
 
+  #ifdef USE_MODULE__DRIVERS_MAVLINK
+    EM_MODULE__DRIVERS_MAVLINK__ID,
+  #endif
+
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
     EM_MODULE_ENERGY_INTERFACE_ID,
@@ -678,6 +682,11 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
+#endif
+
+#ifdef USE_MODULE__DRIVERS_MAVLINK
+  #include "4_Drivers/70_MAVLink/mMAVLink.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK__ID])
 #endif
 
 

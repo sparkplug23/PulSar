@@ -38,6 +38,10 @@
 #include <SD.h>
 #include <Ticker.h>
 
+#ifdef ESP32
+#include <driver/adc.h>
+#endif
+
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
@@ -55,6 +59,20 @@
 
 #define DEFAULT_AT_COMMAND_RESPONSE_WAIT 5000
 
+
+//https://cplusplus.com/reference/cstdio/sscanf/
+//even though celullar here can report GPS, GPS should be rolled into driver/sensor? probably sensor, since its location data
+
+//https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+
+// https://www.google.co.uk/maps/place/@52.410555,-0.5150276,12/ 17
+
+// Or you can use OpenStreetMap directly in a Frame widget with a pin like this —
+
+// https://www.openstreetmap.org/?mlat=54.02227&mlon=-0.66649#map=19/54.02227/-0.66649
+
+
+  //https://github.com/vshymanskyy/TinyGSM/pull/260/files#diff-49f12f4a048fa1f63d160e1adb91526d97e2a16cd3ba3898525ac5d1a44ddb99
 
 
 class mCellular :

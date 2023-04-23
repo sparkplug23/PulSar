@@ -1004,7 +1004,7 @@ void mWiFi::WifiConnect(void)
   
   // if (!Settings.flag4.network_wifi) { return; } //probably for when ethernet is used instead
 
-  ALOG_INF(PSTR(D_LOG_DEBUG "%s"),__FUNCTION__);
+  // ALOG_INF(PSTR(D_LOG_DEBUG "%s"),__FUNCTION__);
   
   WifiSetState(0);
   // WifiSetOutputPower(); //new

@@ -117,9 +117,9 @@ struct handler {
   uint16_t      tRateSecs = 1;
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
-  const char*   postfix_topic;
+  const char*   postfix_topic = nullptr;
   uint8_t       handler_id = 0;
-  Handler_Flags flags;
+  Handler_Flags flags = {0}; //#issue FrequencyRedunctionLevel
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending); // member-function to sender with two args. Extra "json_appending" will allow calling constructjsons directly and adding them to another without closing the main json object
 };
 
@@ -340,12 +340,19 @@ class mMQTT :
         if(ABS_FUNCTION(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
           handler_ptr->tSavedLastSent=millis();
           handler_ptr->flags.SendNow = true;
+
+          #ifndef ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
           //handler_ptr->flags.FrequencyRedunctionLevel = 1;
           if(flag_uptime_reached_reduce_frequency && (handler_ptr->flags.FrequencyRedunctionLevel > MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID)){
             // handler_ptr->flags.FrequencyRedunctionLevel = 0; // reset to don't change            
             //Serial.println("flag_uptime_reached_reduce_frequency");            
             handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs; //only reduce if new rate is longer
           }
+
+          #endif
+
+
         }
       }
 

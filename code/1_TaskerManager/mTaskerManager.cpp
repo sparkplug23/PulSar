@@ -416,6 +416,10 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID] = new mWebCamera();
   #endif
 
+  #ifdef USE_MODULE__DRIVERS_MAVLINK
+    pModule[EM_MODULE__DRIVERS_MAVLINK__ID] = new mMAVLink();
+  #endif
+
 
 
   // Energy

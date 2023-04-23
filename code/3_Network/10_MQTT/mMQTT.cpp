@@ -700,7 +700,8 @@ void mMQTT::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
     #ifdef ENABLE_DEVFEATURE_DDNS_MQTT_TEST
 
-    pubsub->setServer("sparkequinox.ddns.net", 51883);
+    // pubsub->setServer(D_MQTT_MDNS_DDNS_ADDRESS_URL, 51883); // second broker for external
+    pubsub->setServer(D_MQTT_MDNS_DDNS_ADDRESS_URL, D_MQTT_PORT); // main broker
 
     #else
 

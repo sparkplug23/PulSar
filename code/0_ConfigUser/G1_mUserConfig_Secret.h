@@ -103,6 +103,9 @@
 #define D_FLEXI_O2_PHONE_NUMBER_CTR "07515358597"
 
 
+#define D_MQTT_MDNS_DDNS_ADDRESS_URL "sparkequinox.ddns.net"
+// #define D_MQTT_PORT 51883
+
 // Set phone number, if you want to test SMS
 // Set a recipient phone number to test sending SMS (it must be in international format including the "+" sign)
 #define SMS_TARGET  "+447515358597"
