@@ -469,8 +469,8 @@ DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS__CTR) "RC_CHANNELS"; // 6
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_OVERRIDE__CTR) "xxxx"; // 70 
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_RAW__CTR) "RC_CHANNELS_RAW"; // 35 
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_SCALED__CTR) "xxxx"; // 34 
-DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__REMOTE_LOG_BLOCK_STATUS__CTR) "xxxx"; // 185 
-DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__REMOTE_LOG_DATA_BLOCK__CTR) "xxxx"; // 184 
+DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__REMOTE_LOG_BLOCK_STATUS__CTR) "REMOTE_LOG_BLOCK_STATUS"; // 185 
+DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__REMOTE_LOG_DATA_BLOCK__CTR) "REMOTE_LOG_DATA_BLOCK"; // 184 
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__REQUEST_DATA_STREAM__CTR) "REQUEST_DATA_STREAM"; // 66 
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__RESOURCE_REQUEST__CTR) "xxxx"; // 142 
 DEFINE_PGM_CTR(PM_MAVLINK_MSG_PACKET_NAME__RPM__CTR) "xxxx"; // 226 
@@ -559,48 +559,180 @@ class mMAVLink :
     // PixhawkArduinoMAVLink* mav; //(hs);
 
     struct DATA{
-      mavlink_ahrs_t                      ahrs = {0};       
-      mavlink_ahrs2_t                     ahrs2 = {0};    
-      mavlink_attitude_t                  attitude = {0};    
-      mavlink_autopilot_version_t         autopilot_version = {0};
-      mavlink_battery_status_t            battery_status = {0};                  
-      mavlink_ekf_status_report_t         ekf_status_report = {0};                
-      mavlink_fence_status_t              fence_status = {0};                     
-      mavlink_gimbal_report_t             gimbal_report = {0};                        
-      mavlink_gimbal_torque_cmd_report_t  gimbal_torque_cmd_report = {0};
-      mavlink_global_position_int_t       global_position_int = {0};  
-      mavlink_gopro_heartbeat_t           gopro_heartbeat = {0};                
-      mavlink_gps_raw_int_t               gps_raw_int = {0};                 
-      mavlink_heartbeat_t                 heartbeat = {0};                   
-      mavlink_hwstatus_t                  hwstatus = {0};                   
-      mavlink_meminfo_t                   meminfo = {0};                            
-      mavlink_mission_current_t           mission_current = {0};                 
-      mavlink_mount_status_t              mount_status = {0};                          
-      mavlink_nav_controller_output_t     nav_controller_output = {0};        
-      mavlink_param_value_t               param_value = {0};                     
-      mavlink_power_status_t              power_status = {0};               
-      mavlink_raw_imu_t                   raw_imu = {0};                        
-      mavlink_rc_channels_t               rc_channels = {0};                        
-      mavlink_rc_channels_raw_t           rc_channels_raw = {0};                    
-      mavlink_request_data_stream_t       request_data_stream = {0};            
-      mavlink_scaled_imu2_t               scaled_imu2 = {0};                    
-      mavlink_scaled_imu3_t               scaled_imu3 = {0};                        
-      mavlink_scaled_pressure_t           scaled_pressure = {0};                     
-      mavlink_scaled_pressure2_t          scaled_pressure2 = {0};                  
-      mavlink_sensor_offsets_t            sensor_offsets = {0};                       
-      mavlink_servo_output_raw_t          servo_output_raw = {0};               
-      mavlink_statustext_t                statustext = {0};                    
-      mavlink_sys_status_t                sys_status = {0};                     
-      mavlink_system_time_t               system_time = {0};                 
-      mavlink_timesync_t                  timesync = {0};                   
-      mavlink_vfr_hud_t                   vfr_hud = {0};                      
-      mavlink_vibration_t                 vibration = {0};                                
+      struct{
+        mavlink_ahrs_t                    data = {0};       
+        uint32_t                          tUpdate = 0;
+      }ahrs;
+      struct{
+        mavlink_ahrs2_t                   data = {0};       
+        uint32_t                          tUpdate = 0;
+      }ahrs2;
+      struct{
+        mavlink_attitude_t                data = {0};       
+        uint32_t                          tUpdate = 0;
+      }attitude;   
+      struct{
+        mavlink_autopilot_version_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }autopilot_version;
+      struct{
+        mavlink_battery_status_t          data = {0};       
+        uint32_t                          tUpdate = 0;
+      }battery_status;  
+      struct{
+        mavlink_ekf_status_report_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }ekf_status_report;  
+      struct{
+        mavlink_fence_status_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }fence_status;          
+      struct{
+        mavlink_gimbal_report_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }gimbal_report;     
+      struct{
+        mavlink_gimbal_torque_cmd_report_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }gimbal_torque_cmd_report;     
+      struct{
+        mavlink_global_position_int_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }global_position_int;     
+      struct{
+        mavlink_gopro_heartbeat_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }gopro_heartbeat;     
+      struct{
+        mavlink_gopro_set_response_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }gopro_set_response; 
+      struct{
+        mavlink_gps_raw_int_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }gps_raw_int; 
+      struct{
+        mavlink_heartbeat_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }heartbeat; 
+      struct{
+        mavlink_hwstatus_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }hwstatus; 
+      struct{
+        mavlink_meminfo_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }meminfo; 
+      struct{
+        mavlink_mission_current_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }mission_current; 
+      struct{
+        mavlink_mount_status_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }mount_status;    
+      struct{
+        mavlink_nav_controller_output_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }nav_controller_output;    
+      struct{
+        mavlink_param_request_read_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }param_request_read;    
+      struct{
+        mavlink_param_request_list_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }param_request_list;    
+      struct{
+        mavlink_param_value_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }param_value;    
+      struct{
+        mavlink_power_status_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }power_status;    
+      struct{
+        mavlink_raw_imu_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }raw_imu;    
+      struct{
+        mavlink_rc_channels_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }rc_channels; 
+      struct{
+        mavlink_rc_channels_raw_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }rc_channels_raw; 
+      struct{
+        mavlink_remote_log_block_status_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }remote_log_block_status; 
+      struct{
+        mavlink_request_data_stream_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }request_data_stream; 
+      struct{
+        mavlink_scaled_imu2_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }scaled_imu2; 
+      struct{
+        mavlink_scaled_imu3_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }scaled_imu3;   
+      struct{
+        mavlink_scaled_pressure_t         data = {0};       
+        uint32_t                          tUpdate = 0;
+      }scaled_pressure;   
+      struct{
+        mavlink_scaled_pressure2_t        data = {0};       
+        uint32_t                          tUpdate = 0;
+      }scaled_pressure2;           
+      struct{
+        mavlink_sensor_offsets_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }sensor_offsets; 
+      struct{
+        mavlink_servo_output_raw_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }servo_output_raw; 
+      struct{
+        mavlink_set_mode_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }set_mode; 
+      struct{
+        mavlink_statustext_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }statustext;                                       
+      struct{
+        mavlink_sys_status_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }sys_status;                                       
+      struct{
+        mavlink_system_time_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }system_time;                                       
+      struct{
+        mavlink_timesync_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }timesync;                                       
+      struct{
+        mavlink_terrain_report_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }terrain_report;                                      
+      struct{
+        mavlink_vfr_hud_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }vfr_hud;                                      
+      struct{
+        mavlink_vibration_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }vibration;                                                                   
     }pkt;
 
 
     HardwareSerial* _MAVSerial;
     
-    double MILLIG_TO_MS2;
+    
     uint8_t system_id;
     uint8_t component_id;
     uint8_t type;
