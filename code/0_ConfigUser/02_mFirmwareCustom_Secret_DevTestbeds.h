@@ -24,7 +24,8 @@
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM800L
 // #define DEVICE_TESTBED_ESP32_BUZZER_TONES
-#define DEVICE_TESTBED_MAVLINK_DECODER
+// #define DEVICE_TESTBED_MAVLINK_DECODER
+#define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
 
 
 
@@ -2172,6 +2173,9 @@
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+  #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
   
   // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
 
@@ -2294,6 +2298,259 @@
 
 #endif // DEVICE_TESTBED_MAVLINK_DECODER
 
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
+  #define DEVICENAME_CTR          "mavlink_cellular_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+  #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define USE_MODULE__DRIVERS_MAVLINK
+
+  #define USE_DEVFEATURE_DEFINED_SERIAL2
+
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
+  // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+  // // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // // #define USE_MODULE_NETWORK_MQTT
+  // // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // // #define USE_SSIDS_NONE_DEBUGGING
+  // // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // // #define DISABLE_NETWORK
+
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define USE_MODULE__DRIVERS_MAVLINK
+
+  // #define D_MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  #define ENABLE_DEVFEATURE_SIM7000G_HOTSTART_NO_RESTART
+
+
+  // #define USE_DEVFEATURE_DEFINED_SERIAL2
+
+ #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+//  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // // #define USE_MODULE_NETWORK_MQTT
+  // // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // // #define USE_SSIDS_NONE_DEBUGGING
+  // // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // // #define DISABLE_NETWORK
+
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define D_MQTT_PORT 51884 //external mqtt broker on TOWER 
+
+  // /**
+  //  * @brief WiFi MQTT
+  //  * 
+  //  */
+  // // #define USE_MODULE_NETWORK_WIFI
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  // /**
+  //  * @brief Cellular MQTT
+  //  * 
+  //  */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+  //   // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+  #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+
+//  6P connector
+
+//  Green VIN (5v)
+// Orange 18
+// Yellow 19
+// White 25
+// Red 26
+// Black gnd
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 
 
 

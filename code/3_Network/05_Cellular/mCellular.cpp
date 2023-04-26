@@ -135,15 +135,18 @@ void mCellular::Init(void)
    */
   SerialAT.begin(UART_BAUD, SERIAL_8N1, PIN_RX, PIN_TX);
 
+  #ifdef ENABLE_DEVFEATURE_SIM7000G_HOTSTART_NO_RESTART
+  ALOG_INF(PSTR("Faster init modem"));
+  if (!modem->init()) {
+    ALOG_INF(PSTR("Failed to init modem"));
+  }
+  #else
   // Restart takes quite some time, to skip it, call init() instead of restart()
   ALOG_INF(PSTR("Restarting modem (may take 60 seconds)"));
   if (!modem->restart()) {
     ALOG_INF(PSTR("Failed to restart modem, attempting to continue without restarting"));
   }
-  // ALOG_INF(PSTR("Faster init modem"));
-  // if (!modem->init()) {
-  //   ALOG_INF(PSTR("Failed to init modem"));
-  // }
+  #endif
 
   GPRS_Enable();
 

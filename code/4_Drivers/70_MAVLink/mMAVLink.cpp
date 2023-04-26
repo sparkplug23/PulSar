@@ -78,6 +78,22 @@ void mMAVLink::Pre_Init(void)
 
   ALOG_INF(PSTR("mMAVLink::Pre_Init(void)"));
 
+
+
+  // if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_RX_ID)) {
+  //   settings.uart2.receive_interrupts_enable = true;
+  //   settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
+  //   settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
+  //   settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
+  //   // init_UART2_pins();
+  //   AddLog(LOG_LEVEL_INFO, PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+  // }else{
+  //   settings.uart2.receive_interrupts_enable = false;
+  // }
+
+
+
+
   // if (pCONT_pins->PinUsed(GPIO_BUZZER_ID)) {
   //   pinMode(pCONT_pins->GetPin(GPIO_BUZZER_ID), OUTPUT);
   //   Buzzer.pin = pCONT_pins->GetPin(GPIO_BUZZER_ID);
@@ -97,10 +113,22 @@ void mMAVLink::Pre_Init(void)
   //   settings.fEnableSensor = false;
   // }
 
+  #ifdef USE_DEVFEATURE_DEFINED_SERIAL2
+
+  const uint8_t lRXD2 = 18;
+  const uint8_t lTXD2 = 19;
   
+  // Serial2.begin(921600, SERIAL_8N1, RXD2, TXD2);
   _MAVSerial = &Serial2;
-  
+  _MAVSerial->begin(921600, SERIAL_8N1, lRXD2, lTXD2);
+
+  #else
+  _MAVSerial = &Serial2;
   _MAVSerial->begin(921600);
+  #endif
+
+
+
   _MAVSerial->println("BOOT");
   
   
@@ -119,6 +147,9 @@ void mMAVLink::Init(void)
     Serial.println("Init");
   while(!begin()){
     Serial.println("Not Connected: Waiting for Heartbeat from ardupilot");
+    
+  _MAVSerial->println("BOOT");
+
     delay(1000);
   }
 
@@ -144,8 +175,8 @@ void mMAVLink::Init(void)
 // }
 
 bool mMAVLink::begin(){
-  _MAVSerial->begin(921600);
-  delay(1000);
+  // _MAVSerial->begin(921600);
+  // delay(1000);
   if(_MAVSerial->available()<=0){
 
     
@@ -156,7 +187,7 @@ bool mMAVLink::begin(){
     uint8_t bufhb[MAVLINK_MAX_PACKET_LEN];
     mavlink_msg_heartbeat_pack(system_id, component_id, &msghb, type, autopilot, MAV_MODE_PREFLIGHT, 0, MAV_STATE_STANDBY);
     uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
-    delay(1000);
+    // delay(1000);
     _MAVSerial->write(bufhb,lenhb);
     Serial.println("Heartbeats sent! Now will check for recieved heartbeats to record sysid and compid...");
 
@@ -171,7 +202,7 @@ bool mMAVLink::begin(){
 // After that we will check for whether we are recieving HeartBeats back from Pixhawk if Yes,
 // We will note down its sysid and compid to send it a req to Stream Data.
 void mMAVLink::StreamF(){
-  delay(2000);
+  // delay(2000);
   int flag=1;
   Serial.println("Sending Heartbeats...");
   mavlink_message_t msghb;
@@ -179,7 +210,7 @@ void mMAVLink::StreamF(){
   uint8_t bufhb[MAVLINK_MAX_PACKET_LEN];
   mavlink_msg_heartbeat_pack(system_id, component_id, &msghb, type, autopilot, MAV_MODE_PREFLIGHT, 0, MAV_STATE_STANDBY);
   uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
-  delay(1000);
+  // delay(1000);
   _MAVSerial->write(bufhb,lenhb);
   Serial.println("Heartbeats sent! Now will check for recieved heartbeats to record sysid and compid...");
 
@@ -209,13 +240,13 @@ void mMAVLink::StreamF(){
   }
 
   // Sending request for data stream...
-  Serial.println("Now sending request for data stream...");
-  delay(2000);
+  // Serial.println("Now sending request for data stream...");
+  // delay(2000);
   mavlink_message_t msgds;
   uint8_t bufds[MAVLINK_MAX_PACKET_LEN];
   mavlink_msg_request_data_stream_pack(system_id, component_id, &msgds, received_sysid, received_compid, MAV_DATA_STREAM_ALL , 0x05, 1);
   uint16_t lends = mavlink_msg_to_send_buffer(bufds, &msgds);
-  delay(1000);
+  // delay(1000);
   _MAVSerial->write(bufds,lends);
   Serial.println("Request sent! Now you are ready to recieve datas...");
 
@@ -249,6 +280,7 @@ void mMAVLink::PollMAVLink_Stream()
       bool parsed_packet = true; //default will reset
       switch(msg.msgid)
       {
+
         default:
           parsed_packet = false;  
         break; // Not parsed 
@@ -437,7 +469,7 @@ const char* mMAVLink::MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* buffer, 
 {
 
   if(buffer == nullptr){ return PM_SEARCH_NOMATCH;}
-  switch(id){
+  switch(id){    
     default:     memcpy_P(buffer, PM_SEARCH_NOMATCH, sizeof(PM_SEARCH_NOMATCH)); break;
     case MAVLINK_MSG_ID_ACTUATOR_CONTROL_TARGET:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__ACTUATOR_CONTROL_TARGET__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__ACTUATOR_CONTROL_TARGET__CTR)); break;
     case MAVLINK_MSG_ID_ADAP_TUNING:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__ADAP_TUNING__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__ADAP_TUNING__CTR)); break;
@@ -699,17 +731,46 @@ uint8_t mMAVLink::ConstructJSON_Settings(uint8_t json_level, bool json_appending
 
   JBI->Start();
 
+  char buffer[100];
+  JBI->Level_Start("MessageID");
     
-  JBI->Add("msg_count", unique_msg_id_list.size());
+    JBI->Add("UniqueCount", unique_msg_id_list.size());
 
-  JBI->Array_Start("msg list");
-  for(int i=0;i<unique_msg_id_list.size();i++)
-  {
-    JBI->Add(unique_msg_id_list[i]);
+    JBI->Array_Start("FullListID");
+    for(int i=0;i<unique_msg_id_list.size();i++)
+    {
+      JBI->Add(unique_msg_id_list[i]);
+    }
+    JBI->Array_End();
 
-  }
+    JBI->Array_Start("FullListName");
+    for(int i=0;i<unique_msg_id_list.size();i++)
+    {
+      JBI->Add(MavLink_Msg_FriendlyName_By_ID(unique_msg_id_list[i], buffer, sizeof(buffer)));
+    }
+    JBI->Array_End();
 
-  JBI->Array_End();
+    
+    JBI->Array_Start("UnparsedIDName");
+    for(int i=0;i<unique_msg_id_list.size();i++)
+    {
+      bool is_found = false;
+      for(int j=0;j<ARRAY_SIZE(included_parsing_list_mavlink_ids);j++)
+      {
+        if(unique_msg_id_list[i] == included_parsing_list_mavlink_ids[j])
+        {
+          is_found = true;
+          break; //leave for
+        }
+      }
+      if(!is_found)
+      {
+        JBI->Add(MavLink_Msg_FriendlyName_By_ID(unique_msg_id_list[i], buffer, sizeof(buffer)));
+      }
+    }
+    JBI->Array_End();
+
+  JBI->Level_End();
 
 
   return JBI->End();
@@ -720,11 +781,184 @@ uint8_t mMAVLink::ConstructJSON_Settings(uint8_t json_level, bool json_appending
 uint8_t mMAVLink::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_JSON_VOLTAGE, 0);
+  return JBI->End();
+
+}
+
+/**
+ * @brief Sending the useful data in one message
+ * 
+ * @param json_level 
+ * @param json_appending 
+ * @return uint8_t 
+ */
+uint8_t mMAVLink::ConstructJSON_Overview_01(uint8_t json_level, bool json_appending){
+
+  JBI->Start();
+  JBI->Level_Start("heartbeat");
+    JBI->Add("t", pkt.heartbeat.tUpdate);
+    JBI->Add("system_status", pkt.heartbeat.data.system_status); /*< System status flag, as defined by MAV_STATE enum*/
+  JBI->Level_End();
+  JBI->Level_Start("statustext");
+    JBI->Add("severity", pkt.statustext.data.severity);/*< Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.*/
+    JBI->Add("text", pkt.statustext.data.text);/*< Status text message, without null termination character*/
+  JBI->Level_End();
+  JBI->Level_Start("ahrs2");
+    JBI->Add("roll", pkt.ahrs2.data.roll);
+    JBI->Add("pitch", pkt.ahrs2.data.pitch);
+    JBI->Add("yaw", pkt.ahrs2.data.yaw);
+    JBI->Add("altitude", pkt.ahrs2.data.altitude);
+    JBI->Add("lat", pkt.ahrs2.data.lat);
+    JBI->Add("lng", pkt.ahrs2.data.lng);
+  JBI->Level_End();
+  JBI->Level_Start("attitude");
+    JBI->Add("roll", pkt.attitude.data.roll);/*< Roll angle (rad, -pi..+pi)*/
+    JBI->Add("pitch", pkt.attitude.data.pitch); /*< Pitch angle (rad, -pi..+pi)*/
+    JBI->Add("yaw", pkt.attitude.data.yaw);/*< Yaw angle (rad, -pi..+pi)*/
+    JBI->Add("rollspeed", pkt.attitude.data.rollspeed);/*< Roll angular speed (rad/s)*/
+    JBI->Add("pitchspeed", pkt.attitude.data.pitchspeed);/*< Pitch angular speed (rad/s)*/
+    JBI->Add("yawspeed", pkt.attitude.data.yawspeed);/*< Yaw angular speed (rad/s)*/
+  JBI->Level_End();
+  JBI->Level_Start("battery_status");
+    JBI->Add("current_consumed", pkt.battery_status.data.current_consumed); /*< Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate*/
+    JBI->Add("energy_consumed", pkt.battery_status.data.energy_consumed);/*< Consumed energy, in HectoJoules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate*/
+    JBI->Add("temperature", pkt.battery_status.data.temperature);/*< Temperature of the battery in centi-degrees celsius. INT16_MAX for unknown temperature.*/
+    JBI->Array_AddArray("voltages", pkt.battery_status.data.voltages, ARRAY_SIZE(pkt.battery_status.data.voltages));/*< Battery voltage of cells, in millivolts (1 = 1 millivolt). Cells above the valid cell count for this battery should have the UINT16_MAX value.*/
+    JBI->Add("current_battery", pkt.battery_status.data.current_battery);/*< Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current*/
+    JBI->Add("id", pkt.battery_status.data.id);/*< Battery ID*/
+    JBI->Add("battery_function", pkt.battery_status.data.battery_function);/*< Function of the battery*/
+    JBI->Add("type", pkt.battery_status.data.type);/*< Type (chemistry) of the battery*/
+    JBI->Add("battery_remaining", pkt.battery_status.data.battery_remaining);/*< Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery*/
+    JBI->Add("time_remaining", pkt.battery_status.data.time_remaining);/*< Remaining battery time, in seconds (1 = 1s = 0% energy left), 0: autopilot does not provide remaining battery time estimate*/
+    JBI->Add("charge_state", pkt.battery_status.data.charge_state);/*< State for extent of discharge, provided by autopilot for warning or external reactions*/
+  JBI->Level_End();
+  JBI->Level_Start("fence_status");
+    JBI->Add("breach_status", pkt.fence_status.data.breach_status);/*< 0 if currently inside fence, 1 if outside*/
+  JBI->Level_End();
+  JBI->Level_Start("gimbal_report");
+    JBI->Add("joint_roll", pkt.gimbal_report.data.joint_roll);/*< Joint ROLL (radians)*/
+    JBI->Add("joint_el", pkt.gimbal_report.data.joint_el); /*< Joint EL (radians)*/
+    JBI->Add("joint_az", pkt.gimbal_report.data.joint_az);/*< Joint AZ (radians)*/
+  JBI->Level_End();
+  JBI->Level_Start("global_position_int"); 
+  JBI->Add("lat", pkt.global_position_int.data.lat);/*< Latitude, expressed as degrees * 1E7*/
+    JBI->Add("lon", pkt.global_position_int.data.lon);/*< Longitude, expressed as degrees * 1E7*/
+    JBI->Add("alt", pkt.global_position_int.data.alt);/*< Altitude in meters, expressed as * 1000 (millimeters), AMSL (not WGS84 - note that virtually all GPS modules provide the AMSL as well)*/
+    JBI->Add("relative_alt", pkt.global_position_int.data.relative_alt);/*< Altitude above ground in meters, expressed as * 1000 (millimeters)*/
+    JBI->Add("vx", pkt.global_position_int.data.vx);/*< Ground X Speed (Latitude, positive north), expressed as m/s * 100*/
+    JBI->Add("vy", pkt.global_position_int.data.vy); /*< Ground Y Speed (Longitude, positive east), expressed as m/s * 100*/
+    JBI->Add("vz", pkt.global_position_int.data.vz);/*< Ground Z Speed (Altitude, positive down), expressed as m/s * 100*/
+    JBI->Add("hdg", pkt.global_position_int.data.hdg);/*< Vehicle heading (yaw angle) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
+  JBI->Level_End();
+  JBI->Level_Start("gopro_heartbeat");
+    JBI->Add("status", pkt.gopro_heartbeat.data.status);
+    JBI->Add("capture_mode", pkt.gopro_heartbeat.data.capture_mode);
+  JBI->Level_End();
+  JBI->Level_Start("gps_raw_int");
+    JBI->Add("lat", pkt.gps_raw_int.data.lat);/*< Latitude (WGS84, EGM96 ellipsoid), in degrees * 1E7*/
+    JBI->Add("lon", pkt.gps_raw_int.data.lon);/*< Longitude (WGS84, EGM96 ellipsoid), in degrees * 1E7*/
+    JBI->Add("alt", pkt.gps_raw_int.data.alt);/*< Altitude (AMSL, NOT WGS84), in meters * 1000 (positive for up). Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude.*/
+    JBI->Add("eph", pkt.gps_raw_int.data.eph);/*< GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX*/
+    JBI->Add("epv", pkt.gps_raw_int.data.epv);/*< GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX*/
+    JBI->Add("vel", pkt.gps_raw_int.data.vel); /*< GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX*/
+    JBI->Add("cog", pkt.gps_raw_int.data.cog);/*< Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
+    JBI->Add("fix_type", pkt.gps_raw_int.data.fix_type); /*< See the GPS_FIX_TYPE enum.*/
+    JBI->Add("satellites_visible", pkt.gps_raw_int.data.satellites_visible);/*< Number of satellites visible. If unknown, set to 255*/
+    JBI->Add("alt_ellipsoid", pkt.gps_raw_int.data.alt_ellipsoid);/*< Altitude (above WGS84, EGM96 ellipsoid), in meters * 1000 (positive for up).*/
+    JBI->Add("h_acc", pkt.gps_raw_int.data.h_acc);/*< Position uncertainty in meters * 1000 (positive for up).*/
+    JBI->Add("v_acc", pkt.gps_raw_int.data.v_acc);/*< Altitude uncertainty in meters * 1000 (positive for up).*/
+    JBI->Add("vel_acc", pkt.gps_raw_int.data.vel_acc);/*< Speed uncertainty in meters * 1000 (positive for up).*/
+    JBI->Add("hdg_acc", pkt.gps_raw_int.data.hdg_acc);/*< Heading / track uncertainty in degrees * 1e5.*/
+  JBI->Level_End();
+  JBI->Level_Start("hwstatus");
+    JBI->Add("Vcc", pkt.hwstatus.data.Vcc);/*< board voltage (mV)*/
+  JBI->Level_End();
+  JBI->Level_Start("meminfo");
+    JBI->Add("brkval", pkt.meminfo.data.brkval);/*< heap top*/
+    JBI->Add("freemem", pkt.meminfo.data.freemem);/*< free memory*/
+    JBI->Add("freemem32", pkt.meminfo.data.freemem32);/*< free memory (32 bit)*/
+  JBI->Level_End();
+  JBI->Level_Start("mission_current");
+    JBI->Add("seq", pkt.mission_current.data.seq);/*< Sequence*/
+  JBI->Level_End();
+
   return JBI->End();
     
 }
 
+
+/**
+ * @brief Sending the useful data in one message
+ * 
+ * @param json_level 
+ * @param json_appending 
+ * @return uint8_t 
+ */
+uint8_t mMAVLink::ConstructJSON_Overview_02(uint8_t json_level, bool json_appending){
+
+  JBI->Start();
+  JBI->Level_Start("nav_controller_output");
+    JBI->Add("nav_roll", pkt.nav_controller_output.data.nav_roll);/*< Current desired roll in degrees*/
+    JBI->Add("nav_pitch", pkt.nav_controller_output.data.nav_pitch); /*< Current desired pitch in degrees*/
+    JBI->Add("alt_error", pkt.nav_controller_output.data.alt_error);/*< Current altitude error in meters*/
+    JBI->Add("aspd_error", pkt.nav_controller_output.data.aspd_error);/*< Current airspeed error in meters/second*/
+    JBI->Add("xtrack_error", pkt.nav_controller_output.data.xtrack_error); /*< Current crosstrack error on x-y plane in meters*/
+    JBI->Add("nav_bearing", pkt.nav_controller_output.data.nav_bearing);/*< Current desired heading in degrees*/
+    JBI->Add("target_bearing", pkt.nav_controller_output.data.target_bearing);/*< Bearing to current waypoint/target in degrees*/
+    JBI->Add("wp_dist", pkt.nav_controller_output.data.wp_dist); /*< Distance to active waypoint in meters*/
+  JBI->Level_End();
+  JBI->Level_Start("rc_channels");
+    JBI->Add("chancount", pkt.rc_channels.data.chancount);/*< Total number of RC channels being received. This can be larger than 18, indicating that more channels are available but not given in this message. This value should be 0 when no RC channels are available.*/
+    JBI->Add("rssi", pkt.rc_channels.data.rssi);/*< Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.*/
+  JBI->Level_End();
+  JBI->Level_Start("scaled_imu2");
+    JBI->Add("xacc", pkt.scaled_imu2.data.xacc); /*< X acceleration (mg)*/
+    JBI->Add("yacc", pkt.scaled_imu2.data.yacc); /*< y acceleration (mg)*/
+    JBI->Add("zacc", pkt.scaled_imu2.data.zacc); /*< Z acceleration (mg)*/
+    JBI->Add("xgyro", pkt.scaled_imu2.data.xgyro);/*< Angular speed around X axis (millirad /sec)*/
+    JBI->Add("ygyro", pkt.scaled_imu2.data.ygyro);/*< Angular speed around y axis (millirad /sec)*/
+    JBI->Add("zgyro", pkt.scaled_imu2.data.zgyro);/*< Angular speed around Z axis (millirad /sec)*/
+    JBI->Add("xmag", pkt.scaled_imu2.data.xmag);/*< X Magnetic field (milli tesla)*/
+    JBI->Add("ymag", pkt.scaled_imu2.data.ymag);/*<   y Magnetic field (milli tesla)*/
+    JBI->Add("zmag", pkt.scaled_imu2.data.zmag);/*< Z Magnetic field (milli tesla)*/
+  JBI->Level_End();
+  JBI->Level_Start("scaled_pressure");
+    JBI->Add("press_abs", pkt.scaled_pressure.data.press_abs);/*< Absolute pressure (hectopascal)*/
+    JBI->Add("press_diff", pkt.scaled_pressure.data.press_diff);/*< Differential pressure 1 (hectopascal)*/
+    JBI->Add("temperature", pkt.scaled_pressure.data.temperature);/*< Temperature measurement (0.01 degrees celsius)*/
+  JBI->Level_End();
+  JBI->Level_Start("sys_status");
+    JBI->Add("sensorsC", pkt.sys_status.data.onboard_control_sensors_present);/*< Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
+    JBI->Add("sensorsE", pkt.sys_status.data.onboard_control_sensors_enabled);/*< Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
+    JBI->Add("sensorsH", pkt.sys_status.data.onboard_control_sensors_health);/*< Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
+    JBI->Add("load", pkt.sys_status.data.load);/*< Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000*/
+    JBI->Add("voltage_battery", pkt.sys_status.data.voltage_battery); /*< Battery voltage, in millivolts (1 = 1 millivolt)*/
+    JBI->Add("current_battery", pkt.sys_status.data.current_battery);/*< Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current*/
+    JBI->Add("drop_rate_comm", pkt.sys_status.data.drop_rate_comm);/*< Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)*/
+    JBI->Add("errors_comm", pkt.sys_status.data.errors_comm);/*< Communication errors (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)*/
+    JBI->Add("battery_remaining", pkt.sys_status.data.battery_remaining);/*< Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery*/
+  JBI->Level_End();
+  JBI->Level_Start("terrain_report"); 
+    JBI->Add("lat", pkt.terrain_report.data.lat); /*< Latitude (degrees *10^7)*/
+    JBI->Add("lon", pkt.terrain_report.data.lon); /*< Longitude (degrees *10^7)*/
+    JBI->Add("terrain_height", pkt.terrain_report.data.terrain_height); /*< Terrain height in meters AMSL*/
+    JBI->Add("current_height", pkt.terrain_report.data.current_height); /*< Current vehicle height above lat/lon terrain height (meters)*/
+    JBI->Add("spacing", pkt.terrain_report.data.spacing); /*< grid spacing (zero if terrain at this location unavailable)*/
+    JBI->Add("pending", pkt.terrain_report.data.pending); /*< Number of 4x4 terrain blocks waiting to be received or read from disk*/
+    JBI->Add("loaded", pkt.terrain_report.data.loaded); /*< Number of 4x4 terrain blocks in memory*/
+  JBI->Level_End();
+  JBI->Level_Start("vfr_hud");
+    JBI->Add("airspeed", pkt.vfr_hud.data.airspeed);/*< Current airspeed in m/s*/
+    JBI->Add("groundspeed", pkt.vfr_hud.data.groundspeed);/*< Current ground speed in m/s*/
+    JBI->Add("alt", pkt.vfr_hud.data.alt);/*< Current altitude (MSL), in meters*/
+    JBI->Add("climb", pkt.vfr_hud.data.climb);/*< Current climb rate in meters/second*/
+    JBI->Add("heading", pkt.vfr_hud.data.heading);/*< Current heading in degrees, in compass units (0..360, 0=north)*/
+    JBI->Add("throttle", pkt.vfr_hud.data.throttle);/*< Current throttle setting in integer percent, 0 to 100*/
+  JBI->Level_End();
+
+  return JBI->End();
+    
+}
 
 
 uint8_t mMAVLink::ConstructJSON_ahrs(uint8_t json_level, bool json_appending)
@@ -759,12 +993,12 @@ uint8_t mMAVLink::ConstructJSON_attitude(uint8_t json_level, bool json_appending
   JBI->Start();
     JBI->Add("t", millis()-pkt.attitude.tUpdate);
     JBI->Add("time_boot_ms", pkt.attitude.data.time_boot_ms);
-    JBI->Add("roll", pkt.attitude.data.roll);
-    JBI->Add("pitch", pkt.attitude.data.pitch);
-    JBI->Add("yaw", pkt.attitude.data.yaw);
-    JBI->Add("rollspeed", pkt.attitude.data.rollspeed);
-    JBI->Add("pitchspeed", pkt.attitude.data.pitchspeed);
-    JBI->Add("yawspeed", pkt.attitude.data.yawspeed);
+    JBI->Add("roll", pkt.attitude.data.roll);/*< Roll angle (rad, -pi..+pi)*/
+    JBI->Add("pitch", pkt.attitude.data.pitch); /*< Pitch angle (rad, -pi..+pi)*/
+    JBI->Add("yaw", pkt.attitude.data.yaw);/*< Yaw angle (rad, -pi..+pi)*/
+    JBI->Add("rollspeed", pkt.attitude.data.rollspeed);/*< Roll angular speed (rad/s)*/
+    JBI->Add("pitchspeed", pkt.attitude.data.pitchspeed);/*< Pitch angular speed (rad/s)*/
+    JBI->Add("yawspeed", pkt.attitude.data.yawspeed);/*< Yaw angular speed (rad/s)*/
   return JBI->End();    
 }
 
@@ -791,17 +1025,17 @@ uint8_t mMAVLink::ConstructJSON_battery_status(uint8_t json_level, bool json_app
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.battery_status.tUpdate);
-    JBI->Add("current_consumed", pkt.battery_status.data.current_consumed);
-    JBI->Add("energy_consumed", pkt.battery_status.data.energy_consumed);
-    JBI->Add("temperature", pkt.battery_status.data.temperature);
-    JBI->Array_AddArray("voltages", pkt.battery_status.data.voltages, ARRAY_SIZE(pkt.battery_status.data.voltages));
-    JBI->Add("current_battery", pkt.battery_status.data.current_battery);
-    JBI->Add("id", pkt.battery_status.data.id);
-    JBI->Add("battery_function", pkt.battery_status.data.battery_function);
-    JBI->Add("type", pkt.battery_status.data.type);
-    JBI->Add("battery_remaining", pkt.battery_status.data.battery_remaining);
-    JBI->Add("time_remaining", pkt.battery_status.data.time_remaining);
-    JBI->Add("charge_state", pkt.battery_status.data.charge_state);
+    JBI->Add("current_consumed", pkt.battery_status.data.current_consumed); /*< Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate*/
+    JBI->Add("energy_consumed", pkt.battery_status.data.energy_consumed);/*< Consumed energy, in HectoJoules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate*/
+    JBI->Add("temperature", pkt.battery_status.data.temperature);/*< Temperature of the battery in centi-degrees celsius. INT16_MAX for unknown temperature.*/
+    JBI->Array_AddArray("voltages", pkt.battery_status.data.voltages, ARRAY_SIZE(pkt.battery_status.data.voltages));/*< Battery voltage of cells, in millivolts (1 = 1 millivolt). Cells above the valid cell count for this battery should have the UINT16_MAX value.*/
+    JBI->Add("current_battery", pkt.battery_status.data.current_battery);/*< Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current*/
+    JBI->Add("id", pkt.battery_status.data.id);/*< Battery ID*/
+    JBI->Add("battery_function", pkt.battery_status.data.battery_function);/*< Function of the battery*/
+    JBI->Add("type", pkt.battery_status.data.type);/*< Type (chemistry) of the battery*/
+    JBI->Add("battery_remaining", pkt.battery_status.data.battery_remaining);/*< Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery*/
+    JBI->Add("time_remaining", pkt.battery_status.data.time_remaining);/*< Remaining battery time, in seconds (1 = 1s = 0% energy left), 0: autopilot does not provide remaining battery time estimate*/
+    JBI->Add("charge_state", pkt.battery_status.data.charge_state);/*< State for extent of discharge, provided by autopilot for warning or external reactions*/
   return JBI->End();    
 }
 
@@ -823,10 +1057,10 @@ uint8_t mMAVLink::ConstructJSON_fence_status(uint8_t json_level, bool json_appen
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.fence_status.tUpdate);
-    JBI->Add("breach_time", pkt.fence_status.data.breach_time);
-    JBI->Add("breach_count", pkt.fence_status.data.breach_count);
-    JBI->Add("breach_status", pkt.fence_status.data.breach_status);
-    JBI->Add("breach_type", pkt.fence_status.data.breach_type);
+    JBI->Add("breach_time", pkt.fence_status.data.breach_time);/*< time of last breach in milliseconds since boot*/
+    JBI->Add("breach_count", pkt.fence_status.data.breach_count);/*< number of fence breaches*/
+    JBI->Add("breach_status", pkt.fence_status.data.breach_status);/*< 0 if currently inside fence, 1 if outside*/
+    JBI->Add("breach_type", pkt.fence_status.data.breach_type);/*< last breach type (see FENCE_BREACH_* enum)*/
   return JBI->End();    
 }
 
@@ -841,9 +1075,9 @@ uint8_t mMAVLink::ConstructJSON_gimbal_report(uint8_t json_level, bool json_appe
     JBI->Add("delta_velocity_x", pkt.gimbal_report.data.delta_velocity_x);
     JBI->Add("delta_velocity_y", pkt.gimbal_report.data.delta_velocity_y);
     JBI->Add("delta_velocity_z", pkt.gimbal_report.data.delta_velocity_z);
-    JBI->Add("joint_roll", pkt.gimbal_report.data.joint_roll);
-    JBI->Add("joint_el", pkt.gimbal_report.data.joint_el);
-    JBI->Add("joint_az", pkt.gimbal_report.data.joint_az);
+    JBI->Add("joint_roll", pkt.gimbal_report.data.joint_roll);/*< Joint ROLL (radians)*/
+    JBI->Add("joint_el", pkt.gimbal_report.data.joint_el); /*< Joint EL (radians)*/
+    JBI->Add("joint_az", pkt.gimbal_report.data.joint_az);/*< Joint AZ (radians)*/
     JBI->Add("target_system", pkt.gimbal_report.data.target_system);
     JBI->Add("target_component", pkt.gimbal_report.data.target_component);
   return JBI->End();    
@@ -866,14 +1100,14 @@ uint8_t mMAVLink::ConstructJSON_global_position_int(uint8_t json_level, bool jso
   JBI->Start();
     JBI->Add("t", millis()-pkt.global_position_int.tUpdate);
     JBI->Add("time_boot_ms", pkt.global_position_int.data.time_boot_ms);
-    JBI->Add("lat", pkt.global_position_int.data.lat);
-    JBI->Add("lon", pkt.global_position_int.data.lon);
-    JBI->Add("alt", pkt.global_position_int.data.alt);
-    JBI->Add("relative_alt", pkt.global_position_int.data.relative_alt);
-    JBI->Add("vx", pkt.global_position_int.data.vx);
-    JBI->Add("vy", pkt.global_position_int.data.vy);
-    JBI->Add("vz", pkt.global_position_int.data.vz);
-    JBI->Add("hdg", pkt.global_position_int.data.hdg);
+    JBI->Add("lat", pkt.global_position_int.data.lat);/*< Latitude, expressed as degrees * 1E7*/
+    JBI->Add("lon", pkt.global_position_int.data.lon);/*< Longitude, expressed as degrees * 1E7*/
+    JBI->Add("alt", pkt.global_position_int.data.alt);/*< Altitude in meters, expressed as * 1000 (millimeters), AMSL (not WGS84 - note that virtually all GPS modules provide the AMSL as well)*/
+    JBI->Add("relative_alt", pkt.global_position_int.data.relative_alt);/*< Altitude above ground in meters, expressed as * 1000 (millimeters)*/
+    JBI->Add("vx", pkt.global_position_int.data.vx);/*< Ground X Speed (Latitude, positive north), expressed as m/s * 100*/
+    JBI->Add("vy", pkt.global_position_int.data.vy); /*< Ground Y Speed (Longitude, positive east), expressed as m/s * 100*/
+    JBI->Add("vz", pkt.global_position_int.data.vz);/*< Ground Z Speed (Altitude, positive down), expressed as m/s * 100*/
+    JBI->Add("hdg", pkt.global_position_int.data.hdg);/*< Vehicle heading (yaw angle) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
   return JBI->End();    
 }
 
@@ -892,20 +1126,20 @@ uint8_t mMAVLink::ConstructJSON_gps_raw_int(uint8_t json_level, bool json_append
   JBI->Start();
     JBI->Add("t", millis()-pkt.gps_raw_int.tUpdate);
     JBI->Add("time_usec", pkt.gps_raw_int.data.time_usec);
-    JBI->Add("lat", pkt.gps_raw_int.data.lat);
-    JBI->Add("lon", pkt.gps_raw_int.data.lon);
-    JBI->Add("alt", pkt.gps_raw_int.data.alt);
-    JBI->Add("eph", pkt.gps_raw_int.data.eph);
-    JBI->Add("epv", pkt.gps_raw_int.data.epv);
-    JBI->Add("vel", pkt.gps_raw_int.data.vel);
-    JBI->Add("cog", pkt.gps_raw_int.data.cog);
-    JBI->Add("fix_type", pkt.gps_raw_int.data.fix_type);
-    JBI->Add("satellites_visible", pkt.gps_raw_int.data.satellites_visible);
-    JBI->Add("alt_ellipsoid", pkt.gps_raw_int.data.alt_ellipsoid);
-    JBI->Add("h_acc", pkt.gps_raw_int.data.h_acc);
-    JBI->Add("v_acc", pkt.gps_raw_int.data.v_acc);
-    JBI->Add("vel_acc", pkt.gps_raw_int.data.vel_acc);
-    JBI->Add("hdg_acc", pkt.gps_raw_int.data.hdg_acc);
+    JBI->Add("lat", pkt.gps_raw_int.data.lat);/*< Latitude (WGS84, EGM96 ellipsoid), in degrees * 1E7*/
+    JBI->Add("lon", pkt.gps_raw_int.data.lon);/*< Longitude (WGS84, EGM96 ellipsoid), in degrees * 1E7*/
+    JBI->Add("alt", pkt.gps_raw_int.data.alt);/*< Altitude (AMSL, NOT WGS84), in meters * 1000 (positive for up). Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude.*/
+    JBI->Add("eph", pkt.gps_raw_int.data.eph);/*< GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX*/
+    JBI->Add("epv", pkt.gps_raw_int.data.epv);/*< GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX*/
+    JBI->Add("vel", pkt.gps_raw_int.data.vel); /*< GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX*/
+    JBI->Add("cog", pkt.gps_raw_int.data.cog);/*< Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
+    JBI->Add("fix_type", pkt.gps_raw_int.data.fix_type); /*< See the GPS_FIX_TYPE enum.*/
+    JBI->Add("satellites_visible", pkt.gps_raw_int.data.satellites_visible);/*< Number of satellites visible. If unknown, set to 255*/
+    JBI->Add("alt_ellipsoid", pkt.gps_raw_int.data.alt_ellipsoid);/*< Altitude (above WGS84, EGM96 ellipsoid), in meters * 1000 (positive for up).*/
+    JBI->Add("h_acc", pkt.gps_raw_int.data.h_acc);/*< Position uncertainty in meters * 1000 (positive for up).*/
+    JBI->Add("v_acc", pkt.gps_raw_int.data.v_acc);/*< Altitude uncertainty in meters * 1000 (positive for up).*/
+    JBI->Add("vel_acc", pkt.gps_raw_int.data.vel_acc);/*< Speed uncertainty in meters * 1000 (positive for up).*/
+    JBI->Add("hdg_acc", pkt.gps_raw_int.data.hdg_acc);/*< Heading / track uncertainty in degrees * 1e5.*/
   return JBI->End();    
 }
 
@@ -913,12 +1147,12 @@ uint8_t mMAVLink::ConstructJSON_heartbeat(uint8_t json_level, bool json_appendin
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.heartbeat.tUpdate);
-    JBI->Add("custom_mode", pkt.heartbeat.data.custom_mode);
-    JBI->Add("type", pkt.heartbeat.data.type);
-    JBI->Add("autopilot", pkt.heartbeat.data.autopilot);
-    JBI->Add("base_mode", pkt.heartbeat.data.base_mode);
-    JBI->Add("system_status", pkt.heartbeat.data.system_status);
-    JBI->Add("mavlink_version", pkt.heartbeat.data.mavlink_version);
+    JBI->Add("custom_mode", pkt.heartbeat.data.custom_mode);/*< A bitfield for use for autopilot-specific flags*/
+    JBI->Add("type", pkt.heartbeat.data.type);/*< Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)*/
+    JBI->Add("autopilot", pkt.heartbeat.data.autopilot);/*< Autopilot type / class. defined in MAV_AUTOPILOT ENUM*/
+    JBI->Add("base_mode", pkt.heartbeat.data.base_mode);/*< System mode bitfield, as defined by MAV_MODE_FLAG enum*/
+    JBI->Add("system_status", pkt.heartbeat.data.system_status); /*< System status flag, as defined by MAV_STATE enum*/
+    JBI->Add("mavlink_version", pkt.heartbeat.data.mavlink_version);/*< MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version*/
   return JBI->End();    
 }
 
@@ -926,8 +1160,8 @@ uint8_t mMAVLink::ConstructJSON_hwstatus(uint8_t json_level, bool json_appending
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.hwstatus.tUpdate);
-    JBI->Add("Vcc", pkt.hwstatus.data.Vcc);
-    JBI->Add("I2Cerr", pkt.hwstatus.data.I2Cerr);
+    JBI->Add("Vcc", pkt.hwstatus.data.Vcc);/*< board voltage (mV)*/
+    JBI->Add("I2Cerr", pkt.hwstatus.data.I2Cerr); /*< I2C error count*/
   return JBI->End();    
 }
 
@@ -935,9 +1169,9 @@ uint8_t mMAVLink::ConstructJSON_meminfo(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.meminfo.tUpdate);
-    JBI->Add("brkval", pkt.meminfo.data.brkval);
-    JBI->Add("freemem", pkt.meminfo.data.freemem);
-    JBI->Add("freemem32", pkt.meminfo.data.freemem32);
+    JBI->Add("brkval", pkt.meminfo.data.brkval);/*< heap top*/
+    JBI->Add("freemem", pkt.meminfo.data.freemem);/*< free memory*/
+    JBI->Add("freemem32", pkt.meminfo.data.freemem32);/*< free memory (32 bit)*/
   return JBI->End();    
 }
 
@@ -945,7 +1179,7 @@ uint8_t mMAVLink::ConstructJSON_mission_current(uint8_t json_level, bool json_ap
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.mission_current.tUpdate);
-    JBI->Add("seq", pkt.mission_current.data.seq);
+    JBI->Add("seq", pkt.mission_current.data.seq);/*< Sequence*/
   return JBI->End();    
 }
 
@@ -965,14 +1199,14 @@ uint8_t mMAVLink::ConstructJSON_nav_controller_output(uint8_t json_level, bool j
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.nav_controller_output.tUpdate);
-    JBI->Add("nav_roll", pkt.nav_controller_output.data.nav_roll);
-    JBI->Add("nav_pitch", pkt.nav_controller_output.data.nav_pitch);
-    JBI->Add("alt_error", pkt.nav_controller_output.data.alt_error);
-    JBI->Add("aspd_error", pkt.nav_controller_output.data.aspd_error);
-    JBI->Add("xtrack_error", pkt.nav_controller_output.data.xtrack_error);
-    JBI->Add("nav_bearing", pkt.nav_controller_output.data.nav_bearing);
-    JBI->Add("target_bearing", pkt.nav_controller_output.data.target_bearing);
-    JBI->Add("wp_dist", pkt.nav_controller_output.data.wp_dist);
+    JBI->Add("nav_roll", pkt.nav_controller_output.data.nav_roll);/*< Current desired roll in degrees*/
+    JBI->Add("nav_pitch", pkt.nav_controller_output.data.nav_pitch); /*< Current desired pitch in degrees*/
+    JBI->Add("alt_error", pkt.nav_controller_output.data.alt_error);/*< Current altitude error in meters*/
+    JBI->Add("aspd_error", pkt.nav_controller_output.data.aspd_error);/*< Current airspeed error in meters/second*/
+    JBI->Add("xtrack_error", pkt.nav_controller_output.data.xtrack_error); /*< Current crosstrack error on x-y plane in meters*/
+    JBI->Add("nav_bearing", pkt.nav_controller_output.data.nav_bearing);/*< Current desired heading in degrees*/
+    JBI->Add("target_bearing", pkt.nav_controller_output.data.target_bearing);/*< Bearing to current waypoint/target in degrees*/
+    JBI->Add("wp_dist", pkt.nav_controller_output.data.wp_dist); /*< Distance to active waypoint in meters*/
   return JBI->End();    
 }
 
@@ -992,9 +1226,9 @@ uint8_t mMAVLink::ConstructJSON_power_status(uint8_t json_level, bool json_appen
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.power_status.tUpdate);
-    JBI->Add("Vcc", pkt.power_status.data.Vcc);
-    JBI->Add("Vservo", pkt.power_status.data.Vservo);
-    JBI->Add("flags", pkt.power_status.data.flags);
+    JBI->Add("Vcc", pkt.power_status.data.Vcc);/*< 5V rail voltage in millivolts*/
+    JBI->Add("Vservo", pkt.power_status.data.Vservo);/*< servo rail voltage in millivolts*/
+    JBI->Add("flags", pkt.power_status.data.flags);/*< power supply status flags (see MAV_POWER_STATUS enum)*/
   return JBI->End();    
 }
 
@@ -1038,8 +1272,8 @@ uint8_t mMAVLink::ConstructJSON_rc_channels(uint8_t json_level, bool json_append
     JBI->Add("chan16_raw", pkt.rc_channels.data.chan16_raw);
     JBI->Add("chan17_raw", pkt.rc_channels.data.chan17_raw);
     JBI->Add("chan18_raw", pkt.rc_channels.data.chan18_raw);
-    JBI->Add("chancount", pkt.rc_channels.data.chancount);
-    JBI->Add("rssi", pkt.rc_channels.data.rssi);
+    JBI->Add("chancount", pkt.rc_channels.data.chancount);/*< Total number of RC channels being received. This can be larger than 18, indicating that more channels are available but not given in this message. This value should be 0 when no RC channels are available.*/
+    JBI->Add("rssi", pkt.rc_channels.data.rssi);/*< Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.*/
   return JBI->End();    
 }
 
@@ -1078,15 +1312,15 @@ uint8_t mMAVLink::ConstructJSON_imu2(uint8_t json_level, bool json_appending)
   JBI->Start();
     JBI->Add("t", millis()-pkt.scaled_imu2.tUpdate);
     JBI->Add("time_boot_ms", pkt.scaled_imu2.data.time_boot_ms);
-    JBI->Add("xacc", pkt.scaled_imu2.data.xacc);
-    JBI->Add("yacc", pkt.scaled_imu2.data.yacc);
-    JBI->Add("zacc", pkt.scaled_imu2.data.zacc);
-    JBI->Add("xgyro", pkt.scaled_imu2.data.xgyro);
-    JBI->Add("ygyro", pkt.scaled_imu2.data.ygyro);
-    JBI->Add("zgyro", pkt.scaled_imu2.data.zgyro);
-    JBI->Add("xmag", pkt.scaled_imu2.data.xmag);
-    JBI->Add("ymag", pkt.scaled_imu2.data.ymag);
-    JBI->Add("zmag", pkt.scaled_imu2.data.zmag);
+    JBI->Add("xacc", pkt.scaled_imu2.data.xacc); /*< X acceleration (mg)*/
+    JBI->Add("yacc", pkt.scaled_imu2.data.yacc); /*< y acceleration (mg)*/
+    JBI->Add("zacc", pkt.scaled_imu2.data.zacc); /*< Z acceleration (mg)*/
+    JBI->Add("xgyro", pkt.scaled_imu2.data.xgyro);/*< Angular speed around X axis (millirad /sec)*/
+    JBI->Add("ygyro", pkt.scaled_imu2.data.ygyro);/*< Angular speed around y axis (millirad /sec)*/
+    JBI->Add("zgyro", pkt.scaled_imu2.data.zgyro);/*< Angular speed around Z axis (millirad /sec)*/
+    JBI->Add("xmag", pkt.scaled_imu2.data.xmag);/*< X Magnetic field (milli tesla)*/
+    JBI->Add("ymag", pkt.scaled_imu2.data.ymag);/*<   y Magnetic field (milli tesla)*/
+    JBI->Add("zmag", pkt.scaled_imu2.data.zmag);/*< Z Magnetic field (milli tesla)*/
   return JBI->End();    
 }
 
@@ -1112,9 +1346,9 @@ uint8_t mMAVLink::ConstructJSON_scaled_pressure(uint8_t json_level, bool json_ap
   JBI->Start();
     JBI->Add("t", millis()-pkt.scaled_pressure.tUpdate);
     JBI->Add("time_boot_ms", pkt.scaled_pressure.data.time_boot_ms);
-    JBI->Add("press_abs", pkt.scaled_pressure.data.press_abs);
-    JBI->Add("press_diff", pkt.scaled_pressure.data.press_diff);
-    JBI->Add("temperature", pkt.scaled_pressure.data.temperature);
+    JBI->Add("press_abs", pkt.scaled_pressure.data.press_abs);/*< Absolute pressure (hectopascal)*/
+    JBI->Add("press_diff", pkt.scaled_pressure.data.press_diff);/*< Differential pressure 1 (hectopascal)*/
+    JBI->Add("temperature", pkt.scaled_pressure.data.temperature);/*< Temperature measurement (0.01 degrees celsius)*/
   return JBI->End();    
 }
 
@@ -1177,8 +1411,8 @@ uint8_t mMAVLink::ConstructJSON_statustext(uint8_t json_level, bool json_appendi
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.statustext.tUpdate);
-    JBI->Add("severity", pkt.statustext.data.severity);
-    JBI->Add("text", pkt.statustext.data.text);
+    JBI->Add("severity", pkt.statustext.data.severity);/*< Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.*/
+    JBI->Add("text", pkt.statustext.data.text);/*< Status text message, without null termination character*/
   return JBI->End();    
 }
 
@@ -1186,19 +1420,19 @@ uint8_t mMAVLink::ConstructJSON_sys_status(uint8_t json_level, bool json_appendi
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.sys_status.tUpdate);
-    JBI->Add("sensorsC", pkt.sys_status.data.onboard_control_sensors_present);
-    JBI->Add("sensorsE", pkt.sys_status.data.onboard_control_sensors_enabled);
-    JBI->Add("sensorsH", pkt.sys_status.data.onboard_control_sensors_health);
-    JBI->Add("load", pkt.sys_status.data.load);
-    JBI->Add("voltage_battery", pkt.sys_status.data.voltage_battery);
-    JBI->Add("current_battery", pkt.sys_status.data.current_battery);
-    JBI->Add("drop_rate_comm", pkt.sys_status.data.drop_rate_comm);
-    JBI->Add("errors_comm", pkt.sys_status.data.errors_comm);
-    JBI->Add("errors_count1", pkt.sys_status.data.errors_count1);
-    JBI->Add("errors_count2", pkt.sys_status.data.errors_count2);
-    JBI->Add("errors_count3", pkt.sys_status.data.errors_count3);
-    JBI->Add("errors_count4", pkt.sys_status.data.errors_count4);
-    JBI->Add("battery_remaining", pkt.sys_status.data.battery_remaining);
+    JBI->Add("sensorsC", pkt.sys_status.data.onboard_control_sensors_present);/*< Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
+    JBI->Add("sensorsE", pkt.sys_status.data.onboard_control_sensors_enabled);/*< Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
+    JBI->Add("sensorsH", pkt.sys_status.data.onboard_control_sensors_health);/*< Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
+    JBI->Add("load", pkt.sys_status.data.load);/*< Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000*/
+    JBI->Add("voltage_battery", pkt.sys_status.data.voltage_battery); /*< Battery voltage, in millivolts (1 = 1 millivolt)*/
+    JBI->Add("current_battery", pkt.sys_status.data.current_battery);/*< Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current*/
+    JBI->Add("drop_rate_comm", pkt.sys_status.data.drop_rate_comm);/*< Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)*/
+    JBI->Add("errors_comm", pkt.sys_status.data.errors_comm);/*< Communication errors (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)*/
+    JBI->Add("errors_count1", pkt.sys_status.data.errors_count1);/*< Autopilot-specific errors*/
+    JBI->Add("errors_count2", pkt.sys_status.data.errors_count2);/*< Autopilot-specific errors*/
+    JBI->Add("errors_count3", pkt.sys_status.data.errors_count3);/*< Autopilot-specific errors*/
+    JBI->Add("errors_count4", pkt.sys_status.data.errors_count4);/*< Autopilot-specific errors*/
+    JBI->Add("battery_remaining", pkt.sys_status.data.battery_remaining);/*< Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery*/
   return JBI->End();    
 }
 
@@ -1220,16 +1454,31 @@ uint8_t mMAVLink::ConstructJSON_timesync(uint8_t json_level, bool json_appending
   return JBI->End();    
 }
 
+uint8_t mMAVLink::ConstructJSON_terrain_report(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+    JBI->Add("t", millis()-pkt.terrain_report.tUpdate);    
+    JBI->Add("lat", pkt.terrain_report.data.lat); /*< Latitude (degrees *10^7)*/
+    JBI->Add("lon", pkt.terrain_report.data.lon); /*< Longitude (degrees *10^7)*/
+    JBI->Add("terrain_height", pkt.terrain_report.data.terrain_height); /*< Terrain height in meters AMSL*/
+    JBI->Add("current_height", pkt.terrain_report.data.current_height); /*< Current vehicle height above lat/lon terrain height (meters)*/
+    JBI->Add("spacing", pkt.terrain_report.data.spacing); /*< grid spacing (zero if terrain at this location unavailable)*/
+    JBI->Add("pending", pkt.terrain_report.data.pending); /*< Number of 4x4 terrain blocks waiting to be received or read from disk*/
+    JBI->Add("loaded", pkt.terrain_report.data.loaded); /*< Number of 4x4 terrain blocks in memory*/
+  return JBI->End();    
+}
+
+
 uint8_t mMAVLink::ConstructJSON_vfr_hud(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.vfr_hud.tUpdate);
-    JBI->Add("airspeed", pkt.vfr_hud.data.airspeed);
-    JBI->Add("groundspeed", pkt.vfr_hud.data.groundspeed);
-    JBI->Add("alt", pkt.vfr_hud.data.alt);
-    JBI->Add("climb", pkt.vfr_hud.data.climb);
-    JBI->Add("heading", pkt.vfr_hud.data.heading);
-    JBI->Add("throttle", pkt.vfr_hud.data.throttle);
+    JBI->Add("airspeed", pkt.vfr_hud.data.airspeed);/*< Current airspeed in m/s*/
+    JBI->Add("groundspeed", pkt.vfr_hud.data.groundspeed);/*< Current ground speed in m/s*/
+    JBI->Add("alt", pkt.vfr_hud.data.alt);/*< Current altitude (MSL), in meters*/
+    JBI->Add("climb", pkt.vfr_hud.data.climb);/*< Current climb rate in meters/second*/
+    JBI->Add("heading", pkt.vfr_hud.data.heading);/*< Current heading in degrees, in compass units (0..360, 0=north)*/
+    JBI->Add("throttle", pkt.vfr_hud.data.throttle);/*< Current throttle setting in integer percent, 0 to 100*/
   return JBI->End();    
 }
 
@@ -1286,18 +1535,39 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 10; 
+  ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Sensor;
+
+  ptr = &mqtthandler_overview_01;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_01_CTR;
+  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Overview_01;
+
+  ptr = &mqtthandler_overview_02;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_02_CTR;
+  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Overview_02;
+
 
   // 163,AHRS
   ptr = &mqtthandler_mavlink_packet__ahrs;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS__CTR;
@@ -1308,7 +1578,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS2__CTR;
@@ -1319,7 +1589,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__ATTITUDE__CTR;
@@ -1330,7 +1600,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AUTOPILOT_VERSION_REQUEST__CTR;
@@ -1341,7 +1611,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__BATTERY_STATUS__CTR;
@@ -1352,7 +1622,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR;
@@ -1363,7 +1633,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR;
@@ -1374,7 +1644,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR;
@@ -1385,7 +1655,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR;
@@ -1396,7 +1666,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR;
@@ -1407,7 +1677,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR;
@@ -1418,7 +1688,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GPS_RAW_INT__CTR;
@@ -1429,7 +1699,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HEARTBEAT__CTR;
@@ -1440,7 +1710,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HWSTATUS__CTR;
@@ -1451,7 +1721,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MEMINFO__CTR;
@@ -1462,7 +1732,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MISSION_CURRENT__CTR;
@@ -1473,7 +1743,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MOUNT_STATUS__CTR;
@@ -1484,7 +1754,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__NAV_CONTROLLER_OUTPUT__CTR;
@@ -1495,7 +1765,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__PARAM_VALUE__CTR;
@@ -1506,7 +1776,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__POWER_STATUS__CTR;
@@ -1517,7 +1787,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RAW_IMU__CTR;
@@ -1528,7 +1798,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS__CTR;
@@ -1539,7 +1809,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_RAW__CTR;
@@ -1550,7 +1820,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__REQUEST_DATA_STREAM__CTR;
@@ -1561,7 +1831,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU2__CTR;
@@ -1572,7 +1842,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU3__CTR;
@@ -1583,7 +1853,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE__CTR;
@@ -1594,7 +1864,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE2__CTR;
@@ -1605,7 +1875,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SENSOR_OFFSETS__CTR;
@@ -1616,7 +1886,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SERVO_OUTPUT_RAW__CTR;
@@ -1627,18 +1897,18 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__STATUSTEXT__CTR;
   ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_statustext;
   
-  // 1,SYS_STATUS
+  // 60,SYS_STATUS
   ptr = &mqtthandler_mavlink_packet__sys_status;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYS_STATUS__CTR;
@@ -1649,7 +1919,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYSTEM_TIME__CTR;
@@ -1660,18 +1930,30 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TIMESYNC__CTR;
   ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_timesync;
   
+  // 
+  ptr = &mqtthandler_mavlink_packet__terrain_report;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TERRAIN_REPORT__CTR;
+  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_terrain_report;
+
+
   // 74,VFR_HUD
   ptr = &mqtthandler_mavlink_packet__vfr_hud;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR;
@@ -1682,7 +1964,7 @@ void mMAVLink::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR;

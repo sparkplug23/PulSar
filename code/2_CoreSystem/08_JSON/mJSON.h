@@ -217,38 +217,39 @@ class JsonBuilder{
         (writer.buffer[writer.length-1]!='{')&&
         (writer.buffer[writer.length-1]!='[')      
       ){ 
-        writer.length += sprintf_P(&writer.buffer[writer.length],","); }
+        writer.length += sprintf_P(&writer.buffer[writer.length],","); 
+      }
 
-        #ifdef DEBUG_JSON_BUILDER
-        char buffer_id[50];
-        uint8_t id = getIdentifierID4(value);
-        GetIndentifierNameByID(id, buffer_id);
-        DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
-        #endif
-        
-          // float f = reinterpret_cast<float>(value);
-        
-        /**
-         * @brief Order is important
-         * - pointer of strings needs to be found first
-         */
-        if(is_unsigned_number_type<T>::value){ 
-          writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%lu",key,value);
-        }else
-        if(is_signed_number_type<T>::value){ 
-          writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%d",key,value);
-        }else
-        if(is_string_type<T>::value){ 
-          writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
-        }else
-        if(is_char_type<T>::value){   
-          writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
-        }else
-        if (is_float_type<T>::value){ 
-          float f = 0;     memcpy(&f,&value,sizeof(f));
-          char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
-          writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
-        }
+      #ifdef DEBUG_JSON_BUILDER
+      char buffer_id[50];
+      uint8_t id = getIdentifierID4(value);
+      GetIndentifierNameByID(id, buffer_id);
+      DEBUG_PRINTF("%s id=%d %s \n\t", key, id, buffer_id);
+      #endif
+      
+        // float f = reinterpret_cast<float>(value);
+      
+      /**
+       * @brief Order is important
+       * - pointer of strings needs to be found first
+       */
+      if(is_unsigned_number_type<T>::value){ 
+        writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%lu",key,value);
+      }else
+      if(is_signed_number_type<T>::value){ 
+        writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%d",key,value);
+      }else
+      if(is_string_type<T>::value){ 
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+      }else
+      if(is_char_type<T>::value){   
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
+      }else
+      if (is_float_type<T>::value){ 
+        float f = 0;     memcpy(&f,&value,sizeof(f));
+        char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+      }
 
 
         /**
