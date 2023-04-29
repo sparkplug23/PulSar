@@ -2,6 +2,64 @@
 
 mTaskerManager* mTaskerManager::instance = nullptr;
 
+
+
+/****
+ * 
+ * 
+ * I need to decouple/move this into tasker and not from "sub"-module time, it should all be called via the tasker and not a sub module
+ * 
+ * 
+ * 
+*/
+      // // Check for midnight
+      // if((RtcTime.hour==0)&&(RtcTime.minute==0)&&(RtcTime.second==0)&&(lastday_run != RtcTime.Yday)){
+      //   lastday_run = RtcTime.Yday;
+      //   pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
+      // }
+      // if(RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+      
+      // if(
+      //   ((uptime.seconds_nonreset%5)==0)&&
+      //   (uptime.seconds_nonreset>20)
+      // ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
+
+
+      // if(
+      //   ((uptime.seconds_nonreset%300)==0)&&
+      //   (uptime.seconds_nonreset>60)
+      // ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
+
+
+      // if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+
+      // // Uptime triggers
+      // if(uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
+      // if(uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
+      // if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
+      // if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+
+
+      // /**
+      //  * @brief Boot is only successful if mqtt+network has been active for 1 minute, then reset fastboot
+      //  **/
+      // #ifdef ENABLE_DEVFEATURE_BOOT_SUCCESS_WHEN_NETWORK_STABLE
+
+      // // For now, just enable this to happen 
+
+      // if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+
+
+      // #else
+
+      // //I need another for stable boot
+      // // Stable time set to 2 minutes, as easy way to ensure mqtt/network has been stable
+      // if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+
+      // #endif
+
+
+
 int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
@@ -426,8 +484,14 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID] = new mWebCamera();
   #endif
 
-  #ifdef USE_MODULE__DRIVERS_MAVLINK
-    pModule[EM_MODULE__DRIVERS_MAVLINK__ID] = new mMAVLink();
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID] = new mMAVLink_Decoder();
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+    pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID] = new mMAVLink_Telemetry_WiFi();
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+    pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID] = new mMAVLink_Telemetry_Cellular();
   #endif
 
 
@@ -630,7 +694,7 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID] = new mCellularBlackBox();
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
-    pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID] = new mMAVLinkParserOLED();
+    pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID] = new mMAVLink_Decoder_OLED();
   #endif
 };
 

@@ -418,7 +418,7 @@ MAVLINK_HELPER uint16_t mavlink_msg_to_send_buffer(uint8_t *buf, const mavlink_m
 {
 	uint8_t signature_len, header_len;
 	uint8_t *ck;
-        uint8_t length = msg->len;
+	uint8_t length = msg->len;
 
 	if (msg->magic == MAVLINK_STX_MAVLINK1) {
 		signature_len = 0;

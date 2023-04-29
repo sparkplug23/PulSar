@@ -1,5 +1,5 @@
 /*
-  mMAVLinkParserOLED.h 
+  mMAVLink_Decoder_OLED.h 
   
   Copyright (C) 2021  Michael
 
@@ -30,13 +30,13 @@
 
 // #include <Averaging_Data.h>
 
-class mMAVLinkParserOLED :
+class mMAVLink_Decoder_OLED :
   public mTaskerInterface
 {
 
   private:
   public:
-    mMAVLinkParserOLED(){};
+    mMAVLink_Decoder_OLED(){};
     void init(void);
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -47,7 +47,7 @@ class mMAVLinkParserOLED :
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_ID; }
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){      return sizeof(mMAVLinkParserOLED); };
+    uint16_t GetClassSize(){      return sizeof(mMAVLink_Decoder_OLED); };
     #endif
 
     
@@ -93,13 +93,13 @@ class mMAVLinkParserOLED :
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
 
-    struct handler<mMAVLinkParserOLED> mqtthandler_settings_teleperiod;
-    struct handler<mMAVLinkParserOLED> mqtthandler_state_ifchanged;
+    struct handler<mMAVLink_Decoder_OLED> mqtthandler_settings_teleperiod;
+    struct handler<mMAVLink_Decoder_OLED> mqtthandler_state_ifchanged;
 
     //No extra handlers: ie settings and "state" only
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
       
-    struct handler<mMAVLinkParserOLED>* mqtthandler_list[2] = {
+    struct handler<mMAVLink_Decoder_OLED>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_state_ifchanged
     };

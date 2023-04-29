@@ -301,9 +301,18 @@ enum MODULE_IDS{
     EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID,
   #endif
 
-  #ifdef USE_MODULE__DRIVERS_MAVLINK
-    EM_MODULE__DRIVERS_MAVLINK__ID,
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
   #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+    EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID,
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+    EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID,
+  #endif
+
+
+
 
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -687,11 +696,18 @@ enum MODULE_IDS{
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
 #endif
 
-#ifdef USE_MODULE__DRIVERS_MAVLINK
-  #include "4_Drivers/70_MAVLink/mMAVLink.h"
-  #define pCONT_mavlink                              static_cast<mMAVLink*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK__ID])
+#ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+  #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
 #endif
-
+#ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+  #include "4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
+#endif
+#ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+  #include "4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
+#endif
 
 
 
@@ -996,10 +1012,9 @@ enum MODULE_IDS{
   #define pCONT_immersion_cont         static_cast<mCellularBlackBox*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
-  #include "10_ConSpec/09_mMAVLinkParserOLED/mMAVLinkParserOLED.h"
-  #define pCONT_cont_mavlinoled         static_cast<mMAVLinkParserOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID])
+  #include "10_ConSpec/09_mMAVLink_Decoder_OLED/mMAVLink_Decoder_OLED.h"
+  #define pCONT_cont_mavlinoled         static_cast<mMAVLink_Decoder_OLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID])
 #endif
-
 
 
 

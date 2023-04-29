@@ -36,6 +36,8 @@ enum XsnsFunctions {
   
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc
 
+  FUNC_INIT_DELAYED_SECONDS, // To enable modules to either intentional begin with a delayed start, or, to changed at an interval if it is possible to start again (e.g. new sensor connected)
+
   /**
    * Flags that are used in debugging, that will override any stored or default init states. This will be optionally called at the end of setup.
    * */

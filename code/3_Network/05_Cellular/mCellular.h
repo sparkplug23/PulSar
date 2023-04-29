@@ -138,6 +138,8 @@ class mCellular :
       bool enabled = 0; // 0 disabled, 1 enabled     
       uint32_t connected_seconds = 0;      
       uint32_t last_comms_millis_updated = 0; 
+      float signal_quality_rssi_dbm = 0;
+      uint16_t signal_quality_raw = 0;
     }gprs;
     void GPRS_Enable();
     void GPRS_Disable();

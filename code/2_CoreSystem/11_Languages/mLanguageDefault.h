@@ -178,8 +178,14 @@
   #define D_MODULE_DRIVERS__TINYGSM__FRIENDLY_CTR "tinygsm"
 
 
-  #define D_MODULE__DRIVERS_MAVLINK__CTR          "mavlink"
-  #define D_MODULE__DRIVERS_MAVLINK__FRIENDLY_CTR "mavlink"
+  #define D_MODULE__DRIVERS_MAVLINK_DECODER__CTR          "mavlink"
+  #define D_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR "mavlink"
+
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_telemetry"
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__FRIENDLY_CTR "mavlink_telemetry"
+  
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__CTR "mavlink_telemetry"
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__FRIENDLY_CTR "mavlink_telemetry"
 
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"

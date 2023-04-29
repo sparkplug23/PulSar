@@ -71,6 +71,10 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
 
       ModemUpdate_BatteryStatus();
 
+      #ifdef ENABLE_DEVFEATURE_TEXT_LOCATION_EVERY_MINUTE_WHEN_POWERED
+      SMS_GPSLocation();
+      #endif 
+
       // SendATCommand_SMSFormatAscii(); //tmp
 
     break;
@@ -641,7 +645,21 @@ void mCellular::ModemUpdate_GPRS()
       {
 
         int csq = modem->getSignalQuality();
-        ALOG_INF(PSTR("Signal quality: %d"), csq);
+
+
+        gprs.signal_quality_raw = csq;
+
+        if(csq == 99)
+        {
+          gprs.signal_quality_rssi_dbm = -150;
+        }
+        else
+        {
+          gprs.signal_quality_rssi_dbm = map(csq, 0, 31, -113, -51);
+        }
+
+        ALOG_INF(PSTR("Signal quality: %d dBm (%d)"), int(gprs.signal_quality_rssi_dbm), csq);
+
 
         gprs.connected_seconds++;
         gprs.last_comms_millis_updated = millis();
@@ -759,11 +777,18 @@ void mCellular::SMS_GPSLocation()
     snprintf_P(message2, sizeof(message2),
       PSTR(
         "Battery  %d mV\n"
+        "Battery  %d mA\n"
+        "Mission  %d (%dm)\n"
+        "PKT Age  %d\n"
         "Accuracy %s m\n"
         "\n"
         "https://www.google.com/maps/dir//%s,%s"
       ), 
-      modem_status.battery.volts_mv,
+      pCONT_mavlink->pkt.battery_status.data.battery_remaining,
+      pCONT_mavlink->pkt.battery_status.data.current_consumed,
+      pCONT_mavlink->pkt.mission_current.data.seq,
+      pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
+      millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
       convf_fix,
       convf_lat, 
       convf_lon

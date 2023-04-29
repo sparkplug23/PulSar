@@ -73,6 +73,15 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       // Serial.printf("uptime.seconds_nonreset=%d\n\r",uptime.seconds_nonreset);
 
 
+
+/****
+ * 
+ * 
+ * I need to decouple/move this into tasker and not from "sub"-module time, it should all be called via the tasker and not a sub module
+ * 
+ * 
+ * 
+*/
       // Check for midnight
       if((RtcTime.hour==0)&&(RtcTime.minute==0)&&(RtcTime.second==0)&&(lastday_run != RtcTime.Yday)){
         lastday_run = RtcTime.Yday;
@@ -118,6 +127,8 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
       if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
 
       #endif
+
+      pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
 
 
 

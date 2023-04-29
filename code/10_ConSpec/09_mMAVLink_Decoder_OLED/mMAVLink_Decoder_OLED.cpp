@@ -18,15 +18,16 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "mMAVLinkParserOLED.h"
+
+#include "mMAVLink_Decoder_OLED.h"
 
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
 
-const char* mMAVLinkParserOLED::PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_CTR;
-const char* mMAVLinkParserOLED::PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR = D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR;
+const char* mMAVLink_Decoder_OLED::PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_CTR;
+const char* mMAVLink_Decoder_OLED::PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR = D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR;
 
 
-int8_t mMAVLinkParserOLED::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mMAVLink_Decoder_OLED::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     /************
@@ -80,13 +81,13 @@ int8_t mMAVLinkParserOLED::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
-void mMAVLinkParserOLED::Pre_Init(void)
+void mMAVLink_Decoder_OLED::Pre_Init(void)
 {
 
 }
 
 
-void mMAVLinkParserOLED::Init(void)
+void mMAVLink_Decoder_OLED::Init(void)
 {
   
     settings.fEnableSensor = true;
@@ -95,7 +96,7 @@ void mMAVLinkParserOLED::Init(void)
 }
 
 
-void mMAVLinkParserOLED::EverySecond()
+void mMAVLink_Decoder_OLED::EverySecond()
 {
   
   SubTask_UpdateOLED();
@@ -115,7 +116,7 @@ void mMAVLinkParserOLED::EverySecond()
  * 
  * 
  * */
-void mMAVLinkParserOLED::SubTask_UpdateOLED()
+void mMAVLink_Decoder_OLED::SubTask_UpdateOLED()
 {
   
   pCONT_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
@@ -144,7 +145,7 @@ void mMAVLinkParserOLED::SubTask_UpdateOLED()
 
 }
 
-void mMAVLinkParserOLED::SubSubTask_ShowDisplay_Page0()
+void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
 {
 
   char buffer[30] = {0};
@@ -199,7 +200,7 @@ void mMAVLinkParserOLED::SubSubTask_ShowDisplay_Page0()
   snprintf(buffer, sizeof(buffer), "Lon %s", convf_lon); pCONT_iDisp->LogBuffer_AddRow(buffer, 1);
   snprintf(buffer, sizeof(buffer), "Alt %sm  Spd %smph", convf_altitude, convf_speed_mph); pCONT_iDisp->LogBuffer_AddRow(buffer, 2);  
   snprintf(buffer, sizeof(buffer), "Acc %sm Fix %s|%s", convf_accuracy, convf_usat, convf_vsat); pCONT_iDisp->LogBuffer_AddRow(buffer, 3);  
-  snprintf(buffer, sizeof(buffer), "GPRS u%s secs", convf_gprs_upsecs);  pCONT_iDisp->LogBuffer_AddRow(buffer, 4);
+  snprintf(buffer, sizeof(buffer), "GPRS u%s secs %d dBm", convf_gprs_upsecs, int(pCONT_cell->gprs.signal_quality_rssi_dbm));  pCONT_iDisp->LogBuffer_AddRow(buffer, 4);
   snprintf(buffer, sizeof(buffer), "Bat %s mv, %s%%", convf_batt_mv, convf_batt_per);  pCONT_iDisp->LogBuffer_AddRow(buffer, 5);
   snprintf(buffer, sizeof(buffer), "GT %02d:%02d:%02d", pCONT_gps->location.hour, pCONT_gps->location.minute, pCONT_gps->location.second);  pCONT_iDisp->LogBuffer_AddRow(buffer, 6);
   
@@ -213,7 +214,7 @@ void mMAVLinkParserOLED::SubSubTask_ShowDisplay_Page0()
   }
   
 }
-void mMAVLinkParserOLED::SubSubTask_ShowDisplay_Page1()
+void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
 {
 
   char buffer[30] = {0};
@@ -283,7 +284,7 @@ void mMAVLinkParserOLED::SubSubTask_ShowDisplay_Page1()
 *******************************************************************************************************************/
 
 
-void mMAVLinkParserOLED::parse_JSONCommand(JsonParserObject obj)
+void mMAVLink_Decoder_OLED::parse_JSONCommand(JsonParserObject obj)
 {
 
   JsonParserToken jtok = 0; 
@@ -304,7 +305,7 @@ void mMAVLinkParserOLED::parse_JSONCommand(JsonParserObject obj)
 
 
 
-uint8_t mMAVLinkParserOLED::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+uint8_t mMAVLink_Decoder_OLED::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
     JBI->Add(D_JSON_COUNT, settings.fEnableSensor);    
@@ -312,7 +313,7 @@ uint8_t mMAVLinkParserOLED::ConstructJSON_Settings(uint8_t json_level, bool json
 
 }
 
-uint8_t mMAVLinkParserOLED::ConstructJSON_State(uint8_t json_level, bool json_appending){
+uint8_t mMAVLink_Decoder_OLED::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   char buffer[40];
 
@@ -330,10 +331,10 @@ uint8_t mMAVLinkParserOLED::ConstructJSON_State(uint8_t json_level, bool json_ap
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mMAVLinkParserOLED::MQTTHandler_Init()
+void mMAVLink_Decoder_OLED::MQTTHandler_Init()
 {
 
-  struct handler<mMAVLinkParserOLED>* ptr;
+  struct handler<mMAVLink_Decoder_OLED>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -343,7 +344,7 @@ void mMAVLinkParserOLED::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mMAVLinkParserOLED::ConstructJSON_Settings;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder_OLED::ConstructJSON_Settings;
 
   ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -353,7 +354,7 @@ void mMAVLinkParserOLED::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
-  ptr->ConstructJSON_function = &mMAVLinkParserOLED::ConstructJSON_State;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder_OLED::ConstructJSON_State;
 
 } //end "MQTTHandler_Init"
 
@@ -361,7 +362,7 @@ void mMAVLinkParserOLED::MQTTHandler_Init()
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mMAVLinkParserOLED::MQTTHandler_Set_RefreshAll()
+void mMAVLink_Decoder_OLED::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -371,7 +372,7 @@ void mMAVLinkParserOLED::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mMAVLinkParserOLED::MQTTHandler_Set_DefaultPeriodRate()
+void mMAVLink_Decoder_OLED::MQTTHandler_Set_DefaultPeriodRate()
 {
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
@@ -384,7 +385,7 @@ void mMAVLinkParserOLED::MQTTHandler_Set_DefaultPeriodRate()
 /**
  * @brief MQTTHandler_Sender
  * */
-void mMAVLinkParserOLED::MQTTHandler_Sender(uint8_t id)
+void mMAVLink_Decoder_OLED::MQTTHandler_Sender(uint8_t id)
 {
   for(auto& handle:mqtthandler_list){
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID, handle, id);

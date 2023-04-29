@@ -1,15 +1,16 @@
-#include "mMAVLink.h"
+#include "mMAVLink_Decoder.h"
 
-#ifdef USE_MODULE__DRIVERS_MAVLINK
+#ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
 
-const char* mMAVLink::PM_MODULE__DRIVERS_MAVLINK__CTR = D_MODULE__DRIVERS_MAVLINK__CTR;
-const char* mMAVLink::PM_MODULE__DRIVERS_MAVLINK__FRIENDLY_CTR = D_MODULE__DRIVERS_MAVLINK__FRIENDLY_CTR;
+const char* mMAVLink_Decoder::PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR = D_MODULE__DRIVERS_MAVLINK_DECODER__CTR;
+const char* mMAVLink_Decoder::PM_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR = D_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR;
 
-int8_t mMAVLink::Tasker(uint8_t function, JsonParserObject obj){
+
+int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
+{
   
   int8_t function_result = 0;
   
-  // some functions must run regardless
   switch(function){
     /************
      * INIT SECTION * 
@@ -20,31 +21,23 @@ int8_t mMAVLink::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_INIT:
       Init();
     break;
+    case FUNC_INIT_DELAYED_SECONDS:
+      Delayed_Init();
+    break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.flags.init_completed){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     /************
      * PERIODIC SECTION * 
     *******************/
    case FUNC_LOOP:
-   {
-    PollMAVLink_Stream();
-   }
+    Maintain_Connection(); //instead of delayed start, with this importance just assume its needed and keep retrying 
    break;
-    case FUNC_EVERY_100_MSECOND:
-      // BuzzerEvery100mSec();
-    break;
     case FUNC_EVERY_SECOND:
-      // AddLog(LOG_LEVEL_TEST, PSTR("pinMode %d"),Buzzer.pin);
-      // digitalWrite(Buzzer.pin, !digitalRead(Buzzer.pin));
-
-      // ALOG_INF(PSTR("PinUsed = %d"), pCONT_pins->PinUsed(GPIO_BUZZER_ID));
-
       ALOG_INF(PSTR("Battery %d%%"), pkt.battery_status.data.battery_remaining);
-
-
+      ALOG_INF(PSTR("Response %d"),millis()-pkt.tSaved_Last_Response);
     break;
     /************
      * COMMANDS SECTION * 
@@ -73,12 +66,10 @@ int8_t mMAVLink::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-void mMAVLink::Pre_Init(void)
+void mMAVLink_Decoder::Pre_Init(void)
 {
 
-  ALOG_INF(PSTR("mMAVLink::Pre_Init(void)"));
-
-
+  ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void)"));
 
   // if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_RX_ID)) {
   //   settings.uart2.receive_interrupts_enable = true;
@@ -91,27 +82,6 @@ void mMAVLink::Pre_Init(void)
   //   settings.uart2.receive_interrupts_enable = false;
   // }
 
-
-
-
-  // if (pCONT_pins->PinUsed(GPIO_BUZZER_ID)) {
-  //   pinMode(pCONT_pins->GetPin(GPIO_BUZZER_ID), OUTPUT);
-  //   Buzzer.pin = pCONT_pins->GetPin(GPIO_BUZZER_ID);
-  // ALOG_INF(PSTR("mMAVLink::GPIO_BUZZER_ID(void)"));
-  //   BuzzerSet(0);
-  //   settings.fEnableSensor = true;
-  // } else
-  // if (pCONT_pins->PinUsed(GPIO_BUZZER_INV_ID)) {
-  //   pinMode(pCONT_pins->GetPin(GPIO_BUZZER_INV_ID), OUTPUT);
-  //   Buzzer.pin = pCONT_pins->GetPin(GPIO_BUZZER_INV_ID);
-  // ALOG_INF(PSTR("mMAVLink::GPIO_BUZZER_INV_ID(void)"));
-  //   Buzzer.inverted = true;
-  //   BuzzerSet(0);
-    settings.fEnableSensor = true;
-  // }   
-  // else {
-  //   settings.fEnableSensor = false;
-  // }
 
   #ifdef USE_DEVFEATURE_DEFINED_SERIAL2
 
@@ -126,136 +96,129 @@ void mMAVLink::Pre_Init(void)
   _MAVSerial = &Serial2;
   _MAVSerial->begin(921600);
   #endif
-
-
-
-  _MAVSerial->println("BOOT");
   
-  
-  system_id = 1; // Your i.e. Arduino sysid
-  component_id = 158; // Your i.e. Arduino compid
-  type = MAV_TYPE_QUADROTOR;
-  autopilot =  MAV_AUTOPILOT_INVALID;
+  connection.system_id = 1; // ESP32 sysid
+  connection.component_id = 158; // ESP32 compid
+  connection.type = MAV_TYPE_QUADROTOR;
+  connection.autopilot =  MAV_AUTOPILOT_INVALID;
 
+  ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void) DONE"));
+
+  settings.flags.init_completed = true;
 
 }
 
-
-void mMAVLink::Init(void)
+void mMAVLink_Decoder::Send_Heartbeat()
 {
+  mavlink_message_t msghb;
+  mavlink_heartbeat_t heartbeat;
+  uint8_t bufhb[MAVLINK_MAX_PACKET_LEN];
+  mavlink_msg_heartbeat_pack(
+    connection.system_id, 
+    connection.component_id, 
+    &msghb, 
+    connection.type, 
+    connection.autopilot, 
+    MAV_MODE_PREFLIGHT, 
+    0, 
+    MAV_STATE_STANDBY
+  );
+  uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
+  _MAVSerial->write(bufhb,lenhb);
+  ALOG_INF(PSTR("Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
+}
 
-    Serial.println("Init");
-  while(!begin()){
-    Serial.println("Not Connected: Waiting for Heartbeat from ardupilot");
-    
-  _MAVSerial->println("BOOT");
 
-    delay(1000);
-  }
-
-  StreamF();
-
-  // delay(2000);
-
-  // Serial.println("mMAVLink::Init DONE");
-
+void mMAVLink_Decoder::Init(void)
+{
+  ALOG_INF(PSTR("mMAVLink_Decoder::Init(void) DONE"));
 }
 
  
 
-/*
-  mMAVLink.cpp - Library for using Arduino to recieve Pixhawk's sensor data as well as some other usefull data which you might need.
-  Created by Shashi Kant, June 23, 2018.
-  Using MAVLink C headers files generated from the ardupilotmega.xml with the help of mavgenerator.
-*/
 
-// #include "mMAVLink.h"
+void mMAVLink_Decoder::Delayed_Init(void)
+{
 
-// mMAVLink::mMAVLink(HardwareSerial &hs){
-// }
-
-bool mMAVLink::begin(){
-  // _MAVSerial->begin(921600);
-  // delay(1000);
-  if(_MAVSerial->available()<=0){
-
-    
-    int flag=1;
-    Serial.println("Sending Heartbeats...");
-    mavlink_message_t msghb;
-    mavlink_heartbeat_t heartbeat;
-    uint8_t bufhb[MAVLINK_MAX_PACKET_LEN];
-    mavlink_msg_heartbeat_pack(system_id, component_id, &msghb, type, autopilot, MAV_MODE_PREFLIGHT, 0, MAV_STATE_STANDBY);
-    uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
-    // delay(1000);
-    _MAVSerial->write(bufhb,lenhb);
-    Serial.println("Heartbeats sent! Now will check for recieved heartbeats to record sysid and compid...");
-
-    
-    return 0;
-  }else{
-    return 1;
+  if(settings.flags.init_completed)
+  { 
+    return; // No further again required 
   }
+
+  if(settings.tSaved_ReInit_Counter == 1) // Execute
+  {
+    ALOG_HGL(PSTR("mMAVLink_Decoder::Delayed_Init TRIGGERED %d"), settings.tSaved_ReInit_Counter);
+    Init();
+
+
+    /*
+    Check if init worked
+    */
+    if(settings.flags.init_completed)
+    {
+      //any other inits? mqtt_init should just be inside init
+    }
+
+    settings.tSaved_ReInit_Counter = settings.ReInit_BackOff_Secs; // reset timer
+    return;
+  }
+  
+  if(settings.tSaved_ReInit_Counter > 0){ 
+    settings.tSaved_ReInit_Counter--; 
+    ALOG_HGL(PSTR("mMAVLink_Decoder::Delayed_Init waiting %d"), settings.tSaved_ReInit_Counter);
+  }
+
 }
 
-// At first we will send some HeartBeats to Pixhawk to check whether it's available or not??
-// After that we will check for whether we are recieving HeartBeats back from Pixhawk if Yes,
-// We will note down its sysid and compid to send it a req to Stream Data.
-void mMAVLink::StreamF(){
-  // delay(2000);
-  int flag=1;
-  Serial.println("Sending Heartbeats...");
-  mavlink_message_t msghb;
-  mavlink_heartbeat_t heartbeat;
-  uint8_t bufhb[MAVLINK_MAX_PACKET_LEN];
-  mavlink_msg_heartbeat_pack(system_id, component_id, &msghb, type, autopilot, MAV_MODE_PREFLIGHT, 0, MAV_STATE_STANDBY);
-  uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
-  // delay(1000);
-  _MAVSerial->write(bufhb,lenhb);
-  Serial.println("Heartbeats sent! Now will check for recieved heartbeats to record sysid and compid...");
 
-  // Looping untill we get the required data.
-  while(flag==1){
-    delay(1);
-    while(_MAVSerial->available()>0){
-      mavlink_message_t msgpx;
-      mavlink_status_t statuspx;
-      uint8_t ch = _MAVSerial->read();
-      if(mavlink_parse_char(MAVLINK_COMM_0, ch, &msgpx, &statuspx)){
-        Serial.println("Message Parsing Done!");
-        switch(msgpx.msgid){
-          case MAVLINK_MSG_ID_HEARTBEAT:
-          {
-            mavlink_heartbeat_t packet;
-            mavlink_msg_heartbeat_decode(&msgpx, &packet);
-            received_sysid = msgpx.sysid; // Pixhawk sysid
-            received_compid = msgpx.compid; // Pixhawk compid
-            Serial.println("sysid and compid successfully recorded");
-            flag = 0;
-            break;
-          }
-        }
-      }
-    }
-  }
 
-  // Sending request for data stream...
-  // Serial.println("Now sending request for data stream...");
-  // delay(2000);
+void mMAVLink_Decoder::Send_MAVLink_Stream_Pack__Enable_All()
+{
+
   mavlink_message_t msgds;
   uint8_t bufds[MAVLINK_MAX_PACKET_LEN];
-  mavlink_msg_request_data_stream_pack(system_id, component_id, &msgds, received_sysid, received_compid, MAV_DATA_STREAM_ALL , 0x05, 1);
+  mavlink_msg_request_data_stream_pack(connection.system_id, connection.component_id, &msgds, connection.received_sysid, connection.received_compid, MAV_DATA_STREAM_ALL , 0x05, 1);
   uint16_t lends = mavlink_msg_to_send_buffer(bufds, &msgds);
-  // delay(1000);
   _MAVSerial->write(bufds,lends);
-  Serial.println("Request sent! Now you are ready to recieve datas...");
+  ALOG_HGL(PSTR(DEBUG_INSERT_PAGE_BREAK "Send_MAVLink_Stream_Pack__Enable_All"));
 
 }
 
-void mMAVLink::PollMAVLink_Stream()
+
+void mMAVLink_Decoder::Maintain_Connection()
 {
-  
-  
+
+  if(mTime::TimeReached(&connection.timereached_heartbeat, 1000))
+  {
+    Send_Heartbeat();
+    
+    /**
+     * @brief Send to config stream if no X has been received
+     * 
+     */
+    if(abs(millis()-pkt.ahrs.tUpdate)>3000)
+    {
+      Send_MAVLink_Stream_Pack__Enable_All();
+    }
+
+  }
+
+  PollMAVLink_Stream();
+
+}
+
+
+
+
+
+void mMAVLink_Decoder::PollMAVLink_Stream()
+{
+  if(labs(millis()-pkt.tSaved_Last_Response)>10000)
+  {
+    ALOG_INF(PSTR("No data from connected mavlink stream, begining stream session to restart (possible power cycle of vehicle?)"));
+    settings.flags.init_completed = false; // this will allow the re_init to start
+  }
+    
   while(_MAVSerial->available() > 0)
   {
   
@@ -267,7 +230,11 @@ void mMAVLink::PollMAVLink_Stream()
     {
       // Serial.println("Message Parsing Done!");
       // Serial.println(msg.msgid);
-
+      pkt.tSaved_Last_Response = millis();
+      
+      
+      // ALOG_INF(PSTR("Packet = %d \"%S\""), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)));
+      
 
       if(std::find(unique_msg_id_list.begin(), unique_msg_id_list.end(), msg.msgid) != unique_msg_id_list.end()) {
         /* v contains x */
@@ -337,12 +304,25 @@ void mMAVLink::PollMAVLink_Stream()
           pkt.gps_raw_int.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_HEARTBEAT:                         
-          mavlink_msg_heartbeat_decode(&msg, &pkt.heartbeat.data);                                      
+          mavlink_msg_heartbeat_decode(&msg, &pkt.heartbeat.data);  
+          // Use heartbeat from vehicle to get additional info      
+          pkt.heartbeat.vehicle_component_id = msg.compid;      
+          if(pkt.heartbeat.vehicle_sys_id != msg.sysid){ Serial.println(DEBUG_INSERT_PAGE_BREAK "RESEND?"); }
+          pkt.heartbeat.vehicle_sys_id = msg.sysid;      
+          ALOG_INF(PSTR("Packet = %d \"%S\", sys %d, comp %d"), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
           pkt.heartbeat.tUpdate = millis();     
+        break;
+        case MAVLINK_MSG_ID_HOME_POSITION:                         
+          mavlink_msg_home_position_decode(&msg, &pkt.home_position.data);                                      
+          pkt.home_position.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_HWSTATUS:                         
           mavlink_msg_hwstatus_decode(&msg, &pkt.hwstatus.data);                                      
           pkt.hwstatus.tUpdate = millis();     
+        break;
+        case MAVLINK_MSG_ID_LOCAL_POSITION_NED:                         
+          mavlink_msg_local_position_ned_decode(&msg, &pkt.local_position_ned.data);                                      
+          pkt.local_position_ned.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_MEMINFO:                         
           mavlink_msg_meminfo_decode(&msg, &pkt.meminfo.data);                                      
@@ -387,6 +367,10 @@ void mMAVLink::PollMAVLink_Stream()
         case MAVLINK_MSG_ID_RC_CHANNELS_RAW:                         
           mavlink_msg_rc_channels_raw_decode(&msg, &pkt.rc_channels_raw.data);                                      
           pkt.rc_channels_raw.tUpdate = millis();     
+        break;
+        case MAVLINK_MSG_ID_RC_CHANNELS_SCALED:                         
+          mavlink_msg_rc_channels_scaled_decode(&msg, &pkt.rc_channels_scaled.data);                                      
+          pkt.rc_channels_scaled.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_REMOTE_LOG_BLOCK_STATUS:                         
           mavlink_msg_remote_log_block_status_decode(&msg, &pkt.remote_log_block_status.data);                                      
@@ -465,7 +449,7 @@ void mMAVLink::PollMAVLink_Stream()
 }
 
 
-const char* mMAVLink::MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* buffer, uint8_t buflen)
+const char* mMAVLink_Decoder::MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* buffer, uint8_t buflen)
 {
 
   if(buffer == nullptr){ return PM_SEARCH_NOMATCH;}
@@ -510,35 +494,35 @@ const char* mMAVLink::MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* buffer, 
     case MAVLINK_MSG_ID_DATA16:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA16__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA16__CTR)); break;
     case MAVLINK_MSG_ID_DATA32:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA32__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA32__CTR)); break;
     case MAVLINK_MSG_ID_DATA64:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA64__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA64__CTR)); break;
-    case MAVLINK_MSG_ID_DATA96:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA96__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA96__CTR)); break;
-    case MAVLINK_MSG_ID_DATA_STREAM:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA_STREAM__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA_STREAM__CTR)); break;
-    case MAVLINK_MSG_ID_DATA_TRANSMISSION_HANDSHAKE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA_TRANSMISSION_HANDSHAKE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA_TRANSMISSION_HANDSHAKE__CTR)); break;
-    case MAVLINK_MSG_ID_DEBUG:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEBUG__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEBUG__CTR)); break;
-    case MAVLINK_MSG_ID_DEBUG_VECT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEBUG_VECT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEBUG_VECT__CTR)); break;
-    case MAVLINK_MSG_ID_DEEPSTALL:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEEPSTALL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEEPSTALL__CTR)); break;
-    case MAVLINK_MSG_ID_DEVICE_OP_READ:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ__CTR)); break;
-    case MAVLINK_MSG_ID_DEVICE_OP_READ_REPLY:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ_REPLY__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ_REPLY__CTR)); break;
-    case MAVLINK_MSG_ID_DEVICE_OP_WRITE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE__CTR)); break;
-    case MAVLINK_MSG_ID_DEVICE_OP_WRITE_REPLY:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE_REPLY__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE_REPLY__CTR)); break;
-    case MAVLINK_MSG_ID_DIGICAM_CONFIGURE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONFIGURE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONFIGURE__CTR)); break;
-    case MAVLINK_MSG_ID_DIGICAM_CONTROL:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONTROL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONTROL__CTR)); break;
-    case MAVLINK_MSG_ID_DISTANCE_SENSOR:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DISTANCE_SENSOR__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DISTANCE_SENSOR__CTR)); break;
-    case MAVLINK_MSG_ID_EKF_STATUS_REPORT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR)); break;
-    case MAVLINK_MSG_ID_ENCAPSULATED_DATA:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__ENCAPSULATED_DATA__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__ENCAPSULATED_DATA__CTR)); break;
-    case MAVLINK_MSG_ID_ESTIMATOR_STATUS:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__ESTIMATOR_STATUS__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__ESTIMATOR_STATUS__CTR)); break;
-    case MAVLINK_MSG_ID_EXTENDED_SYS_STATE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__EXTENDED_SYS_STATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__EXTENDED_SYS_STATE__CTR)); break;
-    case MAVLINK_MSG_ID_FENCE_FETCH_POINT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FENCE_FETCH_POINT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FENCE_FETCH_POINT__CTR)); break;
-    case MAVLINK_MSG_ID_FENCE_POINT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FENCE_POINT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FENCE_POINT__CTR)); break;
-    case MAVLINK_MSG_ID_FENCE_STATUS:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR)); break;
+    case MAVLINK_MSG_ID_DATA96:                           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA96__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA96__CTR)); break;
+    case MAVLINK_MSG_ID_DATA_STREAM:                      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA_STREAM__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA_STREAM__CTR)); break;
+    case MAVLINK_MSG_ID_DATA_TRANSMISSION_HANDSHAKE:      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DATA_TRANSMISSION_HANDSHAKE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DATA_TRANSMISSION_HANDSHAKE__CTR)); break;
+    case MAVLINK_MSG_ID_DEBUG:                            memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEBUG__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEBUG__CTR)); break;
+    case MAVLINK_MSG_ID_DEBUG_VECT:                       memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEBUG_VECT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEBUG_VECT__CTR)); break;
+    case MAVLINK_MSG_ID_DEEPSTALL:                        memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEEPSTALL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEEPSTALL__CTR)); break;
+    case MAVLINK_MSG_ID_DEVICE_OP_READ:                   memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ__CTR)); break;
+    case MAVLINK_MSG_ID_DEVICE_OP_READ_REPLY:             memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ_REPLY__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_READ_REPLY__CTR)); break;
+    case MAVLINK_MSG_ID_DEVICE_OP_WRITE:                  memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE__CTR)); break;
+    case MAVLINK_MSG_ID_DEVICE_OP_WRITE_REPLY:            memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE_REPLY__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DEVICE_OP_WRITE_REPLY__CTR)); break;
+    case MAVLINK_MSG_ID_DIGICAM_CONFIGURE:                memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONFIGURE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONFIGURE__CTR)); break;
+    case MAVLINK_MSG_ID_DIGICAM_CONTROL:                  memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONTROL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DIGICAM_CONTROL__CTR)); break;
+    case MAVLINK_MSG_ID_DISTANCE_SENSOR:                  memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__DISTANCE_SENSOR__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__DISTANCE_SENSOR__CTR)); break;
+    case MAVLINK_MSG_ID_EKF_STATUS_REPORT:                memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR)); break;
+    case MAVLINK_MSG_ID_ENCAPSULATED_DATA:                memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__ENCAPSULATED_DATA__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__ENCAPSULATED_DATA__CTR)); break;
+    case MAVLINK_MSG_ID_ESTIMATOR_STATUS:                 memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__ESTIMATOR_STATUS__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__ESTIMATOR_STATUS__CTR)); break;
+    case MAVLINK_MSG_ID_EXTENDED_SYS_STATE:               memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__EXTENDED_SYS_STATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__EXTENDED_SYS_STATE__CTR)); break;
+    case MAVLINK_MSG_ID_FENCE_FETCH_POINT:                memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FENCE_FETCH_POINT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FENCE_FETCH_POINT__CTR)); break;
+    case MAVLINK_MSG_ID_FENCE_POINT:                      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FENCE_POINT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FENCE_POINT__CTR)); break;
+    case MAVLINK_MSG_ID_FENCE_STATUS:                     memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR)); break;
     case MAVLINK_MSG_ID_FILE_TRANSFER_PROTOCOL:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FILE_TRANSFER_PROTOCOL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FILE_TRANSFER_PROTOCOL__CTR)); break;
-    case MAVLINK_MSG_ID_FLIGHT_INFORMATION:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FLIGHT_INFORMATION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FLIGHT_INFORMATION__CTR)); break;
-    case MAVLINK_MSG_ID_FOLLOW_TARGET:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FOLLOW_TARGET__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FOLLOW_TARGET__CTR)); break;
-    case MAVLINK_MSG_ID_GIMBAL_CONTROL:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_CONTROL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_CONTROL__CTR)); break;
-    case MAVLINK_MSG_ID_GIMBAL_REPORT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR)); break;
-    case MAVLINK_MSG_ID_GIMBAL_TORQUE_CMD_REPORT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR)); break;
-    case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR)); break;
-    case MAVLINK_MSG_ID_GLOBAL_POSITION_INT_COV:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT_COV__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT_COV__CTR)); break;
-    case MAVLINK_MSG_ID_GLOBAL_VISION_POSITION_ESTIMATE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_VISION_POSITION_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_VISION_POSITION_ESTIMATE__CTR)); break;
+    case MAVLINK_MSG_ID_FLIGHT_INFORMATION:               memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FLIGHT_INFORMATION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FLIGHT_INFORMATION__CTR)); break;
+    case MAVLINK_MSG_ID_FOLLOW_TARGET:                    memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__FOLLOW_TARGET__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__FOLLOW_TARGET__CTR)); break;
+    case MAVLINK_MSG_ID_GIMBAL_CONTROL:                   memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_CONTROL__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_CONTROL__CTR)); break;
+    case MAVLINK_MSG_ID_GIMBAL_REPORT:                    memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR)); break;
+    case MAVLINK_MSG_ID_GIMBAL_TORQUE_CMD_REPORT:         memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR)); break;
+    case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:              memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR)); break;
+    case MAVLINK_MSG_ID_GLOBAL_POSITION_INT_COV:          memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT_COV__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT_COV__CTR)); break;
+    case MAVLINK_MSG_ID_GLOBAL_VISION_POSITION_ESTIMATE:  memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_VISION_POSITION_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_VISION_POSITION_ESTIMATE__CTR)); break;
     case MAVLINK_MSG_ID_GOPRO_GET_REQUEST:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GOPRO_GET_REQUEST__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GOPRO_GET_REQUEST__CTR)); break;
     case MAVLINK_MSG_ID_GOPRO_GET_RESPONSE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GOPRO_GET_RESPONSE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GOPRO_GET_RESPONSE__CTR)); break;
     case MAVLINK_MSG_ID_GOPRO_HEARTBEAT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR)); break;
@@ -708,7 +692,7 @@ const char* mMAVLink::MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* buffer, 
 *******************************************************************************************************************/
 
   
-void mMAVLink::parse_JSONCommand(JsonParserObject obj){
+void mMAVLink_Decoder::parse_JSONCommand(JsonParserObject obj){
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
@@ -727,7 +711,7 @@ void mMAVLink::parse_JSONCommand(JsonParserObject obj){
  * ConstructJson
 *******************************************************************************************************************/
 
-uint8_t mMAVLink::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+uint8_t mMAVLink_Decoder::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
@@ -778,7 +762,7 @@ uint8_t mMAVLink::ConstructJSON_Settings(uint8_t json_level, bool json_appending
 }
 
 
-uint8_t mMAVLink::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
+uint8_t mMAVLink_Decoder::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
   return JBI->End();
@@ -792,7 +776,7 @@ uint8_t mMAVLink::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
  * @param json_appending 
  * @return uint8_t 
  */
-uint8_t mMAVLink::ConstructJSON_Overview_01(uint8_t json_level, bool json_appending){
+uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool json_appending){
 
   JBI->Start();
   JBI->Level_Start("heartbeat");
@@ -808,8 +792,16 @@ uint8_t mMAVLink::ConstructJSON_Overview_01(uint8_t json_level, bool json_append
     JBI->Add("pitch", pkt.ahrs2.data.pitch);
     JBI->Add("yaw", pkt.ahrs2.data.yaw);
     JBI->Add("altitude", pkt.ahrs2.data.altitude);
+    #ifdef ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+    JBI->Add("lat", float(pkt.ahrs2.data.lat)/10000000);
+    #else
     JBI->Add("lat", pkt.ahrs2.data.lat);
+    #endif
+    #ifdef ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+    JBI->Add("lng", float(pkt.ahrs2.data.lng)/10000000);
+    #else
     JBI->Add("lng", pkt.ahrs2.data.lng);
+    #endif
   JBI->Level_End();
   JBI->Level_Start("attitude");
     JBI->Add("roll", pkt.attitude.data.roll);/*< Roll angle (rad, -pi..+pi)*/
@@ -894,7 +886,7 @@ uint8_t mMAVLink::ConstructJSON_Overview_01(uint8_t json_level, bool json_append
  * @param json_appending 
  * @return uint8_t 
  */
-uint8_t mMAVLink::ConstructJSON_Overview_02(uint8_t json_level, bool json_appending){
+uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool json_appending){
 
   JBI->Start();
   JBI->Level_Start("nav_controller_output");
@@ -961,7 +953,7 @@ uint8_t mMAVLink::ConstructJSON_Overview_02(uint8_t json_level, bool json_append
 }
 
 
-uint8_t mMAVLink::ConstructJSON_ahrs(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_ahrs(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.ahrs.tUpdate);
@@ -975,7 +967,7 @@ uint8_t mMAVLink::ConstructJSON_ahrs(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_ahrs2(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_ahrs2(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.ahrs2.tUpdate);
@@ -983,12 +975,12 @@ uint8_t mMAVLink::ConstructJSON_ahrs2(uint8_t json_level, bool json_appending)
     JBI->Add("pitch", pkt.ahrs2.data.pitch);
     JBI->Add("yaw", pkt.ahrs2.data.yaw);
     JBI->Add("altitude", pkt.ahrs2.data.altitude);
-    JBI->Add("lat", pkt.ahrs2.data.lat);
-    JBI->Add("lng", pkt.ahrs2.data.lng);
+    JBI->Add("lat", float(pkt.ahrs2.data.lat)/10000000);
+    JBI->Add("lng", float(pkt.ahrs2.data.lng)/10000000);
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_attitude(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_attitude(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.attitude.tUpdate);
@@ -1002,7 +994,7 @@ uint8_t mMAVLink::ConstructJSON_attitude(uint8_t json_level, bool json_appending
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_autopilot_version_request(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_autopilot_version_request(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.autopilot_version.tUpdate);
@@ -1021,7 +1013,7 @@ uint8_t mMAVLink::ConstructJSON_autopilot_version_request(uint8_t json_level, bo
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_battery_status(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_battery_status(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.battery_status.tUpdate);
@@ -1039,7 +1031,7 @@ uint8_t mMAVLink::ConstructJSON_battery_status(uint8_t json_level, bool json_app
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_ekf_status_report(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_ekf_status_report(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.ekf_status_report.tUpdate);
@@ -1053,7 +1045,7 @@ uint8_t mMAVLink::ConstructJSON_ekf_status_report(uint8_t json_level, bool json_
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_fence_status(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_fence_status(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.fence_status.tUpdate);
@@ -1064,7 +1056,7 @@ uint8_t mMAVLink::ConstructJSON_fence_status(uint8_t json_level, bool json_appen
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_gimbal_report(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_gimbal_report(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.gimbal_report.tUpdate);
@@ -1083,7 +1075,7 @@ uint8_t mMAVLink::ConstructJSON_gimbal_report(uint8_t json_level, bool json_appe
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_gimbal_torque_cmd_report(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_gimbal_torque_cmd_report(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.gimbal_torque_cmd_report.tUpdate);
@@ -1095,7 +1087,7 @@ uint8_t mMAVLink::ConstructJSON_gimbal_torque_cmd_report(uint8_t json_level, boo
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_global_position_int(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_global_position_int(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.global_position_int.tUpdate);
@@ -1111,7 +1103,7 @@ uint8_t mMAVLink::ConstructJSON_global_position_int(uint8_t json_level, bool jso
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_gopro_heartbeat(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_gopro_heartbeat(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.gopro_heartbeat.tUpdate);
@@ -1121,7 +1113,7 @@ uint8_t mMAVLink::ConstructJSON_gopro_heartbeat(uint8_t json_level, bool json_ap
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_gps_raw_int(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_gps_raw_int(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.gps_raw_int.tUpdate);
@@ -1143,7 +1135,7 @@ uint8_t mMAVLink::ConstructJSON_gps_raw_int(uint8_t json_level, bool json_append
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_heartbeat(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_heartbeat(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.heartbeat.tUpdate);
@@ -1156,7 +1148,25 @@ uint8_t mMAVLink::ConstructJSON_heartbeat(uint8_t json_level, bool json_appendin
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_hwstatus(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_home_position(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+    JBI->Add("t", millis()-pkt.home_position.tUpdate);
+    JBI->Add("latitude", pkt.home_position.data.latitude); /*< Latitude (WGS84), in degrees * 1E7*/
+    JBI->Add("longitude", pkt.home_position.data.longitude); /*< Longitude (WGS84, in degrees * 1E7*/
+    JBI->Add("altitude", pkt.home_position.data.altitude); /*< Altitude (AMSL), in meters * 1000 (positive for up)*/
+    JBI->Add("x", pkt.home_position.data.x); /*< Local X position of this position in the local coordinate frame*/
+    JBI->Add("y", pkt.home_position.data.y); /*< Local Y position of this position in the local coordinate frame*/
+    JBI->Add("z", pkt.home_position.data.z); /*< Local Z position of this position in the local coordinate frame*/
+    JBI->Array_AddArray("q", pkt.home_position.data.q, 4); /*< World to surface normal and heading transformation of the takeoff position. Used to indicate the heading and slope of the ground*/
+    JBI->Add("approach_x", pkt.home_position.data.approach_x); /*< Local X position of the end of the approach vector. Multicopters should set this position based on their takeoff path. Grass-landing fixed wing aircraft should set it the same way as multicopters. Runway-landing fixed wing aircraft should set it to the opposite direction of the takeoff, assuming the takeoff happened from the threshold / touchdown zone.*/
+    JBI->Add("approach_y", pkt.home_position.data.approach_y); /*< Local Y position of the end of the approach vector. Multicopters should set this position based on their takeoff path. Grass-landing fixed wing aircraft should set it the same way as multicopters. Runway-landing fixed wing aircraft should set it to the opposite direction of the takeoff, assuming the takeoff happened from the threshold / touchdown zone.*/
+    JBI->Add("approach_z", pkt.home_position.data.approach_z); /*< Local Z position of the end of the approach vector. Multicopters should set this position based on their takeoff path. Grass-landing fixed wing aircraft should set it the same way as multicopters. Runway-landing fixed wing aircraft should set it to the opposite direction of the takeoff, assuming the takeoff happened from the threshold / touchdown zone.*/
+    JBI->Add("time_usec", pkt.home_position.data.time_usec); /*< Timestamp (microseconds since UNIX epoch or microseconds since system boot)*/
+  return JBI->End();    
+}
+
+uint8_t mMAVLink_Decoder::ConstructJSON_hwstatus(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.hwstatus.tUpdate);
@@ -1165,7 +1175,21 @@ uint8_t mMAVLink::ConstructJSON_hwstatus(uint8_t json_level, bool json_appending
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_meminfo(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_local_position_ned(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+    JBI->Add("t", millis()-pkt.local_position_ned.tUpdate);
+    JBI->Add("time_boot_ms", pkt.local_position_ned.data.time_boot_ms); /*< Timestamp (milliseconds since system boot)*/
+    JBI->Add("x", pkt.local_position_ned.data.x); /*< X Position*/
+    JBI->Add("y", pkt.local_position_ned.data.y); /*< Y Position*/
+    JBI->Add("z", pkt.local_position_ned.data.z); /*< Z Position*/
+    JBI->Add("vx", pkt.local_position_ned.data.vx);/*< X Speed*/
+    JBI->Add("vy", pkt.local_position_ned.data.vy); /*< Y Speed*/
+    JBI->Add("vz", pkt.local_position_ned.data.vz); /*< Z Speed*/
+  return JBI->End();    
+}
+
+uint8_t mMAVLink_Decoder::ConstructJSON_meminfo(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.meminfo.tUpdate);
@@ -1175,7 +1199,7 @@ uint8_t mMAVLink::ConstructJSON_meminfo(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_mission_current(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_mission_current(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.mission_current.tUpdate);
@@ -1183,7 +1207,7 @@ uint8_t mMAVLink::ConstructJSON_mission_current(uint8_t json_level, bool json_ap
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_mount_status(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_mount_status(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.mount_status.tUpdate);
@@ -1195,7 +1219,7 @@ uint8_t mMAVLink::ConstructJSON_mount_status(uint8_t json_level, bool json_appen
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_nav_controller_output(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_nav_controller_output(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.nav_controller_output.tUpdate);
@@ -1210,7 +1234,7 @@ uint8_t mMAVLink::ConstructJSON_nav_controller_output(uint8_t json_level, bool j
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_param_value(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_param_value(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.param_value.tUpdate);
@@ -1222,7 +1246,7 @@ uint8_t mMAVLink::ConstructJSON_param_value(uint8_t json_level, bool json_append
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_power_status(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_power_status(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.power_status.tUpdate);
@@ -1232,7 +1256,7 @@ uint8_t mMAVLink::ConstructJSON_power_status(uint8_t json_level, bool json_appen
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_raw_imu(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_raw_imu(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.raw_imu.tUpdate);
@@ -1249,7 +1273,7 @@ uint8_t mMAVLink::ConstructJSON_raw_imu(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_rc_channels(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_rc_channels(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.rc_channels.tUpdate);
@@ -1277,7 +1301,7 @@ uint8_t mMAVLink::ConstructJSON_rc_channels(uint8_t json_level, bool json_append
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_rc_channels_raw(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_rc_channels_raw(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.rc_channels_raw.tUpdate);
@@ -1295,7 +1319,25 @@ uint8_t mMAVLink::ConstructJSON_rc_channels_raw(uint8_t json_level, bool json_ap
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_request_data_stream(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_rc_channels_scaled(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+    JBI->Add("t", millis()-pkt.rc_channels_scaled.tUpdate);
+    JBI->Add("time_boot_ms", pkt.rc_channels_scaled.data.time_boot_ms); /*< Timestamp (milliseconds since system boot)*/
+    JBI->Add("chan1_scaled", pkt.rc_channels_scaled.data.chan1_scaled); /*< RC channel 1 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan2_scaled", pkt.rc_channels_scaled.data.chan2_scaled); /*< RC channel 2 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan3_scaled", pkt.rc_channels_scaled.data.chan3_scaled); /*< RC channel 3 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan4_scaled", pkt.rc_channels_scaled.data.chan4_scaled); /*< RC channel 4 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan5_scaled", pkt.rc_channels_scaled.data.chan5_scaled); /*< RC channel 5 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan6_scaled", pkt.rc_channels_scaled.data.chan6_scaled); /*< RC channel 6 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan7_scaled", pkt.rc_channels_scaled.data.chan7_scaled); /*< RC channel 7 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("chan8_scaled", pkt.rc_channels_scaled.data.chan8_scaled); /*< RC channel 8 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.*/
+    JBI->Add("port", pkt.rc_channels_scaled.data.port); /*< Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows for more than 8 servos.*/
+    JBI->Add("rssi", pkt.rc_channels_scaled.data.rssi); /*< Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.*/
+  return JBI->End();    
+}
+
+uint8_t mMAVLink_Decoder::ConstructJSON_request_data_stream(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.request_data_stream.tUpdate);
@@ -1307,7 +1349,7 @@ uint8_t mMAVLink::ConstructJSON_request_data_stream(uint8_t json_level, bool jso
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_imu2(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_imu2(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.scaled_imu2.tUpdate);
@@ -1324,7 +1366,7 @@ uint8_t mMAVLink::ConstructJSON_imu2(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_imu3(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_imu3(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.scaled_imu3.tUpdate);
@@ -1341,7 +1383,7 @@ uint8_t mMAVLink::ConstructJSON_imu3(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_scaled_pressure(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_scaled_pressure(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.scaled_pressure.tUpdate);
@@ -1352,7 +1394,7 @@ uint8_t mMAVLink::ConstructJSON_scaled_pressure(uint8_t json_level, bool json_ap
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_scaled_pressure2(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_scaled_pressure2(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.scaled_pressure2.tUpdate);
@@ -1363,7 +1405,7 @@ uint8_t mMAVLink::ConstructJSON_scaled_pressure2(uint8_t json_level, bool json_a
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_sensor_offsets(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_sensor_offsets(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.sensor_offsets.tUpdate);
@@ -1382,7 +1424,7 @@ uint8_t mMAVLink::ConstructJSON_sensor_offsets(uint8_t json_level, bool json_app
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_servo_output_raw(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_servo_output_raw(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.servo_output_raw.tUpdate);
@@ -1407,7 +1449,7 @@ uint8_t mMAVLink::ConstructJSON_servo_output_raw(uint8_t json_level, bool json_a
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_statustext(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_statustext(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.statustext.tUpdate);
@@ -1416,7 +1458,7 @@ uint8_t mMAVLink::ConstructJSON_statustext(uint8_t json_level, bool json_appendi
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_sys_status(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_sys_status(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.sys_status.tUpdate);
@@ -1436,7 +1478,7 @@ uint8_t mMAVLink::ConstructJSON_sys_status(uint8_t json_level, bool json_appendi
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_system_time(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_system_time(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.system_time.tUpdate);
@@ -1445,7 +1487,7 @@ uint8_t mMAVLink::ConstructJSON_system_time(uint8_t json_level, bool json_append
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_timesync(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_timesync(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.timesync.tUpdate);
@@ -1454,7 +1496,7 @@ uint8_t mMAVLink::ConstructJSON_timesync(uint8_t json_level, bool json_appending
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_terrain_report(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_terrain_report(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.terrain_report.tUpdate);    
@@ -1469,7 +1511,7 @@ uint8_t mMAVLink::ConstructJSON_terrain_report(uint8_t json_level, bool json_app
 }
 
 
-uint8_t mMAVLink::ConstructJSON_vfr_hud(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_vfr_hud(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.vfr_hud.tUpdate);
@@ -1482,7 +1524,7 @@ uint8_t mMAVLink::ConstructJSON_vfr_hud(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
-uint8_t mMAVLink::ConstructJSON_vibration(uint8_t json_level, bool json_appending)
+uint8_t mMAVLink_Decoder::ConstructJSON_vibration(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
     JBI->Add("t", millis()-pkt.vibration.tUpdate);
@@ -1506,10 +1548,15 @@ uint8_t mMAVLink::ConstructJSON_vibration(uint8_t json_level, bool json_appendin
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mMAVLink::MQTTHandler_Init()
+void mMAVLink_Decoder::MQTTHandler_Init()
 {
 
-  struct handler<mMAVLink>* ptr;
+  if(mqtthandler_list.size())
+  {
+    ALOG_ERR(PSTR("MQTTHandler_Init already configured?"));
+  }
+
+  struct handler<mMAVLink_Decoder>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -1519,7 +1566,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Settings;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -1529,7 +1577,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Sensor;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -1539,7 +1588,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Sensor;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_overview_01;
   ptr->tSavedLastSent = millis();
@@ -1549,7 +1599,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_01_CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Overview_01;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Overview_01;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_overview_02;
   ptr->tSavedLastSent = millis();
@@ -1559,7 +1610,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_02_CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_Overview_02;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Overview_02;
+  mqtthandler_list.push_back(ptr);
 
 
   // 163,AHRS
@@ -1571,7 +1623,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_ahrs;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ahrs;
+  mqtthandler_list.push_back(ptr);
 
   // 178,AHRS2
   ptr = &mqtthandler_mavlink_packet__ahrs2;
@@ -1582,7 +1635,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS2__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_ahrs2;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ahrs2;
+  mqtthandler_list.push_back(ptr);
 
   // 30,ATTITUDE
   ptr = &mqtthandler_mavlink_packet__attitude;
@@ -1593,7 +1647,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__ATTITUDE__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_attitude;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_attitude;
+  mqtthandler_list.push_back(ptr);
 
   // 183,AUTOPILOT_VERSION_REQUEST
   ptr = &mqtthandler_mavlink_packet__autopilot_version_request;
@@ -1604,7 +1659,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AUTOPILOT_VERSION_REQUEST__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_autopilot_version_request;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_autopilot_version_request;
+  mqtthandler_list.push_back(ptr);
 
   //147,BATTERY_STATUS
   ptr = &mqtthandler_mavlink_packet__battery_status;
@@ -1615,7 +1671,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__BATTERY_STATUS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_battery_status;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_battery_status;
+  mqtthandler_list.push_back(ptr);
 
   // 193,EKF_STATUS_REPORT
   ptr = &mqtthandler_mavlink_packet__ekf_status_report;
@@ -1626,7 +1683,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_ekf_status_report;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ekf_status_report;
+  mqtthandler_list.push_back(ptr);
 
   // 162,FENCE_STATUS
   ptr = &mqtthandler_mavlink_packet__fence_status;
@@ -1637,7 +1695,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_fence_status;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_fence_status;
+  mqtthandler_list.push_back(ptr);
 
   // 200,GIMBAL_REPORT
   ptr = &mqtthandler_mavlink_packet__gimbal_report;
@@ -1648,7 +1707,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_gimbal_report;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gimbal_report;
+  mqtthandler_list.push_back(ptr);
 
   // 214,GIMBAL_TORQUE_CMD_REPORT
   ptr = &mqtthandler_mavlink_packet__gimbal_torque_cmd_report;
@@ -1659,7 +1719,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_gimbal_torque_cmd_report;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gimbal_torque_cmd_report;
+  mqtthandler_list.push_back(ptr);
 
   // 33,GLOBAL_POSITION_INT
   ptr = &mqtthandler_mavlink_packet__global_position_int;
@@ -1670,7 +1731,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_global_position_int;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_global_position_int;
+  mqtthandler_list.push_back(ptr);
   
   // 215,GOPRO_HEARTBEAT
   ptr = &mqtthandler_mavlink_packet__gopro_heartbeat;
@@ -1681,7 +1743,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_gopro_heartbeat;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gopro_heartbeat;
+  mqtthandler_list.push_back(ptr);
   
   // 24,GPS_RAW_INT
   ptr = &mqtthandler_mavlink_packet__gps_raw_int;
@@ -1692,7 +1755,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GPS_RAW_INT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_gps_raw_int;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gps_raw_int;
+  mqtthandler_list.push_back(ptr);
   
   // 0,HEARTBEAT
   ptr = &mqtthandler_mavlink_packet__heartbeat;
@@ -1703,7 +1767,20 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HEARTBEAT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_heartbeat;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_heartbeat;
+  mqtthandler_list.push_back(ptr);
+  
+  // 0,HEARTBEAT
+  ptr = &mqtthandler_mavlink_packet__home_position;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HOME_POSITION__CTR;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_home_position;
+  mqtthandler_list.push_back(ptr);
   
   // 165,HWSTATUS
   ptr = &mqtthandler_mavlink_packet__hwstatus;
@@ -1714,7 +1791,20 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HWSTATUS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_hwstatus;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_hwstatus;
+  mqtthandler_list.push_back(ptr);
+  
+  // 165,HWSTATUS
+  ptr = &mqtthandler_mavlink_packet__local_position_ned;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__LOCAL_POSITION_NED__CTR;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_local_position_ned;
+  mqtthandler_list.push_back(ptr);
   
   // 152,MEMINFO
   ptr = &mqtthandler_mavlink_packet__meminfo;
@@ -1725,7 +1815,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MEMINFO__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_meminfo;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_meminfo;
+  mqtthandler_list.push_back(ptr);
   
   // 42,MISSION_CURRENT
   ptr = &mqtthandler_mavlink_packet__mission_current;
@@ -1736,7 +1827,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MISSION_CURRENT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_mission_current;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_mission_current;
+  mqtthandler_list.push_back(ptr);
   
   // 158,MOUNT_STATUS
   ptr = &mqtthandler_mavlink_packet__mount_status;
@@ -1747,7 +1839,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MOUNT_STATUS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_mount_status;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_mount_status;
+  mqtthandler_list.push_back(ptr);
   
   // 62,NAV_CONTROLLER_OUTPUT
   ptr = &mqtthandler_mavlink_packet__nav_controller_output;
@@ -1758,7 +1851,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__NAV_CONTROLLER_OUTPUT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_nav_controller_output;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_nav_controller_output;
+  mqtthandler_list.push_back(ptr);
   
   // 22,PARAM_VALUE
   ptr = &mqtthandler_mavlink_packet__param_value;
@@ -1769,7 +1863,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__PARAM_VALUE__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_param_value;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_param_value;
+  mqtthandler_list.push_back(ptr);
   
   // 125,POWER_STATUS
   ptr = &mqtthandler_mavlink_packet__power_status;
@@ -1780,7 +1875,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__POWER_STATUS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_power_status;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_power_status;
+  mqtthandler_list.push_back(ptr);
   
   // 27,RAW_IMU
   ptr = &mqtthandler_mavlink_packet__raw_imu;
@@ -1791,7 +1887,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RAW_IMU__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_raw_imu;   
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_raw_imu;   
+  mqtthandler_list.push_back(ptr);
   
   // 65,RC_CHANNELS
   ptr = &mqtthandler_mavlink_packet__rc_channels;
@@ -1802,7 +1899,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_rc_channels;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels;
+  mqtthandler_list.push_back(ptr);
   
   // 35,RC_CHANNELS_RAW
   ptr = &mqtthandler_mavlink_packet__rc_channels_raw;
@@ -1813,7 +1911,20 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_RAW__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_rc_channels_raw;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels_raw;
+  mqtthandler_list.push_back(ptr);
+  
+  // 34,RC_CHANNELS_SCALED
+  ptr = &mqtthandler_mavlink_packet__rc_channels_scaled;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_SCALED__CTR;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels_scaled;
+  mqtthandler_list.push_back(ptr);
   
   // 66,REQUEST_DATA_STREAM
   ptr = &mqtthandler_mavlink_packet__request_data_stream;
@@ -1824,7 +1935,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__REQUEST_DATA_STREAM__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_request_data_stream;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_request_data_stream;
+  mqtthandler_list.push_back(ptr);
   
   // 116,SCALED_IMU2
   ptr = &mqtthandler_mavlink_packet__scaled_imu2;
@@ -1835,7 +1947,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU2__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_imu2;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_imu2;
+  mqtthandler_list.push_back(ptr);
   
   // 129,SCALED_IMU3
   ptr = &mqtthandler_mavlink_packet__scaled_imu3;
@@ -1846,7 +1959,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU3__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_imu3;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_imu3;
+  mqtthandler_list.push_back(ptr);
   
   // 29,SCALED_PRESSURE
   ptr = &mqtthandler_mavlink_packet__scaled_pressure;
@@ -1857,7 +1971,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_scaled_pressure;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_scaled_pressure;
+  mqtthandler_list.push_back(ptr);
   
   // 137,SCALED_PRESSURE2
   ptr = &mqtthandler_mavlink_packet__scaled_pressure2;
@@ -1868,7 +1983,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE2__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_scaled_pressure2;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_scaled_pressure2;
+  mqtthandler_list.push_back(ptr);
   
   // 150,SENSOR_OFFSETS
   ptr = &mqtthandler_mavlink_packet__sensor_offsets;
@@ -1879,7 +1995,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SENSOR_OFFSETS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_sensor_offsets;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_sensor_offsets;
+  mqtthandler_list.push_back(ptr);
   
   // 36,SERVO_OUTPUT_RAW
   ptr = &mqtthandler_mavlink_packet__servo_output_raw;
@@ -1890,7 +2007,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SERVO_OUTPUT_RAW__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_servo_output_raw;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_servo_output_raw;
+  mqtthandler_list.push_back(ptr);
   
   // 253,STATUSTEXT
   ptr = &mqtthandler_mavlink_packet__statustext;
@@ -1901,7 +2019,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__STATUSTEXT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_statustext;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_statustext;
+  mqtthandler_list.push_back(ptr);
   
   // 60,SYS_STATUS
   ptr = &mqtthandler_mavlink_packet__sys_status;
@@ -1912,7 +2031,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYS_STATUS__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_sys_status;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_sys_status;
+  mqtthandler_list.push_back(ptr);
   
   // 2,SYSTEM_TIME
   ptr = &mqtthandler_mavlink_packet__system_time;
@@ -1923,7 +2043,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYSTEM_TIME__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_system_time;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_system_time;
+  mqtthandler_list.push_back(ptr);
   
   // 111,TIMESYNC
   ptr = &mqtthandler_mavlink_packet__timesync;
@@ -1934,7 +2055,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TIMESYNC__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_timesync;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_timesync;
+  mqtthandler_list.push_back(ptr);
   
   // 
   ptr = &mqtthandler_mavlink_packet__terrain_report;
@@ -1945,7 +2067,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TERRAIN_REPORT__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_terrain_report;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_terrain_report;
+  mqtthandler_list.push_back(ptr);
 
 
   // 74,VFR_HUD
@@ -1957,7 +2080,8 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_vfr_hud;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_vfr_hud;
+  mqtthandler_list.push_back(ptr);
   
   // 241,VIBRATION
   ptr = &mqtthandler_mavlink_packet__vibration;
@@ -1968,14 +2092,15 @@ void mMAVLink::MQTTHandler_Init()
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR;
-  ptr->ConstructJSON_function = &mMAVLink::ConstructJSON_vibration;
+  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_vibration;
+  mqtthandler_list.push_back(ptr);
   
 } //end "MQTTHandler_Init"
 
 /**
  * @brief Set flag for all mqtthandlers to send
  * */
-void mMAVLink::MQTTHandler_Set_RefreshAll()
+void mMAVLink_Decoder::MQTTHandler_Set_RefreshAll()
 {
   for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
@@ -1985,23 +2110,23 @@ void mMAVLink::MQTTHandler_Set_RefreshAll()
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
  * */
-void mMAVLink::MQTTHandler_Set_DefaultPeriodRate()
+void mMAVLink_Decoder::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**
  * @brief MQTTHandler_Sender
  * */
-void mMAVLink::MQTTHandler_Sender(uint8_t id)
+void mMAVLink_Decoder::MQTTHandler_Sender(uint8_t id)
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__DRIVERS_MAVLINK__ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__DRIVERS_MAVLINK_DECODER__ID, handle, id);
   }
 }
   
