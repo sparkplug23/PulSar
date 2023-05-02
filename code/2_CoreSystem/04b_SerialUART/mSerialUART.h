@@ -1,11 +1,11 @@
-#ifndef _USE_MODULE_DRIVERS_SERIAL_UART_H
-#define _USE_MODULE_DRIVERS_SERIAL_UART_H
+#ifndef _USE_MODULE_CORE_SERIAL_UART_H
+#define _USE_MODULE_CORE_SERIAL_UART_H
 
-#define D_UNIQUE_MODULE_DRIVERS_SERIAL_UART_ID ((4*1000)+01)
+#define D_UNIQUE_MODULE_CORE_SERIAL_UART_ID ((4*1000)+04)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_DRIVERS_SERIAL_UART
+#ifdef USE_MODULE_CORE_SERIAL_UART
 
 #define ENABLE_UART2_ISR_BUFFERS
 
@@ -76,6 +76,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR) "uartinfo";
 // #include "FS.h"
 // #include "SD_MMC.h"
 
+#include "3_Network/10_MQTT/mMQTT.h"
+
 static uart_isr_handle_t *uart1_handle_console;
 static uart_isr_handle_t *uart2_handle_console;
 
@@ -89,11 +91,11 @@ class mSerialUART :
   public:
     mSerialUART(){};
     
-    static const char* PM_MODULE_DRIVERS_SERIAL_UART_CTR;
-    static const char* PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_SERIAL_UART_CTR; }
-    PGM_P GetModuleFriendlyName(){  return PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SERIAL_UART_ID; }
+    static const char* PM_MODULE_CORE_SERIAL_UART_CTR;
+    static const char* PM_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_CORE_SERIAL_UART_CTR; }
+    PGM_P GetModuleFriendlyName(){  return PM_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SERIAL_UART_ID; }
 
     #ifdef USE_DEBUG_CLASS_SIZE
     uint16_t GetClassSize(){
@@ -168,6 +170,7 @@ class mSerialUART :
     
     struct UART_SETTINGS{
       bool receive_interrupts_enable = false;
+      uint8_t configured = false;
       uint8_t initialised = false;
       uint32_t baud = 115200; //must be int
       RingbufHandle_t ringbuffer_handle;
@@ -181,6 +184,13 @@ class mSerialUART :
         int8_t rx = UART_PIN_NO_CHANGE;
       }gpio;
     };
+
+    
+    HardwareSerial* HWSerial  = nullptr;
+    HardwareSerial* HWSerial1 = nullptr;
+    HardwareSerial* HWSerial2 = nullptr;
+
+
 
     struct SETTINGS{
       uint8_t fEnableModule = false;
@@ -200,6 +210,8 @@ class mSerialUART :
     void CommandSet_SerialPrint_FileNames(const char* value);
     void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
     void CommandSet_ReadFile(const char* filename);
+
+    HardwareSerial* GetSerial(uint8_t index = 0);
 
     /**
      * lazy for now, hard coded 0xFF 0xFF

@@ -41,7 +41,7 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_LOOP: 
     {      
-      Handler_ModemResponses();
+      Handler_ModemResponses_Fast();
     }
     break;
     case FUNC_EVERY_SECOND: 
@@ -49,7 +49,9 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       //     ALOG_INF(PSTR("analogRead \t\t\t\t%d"),analogRead(35));
       // Serial.printf("adc1_get_raw(ADC1_CHANNEL_7) = %d\n\r", adc1_get_raw(ADC1_CHANNEL_7));
       
+      #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       ModemUpdate_GPS();
+      #endif
 
       ModemUpdate_GPRS();
       
@@ -64,7 +66,7 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_FIVE_SECOND:
     
 
-      ALOG_INF(PSTR("Network connected? %d"), modem->isNetworkConnected());
+      // ALOG_INF(PSTR("Network connected? %d"), modem->isNetworkConnected());
     
     break;
     case FUNC_EVERY_MINUTE:
@@ -125,6 +127,34 @@ void mCellular::Init(void)
 
   modem = new TinyGsm(SerialAT);
 
+  #ifdef USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+
+
+  /**
+   * @brief Change from default
+   **/
+  SerialAT.begin(115200, SERIAL_8N1, PIN_RX, PIN_TX); // #define UART_BAUD   115200
+  delay(500);
+  if (modem->testAT()) { 
+    ALOG_INF(PSTR("Baud Found: %d"), 115200);
+  }else{
+    ALOG_INF(PSTR("Baud not Found: %d"), 115200);
+  }
+
+  /**
+   * @brief Change from default
+   **/
+  modem->setBaud(UART_CELLULAR_BAUD);
+
+  SerialAT.begin(UART_CELLULAR_BAUD, SERIAL_8N1, PIN_RX, PIN_TX); // #define UART_BAUD   115200
+  if (modem->testAT()) { 
+    ALOG_INF(PSTR("Baud Found: %d"), UART_CELLULAR_BAUD);
+  }else{
+    ALOG_INF(PSTR("Baud not Found: %d"), UART_CELLULAR_BAUD);
+  }
+  #endif // USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+
+
   /**
    * @brief Power on  (move into templates)
    * 
@@ -137,9 +167,9 @@ void mCellular::Init(void)
   /**
    * @brief Move into UART config to "claim" for tinygsm
    */
-  SerialAT.begin(UART_BAUD, SERIAL_8N1, PIN_RX, PIN_TX);
+  // SerialAT.begin(UART_CELLULAR_BAUD, SERIAL_8N1, PIN_RX, PIN_TX); // #define UART_BAUD   115200
 
-  #ifdef ENABLE_DEVFEATURE_SIM7000G_HOTSTART_NO_RESTART
+  #ifdef ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
   ALOG_INF(PSTR("Faster init modem"));
   if (!modem->init()) {
     ALOG_INF(PSTR("Failed to init modem"));
@@ -151,10 +181,13 @@ void mCellular::Init(void)
     ALOG_INF(PSTR("Failed to restart modem, attempting to continue without restarting"));
   }
   #endif
+  ALOG_INF(PSTR("Faster init modem DONE"));
 
   GPRS_Enable();
 
+  #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
   GPS_Enable();
+  #endif 
 
   SendATCommand_SMSFormatAscii();
   SendATCommand_SMSImmediateForwardOverSerial();
@@ -169,13 +202,22 @@ void mCellular::Handler_ModemResponses()
 
   // Response
   String incoming = String();
+  // SerialAT.setTimeout(200);
   if (SerialAT.available()) 
   {
+
+
+    uint32_t receive_millis = millis();
+
+    // ALOG_INF(PSTR("millisA = %d"), millis());
+
     incoming = SerialAT.readString();
     ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
 
-    char buffer[300] = {0};
-    char buffer2[300] = {0};
+    ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
+    char buffer[300];
+    char buffer2[300];
+    // ALOG_INF(PSTR("millisC = %d"), millis());
 
     sprintf(buffer, "%s", incoming.c_str());
 
@@ -200,6 +242,9 @@ void mCellular::Handler_ModemResponses()
 
     ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
     
+    // ALOG_INF(PSTR("millisD = %d"), millis());
+
+    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
     // Check for request at GPS
     if (strncasecmp(buffer2, "GPS", 3) == 0)
     {
@@ -210,6 +255,96 @@ void mCellular::Handler_ModemResponses()
       ALOG_INF(PSTR("NO Request for GPS: Sending anyway for now"));
       // SMS_GPSLocation();
     }
+    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+  }
+
+}
+
+
+// String Stream::readString()
+// {
+//     String ret;
+//     int c = timedRead();
+//     while(c >= 0) {
+//         ret += (char) c;
+//         c = timedRead();
+//     }
+//     return ret;
+// }
+
+
+
+
+void mCellular::Handler_ModemResponses_Fast()
+{
+
+  // Response
+  String incoming = String();
+  // SerialAT.setTimeout(200);
+
+
+  if (SerialAT.available()) 
+  {
+
+
+    uint32_t receive_millis = millis();
+
+    // ALOG_INF(PSTR("millisA = %d"), millis());
+
+    char buffer[300];
+
+    
+    int c = SerialAT.read();
+    while(c >= 0) {
+      incoming += (char) c;
+      c = SerialAT.read();
+    }
+    
+    ALOG_HGL(PSTR("while\nIncoming \n\r===(%s)==="), incoming.c_str());
+
+    // ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
+
+    ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
+    char buffer2[300];
+    // ALOG_INF(PSTR("millisC = %d"), millis());
+
+    sprintf(buffer, "%s", incoming.c_str());
+
+    // ALOG_INF(PSTR("buffer = %s"), buffer);
+    // for(int i = 0;i < incoming.length(); i++)
+    // {
+    //   Serial.printf("%02d>    %c       \n\r",i,buffer[i]);
+    //   if(buffer[i]=='\n')
+    //   {
+    //     Serial.printf("=====================%02d>\"%c\"\n\r",i,buffer[i]);
+    //   }
+    // }
+
+    char *search = "\r\n+CMT";
+    char *result = strstr(buffer, search);
+    if(result)
+    {
+      ALOG_INF(PSTR("FOUND CMT MESSAGE result >>>%s<<<"), result);
+      ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
+    }
+
+    ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
+    
+    // ALOG_INF(PSTR("millisD = %d"), millis());
+
+    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    // Check for request at GPS
+    if (strncasecmp(buffer2, "GPS", 3) == 0)
+    {
+      ALOG_INF(PSTR("Request for GPS"));
+      SMS_GPSLocation();
+    }
+    else{
+      ALOG_INF(PSTR("NO Request for GPS: Sending anyway for now"));
+      // SMS_GPSLocation();
+    }
+    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
   }
 
@@ -318,9 +453,11 @@ void mCellular::ModemUpdate_BatteryStatus()
   ALOG_DBM(PSTR("{\"Volts_mv\":%d,\"Percent\":%d,\"Charging\":%d}"),
     modem_status.battery.volts_mv,modem_status.battery.percentage,modem_status.battery.charge_state);
 
+
+  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
   pCONT_batt_modem->readings.battery.volts_mv = modem_status.battery.volts_mv;
   pCONT_batt_modem->readings.battery.percentage = modem_status.battery.percentage;
-
+  #endif
 
 }
 
@@ -350,6 +487,8 @@ void mCellular::modemRestart()
 
 
 // ==============================================================================================
+
+#ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 void mCellular::GPS_Enable()
 {
@@ -389,7 +528,7 @@ void mCellular::ModemUpdate_GPS()
     if(gps.enabled)
     {
       
-      if(modem->getGPS(
+      if(modem->getGPS_Detailed(
         &gps.latitude, 
         &gps.longitude, 
         &gps.speed, 
@@ -402,10 +541,18 @@ void mCellular::ModemUpdate_GPS()
         &gps.day, 
         &gps.hour, 
         &gps.minute, 
-        &gps.second
+        &gps.second, 
+        &gps.course, 
+        &gps.FixMode, 
+        &gps.accuracy_position, 
+        &gps.accuracy_vertical, 
+        &gps.usat_glonass, 
+        &gps.cno_max, 
+        &gps.HPA, 
+        &gps.VPA
       )) 
       {
-        ALOG_INF(PSTR("GPS Fix (%d cm)"), (int)(gps.accuracy*100));
+        ALOG_INF(PSTR("GPS getGPS_Detailed Fix (%d cm)"), (int)(gps.accuracy*100));
         
         #ifdef USE_MODULE_SENSORS_GPS_MODEM
         pCONT_gps->readings.update_seconds = millis();
@@ -435,6 +582,7 @@ void mCellular::ModemUpdate_GPS()
 
 }
 
+#endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 // ==============================================================================================
 
@@ -633,7 +781,7 @@ void mCellular::GPRS_Disable()
 
 void mCellular::ModemUpdate_GPRS()
 {
-  if(mTime::TimeReached(&gprs.tReached_Update, 1000))
+  if(mTime::TimeReached(&gprs.tReached_Update, 5000))
   {
     if(gprs.enabled)
     {
@@ -753,7 +901,7 @@ void mCellular::ModemUpdate_SMS()
 
 }
 
-
+#ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 void mCellular::SMS_GPSLocation()
 {
   if(modem)
@@ -776,19 +924,19 @@ void mCellular::SMS_GPSLocation()
 
     snprintf_P(message2, sizeof(message2),
       PSTR(
-        "Battery  %d mV\n"
-        "Battery  %d mA\n"
-        "Mission  %d (%dm)\n"
-        "PKT Age  %d\n"
+        // "Battery  %d mV\n"
+        // "Battery  %d mA\n"
+        // "Mission  %d (%dm)\n"
+        // "PKT Age  %d\n"
         "Accuracy %s m\n"
         "\n"
         "https://www.google.com/maps/dir//%s,%s"
       ), 
-      pCONT_mavlink->pkt.battery_status.data.battery_remaining,
-      pCONT_mavlink->pkt.battery_status.data.current_consumed,
-      pCONT_mavlink->pkt.mission_current.data.seq,
-      pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
-      millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
+      // pCONT_mavlink->pkt.battery_status.data.battery_remaining,
+      // pCONT_mavlink->pkt.battery_status.data.current_consumed,
+      // pCONT_mavlink->pkt.mission_current.data.seq,
+      // pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
+      // millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
       convf_fix,
       convf_lat, 
       convf_lon
@@ -802,7 +950,7 @@ void mCellular::SMS_GPSLocation()
 
   }
 }
-
+#endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 /******************************************************************************************************************
  * Commands
@@ -822,7 +970,7 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
     DIGITAL_INVERT_PIN(12); //esp32 blue led
   }
 
-
+  #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
   if(jtok = obj["GPS_Enable"]){
     ALOG_INF( PSTR("GPS_Enable"));
     if(jtok.getInt() == 1)
@@ -830,6 +978,7 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
       GPS_Enable();
     }
   }
+  #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 
   if(jtok = obj["GPRS_Enable"]){
@@ -849,7 +998,7 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
     }
   }
 
-
+  #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
   if(jtok = obj["SMS_GPSLocation"]){
     ALOG_INF( PSTR("SMS_GPSLocation"));
     if(jtok.getInt() == 1)
@@ -857,6 +1006,7 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
       SMS_GPSLocation();
     }
   }
+  #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
   
   if(jtok = obj["BattVolt"]){
@@ -947,6 +1097,7 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
     JBI->Level_Start("GPRS");
         JBI->Add("ConSec", gprs.connected_seconds);
     JBI->Level_End();
+    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
     JBI->Level_Start("GPS");
       JBI->Add("Enabled", gps.enabled);
       JBI->Add("Latitude", gps.latitude);
@@ -962,6 +1113,14 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
       JBI->Add("hour", gps.hour);
       JBI->Add("minute", gps.minute);
       JBI->Add("second", gps.second);
+      JBI->Add("course", gps.course);
+      JBI->Add("FixMode", gps.FixMode);
+      JBI->Add("accuracy_position", gps.accuracy_position);
+      JBI->Add("accuracy_vertical", gps.accuracy_vertical);
+      JBI->Add("usat_glonass", gps.usat_glonass);
+      JBI->Add("cno_max", gps.cno_max);
+      JBI->Add("HPA", gps.HPA);
+      JBI->Add("VPA", gps.VPA);
 
       char convf_lat[TBUFFER_SIZE_FLOAT];
       mSupport::float2CString(gps.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
@@ -980,6 +1139,7 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
       JBI->Add("url", buffer);
     JBI->Level_End();
+    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
     JBI->Level_Start("Battery");
       JBI->Add("Volts_mv", modem_status.battery.volts_mv);
       JBI->Add("Percentage", modem_status.battery.percentage);

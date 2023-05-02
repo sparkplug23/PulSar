@@ -253,7 +253,6 @@ class mMAVLink_Decoder :
 	  mMAVLink_Decoder(){};
     void Pre_Init(void);
     void Init(void);
-    void Delayed_Init();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static const char* PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR;
@@ -361,6 +360,10 @@ class mMAVLink_Decoder :
         mavlink_gopro_set_response_t       data = {0};       
         uint32_t                          tUpdate = 0;
       }gopro_set_response; 
+      struct{
+        mavlink_gps_global_origin_t       data = {0};       
+        uint32_t                          tUpdate = 0;
+      }gps_global_origin; 
       struct{
         mavlink_gps_raw_int_t       data = {0};       
         uint32_t                          tUpdate = 0;
@@ -501,7 +504,7 @@ class mMAVLink_Decoder :
      * @brief Debug
      * 
      */
-    uint8_t included_parsing_list_mavlink_ids[40] =
+    uint8_t included_parsing_list_mavlink_ids[41] =
     {      
       MAVLINK_MSG_ID_AHRS,
       MAVLINK_MSG_ID_AHRS2,
@@ -514,6 +517,7 @@ class mMAVLink_Decoder :
       MAVLINK_MSG_ID_FENCE_STATUS,
       MAVLINK_MSG_ID_GIMBAL_REPORT,
       MAVLINK_MSG_ID_GIMBAL_TORQUE_CMD_REPORT,
+      MAVLINK_MSG_ID_GPS_GLOBAL_ORIGIN,
       MAVLINK_MSG_ID_GLOBAL_POSITION_INT,
       MAVLINK_MSG_ID_GOPRO_HEARTBEAT,
       // MAVLINK_MSG_ID_GOPRO_SET_RESPONSE,
@@ -565,8 +569,6 @@ class mMAVLink_Decoder :
      ******************************************************************************************************************************/
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);   
-
       
     uint8_t ConstructJSON_ahrs(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_ahrs2(uint8_t json_level = 0, bool json_appending = true);
@@ -579,6 +581,7 @@ class mMAVLink_Decoder :
     uint8_t ConstructJSON_gimbal_torque_cmd_report(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_global_position_int(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_gopro_heartbeat(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_gps_global_origin(uint8_t json_level = 0, bool json_appending = true);    
     uint8_t ConstructJSON_gps_raw_int(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_heartbeat(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_home_position(uint8_t json_level = 0, bool json_appending = true);
@@ -632,8 +635,6 @@ class mMAVLink_Decoder :
     
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     struct handler<mMAVLink_Decoder> mqtthandler_settings_teleperiod;
-    struct handler<mMAVLink_Decoder> mqtthandler_sensor_ifchanged;
-    struct handler<mMAVLink_Decoder> mqtthandler_sensor_teleperiod;
 
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs;
     struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs2;

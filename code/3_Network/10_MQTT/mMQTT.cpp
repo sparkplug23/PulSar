@@ -70,7 +70,7 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
         // if(pCONT_wif->WifiCheckIpConnected()){
         if(pCONT_interface_network->Connected())
         {
-          AddLog(LOG_LEVEL_TEST, PSTR("IS Connected"));
+          // AddLog(LOG_LEVEL_TEST, PSTR("IS Connected"));
           CheckConnection();
         }else{
           AddLog(LOG_LEVEL_TEST, PSTR("NOT Connected"));

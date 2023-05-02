@@ -76,27 +76,21 @@ class mTelemetry :
   public mTaskerInterface
 {
   public:
-    mTelemetry(){};
-    
+    mTelemetry(){};    
+    void Init();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void init(void);
+    void parse_JSONCommand(JsonParserObject obj);
     void WebPage_Root_AddHandlers();
-
     
-
     static const char* PM_MODULE_CORE_TELEMETRY_CTR;
     static const char* PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
-
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mTelemetry);
-    };
+    uint16_t GetClassSize(){      return sizeof(mTelemetry);    };
     #endif
-    void parse_JSONCommand(JsonParserObject obj);
+    
 
     uint8_t ConstructJSON_Health(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_appending = true);
@@ -114,9 +108,10 @@ class mTelemetry :
     uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_System_Stored_Settings(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_method = 0, bool json_appending = true);
     #endif
 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
     void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
@@ -144,89 +139,63 @@ class mTelemetry :
     void ConstructCtr_HardwareStatus();
     #endif // ENABLE_DEVFEATURE_HARDWARE_STATUS
 
-    // uint16_t wifi_reconnects_counter = 0;
 
-    void Init();
+    #ifdef USE_MODULE_NETWORK_MQTT    
+      //use new syntax
+      enum STATUS_SYSTEM_IDS{
+        MQTT_HANDLER_SYSTEM_ALL_ID = 0,
+        MQTT_HANDLER_SYSTEM_HEALTH_ID, // To align with "status #" type commands
+        MQTT_HANDLER_SYSTEM_SETTINGS_ID,
+        MQTT_HANDLER_SYSTEM_PARAMETERS_ID,
+        MQTT_HANDLER_SYSTEM_LOG_ID,
+        MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
+        MQTT_HANDLER_SYSTEM_MEMORY_ID,
+        MQTT_HANDLER_SYSTEM_NETWORK_ID,
+        MQTT_HANDLER_SYSTEM_MQTT_ID,
+        MQTT_HANDLER_SYSTEM_TIME_ID,
+        MQTT_HANDLER_SYSTEM_DEVICES_ID,
+        MQTT_HANDLER_SYSTEM_REBOOT_ID,
+        MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
+        #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
+          MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
+          MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
+          MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
+          MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
+          MQTT_HANDLER_SYSTEM_DEBUG_SYSTEM_SAVED_SETTINGS_ID,
+          MQTT_HANDLER_SYSTEM_DEBUG_TASKER_INTERFACE_PERFORMANCE,
+        #endif
+        MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
+      };
 
-    // #define HARDWARE_STATUS_OFFSET_INDEX MQTT_MAX_PACKET_SIZE/2
+      
+      void MQTTHandler_Init();
+      void MQTTHandler_Set_RefreshAll();
+      void MQTTHandler_Set_DefaultPeriodRate();
+      void MQTTHandler_Sender(uint8_t status_id = MQTT_HANDLER_SYSTEM_ALL_ID);
+      
+      std::vector<struct handler<mTelemetry>*> mqtthandler_list;    
 
-    // uint8_t fParseTasmotaCommand = false;
-
-    // uint32_t tSavedTest;
-
-    // uint32_t loop_delay_temp = 100;
-
-
-  #ifdef USE_MODULE_NETWORK_MQTT
-  
-    //use new syntax
-    enum STATUS_SYSTEM_IDS{
-      MQTT_HANDLER_SYSTEM_ALL_ID = 0,
-      MQTT_HANDLER_SYSTEM_HEALTH_ID, // To align with "status #" type commands
-      MQTT_HANDLER_SYSTEM_SETTINGS_ID,
-      MQTT_HANDLER_SYSTEM_PARAMETERS_ID,
-      MQTT_HANDLER_SYSTEM_LOG_ID,
-      MQTT_HANDLER_SYSTEM_FIRMWARE_ID,
-      MQTT_HANDLER_SYSTEM_MEMORY_ID,
-      MQTT_HANDLER_SYSTEM_NETWORK_ID,
-      MQTT_HANDLER_SYSTEM_MQTT_ID,
-      MQTT_HANDLER_SYSTEM_TIME_ID,
-      MQTT_HANDLER_SYSTEM_DEVICES_ID,
-      MQTT_HANDLER_SYSTEM_REBOOT_ID,
-      MQTT_HANDLER_SYSTEM_REBOOT_EVENT_ID,
+      handler<mTelemetry> mqtthandler_health;
+      handler<mTelemetry> mqtthandler_settings;
+      handler<mTelemetry> mqtthandler_log;
+      handler<mTelemetry> mqtthandler_firmware;
+      handler<mTelemetry> mqtthandler_memory;
+      handler<mTelemetry> mqtthandler_network;
+      handler<mTelemetry> mqtthandler_mqtt;
+      handler<mTelemetry> mqtthandler_time;
+      handler<mTelemetry> mqtthandler_devices;
+      handler<mTelemetry> mqtthandler_reboot;
+      handler<mTelemetry> mqtthandler_reboot_event;
       #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-        MQTT_HANDLER_SYSTEM_DEBUG_PINS_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_TEMPLATE_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
-        MQTT_HANDLER_SYSTEM_DEBUG_SYSTEM_SAVED_SETTINGS_ID,
+        handler<mTelemetry> mqtthandler_debug_pins;
+        handler<mTelemetry> mqtthandler_debug_template;
+        handler<mTelemetry> mqtthandler_debug_moduleinterface;
+        handler<mTelemetry> mqtthandler_debug_minimal;
+        handler<mTelemetry> mqtthandler_debug_system_saved_settings;
+        handler<mTelemetry> mqtthandler_debug_tasker_interface_performance;
       #endif
-      MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
-    };
-
     
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t status_id = MQTT_HANDLER_SYSTEM_ALL_ID);
-
-    handler<mTelemetry> mqtthandler_health;
-    handler<mTelemetry> mqtthandler_settings;
-    handler<mTelemetry> mqtthandler_log;
-    handler<mTelemetry> mqtthandler_firmware;
-    handler<mTelemetry> mqtthandler_memory;
-    handler<mTelemetry> mqtthandler_network;
-    handler<mTelemetry> mqtthandler_mqtt;
-    handler<mTelemetry> mqtthandler_time;
-    handler<mTelemetry> mqtthandler_devices;
-    handler<mTelemetry> mqtthandler_reboot;
-    handler<mTelemetry> mqtthandler_reboot_event;
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      handler<mTelemetry> mqtthandler_debug_pins;
-      handler<mTelemetry> mqtthandler_debug_template;
-      handler<mTelemetry> mqtthandler_debug_moduleinterface;
-      handler<mTelemetry> mqtthandler_debug_minimal;
-      handler<mTelemetry> mqtthandler_debug_system_saved_settings;
-    #endif
-    
-  struct handler<mTelemetry>* mqtthandler_list[
-    11  
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-    +5
-    #endif
-    ] = {
-    &mqtthandler_health, &mqtthandler_settings,
-    &mqtthandler_log, &mqtthandler_firmware, &mqtthandler_memory,
-    &mqtthandler_network, &mqtthandler_mqtt, &mqtthandler_time, 
-    &mqtthandler_devices, &mqtthandler_reboot, &mqtthandler_reboot_event,
-    #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-      &mqtthandler_debug_pins, &mqtthandler_debug_template,
-      &mqtthandler_debug_moduleinterface, &mqtthandler_debug_minimal, 
-      &mqtthandler_debug_system_saved_settings
-    #endif
-  };
-
-#endif // USE_MODULE_NETWORK_MQTT
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 

@@ -106,8 +106,12 @@ class TinyGsmSim7000 : public TinyGsmSim70xx<TinyGsmSim7000>,
 
     if (!testAT()) { return false; }
 
+    Serial.println("Likey to get stuck");
+
     sendAT(GF("E0"));  // Echo Off
     if (waitResponse() != 1) { return false; }
+
+    Serial.println("PASSED");
 
 #ifdef TINY_GSM_DEBUG
     sendAT(GF("+CMEE=2"));  // turn on verbose error codes

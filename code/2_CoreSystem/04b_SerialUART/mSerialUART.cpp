@@ -3,12 +3,25 @@
 /**
  * All Serial buffers will store in ringbuffers, then set a flag that it is ready. Other modules will then "pop" off some of the 
  * data from the buffers and free the memory.
+ * 
+ * 
+
+
+
+
+
+Consider moving this to "CoreSystem" and other "I2C" etc so they are preconfigured before drivers/sensors need them
+
+
+
+
+
  * */
 
-#ifdef USE_MODULE_DRIVERS_SERIAL_UART
+#ifdef USE_MODULE_CORE_SERIAL_UART
 
-const char* mSerialUART::PM_MODULE_DRIVERS_SERIAL_UART_CTR = D_MODULE_DRIVERS_SERIAL_UART_CTR;
-const char* mSerialUART::PM_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR = D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR;
+const char* mSerialUART::PM_MODULE_CORE_SERIAL_UART_CTR = D_MODULE_CORE_SERIAL_UART_CTR;
+const char* mSerialUART::PM_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR = D_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR;
 
   uint8_t simple_uart2_receive_frame_for_calibration[4] = {0};
   bool flag_simple_uart2_receive_frame_for_calibration_updated = false;
@@ -25,42 +38,42 @@ int8_t mSerialUART::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_INIT: 
       Init(); 
     break;
-    /**
-     * Special case, I want to loop and init this when another modules says
-     * */
-    case FUNC_LOOP:
+//     /**
+//      * Special case, I want to loop and init this when another modules says
+//      * */
+//     case FUNC_LOOP:
 
-      #ifndef USE_MODULE_DRIVERS_GPS
-        // Finsihed with manual control, start ISRs
-        pCONT_uart->flag_init_buffers_and_start_isrs = true;
-      #endif
+//       #ifndef USE_MODULE_DRIVERS_GPS
+//         // Finsihed with manual control, start ISRs
+//         pCONT_uart->flag_init_buffers_and_start_isrs = true;
+//       #endif
     
-     if(flag_init_buffers_and_start_isrs && !settings.fEnableModule)
-     {       
-      StartISR_RingBuffers(); 
-     }
+//      if(flag_init_buffers_and_start_isrs && !settings.fEnableModule)
+//      {       
+//       StartISR_RingBuffers(); 
+//      }
      
-    #ifndef USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
+//     #ifndef USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
 
-This might be causing delays when not needed in measurements
+// This might be causing delays when not needed in measurements
      
-//temp dump data so it doesnt fill
+// //temp dump data so it doesnt fill
 
-      size_t rss_data_read_size = 0;
-      char *rss_data_read = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &rss_data_read_size, pdMS_TO_TICKS(1000));
-      if (rss_data_read != NULL) { // Read from buffer
-        //memcpy(isr_rss_buffer,rss_data_read,rss_data_read_size);
-        // for(int i=0;i<rss_data_read_size;i++){
-        //   BufferWriterI->Append_P(PSTR("%d%s"), rss_data_read[i], i<rss_data_read_size-1? ",": ""); 
-        // }
-        vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)rss_data_read); // Free memory
-      }
-      #endif // USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
+//       size_t rss_data_read_size = 0;
+//       char *rss_data_read = (char *)xRingbufferReceive(pCONT_uart->settings.uart2.ringbuffer_handle, &rss_data_read_size, pdMS_TO_TICKS(1000));
+//       if (rss_data_read != NULL) { // Read from buffer
+//         //memcpy(isr_rss_buffer,rss_data_read,rss_data_read_size);
+//         // for(int i=0;i<rss_data_read_size;i++){
+//         //   BufferWriterI->Append_P(PSTR("%d%s"), rss_data_read[i], i<rss_data_read_size-1? ",": ""); 
+//         // }
+//         vRingbufferReturnItem(pCONT_uart->settings.uart2.ringbuffer_handle, (void *)rss_data_read); // Free memory
+//       }
+//       #endif // USE_SYSTEM_RSS_FROM_PIC32_INPUT_STREAM
 
-    // case FUNC_UPTIME_10_SECONDS: 
-    // case FUNC_UPTIME_30_SECONDS: 
-    //   StartISR_RingBuffers(); 
-    break;
+//     // case FUNC_UPTIME_10_SECONDS: 
+//     // case FUNC_UPTIME_30_SECONDS: 
+//     //   StartISR_RingBuffers(); 
+//     break;
   }
 
   // Only continue in to tasker if module was configured properly
@@ -231,6 +244,21 @@ void mSerialUART::Pre_Init_Pins()
   #endif // ENABLE_HARDWARE_UART_1
 
   #ifdef ENABLE_HARDWARE_UART_2
+  if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RX_ID)) {
+    settings.uart2.receive_interrupts_enable = true;
+    settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
+    settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_TX_ID);
+    settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RX_ID);
+    settings.uart2.configured = true;
+    // init_UART2_pins();
+    AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+
+    
+
+  }else{
+    settings.uart2.receive_interrupts_enable = false;
+  }
+
   if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_RX_ID)) {
     settings.uart2.receive_interrupts_enable = true;
     settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
@@ -263,8 +291,55 @@ void mSerialUART::Init(void)
   //   init_UART2_RingBuffer();
   //   init_UART2_ISR();
   // }
-  // #endif // ENABLE_HARDWARE_UART_2
+  // #endif // 
   
+
+  #ifdef ENABLE_HARDWARE_UART_2
+  if(settings.uart2.configured) {
+
+    DEBUG_LINE_HERE;
+
+    HWSerial2 = new HardwareSerial(2);
+
+    HWSerial2->begin(
+      settings.uart2.baud, 
+      SERIAL_8N1, 
+      settings.uart2.gpio.rx, 
+      settings.uart2.gpio.tx
+    );
+
+    DEBUG_LINE_HERE;
+
+    ALOG_INF(PSTR("mSerialUART::Init %d %d %d"),
+      pCONT_uart->settings.uart2.baud, 
+      pCONT_uart->settings.uart2.gpio.rx, 
+      pCONT_uart->settings.uart2.gpio.tx
+    );
+
+
+    settings.uart2.initialised = true;
+    // init_UART2_pins();
+    AddLog(LOG_LEVEL_INFO, PSTR("UART2 pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
+
+    
+
+  }
+  #endif
+
+
+  
+}
+
+
+HardwareSerial* mSerialUART::GetSerial(uint8_t index)
+{
+  switch(index)
+  {
+    default:
+    case 0: return &Serial;
+    case 1: return &Serial1;
+    case 2: return &Serial2;
+  }
 }
 
 
@@ -1785,7 +1860,7 @@ void mSerialUART::MQTTHandler_Set_DefaultPeriodRate()
 void mSerialUART::MQTTHandler_Sender(uint8_t id)
 {
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_DRIVERS_SERIAL_UART_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_SERIAL_UART_ID, handle, id);
   }
 }
 #endif // USE_MODULE_NETWORK_MQTT

@@ -153,10 +153,9 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
   char buffer_n[100] = {0};
   
 
-
+  #ifdef USE_MODULE_SENSORS_GPS_MODEM
   char convf_lat[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(pCONT_gps->location.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
-
   char convf_lon[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(pCONT_gps->location.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
 
@@ -175,6 +174,15 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
   char convf_vsat[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(pCONT_gps->location.vsat,0,convf_vsat);
 
+  
+  uint16_t gps_seconds_updated = 0;
+  uint32_t gps_millis_updated = abs(millis()-pCONT_gps->readings.update_seconds);
+  gps_millis_updated /= 1000;
+
+
+  #endif // USE_MODULE_SENSORS_GPS_MODEM
+
+  #ifdef USE_MODULE_NETWORK_CELLULAR
   char convf_gprs_upsecs[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(pCONT_cell->gprs.connected_seconds,0,convf_gprs_upsecs);
 
@@ -183,13 +191,11 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
   char convf_batt_per[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(pCONT_cell->modem_status.battery.percentage,0,convf_batt_per);
 
-  uint16_t gps_seconds_updated = 0;
-  uint32_t gps_millis_updated = abs(millis()-pCONT_gps->readings.update_seconds);
-  gps_millis_updated /= 1000;
   uint32_t gprs_millis_updated = abs(millis()-pCONT_cell->gprs.last_comms_millis_updated);
   gprs_millis_updated /= 1000;
+  #endif // USE_MODULE_NETWORK_CELLULAR
  
-  
+  #ifdef USE_MODULE_SENSORS_GPS_MODEM
   /**
    * @brief 21x8
    * 
@@ -212,6 +218,8 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page0()
   }else{
     snprintf(buffer, sizeof(buffer), "OH %s  m%d sec", display_message.line7, gps_millis_updated);  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
   }
+
+  #endif // USE_MODULE_SENSORS_GPS_MODEM
   
 }
 void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
@@ -222,6 +230,7 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
   char buffer_n[100] = {0};
   
 
+  #ifdef USE_MODULE_NETWORK_CELLULAR
 
   char convf_lat[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.lat)/10000000,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
@@ -275,6 +284,7 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
   
   snprintf(buffer, sizeof(buffer), "%s", pCONT_mavlink->pkt.statustext.data.text);  pCONT_iDisp->LogBuffer_AddRow(buffer, 7);
   
+  #endif // USE_MODULE_NETWORK_CELLULAR
   
 }
 

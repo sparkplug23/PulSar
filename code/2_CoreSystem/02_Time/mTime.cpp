@@ -57,100 +57,16 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_SECOND:{
       
-      #ifdef ENABLE_DEVFEATURE_SHOW_UPTIME_SECONDS
-      // #ifndef DISABLE_SERIAL0_CORE
-      Serial.println(GetUptime());
-      // #endif
-      #endif // ENABLE_DEVFEATURE_SHOW_UPTIME_SECONDS
-      
-
-      //   // Serial.printf("time_start1=%d\n\r",millis()-time_start);
-        UpdateStoredRTCVariables();
-      //   // Serial.printf("time_start2=%d\n\r",millis()-time_start);
-        UpdateUpTime();
-
-        
-      // Serial.printf("uptime.seconds_nonreset=%d\n\r",uptime.seconds_nonreset);
-
-
-
-/****
- * 
- * 
- * I need to decouple/move this into tasker and not from "sub"-module time, it should all be called via the tasker and not a sub module
- * 
- * 
- * 
-*/
-      // Check for midnight
-      if((RtcTime.hour==0)&&(RtcTime.minute==0)&&(RtcTime.second==0)&&(lastday_run != RtcTime.Yday)){
-        lastday_run = RtcTime.Yday;
-        pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
-      }
-      if(RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
-      
-      if(
-        ((uptime.seconds_nonreset%5)==0)&&
-        (uptime.seconds_nonreset>20)
-      ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
-
-
-      if(
-        ((uptime.seconds_nonreset%300)==0)&&
-        (uptime.seconds_nonreset>60)
-      ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
-
-
-      if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
-
-      // Uptime triggers
-      if(uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
-      if(uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
-      if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
-      if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
-
-
-      /**
-       * @brief Boot is only successful if mqtt+network has been active for 1 minute, then reset fastboot
-       **/
-      #ifdef ENABLE_DEVFEATURE_BOOT_SUCCESS_WHEN_NETWORK_STABLE
-
-      // For now, just enable this to happen 
-
-      if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
-
-
-      #else
-
-      //I need another for stable boot
-      // Stable time set to 2 minutes, as easy way to ensure mqtt/network has been stable
-      if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
-
-      #endif
-
-      pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
-
-
-
+      UpdateStoredRTCVariables();
+      UpdateUpTime();
       
       #ifndef DISABLE_SERIAL0_CORE
-
-        // SetUTCTime(
-        //   2021,
-        //   6,
-        //   17,
-        //   15,
-        //   16,
-        //   17);
-
         #ifdef DEBUG_MODULE_TIME_STD
         char buffer[40];
         AddLog(LOG_LEVEL_TEST, PSTR("DT_DST=%s"), pCONT_time->GetDateAndTimeCtr(DT_DST, buffer, sizeof(buffer)));
         AddLog(LOG_LEVEL_TEST, PSTR("DT_STD=%s"), pCONT_time->GetDateAndTimeCtr(DT_STD, buffer, sizeof(buffer)));
         AddLog(LOG_LEVEL_TEST, PSTR("DT_TIMEZONE=%s IsDst=%d"), pCONT_time->GetDateAndTimeCtr(DT_TIMEZONE, buffer, sizeof(buffer)), IsDst());
         #endif
-
-      // Serial.println(GetUptime());
       #endif
 
       #ifdef ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME

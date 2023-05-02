@@ -21,9 +21,6 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_INIT:
       Init();
     break;
-    case FUNC_INIT_DELAYED_SECONDS:
-      Delayed_Init();
-    break;
   }
 
   if(!settings.flags.init_completed){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
@@ -32,12 +29,17 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-   case FUNC_LOOP:
-    Maintain_Connection(); //instead of delayed start, with this importance just assume its needed and keep retrying 
-   break;
+    case FUNC_LOOP:
+      Maintain_Connection();
+    break;
     case FUNC_EVERY_SECOND:
-      ALOG_INF(PSTR("Battery %d%%"), pkt.battery_status.data.battery_remaining);
-      ALOG_INF(PSTR("Response %d"),millis()-pkt.tSaved_Last_Response);
+      // ALOG_INF(PSTR("Battery %d%%"), pkt.battery_status.data.battery_remaining);
+      if((millis()-pkt.tSaved_Last_Response)>10000)
+      {
+        ALOG_ERR(PSTR("MAVLINK No Data!!! %d secs"),(millis()-pkt.tSaved_Last_Response)/1000);
+      }else{
+        ALOG_INF(PSTR("MAVLINK %d ms"),millis()-pkt.tSaved_Last_Response);
+      }
     break;
     /************
      * COMMANDS SECTION * 
@@ -69,33 +71,8 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
 void mMAVLink_Decoder::Pre_Init(void)
 {
 
-  ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void)"));
+  // ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void) %d"), pCONT_uart->settings.uart2.initialised);
 
-  // if(pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_TX_ID)&&pCONT_pins->PinUsed(GPIO_HWSERIAL2_RING_BUFFER_RX_ID)) {
-  //   settings.uart2.receive_interrupts_enable = true;
-  //   settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
-  //   settings.uart2.gpio.tx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_TX_ID);
-  //   settings.uart2.gpio.rx = pCONT_pins->GetPin(GPIO_HWSERIAL2_RING_BUFFER_RX_ID);
-  //   // init_UART2_pins();
-  //   AddLog(LOG_LEVEL_INFO, PSTR("UART2 RingBuffer Interrupts pins: TX[%d] RX[%d]"),settings.uart2.gpio.tx, settings.uart2.gpio.rx);
-  // }else{
-  //   settings.uart2.receive_interrupts_enable = false;
-  // }
-
-
-  #ifdef USE_DEVFEATURE_DEFINED_SERIAL2
-
-  const uint8_t lRXD2 = 18;
-  const uint8_t lTXD2 = 19;
-  
-  // Serial2.begin(921600, SERIAL_8N1, RXD2, TXD2);
-  _MAVSerial = &Serial2;
-  _MAVSerial->begin(921600, SERIAL_8N1, lRXD2, lTXD2);
-
-  #else
-  _MAVSerial = &Serial2;
-  _MAVSerial->begin(921600);
-  #endif
   
   connection.system_id = 1; // ESP32 sysid
   connection.component_id = 158; // ESP32 compid
@@ -114,62 +91,50 @@ void mMAVLink_Decoder::Send_Heartbeat()
   mavlink_heartbeat_t heartbeat;
   uint8_t bufhb[MAVLINK_MAX_PACKET_LEN];
   mavlink_msg_heartbeat_pack(
-    connection.system_id, 
-    connection.component_id, 
-    &msghb, 
-    connection.type, 
-    connection.autopilot, 
-    MAV_MODE_PREFLIGHT, 
-    0, 
-    MAV_STATE_STANDBY
+    connection.system_id,      // system_id – ID of this system
+    connection.component_id,   // component_id – ID of this component (e.g. 200 for IMU)
+    &msghb,                    // msg – The MAVLink message to compress the data into
+    connection.type,           // type – Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
+    connection.autopilot,      // autopilot – Autopilot type / class. defined in MAV_AUTOPILOT ENUM
+    MAV_MODE_PREFLIGHT,        // base_mode – System mode bitfield, as defined by MAV_MODE_FLAG enum
+    0,                         // custom_mode – A bitfield for use for autopilot-specific flags
+    MAV_STATE_STANDBY          // system_status – System status flag, as defined by MAV_STATE enum
   );
   uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
   _MAVSerial->write(bufhb,lenhb);
-  ALOG_INF(PSTR("Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
+  ALOG_INF(PSTR(">>>>>>>>>>>>>>>>>>>>>>>>>>>Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
 }
 
 
 void mMAVLink_Decoder::Init(void)
 {
+  
+  #ifdef USE_MODULE_CORE_SERIAL_UART
+  if(pCONT_uart->settings.uart2.initialised)
+  {
+    _MAVSerial = pCONT_uart->HWSerial2;//pCONT_uart->GetSerial(2);
+    // _MAVSerial->begin(
+    //   pCONT_uart->settings.uart2.baud, 
+    //   SERIAL_8N1, 
+    //   pCONT_uart->settings.uart2.gpio.rx, 
+    //   pCONT_uart->settings.uart2.gpio.tx
+    // );
+    // ALOG_INF(PSTR("mMAVLink_Decoder::Pre_Init(void) %d %d %d"),
+    //   pCONT_uart->settings.uart2.baud, 
+    //   pCONT_uart->settings.uart2.gpio.rx, 
+    //   pCONT_uart->settings.uart2.gpio.tx
+    // );
+  }
+  #else
+  _MAVSerial = &Serial2;
+  _MAVSerial->begin(921600, SERIAL_8N1, 16, 17);
+  // _MAVSerial->begin(921600);
+  #endif
+
+  _MAVSerial->print("Boot");
+
   ALOG_INF(PSTR("mMAVLink_Decoder::Init(void) DONE"));
 }
-
- 
-
-
-void mMAVLink_Decoder::Delayed_Init(void)
-{
-
-  if(settings.flags.init_completed)
-  { 
-    return; // No further again required 
-  }
-
-  if(settings.tSaved_ReInit_Counter == 1) // Execute
-  {
-    ALOG_HGL(PSTR("mMAVLink_Decoder::Delayed_Init TRIGGERED %d"), settings.tSaved_ReInit_Counter);
-    Init();
-
-
-    /*
-    Check if init worked
-    */
-    if(settings.flags.init_completed)
-    {
-      //any other inits? mqtt_init should just be inside init
-    }
-
-    settings.tSaved_ReInit_Counter = settings.ReInit_BackOff_Secs; // reset timer
-    return;
-  }
-  
-  if(settings.tSaved_ReInit_Counter > 0){ 
-    settings.tSaved_ReInit_Counter--; 
-    ALOG_HGL(PSTR("mMAVLink_Decoder::Delayed_Init waiting %d"), settings.tSaved_ReInit_Counter);
-  }
-
-}
-
 
 
 void mMAVLink_Decoder::Send_MAVLink_Stream_Pack__Enable_All()
@@ -188,7 +153,7 @@ void mMAVLink_Decoder::Send_MAVLink_Stream_Pack__Enable_All()
 void mMAVLink_Decoder::Maintain_Connection()
 {
 
-  if(mTime::TimeReached(&connection.timereached_heartbeat, 1000))
+  if(mTime::TimeReached(&connection.timereached_heartbeat, 5000))
   {
     Send_Heartbeat();
     
@@ -196,7 +161,7 @@ void mMAVLink_Decoder::Maintain_Connection()
      * @brief Send to config stream if no X has been received
      * 
      */
-    if(abs(millis()-pkt.ahrs.tUpdate)>3000)
+    if(abs(millis()-pkt.ahrs.tUpdate)>30000)
     {
       Send_MAVLink_Stream_Pack__Enable_All();
     }
@@ -208,16 +173,8 @@ void mMAVLink_Decoder::Maintain_Connection()
 }
 
 
-
-
-
 void mMAVLink_Decoder::PollMAVLink_Stream()
 {
-  if(labs(millis()-pkt.tSaved_Last_Response)>10000)
-  {
-    ALOG_INF(PSTR("No data from connected mavlink stream, begining stream session to restart (possible power cycle of vehicle?)"));
-    settings.flags.init_completed = false; // this will allow the re_init to start
-  }
     
   while(_MAVSerial->available() > 0)
   {
@@ -228,14 +185,10 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
     
     if(mavlink_parse_char(MAVLINK_COMM_0, ch, &msg, &status1))
     {
-      // Serial.println("Message Parsing Done!");
-      // Serial.println(msg.msgid);
       pkt.tSaved_Last_Response = millis();
-      
-      
-      // ALOG_INF(PSTR("Packet = %d \"%S\""), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)));
-      
+      // ALOG_INF(PSTR("Packet = %d \"%S\""), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)));     
 
+      #ifdef USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
       if(std::find(unique_msg_id_list.begin(), unique_msg_id_list.end(), msg.msgid) != unique_msg_id_list.end()) {
         /* v contains x */
       } else {
@@ -243,8 +196,9 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
         unique_msg_id_list.push_back(msg.msgid);
         sort(unique_msg_id_list.begin(), unique_msg_id_list.end());
       }
+      #endif // USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
 
-      bool parsed_packet = true; //default will reset
+      bool parsed_packet = true; // default will reset
       switch(msg.msgid)
       {
 
@@ -299,6 +253,10 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
           mavlink_msg_gopro_set_response_decode(&msg, &pkt.gopro_set_response.data);                                      
           pkt.gopro_set_response.tUpdate = millis();     
         break;
+        case MAVLINK_MSG_ID_GPS_GLOBAL_ORIGIN:               
+          mavlink_msg_gps_global_origin_decode(&msg, &pkt.gps_global_origin.data);                                      
+          pkt.gps_global_origin.tUpdate = millis();     
+        break;
         case MAVLINK_MSG_ID_GPS_RAW_INT:                         
           mavlink_msg_gps_raw_int_decode(&msg, &pkt.gps_raw_int.data);                                      
           pkt.gps_raw_int.tUpdate = millis();     
@@ -309,7 +267,7 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
           pkt.heartbeat.vehicle_component_id = msg.compid;      
           if(pkt.heartbeat.vehicle_sys_id != msg.sysid){ Serial.println(DEBUG_INSERT_PAGE_BREAK "RESEND?"); }
           pkt.heartbeat.vehicle_sys_id = msg.sysid;      
-          ALOG_INF(PSTR("Packet = %d \"%S\", sys %d, comp %d"), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
+          ALOG_INF(PSTR("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Received Heartbeat Packet = %d \"%S\", sys %d, comp %d"), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
           pkt.heartbeat.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_HOME_POSITION:                         
@@ -669,14 +627,22 @@ const char* mMAVLink_Decoder::MavLink_Msg_FriendlyName_By_ID(uint16_t id, char* 
     case MAVLINK_MSG_ID_UAVCAN_NODE_STATUS:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__UAVCAN_NODE_STATUS__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__UAVCAN_NODE_STATUS__CTR)); break;
     case MAVLINK_MSG_ID_UAVIONIX_ADSB_OUT_CFG:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_OUT_CFG__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_OUT_CFG__CTR)); break;
     case MAVLINK_MSG_ID_UAVIONIX_ADSB_OUT_DYNAMIC:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_OUT_DYNAMIC__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_OUT_DYNAMIC__CTR)); break;
-    case MAVLINK_MSG_ID_UAVIONIX_ADSB_TRANSCEIVER_HEALTH_REPORT:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_TRANSCEIVER_HEALTH_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_TRANSCEIVER_HEALTH_REPORT__CTR)); break;
-    case MAVLINK_MSG_ID_V2_EXTENSION:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__V2_EXTENSION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__V2_EXTENSION__CTR)); break;
-    case MAVLINK_MSG_ID_VFR_HUD:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR)); break;
-    case MAVLINK_MSG_ID_VIBRATION:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR)); break;
-    case MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VICON_POSITION_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VICON_POSITION_ESTIMATE__CTR)); break;
-    case MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VIDEO_STREAM_INFORMATION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VIDEO_STREAM_INFORMATION__CTR)); break;
-    case MAVLINK_MSG_ID_VISION_POSITION_DELTA:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_DELTA__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_DELTA__CTR)); break;
-    case MAVLINK_MSG_ID_VISION_POSITION_ESTIMATE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_ESTIMATE__CTR)); break;
+    case MAVLINK_MSG_ID_UAVIONIX_ADSB_TRANSCEIVER_HEALTH_REPORT:  memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_TRANSCEIVER_HEALTH_REPORT__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__UAVIONIX_ADSB_TRANSCEIVER_HEALTH_REPORT__CTR)); break;
+    case MAVLINK_MSG_ID_V2_EXTENSION:                             memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__V2_EXTENSION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__V2_EXTENSION__CTR)); break;
+    case MAVLINK_MSG_ID_VFR_HUD:                                  memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR)); break;
+    case MAVLINK_MSG_ID_VIBRATION:                                memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR)); break;
+    case MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE:           
+      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VICON_POSITION_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VICON_POSITION_ESTIMATE__CTR)); 
+    break;
+    case MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION:           
+      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VIDEO_STREAM_INFORMATION__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VIDEO_STREAM_INFORMATION__CTR)); 
+    break;
+    case MAVLINK_MSG_ID_VISION_POSITION_DELTA:           
+      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_DELTA__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_DELTA__CTR)); 
+    break;
+    case MAVLINK_MSG_ID_VISION_POSITION_ESTIMATE:           
+      memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VISION_POSITION_ESTIMATE__CTR)); 
+    break;
     case MAVLINK_MSG_ID_VISION_SPEED_ESTIMATE:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__VISION_SPEED_ESTIMATE__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__VISION_SPEED_ESTIMATE__CTR)); break;
     case MAVLINK_MSG_ID_WIFI_CONFIG_AP:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__WIFI_CONFIG_AP__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__WIFI_CONFIG_AP__CTR)); break;
     case MAVLINK_MSG_ID_WIND:           memcpy_P(buffer, PM_MAVLINK_MSG_PACKET_NAME__WIND__CTR, sizeof(PM_MAVLINK_MSG_PACKET_NAME__WIND__CTR)); break;
@@ -701,7 +667,6 @@ void mMAVLink_Decoder::parse_JSONCommand(JsonParserObject obj){
   if(jtok = obj["beeps"]){
     AddLog(LOG_LEVEL_TEST, PSTR("bbeeps=%d"),jtok.getInt());
     // pinMode(Buzzer.pin, jtok.getInt());
-
   }
 
 }
@@ -761,13 +726,6 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Settings(uint8_t json_level, bool json_a
 
 }
 
-
-uint8_t mMAVLink_Decoder::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
-
-  JBI->Start();
-  return JBI->End();
-
-}
 
 /**
  * @brief Sending the useful data in one message
@@ -1110,6 +1068,18 @@ uint8_t mMAVLink_Decoder::ConstructJSON_gopro_heartbeat(uint8_t json_level, bool
     JBI->Add("status", pkt.gopro_heartbeat.data.status);
     JBI->Add("capture_mode", pkt.gopro_heartbeat.data.capture_mode);
     JBI->Add("flags", pkt.gopro_heartbeat.data.flags);
+  return JBI->End();    
+}
+
+
+uint8_t mMAVLink_Decoder::ConstructJSON_gps_global_origin(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+    JBI->Add("t", millis()-pkt.gps_global_origin.tUpdate);
+    JBI->Add("latitude", pkt.gps_global_origin.data.latitude); /*< Latitude (WGS84), in degrees * 1E7*/
+    JBI->Add("longitude", pkt.gps_global_origin.data.longitude); /*< Longitude (WGS84), in degrees * 1E7*/
+    JBI->Add("altitude", pkt.gps_global_origin.data.altitude); /*< Altitude (AMSL), in meters * 1000 (positive for up)*/
+    JBI->Add("flagstime_usec", pkt.gps_global_origin.data.time_usec); /*< Timestamp (microseconds since UNIX epoch or microseconds since system boot)*/
   return JBI->End();    
 }
 
@@ -1569,34 +1539,12 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC_IN_MIN; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
-
-  ptr = &mqtthandler_sensor_ifchanged;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
-
   ptr = &mqtthandler_overview_01;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_01_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Overview_01;
@@ -1607,12 +1555,13 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_02_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Overview_02;
   mqtthandler_list.push_back(ptr);
 
+  #ifdef ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
 
   // 163,AHRS
   ptr = &mqtthandler_mavlink_packet__ahrs;
@@ -1620,7 +1569,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ahrs;
@@ -1632,7 +1581,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS2__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ahrs2;
@@ -1644,7 +1593,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__ATTITUDE__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_attitude;
@@ -1656,7 +1605,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AUTOPILOT_VERSION_REQUEST__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_autopilot_version_request;
@@ -1668,7 +1617,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__BATTERY_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_battery_status;
@@ -1680,7 +1629,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ekf_status_report;
@@ -1692,7 +1641,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_fence_status;
@@ -1704,7 +1653,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gimbal_report;
@@ -1716,7 +1665,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gimbal_torque_cmd_report;
@@ -1728,7 +1677,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_global_position_int;
@@ -1740,7 +1689,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gopro_heartbeat;
@@ -1752,7 +1701,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GPS_RAW_INT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gps_raw_int;
@@ -1764,7 +1713,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HEARTBEAT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_heartbeat;
@@ -1776,7 +1725,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HOME_POSITION__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_home_position;
@@ -1788,7 +1737,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HWSTATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_hwstatus;
@@ -1800,7 +1749,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__LOCAL_POSITION_NED__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_local_position_ned;
@@ -1812,7 +1761,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MEMINFO__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_meminfo;
@@ -1824,7 +1773,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MISSION_CURRENT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_mission_current;
@@ -1836,7 +1785,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MOUNT_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_mount_status;
@@ -1848,7 +1797,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__NAV_CONTROLLER_OUTPUT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_nav_controller_output;
@@ -1860,7 +1809,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__PARAM_VALUE__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_param_value;
@@ -1872,7 +1821,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__POWER_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_power_status;
@@ -1884,7 +1833,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RAW_IMU__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_raw_imu;   
@@ -1896,7 +1845,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels;
@@ -1908,7 +1857,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_RAW__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels_raw;
@@ -1920,7 +1869,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_SCALED__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels_scaled;
@@ -1932,7 +1881,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__REQUEST_DATA_STREAM__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_request_data_stream;
@@ -1944,7 +1893,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU2__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_imu2;
@@ -1956,7 +1905,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU3__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_imu3;
@@ -1968,7 +1917,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_scaled_pressure;
@@ -1980,7 +1929,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE2__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_scaled_pressure2;
@@ -1992,7 +1941,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SENSOR_OFFSETS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_sensor_offsets;
@@ -2004,7 +1953,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SERVO_OUTPUT_RAW__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_servo_output_raw;
@@ -2016,7 +1965,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__STATUSTEXT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_statustext;
@@ -2028,7 +1977,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYS_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_sys_status;
@@ -2040,7 +1989,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYSTEM_TIME__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_system_time;
@@ -2052,7 +2001,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TIMESYNC__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_timesync;
@@ -2064,12 +2013,11 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TERRAIN_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_terrain_report;
   mqtthandler_list.push_back(ptr);
-
 
   // 74,VFR_HUD
   ptr = &mqtthandler_mavlink_packet__vfr_hud;
@@ -2077,7 +2025,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_vfr_hud;
@@ -2089,11 +2037,14 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_vibration;
   mqtthandler_list.push_back(ptr);
+
+
+  #endif // ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
   
 } //end "MQTTHandler_Init"
 
@@ -2115,7 +2066,7 @@ void mMAVLink_Decoder::MQTTHandler_Set_DefaultPeriodRate()
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
   }
 }

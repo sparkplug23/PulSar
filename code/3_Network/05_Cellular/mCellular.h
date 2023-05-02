@@ -45,7 +45,7 @@
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
-#define UART_BAUD   115200
+#define UART_CELLULAR_BAUD   921600
 #define PIN_DTR     25
 #define PIN_TX      27
 #define PIN_RX      26
@@ -109,7 +109,7 @@ class mCellular :
     String pieces[24], input;
 
 
-
+    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
     struct GPS_STATUS
     {
       timereached_t tReached_Update;
@@ -127,10 +127,23 @@ class mCellular :
       int hour = 0;// Two digit hour
       int minute = 0;// Two digit minute
       int second = 0;// 6 digit second with subseconds
+      
+      float course      = 0;
+      int   FixMode     = 0;
+      float accuracy_position    = 0;
+      float accuracy_vertical    = 0;
+      int   usat_glonass = 0;
+      int   cno_max = 0;
+      int   HPA = 0;
+      int   VPA = 0;
+
+
     }gps;
     void GPS_Enable();
     void GPS_Disable();
     void ModemUpdate_GPS();
+    void SMS_GPSLocation();
+    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
     struct GPRS_STATUS
     {
@@ -155,7 +168,6 @@ class mCellular :
     void SMS_Enable();
     void SMS_Disable();
     void ModemUpdate_SMS();
-    void SMS_GPSLocation();
 
 
     struct DATA
@@ -190,6 +202,7 @@ class mCellular :
     void SendATCommand_FunctionalityMode_Full();
 
     void Handler_ModemResponses();
+    void Handler_ModemResponses_Fast();
     char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
 
 

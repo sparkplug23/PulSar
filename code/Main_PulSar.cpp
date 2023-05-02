@@ -583,7 +583,41 @@ void LoopTasker()
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);      }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ 
+    
+    pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
+
+    if(pCONT_time->RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    
+    if(
+      ((pCONT_time->uptime.seconds_nonreset%5)==0)&&
+      (pCONT_time->uptime.seconds_nonreset>20)
+    ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
+
+    if(
+      ((pCONT_time->uptime.seconds_nonreset%300)==0)&&
+      (pCONT_time->uptime.seconds_nonreset>60)
+    ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
+
+    // Uptime triggers
+    if(pCONT_time->uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
+    if(pCONT_time->uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
+    if(pCONT_time->uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
+    if(pCONT_time->uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+
+    // Check for midnight
+    if((pCONT_time->RtcTime.hour==0)&&(pCONT_time->RtcTime.minute==0)&&(pCONT_time->RtcTime.second==0)&&(pCONT_time->lastday_run != pCONT_time->RtcTime.Yday)){
+      pCONT_time->lastday_run = pCONT_time->RtcTime.Yday;
+      pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
+    }
+
+    if(pCONT_time->uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+
+    if(pCONT_time->uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+      
+    pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
+
+  }
 
 }
 
@@ -633,8 +667,13 @@ void loop(void)
 
   if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
-    ALOG_DBM(PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
+    ALOG_DBM(PSTR("LOOPSEC = \t\t\t\t\t%d %d last %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
     pCONT_sup->activity.loop_counter=0;
+  }
+
+  if(pCONT_sup->loop_runtime_millis > 500)
+  {
+    ALOG_ERR(PSTR("LONG_LOOP =============================================== %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
   }
 
   /**

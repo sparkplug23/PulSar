@@ -470,6 +470,10 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_ON_BOOT_SUCCESSFUL:
 
+      #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
+      memset(&pCONT->debug_module_time,0,sizeof(pCONT->debug_module_time));
+      ALOG_INF(PSTR("Reset: debug_module_time"));
+      #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
 // #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 // //move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)

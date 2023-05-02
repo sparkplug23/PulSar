@@ -3,81 +3,10 @@
 mTaskerManager* mTaskerManager::instance = nullptr;
 
 
-
-/****
- * 
- * 
- * I need to decouple/move this into tasker and not from "sub"-module time, it should all be called via the tasker and not a sub module
- * 
- * 
- * 
-*/
-      // // Check for midnight
-      // if((RtcTime.hour==0)&&(RtcTime.minute==0)&&(RtcTime.second==0)&&(lastday_run != RtcTime.Yday)){
-      //   lastday_run = RtcTime.Yday;
-      //   pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
-      // }
-      // if(RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
-      
-      // if(
-      //   ((uptime.seconds_nonreset%5)==0)&&
-      //   (uptime.seconds_nonreset>20)
-      // ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
-
-
-      // if(
-      //   ((uptime.seconds_nonreset%300)==0)&&
-      //   (uptime.seconds_nonreset>60)
-      // ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
-
-
-      // if(uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
-
-      // // Uptime triggers
-      // if(uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
-      // if(uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
-      // if(uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
-      // if(uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
-
-
-      // /**
-      //  * @brief Boot is only successful if mqtt+network has been active for 1 minute, then reset fastboot
-      //  **/
-      // #ifdef ENABLE_DEVFEATURE_BOOT_SUCCESS_WHEN_NETWORK_STABLE
-
-      // // For now, just enable this to happen 
-
-      // if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
-
-
-      // #else
-
-      // //I need another for stable boot
-      // // Stable time set to 2 minutes, as easy way to ensure mqtt/network has been stable
-      // if(uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
-
-      // #endif
-
-
-
 int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
-// DEBUG_LINE_HERE;
   int8_t result = 0;
-
-/**
- * @brief Construct a new if object
- * Add debug functions that can be called to highlight 
- * 
- * 
- * DebugTasker__ExactIDMAtch()
- * DebugTasker__RangedMinMaxIDs()
- * 
- * ff
- * 
- */
-
 
   if(target_tasker){
     ALOG_INF(PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
@@ -85,85 +14,71 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
   JsonParserObject obj = 0;
   
-  switch(function)
-  {
-    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:    
-      // if(obj && GetModuleIDbyFriendlyName(topic)==i)
-      // else{break;}
-      // If match, switch target tasker to be the directed command
-    case FUNC_JSON_COMMAND_ID:
+  if(function == FUNC_JSON_COMMAND_ID)
+  { 
+    
+    JsonParser parser(data_buffer.payload.ctr);
+    
+    // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
+    obj = parser.getRootObject();   
+    if (!obj)
+    {
+      #ifdef ENABLE_LOG_LEVEL_COMMANDS
+      AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
+      #endif //ENABLE_LOG_LEVEL_COMMANDS
+      return 0;
+    }
+    else{
+      // ALOG_INF(PSTR("JSON_SERIALIZATION"));
+    }
+
+    for(uint8_t i=0;i<GetClassCount();i++)
     { 
+      // switch_index = target_tasker ? target_tasker : i;
+
       
-      JsonParser parser(data_buffer.payload.ctr);
-      
-      // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
-      obj = parser.getRootObject();   
-      if (!obj)
+      if(target_tasker){
+        switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
+      }else{
+        switch_index = i; // Normally index is synonomous with enum list
+      }
+
+      // ALOG_INF(PSTR("JSON_SERIALIZATION"));  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
+
+
+      pModule[switch_index]->Tasker(function, obj);
+      if(target_tasker)
       {
-        #ifdef ENABLE_LOG_LEVEL_COMMANDS
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-        #endif //ENABLE_LOG_LEVEL_COMMANDS
-        break;
+        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));  
+        // #endif // ENABLE_LOG_LEVEL_COMMANDS          
+        break; 
       }
-      else{
-        // ALOG_INF(PSTR("JSON_SERIALIZATION"));
-      }
-
-      for(uint8_t i=0;i<GetClassCount();i++)
-      { 
-        // switch_index = target_tasker ? target_tasker : i;
-
-        
-        if(target_tasker){
-          switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
-        }else{
-          switch_index = i; // Normally index is synonomous with enum list
-        }
-
-        // ALOG_INF(PSTR("JSON_SERIALIZATION"));  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
-
-
-        pModule[switch_index]->Tasker(function, obj);
-        if(target_tasker)
-        {
-          // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-          AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));  
-          // #endif // ENABLE_LOG_LEVEL_COMMANDS          
-          break; 
-        }
-      }
+    }
 // DEBUG_LINE_HERE;
-      return 0; // needs to return via "Tasker"
-    } 
-    break;
-  } //END switch
+    return 0; // needs to return via "Tasker"
+  } 
 
   #ifdef  ENABLE_DEBUG_FUNCTION_NAMES
     char buffer_taskname[50];
   #endif
-  // #ifdef DEBUG_PIN3_GPIO
-  //   for(int i=0;i<1;i++){
-  //   DEBUG_PIN3_SET(0); //green
-  //   DEBUG_PIN3_SET(1);
-  //   }
-  // #endif // DEBUG_PIN3_GPIO
 
-  for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
-
+/**
+ * @brief ==============================================================================================================================
+ **/
+  for(uint8_t i=0;i<GetClassCount();i++)
+  {     
+    
+    // If target_tasker != 0, then use it, else, use indexed array
     if(target_tasker){
       switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
     }else{
       switch_index = i; // Normally index is synonomous with enum list
     }
 
-    // switch_index = target_tasker ? target_tasker : i;
-    // #ifdef ENABLE_ADVANCED_DEBUGGING
-    // Serial.printf("switch_index=%d\n\r",switch_index);
+
+    #ifdef ENABLE_ADVANCED_DEBUGGING
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-    /**
-     * @brief Show task about to be called after a certain uptime has elasped.
-     * Setting a time allows "skipping" forward until the expected error point 
-     */
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       if(pCONT_time->uptime_seconds_nonreset>ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS)
       {
@@ -172,122 +87,49 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       if(pCONT_time->uptime_seconds_nonreset<ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS)
       {
       #endif
-
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-      
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));      
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       }
       #endif
       #ifdef ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS
       }
       #endif
-
-    #endif
-    #ifdef ENABLE_ADVANCED_DEBUGGING
-    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      ALOG_INF(PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module started \t%d ms %s"),millis(), pCONT_set->GetTaskName(function, buffer_taskname));
-      #endif
-    #endif
-    // #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
-    // if(pCONT_time->uptime_seconds_nonreset>ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS)
-    // {
-    //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-    // }
-    // #endif // ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
+    #endif // ENABLE_DEBUG_FUNCTION_NAMES
+    #endif // ENABLE_ADVANCED_DEBUGGING
     
-    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+
+    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t start_millis = millis();
     #endif
     
-  //   if(function == FUNC_EVENT_INPUT_STATE_CHANGED_ID)
-  //   {
-  // DEBUG_LINE_HERE; ALOG_INF(PSTR("event_triggered.module_id = i%d f%d\t %d"),switch_index, function, pCONT_rules->event_triggered.module_id); 
-  //   }
 
-  // DEBUG_LINE_HERE;
+    pModule[switch_index]->Tasker(function, obj);
+    
 
-  /**
-   * @brief Convert "unique_module_id" to "enum_index"
-   * 
-   */
-
-// DEBUG_LINE_HERE;
-
-// DEBUG_PIN6_SET(LOW);
-    switch(function)
-    {
-      // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
-      case FUNC_JSON_COMMAND_ID: 
-        // AddLog(LOG_LEVEL_TEST, PSTR("FUNC_JSON_COMMAND_ID=%d"),obj["test2"].getInt());   
-      //   if(obj)
-      //   {
-      //     // pModule[switch_index]->parse_JSONCommand(obj); // This should only happen if the function is enabled internally
-      //     pModule[switch_index]->Tasker(function,obj);
-      //   }
-      break;
-      default:
-
-      // DEBUG_LINE_HERE;
-      
-          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d (f%d)"), switch_index, function);  
-          // WDT_Reset();
-        // switch(switch_index)
-        // {
-        //   case EM_MODULE_CORE_HARDWAREPINS_ID:
-        //   case EM_MODULE_CORE_SETTINGS_ID:
-        //   case EM_MODULE_CORE_SUPPORT_ID:
-        //   case EM_MODULE_CORE_LOGGING_ID:
-        //   case EM_MODULE_CORE_TELEMETRY_ID:
-        //   case EM_MODULE_CORE_TIME_ID:
-        //   case EM_MODULE_CORE_RULES_ID:
-        //   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
-        // DEBUG_LINE_HERE;
-        // if(EM_MODULE_NETWORK_WEBSERVER_ID!=switch_index)
-        // {
-          pModule[switch_index]->Tasker(function, obj);
-        // }else{
-        //   DEBUG_LINE_HERE;
-        //   // return;
-        //   // delay(2000);
-        //   // DEBUG_LINE_HERE;
-        // }
-
-        //   break;
-        //   default:
-        //   //nothing
-        //   break;
-        // }
-
-      break;
-    }
-// DEBUG_PIN6_SET(HIGH);
-
-          // DEBUG_LINE_HERE;
-    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t end_millis = millis(); // Remember start millis
     uint32_t this_millis = end_millis - start_millis; // Get this execution time 
-    #if defined(DEBUG_EXECUTION_TIME) // Get average
-    //if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
-      module_settings.execution_time_average_ms[i] += this_millis;
-      module_settings.execution_time_average_ms[i] /= 2; //gets average
-     // Get max
-      if(this_millis > module_settings.execution_time_max_ms[i]){
-        module_settings.execution_time_max_ms[i] = this_millis; // remember max
-      }
-    //}
-    #endif // DEBUG_EXECUTION_TIME
+    debug_module_time[switch_index].last_loop_time = this_millis;
+    debug_module_time[switch_index].avg_time += this_millis;
+    debug_module_time[switch_index].avg_time /= 2;
+    if(this_millis > debug_module_time[switch_index].max_time){
+      debug_module_time[switch_index].max_time = this_millis; // Save Max
+      debug_module_time[switch_index].max_function_id = function;
+    }
     #endif
+
+    
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname));
     #endif
-    #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
-      if(this_millis > 500){
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-      }
-    #endif
+    // #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS)
+    //   if(this_millis > ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS){
+    //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    //   }
+    // #endif
 
-          // DEBUG_LINE_HERE;
+
     if(target_tasker!=0){
       #ifdef ENABLE_LOG_LEVEL_INFO
         AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
@@ -295,8 +137,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       break; //only run for loop for the class set. if 0, rull all
     }
     
-          // DEBUG_LINE_HERE;
-
     // Special flag that can be set to end interface ie event handled, no need to check others
     if(fExitTaskerWithCompletion){
       fExitTaskerWithCompletion=false;
@@ -308,7 +148,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   
   } //end for
 
-          // DEBUG_LINE_HERE;
+
   #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
   if(!pCONT_set->flag_boot_complete){
     char buffer_taskname[50];
@@ -333,16 +173,13 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   }//flag_boot_complete
   #endif // ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
 
-          // DEBUG_LINE_HERE;
+
   if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
   
-          // DEBUG_LINE_HERE;
-  DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
 
-          // DEBUG_LINE_HERE;
   return result;
 
 }
@@ -354,6 +191,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_HARDWAREPINS
   pModule[EM_MODULE_CORE_HARDWAREPINS_ID] = new mHardwarePins();
   #endif 
+  #ifdef USE_MODULE_CORE_SERIAL_UART
+    pModule[EM_MODULE_CORE_SERIAL_UART_ID] = new mSerialUART();
+  #endif
   #ifdef USE_MODULE_CORE_SETTINGS
   pModule[EM_MODULE_CORE_SETTINGS_ID] = new mSettings();
   #endif 
@@ -430,9 +270,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_DRIVERS_SDCARD
     pModule[EM_MODULE_DRIVERS_SDCARD_ID] = new mSDCard();
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new mSerialUART();
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
     pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID] = new mShellyDimmer();

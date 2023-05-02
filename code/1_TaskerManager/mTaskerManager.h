@@ -158,6 +158,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CORE_HARDWAREPINS
     EM_MODULE_CORE_HARDWAREPINS_ID,
   #endif 
+  #ifdef USE_MODULE_CORE_SERIAL_UART
+    EM_MODULE_CORE_SERIAL_UART_ID,
+  #endif
   #ifdef USE_MODULE_CORE_SETTINGS
     EM_MODULE_CORE_SETTINGS_ID,
   #endif 
@@ -242,9 +245,6 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
     EM_MODULE_DRIVERS_GPS_ID,
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    EM_MODULE_DRIVERS_SERIAL_UART_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
     EM_MODULE_DRIVERS_SHELLY_DIMMER_ID,
@@ -519,6 +519,10 @@ enum MODULE_IDS{
   #include "2_CoreSystem/04_HardwarePins/mHardwarePins.h"
   #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
 #endif 
+#ifdef USE_MODULE_CORE_SERIAL_UART
+  #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
+  #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
+#endif
 #ifdef USE_MODULE_CORE_SETTINGS
   #include "2_CoreSystem/01_Settings/mSettings.h"
   #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
@@ -659,10 +663,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
   #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_SERIAL_UART
-  #include "4_Drivers/SerialUART/mSerialUART.h"
-  #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
   #include "4_Drivers/50_CAM_OV2640/mCamera.h"
@@ -1077,18 +1077,21 @@ class mTaskerManager{
     
     int16_t GetEnumVectorIndexbyModuleUniqueID(int16_t unique_id);
 
-    #ifdef ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-    // #define CLASS_ID_MAX 255
-    // struct CLASS_ID{
-    //   uint8_t list[CLASS_ID_MAX];
-    //   uint8_t module_type[CLASS_ID_MAX];
-    //   // #ifdef DEBUG_EXECUTION_TIME
-    //   // uint16_t execution_time_average_ms[CLASS_ID_MAX];
-    //   // uint16_t execution_time_max_ms[CLASS_ID_MAX];
-    //   // #endif
-    //   uint8_t count = 0;
-    // }module_settings; 
-    #endif // ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    struct DEBUG_MODULE_TIME
+    {
+      uint16_t seconds_to_keep_stats_before_reset = 0;
+      uint16_t max_time = 0;
+      // uint16_t min_time = 0;
+      uint16_t avg_time = 0;
+      uint32_t last_loop_time = 0;
+      uint16_t max_function_id = 0; // func_task that caused the max_time
+      // Only record them after boot sucessful
+    }debug_module_time[EM_MODULE_LENGTH_ID];
+    #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
+
+    
 
     uint16_t last_function = 255; // 0 will be first
 

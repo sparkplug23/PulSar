@@ -694,3 +694,66 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
 
   return JBI->End();
 }
+
+
+
+uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_level, bool json_appending)
+{
+
+  JBI->Start();
+
+  char buffer2[100];
+  
+  for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  {
+    JBI->Level_Start_P(pCONT->pModule[ii]->GetModuleFriendlyName());
+
+      JBI->Add("max_time", pCONT->debug_module_time[ii].max_time);
+      JBI->Add("avg_time", pCONT->debug_module_time[ii].avg_time);
+      JBI->Add("max_function_id", pCONT->debug_module_time[ii].max_function_id);
+
+    JBI->Level_End();
+
+
+
+
+  }
+
+
+
+
+
+
+
+  //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
+  //   // if(pCONT->GetClassSizeByID(i)>10000){
+  //   //   JBI->Add("bad",i);
+  //   // }
+
+
+
+  // }
+
+  // /**
+  //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
+  //  * I could also run a "append" id but check its not in it already (easier with vector?)
+  //  * 
+  //  */
+  // char buffer[100];
+
+
+
+  // JBI->Array_Start("ModuleIDs");
+  // for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  // {
+  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
+
+  //   JBI->Add(buffer);
+  // }
+  // JBI->Array_End();
+
+  // JBI->Level_End();
+
+
+  return JBI->End();
+}

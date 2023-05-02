@@ -35,6 +35,24 @@ class TinyGsmGPS {
     return thisModem().getGPSImpl(lat, lon, speed, alt, vsat, usat, accuracy,
                                   year, month, day, hour, minute, second);
   }
+  bool getGPS_Detailed(float* lat, float* lon, float* speed = 0, float* alt = 0,
+              int* vsat = 0, int* usat = 0, float* accuracy = 0, int* year = 0,
+              int* month = 0, int* day = 0, int* hour = 0, int* minute = 0,
+              int* second = 0,
+              float* course      = 0,
+              int*   FixMode     = 0,
+              float* accuracy_position    = 0,
+              float* accuracy_vertical    = 0,
+              int*   usat_glonass = 0,
+              int*   cno_max = 0,
+              int*   HPA = 0,
+              int*   VPA = 0    
+    ) {
+    return thisModem().getGPSImpl_Detailed(lat, lon, speed, alt, vsat, usat, accuracy,
+                                  year, month, day, hour, minute, second,
+                                  course,FixMode,accuracy_position,accuracy_vertical,usat_glonass,cno_max,HPA,VPA   
+              );
+  }
   bool getGPSTime(int* year, int* month, int* day, int* hour, int* minute,
                   int* second) {
     float lat = 0;
