@@ -22,11 +22,8 @@ class mGPS_Modem :
     PGM_P GetModuleName(){          return PM_MODULE__SENSORS_GPS_MODEM__CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mGPS_Modem);
-    };
+    uint16_t GetClassSize(){      return sizeof(mGPS_Modem);    };
     #endif
 
     void parse_JSONCommand(JsonParserObject obj);

@@ -10,9 +10,7 @@
 #include "2_CoreSystem/06_Support/mSupport.h"
 
 #include "2_CoreSystem/08_JSON/mJSON.h"
-
 #include "3_Network/10_MQTT/mMQTT.h"
-
 
 #include "2_CoreSystem/05_Logging/mLogging.h"
 
@@ -192,7 +190,9 @@ class mTelemetry :
         handler<mTelemetry> mqtthandler_debug_moduleinterface;
         handler<mTelemetry> mqtthandler_debug_minimal;
         handler<mTelemetry> mqtthandler_debug_system_saved_settings;
+        #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
         handler<mTelemetry> mqtthandler_debug_tasker_interface_performance;
+        #endif
       #endif
     
     #endif // USE_MODULE_NETWORK_MQTT

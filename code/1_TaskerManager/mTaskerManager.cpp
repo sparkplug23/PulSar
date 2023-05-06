@@ -68,6 +68,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
  **/
   for(uint8_t i=0;i<GetClassCount();i++)
   {     
+        
+    // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
     
     // If target_tasker != 0, then use it, else, use indexed array
     if(target_tasker){
@@ -87,7 +89,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       if(pCONT_time->uptime_seconds_nonreset<ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS)
       {
       #endif
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));      
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIS_%d\t %02d %02d T:%S\tM:%S"), millis(), switch_index, i, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));      
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       }
       #endif
@@ -121,7 +123,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname));
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIE_%d FUNC time %dms"),millis(),millis()-start_millis);
     #endif
     // #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS)
     //   if(this_millis > ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS){
@@ -231,9 +233,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_NETWORK_MQTT
   pModule[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
-  #endif 
-  #ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
-  pModule[EM_MODULE_NETWORK_MQTT_MULTIPLE_ID] = new mMQTT();
   #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   pModule[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebServer();
@@ -675,7 +674,7 @@ bool mTaskerManager::ValidTaskID(uint8_t id)
   return id <= GetClassCount() ? true : false;
 }
 
-PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t id)
+PGM_P mTaskerManager::GetModuleFriendlyName(uint16_t id)
 {
   if(ValidTaskID(id))
   {

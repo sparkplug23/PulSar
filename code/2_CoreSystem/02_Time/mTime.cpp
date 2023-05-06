@@ -90,7 +90,7 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_MIDNIGHT:
     
     break;
-    #ifdef USE_MODULE_NETWORK_MQTT
+    #if defined(USE_MODULE_NETWORK_MQTT) || defined(USE_MODULE_NETWORK_MQTT_MULTIPLE)
     case FUNC_MQTT_SENDER:
       //SubTasker_MQTTSender();
     break;

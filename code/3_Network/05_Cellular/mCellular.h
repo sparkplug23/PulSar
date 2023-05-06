@@ -183,13 +183,16 @@ class mCellular :
 
     }modem_status;
 
+    struct SMS_PDU_Message{
+
+      uint8_t length_of_smsc_information = 0;
+
+
+    }sms_pdu_message;
+
     
     void ModemUpdate_BatteryStatus();
       
-
-    void ArduinoNetworkTest();
-    void ArduinoExample_GPRSConnect();
-    void ArduinoExample_GPRSConnect1();
 
 
     void modemPowerOn();
@@ -197,18 +200,18 @@ class mCellular :
     void modemRestart();
 
     void SendATCommand_SMSFormatAscii();
+    void SendATCommand_SMSFormatPDU();
     void SendATCommand_SMSImmediateForwardOverSerial();
     void SendATCommand_FunctionalityMode_Minimum();
     void SendATCommand_FunctionalityMode_Full();
 
     void Handler_ModemResponses();
     void Handler_ModemResponses_Fast();
+    void Handler_ModemResponses_Fast_FDU();
     char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
 
 
     void EveryLoop();
-
-    void TestCode_RunAll();
 
     void Pre_Init();
     void Init(void);

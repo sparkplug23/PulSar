@@ -201,12 +201,6 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
-  #ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
-    EM_MODULE_NETWORK_MQTT_MULTIPLE_ID,
-  #endif 
-  // #ifdef USE_MODULE_DRIVERS_TINYGSM
-  //   EM_MODULE_DRIVERS_TINYGSM_ID,
-  // #endif
   #ifdef USE_MODULE_NETWORK_WEBSERVER
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
@@ -234,7 +228,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     EM_MODULE_DRIVERS_IRTRANSCEIVER_ID,
   #endif
-  #if defined(USE_MODULE_DRIVERS_RELAY) || defined(USE_MODULE_DRIVERS_RELAY_V2)
+  #ifdef USE_MODULE_DRIVERS_RELAY
     EM_MODULE_DRIVERS_RELAY_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_PWM
@@ -561,10 +555,6 @@ enum MODULE_IDS{
   #include "3_Network/00_Interface/mInterface.h"
   #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(pCONT->pModule[EM_MODULE__NETWORK_INTERFACE__ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_MQTT
-  #include "3_Network/10_MQTT/mMQTT.h"
-  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
-#endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include "3_Network/20_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
@@ -573,14 +563,14 @@ enum MODULE_IDS{
   #include "3_Network/03_WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_MQTT_MULTIPLE
-  #include "3_Network/11_MQTT_Multiple/mMQTT.h"
-  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_MULTIPLE_ID])
-#endif 
 #ifdef USE_MODULE_NETWORK_CELLULAR
 #include "3_Network/05_Cellular/mCellular.h"
   #define pCONT_cell                               static_cast<mCellular*>(pCONT->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
 #endif
+#ifdef USE_MODULE_NETWORK_MQTT
+  #include "3_Network/10_MQTT/mMQTT.h"
+  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
+#endif 
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
@@ -1065,7 +1055,7 @@ class mTaskerManager{
     uint16_t GetClassSizeByID(uint8_t class_id);
 
     PGM_P GetModuleName(uint8_t id);
-    PGM_P GetModuleFriendlyName(uint8_t module_id);
+    PGM_P GetModuleFriendlyName(uint16_t module_id);
     uint16_t GetClassCount();
 
     

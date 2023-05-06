@@ -13,6 +13,15 @@
  */
 #include "mCellular.h"
 
+
+/**
+ * @brief 
+ * 
+ * If modem connection is handled by another task pinned to the other core, then any slow downs will not hold the main processing back
+ * Leave this until I better understand pinning tasks and can make them work well
+ * 
+ */
+
 #ifdef USE_MODULE_NETWORK_CELLULAR
 
 const char* mCellular::PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
@@ -41,7 +50,7 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_LOOP: 
     {      
-      Handler_ModemResponses_Fast();
+      Handler_ModemResponses_Fast_FDU();
     }
     break;
     case FUNC_EVERY_SECOND: 
@@ -67,6 +76,7 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
     
 
       // ALOG_INF(PSTR("Network connected? %d"), modem->isNetworkConnected());
+
     
     break;
     case FUNC_EVERY_MINUTE:
@@ -152,6 +162,9 @@ void mCellular::Init(void)
   }else{
     ALOG_INF(PSTR("Baud not Found: %d"), UART_CELLULAR_BAUD);
   }
+
+  #else 
+  SerialAT.begin(115200, SERIAL_8N1, PIN_RX, PIN_TX);
   #endif // USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
 
 
@@ -189,7 +202,12 @@ void mCellular::Init(void)
   GPS_Enable();
   #endif 
 
+  #ifdef ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE
+  SendATCommand_SMSFormatPDU();
+  #else
   SendATCommand_SMSFormatAscii();
+  #endif
+
   SendATCommand_SMSImmediateForwardOverSerial();
 
 
@@ -200,64 +218,64 @@ void mCellular::Init(void)
 void mCellular::Handler_ModemResponses()
 {
 
-  // Response
-  String incoming = String();
-  // SerialAT.setTimeout(200);
-  if (SerialAT.available()) 
-  {
+  // // Response
+  // String incoming = String();
+  // // SerialAT.setTimeout(200);
+  // if (SerialAT.available()) 
+  // {
 
 
-    uint32_t receive_millis = millis();
+  //   uint32_t receive_millis = millis();
 
-    // ALOG_INF(PSTR("millisA = %d"), millis());
+  //   // ALOG_INF(PSTR("millisA = %d"), millis());
 
-    incoming = SerialAT.readString();
-    ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
+  //   incoming = SerialAT.readString();
+  //   ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
 
-    ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
-    char buffer[300];
-    char buffer2[300];
-    // ALOG_INF(PSTR("millisC = %d"), millis());
+  //   ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
+  //   char buffer[300];
+  //   char buffer2[300];
+  //   // ALOG_INF(PSTR("millisC = %d"), millis());
 
-    sprintf(buffer, "%s", incoming.c_str());
+  //   sprintf(buffer, "%s", incoming.c_str());
 
-    // ALOG_INF(PSTR("buffer = %s"), buffer);
-    // for(int i = 0;i < incoming.length(); i++)
-    // {
-    //   Serial.printf("%02d>    %c       \n\r",i,buffer[i]);
-    //   if(buffer[i]=='\n')
-    //   {
-    //     Serial.printf("=====================%02d>\"%c\"\n\r",i,buffer[i]);
-    //   }
-    // }
+  //   // ALOG_INF(PSTR("buffer = %s"), buffer);
+  //   // for(int i = 0;i < incoming.length(); i++)
+  //   // {
+  //   //   Serial.printf("%02d>    %c       \n\r",i,buffer[i]);
+  //   //   if(buffer[i]=='\n')
+  //   //   {
+  //   //     Serial.printf("=====================%02d>\"%c\"\n\r",i,buffer[i]);
+  //   //   }
+  //   // }
     
-    char *search = "\r\n+CMT";
-    char *result = strstr(buffer, search);
-    if(result)
-    {
-      ALOG_INF(PSTR("FOUND CMT MESSAGE result >>>%s<<<"), result);
-      ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
-    }
+  //   char *search = "\r\n+CMT";
+  //   char *result = strstr(buffer, search);
+  //   if(result)
+  //   {
+  //     ALOG_INF(PSTR("FOUND CMT MESSAGE result >>>%s<<<"), result);
+  //     ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
+  //   }
 
 
-    ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
+  //   ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
     
-    // ALOG_INF(PSTR("millisD = %d"), millis());
+  //   // ALOG_INF(PSTR("millisD = %d"), millis());
 
-    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    // Check for request at GPS
-    if (strncasecmp(buffer2, "GPS", 3) == 0)
-    {
-      ALOG_INF(PSTR("Request for GPS"));
-      SMS_GPSLocation();
-    }
-    else{
-      ALOG_INF(PSTR("NO Request for GPS: Sending anyway for now"));
-      // SMS_GPSLocation();
-    }
-    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+  //   #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+  //   // Check for request at GPS
+  //   if (strncasecmp(buffer2, "GPS", 3) == 0)
+  //   {
+  //     ALOG_INF(PSTR("Request for GPS"));
+  //     SMS_GPSLocation();
+  //   }
+  //   else{
+  //     ALOG_INF(PSTR("NO Request for GPS: Sending anyway for now"));
+  //     // SMS_GPSLocation();
+  //   }
+  //   #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
-  }
+  // }
 
 }
 
@@ -294,18 +312,18 @@ void mCellular::Handler_ModemResponses_Fast()
 
     char buffer[300];
 
-    
+    // Add timeout
     int c = SerialAT.read();
     while(c >= 0) {
       incoming += (char) c;
       c = SerialAT.read();
     }
     
-    ALOG_HGL(PSTR("while\nIncoming \n\r===(%s)==="), incoming.c_str());
+    // ALOG_HGL(PSTR("while\nIncoming \n\r===(%s)==="), incoming.c_str());
 
     // ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
 
-    ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
+    // ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
     char buffer2[300];
     // ALOG_INF(PSTR("millisC = %d"), millis());
 
@@ -341,7 +359,7 @@ void mCellular::Handler_ModemResponses_Fast()
       SMS_GPSLocation();
     }
     else{
-      ALOG_INF(PSTR("NO Request for GPS: Sending anyway for now"));
+      ALOG_INF(PSTR("Unknown Message"));
       // SMS_GPSLocation();
     }
     #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
@@ -351,10 +369,141 @@ void mCellular::Handler_ModemResponses_Fast()
 }
 
 
+
+void mCellular::Handler_ModemResponses_Fast_FDU()
+{
+
+  // Response
+  // String incoming = String();
+  // SerialAT.setTimeout(200);
+
+
+/**
+ * @brief 
+ * 
+  >>> Example: Test from my phone "0000012345432100000" <<<
+ 
+ +CMT: ,36
+  0791448720003023040C914457515358790000325060717104401330180C068BC966B41A6D268BC16030180C
+ 
+  // Decoded with https://www.diafaan.com/sms-tutorials/gsm-modem-tutorial/online-sms-pdu-decoder/
+  Text message
+  From:	+447515358597
+  Message:	0000012345432100000
+
+  Additional information
+  PDU type:	SMS-DELIVER
+  Time stamp:	06/05/2023 17:17:40
+  SMSC:	+447802000332
+  Data coding:	SMS Default Alphabet
+
+  Original Encoded PDU fields
+  SMSC:	0791448720003023
+  PDU header:	04
+  TP-MTI:	00
+  TP-MMS:	04
+  TP-SRI:	00
+  TP-RP:	00
+  TP-UDHI:00
+  TP-OA:	0C91445751535879
+  TP-PID: 00
+  TP-DCS: 00
+  TP-SCTS:32506071710440
+  TP-UDL:	13
+  TP-UD:	30180C068BC966B41A6D268BC16030180C
+    
+  07 - Length of the SMSC information (in this case 7 octets)
+  91 - Type-of-address of the SMSC. (91 means international format of the phone number)
+  44 87 20 00 30 23 - Service center number(in decimal semi-octets). The length of the phone  number is odd (11), so a trailing F has been added to form proper octets. 
+                      The  phone number of this service center is "+27831000015". See below.
+  04 - First octet of this SMS-DELIVER message.
+  0C - Address-Length. Length of the sender number (0B hex = 11 dec)
+  91 - Type-of-address of the sender number
+  44 57 51 53 58 79 - Sender number (decimal semi-octets), with a trailing F
+  00
+  00
+  32 50 60 71 71 04 40
+  13
+  30180C068BC966B41A6D268BC16030180C
+
+***/
+
+
+
+
+  if (SerialAT.available()) 
+  {
+
+
+    uint32_t receive_millis = millis();
+
+    Serial.write(Serial1.read());
+
+    // ALOG_INF(PSTR("millisA = %d"), millis());
+
+    // char buffer[300];
+
+    // // Add timeout
+    // int c = SerialAT.read();
+    // while(c >= 0) {
+    //   incoming += (char) c;
+    //   c = SerialAT.read();
+    // }
+    
+    // // ALOG_HGL(PSTR("while\nIncoming \n\r===(%s)==="), incoming.c_str());
+
+    // // ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
+
+    // // ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
+    // char buffer2[300];
+    // // ALOG_INF(PSTR("millisC = %d"), millis());
+
+    // sprintf(buffer, "%s", incoming.c_str());
+
+    // ALOG_INF(PSTR("buffer = %s"), buffer);
+    // for(int i = 0;i < incoming.length(); i++)
+    // {
+    //   Serial.printf("%02d>    %c       \n\r",i,buffer[i]);
+    //   if(buffer[i]=='\n')
+    //   {
+    //     Serial.printf("=====================%02d>\"%c\"\n\r",i,buffer[i]);
+    //   }
+    // }
+
+    // char *search = "\r\n+CMT";
+    // char *result = strstr(buffer, search);
+    // if(result)
+    // {
+    //   ALOG_INF(PSTR("FOUND CMT MESSAGE result >>>%s<<<"), result);
+    //   ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
+    // }
+
+    // ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
+    
+    // // ALOG_INF(PSTR("millisD = %d"), millis());
+
+    // #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    // // Check for request at GPS
+    // if (strncasecmp(buffer2, "GPS", 3) == 0)
+    // {
+    //   ALOG_INF(PSTR("Request for GPS"));
+    //   SMS_GPSLocation();
+    // }
+    // else{
+    //   ALOG_INF(PSTR("Unknown Message"));
+    //   // SMS_GPSLocation();
+    // }
+    // #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+  }
+
+}
+
+
 char* mCellular::ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen)
 {
 
-  ALOG_DBM(PSTR("ATResponse_Parse_CMT"));
+  ALOG_INF(PSTR("ATResponse_Parse_CMT"));
 
   char *result = strstr(
     &incoming[2],   // skip "\r\n" at start of response
@@ -381,6 +530,16 @@ void mCellular::SendATCommand_SMSFormatAscii()
   modem->sendAT("+CMGF=1 "); // Set the ascii messages (not HEX)
   if (modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT) != 1) {
     ALOG_INF(PSTR("SMSFormatAscii DONE"));
+  }
+}
+
+
+void mCellular::SendATCommand_SMSFormatPDU()
+{
+  // Enable SMS always send to serial when they arrive, move to function later
+  modem->sendAT("+CMGF=0 "); // Set the ascii messages (not HEX)
+  if (modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT) != 1) {
+    ALOG_INF(PSTR("SMSFormatPDU DONE"));
   }
 }
 
@@ -552,7 +711,7 @@ void mCellular::ModemUpdate_GPS()
         &gps.VPA
       )) 
       {
-        ALOG_INF(PSTR("GPS getGPS_Detailed Fix (%d cm)"), (int)(gps.accuracy*100));
+        ALOG_INF(PSTR("GPS u/v_sat %d/%d Fix (%d cm)"), gps.usat, gps.vsat, (int)(gps.accuracy*100));
         
         #ifdef USE_MODULE_SENSORS_GPS_MODEM
         pCONT_gps->readings.update_seconds = millis();
@@ -561,18 +720,11 @@ void mCellular::ModemUpdate_GPS()
         pCONT_gps->location.speed = gps.speed;
         pCONT_gps->location.altitude = gps.altitude;
         pCONT_gps->location.accuracy = gps.accuracy;
-
-
-
-
-
         #endif // USE_MODULE_SENSORS_GPS_MODEM
-        
-
+      
       }else{
         ALOG_ERR(PSTR("GPS NO FIX"));
-
-        GPS_Enable(); //need a backoff timer but otherwise should force it
+        // GPS_Enable(); //need a backoff timer but otherwise should force it
       }
 
             
@@ -610,32 +762,41 @@ void mCellular::GPRS_Connect()
       return;
     }
 
-    ALOG_INF(PSTR("GPRS status: "));
+    ALOG_INF(PSTR("GPRS Checking..."));
     if (modem->isGprsConnected()) 
     {
-      ALOG_INF(PSTR("connected"));
+      ALOG_INF(PSTR("GPRS Connected"));
       gsm_client = new TinyGsmClient(*modem);
-      pCONT_mqtt->SetPubSubClient(gsm_client);
+        ALOG_INF(PSTR("MQTT size %d"), pCONT_mqtt->brokers.size());
+      if(pCONT_mqtt->brokers.size()<1)
+      {
+        // TMP fix
+        pCONT_mqtt->brokers.push_back(new MQTTConnection());
+
+
+        ALOG_INF(PSTR("MQTT not working push_back(new MQTTConnection())"));
+      }
+      pCONT_mqtt->brokers[0]->SetPubSubClient(gsm_client);
     } 
     else 
     {
-      ALOG_INF(PSTR("not connected"));
+      ALOG_INF(PSTR("GPRS NOT Connected"));
     }
 
-    String ccid = modem->getSimCCID();
-    ALOG_INF(PSTR("CCID: %s"), ccid.c_str());
+    // String ccid = modem->getSimCCID();
+    // ALOG_INF(PSTR("CCID: %s"), ccid.c_str());
 
-    String imei = modem->getIMEI();
-    ALOG_INF(PSTR("IMEI: %s"), imei.c_str());
+    // String imei = modem->getIMEI();
+    // ALOG_INF(PSTR("IMEI: %s"), imei.c_str());
 
-    String cop = modem->getOperator();
-    ALOG_INF(PSTR("Operator: %s"), cop.c_str());
+    // String cop = modem->getOperator();
+    // ALOG_INF(PSTR("Operator: %s"), cop.c_str());
 
-    IPAddress local = modem->localIP();
-    ALOG_INF(PSTR("Local IP: %s"), String(local).c_str());
+    // IPAddress local = modem->localIP();
+    // ALOG_INF(PSTR("Local IP: %s"), String(local).c_str());
 
-    int csq = modem->getSignalQuality();
-    ALOG_INF(PSTR("Signal quality: %d"), csq);
+    // int csq = modem->getSignalQuality();
+    // ALOG_INF(PSTR("Signal quality: %d"), csq);
 
   }
 
@@ -654,7 +815,7 @@ void mCellular::GPRS_Enable()
     while (!modem->testAT()) 
     {
       Serial.print(".");
-      if (millis() - timeout > 60000 ) 
+      if (millis() - timeout > 10000 ) 
       {
         ALOG_INF(PSTR("> It looks like the modem is not responding, trying to restart"));
         modemPowerOff();
@@ -670,7 +831,7 @@ void mCellular::GPRS_Enable()
     ALOG_INF(PSTR("> Get SIM card status"));
     while (modem->getSimStatus() != SIM_READY) {
       Serial.print(".");
-      if (millis() - timeout > 60000 ) {
+      if (millis() - timeout > 10000 ) {
           ALOG_INF(PSTR("It seems that your SIM card has not been detected. Has it been inserted?"));
           return;
       }
@@ -709,11 +870,10 @@ void mCellular::GPRS_Enable()
         ALOG_INF(PSTR("> The SIM card you use has been rejected by the network operator. Please check that the card you use is not bound to a device!"));
         return;
       } else {
-        ALOG_INF(PSTR("Signal:"));
-        ALOG_INF(PSTR("sq=%d"),sq);
+        ALOG_INF(PSTR("Signal sq %d"), sq);
       }
 
-      if (millis() - timeout > 360000 ) { //!! THIS IS BLOCKING CODE, NEEDS RESOLVED TO RETRY AGAIN
+      if (millis() - timeout > 10000 ) { //!! THIS IS BLOCKING CODE, NEEDS RESOLVED TO RETRY AGAIN
         if (sq == 99) {
           ALOG_INF(PSTR("It seems that there is no signal."));
           return;
@@ -800,10 +960,13 @@ void mCellular::ModemUpdate_GPRS()
         if(csq == 99)
         {
           gprs.signal_quality_rssi_dbm = -150;
+          pCONT_interface_network->data.cellular_state.isvalid = false;
+          pCONT_interface_network->data.mqtt_state.isvalid = false;
         }
         else
         {
           gprs.signal_quality_rssi_dbm = map(csq, 0, 31, -113, -51);
+          pCONT_interface_network->data.cellular_state.isvalid = true;
         }
 
         ALOG_INF(PSTR("Signal quality: %d dBm (%d)"), int(gprs.signal_quality_rssi_dbm), csq);
@@ -826,6 +989,10 @@ void mCellular::ModemUpdate_GPRS()
         GPRS_Connect();
       }
 
+    }
+    else
+    {
+      GPRS_Enable();
     }
   }
 
@@ -920,9 +1087,10 @@ void mCellular::SMS_GPSLocation()
     char convf_fix[TBUFFER_SIZE_FLOAT];
     mSupport::float2CString(gps.accuracy,2,convf_fix);
 
-    char message2[STANDARD_SMS_CHAR_LENGTH];
+    uint16_t buflen = 0;
+    char     buffer[STANDARD_SMS_CHAR_LENGTH];
 
-    snprintf_P(message2, sizeof(message2),
+    buflen += snprintf_P(buffer+buflen, sizeof(buffer),
       PSTR(
         // "Battery  %d mV\n"
         // "Battery  %d mA\n"
@@ -941,11 +1109,31 @@ void mCellular::SMS_GPSLocation()
       convf_lat, 
       convf_lon
     );
+
+    #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    /**
+     * @brief MAVLink Data
+     **/    
+    char convf_lat2[TBUFFER_SIZE_FLOAT];
+    mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat2);
+    char convf_lon2[TBUFFER_SIZE_FLOAT];
+    mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon2);
+
+    buflen += snprintf_P(buffer+buflen, sizeof(buffer),
+      PSTR(
+        "\n"
+        "MAV\n"
+        "https://www.google.com/maps/dir//%s,%s"
+      ), 
+      convf_lat2, 
+      convf_lon2
+    );
+    #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
     
-    ALOG_INF(PSTR("message2  %s"),message2);
+    ALOG_INF(PSTR("buffer  %s"),buffer);
     
     String res;
-    res = modem->sendSMS(SMS_TARGET, String(message2));
+    res = modem->sendSMS(SMS_TARGET, String(buffer));
     ALOG_INF(PSTR("SMS:"), res ? "OK" : "fail");
 
   }
@@ -1044,32 +1232,6 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
       }
     }
 
-  }
-
-
-  if(jtok = obj["TestCode_RunAll"]){
-    ALOG_INF( PSTR("TestCode_RunAll"));
-    TestCode_RunAll();
-  }
-
-
-  if(jtok = obj["SIM"].getObject()["Connect1"])
-  {
-    ALOG_INF( PSTR("Connect1"));
-    ArduinoExample_GPRSConnect1();
-  }
-
-  
-  if(jtok = obj["SIM"].getObject()["GPRSConnect"])
-  {
-    ALOG_INF( PSTR("GPRSConnect"));
-    ArduinoExample_GPRSConnect();
-  }
-
-
-  if(jtok = obj["NetworkTest"])
-  {
-    ArduinoNetworkTest();
   }
 
     

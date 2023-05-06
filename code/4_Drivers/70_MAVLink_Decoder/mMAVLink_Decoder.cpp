@@ -102,7 +102,7 @@ void mMAVLink_Decoder::Send_Heartbeat()
   );
   uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
   _MAVSerial->write(bufhb,lenhb);
-  ALOG_INF(PSTR(">>>>>>>>>>>>>>>>>>>>>>>>>>>Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
+  ALOG_INF(PSTR(">>>>>>>> Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
 }
 
 
@@ -267,7 +267,7 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
           pkt.heartbeat.vehicle_component_id = msg.compid;      
           if(pkt.heartbeat.vehicle_sys_id != msg.sysid){ Serial.println(DEBUG_INSERT_PAGE_BREAK "RESEND?"); }
           pkt.heartbeat.vehicle_sys_id = msg.sysid;      
-          ALOG_INF(PSTR("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Received Heartbeat Packet = %d \"%S\", sys %d, comp %d"), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
+          ALOG_INF(PSTR("<<<<<<<<<Received Heartbeat Packet = %d \"%S\", sys %d, comp %d"), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
           pkt.heartbeat.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_HOME_POSITION:                         
@@ -1532,7 +1532,7 @@ void mMAVLink_Decoder::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
@@ -2063,12 +2063,12 @@ void mMAVLink_Decoder::MQTTHandler_Set_RefreshAll()
  * */
 void mMAVLink_Decoder::MQTTHandler_Set_DefaultPeriodRate()
 {
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
 }
 
 /**

@@ -252,7 +252,7 @@ void mSensorsInterface::MQTT_Report_Event_Button()
 
 
 
-  pCONT_mqtt->ppublish("status/sensors_interface/event",JsonBuilderI->GetBufferPtr(),false);
+  pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JsonBuilderI->GetBufferPtr(),false);
 
 
   /**
@@ -298,7 +298,7 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 		if(ready_to_send)
 		{			
     	AddLog(LOG_LEVEL_TEST, PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
-			pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+			pCONT_mqtt->brokers[0]->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		}
 
 	}

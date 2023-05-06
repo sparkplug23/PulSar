@@ -87,7 +87,7 @@
 
 #define CHECK_STRING_LENGTH(l,s) if (l+2+strlen(s) > MQTT_MAX_PACKET_SIZE) {_client->stop();return false;}
 
-class mPubSubClient : public Print {
+class PubSubClient : public Print {
 private:
    Client* _client;
    uint8_t buffer[MQTT_MAX_PACKET_SIZE];
@@ -112,28 +112,28 @@ private:
    Stream* stream;
    int _state;
 public:
-   mPubSubClient();
-   mPubSubClient(Client& client);
-   mPubSubClient(IPAddress, uint16_t, Client& client);
-   mPubSubClient(IPAddress, uint16_t, Client& client, Stream&);
-   mPubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
-   mPubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
-   mPubSubClient(uint8_t *, uint16_t, Client& client);
-   mPubSubClient(uint8_t *, uint16_t, Client& client, Stream&);
-   mPubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
-   mPubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
-   mPubSubClient(const char*, uint16_t, Client& client);
-   mPubSubClient(const char*, uint16_t, Client& client, Stream&);
-   mPubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
-   mPubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
-   virtual ~mPubSubClient() {}
+   PubSubClient();
+   PubSubClient(Client& client);
+   PubSubClient(IPAddress, uint16_t, Client& client);
+   PubSubClient(IPAddress, uint16_t, Client& client, Stream&);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
+   PubSubClient(IPAddress, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(uint8_t *, uint16_t, Client& client);
+   PubSubClient(uint8_t *, uint16_t, Client& client, Stream&);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
+   PubSubClient(uint8_t *, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   PubSubClient(const char*, uint16_t, Client& client);
+   PubSubClient(const char*, uint16_t, Client& client, Stream&);
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client);
+   PubSubClient(const char*, uint16_t, MQTT_CALLBACK_SIGNATURE,Client& client, Stream&);
+   virtual ~PubSubClient() {}
 
-   mPubSubClient& setServer(IPAddress ip, uint16_t port);
-   mPubSubClient& setServer(uint8_t * ip, uint16_t port);
-   mPubSubClient& setServer(const char * domain, uint16_t port);
-   mPubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
-   mPubSubClient& setClient(Client& client);
-   mPubSubClient& setStream(Stream& stream);
+   PubSubClient& setServer(IPAddress ip, uint16_t port);
+   PubSubClient& setServer(uint8_t * ip, uint16_t port);
+   PubSubClient& setServer(const char * domain, uint16_t port);
+   PubSubClient& setCallback(MQTT_CALLBACK_SIGNATURE);
+   PubSubClient& setClient(Client& client);
+   PubSubClient& setStream(Stream& stream);
 
    boolean connect(const char* id);
    boolean connect(const char* id, const char* user, const char* pass);

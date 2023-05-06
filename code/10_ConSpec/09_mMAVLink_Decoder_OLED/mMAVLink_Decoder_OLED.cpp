@@ -230,7 +230,7 @@ void mMAVLink_Decoder_OLED::SubSubTask_ShowDisplay_Page1()
   char buffer_n[100] = {0};
   
 
-  #ifdef USE_MODULE_NETWORK_CELLULAR
+  #if defined(USE_MODULE_NETWORK_CELLULAR) && defined(USE_MODULE__DRIVERS_MAVLINK_DECODER)
 
   char convf_lat[TBUFFER_SIZE_FLOAT];
   mSupport::float2CString(float(pCONT_mavlink->pkt.gps_raw_int.data.lat)/10000000,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);

@@ -25,13 +25,26 @@
 // #define DEVICE_TESTBED_ESP32_BUZZER_TONES
 
 // #define DEVICE_TESTBED_MAVLINK_DECODER
-// #define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
 // #define DEVICE_TESTBED_MAVLINK_TELEMETRY_WIFI_01
 // #define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_FLIGHTREADY_01
 
 
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_01
-#define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+
+// #define DEVICE_TESTBED_ESP32_MQTT_MULTIPLE_01
+
+
+/**
+ * @brief Active SIM1
+ * 
+ */
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+/**
+ * @brief Active SIM2 105
+ * 
+ */
+#define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
 
 
 /**
@@ -2282,93 +2295,7 @@
 
 /**
  * @brief 
- * Primary testbed for all new lighting code on nodemcu
- */
-#ifdef DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
-  #define DEVICENAME_CTR          "mavlink_cellular_01"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
-
-
-  #define SERIAL_DEBUG_BAUD_DEFAULT 921600
-
-  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS 500
-  
-
-  #define USE_MODULE__DRIVERS_MAVLINK_DECODER
-    #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
-    #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
-    // #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
-  
-  #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
-
-  #define USE_DEVFEATURE_DEFINED_SERIAL2
-
-  #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
-
-  #define USE_MODULE_CORE_SERIAL_UART
-    #define ENABLE_HARDWARE_UART_2
-    #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
-
-
-  // #define USE_DEVFEATURE_DEFINED_SERIAL2
-
-
-
-  #define USE_MQTT_AS_CELLULAR
-
-
-
-  /**
-   * @brief WiFi MQTT
-   * 
-   */
-  #ifndef USE_MQTT_AS_CELLULAR
-    #define USE_MODULE_NETWORK_WIFI
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-  #endif // USE_MQTT_AS_CELLULAR
-
-  /**
-   * @brief Cellular MQTT
-   * 
-   */  
-  #ifdef USE_MQTT_AS_CELLULAR
-    #define DISABLE_NETWORK_WIFI
-    #define USE_MODULE_NETWORK_CELLULAR
-    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-    // #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-    #define USE_MODULE_SENSORS_GPS_MODEM
-    #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
-    //  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
-    #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
-  #endif
-
-  #define USE_MODULE_SENSORS_BATTERY_MODEM
-
-
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SH1106
-    #define SHOW_SPLASH
-
-  #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
-
-
-
-  // //   // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
-
-
-/**
+ * 
  * @brief 6P connector
  * Green VIN (5v)
  * Orange 18
@@ -2376,14 +2303,67 @@
  * White 25
  * Red 26
  * Black gnd
- */  
-
-/**
+ *
+ *
  * @brief 
  * Connecting 6P to pixhawk 2.4.8 with Serial5 enabled will clash with modem serial
  * 
+ *
  */
+#ifdef DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
+  #define DEVICENAME_CTR          "mavlink_cellular_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  #define USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  // #define USE_GROUPFEATURE__MAVLINK_DECODER
+  // #define USE_GROUPFEATURE__OLED_SH1106_MAVLINK
+
+  // *************************************************************************************
+
+  #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+    #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+  #endif
+ 
+  #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
+    #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+      #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+      #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+      #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+    #define USE_MODULE_CORE_SERIAL_UART
+      #define ENABLE_HARDWARE_UART_2
+      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    // #define USE_MODULE_SENSORS_GPS_MODEM
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+    //  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
+    // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+    #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+    #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE
+  #else // wifi
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  #endif
+
+  #ifdef USE_GROUPFEATURE__OLED_SH1106_MAVLINK
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_OLED_SH1106
+      #define SHOW_SPLASH
+    #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+  #endif
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2431,7 +2411,7 @@
 
 
 
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -2491,7 +2471,8 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
 
-
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+  
   #define SERIAL_DEBUG_BAUD_DEFAULT 921600
 
   #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
@@ -2499,15 +2480,7 @@
     
   #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
 
-  #define USE_DEVFEATURE_DEFINED_SERIAL2
-
-  // #define USE_DEVFEATURE_DEFINED_SERIAL2
-
-
-
   #define USE_MQTT_AS_CELLULAR
-
-
 
   /**
    * @brief WiFi MQTT
@@ -2572,139 +2545,45 @@
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"   
-
-
     "\"" D_JSON_DISPLAY "\":{"
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
-    "},"    
-
-
-
-
-
+    "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
-
-
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"MQTT\":{\"RetrySecs\":10}"
-  // "}";
-  /*
-  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
-  
-  {
-  "GPS_Enable": 0,
-  "SMS_Enable": 1,
-  "ATCommands": [
-    "AT",
-    "AT+CMGF=1",
-    "AT+CMTI?",
-    "AT+CNMI= 2,2,0,0,0"
-  ]
-}
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  */
-
-
-
 
 #endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
 
 
 
-
-
 /**
  * @brief 
- * Only code that functions and tested for comms to save a vehicle
+ * Primary testbed for all new lighting code on nodemcu
  */
-#ifdef DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_FLIGHTREADY_01
-  #define DEVICENAME_CTR          "mavlink_cellular_01"
+#ifdef DEVICE_TESTBED_ESP32_MQTT_MULTIPLE_01
+  #define DEVICENAME_CTR          "tb_mqtt_multiple_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  #define USE_DEVFEATURE_MQTT_INTERFACE_USES_MULTIP  
+  // #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI  
+
+  #define USE_DEVFEATURE_MQTT_INTERFACE_USES_MULTIPLE
+
+  // #define ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST1
+  #define ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST2
   
-
-  #define USE_MODULE__DRIVERS_MAVLINK_DECODER
-
-  #define USE_DEVFEATURE_DEFINED_SERIAL2
-
-  #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
-
-
-  /**
-   * @brief WiFi MQTT
-   * 
-   */
-  // #define USE_MODULE_NETWORK_WIFI
-  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-
-  #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
-
-
- #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
-//  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
-
-  /**
-   * @brief WiFi MQTT
-   * 
-   */
-  // #define USE_MODULE_NETWORK_WIFI
-  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-  /**
-   * @brief Cellular MQTT
-   * 
-   */  
-  #define DISABLE_NETWORK_WIFI
-  #define USE_MODULE_NETWORK_CELLULAR
-  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-  #define USE_MODULE_SENSORS_GPS_MODEM
-  #define USE_MODULE_SENSORS_INTERFACE
-  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-
-  #define USE_MODULE_SENSORS_BATTERY_MODEM
-
-  #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
-
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SH1106
-    #define SHOW_SPLASH
-
-  #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
-
-  #define ENABLE_DEVFEATURE_TEXT_LOCATION_EVERY_MINUTE_WHEN_POWERED
-
-//  6P connector
-
-//  Green VIN (5v)
-// Orange 18
-// Yellow 19
-// White 25
-// Red 26
-// Black gnd
-
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2714,8 +2593,12 @@
     "\"" D_JSON_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
       "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
     "},"
@@ -2735,60 +2618,15 @@
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-
-
-    "\"" D_JSON_DISPLAY "\":{"
-      "\"" "DisplayRows" "\":8,"
-      "\"" "DisplayCols" "\":[21,2],"
-      "\"" "DisplaySize" "\":1"
-    "},"    
-
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
-
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"MQTT\":{\"RetrySecs\":10}"
-  // "}";
-  /*
-  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
-  
-  {
-  "GPS_Enable": 0,
-  "SMS_Enable": 1,
-  "ATCommands": [
-    "AT",
-    "AT+CMGF=1",
-    "AT+CMTI?",
-    "AT+CNMI= 2,2,0,0,0"
-  ]
-}
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  */
+#endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
 
 
 
-
-#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 
 
 /**

@@ -50,7 +50,7 @@ int8_t mSolarLunar::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
+      MQTTHandler_Init();
     break;
     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
@@ -387,6 +387,7 @@ void mSolarLunar::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSolarLunar::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -397,6 +398,7 @@ void mSolarLunar::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSolarLunar::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -407,18 +409,9 @@ void mSolarLunar::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSolarLunar::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSolarLunar::MQTTHandler_Set_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
 
 /**
  * @brief Update 'tRateSecs' with shared teleperiod
@@ -428,13 +421,13 @@ void mSolarLunar::MQTTHandler_Set_DefaultPeriodRate()
   for(auto& handle:mqtthandler_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    // if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-    //   handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
   }
 }
 
 /**
- * @brief MQTTHandler_Sender
+ * @brief Check all handlers if they require action
  * */
 void mSolarLunar::MQTTHandler_Sender(uint8_t id)
 {
@@ -442,6 +435,8 @@ void mSolarLunar::MQTTHandler_Sender(uint8_t id)
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_SENSORS_SOLAR_LUNAR_ID, handle, id);
   }
 }
+
+
 
 #endif // USE_MODULE_NETWORK_MQTT
 

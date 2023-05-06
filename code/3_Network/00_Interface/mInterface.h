@@ -49,8 +49,10 @@ class mInterfaceNetwork :
 
     struct DATA
     {
+      bool is_connected = false;
       ConnectionState_t wifi_state;
       ConnectionState_t ethernet_state;
+      ConnectionState_t cellular_state;
       ConnectionState_t mqtt_state;
     }
     data;

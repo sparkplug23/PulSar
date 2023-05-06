@@ -72,6 +72,9 @@
 #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
 
+#define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR              "mMQTT"
+#define D_MODULE_NETWORK_MQTT_MULTIPLE_FRIENDLY_CTR              "system"
+
 #define D_MODULE_NETWORK_MQTT_CELLULAR_CTR              "mMQTT_CELLULAR"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CELLULAR_CTR              "mqtt_cellular"
 

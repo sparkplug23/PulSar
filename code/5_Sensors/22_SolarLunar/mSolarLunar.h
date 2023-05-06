@@ -6,7 +6,6 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
-
 #include "3_Network/10_MQTT/mMQTT.h"
 
 #include <cmath> 
@@ -116,9 +115,8 @@ class mSolarLunar :
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    void MQTTHandler_Sender(uint8_t id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mSolarLunar> mqtthandler_settings_teleperiod;
     struct handler<mSolarLunar> mqtthandler_sensor_ifchanged;
@@ -127,12 +125,7 @@ class mSolarLunar :
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
-    struct handler<mSolarLunar>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
+    std::vector<struct handler<mSolarLunar>*> mqtthandler_list;    
     #endif // USE_MODULE_NETWORK_MQTT 
 
 

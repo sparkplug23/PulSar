@@ -696,7 +696,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
 }
 
 
-
+#ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_level, bool json_appending)
 {
 
@@ -757,3 +757,4 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
 
   return JBI->End();
 }
+#endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
