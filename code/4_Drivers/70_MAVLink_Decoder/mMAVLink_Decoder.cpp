@@ -264,10 +264,10 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
         case MAVLINK_MSG_ID_HEARTBEAT:                         
           mavlink_msg_heartbeat_decode(&msg, &pkt.heartbeat.data);  
           // Use heartbeat from vehicle to get additional info      
-          pkt.heartbeat.vehicle_component_id = msg.compid;      
-          if(pkt.heartbeat.vehicle_sys_id != msg.sysid){ Serial.println(DEBUG_INSERT_PAGE_BREAK "RESEND?"); }
-          pkt.heartbeat.vehicle_sys_id = msg.sysid;      
-          ALOG_INF(PSTR("<<<<<<<<<Received Heartbeat Packet = %d \"%S\", sys %d, comp %d"), msg.msgid, MavLink_Msg_FriendlyName_By_ID(msg.msgid, buffer, sizeof(buffer)), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
+          // pkt.heartbeat.vehicle_component_id = msg.compid;      
+          // if(pkt.heartbeat.vehicle_sys_id != msg.sysid){ }//Serial.println(DEBUG_INSERT_PAGE_BREAK "RESEND?"); }
+          // pkt.heartbeat.vehicle_sys_id = msg.sysid;      
+          ALOG_INF(PSTR("<<<<<<<<< Heartbeat SysID %d CompID %d"), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
           pkt.heartbeat.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_HOME_POSITION:                         

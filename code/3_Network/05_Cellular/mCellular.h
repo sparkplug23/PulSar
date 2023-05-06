@@ -190,7 +190,8 @@ class mCellular :
 
     }sms_pdu_message;
 
-    
+
+     
     void ModemUpdate_BatteryStatus();
       
 
@@ -207,7 +208,7 @@ class mCellular :
 
     void Handler_ModemResponses();
     void Handler_ModemResponses_Fast();
-    void Handler_ModemResponses_Fast_FDU();
+    void Handler_ModemResponses_Fast_PDU();
     char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
 
 

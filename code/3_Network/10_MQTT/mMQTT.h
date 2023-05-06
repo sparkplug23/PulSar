@@ -357,11 +357,18 @@ class mMQTT :
         // Send MQTT payload with structured output
         if(fSendPayload)
         { 
+          // Send on each connected broker
           for(auto& con:brokers)
           {
             con->MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); 
           }
         }
+
+        // #ifdef ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT
+
+        // return;
+        // #endif // ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT
+
       }
     };
 

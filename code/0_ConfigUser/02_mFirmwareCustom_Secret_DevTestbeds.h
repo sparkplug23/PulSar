@@ -2323,6 +2323,7 @@
 
   // *************************************************************************************
 
+  
   #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
     #define SERIAL_DEBUG_BAUD_DEFAULT 921600
   #endif
@@ -2351,7 +2352,8 @@
     //  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
     // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
     #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-    #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE
+    // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+    #define ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT // ie if one sends, return early from sending others
   #else // wifi
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
