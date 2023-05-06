@@ -50,7 +50,7 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_LOOP: 
     {      
-      Handler_ModemResponses_Fast_FDU();
+      Handler_ModemResponses_Fast();
     }
     break;
     case FUNC_EVERY_SECOND: 
@@ -72,11 +72,9 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       }
 
     break;
-    case FUNC_EVERY_FIVE_SECOND:
-    
+    case FUNC_EVERY_FIVE_SECOND:   
 
       // ALOG_INF(PSTR("Network connected? %d"), modem->isNetworkConnected());
-
     
     break;
     case FUNC_EVERY_MINUTE:
@@ -123,11 +121,6 @@ void mCellular::Pre_Init(void){
   settings.fEnableSensor = true;
 
   pinMode(12, OUTPUT);
-  // pinMode(35, INPUT);
-
-  
-  //   adc1_config_width(ADC_WIDTH_BIT_12);
-  //   adc1_config_channel_atten(ADC1_CHANNEL_7,ADC_ATTEN_DB_0);
   
 }
 
@@ -305,64 +298,59 @@ void mCellular::Handler_ModemResponses_Fast()
   if (SerialAT.available()) 
   {
 
-
     uint32_t receive_millis = millis();
-
     // ALOG_INF(PSTR("millisA = %d"), millis());
 
-    char buffer[300];
+    uint16_t buflen = 0;
+    char buffer[300] = {0};
 
-    // Add timeout
-    int c = SerialAT.read();
-    while(c >= 0) {
-      incoming += (char) c;
-      c = SerialAT.read();
+    while(SerialAT.available())
+    {
+      buffer[buflen++] = SerialAT.read();
+      if(buflen>(sizeof(buffer)-1))
+      {
+        ALOG_ERR(PSTR("SerialAT overflow"));
+      }
     }
-    
-    // ALOG_HGL(PSTR("while\nIncoming \n\r===(%s)==="), incoming.c_str());
 
-    // ALOG_HGL(PSTR("Incoming \n\r===(%s)==="), incoming.c_str());
-
-    // ALOG_INF(PSTR("millisB = %d\tR\t%d"), millis(), millis()-receive_millis);
-    char buffer2[300];
-    // ALOG_INF(PSTR("millisC = %d"), millis());
-
-    sprintf(buffer, "%s", incoming.c_str());
-
-    // ALOG_INF(PSTR("buffer = %s"), buffer);
-    // for(int i = 0;i < incoming.length(); i++)
-    // {
-    //   Serial.printf("%02d>    %c       \n\r",i,buffer[i]);
-    //   if(buffer[i]=='\n')
-    //   {
-    //     Serial.printf("=====================%02d>\"%c\"\n\r",i,buffer[i]);
-    //   }
-    // }
-
-    char *search = "\r\n+CMT";
+    // +CDS:  A GSM/GPRS modem or mobile phone uses +CDS to forward a newly received SMS status report to the computer / PC.
+    // +CDSI: A GSM/GPRS modem or mobile phone uses +CDSI to notify the computer / PC that a new SMS status report has been received and the memory location where it is stored.
+    // +CMT:  A GSM/GPRS modem or mobile phone uses +CMT to forward a newly received SMS message to the computer / PC.
+    // +CMTI: A GSM/GPRS modem or mobile phone uses +CMTI to notify the computer / PC that a new SMS message has been received and the memory location where it is stored.
+    /**
+     * @brief Temporary method expecting just SMS, later the "CMT" portion of the command needs parsed out
+     * 
+     */
+    char buffer2[160] = {0}; 
+    // char *search = "\r\n+CMT";
+    char *search = "+CMT"; // A GSM/GPRS modem or mobile phone uses +CMT to forward a newly received SMS message to the computer / PC.
     char *result = strstr(buffer, search);
     if(result)
     {
       ALOG_INF(PSTR("FOUND CMT MESSAGE result >>>%s<<<"), result);
       ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
+
+      ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
+
+      #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+      // Check for request at GPS
+      if (strncasecmp(buffer2, "GPS", 3) == 0)
+      {
+        ALOG_INF(PSTR("Request for GPS"));
+        SMS_GPSLocation();
+      }
+      else{
+        ALOG_INF(PSTR("Unknown Message"));
+        SMS_GPSLocation();
+      }
+      #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+
     }
 
-    ALOG_INF(PSTR("buffer2 >>>%s<<<"), buffer2);
     
     // ALOG_INF(PSTR("millisD = %d"), millis());
 
-    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    // Check for request at GPS
-    if (strncasecmp(buffer2, "GPS", 3) == 0)
-    {
-      ALOG_INF(PSTR("Request for GPS"));
-      SMS_GPSLocation();
-    }
-    else{
-      ALOG_INF(PSTR("Unknown Message"));
-      // SMS_GPSLocation();
-    }
-    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
   }
 
@@ -370,7 +358,7 @@ void mCellular::Handler_ModemResponses_Fast()
 
 
 
-void mCellular::Handler_ModemResponses_Fast_FDU()
+void mCellular::Handler_ModemResponses_Fast_PDU()
 {
 
   // Response
