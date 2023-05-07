@@ -158,7 +158,7 @@ Hallway + Understairs
   - dht
  **/  
 // #define DEVICE_SHELLYDIMMER_LANDING_CEILING
-// #define DEVICE_IMMERSION_CONTROL_PANEL
+#define DEVICE_IMMERSION_CONTROL_PANEL
 
 /**
 Outside + Garage
@@ -4441,80 +4441,95 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  // #define ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS
-  // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
-  // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 110
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // ***************************************************************************************************************************************
 
-// Change to only update the immersion nextion every 10 seconds to reduce load on esp32 to check for stability
+  #define ENABLE_GROUPFEATURE__DX18S20_SENSORS
+  #define ENABLE_GROUPFEATURE__BME_SENSORS
+  #define ENABLE_GROUPFEATURE__MOTION_SENSORS
+  #define ENABLE_GROUPFEATURE__CASE_BUTTONS
+  // #define ENABLE_GROUPFEATURE__LIGHTS_PANEL_UPDOWNLIGHTS
+  // #define ENABLE_GROUPFEATURE__LIGHTS_TANK_GRADIENT  
+  // #define ENABLE_GROUPFEATURE__NEXTION_TOUCH_DISPLAY
+  #define ENABLE_GROUPFEATURE__OLED_STATUS_DISPLAY  
+  #define ENABLE_GROUPFEATURE__HVAC_IMMERSION
 
-  #define DISABLE_SLEEP
+  // ***************************************************************************************************************************************
 
-  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  #ifdef ENABLE_GROUPFEATURE__DX18S20_SENSORS
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #define DS18X20_MAX_SENSORS 20
+      #define ENABLE_DEVFEATURE_DS18B20_SEARCHING_SENSOR_LOCATION_WITH_ADDRESS_TEMP_SPLASH
+      #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
+      #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
+      #define DB18_SENSOR_MAX                     15
+      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
+      #define MQTT_MAX_PACKET_SIZE                3000
+      #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #endif // ENABLE_GROUPFEATURE__DX18S20_SENSORS
 
-  #define USE_MODULE_CORE_RULES
-
-  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
-  #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
-  #define DB18_SENSOR_MAX                     15
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
-  #define MQTT_MAX_PACKET_SIZE                3000
-
-  #define USE_MODULE_SENSORS_INTERFACE
+  #ifdef ENABLE_GROUPFEATURE__BME_SENSORS
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_BME
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    #define DS18X20_MAX_SENSORS 20
-    #define ENABLE_DEVFEATURE_DS18B20_SEARCHING_SENSOR_LOCATION_WITH_ADDRESS_TEMP_SPLASH
-  #define USE_MODULE_SENSORS_BME
-      
-  #define USE_MODULE_SENSORS_SWITCHES
-  #define USE_MODULE_SENSORS_MOTION
-  #define USE_MODULE_SENSORS_BUTTONS
-  //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
-  //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
+  #endif // ENABLE_GROUPFEATURE__BME_SENSORS      
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
-    #define STRIP_SIZE_MAX 40
+  #ifdef ENABLE_GROUPFEATURE__MOTION_SENSORS
+    #define USE_MODULE_CORE_RULES
+    #define USE_MODULE_SENSORS_SWITCHES
+    #define USE_MODULE_SENSORS_MOTION
+  #endif // ENABLE_GROUPFEATURE__MOTION_SENSORS
 
+  #ifdef ENABLE_GROUPFEATURE__CASE_BUTTONS
+    #define USE_MODULE_SENSORS_SWITCHES
+    #define USE_MODULE_SENSORS_BUTTONS
+    //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
+    //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
+  #endif // ENABLE_GROUPFEATURE__CASE_BUTTONS
+
+  #ifdef ENABLE_GROUPFEATURE__LIGHTS_PANEL_UPDOWNLIGHTS
+    #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
+    #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
+      #define STRIP_SIZE_MAX 40
+  #endif // ENABLE_GROUPFEATURE__LIGHTS_PANEL_UPDOWNLIGHTS
+
+  #ifdef ENABLE_GROUPFEATURE__LIGHTS_TANK_GRADIENT
     // #define USE_RGB_OUT_TANK
     #define USE_RGB_OUT_LANDING_PANEL
+  #endif // ENABLE_GROUPFEATURE__LIGHTS_TANK_GRADIENT
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
-    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+  #ifdef ENABLE_GROUPFEATURE__NEXTION_TOUCH_DISPLAY
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_NEXTION
+      #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+    #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+      #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+  #endif // ENABLE_GROUPFEATURE__NEXTION_TOUCH_DISPLAY
 
-  
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SH1106
-    #define SHOW_SPLASH
-
+  #ifdef ENABLE_GROUPFEATURE__OLED_STATUS_DISPLAY  
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_OLED_SH1106
+      #define SHOW_SPLASH
     // 4x10
     // Uptime so I know its working by glance
     // Relay Minutes On
     // Shower Temp /     Bath Temp
+  #endif // ENABLE_GROUPFEATURE__OLED_STATUS_DISPLAY
 
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
-  #define USE_MODULE_DRIVERS_LEDS
-    #define MAX_RELAYS 1
-    
-  /**
-   * @brief 
-   * Add extra settings parameter that allows for "expected total device count" (relays+sensors) and allow a NEW alert topic (status/alert status/event) to tell me something is wrong
-   * 
-   */
-  // #define USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
-    // #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR  //should this be a "controller", or via interface "getTemp convert to heatmap"
-    // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 60  
-    // #define USE_DEVFEATURE_SENSOR_COLOURS_TOP_TO_BOTTOM
-
-  #define USE_MODULE_CONTROLLER_HVAC
-    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-    #define HEATING_DEVICE_MAX 1
-
-  #define USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
+  #ifdef ENABLE_GROUPFEATURE__HVAC_IMMERSION
+    #define USE_MODULE_DRIVERS_INTERFACE
+    #define USE_MODULE_DRIVERS_RELAY
+    #define USE_MODULE_DRIVERS_LEDS
+      #define MAX_RELAYS 1
+    // #define USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
+      // #define ENABLE_DEVFEATURE_SENSORS_INTERFACE_SHOW_TEMPERATURE_AS_COLOUR  //should this be a "controller", or via interface "getTemp convert to heatmap"
+      // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 60  
+      // #define USE_DEVFEATURE_SENSOR_COLOURS_TOP_TO_BOTTOM
+    #define USE_MODULE_CONTROLLER_HVAC
+      #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+      #define HEATING_DEVICE_MAX 1
+    #define USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
+  #endif // ENABLE_GROUPFEATURE__HVAC_IMMERSION  
      
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -4612,8 +4627,6 @@ Bathroom
   #define D_DEVICE_SENSOR_DB18S20_18_ADDRESS     "[40,0,95,50,59,71,5,126]"
   #define D_DEVICE_SENSOR_DB18S20_19_NAME        "FeedRed"
   #define D_DEVICE_SENSOR_DB18S20_19_ADDRESS     "[40,0,149,87,59,71,5,240]"
-  
-
 
   #define D_DEVICE_DRIVER_RELAY_01_NAME "Immersion"
   
@@ -4699,7 +4712,7 @@ Bathroom
         "}"
       "]"
     "}"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":600}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
   // #ifdef USE_RGB_OUT_LANDING_PANEL
