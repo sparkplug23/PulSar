@@ -23,9 +23,6 @@
  *  ** Leave lighting with current tape method, but move wiring into wall
  *  ** Add 4C wire for the door sensor (or 3C if available)
  * 
- * AtticSensor
- *  ** Change to esp32
- *  ** Add water tank ultrasonic sensor, mostly as a long term ULT tester
  * HallwaySensor/Radiatorfan
  *  ** print casing with new BME680 and mount on wall/rail
  * 
