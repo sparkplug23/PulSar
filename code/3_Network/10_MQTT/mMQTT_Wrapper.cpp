@@ -28,19 +28,19 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
 
 
 
-      #ifdef ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-      if(brokers.size())
-      {
-        if(brokers[0]->MqttIsConnected())
-        {
-          pCONT_interface_network->data.mqtt_state.isvalid = true;
-        }
-        else
-        {
-          pCONT_interface_network->data.mqtt_state.isvalid = false;
-        }
-      }
-      #endif // ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+      // #ifdef ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+      // if(brokers.size())
+      // {
+      //   if(brokers[0]->MqttIsConnected())
+      //   {
+      //     pCONT_interface_network->data.mqtt_state.isvalid = true;
+      //   }
+      //   else
+      //   {
+      //     pCONT_interface_network->data.mqtt_state.isvalid = false;
+      //   }
+      // }
+      // #endif // ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
 
 
       #ifdef ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
@@ -216,11 +216,11 @@ void mMQTT::Init(void)
 
   #else
 
-  if(!brokers.size())
-  {
-    ALOG_ERR(PSTR("Fallback mqtt broker starting, should be set via network mode instead"));
-    brokers.push_back(new MQTTConnection());
-  }
+  // if(!brokers.size())
+  // {
+  //   ALOG_ERR(PSTR("Fallback mqtt broker starting, should be set via network mode instead"));
+  //   brokers.push_back(new MQTTConnection());
+  // }
 
 
 

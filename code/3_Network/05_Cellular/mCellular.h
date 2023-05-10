@@ -7,6 +7,7 @@
 
 #ifdef USE_MODULE_NETWORK_CELLULAR
 
+// https://shop.marcomweb.it/media/kunena/attachments/42/wm02_an60_atc_timeouts_v05.pdf
 
 #include <Arduino.h>
 
@@ -45,7 +46,7 @@
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
-#define UART_CELLULAR_BAUD   921600
+#define UART_CELLULAR_BAUD   115200//921600
 #define PIN_DTR     25
 #define PIN_TX      27
 #define PIN_RX      26
@@ -57,7 +58,10 @@
 #define SD_CS       13
 #define LED_PIN     12
 
-#define DEFAULT_AT_COMMAND_RESPONSE_WAIT 5000
+#define DEFAULT_AT_COMMAND_RESPONSE_WAIT 10000
+
+#define AT_COMMAND_RESPONSE_TIMEOUT__CFUN 1000
+#define AT_COMMAND_RESPONSE_TIMEOUT__CNMI 1000
 
 
 //https://cplusplus.com/reference/cstdio/sscanf/
@@ -152,7 +156,11 @@ class mCellular :
       uint32_t connected_seconds = 0;      
       uint32_t last_comms_millis_updated = 0; 
       float signal_quality_rssi_dbm = 0;
-      uint16_t signal_quality_raw = 0;
+      int16_t signal_quality_raw = 0;
+
+
+      uint16_t reconnect_init_counts = 0;
+
     }gprs;
     void GPRS_Enable();
     void GPRS_Disable();
@@ -169,6 +177,7 @@ class mCellular :
     void SMS_Disable();
     void ModemUpdate_SMS();
 
+    void Get_Modem_Hardware();
 
     struct DATA
     {
@@ -190,9 +199,16 @@ class mCellular :
 
     }sms_pdu_message;
 
+    
 
+
+    bool flags_modem_init_commands = false;
+
+    void parse_ATCommands(char* buffer, uint16_t buflen);
      
     void ModemUpdate_BatteryStatus();
+
+    void SMS_Send_TimedHeartbeat();
       
 
 
@@ -207,8 +223,6 @@ class mCellular :
     void SendATCommand_FunctionalityMode_Full();
 
     void Handler_ModemResponses();
-    void Handler_ModemResponses_Fast();
-    void Handler_ModemResponses_Fast_PDU();
     char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
 
 
@@ -226,18 +240,13 @@ class mCellular :
     void MQTTHandler_Set_RefreshAll();
     void MQTTHandler_Set_DefaultPeriodRate();
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+    std::vector<struct handler<mCellular>*> mqtthandler_list;
     
     struct handler<mCellular> mqtthandler_settings_teleperiod;
     struct handler<mCellular> mqtthandler_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;  
-
-    struct handler<mCellular>* mqtthandler_list[2] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_state_ifchanged
-    };
-
     
 };
 

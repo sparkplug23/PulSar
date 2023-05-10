@@ -1439,6 +1439,7 @@
   #define D_LOG_BRIDGE "BRG: "       // Bridge
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_CELLULAR "CEL: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
   #define D_LOG_COMMAND "CMD: "      // Command
   #define D_LOG_DEBUG "DBG: "        // Debug
@@ -1497,6 +1498,7 @@
   #define D_LOG_BRIDGE "BRG: "       // Bridge
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_CELLULAR "CEL: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
   #define D_LOG_COMMAND "CMD: "      // Command
   #define D_LOG_DEBUG "DBG: "        // Debug
