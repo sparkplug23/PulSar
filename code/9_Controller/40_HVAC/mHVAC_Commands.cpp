@@ -36,7 +36,7 @@ void mHVAC::parse_JSONCommand(JsonParserObject obj)
       { // D_JSON_DEVICE
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HEATING D_PARSING_MATCHED D_JSON_COMMAND_NVALUE_K(D_JSON_HVAC_DEVICE)),device_id);
       }else{
-        AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_HVAC_DEVICE "device_id=%d"), device_id);
+        AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_HEATING D_JSON_HVAC_DEVICE " device_id=%d"), device_id);
       }
     }else
     if(jtok.isNum()){
