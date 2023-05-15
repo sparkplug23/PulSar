@@ -104,6 +104,23 @@ void mInterfaceNetwork::EveryLoop()
 bool mInterfaceNetwork::Connected(uint8_t type)
 {
 
+
+  #ifdef USE_MODULE_NETWORK_WIFI
+  if(
+    (type == NETWORK_TYPE_WIFI) ||
+    (type == NETWORK_TYPE_ANY)
+  ){
+    if(pCONT_wif->WifiCheckIpConnected())
+    {
+      return true;
+    }
+  }
+  #endif // USE_MODULE_NETWORK_WIFI
+
+/**
+ * @brief WiFi needs to be first to fix extra AT commands when WiFi and Cellular are being used, but mqtt is via Wifi and not cellular
+ * 
+ */
   #ifdef USE_MODULE_NETWORK_CELLULAR
   if(
     (type == NETWORK_TYPE_CELLULAR) ||
@@ -118,19 +135,6 @@ bool mInterfaceNetwork::Connected(uint8_t type)
     }
   }
   #endif // USE_MODULE_NETWORK_CELLULAR
-
-  #ifdef USE_MODULE_NETWORK_WIFI
-  if(
-    (type == NETWORK_TYPE_WIFI) ||
-    (type == NETWORK_TYPE_ANY)
-  ){
-    if(pCONT_wif->WifiCheckIpConnected())
-    {
-      return true;
-    }
-  }
-  #endif // USE_MODULE_NETWORK_WIFI
-
 
 
   return false;

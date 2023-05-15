@@ -61,6 +61,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       {
         mqtt_client = new WiFiClient();
         pCONT_mqtt->SetPubSubClient(mqtt_client);
+  DEBUG_LINE_HERE;
       }
 
     break;

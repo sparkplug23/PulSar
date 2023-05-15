@@ -13,6 +13,9 @@
  */
 #include "mCellular.h"
 
+#ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+StreamDebugger debugger(SerialAT, Serial);
+#endif // ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
 
 /**
  * @brief 
@@ -50,7 +53,17 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case FUNC_LOOP: 
     {      
-      Handler_ModemResponses();
+      Handler_ModemResponses(LOG_LEVEL_DEBUG_MORE);
+      
+      /**
+       * @brief Here so it can be set from anywhere/method and then read later
+       * 
+       */
+      if(sms.texts_saved_on_sim_indexs.size())
+      {
+        SMSReadAndEraseSavedSMS();
+      } 
+
     }
     break;
     case FUNC_EVERY_SECOND: 
@@ -58,15 +71,19 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       if(!flags_modem_init_commands)
       {
 
-        GPRS_Enable();
+        bool status = 0;
 
+        Modem_Enable();
+
+        #ifndef ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+        GPRS_Enable();
+        #endif
 
         #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
         GPS_Enable();
         #endif 
 
         SMS_Enable();
-        SendATCommand_SMSImmediateForwardOverSerial();
 
         flags_modem_init_commands = true;
 
@@ -75,38 +92,42 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       if(flags_modem_init_commands)
       {
 
+        if(modem){
+          modem->maintain();
+        }
+
         #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
         ModemUpdate_GPS();
         #endif
 
+        #ifndef ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
         ModemUpdate_GPRS();
+        #endif
         
         ModemUpdate_SMS();
-        
-        if(modem)
-        {
-          modem->maintain();
-        }
 
+        
       }
 
     break;
     case FUNC_EVERY_FIVE_SECOND:   
-
-      ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.reconnect_init_counts %d"), gprs.reconnect_init_counts); 
-      ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.connected_seconds %d"), gprs.connected_seconds);      
+  
+  // SendATCommand_SMSImmediateForwardOverSerial();
       
       #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       ALOG_INF(PSTR(D_LOG_CELLULAR "GPS u/v_sat %d/%d Fix (%d cm)"), gps.usat, gps.vsat, (int)(gps.accuracy*100)); 
       #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
-      modem->sendAT("AT+CMGL=\"ALL\"");
+      // modem->sendAT("AT+CMGL=\"ALL\"");
+
+      
+      // modem->sendAT("+CPMS?"); // How many SMS are waiting?
 
     break;
     case FUNC_EVERY_MINUTE:
 
         // SendATCommand_SMSImmediateForwardOverSerial();
-      ModemUpdate_BatteryStatus();
+      // ModemUpdate_BatteryStatus();
       // SMS_Send_TimedHeartbeat();
 
       #ifdef ENABLE_DEVFEATURE_TEXT_LOCATION_EVERY_MINUTE_WHEN_POWERED
@@ -114,7 +135,38 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       #endif 
 
       // SendATCommand_SMSFormatAscii(); //tmp
+      ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.reconnect_init_counts %d"), gprs.reconnect_init_counts); 
+      ALOG_INF(PSTR(D_LOG_CELLULAR "gprs.connected_seconds %d"), gprs.connected_seconds);    
 
+      /**
+       * @brief For debugging, lets check states
+       * 
+       */
+      // modem->sendAT("+CMFG?"); // 1= ascii mode //expected 1
+      // modem->sendAT("+CNMI?"); // <mode>,<mt>,<bm>,<ds>,<bfr> //expected 2,2,0,0,0 
+
+
+      // modem->sendAT("+CPMS?"); // How many SMS are waiting?
+      // modem->sendAT("+CNMI?"); // <mode>,<mt>,<bm>,<ds>,<bfr> //expected 2,2,0,0,0 
+
+
+    // "AT+CMGD=,4",// DELETE ALL MESSAGES (Read or not)
+    // "AT+CMGR=1",
+    // "AT+CMGL=\"REC UNREAD\""
+    // "AT+CPMS?"     // Number of stored SMS
+
+/*
+
+
+{
+  "ATCommands": [
+    "AT+CMGR=1",
+    "AT+CNMI=3,2,0,0,0",
+    "AT+CMGL=\"REC UNREAD\""
+  ]
+}
+
+*/
     break;
     case FUNC_EVERY_HOUR:
 #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
@@ -161,15 +213,22 @@ void mCellular::Pre_Init(void){
 void mCellular::Init(void)
 {
 
+  #ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT  // if enabled it requires the streamDebugger lib
+  modem = new TinyGsm(debugger);
+  #else
   modem = new TinyGsm(SerialAT);
+  #endif
+
 
   #ifdef USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-    SerialAT.begin(115200, SERIAL_8N1, PIN_RX, PIN_TX); // #define UART_BAUD   115200
-    modem->setBaud(UART_CELLULAR_BAUD); // Change from default
+    // SerialAT.begin(115200, SERIAL_8N1, PIN_RX, PIN_TX); // #define UART_BAUD   115200
+    // modem->setBaud(UART_CELLULAR_BAUD); // Change from default
     SerialAT.begin(UART_CELLULAR_BAUD, SERIAL_8N1, PIN_RX, PIN_TX); // #define UART_BAUD   115200
   #else 
-    SerialAT.begin(115200, SERIAL_8N1, PIN_RX, PIN_TX);
+    SerialAT.begin(115200, SERIAL_8N1, 26,27);// PIN_RX, PIN_TX);
   #endif // USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+
+  SerialAT.setTimeout(100); //ms
 
   /**
    * @brief Power on
@@ -194,7 +253,7 @@ void mCellular::Init(void)
 }
 
 
-void mCellular::Handler_ModemResponses()
+bool mCellular::Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_millis)
 {
 
   if (SerialAT.available()) 
@@ -220,82 +279,53 @@ void mCellular::Handler_ModemResponses()
       }
     }
 
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Buffer[%d] \"%s\""), buflen, buffer);
-
-    parse_ATCommands(buffer, buflen);
+    AddLog(response_loglevel, PSTR(D_LOG_CELLULAR "Handler_ModemResponses %d>> Buffer[%d] \"%s\""),response_loglevel, buflen, buffer);
+    
+    return parse_ATCommands(buffer, buflen, response_loglevel);
 
   }
+
+  return false; // nothing handled or received
 
 }
 
 
-void mCellular::parse_ATCommands(char* buffer, uint16_t buflen)
+void mCellular::SMSReadAndEraseSavedSMS()
 {
 
-  // +CDS:  A GSM/GPRS modem or mobile phone uses +CDS to forward a newly received SMS status report to the computer / PC.
-  // +CDSI: A GSM/GPRS modem or mobile phone uses +CDSI to notify the computer / PC that a new SMS status report has been received and the memory location where it is stored.
-  // +CMT:  A GSM/GPRS modem or mobile phone uses +CMT to forward a newly received SMS message to the computer / PC.
-  // +CMTI: A GSM/GPRS modem or mobile phone uses +CMTI to notify the computer / PC that a new SMS message has been received and the memory location where it is stored.
-  /**
-   * @brief Temporary method expecting just SMS, later the "CMT" portion of the command needs parsed out
-   **/
-  char buffer2[160] = {0};
-  char *search = "+CMT"; // A GSM/GPRS modem or mobile phone uses +CMT to forward a newly received SMS message to the computer / PC.
-  char *result = strstr(buffer, search);
-  if(result)
+  #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- START"));
+  #endif 
+
+  for(auto& id:sms.texts_saved_on_sim_indexs)
   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Parsed \"CMT\" result >>>\n\r%s\n\r<<<"), result);
-    ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
-
-    ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Content \"%s\""), buffer2);
-
-    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    // Check for request at GPS
-    if (strcasecmp(buffer2, "GPS") == 0)
+    if(SendAT_ATParseResponse_F(200, LOG_LEVEL_COMMANDS, PSTR("+CMGR=%d"), id))
     {
-      ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for GPS"));
-      SMS_GPSLocation();
-    }
-    else{
-      ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
-      SMS_GPSLocation();
-    }
-    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-
-  }
-
-
-}
-
-
-char* mCellular::ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen)
-{
-
-  ALOG_INF(PSTR(D_LOG_CELLULAR "ATResponse_Parse_CMT"));
-
-  char *result = strstr(
-    &incoming[2],   // skip "\r\n" at start of response
-    "\r\n"          // search for split between header/body of SMS
-  );
-
-  if(result)
-  {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "ATResponse_Parse_CMT::result \"%s\""), &result[2]); //skip token
-    if(parsed_buf != nullptr)
-    {
-      snprintf(parsed_buf, strlen(&result[2])-1, &result[2]); // Copy and remove the trailing "\r\n"
+      // modem->waitResponse(200);
+      // delay(200);
+      
+      // Erase from memory
+      if(SendAT_F(200, PSTR("+CMGD=%d"), id))
+      {
+        ALOG_INF(PSTR("SMSReadAndEraseSavedSMS %d deleted"), id);
+      }
     }
   }
 
-}
+  sms.texts_saved_on_sim_indexs.clear(); // for now assumed its done
 
+  #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CELLULAR "SMSReadAndEraseSavedSMS -- END"));
+  #endif
+
+}
 
 
 
 void mCellular::SendATCommand_SMSFormatAscii()
 {
   // Enable SMS always send to serial when they arrive, move to function later
-  modem->sendAT("+CMGF=1 "); // Set the ascii messages (not HEX)
+  modem->sendAT("+CMGF=1"); // Set the ascii messages (not HEX)
   bool result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
   ALOG_INF(PSTR(D_LOG_CELLULAR "SMSFormatAscii %d"), result);
 }
@@ -304,7 +334,7 @@ void mCellular::SendATCommand_SMSFormatAscii()
 void mCellular::SendATCommand_SMSFormatPDU()
 {
   // Enable SMS always send to serial when they arrive, move to function later
-  modem->sendAT("+CMGF=0 "); // Set the ascii messages (not HEX)
+  modem->sendAT("+CMGF=0"); // Set the ascii messages (not HEX)
   bool result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
   ALOG_INF(PSTR(D_LOG_CELLULAR "SMSFormatPDU %d"), result);
 }
@@ -331,7 +361,7 @@ void mCellular::SendATCommand_SMSFormatPDU()
 void mCellular::SendATCommand_SMSImmediateForwardOverSerial()
 {
   // Enable SMS always send to serial when they arrive, move to function later
-  modem->sendAT("+CNMI= 2,2,0,0,0 ");
+  modem->sendAT("+CNMI=3,2,0,0,0");
   bool result = modem->waitResponse(AT_COMMAND_RESPONSE_TIMEOUT__CNMI);
   ALOG_INF(PSTR(D_LOG_CELLULAR "SMSImmediateForwardOverSerial %d"), result);
 }
@@ -350,13 +380,13 @@ void mCellular::SendATCommand_SMSImmediateForwardOverSerial()
   **/
 void mCellular::SendATCommand_FunctionalityMode_Minimum()
 {
-  modem->sendAT("+CFUN=0 "); 
+  modem->sendAT("+CFUN=0"); 
   bool result = modem->waitResponse(AT_COMMAND_RESPONSE_TIMEOUT__CFUN);
   ALOG_INF(PSTR(D_LOG_CELLULAR "FunctionalityMode_Minimum %d"), result);
 }
 void mCellular::SendATCommand_FunctionalityMode_Full()
 {
-  modem->sendAT("+CFUN=1 ");
+  modem->sendAT("+CFUN=1");
   bool result = modem->waitResponse(AT_COMMAND_RESPONSE_TIMEOUT__CFUN); 
   ALOG_INF(PSTR(D_LOG_CELLULAR "FunctionalityMode_Full %d"), result);
 }
@@ -374,7 +404,6 @@ void mCellular::ModemUpdate_BatteryStatus()
   ALOG_DBM(PSTR(D_LOG_CELLULAR "{\"Volts_mv\":%d,\"Percent\":%d,\"Charging\":%d}"),
     modem_status.battery.volts_mv,modem_status.battery.percentage,modem_status.battery.charge_state);
 
-
   #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
   pCONT_batt_modem->readings.battery.volts_mv = modem_status.battery.volts_mv;
   pCONT_batt_modem->readings.battery.percentage = modem_status.battery.percentage;
@@ -387,7 +416,7 @@ void mCellular::modemPowerOn()
 {
   pinMode(PWR_PIN, OUTPUT);
   digitalWrite(PWR_PIN, LOW);
-  delay(100);    // Datasheet T_on = 72ms
+  delay(1000);    // Datasheet T_on = 72ms
   digitalWrite(PWR_PIN, HIGH);
   flags_modem_init_commands = false;
 }
@@ -403,7 +432,7 @@ void mCellular::modemPowerOff()
 void mCellular::modemRestart()
 {
   modemPowerOff();
-  delay(1000);
+  delay(5000);
   modemPowerOn();
 }
 
@@ -528,6 +557,7 @@ void mCellular::GPRS_Connect()
     ALOG_INF(PSTR(D_LOG_CELLULAR "GPRS Checking..."));
     if (modem->isGprsConnected()) 
     {
+      #ifndef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
       ALOG_INF(PSTR(D_LOG_CELLULAR "GPRS Connected"));
       gsm_client = new TinyGsmClient(*modem);
         ALOG_INF(PSTR(D_LOG_CELLULAR "MQTT size %d"), pCONT_mqtt->brokers.size());
@@ -540,6 +570,7 @@ void mCellular::GPRS_Connect()
         ALOG_INF(PSTR(D_LOG_CELLULAR "MQTT not working push_back(new MQTTConnection())"));
       }
       pCONT_mqtt->brokers[0]->SetPubSubClient(gsm_client);
+      #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
     } 
     else 
     {
@@ -568,40 +599,93 @@ void mCellular::GPRS_Connect()
 }
 
 
-void mCellular::GPRS_Enable()
+bool mCellular::Modem_CheckSerialConnection(bool flag_enable_retries)
 {
-  if(modem)
-  {
-    
-    ALOG_INF(PSTR(D_LOG_CELLULAR "> Check whether Modem is online"));
-    
+
     //test modem is online ?
+    uint8_t timeout_counter = 0;
     uint32_t  timeout = millis();
     while (!modem->testAT()) 
     {
       Serial.print(".");
-      if (millis() - timeout > 10000 ) 
+      if (millis() - timeout > 1000 ) 
       {
-        ALOG_INF(PSTR(D_LOG_CELLULAR "> It looks like the modem is not responding, trying to restart"));
-        modemPowerOff();
-        delay(5000);
-        modemPowerOn();
+        ALOG_INF(PSTR(D_LOG_CELLULAR "> It looks like the modem is not responding, trying to restart %d"), timeout_counter);
+        // modemRestart();
         timeout = millis();
+        // if(timeout_counter++ > 5)
+        // {
+        //   ALOG_INF(PSTR(D_LOG_CELLULAR "> Modem_Enable FAILED"));
+        //   return;
+        // }
       }
     }
 
+
+
+
+
+}
+bool mCellular::Modem_RestartUntilSerialResponse(bool flag_enable_retries)
+{
+
+    //test modem is online ?
+    uint8_t timeout_counter = 0;
+    uint32_t  timeout = millis();
+    while (!modem->testAT()) 
+    {
+      Serial.print(".");
+      if (millis() - timeout > 20000 ) 
+      {
+        ALOG_INF(PSTR(D_LOG_CELLULAR "> It looks like the modem is not responding, trying to restart %d"), timeout_counter);
+        modemRestart();
+        timeout = millis();
+        // if(timeout_counter++ > 5)
+        // {
+        //   ALOG_INF(PSTR(D_LOG_CELLULAR "> Modem_Enable FAILED"));
+        //   return;
+        // }
+      }
+    }
+
+
+
+
+
+}
+
+
+
+void mCellular::Modem_Enable()
+{
+  if(modem)
+  {
+    
+    ALOG_INF(PSTR(D_LOG_CELLULAR "Modem_Enable Start"));
+    Modem_RestartUntilSerialResponse();
     ALOG_INF(PSTR(D_LOG_CELLULAR "\nModem is online"));
 
-    timeout = millis();
-    ALOG_INF(PSTR(D_LOG_CELLULAR "> Get SIM card status"));
-    while (modem->getSimStatus() != SIM_READY) {
-      Serial.print(".");
-      if (millis() - timeout > 10000 ) {
-          ALOG_INF(PSTR(D_LOG_CELLULAR "It seems that your SIM card has not been detected. Has it been inserted?"));
-          return;
-      }
-    }
+    // timeout = millis();
+    // ALOG_INF(PSTR(D_LOG_CELLULAR "> Get SIM card status"));
+    // while (modem->getSimStatus() != SIM_READY) {
+    //   Serial.print(".");
+    //   if (millis() - timeout > 10000 ) {
+    //       ALOG_INF(PSTR(D_LOG_CELLULAR "It seems that your SIM card has not been detected. Has it been inserted?"));
+    //       return;
+    //   }
+    // }
     
+    ALOG_INF(PSTR(D_LOG_CELLULAR "Modem_Enable End"));
+
+  }
+}
+
+
+void mCellular::GPRS_Enable()
+{
+  if(modem)
+  {
+        
     //Set mobile operation band
     modem->sendAT("+CBAND=ALL_MODE");
     modem->waitResponse();
@@ -611,8 +695,7 @@ void mCellular::GPRS_Enable()
     // 2 NB-IoT
     // 3 CAT-M and NB-IoT
     // Set network preferre to auto
-    uint8_t perferred = 3;
-    modem->setPreferredMode(perferred);
+    modem->setPreferredMode(3);
 
     // Args:
     // 2 Automatic
@@ -622,8 +705,9 @@ void mCellular::GPRS_Enable()
     // Set network mode to auto
     modem->setNetworkMode(2);
 
+    uint32_t  timeout = millis();
     // Check network signal and registration information
-    ALOG_INF(PSTR(D_LOG_CELLULAR "> SIM7000/SIM7070 uses automatic mode to access the network. The access speed may be slow. Please wait patiently"));
+    // ALOG_INF(PSTR(D_LOG_CELLULAR "> SIM7000/SIM7070 uses automatic mode to access the network. The access speed may be slow. Please wait patiently"));
     RegStatus status;
     timeout = millis();
     do {
@@ -632,10 +716,10 @@ void mCellular::GPRS_Enable()
       status = modem->getRegistrationStatus();
 
       if (status == REG_DENIED) {
-        ALOG_INF(PSTR(D_LOG_CELLULAR "> The SIM card you use has been rejected by the network operator. Please check that the card you use is not bound to a device!"));
+        ALOG_INF(PSTR(D_LOG_CELLULAR "The SIM card you use has been rejected by the network operator"));
         return;
       } else {
-        ALOG_INF(PSTR(D_LOG_CELLULAR "Signal sq %d"), sq);
+        ALOG_INF(PSTR(D_LOG_CELLULAR "Signal %d dBm"), (int)GetSignalQualityPower(sq));
       }
 
       if (millis() - timeout > 10000 ) { //!! THIS IS BLOCKING CODE, NEEDS RESOLVED TO RETRY AGAIN
@@ -761,6 +845,38 @@ void mCellular::ModemUpdate_GPRS()
 }
 
 
+float mCellular::GetSignalQualityPower()
+{
+  return GetSignalQualityPower(modem->getSignalQuality());
+}
+
+/**
+ * @brief Conversion without calling modem again
+ * 
+ * @param signal_quality_raw 
+ * @return float 
+ */
+float mCellular::GetSignalQualityPower(int16_t signal_quality_raw)
+{
+
+  float signal_quality_rssi_dbm = 0;
+
+  if(signal_quality_raw == 99)
+  {
+    signal_quality_rssi_dbm = -150;
+  }
+  else
+  {
+    signal_quality_rssi_dbm = mSupport::mapfloat(signal_quality_raw, 0, 31, -113, -51);
+  }
+
+  return signal_quality_rssi_dbm;
+
+}
+
+
+
+
 void mCellular::SMS_Enable()
 {
     
@@ -769,36 +885,42 @@ void mCellular::SMS_Enable()
   if(modem)
   {
     
-    SendATCommand_FunctionalityMode_Minimum();
 
-    /*
-      2 Automatic
-      13 GSM only
-      38 LTE only
-      51 GSM and LTE only
-    * * * */
-   if(modem->setNetworkMode(2))
-   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "setNetworkMode Pass"));
-   }
+    // THIS SECTION SHOULD ONLY BE SET IF NOT CONFIGURED, AND NOT RESET!!
+  //   SendATCommand_FunctionalityMode_Minimum();
 
-    /**
-     * @brief 
-      Set the preferred selection between CAT-M and NB-IOT
-      1 CAT-M
-      2 NB-Iot
-      3 CAT-M and NB-IoT
-    **/
-   if(modem->setPreferredMode(3))
-   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "setPreferredMode Pass"));
-   }
+  //   /*
+  //     2 Automatic
+  //     13 GSM only
+  //     38 LTE only
+  //     51 GSM and LTE only
+  //   * * * */
+  //  if(modem->setNetworkMode(2))
+  //  {
+  //   ALOG_INF(PSTR(D_LOG_CELLULAR "setNetworkMode Pass"));
+  //  }
+
+  //   /**
+  //    * @brief 
+  //     Set the preferred selection between CAT-M and NB-IOT
+  //     1 CAT-M
+  //     2 NB-Iot
+  //     3 CAT-M and NB-IoT
+  //   **/
+  //  if(modem->setPreferredMode(3))
+  //  {
+  //   ALOG_INF(PSTR(D_LOG_CELLULAR "setPreferredMode Pass"));
+  //  }
 
     SendATCommand_FunctionalityMode_Full();    
 
+
+
+
+
     SendATCommand_SMSFormatAscii();
 
-    SendATCommand_SMSImmediateForwardOverSerial();      
+    // SendATCommand_SMSImmediateForwardOverSerial();      
 
     sms.enabled = true;
   }
@@ -814,6 +936,13 @@ void mCellular::SMS_Disable()
 
 void mCellular::ModemUpdate_SMS()
 {
+  
+  /**
+   * @brief Check for waiting SMS messages
+   **/
+  SendAT_ATParseResponse_F(100, LOG_LEVEL_DEBUG_MORE, PSTR("+CMGD=?"));
+
+
   if(mTime::TimeReached(&sms.tReached_Update, 1000))
   {
     if(sms.enabled)
@@ -853,8 +982,52 @@ void mCellular::SMS_GPSLocation()
         
     // --------TESTING SENDING SMS--------
 
+    uint16_t buflen = 0;
+    char     buffer[STANDARD_SMS_CHAR_LENGTH] = {0};
+
     // https://www.google.com/maps/dir//54.505,-6.299
     // https://www.google.com/maps/dir//54.505044,-6.298891
+
+    
+    /**
+     * @brief Mavlink
+     **/
+
+    #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    /**
+     * @brief MAVLink Data
+     **/    
+    float mavlink_lat = pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
+    float mavlink_lon = pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+
+    char convf_mavlink_lat[TBUFFER_SIZE_FLOAT];
+    mSupport::float2CString(mavlink_lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lat);
+    char convf_mavlink_lon[TBUFFER_SIZE_FLOAT];
+    mSupport::float2CString(mavlink_lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lon);
+
+    buflen += sprintf_P(buffer+buflen, 
+      PSTR(
+        "b%d%% c%d\n"
+        "WP i%d %dm\n"
+        "%dms\n"
+        "https://www.google.com/maps/dir//%s,%s\n"
+      ), 
+      pCONT_mavlink->pkt.battery_status.data.battery_remaining,
+      pCONT_mavlink->pkt.battery_status.data.current_consumed,
+
+      pCONT_mavlink->pkt.mission_current.data.seq,
+      pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
+
+      millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
+      convf_mavlink_lat, 
+      convf_mavlink_lon
+    );
+
+    #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
+
+    /**
+     * @brief GPS Modem
+     **/
 
     char convf_lat[TBUFFER_SIZE_FLOAT];
     mSupport::float2CString(gps.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
@@ -863,50 +1036,17 @@ void mCellular::SMS_GPSLocation()
     char convf_fix[TBUFFER_SIZE_FLOAT];
     mSupport::float2CString(gps.accuracy,2,convf_fix);
 
-    uint16_t buflen = 0;
-    char     buffer[STANDARD_SMS_CHAR_LENGTH];
-
-    buflen += snprintf_P(buffer+buflen, sizeof(buffer),
+    buflen += sprintf_P(buffer+buflen, 
       PSTR(
-        // "Battery  %d mV\n"
-        // "Battery  %d mA\n"
-        // "Mission  %d (%dm)\n"
-        // "PKT Age  %d\n"
-        "Accuracy %s m\n"
-        "\n"
+        "f%s m\n"
         "https://www.google.com/maps/dir//%s,%s"
       ), 
-      // pCONT_mavlink->pkt.battery_status.data.battery_remaining,
-      // pCONT_mavlink->pkt.battery_status.data.current_consumed,
-      // pCONT_mavlink->pkt.mission_current.data.seq,
-      // pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
-      // millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
       convf_fix,
       convf_lat, 
       convf_lon
     );
-
-    #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-    /**
-     * @brief MAVLink Data
-     **/    
-    char convf_lat2[TBUFFER_SIZE_FLOAT];
-    mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat2);
-    char convf_lon2[TBUFFER_SIZE_FLOAT];
-    mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon2);
-
-    buflen += snprintf_P(buffer+buflen, sizeof(buffer),
-      PSTR(
-        "\n"
-        "MAV\n"
-        "https://www.google.com/maps/dir//%s,%s"
-      ), 
-      convf_lat2, 
-      convf_lon2
-    );
-    #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
     
-    ALOG_INF(PSTR(D_LOG_CELLULAR "buffer  %s"),buffer);
+    ALOG_INF(PSTR(D_LOG_CELLULAR "buffer[%d] \"%s\""), strlen(buffer), buffer);
     
     String res;
     res = modem->sendSMS(SMS_TARGET, String(buffer));
@@ -914,6 +1054,98 @@ void mCellular::SMS_GPSLocation()
 
   }
 }
+// void mCellular::SMS_GPSLocation()
+// {
+//   if(modem)
+//   {
+//     ALOG_INF(PSTR(D_LOG_CELLULAR "SMS: Sending GPS Location"));
+        
+//     // --------TESTING SENDING SMS--------
+
+//     // https://www.google.com/maps/dir//54.505,-6.299
+//     // https://www.google.com/maps/dir//54.505044,-6.298891
+
+//     char convf_lat[TBUFFER_SIZE_FLOAT];
+//     mSupport::float2CString(gps.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
+//     char convf_lon[TBUFFER_SIZE_FLOAT];
+//     mSupport::float2CString(gps.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
+//     char convf_fix[TBUFFER_SIZE_FLOAT];
+//     mSupport::float2CString(gps.accuracy,2,convf_fix);
+
+//     uint16_t buflen = 0;
+//     char     buffer[STANDARD_SMS_CHAR_LENGTH] = {0};
+
+// // DEBUG_LINE_HERE;
+//     buflen += sprintf_P(buffer+buflen, //sizeof(buffer),
+//     // buflen += snprintf_P(buffer+buflen, sizeof(buffer),
+//       PSTR(
+//         "Batt %d%% %dmV\n"
+//         "WP  %d (%dm)\n"
+//         "PKT Age  %d\n"
+//         "Accuracy %s m\n"
+//         "https://www.google.com/maps/dir//%s,%s"
+//       ), 
+//       pCONT_mavlink->pkt.battery_status.data.battery_remaining,
+//       pCONT_mavlink->pkt.battery_status.data.current_consumed,
+
+//       pCONT_mavlink->pkt.mission_current.data.seq,
+//       pCONT_mavlink->pkt.nav_controller_output.data.wp_dist,
+
+//       millis()-pCONT_mavlink->pkt.tSaved_Last_Response,
+//       convf_fix,
+//       convf_lat, 
+//       convf_lon
+//     );
+//     // buflen += sprintf_P(buffer+buflen, //sizeof(buffer),
+//     //   PSTR(
+//     //     "Accuracy %s m\n"
+//     //     "https://www.google.com/maps/dir//%s,%s"
+//     //   ), 
+//     //   convf_fix,
+//     //   convf_lat, 
+//     //   convf_lon
+//     // );
+// //     ALOG_INF(PSTR(D_LOG_CELLULAR "bufferA%d \"%s\""), buflen, buffer);
+// // DEBUG_LINE_HERE;
+//     #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+//     /**
+//      * @brief MAVLink Data
+//      **/    
+//     float mavlink_lat = pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
+//     float mavlink_lon = pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+
+
+//     char convf_lat2[TBUFFER_SIZE_FLOAT];
+//     mSupport::float2CString(mavlink_lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat2);
+//     char convf_lon2[TBUFFER_SIZE_FLOAT];
+//     mSupport::float2CString(mavlink_lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon2);
+
+// //     ALOG_INF(PSTR(D_LOG_CELLULAR "convf_lat2 \"%s\""),convf_lat2);
+// //     ALOG_INF(PSTR(D_LOG_CELLULAR "convf_lon2 \"%s\""), convf_lon2);
+// // DEBUG_LINE_HERE;
+//     buflen += sprintf_P(buffer+buflen, //sizeof(buffer),
+//       PSTR(
+//         "\n"
+//         "MAV\n"
+//         "https://www.google.com/maps/dir//%s,%s"
+//       ), 
+//       convf_lat2, 
+//       convf_lon2
+//     );
+//     #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
+    
+// //     ALOG_INF(PSTR(D_LOG_CELLULAR "bufferB%d \"%s\""), buflen, buffer);
+// // DEBUG_LINE_HERE;
+//     ALOG_INF(PSTR(D_LOG_CELLULAR "buffer \"%s\""), buffer);
+    
+// // DEBUG_LINE_HERE;
+//     String res;
+//     res = modem->sendSMS(SMS_TARGET, String(buffer));
+//     ALOG_INF(PSTR(D_LOG_CELLULAR "SMS:"), res ? "OK" : "fail");
+
+// // DEBUG_LINE_HERE;
+//   }
+// }
 
 void mCellular::SMS_Send_TimedHeartbeat()
 {
@@ -966,15 +1198,15 @@ void mCellular::SMS_Send_TimedHeartbeat()
     char convf_lon2[TBUFFER_SIZE_FLOAT];
     mSupport::float2CString(pCONT_mavlink->pkt.gps_raw_int.data.lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon2);
 
-    buflen += snprintf_P(buffer+buflen, sizeof(buffer),
-      PSTR(
-        "\n"
-        "MAV\n"
-        "https://www.google.com/maps/dir//%s,%s"
-      ), 
-      convf_lat2, 
-      convf_lon2
-    );
+    // buflen += snprintf_P(buffer+buflen, sizeof(buffer),
+    //   PSTR(
+    //     "\n"
+    //     "MAV\n"
+    //     "https://www.google.com/maps/dir//%s,%s"
+    //   ), 
+    //   convf_lat2, 
+    //   convf_lon2
+    // );
     #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
     
     ALOG_INF(PSTR(D_LOG_CELLULAR "buffer  %s"),buffer);
@@ -996,6 +1228,7 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
 {
 
   JsonParserToken jtok = 0; 
+  JsonParserToken jtok2 = 0; 
   int8_t tmp_id = 0;
 
   
@@ -1080,6 +1313,149 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
   }
 
 
+  if(jtok = obj["ReadSMS"]){
+
+    ALOG_INF( PSTR(D_LOG_CELLULAR "ReadSMS"));
+
+    // flags_modem_init_commands = jtok.getInt();
+  
+      // modem->sendAT("+CNMI?"); // <mode>,<mt>,<bm>,<ds>,<bfr> //expected 2,2,0,0,0 
+
+      modem->sendAT("+CMGR=0");
+
+      //parser right here
+
+      bool result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
+      ALOG_INF(PSTR(D_LOG_CELLULAR "ReadSMS %d"), result);
+      
+
+    // "AT+CMGD=,4",// DELETE ALL MESSAGES (Read or not)
+    // "AT+CMGR=1",
+    // "AT+CMGL=\"REC UNREAD\""
+
+
+  }
+
+  
+  if(jtok = obj["ATDebugCommand"])
+  {
+
+    if(jtok2 = jtok.getObject()["SMSReadOnly"])
+    {
+      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSReadOnly"));
+
+      if(jtok2.isStr()) //Assumed worded group type
+      {        
+        SendAT_F(100, PSTR("+CMGR=\"%s\""), jtok2.getStr());
+      }
+      if(jtok2.isNum()) // Assumed index (From 0-max)
+      {        
+        SendAT_ATParseResponse_F(100, LOG_LEVEL_COMMANDS, PSTR("+CMGR=%d"), jtok2.getInt());
+      }
+    }
+
+    if(jtok2 = jtok.getObject()["SMSReadAndClear"])
+    {
+      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSReadAndClear"));
+
+      if(jtok2.isNum()) // Assumed index (From 0-max)
+      {        
+        if(SendAT_ATParseResponse_F(100, LOG_LEVEL_COMMANDS, PSTR("+CMGR=%d"), jtok2.getInt()))
+        {
+          // Clear it if it was successfully read
+          SendAT_F(100, PSTR("+CMGD=%d"), jtok2.getInt());
+        }
+      }
+    }
+
+
+    if(jtok2 = jtok.getObject()["SMSReadAndClearAll"])
+    {
+      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSReadAndClearAll"));
+      
+      if(SendAT_ATParseResponse_F(100, LOG_LEVEL_COMMANDS, PSTR("+CMGD=?")))
+      {
+        /**
+         * @brief Placing in here now
+         *  */
+        // if(sms.texts_saved_on_sim_indexs.size())
+        // {
+        //   SMSReadAndEraseSavedSMS();
+        // } 
+
+      }
+      
+    }
+
+    
+  
+
+
+
+
+
+    if(jtok2 = jtok.getObject()["SMSCheckWaitingIndexs"])
+    {
+      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSCheckWaitingIndexs"));
+      
+      if(SendAT_ATParseResponse_F(100, LOG_LEVEL_COMMANDS, PSTR("+CMGD=?")))
+      {
+        // Clear it if it was successfully read
+        // SendAT_F(100, PSTR("+CMGD=%d"), jtok2.getInt());
+      }
+      
+    }
+
+
+    if(jtok2 = jtok.getObject()["SMSClearAll"])
+    {
+      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSClearAll"));
+      uint8_t flag = 4; // delete all
+      SendAT_F(100, PSTR("+CMGR=%d[,%d]"), jtok2.getInt(), flag);
+    }
+
+  }
+
+  if(jtok = obj["ReadDeleteSMS"]){
+
+    ALOG_INF( PSTR(D_LOG_CELLULAR "ReadDeleteSMS"));
+
+    // flags_modem_init_commands = jtok.getInt();
+  
+      // modem->sendAT("+CNMI?"); // <mode>,<mt>,<bm>,<ds>,<bfr> //expected 2,2,0,0,0 
+
+
+      // SendAT("+CMGR=0[,4]", 100);
+
+      // uint8_t flag = 4; // delete all
+
+      // SendAT_F(PSTR("+CMGR=%d[,%d]"), index, flag);
+
+      modem->sendAT("+CMGR=0[,4]");
+
+// //+CMGD: (list_of_indexes)[,(list_of_flag_values)]
+
+//       //parser right here
+
+      bool result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
+//       ALOG_INF(PSTR(D_LOG_CELLULAR "ReadDeleteSMS %d"), result);
+      
+
+      modem->sendAT("+CMGD=0");
+
+      
+       result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
+      ALOG_INF(PSTR(D_LOG_CELLULAR "ReadDeleteSMS %d"), result);
+    // "AT+CMGD=,4",// DELETE ALL MESSAGES (Read or not)
+    // "AT+CMGR=1",
+    // "AT+CMGL=\"REC UNREAD\""
+
+
+  }
+
+
+
+
   if(jtok = obj["ATCommands"]){
     ALOG_INF( PSTR(D_LOG_CELLULAR "ATCommands"));
     JsonParserArray array = jtok;
@@ -1097,6 +1473,112 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
 
     
 }
+
+
+/**
+ * @brief Mostly to debug, but also return if it worked
+ * 
+ * @param buffer 
+ * @return true 
+ * @return false 
+ */
+bool mCellular::SendAT(const char* buffer, uint16_t wait_millis)
+{
+  if(!modem){ return false; }
+
+  uint32_t tSaved_millis = millis();
+
+  modem->sendAT(buffer);
+  bool result = true;
+  if(wait_millis)
+  {
+    result = modem->waitResponse(wait_millis);
+  }
+  uint32_t tSaved_Elapsed = millis()-tSaved_millis;
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR ">>>%s %s (%dms)"), buffer, result?"Success":"FAILED", tSaved_Elapsed);
+
+  return result;
+  
+}
+
+
+bool mCellular::SendAT_F(uint16_t wait_millis, PGM_P formatP, ...)
+{
+
+  char command_buffer[200];
+
+  va_list arg;
+  va_start(arg, formatP);
+  vsnprintf_P(command_buffer, sizeof(command_buffer), formatP, arg);
+  va_end(arg);
+
+  return SendAT(command_buffer, wait_millis);
+
+}
+
+
+bool mCellular::SendAT_ATParseResponse_F(uint16_t wait_millis, uint8_t response_loglevel, PGM_P formatP, ...)
+{
+
+  // AddLog(response_loglevel, PSTR("response_loglevel=%d"),response_loglevel);
+
+  char command_buffer[200];
+
+  va_list arg;
+  va_start(arg, formatP);
+  vsnprintf_P(command_buffer, sizeof(command_buffer), formatP, arg);
+  va_end(arg);
+  
+  if(!modem){ return false; }
+
+  uint32_t tSaved_millis = millis();
+
+  modem->sendAT(command_buffer);
+
+  /**
+   * @brief With timeout, expect response to be parsed
+   * 
+   */
+  uint32_t tSaved_Elapsed = millis()-tSaved_millis;
+  while(!Handler_ModemResponses(response_loglevel))
+  {
+    if(
+      (tSaved_Elapsed = (millis()-tSaved_millis)) > wait_millis
+    ){
+      ALOG_ERR(PSTR(D_LOG_CELLULAR "No response (%dms)"), tSaved_Elapsed);
+      return false;
+    }
+
+  }
+
+  // ALOG_ERR(PSTR(D_LOG_CELLULAR "========================================Response (%dms)"), millis()-tSaved_millis);
+  
+  return true;
+
+}
+
+char* mCellular::ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen)
+{
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR "ATResponse_Parse_CMT"));
+
+  char *result = strstr(
+    &incoming[2],   // skip "\r\n" at start of response
+    "\r\n"          // search for split between header/body of SMS
+  );
+
+  if(result)
+  {
+    ALOG_INF(PSTR(D_LOG_CELLULAR "ATResponse_Parse_CMT::result \"%s\""), &result[2]); //skip token
+    if(parsed_buf != nullptr)
+    {
+      snprintf(parsed_buf, strlen(&result[2])-1, &result[2]); // Copy and remove the trailing "\r\n"
+    }
+  }
+
+}
+
   
 /******************************************************************************************************************
  * ConstructJson
@@ -1123,6 +1605,7 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
+    JBI->Add("uptime", pCONT_time->uptime_seconds_nonreset);
     JBI->Level_Start("GPRS");
         JBI->Add("ConSec", gprs.connected_seconds);
     JBI->Level_End();

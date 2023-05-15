@@ -46,7 +46,7 @@
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
-#define UART_CELLULAR_BAUD   115200//921600
+#define UART_CELLULAR_BAUD   921600
 #define PIN_DTR     25
 #define PIN_TX      27
 #define PIN_RX      26
@@ -78,6 +78,7 @@
 
   //https://github.com/vshymanskyy/TinyGSM/pull/260/files#diff-49f12f4a048fa1f63d160e1adb91526d97e2a16cd3ba3898525ac5d1a44ddb99
 
+#include <StreamDebugger.h>
 
 class mCellular :
   public mTaskerInterface
@@ -93,18 +94,31 @@ class mCellular :
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
-    
-    
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mCellular);
-    };
+    uint16_t GetClassSize(){      return sizeof(mCellular); };
     #endif
     
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t leds_found = 0;
     }settings;
+
+    
+    // StreamDebugger debugger(SerialAT, Serial);
+    // TinyGsm modem(debugger);
+
+    bool Modem_CheckSerialConnection(bool flag_enable_retries = false);
+    bool Modem_RestartUntilSerialResponse(bool flag_enable_retries = false);
+
+
+    float GetSignalQualityPower();
+    float GetSignalQualityPower(int16_t signal_quality_raw);
+
+    
+    bool SendAT(const char* buffer, uint16_t wait_millis = 0);
+    bool SendAT_F(uint16_t wait_millis, PGM_P formatP, ...);
+    bool SendAT_ATParseResponse_F(uint16_t wait_millis, uint8_t response_loglevel, PGM_P formatP, ...);
+
 
     TinyGsm* modem = nullptr;
     TinyGsmClient* gsm_client = nullptr;
@@ -167,15 +181,20 @@ class mCellular :
     void ModemUpdate_GPRS();
     void GPRS_Connect();
 
+    void Modem_Enable();
 
     struct SMS_STATUS
     {
       timereached_t tReached_Update;
-      bool enabled = 0; // 0 disabled, 1 enabled            
+      bool enabled = 0; // 0 disabled, 1 enabled       
+      std::vector<uint8_t> texts_saved_on_sim_indexs;     
     }sms;
     void SMS_Enable();
     void SMS_Disable();
     void ModemUpdate_SMS();
+    void SMSReadAndEraseSavedSMS();
+    
+    bool Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_millis = 0);
 
     void Get_Modem_Hardware();
 
@@ -204,7 +223,7 @@ class mCellular :
 
     bool flags_modem_init_commands = false;
 
-    void parse_ATCommands(char* buffer, uint16_t buflen);
+    bool parse_ATCommands(char* buffer, uint16_t buflen, uint8_t log_level = 6);
      
     void ModemUpdate_BatteryStatus();
 
@@ -222,8 +241,9 @@ class mCellular :
     void SendATCommand_FunctionalityMode_Minimum();
     void SendATCommand_FunctionalityMode_Full();
 
-    void Handler_ModemResponses();
     char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
+
+    void ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_t buflen, uint8_t response_loglevel);
 
 
     void EveryLoop();

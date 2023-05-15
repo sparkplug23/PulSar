@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <Arduino.h>
 
+// I want to have a non singleton version so I can use these inside functions nicely with buffer that only lasts inside function
+
+
 class BufferWriter{
     
   private:

@@ -252,6 +252,7 @@ class TinyGsmESP8266 : public TinyGsmModem<TinyGsmESP8266>,
   }
 
   bool isNetworkConnectedImpl() {
+        // Serial.println("HERE: isNetworkConnectedImpl")
     RegStatus s = getRegistrationStatus();
     if (s == REG_OK_IP || s == REG_OK_TCP) {
       // with these, we're definitely connected

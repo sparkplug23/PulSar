@@ -525,7 +525,7 @@ boolean MQTTConnection::ppublish_device_name_prefix_P(const char* topic, const c
       flag_start_reconnect = true;
       return false;
     }
-
+    
     if(strlen_P(payload)<1){
     #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "strlen(payload)<1"));
@@ -545,14 +545,6 @@ boolean MQTTConnection::ppublish_device_name_prefix_P(const char* topic, const c
     }else{
         //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "WiFi.status()=%d"),WiFi.status());
     }
-
-    //if(prefixtopic[0]!=0){}
-//     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Exiting early?"));
-//     // delay(2500); ESP.wdtFeed();
-// Serial.print("HERE1");
-// Serial.flush();
-    // delay(2500); ESP.wdtFeed();
-DEBUG_LINE;
 
 if(WiFi.status() != WL_CONNECTED){ 
     #ifdef ENABLE_LOG_LEVEL_INFO

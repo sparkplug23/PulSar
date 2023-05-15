@@ -246,6 +246,8 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 //   #define DEBUG_HOLD_POINT   //nothing, no code
 // #endif
 
+// #define DEBUG_CRITICAL_FORCE_CRASH  volatile uint32_t dummy; \
+//                               dummy = *((uint32_t*) 0x00000000);
 
 /**
  * Compact forms of basic AddLog, to make prototyping faster. 

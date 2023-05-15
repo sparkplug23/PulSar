@@ -35,7 +35,7 @@ const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TE
 
 int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
 {
-
+return 0;
   switch(function){
     case FUNC_INIT:
       Init();

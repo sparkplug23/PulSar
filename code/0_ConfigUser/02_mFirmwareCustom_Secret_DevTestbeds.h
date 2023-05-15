@@ -2309,6 +2309,8 @@
  * Connecting 6P to pixhawk 2.4.8 with Serial5 enabled will clash with modem serial
  * 
  *
+ * Next priority is getting cell/wifi mqtt swapping working well
+ * 
  */
 #ifdef DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
   #define DEVICENAME_CTR          "mavlink_cellular_01"
@@ -2317,17 +2319,24 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
 
   #define USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
-  // #define USE_GROUPFEATURE__MODEM_GPS
-  // #define USE_GROUPFEATURE__MAVLINK_DECODER
-  // #define USE_GROUPFEATURE__OLED_SH1106_MAVLINK
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+  #define USE_GROUPFEATURE__MODEM_GPS
+  #define USE_GROUPFEATURE__MAVLINK_DECODER
+  #define USE_GROUPFEATURE__OLED_SH1106_MAVLINK
 
   // *************************************************************************************
 
   #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
-    #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+    #define SERIAL_DEBUG_BAUD_DEFAULT 115200//921600
   #endif
  
   #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
@@ -2343,22 +2352,42 @@
   #ifdef USE_GROUPFEATURE__MODEM_GPS
     #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define USE_MODULE_SENSORS_GPS_MODEM
   #endif 
   #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR
     #define DISABLE_NETWORK_WIFI
     #define USE_MODULE_NETWORK_CELLULAR
-    // #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
     #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-    // #define USE_MODULE_SENSORS_GPS_MODEM
     #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
     #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
     //  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
+    // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
     // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
     // #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
     // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
     #define ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT // ie if one sends, return early from sending others
-  #else // wifi
+  #endif
+
+  #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+    #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+
+  #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
@@ -2370,6 +2399,19 @@
       #define SHOW_SPLASH
     #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
   #endif
+
+
+// #define UART_BAUD   115200
+// #define PIN_DTR     25
+// #define PIN_TX      27
+// #define PIN_RX      26
+// #define PWR_PIN     4
+
+// #define SD_MISO     2
+// #define SD_MOSI     15
+// #define SD_SCLK     14
+// #define SD_CS       13
+// #define LED_PIN     12
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2405,18 +2447,11 @@
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"   
-
-
     "\"" D_JSON_DISPLAY "\":{"
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
     "},"    
-
-
-
-
-
     // "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
