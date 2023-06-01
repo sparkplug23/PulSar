@@ -95,7 +95,7 @@ Kitchen/Dining
 // #define DEVICE_KITCHENLIGHT2
 // #define DEVICE_KITCHENLIGHT3
 // #define DEVICE_KITCHENLIGHT4
-// #define DEVICE_RGBSHELF
+#define DEVICE_RGBSHELF
 // #define DEVICE_RGBCOOKER
 // #define DEVICE_KITCHENSENSOR
 // #define DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
@@ -146,7 +146,7 @@ Hallway + Understairs
 // #define DEVICE_CANDLE_ELECTRIC_HALLWAY  // Socket_SocketNumber16_Power
 // #define DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
 // #define DEVICE_HVAC_HEATING_MAIN
-#define DEVICE_HVAC_HEATING_MAIN_2023V2
+// #define DEVICE_HVAC_HEATING_MAIN_2023V2
 
 /**
  *  Landing + Hotpress
@@ -1251,14 +1251,21 @@ Bathroom
 
   // #define DISABLE_NETWORK
 
-  #define DISABLE_SERIAL
-  #define DISABLE_SERIAL0_CORE
-  #define DISABLE_SERIAL_LOGGING
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_CORE_RULES
+       
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_MOTION
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -1306,10 +1313,36 @@ Bathroom
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       #endif
+      #ifdef USE_MODULE_SENSORS_MOTION
+      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\","
+      #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "DiningRoom"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "DiningRoom"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
   "}";
 
   #define STRIP_SIZE_MAX 33
@@ -1320,18 +1353,38 @@ Bathroom
     "HardwareType":"WS28XX",
     "ColourOrder":"RGB",
     "AnimationMode":"Effects",
-    "ColourPalette":"Pastel 02",
+    "ColourPalette":"Pink Purple 80-20",
     "Effects": {
-      "Function":1,
-      "Intensity":50
+      "Function":2,
+      "Intensity":20
     },
     "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
+      "TimeMs": 3000,
+      "RateMs": 10000
     },
     "BrightnessRGB": 100
   }
   )=====";
+
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"// for PIR to follow
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "}"
+  "}";
 
 #endif // DEVICE_RGBSHELF
 

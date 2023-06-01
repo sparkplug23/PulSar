@@ -136,7 +136,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   if(jtok = obj[PM_JSON_COLOUR_PALETTE])
   {
 
-    // ALOG_INF( PSTR("PM_JSON_COLOUR_PALETTE") );
+    ALOG_INF( PSTR("PM_JSON_COLOUR_PALETTE") );
 
     if(jtok.isStr()){
       /**

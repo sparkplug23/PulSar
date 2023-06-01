@@ -395,6 +395,8 @@ void mAnimatorLight::Init_NeoPixelBus(int8_t pin)
 
 
 void mAnimatorLight::Init(void){ 
+
+  
     
   pCONT_iLight->settings.light_size_count = STRIP_SIZE_MAX;
 
@@ -407,21 +409,21 @@ void mAnimatorLight::Init(void){
    * Note: this is going to clash with PWM types in Lighting and should probably be moved into there, leaving here to check in both
    * 
    */
-  bool flag_any_pin_set = false;
-  for(uint16_t gpio = GPIO_PIXELBUS_01_A_ID; gpio < GPIO_PIXELBUS_10_E_ID; gpio++)
-  {
-    if(pCONT_pins->PinUsed(gpio))
-    {
-      flag_any_pin_set = true;
-      break;
-    }
-  }
+  // bool flag_any_pin_set = false;
+  // for(uint16_t gpio = GPIO_PIXELBUS_01_A_ID; gpio < GPIO_PIXELBUS_10_E_ID; gpio++)
+  // {
+  //   if(pCONT_pins->PinUsed(gpio))
+  //   {
+  //     flag_any_pin_set = true;
+  //     break;
+  //   }
+  // }
 
-  if(!flag_any_pin_set)
-  {
-    ALOG_ERR(PSTR("NO PIN FOUND: STOPPING ANIMATOR"));
-    return;
-  }
+  // if(!flag_any_pin_set)
+  // {
+  //   ALOG_ERR(PSTR("NO PIN FOUND: STOPPING ANIMATOR"));
+  //   return;
+  // }
 
 
     #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
@@ -481,7 +483,7 @@ void mAnimatorLight::Init(void){
     #ifdef ESP8266
     stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, 3);
     #else
-    stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, 23);
+    stripbus = new NeoPixelBus<selectedNeoFeatureType, selectedNeoSpeedType>(STRIP_SIZE_MAX, pCONT_pins->GetPin(GPIO_RGB_DATA_ID));
     #endif
   }
   stripbus->Begin();

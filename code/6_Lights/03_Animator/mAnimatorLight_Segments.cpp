@@ -141,7 +141,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
   for (segment_new &seg : segments) 
   {
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,_segments[_segment_index_primary].isActive());
+      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,seg.isActive());
     //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].pixel_range.start,_segments[_segment_index_primary].pixel_range.stop);
     // #endif
 
