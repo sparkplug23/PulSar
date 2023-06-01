@@ -150,6 +150,16 @@ class mTime :
     void parse_JSONCommand(JsonParserObject obj);
 
 
+    void  SystemTime_Update(
+          uint16_t year,
+          uint8_t month,
+          uint8_t day,
+          uint8_t hour,
+          uint8_t minute,
+          uint8_t second,
+          uint16_t minimum_update_seconds = 0 // 0 means force the update
+        );
+
     void  SetUTCTime(
           uint16_t year,
           uint8_t month,
@@ -233,6 +243,16 @@ class mTime :
     }settings;
 
     bool CheckOrStartNTPService();
+
+
+    #ifdef ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+    void SystemTime_NTPUpdate();
+    bool SystemTime_NTPUpdate_GetNTPTime(uint32_t* ntp_time);
+
+
+    #endif // ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+
+
     void TickRTCVariablesWithUptime();
 
     

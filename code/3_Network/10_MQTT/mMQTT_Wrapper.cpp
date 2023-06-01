@@ -2,9 +2,9 @@
 
 #if defined(USE_MODULE_NETWORK_MQTT)
 
-
 const char* mMQTT::PM_MODULE_NETWORK_MQTT_CTR = D_MODULE_NETWORK_MQTT_CTR;
 const char* mMQTT::PM_MODULE_NETWORK_MQTT_FRIENDLY_CTR = D_MODULE_NETWORK_MQTT_FRIENDLY_CTR;
+
 
 int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
 
@@ -25,40 +25,58 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
   *******************/
     case FUNC_LOOP:
       MM_EveryLoop();
-
-
-
-      // #ifdef ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-      // if(brokers.size())
-      // {
-      //   if(brokers[0]->MqttIsConnected())
-      //   {
-      //     pCONT_interface_network->data.mqtt_state.isvalid = true;
-      //   }
-      //   else
-      //   {
-      //     pCONT_interface_network->data.mqtt_state.isvalid = false;
-      //   }
-      // }
-      // #endif // ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-
-
-      #ifdef ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-      if(pCONT_interface_network->data.mqtt_state.isvalid == true){
-      #endif
-      pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
-      #ifdef ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
-      }
-      #endif
+      CallMQTTSenders();
     break;
     case FUNC_MQTT_CONNECTED:
       // Load_New_Subscriptions_From_Function_Template();
     break;
+    case FUNC_NETWORK_CONNECTION_ESTABLISHED:
+
+    /**
+     * @brief If status is down, and awaiting connection, immediate try reconnect
+     * 
+     */
+      if(brokers.size())   
+        if(brokers[0]->retry_counter)
+          brokers[0]->retry_counter = 1; //retry immediate
+          ALOG_HGL(PSTR(D_LOG_PUBSUB "retry_counter IMMEDIATE = %d"),brokers[0]->retry_counter);
+
+
+    break;
+
     case FUNC_EVERY_50_MSECOND:
       MM_Every50mSecond();
+
+      if(brokers.size())   
+        if(brokers[0]->retry_counter)
+          Serial.printf(D_LOG_PUBSUB "retry_counter = %d\n\r", brokers[0]->retry_counter);
+
+
     break;
-    case FUNC_EVERY_SECOND:
+    case FUNC_EVERY_SECOND:{
+
+      // ALOG_INF(PSTR("brokers size %d"),brokers.size());
+      
+      #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+      if(brokers.size())
+      {
+        char buffer[20];
+        mSupport::float2CString(brokers[0]->debug_stats.payload_publish_success_percentage*100, 6, buffer);
+        // ALOG_INF(PSTR("payload_publish_success_percentage %d/%d %s"), brokers[0]->debug_stats.payload_publish_sent, brokers[0]->debug_stats.payload_publish_missed, buffer);
+      }
+      #endif
+
       MM_EverySecond();
+
+      if(pCONT_set->global_state.mqtt_down)
+      { 
+        if(brokers.size())
+        {
+          brokers[0]->downtime_counter++;
+        }
+      }
+
+    }
     break;
     case FUNC_EVERY_HOUR:
       if(brokers.size())
@@ -176,64 +194,19 @@ void mMQTT::Init(void)
   memset(pCONT_set->Settings.mqtt.lwt_topic,0,sizeof(pCONT_set->Settings.mqtt.lwt_topic));
   snprintf_P(pCONT_set->Settings.mqtt.lwt_topic,sizeof(pCONT_set->Settings.mqtt.lwt_topic)-1,PSTR("%s/status/LWT"),pCONT_set->Settings.system_name.device);
 
-
-  // brokers.push_back(new MQTTConnection());
-  #ifdef ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST2
-
-  // IPAddress mqqtserver1(192,168,1,70);
-  // WiFiClient* mqtt_client2 = nullptr;
-  // mqtt_client2 = new WiFiClient();
-  
-  // brokers.push_back(
-  //   new MQTTConnection(
-  //     mqqtserver1, 
-  //     1883,
-  //     *mqtt_client2
-  //   )
-  // );
-  // brokers.push_back(new MQTTConnection());
-  // brokers.push_back(new MQTTConnection());
-
-  pCONT_wif->mqtt_client = new WiFiClient();
-  IPAddress mqqtserver1(192,168,1,70);
-  pCONT_mqtt->brokers.push_back(
-    new MQTTConnection(
-      mqqtserver1, 
-      1883,
-      *pCONT_wif->mqtt_client
-    )
-  );
-  
-  pCONT_wif->mqtt_client2 = new WiFiClient();
-  IPAddress mqqtserver2(192,168,1,66);
-  pCONT_mqtt->brokers.push_back(
-    new MQTTConnection(
-      mqqtserver2, 
-      1883,
-      *pCONT_wif->mqtt_client2
-    )
-  );
-
-  #else
-
-  // if(!brokers.size())
-  // {
-  //   ALOG_ERR(PSTR("Fallback mqtt broker starting, should be set via network mode instead"));
-  //   brokers.push_back(new MQTTConnection());
-  // }
-
-
-
-  #endif // ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST2
-
 }
 
 
-void mMQTT::EveryLoop(){ DEBUG_PRINT_FUNCTION_NAME;
+void mMQTT::CallMQTTSenders()
+{
 
-
-  // Send mqtt from all modules
-  pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
+  if(brokers.size())
+  {
+    if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
+    {
+      pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
+    }
+  }
 
 }
 

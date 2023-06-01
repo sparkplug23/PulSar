@@ -258,33 +258,21 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
+
+    /**
+     * @brief Show wrapper stuff
+     * 
+     */
+
     JBI->Add(PM_JSON_CLIENT_NAME, pCONT_set->Settings.mqtt.client_name);
 
     JBI->Add("RetrySecs", pCONT_set->Settings.mqtt_retry);
-    // JBI->Level_Start(PM_JSON_PACKETS);
-    //   JBI->Add(PM_JSON_SENTCOUNT,      pCONT_mqtt->pubsub->stats.packets_sent_counter);
-    //   JBI->Add(PM_JSON_SENTPERMINUTE,  pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
-    // JBI->Level_End();
-    // JBI->Level_Start(PM_JSON_CONNECTS);
-    //   JBI->Add(PM_JSON_COUNT,          pCONT_mqtt->pubsub->stats.reconnects_counter);
-    //   JBI->Add(PM_JSON_DOWNSECS,       pCONT_mqtt->pubsub->stats.connection_downtime);
-    //   JBI->Add(PM_JSON_UPSECONDS,      pCONT_mqtt->pubsub->stats.connection_uptime);
-    //   JBI->Add(PM_JSON_BROKERHOSTNAME, pCONT_set->Settings.mqtt.hostname_ctr);
-    // JBI->Level_End();
 
     JBI->Level_Start(PM_JSON_REFRESH_RATES);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_set->Settings.sensors.ifchanged_secs);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_set->Settings.sensors.teleperiod_secs);
     JBI->Level_End();
     
-    //make mqtt commands to allow me to tweak and debug 
-    //  = 10;
-    // Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
-    // Settings.sensors.teleperiod_secs = 120;
-    // Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
-    // Settings.sensors.flags.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
-    // Settings.sensors.configperiod_secs = SEC_IN_HOUR;
-
     JBI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
 
 
@@ -295,7 +283,45 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
     #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
 
 
+    /**
+     * @brief Show each instance info
+     * 
+    **/
+    JBI->Array_Start("Instance");
+    for(auto& con:pCONT_mqtt->brokers)
+    {
+      
+      JBI->Array_Start();
+        JBI->Add("broker_url", con->broker_url);
+        JBI->Add("port", con->port);
 
+        JBI->Add("connect_count", con->connect_count);
+        JBI->Add("retry_counter", con->retry_counter);
+        JBI->Add("downtime_counter", con->downtime_counter);
+        // JBI->Add("initial_connection_state", con->initial_connection_state);
+        JBI->Add("connected", con->connected);
+        JBI->Add("allowed", con->allowed);
+        JBI->Add("mqtt_tls", con->mqtt_tls);
+
+        JBI->Add("mqtt_client_type", con->mqtt_client_type);
+
+        JBI->Add("tSaved_LastOutGoingTopic", con->tSaved_LastOutGoingTopic);
+
+        JBI->Add("flag_start_reconnect", con->flag_start_reconnect);
+        JBI->Add("cConnectionAttempts", con->cConnectionAttempts);
+
+        JBI->Add("host_server_type", con->host_server_type);
+
+        #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+        JBI->Add("payload_publish_sent", con->debug_stats.payload_publish_sent);
+        JBI->Add("payload_publish_missed", con->debug_stats.payload_publish_missed);
+        JBI->Add("payload_publish_success_percentage", con->debug_stats.payload_publish_success_percentage);
+        #endif
+      JBI->Array_End();
+
+    }
+    JBI->Array_End();
+  
   return JBI->End();
 
 }

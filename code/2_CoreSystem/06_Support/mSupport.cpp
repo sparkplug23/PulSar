@@ -17,7 +17,7 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
     #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
     #endif
-    const int wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
+    const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
     hw_timer_t *timerwdt = NULL;
     #ifndef ARDUINO_ISR_ATTR
     #define ARDUINO_ISR_ATTR IRAM_ATTR 
@@ -374,6 +374,131 @@ void SafeMode_StartAndAwaitOTA()
 #endif // if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
 
 
+#if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+/**
+ * @brief Single function that a fastboot'ing device will call to await for new code to be uploaded
+ **/
+void SafeMode_CellularConnectionAndSendLocation()
+{
+  TinyGsm modem(SerialAT);
+
+  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
+
+  Serial.println("SafeMode_CellularConnectionAndSendLocation");
+    
+  #define GSM_AUTOBAUD_MIN 9600
+  #define GSM_AUTOBAUD_MAX 921600
+
+  // Set GSM module baud rate
+  // uint32_t found_baud = TinyGsmAutoBaud_CustomPin(SerialAT, SERIAL_8N1, PIN_RX, PIN_TX);
+
+  
+  SerialAT.begin(SERIAL_DEBUG_BAUD_DEFAULT, SERIAL_8N1, PIN_RX, PIN_TX);
+  
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1000);    // Datasheet T_on = 72ms
+  digitalWrite(PWR_PIN, HIGH);
+  delay(1000);    // Datasheet T_on = 72ms
+
+  Serial.println("Initializing modem...");
+  //test modem is online ?
+    uint8_t timeout_counter = 0;
+    uint32_t  timeout = millis();
+    while (!modem.testAT()) 
+    {
+      Serial.print(".");
+      if (millis() - timeout > 20000 ) 
+      {
+        // ALOG_INF(PSTR(D_LOG_CELLULAR "> It looks like the modem is not responding, trying to restart %d"), timeout_counter);
+        
+  Serial.printf("modemRestart - modemPowerOff");
+        
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1500);    // Datasheet T_off = 1.2secs
+  digitalWrite(PWR_PIN, HIGH);
+  delay(5000);
+  Serial.printf("modemPowerOn");
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1000);    // Datasheet T_on = 72ms
+  digitalWrite(PWR_PIN, HIGH);
+  
+
+
+
+        timeout = millis();
+        // if(timeout_counter++ > 5)
+        // {
+        //   ALOG_INF(PSTR(D_LOG_CELLULAR "> Modem_Enable FAILED"));
+        //   return;
+        // }
+      }
+    }
+
+
+
+
+  // if (!modem.restart()) {
+  //   // if (!modem.init()) {
+  //   Serial.println("Failed to restart modem, delaying 10s and retrying");
+  //   // restart autobaud in case GSM just rebooted
+  //   // TinyGsmAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+  //   // return;
+  // }
+
+  String name = modem.getModemName();
+  Serial.printf("Modem Name:", name);
+
+  String modemInfo = modem.getModemInfo();
+  Serial.printf("Modem Info:", modemInfo);
+
+
+
+
+
+
+
+
+
+
+  uint32_t tSaved_heartbeat = millis();
+
+  Serial.println("SafeMode: Just waiting for HTTP upload");
+
+
+  while(1){ 
+    // Serial.println("SafeMode: Just waiting for OTA"); delay(1000);
+    
+    delay(1);
+
+    if(llabs(millis()-tSaved_heartbeat)>1000)
+    {
+      tSaved_heartbeat = millis();
+
+      
+  String modemInfo = modem.getModemInfo();
+  Serial.printf("Modem Info:", modemInfo);
+
+
+      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+      WDT_Reset();
+      #endif
+
+    }
+
+  }
+
+
+}
+
+
+#endif // if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+
+
 
 
 
@@ -490,6 +615,12 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 //   // }
 // #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 
+
+    break;
+
+    case FUNC_LOG__SHOW_UPTIME:
+      
+      ALOG_INF(PSTR("FUNC_LOG__SHOW_UPTIME Uptime %s"), pCONT_time->GetUptime().c_str());
 
     break;
 

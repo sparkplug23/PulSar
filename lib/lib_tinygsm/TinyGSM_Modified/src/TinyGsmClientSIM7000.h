@@ -394,6 +394,9 @@ class TinyGsmSim7000 : public TinyGsmSim70xx<TinyGsmSim7000>,
    * Utilities
    */
  public:
+
+  uint32_t waitresponse_error_counter = 0;
+
   // TODO(vshymanskyy): Optimize this!
   int8_t waitResponse(uint32_t timeout_ms, String& data,
                       GsmConstStr r1 = GFP(GSM_OK),
@@ -500,7 +503,11 @@ class TinyGsmSim7000 : public TinyGsmSim70xx<TinyGsmSim7000>,
   finish:
     if (!index) {
       data.trim();
-      if (data.length()) { DBG("waitResponse ### Unhandled:", data); }
+      if (data.length()) { 
+        DBG("waitResponse ### Unhandled:", data); 
+        
+        waitresponse_error_counter++;  
+      }
       data = "";
     }
     // data.replace(GSM_NL, "/");

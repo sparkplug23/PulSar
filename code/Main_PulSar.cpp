@@ -203,6 +203,16 @@ void setup(void)
     SafeMode_StartAndAwaitOTA();
   }
   #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  /**
+   * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
+   * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
+   **/
+  #if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+  if(RtcFastboot.fast_reboot_count > 10)
+  {
+    SafeMode_CellularConnectionAndSendLocation();
+  }
+  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
 
 #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -583,7 +593,8 @@ void LoopTasker()
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ 
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000))
+  {
     
     pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
 
@@ -617,7 +628,40 @@ void LoopTasker()
       
     pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
 
+  } // END secondloop
+
+    
+  #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+  if(pCONT->function_event_queue.size())
+  {
+    DEBUG_LINE_HERE;
+    bool execute_function = false;
+    uint8_t iter_count = 0;
+    for(auto& queue:pCONT->function_event_queue)
+    {
+      if(queue.delay_millis == 0){ execute_function = true; } // no delay
+      if(mTime::TimeReached(&queue.tSaved_millis,queue.delay_millis)){ execute_function = true; }
+    DEBUG_LINE_HERE;
+
+      if(execute_function)
+      {
+        ALOG_HGL(PSTR("Executing Event Queue Item [%d]: func_id %d"), iter_count, queue.function_id);
+    DEBUG_LINE_HERE;
+        pCONT->Tasker_Interface(queue.function_id);
+    DEBUG_LINE_HERE;
+    // std::vector<mTaskerManager::FUNCTION_EXECUTION_EVENT>::iterator index = pCONT->function_event_queue.begin()+iter_count;
+
+    
+        ALOG_INF(PSTR("erase %d/%d"), iter_count, pCONT->function_event_queue.size());
+
+        pCONT->function_event_queue.erase(pCONT->function_event_queue.begin()+iter_count);    
+    DEBUG_LINE_HERE;   
+      }
+      iter_count++;
+    }
+    DEBUG_LINE_HERE;
   }
+  #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
 
 }
 
@@ -671,10 +715,10 @@ void loop(void)
     pCONT_sup->activity.loop_counter=0;
   }
 
-  if(pCONT_sup->loop_runtime_millis > 500)
-  {
-    ALOG_ERR(PSTR("LONG_LOOP =============================================== %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
-  }
+  // if(pCONT_sup->loop_runtime_millis > 500)
+  // {
+  //   ALOG_ERR(PSTR("LONG_LOOP =============================================== %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+  // }
 
   /**
    * @brief Until code has been stress tested, removing all delays to stop starving resources. This will need to be introduced later one device at a time.

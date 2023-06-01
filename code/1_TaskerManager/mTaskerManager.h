@@ -1081,6 +1081,25 @@ class mTaskerManager{
     #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
 
+    #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+
+    struct FUNCTION_EXECUTION_EVENT
+    {
+      TASKER_FUNCTION_TYPES function_id;
+      uint16_t delay_millis;
+      uint32_t tSaved_millis;
+    };
+    FUNCTION_EXECUTION_EVENT FunctionEvent(TASKER_FUNCTION_TYPES function_id, uint16_t delay_millis = 0)
+    {
+      FUNCTION_EXECUTION_EVENT task;
+      task.tSaved_millis = millis();
+      task.delay_millis = delay_millis;
+      task.function_id = function_id;
+      return task;
+    }
+    std::vector<FUNCTION_EXECUTION_EVENT> function_event_queue;
+    #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+
     
 
     uint16_t last_function = 255; // 0 will be first

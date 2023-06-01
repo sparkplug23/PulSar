@@ -87,8 +87,9 @@
 // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED 192,168,1,65
 // #endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
-#ifndef MQTT_HOST
-#define MQTT_HOST  "192.168.1.65" //Parsing the IP String will be the new method
+#ifndef MQTT_HOST_CELLULAR
+#define MQTT_HOST_CELLULAR "sparkequinox.ddns.net"
+// #define MQTT_HOST  "192.168.1.65" //Parsing the IP String will be the new method
 #endif
 
 // Belfast
@@ -103,7 +104,6 @@
 #define D_FLEXI_O2_PHONE_NUMBER_CTR "07515358597"
 
 
-#define D_MQTT_MDNS_DDNS_ADDRESS_URL "sparkequinox.ddns.net"
 // #define D_MQTT_PORT 51883
 
 // Set phone number, if you want to test SMS

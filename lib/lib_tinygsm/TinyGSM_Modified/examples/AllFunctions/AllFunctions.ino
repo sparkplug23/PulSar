@@ -10,11 +10,11 @@
  **************************************************************/
 
 // Select your modem:
-#define TINY_GSM_MODEM_SIM800
+// #define TINY_GSM_MODEM_SIM800
 // #define TINY_GSM_MODEM_SIM808
 // #define TINY_GSM_MODEM_SIM868
 // #define TINY_GSM_MODEM_SIM900
-// #define TINY_GSM_MODEM_SIM7000
+#define TINY_GSM_MODEM_SIM7000
 // #define TINY_GSM_MODEM_SIM7000SSL
 // #define TINY_GSM_MODEM_SIM7080
 // #define TINY_GSM_MODEM_SIM5360

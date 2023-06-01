@@ -102,7 +102,7 @@ void mMAVLink_Decoder::Send_Heartbeat()
   );
   uint16_t lenhb = mavlink_msg_to_send_buffer(bufhb, &msghb);
   _MAVSerial->write(bufhb,lenhb);
-  ALOG_INF(PSTR(">>>>>>>> Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
+  ALOG_INF(PSTR(">> Send Heartbeat: sys %d, comp %d"), connection.system_id, connection.component_id);
 }
 
 
@@ -267,7 +267,7 @@ void mMAVLink_Decoder::PollMAVLink_Stream()
           // pkt.heartbeat.vehicle_component_id = msg.compid;      
           // if(pkt.heartbeat.vehicle_sys_id != msg.sysid){ }//Serial.println(DEBUG_INSERT_PAGE_BREAK "RESEND?"); }
           // pkt.heartbeat.vehicle_sys_id = msg.sysid;      
-          ALOG_INF(PSTR("<<<<<<<<< Heartbeat SysID %d CompID %d"), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
+          ALOG_INF(PSTR("<< Heartbeat SysID %d CompID %d"), pkt.heartbeat.vehicle_sys_id, pkt.heartbeat.vehicle_component_id);                        
           pkt.heartbeat.tUpdate = millis();     
         break;
         case MAVLINK_MSG_ID_HOME_POSITION:                         

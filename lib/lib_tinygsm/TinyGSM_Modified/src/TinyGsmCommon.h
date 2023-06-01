@@ -95,8 +95,8 @@ const T& TinyGsmMax(const T& a, const T& b) {
 template <class T>
 uint32_t TinyGsmAutoBaud(T& SerialAT, uint32_t minimum = 9600,
                          uint32_t maximum = 115200) {
-  static uint32_t rates[] = {115200, 57600,  38400, 19200, 9600,  74400, 74880,
-                             230400, 460800, 2400,  4800,  14400, 28800};
+  static uint32_t rates[] = {115200, 921600, 57600,  38400, 19200, 9600,  74400, 74880,
+                             230400, 460800, 2400,  4800,  14400, 28800 };
 
   for (uint8_t i = 0; i < sizeof(rates) / sizeof(rates[0]); i++) {
     uint32_t rate = rates[i];
@@ -115,6 +115,37 @@ uint32_t TinyGsmAutoBaud(T& SerialAT, uint32_t minimum = 9600,
     }
   }
   SerialAT.begin(minimum);
+  return 0;
+}
+
+template <class T>
+uint32_t TinyGsmAutoBaud_CustomPin(T& SerialAT, uint32_t config, int8_t rxPin, int8_t txPin) 
+{
+
+  DBG("TinyGsmAutoBaud_CustomPin");
+
+  static uint32_t rates[] = {(uint32_t)115200, (uint32_t)921600};
+  // , 57600,  38400, 19200, 9600,  74400, 74880,
+  //                            230400, 460800, 2400,  4800,  14400, 28800 };
+
+  for (uint8_t i = 0; i < sizeof(rates) / sizeof(rates[0]); i++) {
+    uint32_t rate = rates[i];
+    // if (rate < minimum || rate > maximum) continue;
+
+    DBG("Trying baud rate", rate, "...");
+    SerialAT.begin(rate, config, rxPin, txPin);
+    delay(10);
+    for (int j = 0; j < 10; j++) {
+      SerialAT.print("AT\r\n");
+      String input = SerialAT.readString();
+      Serial.printf("input>> %s\n\r", input.c_str());
+      if (input.indexOf("OK") >= 0) {
+        DBG("Modem responded at rate", rate);
+        return rate;
+      }
+    }
+  }
+  SerialAT.begin(rates[0], config, rxPin, txPin);
   return 0;
 }
 

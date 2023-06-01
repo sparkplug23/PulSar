@@ -171,16 +171,11 @@ uint8_t mGPS_Modem::ConstructJSON_Sensor(uint8_t json_level, bool json_appending
 
 
 
+
 /*********************************************************************************************\
- * BH1750 - Ambient Light Intensity
- *
- * Bh1750Resolution1   0..2    - Set BH1750 1 resolution mode
- * Bh1750Resolution2   0..2    - Set BH1750 2 resolution mode
- * Bh1750MTime1       30..255  - Set BH1750 1 MT register
- * Bh1750MTime2       30..255  - Set BH1750 2 MT register
- *
- * I2C Address: 0x23 or 0x5C
+ * Commands
 \*********************************************************************************************/
+
 void mGPS_Modem::parse_JSONCommand(JsonParserObject obj)
 {
 
@@ -189,42 +184,6 @@ void mGPS_Modem::parse_JSONCommand(JsonParserObject obj)
   char buffer[50];
   JsonParserToken jtok = 0; 
 
-
-/*********************************************************************************************\
- * Commands
-\*********************************************************************************************/
-
-// void CmndBh1750Resolution(void) {
-//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= settings.sensor_count)) {
-//     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 2)) {
-//       if (1 == XdrvMailbox.index) {
-//         Settings.SensorBits1.bh1750_1_resolution = XdrvMailbox.payload;
-//       } else {
-//         Settings.SensorBits1.bh1750_2_resolution = XdrvMailbox.payload;
-//       }
-//       Set_Resolution(XdrvMailbox.index -1);
-//     }
-//     ResponseCmndIdxNumber(Get_Resolution(XdrvMailbox.index -1));
-//   }
-// }
-
-  // if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Assume range 0-100
-  //   CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-  //   data_buffer.isserviced++;
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), brt);
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  // }
-
-// void CmndBh1750MTime(void) {
-//   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= settings.sensor_count)) {
-//     if ((XdrvMailbox.payload > 30) && (XdrvMailbox.payload < 255)) {
-//       device_data[XdrvMailbox.index -1].mtreg = XdrvMailbox.payload;
-//       Set_MeasurementTimeRegister(XdrvMailbox.index -1);
-//     }
-//     ResponseCmndIdxNumber(device_data[XdrvMailbox.index -1].mtreg);
-//   }
-// }
 
 }
 

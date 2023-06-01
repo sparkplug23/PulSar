@@ -35,7 +35,7 @@ const char* mTelemetry::PM_MODULE_CORE_TELEMETRY_FRIENDLY_CTR = D_MODULE_CORE_TE
 
 int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
 {
-return 0;
+  
   switch(function){
     case FUNC_INIT:
       Init();
@@ -60,7 +60,9 @@ return 0;
       MQTTHandler_Set_DefaultPeriodRate();
       break;
     case FUNC_MQTT_SENDER:
+      #ifndef ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
       MQTTHandler_Sender();
+      #endif
       break;
     case FUNC_MQTT_CONNECTED:
     case FUNC_MQTT_STATUS_REFRESH_SEND_ALL:
@@ -380,7 +382,7 @@ void mTelemetry::MQTTHandler_Init()
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 60; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   ptr->json_level = MQTT_TOPIC_TYPE_IFCHANGED_ID;

@@ -144,6 +144,11 @@ enum CONNECTION_CLIENT_TYPE{
 };
 
 
+// #define MQTT_CONNECTION_CONNECTED_CALLBACK_SIGNATURE std::function<bool(void)> callback
+
+
+
+
 // Contains instance of each connection
 class MQTTConnection
 {
@@ -151,11 +156,21 @@ class MQTTConnection
   
     uint16_t connect_count = 0;            // MQTT re-connect count
     uint16_t retry_counter = 1;            // MQTT connection retry counter
+    
     uint16_t downtime_counter = 0;
-    uint8_t initial_connection_state = 2;  // MQTT connection messages state
+    uint32_t uptime_seconds = 0;
+
+    // uint8_t initial_connection_state = 2;  // MQTT connection messages state
     bool connected = false;                // MQTT virtual connection status
     bool allowed = false;                  // MQTT enabled and parameters valid
     bool mqtt_tls = false;                 // MQTT TLS is enabled
+    bool flag_start_reconnect = false;
+    uint8_t cConnectionAttempts = 0; 
+    uint8_t host_server_type = 0;
+
+
+    char broker_url[100] = {0}; // ip or url, always convert and store IP as string to make this the same method for all types
+    uint16_t port = 0; // 0 means not used
 
     #ifdef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
     uint8_t mqtt_client_type = CLIENT_TYPE_CELLULAR_ID; //default wifi, 1 ethernet, 2 cellular
@@ -163,16 +178,32 @@ class MQTTConnection
     uint8_t mqtt_client_type = CLIENT_TYPE_WIFI_ID; //default wifi, 1 ethernet, 2 cellular
     #endif
 
-    bool flag_start_reconnect = false;
-    uint8_t cConnectionAttempts = 0; 
+    uint32_t tSaved_LastOutGoingTopic = 0; //this needs to become inside instance, so multiple connections dont block others
 
-    uint8_t host_server_type = 0;
+    struct DEBUG{
+      #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+      uint32_t payload_publish_sent = 0;
+      uint32_t payload_publish_missed = 0;
+      float    payload_publish_success_percentage = 0;
+      #endif
+
+    }debug_stats;
+
+    
+    // MQTT_CONNECTION_CONNECTED_CALLBACK_SIGNATURE;
+    // void setCallback(MQTT_CONNECTION_CONNECTED_CALLBACK_SIGNATURE);
+    
+    Client* network_client = nullptr;
+
 
     PubSubClient* pubsub = nullptr; //to be made private
 
-    MQTTConnection( )
+    MQTTConnection(Client* client_in, char* url, uint16_t _port)
     {
-      
+      network_client = client_in;
+      SetPubSubClient(client_in);
+      port = _port;
+      snprintf(broker_url, sizeof(broker_url), url);
     };
 
     MQTTConnection(IPAddress addr, uint16_t port, Client& client)
@@ -196,6 +227,13 @@ class MQTTConnection
     {
       return pubsub->connected();
     }
+
+    // Faster than doing socket open, try this prior to sending
+    bool NetworkConnected()
+    {
+      if(!network_client) return false;
+      return network_client->connected();
+    }
     
     
     void MqttConnected(void);
@@ -207,9 +245,9 @@ class MQTTConnection
     
     void MqttDisconnected(int state);
     void SetPubSubClient(Client* client);
-    void MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t module_id, const char* postfix_topic_ctr);
+    bool MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t module_id, const char* postfix_topic_ctr);
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
-    void publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
+    bool publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
     void publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag);
 
     boolean ppublish(const char* topic, const char* payload, boolean retained = false);
@@ -240,6 +278,54 @@ class mMQTT :
     void parse_JSONCommand(JsonParserObject obj);
 
     std::vector<MQTTConnection*> brokers;
+    
+
+    /**
+     * @brief Create a Connection, only if it is new. Checks are needed
+     * 
+     * returns if new connection has been added
+     * @return true 
+     * @return false 
+     */
+    bool CreateConnection(Client* client_in, char* url, uint16_t _port)
+    {
+
+      
+          // Serial.printf("CreateConnectionn\r\n\r\n\r\n\r\n\r\n");
+          
+
+
+      /**
+       * @brief Check if url already exists
+       **/
+      int8_t found_index = -1;
+      uint8_t search_index = 0;
+      for(auto& con:brokers)
+      {
+        Serial.printf("Checking \"%s\" against existing \"%s\"\n\r\r\n\r\n\r\n\r\n\r\n", url, con->broker_url);
+        if(strcmp(con->broker_url, url)==0)
+        {
+          // Serial.printf("found existing connection with \"%s\" Index:%d\n\r", url, search_index);
+        search_index++;
+        }
+        else
+        {
+          // Serial.printf("NOT found, needs to add \"%s\" Index:%d\n\r", url, search_index);
+        }
+      }
+
+      if(search_index==0) // None found
+      {
+        // Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", url, search_index, brokers.size());
+        brokers.push_back(new MQTTConnection(client_in, url, _port));
+      }
+
+      // Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", url, _port, search_index);
+
+    }
+
+    
+
 
     void MM_EveryLoop()
     {
@@ -263,11 +349,29 @@ class mMQTT :
     {
       for(auto& con:brokers)
       {
-        if(con->connected){
-          if(con->pubsub)
+
+        if(con->pubsub->loop())
+        {
+          // connected maintained by loop call. Same as pubsub->connected(), this does so by checking network client too!
+          
+          // cancel reconnect
+            con->flag_start_reconnect = false;
+            con->retry_counter = 0;
+
+        }
+        else
+        {
+          Serial.println(D_LOG_PUBSUB "loop() Not Connected");
+
+          /**
+           * @brief Check if not waiting to reconnect
+           **/
+          if(!con->retry_counter)
           {
-            con->pubsub->loop();
+            con->flag_start_reconnect = true;
+            con->retry_counter = 10;
           }
+          
         }
       }
     }
@@ -288,9 +392,10 @@ class mMQTT :
 
     const char* GetState_PCtr(int8_t state);
     void Load_New_Subscriptions_From_Function_Template();
-    void EveryLoop();
     
     void setprefixtopic(const char* _prefixtopic);
+
+    void CallMQTTSenders();
 
 
     /**
@@ -323,6 +428,27 @@ class mMQTT :
       if(handler_ptr == nullptr){
         return;
       }
+
+
+      /**
+       * @brief Only permit function to run if at least ONE broker is connected
+       */
+      bool is_any_broker_connected = false;
+      for(auto& con:brokers)
+      {
+        if(con->uptime_seconds)
+        {
+          is_any_broker_connected = true;
+        }
+      }
+      if(!is_any_broker_connected)
+      {
+        Serial.println("MQTTHandler_Command::Blocked");
+        return;
+      }
+
+
+
             
       #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
       Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
@@ -348,11 +474,11 @@ class mMQTT :
         }
       }
 
-      if(handler_ptr->flags.SendNow){ 
-        handler_ptr->flags.SendNow = false;
-        handler_ptr->tSavedLastSent = millis();    
+      if(handler_ptr->flags.SendNow){   
 
         uint8_t fSendPayload = CALL_MEMBER_FUNCTION(class_ptr,handler_ptr->ConstructJSON_function)(handler_ptr->json_level, true);
+
+        bool packet_successfully_sent = false;
          
         // Send MQTT payload with structured output
         if(fSendPayload)
@@ -360,14 +486,57 @@ class mMQTT :
           // Send on each connected broker
           for(auto& con:brokers)
           {
-            con->MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); 
+
+            /*
+            * prior to sending, check if limit time has passed
+            */
+            #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+            if(labs(millis()-con->tSaved_LastOutGoingTopic)>ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS)
+            {
+            #endif // ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+
+              uint32_t tSaved_SendTime = millis();
+
+              packet_successfully_sent = con->MQTTHandler_Send_Formatted(handler_ptr->topic_type,class_id,handler_ptr->postfix_topic); 
+
+              #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+              Serial.printf("^^^^^^^^^^^^^^^^^^^ MQTTHandler_Send_Formatted %dms \n\r", millis()-tSaved_SendTime );
+              #endif
+              
+            #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+              if(packet_successfully_sent){
+                #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+                Serial.printf("^^^^^^^^^^^^^^^^^^^ packet_successfully_sent %s DONE \n\r",handler_ptr->postfix_topic);
+                #endif
+                #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+                con->debug_stats.payload_publish_sent++;
+                con->debug_stats.payload_publish_success_percentage = (float)con->debug_stats.payload_publish_sent/(float)(con->debug_stats.payload_publish_missed+con->debug_stats.payload_publish_sent);
+                #endif
+
+                handler_ptr->flags.SendNow = false;      // Only to be reset if it sent at least once
+                handler_ptr->tSavedLastSent = millis();  // Only to be reset if it sent at least once
+
+              }else{
+                #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+                Serial.printf("------------------- packet_successfully_sent %s ERROR\n\r",handler_ptr->postfix_topic);
+                #endif
+                #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+                con->debug_stats.payload_publish_missed++;
+                con->debug_stats.payload_publish_success_percentage = (float)con->debug_stats.payload_publish_sent/(float)(con->debug_stats.payload_publish_missed+con->debug_stats.payload_publish_sent);
+                #endif
+              }
+            }else{
+                // Serial.printf("------------------- packet_successfully_sent %s LIMIT\n\r",handler_ptr->postfix_topic);
+            }
+            #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+            Serial.printf("last sent %d\n\r", millis()-con->tSaved_LastOutGoingTopic);
+            #endif
+            #endif // ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+
           }
+
         }
-
-        // #ifdef ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT
-
-        // return;
-        // #endif // ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT
+        
 
       }
     };

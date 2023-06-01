@@ -39,6 +39,8 @@
 #include <SD.h>
 #include <Ticker.h>
 
+#include <CStringWriter.h>
+
 #ifdef ESP32
 #include <driver/adc.h>
 #endif
@@ -46,7 +48,7 @@
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
-#define UART_CELLULAR_BAUD   921600
+// #define UART_CELLULAR_BAUD   921600
 #define PIN_DTR     25
 #define PIN_TX      27
 #define PIN_RX      26
@@ -58,7 +60,7 @@
 #define SD_CS       13
 #define LED_PIN     12
 
-#define DEFAULT_AT_COMMAND_RESPONSE_WAIT 10000
+#define DEFAULT_AT_COMMAND_RESPONSE_WAIT 3000
 
 #define AT_COMMAND_RESPONSE_TIMEOUT__CFUN 1000
 #define AT_COMMAND_RESPONSE_TIMEOUT__CNMI 1000
@@ -107,8 +109,19 @@ class mCellular :
     // StreamDebugger debugger(SerialAT, Serial);
     // TinyGsm modem(debugger);
 
-    bool Modem_CheckSerialConnection(bool flag_enable_retries = false);
-    bool Modem_RestartUntilSerialResponse(bool flag_enable_retries = false);
+    
+
+    bool Modem__Running(uint16_t wait_millis = 1000);
+    bool Modem__PowerUntilRunning(uint16_t wait_millis = 5000);
+    bool SimNetwork__InitConfig();
+    bool SimNetwork__StartConnection();
+    bool SimNetwork__CheckConnection();
+
+    bool DataNetwork__InitConfig();
+    bool DataNetwork__StartConnection();
+    bool DataNetwork__CheckConnection();
+
+    bool Modem_CheckAndRestartUnresponsiveModem();
 
 
     float GetSignalQualityPower();
@@ -161,33 +174,38 @@ class mCellular :
     void GPS_Disable();
     void ModemUpdate_GPS();
     void SMS_GPSLocation();
+    void SMS_BatteryDetailed();
     #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
+    void GPRS_UpdateConnectionState(bool state);
+    
     struct GPRS_STATUS
     {
       timereached_t tReached_Update;
-      bool enabled = 0; // 0 disabled, 1 enabled     
-      uint32_t connected_seconds = 0;      
+      bool enabled = 0; // 0 disabled, 1 enabled  
       uint32_t last_comms_millis_updated = 0; 
       float signal_quality_rssi_dbm = 0;
-      int16_t signal_quality_raw = 0;
+      int16_t signal_quality_raw = 0;   
+      uint32_t connected_seconds = 0;      
+      uint16_t downtime_secs = 0;
+
+      bool connected = true;
 
 
       uint16_t reconnect_init_counts = 0;
 
+      uint16_t apn_connect_called = 0;
+
     }gprs;
-    void GPRS_Enable();
     void GPRS_Disable();
     void ModemUpdate_GPRS();
-    void GPRS_Connect();
-
     void Modem_Enable();
 
     struct SMS_STATUS
     {
       timereached_t tReached_Update;
       bool enabled = 0; // 0 disabled, 1 enabled       
-      std::vector<uint8_t> texts_saved_on_sim_indexs;     
+      std::vector<uint8_t> messages_incoming_index_list;     
     }sms;
     void SMS_Enable();
     void SMS_Disable();
@@ -221,7 +239,7 @@ class mCellular :
     
 
 
-    bool flags_modem_init_commands = false;
+    bool flag_modem_initialized = false;
 
     bool parse_ATCommands(char* buffer, uint16_t buflen, uint8_t log_level = 6);
      
@@ -358,6 +376,37 @@ class mCellular :
 // //     uint8_t _skip = 0;
 // // };
 
+      // SendATCommand_SMSFormatAscii(); //tmp
+
+      /**
+       * @brief For debugging, lets check states
+       * 
+       */
+      // modem->sendAT("+CMFG?"); // 1= ascii mode //expected 1
+      // modem->sendAT("+CNMI?"); // <mode>,<mt>,<bm>,<ds>,<bfr> //expected 2,2,0,0,0 
+
+
+      // modem->sendAT("+CPMS?"); // How many SMS are waiting?
+      // modem->sendAT("+CNMI?"); // <mode>,<mt>,<bm>,<ds>,<bfr> //expected 2,2,0,0,0 
+
+
+    // "AT+CMGD=,4",// DELETE ALL MESSAGES (Read or not)
+    // "AT+CMGR=1",
+    // "AT+CMGL=\"REC UNREAD\""
+    // "AT+CPMS?"     // Number of stored SMS
+
+/*
+
+
+{
+  "ATCommands": [
+    "AT+CMGR=1",
+    "AT+CNMI=3,2,0,0,0",
+    "AT+CMGL=\"REC UNREAD\""
+  ]
+}
+
+*/
 
 
 

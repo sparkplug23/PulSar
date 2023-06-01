@@ -125,26 +125,24 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     #ifdef ENABLE_ADVANCED_DEBUGGING
       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIE_%d FUNC time %dms"),millis(),millis()-start_millis);
     #endif
-    // #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS)
-    //   if(this_millis > ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_SPLASH_LONG_LOOPS){
-    //     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
-    //   }
-    // #endif
+    #if defined(ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS)
+      if(this_millis > ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS){
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TASKER @@@@@@@@@@@@@@@@@@ %d ms %s %S"), millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+      }
+    #endif
 
 
-    if(target_tasker!=0){
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
-      #endif// ENABLE_LOG_LEVEL_INFO
+    if(target_tasker!=0)
+    {
+      ALOG_DBM(PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
       break; //only run for loop for the class set. if 0, rull all
     }
     
     // Special flag that can be set to end interface ie event handled, no need to check others
-    if(fExitTaskerWithCompletion){
+    if(fExitTaskerWithCompletion)
+    {
       fExitTaskerWithCompletion=false;
-      #ifdef ENABLE_LOG_LEVEL_INFO
-        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
-      #endif// ENABLE_LOG_LEVEL_INFO
+      ALOG_DBM(PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
       break; //only run for loop for the class set. if 0, rull all
     }
   

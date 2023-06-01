@@ -4,7 +4,7 @@
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 //move functions into taskermanager
-enum XsnsFunctions {
+enum TASKER_FUNCTION_TYPES {
   // Init stuff (in importance of boot)
   
   // FUNC_CHECK_POINTERS, //phased out
@@ -87,6 +87,9 @@ enum XsnsFunctions {
   // FUNC_AT_TIME_1_MINUTE,
   // Welcome message to show on boot after X seconds with config
   // FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
+
+  // New list of support items to splash debug info
+  FUNC_LOG__SHOW_UPTIME,
 
   // New method that based on time, will only show the sensor at this period to "AddLog" reducing large serial prints
   FUNC_SENSOR_SHOW_LATEST_LOGGED_ID,
@@ -241,7 +244,15 @@ enum XsnsFunctions {
   FUNC_LIGHT_UPDATE_OUTPUT,
 
 
-  FUNC_FINALLY_END_OF_LOOP // Ran at the end of each loop, used to reset flags that should have been handled eg motion
+  FUNC_CELLULAR_CONNECTION_ESTABLISHED, 
+  FUNC_CELLULAR_CONNECTION_LOST,
+  FUNC_NETWORK_CONNECTION_ESTABLISHED, // Generalised for any connection type (wifi, cellular, ethernet)
+  FUNC_NETWORK_CONNECTION_LOST,
+
+
+  FUNC_FINALLY_END_OF_LOOP, // Ran at the end of each loop, used to reset flags that should have been handled eg motion
+
+  FUNC_LENGTH
 };
 
 #ifdef ENABLE_DEBUG_FUNCTION_NAMES

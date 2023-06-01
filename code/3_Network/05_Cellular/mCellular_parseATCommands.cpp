@@ -37,22 +37,82 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
   if(result)
   {
     ALOG_INF(PSTR(D_LOG_CELLULAR "Parsed \"CMT\" result >>>\n\r%s\n\r<<<"), result);
-    ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
 
-    ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Content \"%s\""), buffer2);
+    // ATResponse_Parse_CMT(buffer, buffer2, sizeof(buffer2));
 
-    #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    // Check for request at GPS
-    if (strcasecmp(buffer2, "GPS") == 0)
-    {
-      ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for GPS"));
-      SMS_GPSLocation();
-    }
-    else{
-      ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
-      SMS_GPSLocation();
-    }
-    #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    // ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Content \"%s\""), buffer2);
+
+    // #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    // // Check for request at GPS
+    // if (strcasecmp(buffer2, "GPS") == 0)
+    // {
+    //   ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for GPS"));
+    //   SMS_GPSLocation();
+    // }else
+    // if (strcasecmp(buffer2, "Batt") == 0)
+    // {
+    //   ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for Battery"));
+    //   SMS_BatteryDetailed();
+    // }
+    // else{
+    //   ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
+    //   SMS_GPSLocation();
+    // }
+    // #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+
+    // const char* delims = "\r\n"; //space + ,
+    // char* tok = strtok(result, delims); // I believe all delims are replaced by NULL?
+
+    // if(tok)
+    // {  
+    //   /**
+    //   for (int i=0;i<5;i++)
+    //   {
+    //     ALOG_INF(PSTR("tok[%d] = %s"), i, tok?tok:"ERROR");
+    //     tok = strtok(NULL, delims);
+    //   }
+
+    //   01:06 INF tok[0] = +CMGR: "REC READ","+447515358597",,"23/05/12,21:28:36+04"
+    //   01:06 INF tok[1] = Message1
+    //   01:06 INF tok[2] = OK
+    //   01:06 INF tok[3] = ERROR
+    //   01:06 INF tok[4] = ERROR
+    //   **/
+    
+
+    //   tok = strtok(NULL, delims);   // SMS header
+    //   // tok = strtok(NULL, delims); 
+    //   char sms_contents[160];
+
+    //   if(tok != NULL) 
+    //   {   
+    //     snprintf(sms_contents, sizeof(sms_contents), tok); 
+    //     ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Message = \"%s\""), sms_contents);
+
+    //     #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    //     if (strcasecmp(sms_contents, "GPS") == 0)
+    //     {
+    //       ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for GPS"));
+    //       SMS_GPSLocation();
+    //     }
+    //     else
+    //     if (strcasecmp(sms_contents, "Batt") == 0)
+    //     {
+    //       ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for Battery"));
+    //       SMS_BatteryDetailed();
+    //     }
+    //     else
+    //     {
+    //       ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
+    //       SMS_GPSLocation();
+    //     }
+    //     #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+    //   }
+
+    // }
+
 
   }
   
@@ -74,7 +134,7 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
      * @brief Add unique name
      **/
     
-    sms.texts_saved_on_sim_indexs.push_back(new_sms_index);
+    sms.messages_incoming_index_list.push_back(new_sms_index);
     }
 
 
@@ -85,10 +145,10 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
     // const char* delims2 = ","; //space + ,
     // char* tok_ids = strtok(buffer_id, delims2); 
     // uint8_t i = 0;
-    // sms.texts_saved_on_sim_indexs.clear();
+    // sms.messages_incoming_index_list.clear();
     // while(tok_ids){
     //   ALOG_INF(PSTR("tok_ids[%d] = %s"), i++, tok_ids?tok_ids:"ERROR");
-    //   sms.texts_saved_on_sim_indexs.push_back(atoi(tok_ids));
+    //   sms.messages_incoming_index_list.push_back(atoi(tok_ids));
     //   tok_ids = strtok(NULL, delims2);
     // }
 
@@ -181,52 +241,58 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
   result2 = strstr(buffer, "+CMGR:"); 
   if(result2)
   {
-    ALOG_HGL(PSTR(D_LOG_CELLULAR "MATCHED \"CMGR\" >>%s<<"), result2);
+    ALOG_HGL(PSTR(D_LOG_CELLULAR "MATCHED \"CMGR\"\n\r>>%s<<"), result2);
 
     const char* delims = "\r\n"; //space + ,
     char* tok = strtok(result2, delims); // I believe all delims are replaced by NULL?
 
     if(tok)
     {  
-    /**
-    for (int i=0;i<5;i++)
-    {
-      ALOG_INF(PSTR("tok[%d] = %s"), i, tok?tok:"ERROR");
-      tok = strtok(NULL, delims);
-    }
-
-    01:06 INF tok[0] = +CMGR: "REC READ","+447515358597",,"23/05/12,21:28:36+04"
-    01:06 INF tok[1] = Message1
-    01:06 INF tok[2] = OK
-    01:06 INF tok[3] = ERROR
-    01:06 INF tok[4] = ERROR
-    **/
-  
-
-    tok = strtok(NULL, delims);   // SMS header
-    // tok = strtok(NULL, delims); 
-    char sms_contents[160];
-
-    if(tok != NULL) 
-    {   
-      snprintf(sms_contents, sizeof(sms_contents), tok); 
-      ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Message = \"%s\""), sms_contents);
-        
-      #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-      // Check for request at GPS
-      if (strcasecmp(sms_contents, "GPS") == 0)
+      /**
+      for (int i=0;i<5;i++)
       {
-        ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for GPS"));
-        SMS_GPSLocation();
+        ALOG_INF(PSTR("tok[%d] = %s"), i, tok?tok:"ERROR");
+        tok = strtok(NULL, delims);
       }
-      else{
-        ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
-        SMS_GPSLocation();
+
+      01:06 INF tok[0] = +CMGR: "REC READ","+447515358597",,"23/05/12,21:28:36+04"
+      01:06 INF tok[1] = Message1
+      01:06 INF tok[2] = OK
+      01:06 INF tok[3] = ERROR
+      01:06 INF tok[4] = ERROR
+      **/
+    
+
+      tok = strtok(NULL, delims);   // SMS header
+      // tok = strtok(NULL, delims); 
+      char sms_contents[160];
+
+      if(tok != NULL) 
+      {   
+        snprintf(sms_contents, sizeof(sms_contents), tok); 
+        ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Message = \"%s\""), sms_contents);
+
+        #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+        if (strcasecmp(sms_contents, "GPS") == 0)
+        {
+          ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for GPS"));
+          SMS_GPSLocation();
+        }
+        else
+        if (strcasecmp(sms_contents, "Batt") == 0)
+        {
+          ALOG_INF(PSTR(D_LOG_CELLULAR "SMS Request for Battery"));
+          SMS_BatteryDetailed();
+        }
+        else
+        {
+          ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
+          SMS_GPSLocation();
+        }
+        #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
       }
-      #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
-
-    }
     }
 
   }
@@ -282,10 +348,10 @@ void mCellular::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8
         const char* delims2 = ","; //space + ,
         char* tok_ids = strtok(buffer_id, delims2); 
         uint8_t i = 0;
-        sms.texts_saved_on_sim_indexs.clear();
+        sms.messages_incoming_index_list.clear();
         while(tok_ids){
           AddLog(response_loglevel,PSTR("tok_ids[%d] = %s"), i++, tok_ids?tok_ids:"ERROR");
-          sms.texts_saved_on_sim_indexs.push_back(atoi(tok_ids));
+          sms.messages_incoming_index_list.push_back(atoi(tok_ids));
           tok_ids = strtok(NULL, delims2);
         }
 

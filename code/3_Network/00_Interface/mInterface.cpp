@@ -100,10 +100,14 @@ void mInterfaceNetwork::EveryLoop()
 
 }
 
-
+/**
+ * @brief Probably not to be used for mqtt, as the socket can now be checked within instance
+ * Adding a debug message so I know its being called, though it will be used later as general connection agent
+ * 
+ */
 bool mInterfaceNetwork::Connected(uint8_t type)
 {
-
+  ALOG_ERR(PSTR("mInterfaceNetwork::Connected"));
 
   #ifdef USE_MODULE_NETWORK_WIFI
   if(

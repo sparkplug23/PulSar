@@ -57,63 +57,12 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
         StartMdns();
       #endif  // USE_NETWORK_MDNS
 
-      #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
-      if(pCONT_mqtt->brokers.size()==0)
-      {
-        pCONT_mqtt->brokers.push_back(new MQTTConnection());
-        pCONT_mqtt->brokers[0]->mqtt_client_type = CLIENT_TYPE_WIFI_ID;
-      }
-      #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
-
-      if(pCONT_mqtt->brokers[0]->mqtt_client_type == CLIENT_TYPE_WIFI_ID)
-      {
-        mqtt_client = new WiFiClient();
-        pCONT_mqtt->brokers[0]->SetPubSubClient(mqtt_client);
-  DEBUG_LINE_HERE;
-
-        
-  #ifdef ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST2
-
-  IPAddress mqqtserver1(192,168,1,70);
-  pCONT_mqtt->brokers.push_back(
-    new MQTTConnection(
-      mqqtserver1, 
-      1883,
-      *mqtt_client
-    )
-  );
-  
-  mqtt_client2 = new WiFiClient();
-  IPAddress mqqtserver2(192,168,1,66);
-  pCONT_mqtt->brokers.push_back(
-    new MQTTConnection(
-      mqqtserver2, 
-      1883,
-      *mqtt_client2
-    )
-  );
-  #endif // ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST2
-
-
-
-
-        #ifdef ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST
-
-        IPAddress mqqtserver(D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED);
-        pCONT_mqtt->brokers[0]->pubsub->setServer(mqqtserver, 1883);
-
-
-        pCONT_mqtt->brokers[1]->SetPubSubClient(new WiFiClient());
-  DEBUG_LINE_HERE;
-        IPAddress mqqtserver2(192,168,1,66);
-        pCONT_mqtt->brokers[1]->pubsub->setServer(mqqtserver2, 1883);
-
-
-        #endif // ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST
-        
-
-
-      }
+      #ifdef ENABLE_DEVFEATURE_MQTT_USING_WIFI
+      ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
+      mqtt_client = new WiFiClient();
+      pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, D_MQTT_PORT);
+      #endif // ENABLE_DEVFEATURE_MQTT_USING_WIFI
+      
 
     break;
   }
