@@ -877,7 +877,7 @@
 #define D_FLASH_WRITE_COUNT "Flash write Count"
 #define D_MAC_ADDRESS "MAC Address"
 #define D_MQTT_HOST "MQTT Host"
-#define D_MQTT_PORT "MQTT Port"
+#define MQTT_PORT "MQTT Port"
 #define D_MQTT_CLIENT "MQTT Client"
 #define D_MQTT_USER "MQTT User"
 #define D_MQTT_TOPIC "MQTT Topic"
@@ -1197,6 +1197,11 @@
 #define D_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR  "Fona RI"
 
 
+
+#define D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR "Modem DTR"
+#define D_GPIO_FUNCTION__MODEM_TX__CTR "Modem TX"
+#define D_GPIO_FUNCTION__MODEM_RX__CTR "Modem RX"
+#define D_GPIO_FUNCTION__MODEM_POWER__CTR "Modem PWR"
 
 
 #define D_GPIO_FUNCTION_BUILTIN_LED1_CTR              "Builtin LED 1" // only enabled if available and not being used by another pin

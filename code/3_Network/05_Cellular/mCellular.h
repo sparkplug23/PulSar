@@ -174,8 +174,24 @@ class mCellular :
     void GPS_Disable();
     void ModemUpdate_GPS();
     void SMS_GPSLocation();
+    void SMS_GPSLocationAuto();
     void SMS_BatteryDetailed();
+
+
+    struct SMSAuto_GPS_Messages{
+      uint16_t rate_seconds = 0; //0 is disable
+      uint32_t tSaved_LastSent = 0;
+    }smsauto_gps_messages;
+    void AutoSMS_Messages_Handle();
+
+
     #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+    
+    void SMS_CommandIntoJSONCommand(char* command);
+
+
+
 
     void GPRS_UpdateConnectionState(bool state);
     

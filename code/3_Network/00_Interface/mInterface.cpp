@@ -107,7 +107,7 @@ void mInterfaceNetwork::EveryLoop()
  */
 bool mInterfaceNetwork::Connected(uint8_t type)
 {
-  ALOG_ERR(PSTR("mInterfaceNetwork::Connected"));
+  // ALOG_ERR(PSTR("mInterfaceNetwork::Connected"));
 
   #ifdef USE_MODULE_NETWORK_WIFI
   if(

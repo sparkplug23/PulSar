@@ -1,70 +1,55 @@
 #include "mMQTT.h"
 
-#if defined(USE_MODULE_NETWORK_MQTT)
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void MQTTConnection::MqttConnected(void)
 {
   
   connected = true;
   retry_counter = 0;
+  cConnectionAttempts = 0; // reset
 
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
+  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"), pCONT_sup->GetResetReason().c_str(), pCONT_time->uptime.hhmmss_ctr);
   
   #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
-    pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic,lwt_message_ondisconnect_ctr,true); // onconnect message
+    pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, lwt_message_ondisconnect_ctr, true); // onconnect message
     delay(100);
   #endif
   
   Send_LWT_Online();
   
   #ifdef USE_MQTT_RETAINED_VERSION_HISTORY_CHECK // for checking version history
-    pubsub->subscribe(("TBD_firmware/set/settings/firmware")); //PSTR failure
+    psubscribe(PSTR("TBD_firmware/set/settings/firmware"));
   #endif
   
   // Group name for setting all devices
-  pubsub->subscribe(("group_all/#"));//(PSTR("group_all/#"));
+  psubscribe(PSTR("group_all/#"));
   
   // subscribe("<devicename>/sync"); //namesake sync name
   psubscribe(PSTR(D_MQTT_SYNC "/#"));
   
   // subscribe("<devicename>/set/#");
   psubscribe(PSTR(D_MQTT_COMMAND "/#"));
-  
-  cConnectionAttempts = 0; // reset
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connection SUCCESS!\""));
-  #endif// ENABLE_LOG_LEVEL_INFO
-  
   // if succesful, clear flag
   flag_start_reconnect = false;
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connected? %d!\""),pubsub->connected());
-  #endif //  ENABLE_LOG_LEVEL_INFO
-
-  // DEBUG_LINE;
+  
   #ifndef ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
   pCONT->Tasker_Interface(FUNC_MQTT_CONNECTED);
   #endif
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT " \"Connected? %d!\""),pubsub->connected());
-  #endif //  ENABLE_LOG_LEVEL_INFO
-    
-  // initial_connection_state = 0;
-
 }
+
 
 void MQTTConnection::Send_LWT_Online()
 {
-  pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true); // onconnect message
+  pubsub->publish(pCONT_set->Settings.mqtt.lwt_topic, WILLMESSAGE_ONCONNECT_CTR, true);
 }
     
 
-void MQTTConnection::CheckConnection()
-{ DEBUG_PRINT_FUNCTION_NAME;
+void MQTTConnection::EverySecond()
+{
 
   #ifdef ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
   ALOG_INF(PSTR("MQTTConnection::CheckConnection \"%s\""), broker_url);
@@ -79,6 +64,7 @@ void MQTTConnection::CheckConnection()
 
     pCONT_set->global_state.mqtt_down = 1;
     uptime_seconds = 0;
+    downtime_counter++;
 
     if(retry_counter == 0)
     {
@@ -110,71 +96,22 @@ void MQTTConnection::CheckConnection()
 
 }
 
-void MQTTConnection::EverySecond()
-{
-
-  // uint32_t before_millis = millis();
-
-  // bool is_connected = network_client->connected();//  pCONT_interface_network->Connected();
-
-  // uint32_t elapsed_millis = millis() - before_millis;
-
-  // ALOG_INF(PSTR("Aelapsed_millis = %d"), elapsed_millis);
-
-
-  // if(is_connected)
-  // {
-  //   // AddLog(LOG_LEVEL_TEST, PSTR("IS Connected"));
-  //   before_millis = millis();
-
-    CheckConnection();
-
-    // elapsed_millis = millis() - before_millis;
-  //   ALOG_INF(PSTR("Belapsed_millis = %d"), elapsed_millis);
-
-
-
-  // }else{
-  //   AddLog(LOG_LEVEL_TEST, PSTR("NOT Connected"));
-
-  // }
-}
-
 
 void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
-  
   
   uint32_t before_millis = millis();
 
   ALOG_HGL(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION " to \"%s:%d\""), broker_url, port);
   
-  DEBUG_LINE;
   connected = false;
   retry_counter = pCONT_set->Settings.mqtt_retry;
   pCONT_set->global_state.mqtt_down = 1;
 
-
-  DEBUG_LINE;
-  // DEBUG_CHECK_AND_PRINT_NULLPTR(pubsub);
-  // If object was created, AND connected was the previous state, disconnect first
   if(pubsub!=nullptr)
   {
     if (pubsub->connected()) { pubsub->disconnect(); }
   }  
 
-  // if(pubsub==nullptr)
-  // {
-  //   ALOG_ERR(PSTR("Wifi or GSM must set client first depending on network connection type"));
-  //   return ;
-  // }
-  
-  DEBUG_LINE;
-
-  // if (2 == initial_connection_state) {  // Executed once just after power on and wifi is connected
-  //   initial_connection_state = 1;
-  // }
-
-// change this to use callback in the future again
   pubsub->setCallback(
     [this](char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){
       this->MqttDataHandler(mqtt_topic, mqtt_data, data_len);
@@ -185,7 +122,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"reset_reason\":\"%s\",\"uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
+  sprintf_P(lwt_message_ondisconnect_ctr,PSTR("{\"LWT\":\"Offline\",\"ResetReason\":\"%s\",\"Uptime\":\"%s\"}"),pCONT_sup->GetResetReason().c_str(),pCONT_time->uptime.hhmmss_ctr);
 
   uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
   #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
@@ -219,7 +156,6 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
     #endif // 
     MqttDisconnected(pubsub->state());  // status codes are documented here http://pubsubclient.knolleary.net/api.html#state
   }
-
   
   uint32_t elapsed_millis = millis() - before_millis;
 
@@ -233,7 +169,8 @@ void MQTTConnection::MqttDisconnected(int state)
   DEBUG_PRINT_FUNCTION_NAME;
   
   cConnectionAttempts++;    
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "Connection FAILED, state = [%s], retrying in %d ms"),state_ctr(),rSavedReconnectAttempt);
+
+  // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MQTT "Connection FAILED, state = [%s], retrying in %d ms"),state_ctr(),rSavedReconnectAttempt);
 
   connected = false;
   retry_counter = pCONT_set->Settings.mqtt_retry; // begin reconnect phase
@@ -250,10 +187,6 @@ void MQTTConnection::MqttDisconnected(int state)
 
 void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len){ DEBUG_PRINT_FUNCTION_NAME;
 
-  // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_TEST, PSTR("MqttDataHandler"));
-  // #endif// ENABLE_LOG_LEVEL_INFO
-
   // Do not allow more data than would be feasable within stack space
   if (data_len >= MQTT_MAX_PACKET_SIZE) { return; }
 
@@ -267,9 +200,6 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
   if(data_len){
     data_buffer.flags.waiting = true;
   }
-
-  // Method which checks if the data was directly meant for it (not json formatted but raw)
-  // if(pCONT->Tasker_Interface(FUNC_MQTT_DATA_ID)){ return; }
 
   if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
     // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
@@ -291,6 +221,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
 
 }
 
+
 boolean MQTTConnection::psubscribe(const char* topic) {
   char ttopic[70];
   memset(ttopic,0,sizeof(ttopic));
@@ -298,6 +229,7 @@ boolean MQTTConnection::psubscribe(const char* topic) {
   ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
   return pubsub->subscribe(ttopic, 0);
 }
+
 
 /**
  * @brief 
@@ -312,7 +244,6 @@ void MQTTConnection::SetPubSubClient(Client* client_in)
 }
 
 
-// Send packet with payload using va_list
 void MQTTConnection::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 {
 
@@ -324,7 +255,6 @@ void MQTTConnection::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
   ppublish(topic, data_buffer.payload.ctr, false);
 
 }// END function
-
 
 
 /**
@@ -340,16 +270,6 @@ bool MQTTConnection::MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t mod
 {
 
   PGM_P module_ctr = pCONT->GetModuleFriendlyName(module_id);
-
-  // uint8_t loglevel = LOG_LEVEL_DEBUG_MORE;
-  // #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
-  // loglevel = LOG_LEVEL_TEST;
-  // #endif
-  // loglevel = LOG_LEVEL_INFO;
-
-  // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted %d %s %s %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected());
-  // #endif// ENABLE_LOG_LEVEL_INFO
 
   bool sent_status = false;
 
@@ -367,14 +287,9 @@ bool MQTTConnection::MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t mod
 
   return sent_status;
 
-  // #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(loglevel,PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted COMPLETE %d %s %s %d %d"),topic_type,module_ctr,postfix_topic_ctr,pubsub->connected(), strlen(data_buffer.payload.ctr));
-  // #endif// ENABLE_LOG_LEVEL_INFO
-
 }
 
 
-//formatted topic
 bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){
 
   char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
@@ -413,7 +328,7 @@ void MQTTConnection::publish_status_module(const char* module_name, const char* 
 
 }
 
-// My function for adding prefix by device name
+
 boolean MQTTConnection::ppublish(const char* topic, const char* payload, boolean retained)
 {
 
@@ -454,64 +369,18 @@ boolean MQTTConnection::ppublish(const char* topic, const char* payload, boolean
 
 
 /**
- * @brief progmem payload version 
+ * @brief progmem payload version  My function for adding prefix by device name
  * 
  * @param topic 
  * @param payload 
  * @param retained 
  * @return boolean 
  */
-// My function for adding prefix by device name
 boolean MQTTConnection::ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained){
 
-//   //// AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "!pubsub->connected() BEFORE "));
-//     if (!pubsub->connected()) {
-//       #ifdef ENABLE_LOG_LEVEL_INFO
-//       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "NOT CONNECTED \"ppublish\" failed!"));
-//       #endif// ENABLE_LOG_LEVEL_INFO
-//       flag_start_reconnect = true;
-//       return false;
-//     }
-    
-//     if(strlen_P(payload)<1){
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//       AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "strlen(payload)<1"));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//     }
-
-// // Serial.println(WiFi.localIP());
-// // Serial.println(static_cast<uint32_t>(WiFi.localIP())); 
-
-// #ifdef USE_MODULE_NETWORK_WIFI
-// #ifndef DISABLE_DEVFEATURE_NETWORK_WIFI
-//     if (!pCONT_wif->WifiCheckIpConnected()) {
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//         AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early pp"));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//         return false;
-//     }else{
-//         //AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "WiFi.status()=%d"),WiFi.status());
-//     }
-
-// if(WiFi.status() != WL_CONNECTED){ 
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PUBSUB "Unable to publish no connection -- Exiting early"));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//   return false;
-// }
-
-// #endif // DISABLE_DEVFEATURE_NETWORK_WIFI
-// #endif // USE_MODULE_NETWORK_WIFI
-// DEBUG_LINE;
-
-//return 0;//
-
-    char convctr[100]; memset(convctr,0,sizeof(convctr));
-    //Serial.println(pCONT_set->Settings.mqtt.prefixtopic); Serial.flush();
-    // Serial.println(topic); Serial.flush();
-    snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
-  
-    return pubsub->publish_P(convctr, payload, retained);
+  char convctr[100]; memset(convctr,0,sizeof(convctr));
+  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),pCONT_set->Settings.mqtt.prefixtopic,topic);
+  return pubsub->publish_P(convctr, payload, retained);
     
 }
 

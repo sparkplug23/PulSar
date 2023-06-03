@@ -285,6 +285,12 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
           SMS_BatteryDetailed();
         }
         else
+        if (strcasecmp(sms_contents, "Command")>0)
+        {
+          ALOG_INF(PSTR(D_LOG_CELLULAR "Future Command with format \"Command KEY VALUE\" that will be shaped into JSON and send to parser"));
+          SMS_CommandIntoJSONCommand(sms_contents);
+        }
+        else
         {
           ALOG_INF(PSTR(D_LOG_CELLULAR "Unknown Message"));
           SMS_GPSLocation();

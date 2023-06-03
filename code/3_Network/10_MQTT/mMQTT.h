@@ -137,7 +137,7 @@ class mSupport;
 #define WILLMESSAGE_ONCONNECT_CTR "{\"LWT\":\"Online\"}"
 
 
-enum CONNECTION_CLIENT_TYPE{
+enum ConnectionClient_t{
   CLIENT_TYPE_WIFI_ID = 0,
   CLIENT_TYPE_ETHERNET_ID,
   CLIENT_TYPE_CELLULAR_ID
@@ -172,11 +172,8 @@ class MQTTConnection
     char broker_url[100] = {0}; // ip or url, always convert and store IP as string to make this the same method for all types
     uint16_t port = 0; // 0 means not used
 
-    #ifdef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    uint8_t mqtt_client_type = CLIENT_TYPE_CELLULAR_ID; //default wifi, 1 ethernet, 2 cellular
-    #else
-    uint8_t mqtt_client_type = CLIENT_TYPE_WIFI_ID; //default wifi, 1 ethernet, 2 cellular
-    #endif
+    ConnectionClient_t client_type = CLIENT_TYPE_WIFI_ID; //default wifi, 1 ethernet, 2 cellular
+   
 
     uint32_t tSaved_LastOutGoingTopic = 0; //this needs to become inside instance, so multiple connections dont block others
 
@@ -198,11 +195,12 @@ class MQTTConnection
 
     PubSubClient* pubsub = nullptr; //to be made private
 
-    MQTTConnection(Client* client_in, char* url, uint16_t _port)
+    MQTTConnection(Client* client_in, char* url, uint16_t _port, ConnectionClient_t _type)
     {
       network_client = client_in;
       SetPubSubClient(client_in);
       port = _port;
+      client_type = _type;
       snprintf(broker_url, sizeof(broker_url), url);
     };
 
@@ -238,7 +236,6 @@ class MQTTConnection
     
     void MqttConnected(void);
     boolean psubscribe(const char* topic);
-    void CheckConnection();
     void MqttReconnect();  
 
     void MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len);  
@@ -287,7 +284,7 @@ class mMQTT :
      * @return true 
      * @return false 
      */
-    bool CreateConnection(Client* client_in, char* url, uint16_t _port)
+    bool CreateConnection(Client* client_in, char* url, uint16_t _port, ConnectionClient_t type)
     {
 
       
@@ -317,7 +314,7 @@ class mMQTT :
       if(search_index==0) // None found
       {
         // Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", url, search_index, brokers.size());
-        brokers.push_back(new MQTTConnection(client_in, url, _port));
+        brokers.push_back(new MQTTConnection(client_in, url, _port, type));
       }
 
       // Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", url, _port, search_index);

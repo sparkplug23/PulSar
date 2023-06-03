@@ -38,14 +38,11 @@ void mCellular::ModemUpdate_GPRS()
       /**
        * @brief Check connection is still active
        */              
-      DEBUG_LINE_HERE;
       
       if (modem->isGprsConnected()) 
       {
 
-      DEBUG_LINE_HERE;
         GPRS_UpdateConnectionState(true);
-      DEBUG_LINE_HERE;
 
         gprs.signal_quality_raw = modem->getSignalQuality();
 
@@ -81,9 +78,7 @@ void mCellular::ModemUpdate_GPRS()
       } 
       else 
       {
-      DEBUG_LINE_HERE;
         GPRS_UpdateConnectionState(false);
-      DEBUG_LINE_HERE;
         ALOG_INF(PSTR(D_LOG_CELLULAR "GPRS status: NOT connected Downtime: %d secs"), gprs.downtime_secs);
         DataNetwork__StartConnection();
       }

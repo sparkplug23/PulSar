@@ -2123,7 +2123,7 @@
 
 // //   // // if (pCONT_set->Settings.flag_system.mqtt_enabled) {
 // //   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_HOST "}2%s"), pCONT_set->Settings.mqtt_host);
-// //   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_PORT "}2%d"), pCONT_set->Settings.mqtt_port);
+// //   // //   AppendBuffer_PI2(PSTR("}1" MQTT_PORT "}2%d"), pCONT_set->Settings.mqtt_port);
 // //   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_USER "}2%s"), pCONT_set->Settings.mqtt_user);
 // //   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_CLIENT "}2%s"), pCONT_set->mqtt_client);
 // //   // //   AppendBuffer_PI2(PSTR("}1" D_MQTT_TOPIC "}2%s"), pCONT_set->Settings.mqtt_topic);

@@ -256,7 +256,7 @@ bool mCellular::DataNetwork__StartConnection()
       {
         gsm_client = new TinyGsmClient(*modem); // Only create new if it didnt already exist
       }
-      pCONT_mqtt->CreateConnection(gsm_client, MQTT_HOST_CELLULAR, MQTT_PORT_CELLULAR);
+      pCONT_mqtt->CreateConnection(gsm_client, MQTT_HOST_CELLULAR, MQTT_PORT_CELLULAR, CLIENT_TYPE_CELLULAR_ID);
         
 
 

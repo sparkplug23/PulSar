@@ -141,4 +141,27 @@ void mCellular::SendATCommand_SMSImmediateForwardOverSerial()
 }
 
 
+
+void mCellular::AutoSMS_Messages_Handle()
+{
+
+  /**
+   * @brief Message1: Send GPS if requested
+   * 
+   */
+  if(smsauto_gps_messages.rate_seconds>0) //if it set to auto
+  {
+
+    if(mTime::TimeReached(&smsauto_gps_messages.tSaved_LastSent, smsauto_gps_messages.rate_seconds*1000))
+    {
+      SMS_GPSLocationAuto();
+    }
+
+
+  }
+
+
+
+}
+
 #endif // USE_MODULE_NETWORK_CELLULAR

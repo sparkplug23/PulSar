@@ -99,22 +99,26 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
           break;
         }
 
-        #ifndef ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
-        DataNetwork__InitConfig();
-        DataNetwork__StartConnection();
-        #endif
+        // Only complete config if modem is working as expected, otherwise retry init again
+        if(DataNetwork__InitConfig())
+        {
+          
+          DataNetwork__StartConnection();
 
-        #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-        GPS_Enable();
-        #endif 
+          #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+          GPS_Enable();
+          #endif 
 
-        SMS_Enable();
+          SMS_Enable();
 
-        flag_modem_initialized = true;
-        DEBUG_LINE_HERE;
+          flag_modem_initialized = true;
+          DEBUG_LINE_HERE;
+        }
 
 
       }
+
+      AutoSMS_Messages_Handle();
       
       #ifdef ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
 

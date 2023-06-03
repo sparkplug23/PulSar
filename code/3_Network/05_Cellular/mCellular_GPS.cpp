@@ -161,6 +161,120 @@ void mCellular::SMS_GPSLocation()
 
 }
 
+
+// https://www.google.com/maps?ll=xx.x,-x.xx
+void mCellular::SMS_GPSLocationAuto()
+{
+  
+  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS: Sending GPS Location"));
+
+  CStringWriter sms_text(STANDARD_SMS_CHAR_LENGTH);
+
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+  
+  float mavlink_lat = (float)pCONT_mavlink->pkt.gps_raw_int.data.lat/10000000;
+  Serial.println(mavlink_lat);
+  char convf_mavlink_lat[TBUFFER_SIZE_FLOAT]; 
+  mSupport::float2CString(mavlink_lat,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lat);
+
+  float mavlink_lon = (float)pCONT_mavlink->pkt.gps_raw_int.data.lon/10000000;
+  char convf_mavlink_lon[TBUFFER_SIZE_FLOAT]; 
+  mSupport::float2CString(mavlink_lon,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_mavlink_lon);
+
+  sms_text.Append_P(PSTR("b%d%% c%d\n"),  pCONT_mavlink->pkt.battery_status.data.battery_remaining, pCONT_mavlink->pkt.battery_status.data.current_consumed);
+  sms_text.Append_P(PSTR("WP i%d %dm\n"), pCONT_mavlink->pkt.mission_current.data.seq, pCONT_mavlink->pkt.nav_controller_output.data.wp_dist);
+  sms_text.Append_P(PSTR("%dms\n"),       millis()-pCONT_mavlink->pkt.tSaved_Last_Response);
+  sms_text.Append_P(PSTR("https://www.google.com/maps/dir//%s,%s\n"), convf_mavlink_lat, convf_mavlink_lon);
+
+  #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER
+  
+  /**
+   * @brief GPS Modem
+   **/
+  char convf_lat[TBUFFER_SIZE_FLOAT];
+  mSupport::float2CString(gps.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat);
+  char convf_lon[TBUFFER_SIZE_FLOAT];
+  mSupport::float2CString(gps.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
+  char convf_fix[TBUFFER_SIZE_FLOAT];
+  mSupport::float2CString(gps.accuracy,2,convf_fix);
+  
+  sms_text.Append_P(PSTR("AutoSend %d secs\n"),  smsauto_gps_messages.rate_seconds);
+  sms_text.Append_P(PSTR("f%s m\n"),  convf_fix);
+  sms_text.Append_P(PSTR("https://www.google.com/maps/dir//%s,%s\n"), convf_lat, convf_lon);
+
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR "sms_text[%d] \"%s\""), sms_text.length(), sms_text.data());
+  
+  bool res = modem->sendSMS(SMS_TARGET, String(sms_text.data()));
+  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS:"), res ? "OK" : "fail");
+
+}
+
+
+
+/**
+ * @brief New method that takes in SMS formatted as "Command:Key:Value" so test case is Command:SMS_GPS_Auto:1 or Command:SMS_GPS_Something:"string", ie key is assumed string but value must have its type added, "string", number, [array]
+ * 
+ * @param sms_command 
+ */
+void mCellular::SMS_CommandIntoJSONCommand(char* sms_command)
+{
+
+  /**
+   * @brief SMS message will contain the repeat rate, and its handled in another call (in seconds)
+   * 
+   */
+  ALOG_INF(PSTR(D_LOG_CELLULAR "sms_command >>%s<<"), sms_command);
+
+  const char* delims = ":"; //space + , "GPSAuto 123" where the space splits the command and number
+  char* tok = strtok(sms_command, delims); // I believe all delims are replaced by NULL?
+
+  if(tok)
+  {  
+    // for (int i=0;i<5;i++)
+    // {
+    //   ALOG_INF(PSTR("tok[%d] = %s"), i, tok?tok:"ERROR");
+    //   tok = strtok(NULL, delims);
+    // }
+
+
+    // tok = strtok(NULL, delims); // "Command" skip
+    
+    tok = strtok(NULL, delims); // Consume first split string and advance token (i.e. skip Command)
+    char key[100];
+    snprintf(key, sizeof(key), tok);
+    ALOG_INF(PSTR(D_LOG_CELLULAR "key=%s"),key);
+
+    tok = strtok(NULL, delims);     
+    char value[100];
+    snprintf(value, sizeof(value), tok);
+    ALOG_INF(PSTR(D_LOG_CELLULAR "value=%s"),value);
+
+    // Read into local
+    D_DATA_BUFFER_CLEAR();
+
+    sprintf(data_buffer.payload.ctr, "{\"%s\":%s}", key, value);
+
+    data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+    ALOG_COM( PSTR(DEBUG_INSERT_PAGE_BREAK  "SMS->JsonCommandBuffer = \"%d|%s\""), data_buffer.payload.len, data_buffer.payload.ctr);
+
+    pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+    ALOG_INF(PSTR(D_LOG_CELLULAR "JsonCommand Finished"));
+
+  }
+
+    // tok
+
+
+
+
+}
+
+
+
+
 void mCellular::SMS_BatteryDetailed()
 {
 

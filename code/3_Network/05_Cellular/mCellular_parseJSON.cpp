@@ -46,6 +46,14 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
   #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
 
+  if(jtok = obj["SMSAuto_GPS"]){
+    ALOG_INF( PSTR(D_LOG_CELLULAR "SMSAuto_GPS smsauto_gps_messages.rate_seconds %d"), jtok.getInt());
+    smsauto_gps_messages.rate_seconds = jtok.getInt();
+    
+  }
+
+
+
   if(jtok = obj["GPRS_Enable"]){
     ALOG_INF( PSTR(D_LOG_CELLULAR "GPRS_Enable"));
     if(jtok.getInt() == 1)

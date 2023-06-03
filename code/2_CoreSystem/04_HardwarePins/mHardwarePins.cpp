@@ -1146,6 +1146,14 @@ int16_t mHardwarePins::GetGPIOFunctionIDbyName(const char* c){
   else if(strcmp_P(c,PM_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR)==0){  return GPIO_FUNCTION__FONA_RING_INDICATOR__ID; }
   #endif // ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
 
+  
+  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR)==0){  return GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_TX__CTR)==0){  return GPIO_FUNCTION__MODEM_TX__ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_RX__CTR)==0){  return GPIO_FUNCTION__MODEM_RX__ID; }
+  else if(strcmp_P(c,PM_GPIO_FUNCTION__MODEM_POWER__CTR)==0){  return GPIO_FUNCTION__MODEM_POWER__ID; }
+
+
+
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IA_CTR)==0){  return GPIO_HBRIDGE_L9110_IA_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_IB_CTR)==0){  return GPIO_HBRIDGE_L9110_IB_ID; }
   else if(strcmp_P(c,PM_GPIO_FUNCTION_HBRIDGE_L9110_OA_CTR)==0){  return GPIO_HBRIDGE_L9110_OA_ID; }
@@ -1330,9 +1338,9 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
     case  GPIO_REL4_INV_ID: return PM_GPIO_FUNCTION_REL4_INV_CTR;           // Relays
 
 
-      case  GPIO_FAN_PWM1_ID: return PM_GPIO_FUNCTION_FAN_PWM1_CTR;           // Relays
+    case  GPIO_FAN_PWM1_ID: return PM_GPIO_FUNCTION_FAN_PWM1_CTR;           // Relays
 
-      case  GPIO_OLED_RESET_ID: return PM_GPIO_FUNCTION_OLED_RESET_CTR;           // Relays
+    case  GPIO_OLED_RESET_ID: return PM_GPIO_FUNCTION_OLED_RESET_CTR;           // Relays
 
     case GPIO_LED1_ID:      return PM_GPIO_FUNCTION_LED1_CTR;
     case GPIO_LED1_INV_ID:  return PM_GPIO_FUNCTION_LED1_INV_CTR;
@@ -1583,6 +1591,18 @@ PGM_P mHardwarePins::GetGPIOFunctionNamebyID_P(uint16_t id){
 
   case GPIO_NEXTION_RX_ID: return PM_GPIO_FUNCTION_NEXTION_RX_CTR;
   case GPIO_NEXTION_TX_ID: return PM_GPIO_FUNCTION_NEXTION_TX_CTR;
+
+
+
+  case GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__ID: return PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR;
+  case GPIO_FUNCTION__MODEM_TX__ID: return PM_GPIO_FUNCTION__MODEM_TX__CTR;
+  case GPIO_FUNCTION__MODEM_RX__ID: return PM_GPIO_FUNCTION__MODEM_RX__CTR;
+  case GPIO_FUNCTION__MODEM_POWER__ID: return PM_GPIO_FUNCTION__MODEM_POWER__CTR;
+
+
+
+
+
 
 
   #ifdef ESP32

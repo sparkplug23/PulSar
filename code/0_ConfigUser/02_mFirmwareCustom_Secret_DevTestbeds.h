@@ -45,9 +45,10 @@
  */
 // #define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
 
-#define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_01
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_01
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
-// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
+#define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
 
 
 /**
@@ -1631,7 +1632,7 @@
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER 
+  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
 
   /**
    * @brief WiFi MQTT
@@ -1922,7 +1923,7 @@
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define D_MQTT_PORT 51884 //external mqtt broker on TOWER 
+  #define MQTT_PORT 51884 //external mqtt broker on TOWER 
 
   /**
    * @brief WiFi MQTT
@@ -2074,7 +2075,7 @@
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER 
+  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
 
   /**
    * @brief WiFi MQTT
@@ -2238,7 +2239,7 @@
   // #define USE_MODULE_SENSORS_GPS_MODEM
   // #define USE_MODULE_SENSORS_INTERFACE
   // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-  // #define D_MQTT_PORT 51883 //external mqtt broker on TOWER 
+  // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
 
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
@@ -2371,7 +2372,7 @@
     #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
     // #define MQTT_SOCKET_TIMEOUT 1
-    // #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
      #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable
     // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
     // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
@@ -2387,7 +2388,7 @@
     #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
     #define USE_MODULE_SENSORS_INTERFACE
     // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    // #define D_MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
     // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
   #endif
 
@@ -2396,7 +2397,7 @@
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
     #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define D_MQTT_PORT     1883
+    #define MQTT_PORT     1883
   #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
 
   #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
@@ -2411,7 +2412,7 @@
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
     #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define D_MQTT_PORT     1883
+    #define MQTT_PORT     1883
 
   #endif
 
@@ -2611,7 +2612,7 @@
     #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
     // #define MQTT_SOCKET_TIMEOUT 1
-    // #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
      #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
     // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
     // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
@@ -2626,7 +2627,7 @@
     #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
     // #define USE_MODULE_SENSORS_INTERFACE
     // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    // #define D_MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
     // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
   #endif
 
@@ -2635,7 +2636,7 @@
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
     #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define D_MQTT_PORT     1883
+    #define MQTT_PORT     1883
   #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
 
   #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
@@ -2745,7 +2746,10 @@
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
   #define UART_CELLULAR_BAUD   921600
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
 #endif
 #ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
@@ -2754,15 +2758,36 @@
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
   #define UART_CELLULAR_BAUD   921600
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
 #endif
 #ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
   #define DEVICENAME_CTR          "cellular_locator_02"
-  #define DEVICENAME_FRIENDLY_CTR "Plane - Optional LIPO for weight"
+  #define DEVICENAME_FRIENDLY_CTR "Plane - Optional LIPO for weight on Plane"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define UART_CELLULAR_BAUD   115200
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+#endif
+#ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
+  /**
+   * @brief Device should run the same code designed for LTE MQTT devices, but connect via WiFi and therefore
+   * test that LTE network stuff is not breaking the normal WiFi stuff and stable code is being developed for both methods.
+   * 
+   */
+  #define DEVICENAME_CTR          "cellular_locator_04"
+  #define DEVICENAME_FRIENDLY_CTR "Tester - Run MQTT over WiFi without LTE connected"
+  #define DEVICENAME_ROOMHINT_CTR "roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define USE_GROUPFEATURE__MQTT_AS_WIFI
   #define UART_CELLULAR_BAUD   115200
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
 #endif
@@ -2829,9 +2854,7 @@
 
 
   // #define USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
-  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
-  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
-  #define USE_GROUPFEATURE__MODEM_GPS
+  // #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
 
   // *************************************************************************************
 
@@ -2862,12 +2885,19 @@
     #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
     // #define MQTT_SOCKET_TIMEOUT 1
-    // #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
      #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
     // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
     // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
     #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
     // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+  #endif
+  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
   #endif
 
   #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
@@ -2877,36 +2907,10 @@
     #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
     // #define USE_MODULE_SENSORS_INTERFACE
     // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    // #define D_MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
     // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
   #endif
 
-  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
-    #define USE_MODULE_NETWORK_WIFI
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
-    #define D_MQTT_PORT     1883
-  #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
-
-  #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
-    #define USE_MODULE_NETWORK_WIFI
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-  #endif
-
-
-// #define UART_BAUD   115200
-// #define PIN_DTR     25
-// #define PIN_TX      27
-// #define PIN_RX      26
-// #define PWR_PIN     4
-
-// #define SD_MISO     2
-// #define SD_MOSI     15
-// #define SD_SCLK     14
-// #define SD_CS       13
-// #define LED_PIN     12
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2918,6 +2922,18 @@
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      #ifdef USE_MODULE_NETWORK_CELLULAR
+      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      #endif // USE_MODULE_NETWORK_CELLULAR   
+      #ifdef USE_MODULE_DRIVERS_SDCARD
+      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
       "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
       "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
@@ -2925,7 +2941,7 @@
       "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
@@ -2949,73 +2965,6 @@
 
 
 
-
-/**
- * @brief 
- * Primary testbed for all new lighting code on nodemcu
- */
-#ifdef DEVICE_TESTBED_ESP32_MQTT_MULTIPLE_01
-  #define DEVICENAME_CTR          "tb_mqtt_multiple_01"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
-
-  #define USE_DEVFEATURE_MQTT_INTERFACE_USES_MULTIP  
-  // #define SERIAL_DEBUG_BAUD_DEFAULT 921600
-
-  #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI  
-
-  #define USE_DEVFEATURE_MQTT_INTERFACE_USES_MULTIPLE
-
-  // #define ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST1
-  #define ENABLE_DEVFEATURE_MQTT_DUAL_WIFI_CONNECTION_TEST2
-  
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_NUMBER "\":{"
-      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
-      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
-      "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
-    "\"MQTT\":{\"RetrySecs\":10}"
-  "}";
-
-#endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
 
 
 
@@ -3099,15 +3048,15 @@
 
   // #define USE_MODULE__DRIVERS_MAVLINK_DECODER
 
-  // #define D_MQTT_PORT 51883 //external mqtt broker on TOWER 
+  // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
 
   #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
 
 
   // #define USE_DEVFEATURE_DEFINED_SERIAL2
 
- #define D_MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
-//  #define D_MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
+ #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+//  #define MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
 
   /**
    * @brief WiFi MQTT
@@ -3148,7 +3097,7 @@
   // // #define ENABLE_ADVANCED_DEBUGGING
   // // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  // #define D_MQTT_PORT 51884 //external mqtt broker on TOWER 
+  // #define MQTT_PORT 51884 //external mqtt broker on TOWER 
 
   // /**
   //  * @brief WiFi MQTT

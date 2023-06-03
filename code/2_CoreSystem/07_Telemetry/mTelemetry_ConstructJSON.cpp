@@ -303,7 +303,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
         JBI->Add("allowed", con->allowed);
         JBI->Add("mqtt_tls", con->mqtt_tls);
 
-        JBI->Add("mqtt_client_type", con->mqtt_client_type);
+        JBI->Add("mqtt_client_type", con->client_type);
 
         JBI->Add("tSaved_LastOutGoingTopic", con->tSaved_LastOutGoingTopic);
 
