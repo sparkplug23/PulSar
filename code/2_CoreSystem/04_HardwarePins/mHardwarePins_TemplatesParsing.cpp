@@ -525,26 +525,18 @@ void mHardwarePins::GpioInit(void)
   //   // SetPinFunction(gpio_pin_number, pin_function);  
   // #endif // ENABLE_DEVFEATURE_PIN_FUNCTION_METHOD
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    ALOG_DBM( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
-
-    #endif //  ENABLE_LOG_LEVEL_INFO
-  //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   // if(mgpio){
-  //   // AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: io %02d, mgpio %d"), i, mgpio);
-  //   // }
-  //   // #endif // ENABLE_LOG_LEVEL_DEBUG
-
-// Phasing section out : moving into their modules
-    if (mgpio) {    
-      
+    ALOG_DBG( PSTR("DBG: real_pin=%d moduleIO=%d  mgpio=%d"), real_pin, pCONT_set->my_module.io[index], mgpio);
+    
+    // Phasing section out : moving into their modules
+    if (mgpio) {         
       //PWM
       if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
         bitSet(pCONT_set->pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
         mgpio -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
       } 
-
     }    
+
+    
     //new way
     if(mgpio){ SetPin(real_pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
     
@@ -557,12 +549,11 @@ void mHardwarePins::GpioInit(void)
    * @brief The check for H801 should be phased out here, as its hardware specific, really the template should force this to happen anyway as TX==2
    * 
    */
-    if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) { 
-  DEBUG_LINE_HERE;
-      Serial.set_tx(2); 
-      flag_serial_set_tx_set = true;
-      
-      }
+  if ((2 == GetPin(GPIO_HWSERIAL0_TX_ID)) || (MODULE_H801_ID == pCONT_set->my_module_type)) 
+  { 
+    Serial.set_tx(2); 
+    flag_serial_set_tx_set = true;
+  }
   #endif
 
   // DEBUG_LINE_HERE;

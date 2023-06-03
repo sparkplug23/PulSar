@@ -18,7 +18,7 @@ Add this to the respective group section
 
 Add to enum list the name
 ```cpp
-  #ifdef USE_MODULE_DRIVERS_BUZZER
+  #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
     EM_MODULE_DRIVERS_BUZZER_ID,
   #endif
 ```

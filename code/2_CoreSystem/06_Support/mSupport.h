@@ -366,6 +366,14 @@ extern uint32_t ResetReason_g(void);
 
 extern void SafeMode_StartAndAwaitOTA();
 
+#ifdef ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
+#define TINY_GSM_MODEM_SIM7000
+#define TINY_GSM_DEBUG Serial
+#define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
+#define SerialAT Serial1
+#include <TinyGsmClient.h>
+extern void SafeMode_CellularConnectionAndSendLocation();
+#endif // ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 
 
     const uint32_t crash_magic = 0x53415400;   // Stack trace magic number (TASx)
@@ -595,8 +603,8 @@ int GetDListIDbyNameCtr(char* destination, size_t destination_size, const char* 
     double CharToDouble(const char *str);
     int TextToInt(char *str);
     // char* ulltoa(unsigned long long value, char *str, int radix);
-    char* dtostrfd(double number, unsigned char prec, char *s);
-    static char* Float2CString(float number, unsigned char prec, char *s);
+    // char* dtostrfd(double number, unsigned char prec, char *s);
+    static char* float2CString(float number, unsigned char prec, char *s);
     char* Unescape(char* buffer, uint16_t* size);
     char* RemoveSpace(char* p);
     char* LowerCase(char* dest, const char* source);

@@ -26,7 +26,7 @@
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
 // Optional user configs, which override defaults
 
-#include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
+// #include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
 
 #ifndef D_USER_MICHAEL // Include my personally named secret file
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"
@@ -47,7 +47,7 @@
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
 #include "2_CoreSystem/09_Events/mEvents.h"
 
-#include "2c_Internal_IsolatedNoTaskerSystems/Decounter/decounter.h"
+#include <DeCounter.h>
 
 #ifdef USE_MODULE_CORE_RULES
 #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
@@ -158,6 +158,9 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CORE_HARDWAREPINS
     EM_MODULE_CORE_HARDWAREPINS_ID,
   #endif 
+  #ifdef USE_MODULE_CORE_SERIAL_UART
+    EM_MODULE_CORE_SERIAL_UART_ID,
+  #endif
   #ifdef USE_MODULE_CORE_SETTINGS
     EM_MODULE_CORE_SETTINGS_ID,
   #endif 
@@ -182,14 +185,19 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
     EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID,
   #endif 
-  // Additional Internal Subsytems
-  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-    EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID,
-  #endif 
   // Network
-  #if defined(USE_MODULE_NETWORK_WIFI) || defined(USE_MODULE_NETWORK_WIFI_V2)
+  #ifdef USE_MODULE_NETWORK_INTERFACE
+    EM_MODULE__NETWORK_INTERFACE__ID,
+  #endif
+  #ifdef USE_MODULE_NETWORK_WIFI
     EM_MODULE_NETWORK_WIFI_ID,
   #endif 
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+    EM_MODULE_NETWORK_ETHERNET_ID,
+  #endif 
+  #ifdef USE_MODULE_NETWORK_CELLULAR
+    EM_MODULE__NETWORK_CELLULAR__ID,
+  #endif
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
@@ -220,7 +228,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
     EM_MODULE_DRIVERS_IRTRANSCEIVER_ID,
   #endif
-  #if defined(USE_MODULE_DRIVERS_RELAY) || defined(USE_MODULE_DRIVERS_RELAY_V2)
+  #ifdef USE_MODULE_DRIVERS_RELAY
     EM_MODULE_DRIVERS_RELAY_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_PWM
@@ -231,9 +239,6 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_DRIVERS_GPS
     EM_MODULE_DRIVERS_GPS_ID,
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
-    EM_MODULE_DRIVERS_SERIAL_UART_ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
     EM_MODULE_DRIVERS_SHELLY_DIMMER_ID,
@@ -258,8 +263,11 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     EM_MODULE_DRIVERS_FILESYSTEM_ID,
   #endif
-  #ifdef USE_MODULE_DRIVERS_BUZZER
-    EM_MODULE_DRIVERS_BUZZER_ID,
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+    EM_MODULE__DRIVERS_BUZZER_BASIC__ID,
+  #endif
+  #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
+    EM_MODULE__DRIVERS_BUZZER_TONES__ID,
   #endif
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     EM_MODULE_DRIVERS_RF433_RCSWITCH_ID,
@@ -286,6 +294,19 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT 
     EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID,
   #endif
+
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+    EM_MODULE__DRIVERS_MAVLINK_DECODER__ID,
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+    EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID,
+  #endif
+  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+    EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID,
+  #endif
+
+
+
 
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -386,6 +407,19 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     EM_MODULE_SENSORS__DS18X20__ID,
   #endif  
+  #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+    EM_MODULE_SENSORS_SOLAR_LUNAR_ID,
+  #endif 
+  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
+  EM_MODULE__SENSORS_GPS_SERIAL__ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_GPS_MODEM
+  EM_MODULE__SENSORS_GPS_MODEM__ID,
+  #endif
+  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+  EM_MODULE__SENSORS_BATTERY_MODEM__ID,
+  #endif
+
   // Controllers 9 (Generic)
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     EM_MODULE_CONTROLLER_BLINDS_ID,
@@ -460,9 +494,12 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
     EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID,
   #endif
-
-
-  
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+    EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID,
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+    EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID,
+  #endif
 
   #ifdef USE_MODULE_CONTROLLER_USERMOD_01
     EM_MODULE_CONTROLLER_USERMOD_01_ID,
@@ -476,6 +513,10 @@ enum MODULE_IDS{
   #include "2_CoreSystem/04_HardwarePins/mHardwarePins.h"
   #define   pCONT_pins                              static_cast<mHardwarePins*>(pCONT->pModule[EM_MODULE_CORE_HARDWAREPINS_ID])
 #endif 
+#ifdef USE_MODULE_CORE_SERIAL_UART
+  #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
+  #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
+#endif
 #ifdef USE_MODULE_CORE_SETTINGS
   #include "2_CoreSystem/01_Settings/mSettings.h"
   #define   pCONT_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
@@ -509,34 +550,27 @@ enum MODULE_IDS{
   #define   pCONT_mDevelopmentDebugging             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
 #endif 
 
-// Subsystems (x-x)
-#ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  #include "2b_Internal_TaskerSystems/01_SolarLunar/mSolarLunar.h"
-  #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID])
-#endif
-
-
-// Network (20-29)
-#ifdef USE_MODULE_NETWORK_MQTT
-  #include "3_Network/01_MQTT/mMQTT.h"
-  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
+// Network
+#ifdef USE_MODULE_NETWORK_INTERFACE
+  #include "3_Network/00_Interface/mInterface.h"
+  #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(pCONT->pModule[EM_MODULE__NETWORK_INTERFACE__ID])
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include "3_Network/02_WebServer/mWebServer.h"
+  #include "3_Network/20_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
 #ifdef USE_MODULE_NETWORK_WIFI
   #include "3_Network/03_WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_WIFI_V2
-  #include "3_Network/03_WiFi_v2/mWiFi.h"
-  #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
+#ifdef USE_MODULE_NETWORK_CELLULAR
+#include "3_Network/05_Cellular/mCellular.h"
+  #define pCONT_cell                               static_cast<mCellular*>(pCONT->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
+#endif
+#ifdef USE_MODULE_NETWORK_MQTT
+  #include "3_Network/10_MQTT/mMQTT.h"
+  #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
-
-
-
-
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE
@@ -566,7 +600,6 @@ enum MODULE_IDS{
   #include "4_Drivers/00_Interface/mDriverInterface.h"
   #define pCONT_iDrivers                           static_cast<mDriverInterface*>(pCONT->pModule[EM_MODULE_DRIVERS_INTERFACE_ID])
 #endif
-
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/03_LEDs/mLEDs.h"
   #define pCONT_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
@@ -579,9 +612,13 @@ enum MODULE_IDS{
   #include "4_Drivers/04_Relays_v2/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_BUZZER
+#ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
   #include "4_Drivers/05_Buzzer/mBuzzer.h"
   #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
+#endif
+#ifdef USE_MODULE__DRIVERS_BUZZER_TONES
+  #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
+  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
   #include "4_Drivers/09_RCSwitch/mRCSwitch.h"
@@ -597,16 +634,6 @@ enum MODULE_IDS{
   #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
   #define pCONT_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-  #include "4_Drivers/16_Fona_Cellular/mFona_Cellular.h"
-  #define pCONT_fona                                static_cast<mFona_Cellular*>(pCONT->pModule[EM_MODULE_DRIVERS_FONA_CELLULAR_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
-  #include "4_Drivers/17_Cellular_SIM/mCellular_SIM.h"
-  #define pCONT_sim                                static_cast<mCellular_SIM7000*>(pCONT->pModule[EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID])
-#endif
-
-
 
 
 
@@ -626,14 +653,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
   #define pCONT_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_GPS
-  #include "4_Drivers/20_GPS_UBX/mGPS.h"
-  #define pCONT_gps                                 static_cast<mGPS*>(pCONT->pModule[EM_MODULE_DRIVERS_GPS_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_SERIAL_UART
-  #include "4_Drivers/SerialUART/mSerialUART.h"
-  #define pCONT_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
   #include "4_Drivers/50_CAM_OV2640/mCamera.h"
@@ -667,6 +686,18 @@ enum MODULE_IDS{
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID])
 #endif
 
+#ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+  #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
+#endif
+#ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+  #include "4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
+#endif
+#ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+  #include "4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
+  #define pCONT_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
+#endif
 
 
 
@@ -828,6 +859,30 @@ enum MODULE_IDS{
   #define pCONT_db18                      static_cast<mDB18x20_ESP32*>(pCONT->pModule[EM_MODULE_SENSORS__DS18X20__ID])
 #endif
 
+#ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+  #include "5_Sensors/22_SolarLunar/mSolarLunar.h"
+  #define   pCONT_solar                             static_cast<mSolarLunar*>(pCONT->pModule[EM_MODULE_SENSORS_SOLAR_LUNAR_ID])
+#endif
+
+
+#ifdef USE_MODULE_SENSORS_GPS_SERIAL
+  #include "5_Sensors/50_GPS_Serial/mGPS.h"
+  #define pCONT_gps                                 static_cast<mGPS_Serial*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID])
+#endif
+#ifdef USE_MODULE_SENSORS_GPS_MODEM
+  #include "5_Sensors/51_GPS_Modem/mGPS_Modem.h"
+  #define pCONT_gps                                 static_cast<mGPS_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
+#endif
+
+#ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+  #include "5_Sensors/52_Battery_Modem/mBattery_Modem.h"
+  #define pCONT_batt_modem                                 static_cast<mBattery_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
+#endif
+
+
+
+
+
 // Specefic Bespoke Modules (Range 170-189) to be named "CONTROLLER"
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
@@ -942,7 +997,14 @@ enum MODULE_IDS{
   #include "10_ConSpec/07_TempSensorOnOLED/mTempSensorOLEDBath.h"
   #define pCONT_immersion_cont         static_cast<mTempSensorOLEDBath*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID])
 #endif
-
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+  #include "10_ConSpec/08_CellularBlackBox/mCellularBlackBox.h"
+  #define pCONT_immersion_cont         static_cast<mCellularBlackBox*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID])
+#endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+  #include "10_ConSpec/09_mMAVLink_Decoder_OLED/mMAVLink_Decoder_OLED.h"
+  #define pCONT_cont_mavlinoled         static_cast<mMAVLink_Decoder_OLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID])
+#endif
 
 
 
@@ -973,8 +1035,6 @@ class mTaskerManager{
       return instance;
     };
 
-    // mTaskerInterface* pModule[EM_MODULE_LENGTH_ID];
-
     int16_t GetModuleIndexbyFriendlyName(const char* c);
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
     uint16_t GetModuleUniqueIDbyVectorIndex(uint8_t id);
@@ -995,7 +1055,7 @@ class mTaskerManager{
     uint16_t GetClassSizeByID(uint8_t class_id);
 
     PGM_P GetModuleName(uint8_t id);
-    PGM_P GetModuleFriendlyName(uint8_t module_id);
+    PGM_P GetModuleFriendlyName(uint16_t module_id);
     uint16_t GetClassCount();
 
     
@@ -1007,18 +1067,40 @@ class mTaskerManager{
     
     int16_t GetEnumVectorIndexbyModuleUniqueID(int16_t unique_id);
 
-    #ifdef ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-    // #define CLASS_ID_MAX 255
-    // struct CLASS_ID{
-    //   uint8_t list[CLASS_ID_MAX];
-    //   uint8_t module_type[CLASS_ID_MAX];
-    //   // #ifdef DEBUG_EXECUTION_TIME
-    //   // uint16_t execution_time_average_ms[CLASS_ID_MAX];
-    //   // uint16_t execution_time_max_ms[CLASS_ID_MAX];
-    //   // #endif
-    //   uint8_t count = 0;
-    // }module_settings; 
-    #endif // ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    struct DEBUG_MODULE_TIME
+    {
+      uint16_t seconds_to_keep_stats_before_reset = 0;
+      uint16_t max_time = 0;
+      // uint16_t min_time = 0;
+      uint16_t avg_time = 0;
+      uint32_t last_loop_time = 0;
+      uint16_t max_function_id = 0; // func_task that caused the max_time
+      // Only record them after boot sucessful
+    }debug_module_time[EM_MODULE_LENGTH_ID];
+    #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
+
+    #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+
+    struct FUNCTION_EXECUTION_EVENT
+    {
+      TASKER_FUNCTION_TYPES function_id;
+      uint16_t delay_millis;
+      uint32_t tSaved_millis;
+    };
+    FUNCTION_EXECUTION_EVENT FunctionEvent(TASKER_FUNCTION_TYPES function_id, uint16_t delay_millis = 0)
+    {
+      FUNCTION_EXECUTION_EVENT task;
+      task.tSaved_millis = millis();
+      task.delay_millis = delay_millis;
+      task.function_id = function_id;
+      return task;
+    }
+    std::vector<FUNCTION_EXECUTION_EVENT> function_event_queue;
+    #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+
+    
 
     uint16_t last_function = 255; // 0 will be first
 

@@ -54,9 +54,19 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #define USE_MODULE_NETWORK_MQTT
 #endif // DISABLE_NETWORK
 
-#if !defined(USE_MODULE_NETWORK_WIFI_V2) && !defined(DISABLE_NETWORK)
-#warning "==========================================================FirmwareDefault: Enable Wifi v1
+
+#ifndef DISABLE_NETWORK_WIFI
 #define USE_MODULE_NETWORK_WIFI
+#endif // DISABLE_NETWORK
+
+#if !defined(DISABLE_NETWORK)
+  #warning "==========================================================FirmwareDefault: Enable Wifi v1
+  // #define USE_MODULE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_INTERFACE
+
+  #ifndef DISABLE_DEVFEATURE_NETWORK_WIFI
+    // #define USE_MODULE_NETWORK_WIFI
+  #endif
 #endif
 
 #ifndef USE_MODULE_NETWORK_WIFI
@@ -65,6 +75,7 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #ifndef USE_MODULE_NETWORK_MQTT
   #warning "USE_MODULE_NETWORK_MQTT" has not been defined -- NO MQTT!
 #endif
+
 
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)

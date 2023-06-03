@@ -93,6 +93,7 @@
 // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 // #endif
 
+#define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
 
 /*********************************************************************************************\
@@ -144,16 +145,7 @@
 // #define USE_MODULE_NETWORK_WIFI
 // #endif // DISABLE_NETWORK
 
-/**
- * FUTURE MQTT will use desktop mdns name, falling back to static IP
- * */
-
-#ifdef MQTT_HOST
-#warning "CAUTION: Using MQTT_HOST defined in templates, likely to be new MQTT broker"
-#endif
-#ifndef MQTT_HOST
-#define MQTT_HOST                     "192.168.1.65"    // [MqttHost] Defined as either "X.X.X.X" for IP, or "NAME" for MDNS. 
-#endif
+#define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
 // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
 #define MQTT_HOST_DISCOVERY
@@ -163,7 +155,7 @@
 #define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
 #endif // #ifdef USE_NETWORK_MDNS
 
-#define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
+// #define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
 #define MQTT_USER                     "DVES_USER"       // [MqttUser] MQTT user
 #define MQTT_PASS                     "DVES_PASS"       // [MqttPassword] MQTT password
 

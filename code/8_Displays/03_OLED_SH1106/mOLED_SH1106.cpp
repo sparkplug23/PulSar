@@ -53,9 +53,6 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:
       EverySecond();
     break;
-    // case FUNC_LOOP:
-    //   EveryLoop();
-    // break;
     case FUNC_DISPLAY_REFRESH_SHOW_ID:
       RefreshDisplay();
     break;

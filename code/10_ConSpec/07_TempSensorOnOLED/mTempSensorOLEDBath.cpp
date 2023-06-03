@@ -159,7 +159,7 @@ void mTempSensorOLEDBath::SubTask_UpdateOLED()
         sprintf(buffer_n, "%s", "BOT");
       }
 
-      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::Float2CString(sensor_data,2,buffer_f));
+      snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
       pCONT_iDisp->LogBuffer_AddRow(buffer, sensor_id);
     
     }

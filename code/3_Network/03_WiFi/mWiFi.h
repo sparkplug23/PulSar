@@ -1,7 +1,7 @@
 #ifndef _MWIFI_H
 #define _MWIFI_H
 
-#define D_UNIQUE_MODULE_NETWORK_WIFI_ID 20
+#define D_UNIQUE_MODULE_NETWORK_WIFI_ID  ((3*1000)+03)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -85,6 +85,9 @@ class mWiFi :
     uint32_t tSavedWiFiCheckIP;
     uint32_t tSavedWiFiReconnect;
 
+    WiFiClient* mqtt_client = nullptr;
+    WiFiClient* mqtt_client2 = nullptr;
+    
     uint16_t wifi_counter_tester = 0;
     
     bool WifiCheckIpConnected();

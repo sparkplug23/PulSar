@@ -172,7 +172,13 @@ const char* mSensorsInterface::GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_SUN_ELEVATION_ID:          return PM_JSON_SUN_ELEVATION;
     case SENSOR_TYPE_DOOR_POSITION_ID:          return PM_JSON_DOOR_POSITION;
     case SENSOR_TYPE_DOOR_LOCKED_ID:            return PM_JSON_DOOR_LOCKED;    
-    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;    
+    case SENSOR_TYPE_ULTRASONIC_DISTANCE_CM_ID: return PM_JSON_ULTRASONIC_DISTANCE_CM;  
+    case SENSOR_TYPE_SPEED_ID:            return PM_JSON_SPEED;  
+    case SENSOR_TYPE_LATITUDE_ID:            return PM_JSON_LATITUDE;  
+    case SENSOR_TYPE_LONGITUDE_ID:            return PM_JSON_LONGITUDE;  
+    case SENSOR_TYPE_ALTITUDE_ID:            return PM_JSON_ALTITUDE;  
+    case SENSOR_TYPE_VOLTAGE_ID:            return PM_JSON_VOLTAGE;
+    case SENSOR_TYPE_STATE_ACTIVE_ID: return PM_JSON_STATE_ACTIVE;
     // Strings
     case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID:            return PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING;
   }
@@ -246,7 +252,7 @@ void mSensorsInterface::MQTT_Report_Event_Button()
 
 
 
-  pCONT_mqtt->ppublish("status/sensors_interface/event",JsonBuilderI->GetBufferPtr(),false);
+  pCONT_mqtt->brokers[0]->ppublish("status/sensors_interface/event",JsonBuilderI->GetBufferPtr(),false);
 
 
   /**
@@ -292,7 +298,7 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 		if(ready_to_send)
 		{			
     	AddLog(LOG_LEVEL_TEST, PSTR("ScanSensors=\"%s\""), JBI->GetBufferPtr());
-			pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+			pCONT_mqtt->brokers[0]->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		}
 
 	}
@@ -316,9 +322,6 @@ uint8_t mSensorsInterface::ConstructJSON_Settings(uint8_t json_level, bool json_
 
 }
 
-
-#ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-
 /**
  * @brief 
  * 
@@ -339,6 +342,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
   JBI->Start();
 
+    // JBI->Add("Redunction", mqtthandler_sensor_ifchanged.flags.FrequencyRedunctionLevel);
   // return 0;
   
   float sensor_data = -1;
@@ -797,6 +801,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
 
 
+    JBI->Add("Rate", mqtthandler_sensor_ifchanged.tRateSecs);
 
 
 
@@ -809,19 +814,6 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
     
 }
 
-
-#else // until devfeature is fixed
-
-uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-    JBI->Add("ToBeRemoved");
-  return JBI->End();
-    
-}
-
-#endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 
 
@@ -867,6 +859,8 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
 
   JBI->Start();
+
+
 
   // return 0;
   
@@ -1186,7 +1180,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
 //   JBI->Start();
 
-//   // #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+//   // #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 //   char buffer[50];
 

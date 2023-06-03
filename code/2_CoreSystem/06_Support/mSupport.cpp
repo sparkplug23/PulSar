@@ -8,40 +8,43 @@ const char* mSupport::PM_MODULE_CORE_SUPPORT_FRIENDLY_CTR = D_MODULE_CORE_SUPPOR
  * Watchdog related
 \*********************************************************************************************/
 #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-#ifdef ESP8266
-  void WDT_Init(){ ESP.wdtEnable(0);}
-  void WDT_Reset(){ESP.wdtFeed();}
-#endif // ESP8266
-#ifdef ESP32
-  #include "esp_system.h"
-  #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
-  #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
-  #endif
-  const int wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
-  hw_timer_t *timerwdt = NULL;
-  #ifndef ARDUINO_ISR_ATTR
-  #define ARDUINO_ISR_ATTR IRAM_ATTR 
-  #endif
-  void ARDUINO_ISR_ATTR resetModule() {
-    ets_printf("reboot\n");
-    Serial.println("WDT REBOOTING!!"); Serial.flush();
-    esp_restart();
-  }
-  // hw_timer_t *timerwdt = NULL;
-  // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
-  void WDT_Init(){
-    timerwdt = timerBegin(0, 80, true);                  //timer 0, div 80
-    timerAttachInterrupt(timerwdt, &resetModule, true);  //attach callback
-    timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  //set time in us
-    timerAlarmEnable(timerwdt);                          //enable interrupt
-  }
-  void WDT_Reset(){
-  // DEBUG_LINE_HERE;
-  if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
-    timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
-    // Serial.println("WDT_Reset");
-  }
-#endif // ESP32
+  #ifdef ESP8266
+    void WDT_Init(){ ESP.wdtEnable(0);}
+    void WDT_Reset(){ESP.wdtFeed();}
+  #endif // ESP8266
+  #ifdef ESP32
+    #include "esp_system.h"
+    #ifndef D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS
+    #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
+    #endif
+    const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;  //time in ms to trigger the watchdog
+    hw_timer_t *timerwdt = NULL;
+    #ifndef ARDUINO_ISR_ATTR
+    #define ARDUINO_ISR_ATTR IRAM_ATTR 
+    #endif
+    void ARDUINO_ISR_ATTR resetModule() {
+      ets_printf("reboot\n");
+      Serial.println("WDT REBOOTING!!"); Serial.flush();
+      esp_restart();
+    }
+    // hw_timer_t *timerwdt = NULL;
+    // void IRAM_ATTR resetModule(){ets_printf("\n\n\n\n\n\nWDT REBOOTING!!\n");ESP.restart();}
+    void WDT_Init(){
+      timerwdt = timerBegin(0, 80, true);                  //timer 0, div 80
+      timerAttachInterrupt(timerwdt, &resetModule, true);  //attach callback
+      timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);  //set time in us
+      timerAlarmEnable(timerwdt);                          //enable interrupt
+    }
+    void WDT_Reset(){
+    // DEBUG_LINE_HERE;
+    if(timerwdt==nullptr){ DEBUG_LINE_HERE; }
+      timerWrite(timerwdt, 0); //reset timerwdt (feed watchdog)
+      // Serial.println("WDT_Reset");
+    }
+  #endif // ESP32
+#else
+void WDT_Init(){};
+void WDT_Reset(){};
 #endif // WATCHDOG_TIMER_SECTION_GUARD_H
 
 #ifdef ESP32
@@ -371,6 +374,131 @@ void SafeMode_StartAndAwaitOTA()
 #endif // if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
 
 
+#if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+/**
+ * @brief Single function that a fastboot'ing device will call to await for new code to be uploaded
+ **/
+void SafeMode_CellularConnectionAndSendLocation()
+{
+  TinyGsm modem(SerialAT);
+
+  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
+
+  Serial.println("SafeMode_CellularConnectionAndSendLocation");
+    
+  #define GSM_AUTOBAUD_MIN 9600
+  #define GSM_AUTOBAUD_MAX 921600
+
+  // Set GSM module baud rate
+  // uint32_t found_baud = TinyGsmAutoBaud_CustomPin(SerialAT, SERIAL_8N1, PIN_RX, PIN_TX);
+
+  
+  SerialAT.begin(SERIAL_DEBUG_BAUD_DEFAULT, SERIAL_8N1, PIN_RX, PIN_TX);
+  
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1000);    // Datasheet T_on = 72ms
+  digitalWrite(PWR_PIN, HIGH);
+  delay(1000);    // Datasheet T_on = 72ms
+
+  Serial.println("Initializing modem...");
+  //test modem is online ?
+    uint8_t timeout_counter = 0;
+    uint32_t  timeout = millis();
+    while (!modem.testAT()) 
+    {
+      Serial.print(".");
+      if (millis() - timeout > 20000 ) 
+      {
+        // ALOG_INF(PSTR(D_LOG_CELLULAR "> It looks like the modem is not responding, trying to restart %d"), timeout_counter);
+        
+  Serial.printf("modemRestart - modemPowerOff");
+        
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1500);    // Datasheet T_off = 1.2secs
+  digitalWrite(PWR_PIN, HIGH);
+  delay(5000);
+  Serial.printf("modemPowerOn");
+  pinMode(PWR_PIN, OUTPUT);
+  digitalWrite(PWR_PIN, LOW);
+  delay(1000);    // Datasheet T_on = 72ms
+  digitalWrite(PWR_PIN, HIGH);
+  
+
+
+
+        timeout = millis();
+        // if(timeout_counter++ > 5)
+        // {
+        //   ALOG_INF(PSTR(D_LOG_CELLULAR "> Modem_Enable FAILED"));
+        //   return;
+        // }
+      }
+    }
+
+
+
+
+  // if (!modem.restart()) {
+  //   // if (!modem.init()) {
+  //   Serial.println("Failed to restart modem, delaying 10s and retrying");
+  //   // restart autobaud in case GSM just rebooted
+  //   // TinyGsmAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+  //   // return;
+  // }
+
+  String name = modem.getModemName();
+  Serial.printf("Modem Name:", name);
+
+  String modemInfo = modem.getModemInfo();
+  Serial.printf("Modem Info:", modemInfo);
+
+
+
+
+
+
+
+
+
+
+  uint32_t tSaved_heartbeat = millis();
+
+  Serial.println("SafeMode: Just waiting for HTTP upload");
+
+
+  while(1){ 
+    // Serial.println("SafeMode: Just waiting for OTA"); delay(1000);
+    
+    delay(1);
+
+    if(llabs(millis()-tSaved_heartbeat)>1000)
+    {
+      tSaved_heartbeat = millis();
+
+      
+  String modemInfo = modem.getModemInfo();
+  Serial.printf("Modem Info:", modemInfo);
+
+
+      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+      WDT_Reset();
+      #endif
+
+    }
+
+  }
+
+
+}
+
+
+#endif // if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+
+
+
 
 
 
@@ -467,6 +595,10 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_ON_BOOT_SUCCESSFUL:
 
+      #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
+      memset(&pCONT->debug_module_time,0,sizeof(pCONT->debug_module_time));
+      ALOG_INF(PSTR("Reset: debug_module_time"));
+      #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
 // #ifndef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 // //move into another FUNC_BOOT_SUCCESS (or make success only happen after 10 seconds)
@@ -483,6 +615,12 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 //   // }
 // #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
 
+
+    break;
+
+    case FUNC_LOG__SHOW_UPTIME:
+      
+      ALOG_INF(PSTR("FUNC_LOG__SHOW_UPTIME Uptime %s"), pCONT_time->GetUptime().c_str());
 
     break;
 
@@ -704,17 +842,25 @@ bool mSupport::JsonLevelFlagCheck(uint8_t json_level_testing, uint8_t json_level
 
 }
 
-char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
-{
-  if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
-    strcpy(s, "null");
-    return s;
-  } else {
-    return dtostrf(number, 1, prec, s);
-  }
-}
+// /**
+//  * @brief FloatToCString FloatToString
+//  * 
+//  * @param number 
+//  * @param prec 
+//  * @param s 
+//  * @return char* 
+//  */
+// char* mSupport::dtostrfd(double number, unsigned char prec, char *s)
+// {
+//   if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
+//     strcpy(s, "null");
+//     return s;
+//   } else {
+//     return dtostrf(number, 1, prec, s);
+//   }
+// }
 
-char* mSupport::Float2CString(float number, unsigned char prec, char *s)
+char* mSupport::float2CString(float number, unsigned char prec, char *s)
 {
   // if ((isnan(number)) || (isinf(number))) {  // Fix for JSON output (https://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript)
   //   strcpy(s, "null");

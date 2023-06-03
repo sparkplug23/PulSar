@@ -127,19 +127,19 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
     bool UsuableGPIOPin(uint8_t pin);
     // int8_t UsablePinToTemplateArrayIndex(uint8_t pin);
 
-    const char* GetGPIOFunctionNamebyID_P(uint8_t id, char* buffer);
-    PGM_P GetGPIOFunctionNamebyID_P(uint8_t id);
+    const char* GetGPIOFunctionNamebyID_P(uint16_t id, char* buffer);
+    PGM_P GetGPIOFunctionNamebyID_P(uint16_t id);
 
     bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
     bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
 
-    int8_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+    int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
     boolean PinUsed(uint32_t gpio, uint32_t index = 0);
     void SetPin(uint32_t lpin, uint32_t gpio);
 
 
-    int8_t GetPinWithGPIO(uint16_t gpio, uint8_t index = 0);
+    int16_t GetPinWithGPIO(uint16_t gpio, uint8_t index = 0);
     uint32_t GetPin(uint32_t gpio, uint32_t index = 0);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t state);
@@ -164,8 +164,8 @@ int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
     gpio_flag ModuleFlag();
     void ModuleDefault(uint8_t module);
     void SetModuleType();
-    uint8_t ValidPin_AdjustGPIO(uint8_t pin, uint8_t gpio);
-    bool ValidGPIO(uint8_t pin, uint8_t gpio);
+    uint16_t ValidPin_AdjustGPIO(uint8_t pin, uint16_t gpio);
+    bool ValidGPIO(uint8_t pin, uint16_t gpio);
     bool GetUsedInModule(uint8_t val, uint8_t *arr);
     bool JsonTemplate(const char* dataBuf);
     void TemplateJson();

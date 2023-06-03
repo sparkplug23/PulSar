@@ -4,7 +4,7 @@
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 //move functions into taskermanager
-enum XsnsFunctions {
+enum TASKER_FUNCTION_TYPES {
   // Init stuff (in importance of boot)
   
   // FUNC_CHECK_POINTERS, //phased out
@@ -26,10 +26,17 @@ enum XsnsFunctions {
 // "FUNC_MODULE_INIT" is phasing out, as its going to be included within PRE_INIT, which is furthermore going to be INIT_PINS
 
 // "PRE_INIT" should be changed to PIN_INIT, and "MODULE_POINTER" should be possibly removed as its either PIN_INIT or INIT
+  
+  /**
+   * @brief "PRE_INIT" as FUNC_INIT_GPIO_POINTERS?
+   * 
+   */
   FUNC_PRE_INIT,     // Configure sub modules and classes as needed
   
   
   FUNC_INIT,         // Actually complete init, read sensors, enable modules fully etc
+
+  FUNC_INIT_DELAYED_SECONDS, // To enable modules to either intentional begin with a delayed start, or, to changed at an interval if it is possible to start again (e.g. new sensor connected)
 
   /**
    * Flags that are used in debugging, that will override any stored or default init states. This will be optionally called at the end of setup.
@@ -81,6 +88,9 @@ enum XsnsFunctions {
   // Welcome message to show on boot after X seconds with config
   // FUNC_RESTART_SPLASH_INFORMATION, //have flag that shows level of information AND make this an ifdef as a debug option
 
+  // New list of support items to splash debug info
+  FUNC_LOG__SHOW_UPTIME,
+
   // New method that based on time, will only show the sensor at this period to "AddLog" reducing large serial prints
   FUNC_SENSOR_SHOW_LATEST_LOGGED_ID,
 
@@ -121,6 +131,7 @@ enum XsnsFunctions {
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,
   // Mqtt
   FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,
+  FUNC_MQTT_STATUS_REFRESH_SEND_ALL,
   //FUNC_MQTT_HANDLERS_RESET, 
   FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD,
   FUNC_MQTT_CHECK_REDUNCTION_LEVEL, 
@@ -136,6 +147,14 @@ enum XsnsFunctions {
    **/
   FUNC_RULES_LOAD_FROM_PROGMEM_ID,
   FUNC_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID,
+
+
+  /**
+   * @brief NNew set of alert messages that can be created depending on the type of driver
+   * e.g., via STATUS_LED, STATUS_BEEPER, STATUS_DISPLAY
+   */
+  FUNC_STATUS_ALERT__NETWORK_CONNECTION_LOST,
+
 
 
   // Events (new internal triggers, if something happens trigger another... this will become rules)
@@ -225,7 +244,15 @@ enum XsnsFunctions {
   FUNC_LIGHT_UPDATE_OUTPUT,
 
 
-  FUNC_FINALLY_END_OF_LOOP // Ran at the end of each loop, used to reset flags that should have been handled eg motion
+  FUNC_CELLULAR_CONNECTION_ESTABLISHED, 
+  FUNC_CELLULAR_CONNECTION_LOST,
+  FUNC_NETWORK_CONNECTION_ESTABLISHED, // Generalised for any connection type (wifi, cellular, ethernet)
+  FUNC_NETWORK_CONNECTION_LOST,
+
+
+  FUNC_FINALLY_END_OF_LOOP, // Ran at the end of each loop, used to reset flags that should have been handled eg motion
+
+  FUNC_LENGTH
 };
 
 #ifdef ENABLE_DEBUG_FUNCTION_NAMES

@@ -220,11 +220,11 @@ void mLEDs::SetLedPowerIdx(uint32_t led, uint32_t state)
 //       pCONT_pins->DigitalWrite(GPIO_LED1_ID+led, bitRead(pCONT_set->led_inverted, led) ? !state : state);
 //     }
 //   }
-// // #ifdef USE_MODULE_DRIVERS_BUZZER
+// // #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
 // //   if (led == 0) {
 // //     BuzzerSetStateToLed(state);
 // //   }
-// // #endif // USE_MODULE_DRIVERS_BUZZER
+// // #endif // USE_MODULE_DRIVERS_BUZZER_BASIC
 }
 
 void mLEDs::SetLedPower(uint32_t state)
@@ -266,9 +266,9 @@ void mLEDs::SetLedLink(uint32_t state)
 //     if (state) { state = 1; }
 //     digitalWrite(led_pin, (led_inv) ? !state : state);
 //   }
-// // #ifdef USE_MODULE_DRIVERS_BUZZER
+// // #ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
 // //   BuzzerSetStateToLed(state);
-// // #endif // USE_MODULE_DRIVERS_BUZZER
+// // #endif // USE_MODULE_DRIVERS_BUZZER_BASIC
 }
 
 /**

@@ -21,6 +21,24 @@ typedef struct event_motion_s{
   }device_name;
 }event_motion_t;
 
+typedef struct sensorset_location_s
+{   
+  bool isvalid = false;
+  float latitude = 54.5;// Latitude
+  float longitude = -6.0;// Longitude
+  float speed = 0;// Speed Over Ground. Unit is knots.
+  float altitude = 0;// MSL Altitude. Unit is meters
+  int vsat = 0;// GNSS Satellites in View
+  int usat = 0;// GNSS Satellites Used
+  float accuracy = 0;// Horizontal Dilution Of Precision
+  int year = 0; // Four digit year
+  int month = 0;// Two digit month
+  int day = 0;// Two digit day
+  int hour = 0;// Two digit hour
+  int minute = 0;// Two digit minute
+  int second = 0;// 6 digit second with subseconds
+}sensorset_location_t;
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "sensors/colours";
@@ -38,29 +56,29 @@ class mSensorsInterface :
 	  mSensorsInterface(){};
     void Pre_Init(void);
     void Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void EveryLoop();
+
     
     static const char* PM_MODULE_SENSORS_INTERFACE_CTR;
     static const char* PM_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_INTERFACE_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_SENSORS_INTERFACE_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_INTERFACE_ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mSensorsInterface);
-    };
+    uint16_t GetClassSize(){      return sizeof(mSensorsInterface);    };
     #endif
+
     void parse_JSONCommand(JsonParserObject obj);
 
-    struct SETTINGS{
+    struct SETTINGS
+    {
       uint8_t fEnableSensor = false;
-      // move this into settings so all devices can share it
       uint8_t tTicker_Splash_Sensors_To_Logs = 30;
       float sealevel_pressure; 
-    }settings;
+    }
+    settings;
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void EveryLoop();
 
     void MQTT_Report_Event_Button();
 
@@ -93,20 +111,10 @@ class mSensorsInterface :
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
-    //No extra handlers example
-    // const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-    //with extra handlers exampleenum
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
       MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID = MQTT_HANDLER_LENGTH_ID,
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
-    
-    // uint8_t list_ids[4] = {
-    //   MQTT_HANDLER_SETTINGS_ID, 
-    //   MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    //   MQTT_HANDLER_SENSOR_TELEPERIOD_ID,
-    //   MQTT_HANDLER_MOTION_EVENT_IFCHANGED_ID
-    // };
     
     struct handler<mSensorsInterface>* mqtthandler_list[5] = {
       &mqtthandler_settings_teleperiod,
@@ -116,7 +124,6 @@ class mSensorsInterface :
       &mqtthandler_motion_event_ifchanged
     };
     #endif // USE_MODULE_NETWORK_MQTT
-
 
 };
 

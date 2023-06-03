@@ -116,12 +116,6 @@ void EmergencySerial_SettingsReset(void) {
 void setup(void)
 { 
 
-  // Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
-  // while(1)
-  // { 
-  //   Serial.println(F("\n\rRebooting..." DEBUG_INSERT_PAGE_BREAK));
-  // }
-
 /********************************************************************************************
  ** Brownout ********************************************************************************
  ********************************************************************************************/
@@ -132,16 +126,16 @@ void setup(void)
   #endif  // DISABLE_ESP32_BROWNOUT
 
   #ifdef CONFIG_IDF_TARGET_ESP32
-    // restore GPIO16/17 if no PSRAM is found
-    // if (!FoundPSRAM()) {
-    //   // test if the CPU is not pico
-    //   uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
-    //   uint32_t pkg_version = chip_ver & 0x7;
-    //   if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
-    //     gpio_reset_pin(GPIO_NUM_16);
-    //     gpio_reset_pin(GPIO_NUM_17);
-    //   }
-    // }
+  // restore GPIO16/17 if no PSRAM is found
+  if (!SupportESP32::FoundPSRAM()) {
+    // test if the CPU is not pico
+    uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
+    uint32_t pkg_version = chip_ver & 0x7;
+    if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
+      gpio_reset_pin(GPIO_NUM_16);
+      gpio_reset_pin(GPIO_NUM_17);
+    }
+  }
   #endif  // CONFIG_IDF_TARGET_ESP32
   #endif  // ESP32
 
@@ -209,6 +203,16 @@ void setup(void)
     SafeMode_StartAndAwaitOTA();
   }
   #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  /**
+   * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
+   * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
+   **/
+  #if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
+  if(RtcFastboot.fast_reboot_count > 10)
+  {
+    SafeMode_CellularConnectionAndSendLocation();
+  }
+  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
 
 #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -257,6 +261,7 @@ pCONT_sup->CmndCrash();
   Serial.setDebugOutput(true);
   #endif 
   
+
 /********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
@@ -297,19 +302,18 @@ pCONT_sup->CmndCrash();
  ** Show PSRAM Present **********************************************************************
  ********************************************************************************************/
 
-//  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
-// #ifdef ESP32
-//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
-//             FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-//   AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
-//   #if !defined(HAS_PSRAM_FIX)
-//   if (FoundPSRAM() && !CanUsePSRAM()) {
-//     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
-//   }
-//   #endif
-// #else // ESP32
-//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
-// #endif // ESP32
+  #ifdef ESP32
+    // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
+    //           SupportESP32::FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+    // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
+    // #if !defined(HAS_PSRAM_FIX)
+    // if (FoundPSRAM() && !CanUsePSRAM()) {
+    //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+    // }
+    // #endif
+  #else // ESP32
+    AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+  #endif // ESP32
 
 /********************************************************************************************
  ** Internal RTC Time PreInit ***************************************************************
@@ -402,8 +406,6 @@ pCONT_sup->CmndCrash();
 //     }
 // #endif
 //   }
-
-
 
 /********************************************************************************************
  ** OsWatch ********************************************************************************
@@ -527,6 +529,8 @@ pCONT_sup->CmndCrash();
   // Load any stored user values into module
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
   // load
+  
+
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
    * */
@@ -535,16 +539,31 @@ pCONT_sup->CmndCrash();
   pCONT->Tasker_Interface(FUNC_CONFIGURE_MODULES_FOR_DEVICE);
   // init mqtt handlers from memory
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_INIT);  
+  
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
+  #endif
+
+// DEBUG_LINE_HERE_SHORT_PAUSE;
+
   // Init the refresh periods for mqtt
   pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #ifdef ENABLE_FUNCTION_DEBUG
     pCONT->Tasker_Interface(FUNC_DEBUG_CONFIGURE);
   #endif
+
+  
+
+
   // Init any dynamic memory buffers
   pCONT->Tasker_Interface(FUNC_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
   // For debugging, allow method to override init/loaded values
   #ifdef ENABLE_BOOT_OVERRIDE_INIT
   pCONT->Tasker_Interface(FUNC_OVERRIDE_BOOT_INIT);
+  #endif
+
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
   #endif
 
   #ifdef USE_MODULE_CORE_RULES
@@ -562,7 +581,7 @@ pCONT_sup->CmndCrash();
 
 void LoopTasker()
 {
-  
+
   #ifdef USE_ARDUINO_OTA
     pCONT_sup->ArduinoOtaLoop();
   #endif
@@ -574,7 +593,75 @@ void LoopTasker()
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(FUNC_EVERY_50_MSECOND);  }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(FUNC_EVERY_100_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&pCONT_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(FUNC_EVERY_250_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000)){ pCONT->Tasker_Interface(FUNC_EVERY_SECOND);      }  DEBUG_LINE;
+  if(mTime::TimeReached(&pCONT_sup->tSavedLoop1Sec   ,1000))
+  {
+    
+    pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
+
+    if(pCONT_time->RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    
+    if(
+      ((pCONT_time->uptime.seconds_nonreset%5)==0)&&
+      (pCONT_time->uptime.seconds_nonreset>20)
+    ){                                      pCONT->Tasker_Interface(FUNC_EVERY_FIVE_SECOND); }
+
+    if(
+      ((pCONT_time->uptime.seconds_nonreset%300)==0)&&
+      (pCONT_time->uptime.seconds_nonreset>60)
+    ){                                    pCONT->Tasker_Interface(FUNC_EVERY_FIVE_MINUTE); }
+
+    // Uptime triggers
+    if(pCONT_time->uptime.seconds_nonreset == 10){   pCONT->Tasker_Interface(FUNC_UPTIME_10_SECONDS); }
+    if(pCONT_time->uptime.seconds_nonreset == 30){   pCONT->Tasker_Interface(FUNC_UPTIME_30_SECONDS); }
+    if(pCONT_time->uptime.seconds_nonreset == 600){   pCONT->Tasker_Interface(FUNC_UPTIME_10_MINUTES); }
+    if(pCONT_time->uptime.seconds_nonreset == 36000){ pCONT->Tasker_Interface(FUNC_UPTIME_60_MINUTES); }
+
+    // Check for midnight
+    if((pCONT_time->RtcTime.hour==0)&&(pCONT_time->RtcTime.minute==0)&&(pCONT_time->RtcTime.second==0)&&(pCONT_time->lastday_run != pCONT_time->RtcTime.Yday)){
+      pCONT_time->lastday_run = pCONT_time->RtcTime.Yday;
+      pCONT->Tasker_Interface(FUNC_EVERY_MIDNIGHT); 
+    }
+
+    if(pCONT_time->uptime.seconds_nonreset==10){       pCONT->Tasker_Interface(FUNC_BOOT_MESSAGE);}
+
+    if(pCONT_time->uptime.seconds_nonreset==120){       pCONT->Tasker_Interface(FUNC_ON_BOOT_SUCCESSFUL);}
+      
+    pCONT->Tasker_Interface(FUNC_INIT_DELAYED_SECONDS);
+
+  } // END secondloop
+
+    
+  #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+  if(pCONT->function_event_queue.size())
+  {
+    DEBUG_LINE_HERE;
+    bool execute_function = false;
+    uint8_t iter_count = 0;
+    for(auto& queue:pCONT->function_event_queue)
+    {
+      if(queue.delay_millis == 0){ execute_function = true; } // no delay
+      if(mTime::TimeReached(&queue.tSaved_millis,queue.delay_millis)){ execute_function = true; }
+    DEBUG_LINE_HERE;
+
+      if(execute_function)
+      {
+        ALOG_HGL(PSTR("Executing Event Queue Item [%d]: func_id %d"), iter_count, queue.function_id);
+    DEBUG_LINE_HERE;
+        pCONT->Tasker_Interface(queue.function_id);
+    DEBUG_LINE_HERE;
+    // std::vector<mTaskerManager::FUNCTION_EXECUTION_EVENT>::iterator index = pCONT->function_event_queue.begin()+iter_count;
+
+    
+        ALOG_INF(PSTR("erase %d/%d"), iter_count, pCONT->function_event_queue.size());
+
+        pCONT->function_event_queue.erase(pCONT->function_event_queue.begin()+iter_count);    
+    DEBUG_LINE_HERE;   
+      }
+      iter_count++;
+    }
+    DEBUG_LINE_HERE;
+  }
+  #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
 
 }
 
@@ -624,9 +711,14 @@ void loop(void)
 
   if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
-    ALOG_DBM(PSTR("LOOPSEC = %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec);
+    ALOG_DBM(PSTR("LOOPSEC = \t\t\t\t\t%d %d last %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
     pCONT_sup->activity.loop_counter=0;
   }
+
+  // if(pCONT_sup->loop_runtime_millis > 500)
+  // {
+  //   ALOG_ERR(PSTR("LONG_LOOP =============================================== %d %d %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+  // }
 
   /**
    * @brief Until code has been stress tested, removing all delays to stop starving resources. This will need to be introduced later one device at a time.

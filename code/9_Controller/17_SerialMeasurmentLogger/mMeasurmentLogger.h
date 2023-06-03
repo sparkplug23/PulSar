@@ -176,7 +176,7 @@
 //     uint8_t ConstructJSON_SDCard_Calibration_Frame(uint8_t json_level = 0, bool json_appending = true);
 
   
-//     #ifdef USE_MODULE_NETWORK_MQTT 
+//     #ifdef USE_MODULE_NETWORK_MQTT
 //     void MQTTHandler_Init();
 //     void MQTTHandler_Set_RefreshAll();
 //     void MQTTHandler_Set_DefaultPeriodRate();

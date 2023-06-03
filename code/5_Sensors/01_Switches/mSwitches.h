@@ -14,8 +14,7 @@
 #include "2_CoreSystem/02_Time/mTime.h"
 #include "2_CoreSystem/05_Logging/mLogging.h"
 // #include "1_TaskerManager/mTaskerManager.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
-#include "3_Network/01_MQTT/mMQTT.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"#include "3_Network/10_MQTT/mMQTT.h"
 #include "2_CoreSystem/02_Time/mTime.h"
 
 
@@ -90,6 +89,24 @@ class mSwitches :
     }switches[MAX_SWITCHES];
 
     bool IsSwitchActive(uint8_t id);
+
+    
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    uint8_t GetSensorCount(void) override
+    {
+      return settings.switches_found;
+    }
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > MAX_SWITCHES-1) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_STATE_ACTIVE_ID);
+      value->data_f.push_back(IsSwitchActive(index));
+      value->sensor_id = index;
+    };
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
+
+
 
     Ticker* TickerSwitch = nullptr;
 
