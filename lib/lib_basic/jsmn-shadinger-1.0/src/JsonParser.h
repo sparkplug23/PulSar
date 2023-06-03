@@ -76,6 +76,8 @@ public:
   inline bool isValid(void) const   { return t->type != JSMN_INVALID; }
   inline size_t size(void) const    { return t->size; }
 
+  
+
   inline bool isSingleToken(void) const { return (t->type >= JSMN_STRING); }
   inline bool isKey(void) const     { return (t->type == JSMN_KEY); }
   inline bool isStr(void) const     { return (t->type == JSMN_STRING); }

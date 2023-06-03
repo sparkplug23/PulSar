@@ -2,11 +2,22 @@
 
 mTaskerManager* mTaskerManager::instance = nullptr;
 
-
 int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
+// DEBUG_LINE_HERE;
   int8_t result = 0;
+
+/**
+ * @brief Construct a new if object
+ * Add debug functions that can be called to highlight 
+ * 
+ * 
+ * DebugTasker__ExactIDMAtch()
+ * DebugTasker__RangedMinMaxIDs()
+ * 
+ */
+
 
   if(target_tasker){
     ALOG_INF(PSTR(D_LOG_CLASSLIST "target_tasker %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));
@@ -14,64 +25,69 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
   JsonParserObject obj = 0;
   
-  if(function == FUNC_JSON_COMMAND_ID)
-  { 
-    
-    JsonParser parser(data_buffer.payload.ctr);
-    
-    // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
-    obj = parser.getRootObject();   
-    if (!obj)
-    {
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-      #endif //ENABLE_LOG_LEVEL_COMMANDS
-      return 0;
-    }
-    else{
-      // ALOG_INF(PSTR("JSON_SERIALIZATION"));
-    }
-
-    for(uint8_t i=0;i<GetClassCount();i++)
+  switch(function)
+  {
+    case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:    
+      // if(obj && GetModuleIDbyFriendlyName(topic)==i)
+      // else{break;}
+      // If match, switch target tasker to be the directed command
+    case FUNC_JSON_COMMAND_ID:
     { 
-      // switch_index = target_tasker ? target_tasker : i;
-
       
-      if(target_tasker){
-        switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
-      }else{
-        switch_index = i; // Normally index is synonomous with enum list
-      }
-
-      // ALOG_INF(PSTR("JSON_SERIALIZATION"));  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
-
-
-      pModule[switch_index]->Tasker(function, obj);
-      if(target_tasker)
+      JsonParser parser(data_buffer.payload.ctr);
+      
+      // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
+      obj = parser.getRootObject();   
+      if (!obj)
       {
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));  
-        // #endif // ENABLE_LOG_LEVEL_COMMANDS          
-        break; 
+        ALOG_ERR(PSTR(D_JSON_DESERIALIZATION_ERROR));
+        break;
       }
-    }
+      else{
+        // ALOG_INF(PSTR("JSON_SERIALIZATION"));
+      }
+
+      for(uint8_t i=0;i<GetClassCount();i++)
+      { 
+        // switch_index = target_tasker ? target_tasker : i;
+
+        
+        if(target_tasker){
+          switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
+        }else{
+          switch_index = i; // Normally index is synonomous with enum list
+        }
+
+        // ALOG_INF(PSTR("JSON_SERIALIZATION"));  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
+
+
+        pModule[switch_index]->Tasker(function, obj);
+        if(target_tasker)
+        {
+          // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+          AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"),target_tasker,GetModuleFriendlyName_WithUniqueID(target_tasker));  
+          // #endif // ENABLE_LOG_LEVEL_COMMANDS          
+          break; 
+        }
+      }
 // DEBUG_LINE_HERE;
-    return 0; // needs to return via "Tasker"
-  } 
+      return 0; // needs to return via "Tasker"
+    } 
+    break;
+  } //END switch
 
   #ifdef  ENABLE_DEBUG_FUNCTION_NAMES
     char buffer_taskname[50];
   #endif
+  // #ifdef DEBUG_PIN3_GPIO
+  //   for(int i=0;i<1;i++){
+  //   DEBUG_PIN3_SET(0); //green
+  //   DEBUG_PIN3_SET(1);
+  //   }
+  // #endif // DEBUG_PIN3_GPIO
 
-/**
- * @brief ==============================================================================================================================
- **/
-  for(uint8_t i=0;i<GetClassCount();i++)
-  {     
-        
-    // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
-    
-    // If target_tasker != 0, then use it, else, use indexed array
+  for(uint8_t i=0;i<GetClassCount();i++){     // If target_tasker != 0, then use it, else, use indexed array
+
     if(target_tasker){
       switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
     }else{
@@ -79,75 +95,140 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     }
 
 
-    #ifdef ENABLE_ADVANCED_DEBUGGING
+
+    // switch_index = target_tasker ? target_tasker : i;
+    // #ifdef ENABLE_ADVANCED_DEBUGGING
+    // Serial.printf("switch_index=%d\n\r",switch_index);
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+    /**
+     * @brief Show task about to be called after a certain uptime has elasped.
+     * Setting a time allows "skipping" forward until the expected error point 
+     */
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       if(pCONT_time->uptime_seconds_nonreset>ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS)
       {
       #endif
-      #ifdef ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS
-      if(pCONT_time->uptime_seconds_nonreset<ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS)
-      {
-      #endif
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIS_%d\t %02d %02d T:%S\tM:%S"), millis(), switch_index, i, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));      
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       }
       #endif
-      #ifdef ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS
-      }
+    #endif
+    #ifdef ENABLE_ADVANCED_DEBUGGING
+    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+      ALOG_INF(PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module started \t%d ms %s"),millis(), pCONT_set->GetTaskName(function, buffer_taskname));
       #endif
-    #endif // ENABLE_DEBUG_FUNCTION_NAMES
-    #endif // ENABLE_ADVANCED_DEBUGGING
+    #endif
+    // #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
+    // if(pCONT_time->uptime_seconds_nonreset>ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS)
+    // {
+    //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TI_%d\t %02d %S\t%S"), millis(), switch_index, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    // }
+    // #endif // ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
     
-
-    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
+    #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t start_millis = millis();
     #endif
     
+  //   if(function == FUNC_EVENT_INPUT_STATE_CHANGED_ID)
+  //   {
+  // DEBUG_LINE_HERE; ALOG_INF(PSTR("event_triggered.module_id = i%d f%d\t %d"),switch_index, function, pCONT_rules->event_triggered.module_id); 
+  //   }
 
-    pModule[switch_index]->Tasker(function, obj);
-    
+  // DEBUG_LINE_HERE;
 
-    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
+  /**
+   * @brief Convert "unique_module_id" to "enum_index"
+   * 
+   */
+
+// DEBUG_LINE_HERE;
+
+// DEBUG_PIN6_SET(LOW);
+    switch(function)
+    {
+      // case FUNC_JSON_COMMAND_CHECK_TOPIC_ID:  
+      case FUNC_JSON_COMMAND_ID: 
+        // AddLog(LOG_LEVEL_TEST, PSTR("FUNC_JSON_COMMAND_ID=%d"),obj["test2"].getInt());   
+      //   if(obj)
+      //   {
+      //     // pModule[switch_index]->parse_JSONCommand(obj); // This should only happen if the function is enabled internally
+      //     pModule[switch_index]->Tasker(function,obj);
+      //   }
+      break;
+      default:
+
+      // DEBUG_LINE_HERE;
+      
+          // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
+        // switch(switch_index)
+        // {
+        //   case EM_MODULE_CORE_HARDWAREPINS_ID:
+        //   case EM_MODULE_CORE_SETTINGS_ID:
+        //   case EM_MODULE_CORE_SUPPORT_ID:
+        //   case EM_MODULE_CORE_LOGGING_ID:
+        //   case EM_MODULE_CORE_TELEMETRY_ID:
+        //   case EM_MODULE_CORE_TIME_ID:
+        //   case EM_MODULE_CORE_RULES_ID:
+        //   case EM_MODULE_DRIVERS_CAMERA_OV2640_ID:
+        // if(EM_MODULE_NETWORK_WEBSERVER_ID!=switch_index)
+        // {
+          pModule[switch_index]->Tasker(function, obj);
+        // }else{
+        //   DEBUG_LINE_HERE;
+        //   delay(2000);
+        //   DEBUG_LINE_HERE;
+        // }
+
+        //   break;
+        //   default:
+        //   //nothing
+        //   break;
+        // }
+
+      break;
+    }
+// DEBUG_PIN6_SET(HIGH);
+
+    #if defined(DEBUG_EXECUTION_TIME)  || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
     uint32_t end_millis = millis(); // Remember start millis
     uint32_t this_millis = end_millis - start_millis; // Get this execution time 
-    debug_module_time[switch_index].last_loop_time = this_millis;
-    debug_module_time[switch_index].avg_time += this_millis;
-    debug_module_time[switch_index].avg_time /= 2;
-    if(this_millis > debug_module_time[switch_index].max_time){
-      debug_module_time[switch_index].max_time = this_millis; // Save Max
-      debug_module_time[switch_index].max_function_id = function;
-    }
+    #if defined(DEBUG_EXECUTION_TIME) // Get average
+    //if(fModule_present){ //only update tasks that run .. IMPROVE this later with flags (manually) or via returns of tasks
+      module_settings.execution_time_average_ms[i] += this_millis;
+      module_settings.execution_time_average_ms[i] /= 2; //gets average
+     // Get max
+      if(this_millis > module_settings.execution_time_max_ms[i]){
+        module_settings.execution_time_max_ms[i] = this_millis; // remember max
+      }
+    //}
+    #endif // DEBUG_EXECUTION_TIME
     #endif
-
-    
     
     #ifdef ENABLE_ADVANCED_DEBUGGING
-      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIE_%d FUNC time %dms"),millis(),millis()-start_millis);
+      AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " module completed \t%d ms %s"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname));
     #endif
-    #if defined(ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS)
-      if(this_millis > ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS){
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TASKER @@@@@@@@@@@@@@@@@@ %d ms %s %S"), millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+    #if defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
+      if(this_millis > 500){
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE "%d ms %s %S"),millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
       }
     #endif
 
-
-    if(target_tasker!=0)
-    {
-      ALOG_DBM(PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
+    if(target_tasker!=0){
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "target_tasker EXITING EARLY"));
+      #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
-    
     // Special flag that can be set to end interface ie event handled, no need to check others
-    if(fExitTaskerWithCompletion)
-    {
+    if(fExitTaskerWithCompletion){
       fExitTaskerWithCompletion=false;
-      ALOG_DBM(PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+      #ifdef ENABLE_LOG_LEVEL_INFO
+        AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_CLASSLIST "fExitTaskerWithCompletion EXITING EARLY"));
+      #endif// ENABLE_LOG_LEVEL_INFO
       break; //only run for loop for the class set. if 0, rull all
     }
   
   } //end for
-
 
   #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
   if(!pCONT_set->flag_boot_complete){
@@ -173,9 +254,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   }//flag_boot_complete
   #endif // ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
 
-
   if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
   
+  DEBUG_LINE;
   #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));
   #endif
@@ -191,9 +272,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_HARDWAREPINS
   pModule[EM_MODULE_CORE_HARDWAREPINS_ID] = new mHardwarePins();
   #endif 
-  #ifdef USE_MODULE_CORE_SERIAL_UART
-    pModule[EM_MODULE_CORE_SERIAL_UART_ID] = new mSerialUART();
-  #endif
   #ifdef USE_MODULE_CORE_SETTINGS
   pModule[EM_MODULE_CORE_SETTINGS_ID] = new mSettings();
   #endif 
@@ -218,24 +296,20 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID] = new mDevelopmentDebugging();
   #endif
-  
-  // Network  
-  #ifdef USE_MODULE_NETWORK_INTERFACE
-  pModule[EM_MODULE__NETWORK_INTERFACE__ID] = new mInterfaceNetwork();
-  #endif 
-  #ifdef USE_MODULE_NETWORK_WIFI
+  // Subsystems
+  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  pModule[EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID] = new mSolarLunar();
+  #endif
+  // Network
+  #if defined(USE_MODULE_NETWORK_WIFI) || defined(USE_MODULE_NETWORK_WIFI_V2)
   pModule[EM_MODULE_NETWORK_WIFI_ID] = new mWiFi();
   #endif 
-  #ifdef USE_MODULE_NETWORK_CELLULAR
-    pModule[EM_MODULE__NETWORK_CELLULAR__ID] = new mCellular();
-  #endif
   #ifdef USE_MODULE_NETWORK_MQTT
   pModule[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
   #endif 
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   pModule[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebServer();
   #endif
-
   // Displays
   #ifdef USE_MODULE_DISPLAYS_INTERFACE
     pModule[EM_MODULE_DISPLAYS_INTERFACE_ID] = new mDisplaysInterface();
@@ -268,6 +342,12 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_SDCARD
     pModule[EM_MODULE_DRIVERS_SDCARD_ID] = new mSDCard();
   #endif
+  #ifdef USE_MODULE_DRIVERS_GPS
+    pModule[EM_MODULE_DRIVERS_GPS_ID] = new mGPS();
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SERIAL_UART
+    pModule[EM_MODULE_DRIVERS_SERIAL_UART_ID] = new mSerialUART();
+  #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
     pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID] = new mShellyDimmer();
   #endif
@@ -286,11 +366,8 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
   #endif
-  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-    pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID] = new mBuzzer();
-  #endif
-  #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
-    pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID] = new mBuzzer();
+  #ifdef USE_MODULE_DRIVERS_BUZZER
+    pModule[EM_MODULE_DRIVERS_BUZZER_ID] = new mBuzzer();
   #endif
   #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
     pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID] = new mRCSwitch();
@@ -318,16 +395,6 @@ uint8_t mTaskerManager::Instance_Init(){
     pModule[EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID] = new mWebCamera();
   #endif
 
-  #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-    pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID] = new mMAVLink_Decoder();
-  #endif
-  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
-    pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID] = new mMAVLink_Telemetry_WiFi();
-  #endif
-  #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
-    pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID] = new mMAVLink_Telemetry_Cellular();
-  #endif
-
 
 
   // Energy
@@ -350,15 +417,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
     pModule[EM_MODULE_LIGHTS_ANIMATOR_ID] = new mAnimatorLight();
   #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    pModule[EM_MODULE_LIGHTS_ADDRESSABLE_ID] = new mAddressableLight();
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    pModule[EM_MODULE_LIGHTS_PWM_ID] = new mPWMLight();
-  #endif
-  // #ifdef USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  //   pModule[EM_MODULE_LIGHTS_WLED_EFFECTS_ID] = new mWLEDEffects();
-  // #endif
   // Sensors
   #ifdef USE_MODULE_SENSORS_INTERFACE
     pModule[EM_MODULE_SENSORS_INTERFACE_ID] = new mSensorsInterface();
@@ -435,20 +493,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     pModule[EM_MODULE_SENSORS__DS18X20__ID] = new mDB18x20_ESP32();
-  #endif  
-  #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
-  pModule[EM_MODULE_SENSORS_SOLAR_LUNAR_ID] = new mSolarLunar();
   #endif
-  #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-    pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID] = new mGPS_Serial();
-  #endif
-  #ifdef USE_MODULE_SENSORS_GPS_MODEM
-    pModule[EM_MODULE__SENSORS_GPS_MODEM__ID] = new mGPS_Modem();
-  #endif
-  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-    pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID] = new mBattery_Modem();
-  #endif
-
   // Controllers
   #ifdef USE_MODULE_CONTROLLER_BLINDS
     pModule[EM_MODULE_CONTROLLER_BLINDS_ID] = new X();
@@ -523,12 +568,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
     pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID] = new mTempSensorOLEDBath();
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
-    pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID] = new mCellularBlackBox();
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
-    pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID] = new mMAVLink_Decoder_OLED();
   #endif
 };
 
@@ -672,7 +711,7 @@ bool mTaskerManager::ValidTaskID(uint8_t id)
   return id <= GetClassCount() ? true : false;
 }
 
-PGM_P mTaskerManager::GetModuleFriendlyName(uint16_t id)
+PGM_P mTaskerManager::GetModuleFriendlyName(uint8_t id)
 {
   if(ValidTaskID(id))
   {

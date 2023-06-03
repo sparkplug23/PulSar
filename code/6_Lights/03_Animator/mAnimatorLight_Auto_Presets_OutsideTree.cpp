@@ -3,6 +3,8 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
+// in the future, these presets should become ".json" files in the file system, uploaded with webui
+
 #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
 
 #ifdef USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE

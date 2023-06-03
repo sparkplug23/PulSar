@@ -159,28 +159,7 @@ AddLog(LOG_LEVEL_TEST,PSTR("pwm %d value = %d"),pin,value);
 
 
 
-//   char buffer[20];
-//   pCONT_set->Settings.light_settings.type = value;
-//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_HARDWARE_TYPE)), GetPixelHardwareTypeName(buffer));
-//   #endif // ENABLE_LOG_LEVEL_COMMANDS
 } 
-// int8_t mInterfaceLight::GetPixelHardwareTypeIDbyName(const char* c){
-//   if(*c=='\0') return -1;
-//   if(     strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)==0){ return LT_PWM5; }
-//   else if(strcmp_P(c,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)==0){       return LT_ADDRESSABLE_WS281X; }
-//   return -1;
-// }
-// const char* mInterfaceLight::GetPixelHardwareTypeName(char* buffer){
-//   return GetPixelHardwareTypeNamebyID(pCONT_set->Settings.light_settings.type, buffer);
-// }
-// const char* mInterfaceLight::GetPixelHardwareTypeNamebyID(uint8_t id, char* buffer){
-//   switch(id){
-//     case LT_PWM5:   memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)); break;
-//     case LT_ADDRESSABLE_WS281X: memcpy_P(buffer,PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR,sizeof(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR));         break;
-//   }
-//   return buffer;
-// }
 
 
 //   //FanPWM = 0-1023

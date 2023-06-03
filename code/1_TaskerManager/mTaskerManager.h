@@ -139,6 +139,7 @@ enum FUNCTION_RESULT_IDS{
 
 #include "2_CoreSystem/01b_RtcMemory/mRtcSettings.h"
 
+
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
   MODULE_SUBTYPE_NETWORK_ID,
@@ -327,12 +328,6 @@ enum MODULE_IDS{
   #endif
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
     EM_MODULE_LIGHTS_ANIMATOR_ID,
-  #endif
-  #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-    EM_MODULE_LIGHTS_ADDRESSABLE_ID,
-  #endif
-  #ifdef USE_MODULE_LIGHTS_PWM
-    EM_MODULE_LIGHTS_PWM_ID,
   #endif
   // Sensors
   #ifdef USE_MODULE_SENSORS_INTERFACE
@@ -736,14 +731,6 @@ enum MODULE_IDS{
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/03_Animator/mAnimatorLight.h"
   #define pCONT_lAni                            static_cast<mAnimatorLight*>(pCONT->pModule[EM_MODULE_LIGHTS_ANIMATOR_ID])
-#endif
-#ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  #include "6_Lights/01_Hardware/Addressable/mAddressableLight.h"
-  #define pCONT_ladd                            static_cast <mAddressableLight*>(pCONT->pModule[EM_MODULE_LIGHTS_ADDRESSABLE_ID])
-#endif
-#ifdef USE_MODULE_LIGHTS_PWM
-  #include "6_Lights/01_Hardware/PWM/mPWMLight.h"
-  #define pCONT_lPWM                            static_cast<mPWMLight*>(pCONT->pModule[EM_MODULE_LIGHTS_PWM_ID])
 #endif
 
 /**
