@@ -2915,7 +2915,7 @@ Bathroom
     "HardwareType":"WS28XX",
     "AnimationMode":"Effects",
     "ColourOrder":"grb",
-    "ColourPalette":"Christmas 01",
+    "ColourPalette":"Christmas 13",
     "Effects": {
       "Function":1,
       "Intensity":50
