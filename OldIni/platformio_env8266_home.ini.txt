@@ -36,7 +36,7 @@ upload_port = 192.168.1.171
 lib_extra_dirs            = 
                             lib/libesp8266/network 
                             lib/lib_network 
-                            lib/libg_neopixel
+                            lib/lib_neopixel_legacy_2022
                             lib/lib_basic      
                             lib/lib_sensor 
 
@@ -45,7 +45,7 @@ lib_extra_dirs            =
 [env:esp_8266_doorbellwallchime]
 build_flags = ${common.build_flags} -D DEVICE_DOORBELLWALLCHIME -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              lib/lib_neopixel_legacy_2022
 extra_scripts   = gzip_fw.py
 upload_protocol = espota
 upload_port = 192.168.1.227
@@ -126,7 +126,7 @@ extra_scripts             = gzip_fw.py
 build_flags = ${common.build_flags} -D DEVICE_RGBUTILITY
                                      -w
 lib_extra_dirs = ${common.lib_extra_dirs}
-              lib/libg_neopixel
+              lib/lib_neopixel_legacy_2022
 ; upload_port = rgbutility.local
 upload_protocol = espota
 extra_scripts             = gzip_fw.py

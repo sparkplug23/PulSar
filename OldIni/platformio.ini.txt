@@ -72,7 +72,7 @@ lib_deps =
 lib_extra_dirs            = 
                             lib/libesp8266/network 
                             lib/lib_network 
-                            ; lib/libg_neopixel
+                            ; lib/lib_neopixel_legacy_2022
                             lib/lib_basic      
                             lib/lib_sensor 
 
