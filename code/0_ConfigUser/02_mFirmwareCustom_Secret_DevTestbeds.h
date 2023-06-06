@@ -47,7 +47,7 @@
 
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_01
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
-#define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
 // #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
 
 
@@ -1037,7 +1037,25 @@
   #define DEVICENAME_CTR          "testbed_segment_multipin_esp32"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 100
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  //mqtt debug
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
   // #define DISABLE_NETWORK
 
@@ -1072,11 +1090,15 @@
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
+    #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+    #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+    #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
     /********* Group: Debug options only ************************/
@@ -1095,22 +1117,6 @@
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
 
-    // #define ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-
-
-    #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
-    #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-
-    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
-
-    #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
-
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1121,20 +1127,15 @@
       "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":[16,17,5,21,22],"  // PWM RGBCCT // needs fixing
+      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":16,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_B_CTR "\":17,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_C_CTR "\":5,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_D_CTR "\":21,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_E_CTR "\":22,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":16,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_B_CTR "\":17,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_C_CTR "\":5,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_D_CTR "\":21,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_E_CTR "\":22,"  // PWM RGBCCT
 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_06_A_CTR "\":23"                // PWM CCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_06_A_CTR "\":23"                // PWM CCT
       #endif
     "},"
     "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1158,9 +1159,11 @@
   #define USE_LIGHTING_TEMPLATE
   // #endif // USE_MODULE_LIGHTS_INTERFACE
 
-  #define USE_LIGHTING_TEMPLATE__SINGLE
-  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED
-  // #define USE_LIGHTING_TEMPLATE_3
+  // #define USE_LIGHTING_TEMPLATE__SINGLE
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
+  #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FIVE_CHANNELS
+  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
 
   #ifdef USE_LIGHTING_TEMPLATE__SINGLE
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1181,7 +1184,7 @@
     )=====";
   #endif // USE_LIGHTING_TEMPLATE__SINGLE
 
-  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -1191,124 +1194,157 @@
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":50
+        "Length":16
       },
       {
         "Pin":13,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":50,
-        "Length":10
+        "Start":15,
+        "Length":3
       },
       {
         "Pin":14,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":60,
-        "Length":10
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":18,
+        "Length":3
       },
       {
         "Pin":27,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":70,
-        "Length":10
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":21,
+        "Length":3
       },
       {
         "Pin":[16,17,5,21,22],
         "ColourOrder":"RGBCW",
         "BusType":"ANALOG_5CH",
-        "Start":80,
+        "Start":24,
         "Length":1
       }
     ],
     "AnimationMode":"Effects",
     "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function":1,
+      "Function":11,
       "Intensity":50
     },
     "Transition": {
-      "TimeMs": 2000,
-      "RateMs": 2100
+      "TimeMs": 500,
+      "RateMs": 1000
     },
-    "BrightnessRGB": 10
+    "BrightnessRGB": 5
   }
   )=====";
-  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
 
-// {
-//   "ColourPalette": 11,
-//   "Effects": {
-//     "Function": 0,
-//     "Intensity": 127,
-//     "Speed": 255
-//   },
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 5000
-//   },
-//   "BrightnessRGB": 100,
-//   "SegColour1": {
-//     "Hue": 240,
-//     "Sat":70
-//   }
-// }
-
-
-
-    // ALOG_COM(PSTR("isObject %d"), jtok.isObject());
-    // ALOG_COM(PSTR("isArray %d"), jtok.isArray());
-    // ALOG_COM(PSTR("isStr %d"), jtok.isStr());
-    // ALOG_COM(PSTR("isNum %d"), jtok.isNum());
-
-    // ALOG_COM(PSTR("BusConfig match jtok.isArrayA() %d"), jtok.isArray());
-    //   ALOG_INF(PSTR("BusConfig **************A  \t%d"), jtok.getType());
-    // ALOG_COM(PSTR("BusConfig match jtok.isArrayB() %d"), jtok.isArray());
-    
-/*
-
-{
-  "HardwareType": "WS28XX",
-  "AnimationMode": "Effects",
-  "BrightnessRGB": 100,
-  "Segment0": {
-    "PixelRange": [
-      0,
-      5
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":16
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":15,
+        "Length":3
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":18,
+        "Length":3
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":21,
+        "Length":3
+      }
     ],
-    "ColourPalette": 10,
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function": 0,
-      "Intensity": 255
+      "Function":11,
+      "Intensity":50
     },
-    "SegColour":{"Hue":120,"Sat":100},
     "Transition": {
-      "TimeMs": 900,
+      "TimeMs": 500,
       "RateMs": 1000
-    }
-  },
-  "Segment1": {
-    "PixelRange": [
-      5,
-      10
+    },
+    "BrightnessRGB": 5
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
+
+
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FIVE_CHANNELS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":16
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":15,
+        "Length":3
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":18,
+        "Length":3
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":21,
+        "Length":3
+      },
+      {
+        "Pin":[16,17,5,21,22],
+        "ColourOrder":"RGBCW",
+        "BusType":"ANALOG_5CH",
+        "Start":24,
+        "Length":1
+      }
     ],
-    "ColourPalette": "Christmas 01",
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function": 24,
-      "Speed": 255,
-      "Intensity": 255,
-      "SegBrightness":255
+      "Function":11,
+      "Intensity":50
     },
     "Transition": {
-      "TimeMs": 0,
-      "RateMs": 23
-    }
+      "TimeMs": 500,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
   }
-}
-
-
-*/
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FIVE_CHANNELS
 
   #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1384,295 +1420,6 @@
   }
   )=====";
   #endif // USE_LIGHTING_TEMPLATE_1
-
-
-//   // #define DISABLE_NETWORK
-
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-  
-//   #define USE_MODULE_DRIVERS_RELAY // using relays to disable other pins
-
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
-//     #define USE_LIGHTS_WS2812
-//     // #define USE_LIGHTS_SK6812
-//     #define STRIP_SIZE_MAX 100
-//     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-//     /********* Group: Testing ************************/
-//     // #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-//     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-//     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//   #define USE_MODULE_TEMPLATE
-//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-//   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
-//       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-//       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\","  // Channel 1
-//       // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Channel 2
-//       // "\"44\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Channel 3
-//       // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Channel 4
-//       #endif 
-
-//       // Disable unused pins
-//       // "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","  // Channel 1
-//       "\"13\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\"," // Channel 2
-//       "\"44\":\"" D_GPIO_FUNCTION_REL3_INV_CTR  "\"," // Channel 3
-//       "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\"," // Channel 4
-
-
-//       #ifdef USE_MODULE_LIGHTS_PWM
-//       "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"22\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","      
-//       #endif 
-//       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-//     "},"
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-//     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-//   "}";
-
-/**
-//  * @brief The issue is template loading is not boot safe.
-//  * I need to move this to init() and have it configure after boot has happened using the new segment method
-//  * */
-//   #ifdef USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_LIGHTING_TEMPLATE
-//   #endif // USE_MODULE_LIGHTS_INTERFACE
-
-//   #ifdef USE_LIGHTS_WS2812
-//   #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//   #define USE_LIGHTING_TEMPLATE__SINGLE_WS
-
-//   #endif 
-
-//     #define USE_SK6812_METHOD_DEFAULT
-//   // #define USE_LIGHTING_TEMPLATE__SINGLE_SK
-//   // #define USE_LIGHTING_TEMPLATE__SINGLE_WS
-//   // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
-//   // #define USE_LIGHTING_TEMPLATE_3
-
-//   #ifdef USE_LIGHTING_TEMPLATE__SINGLE_SK
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-  // {
-  //   "HardwareType":"SK6812",
-  //   "ColourOrder":"grbw",
-  //   "AnimationMode":"Effects",
-  //   "Segment0":{
-  //     "PixelRange": [
-  //       0,
-  //       100
-  //     ],
-  //     "ColourPalette":0,
-  //     "Effects": {
-  //       "Function":1,
-  //       "Intensity":50
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 800,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 10
-  //   }
-  // }
-//   )=====";
-//   #endif // USE_LIGHTING_TEMPLATE__SINGLE
-
-//   #ifdef USE_LIGHTING_TEMPLATE__SINGLE_WS
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "HardwareType":"WS28XX",
-//     "AnimationMode":"Effects",
-//     "ColourOrder":"RGB",
-//     "ColourPalette":0,
-//     "Effects": {
-//       "Function":1,
-//       "Intensity":50
-//     },
-//     "Transition": {
-//       "TimeMs": 0,
-//       "RateMs": 1000
-//     },
-//     "BrightnessRGB": 100
-//   }
-//   )=====";
-//   #endif // USE_LIGHTING_TEMPLATE__SINGLE
-
-// // {
-// //   "ColourPalette": 11,
-// //   "Effects": {
-// //     "Function": 0,
-// //     "Intensity": 127,
-// //     "Speed": 255
-// //   },
-// //   "Transition": {
-// //     "TimeMs": 0,
-// //     "RateMs": 5000
-// //   },
-// //   "BrightnessRGB": 100,
-// //   "SegColour1": {
-// //     "Hue": 240,
-// //     "Sat":70
-// //   }
-// // }
-
-
-
-// // {
-// //   "HardwareType": "WS28XX",
-// //   "AnimationMode": "Effects",
-// //   "BrightnessRGB": 100,
-// //   "Segment0": {
-// //     "PixelRange": [
-// //       0,
-// //       5
-// //     ],
-// //     "ColourPalette": 10,
-// //     "Effects": {
-// //       "Function": 0,
-// //       "Intensity": 255
-// //     },
-// //     "SegColour":{"Hue":120,"Sat":100},
-// //     "Transition": {
-// //       "TimeMs": 900,
-// //       "RateMs": 1000
-// //     }
-// //   },
-// //   "Segment1": {
-// //     "PixelRange": [
-// //       5,
-// //       10
-// //     ],
-// //     "ColourPalette": "Christmas 01",
-// //     "Effects": {
-// //       "Function": 24,
-// //       "Speed": 255,
-// //       "Intensity": 255,
-// //       "SegBrightness":255
-// //     },
-// //     "Transition": {
-// //       "TimeMs": 0,
-// //       "RateMs": 23
-// //     }
-// //   }
-// // }
-
-//   #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "HardwareType":"WS28XX",
-//     "AnimationMode":"Effects",
-//     "Segment0":{
-//       "PixelRange": [
-//         0,
-//         10
-//       ],
-//       "ColourPalette":"Christmas 01",
-//       "Effects": {
-//         "Function":1,
-//         "Intensity":255
-//       },
-//       "Transition": {
-//         "TimeMs": 900,
-//         "RateMs": 1000
-//       },
-//       "BrightnessRGB": 10
-//     },
-//     "Segment1": {
-//       "PixelRange": [
-//         10,
-//         20
-//       ],
-//       "ColourPalette": "Christmas 01",
-//       "Effects": {
-//         "Function": 24,
-//         "Speed":255,
-//         "Intensity":255
-//       },
-//       "Transition": {
-//         "TimeMs": 0,
-//         "RateMs": 23
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "Segment2": {
-//       "PixelRange": [
-//         20,
-//         80
-//       ],
-//       "ColourPalette": "Rainbow",
-//       "Effects": {
-//         "Function":1,
-//         "Speed":100
-//       },
-//       "Transition": {
-//         "TimeMs": 400,
-//         "RateMs": 500
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "Segment3": {
-//       "PixelRange": [
-//         80,
-//         100
-//       ],
-//       "ColourPalette": "Rainbow",
-//       "Effects": {
-//         "Function":22,
-//         "Speed":255
-//       },
-//       "Transition": {
-//         "TimeMs": 0,
-//         "RateMs": 23
-//       },
-//       "BrightnessRGB": 100
-//     }
-//   }
-//   )=====";
-//   #endif // USE_LIGHTING_TEMPLATE_1
 
 #endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
 
@@ -2858,8 +2605,7 @@
   /**
    * @brief Device should run the same code designed for LTE MQTT devices, but connect via WiFi and therefore
    * test that LTE network stuff is not breaking the normal WiFi stuff and stable code is being developed for both methods.
-   * 
-   */
+   **/
   #define DEVICENAME_CTR          "cellular_locator_04"
   #define DEVICENAME_FRIENDLY_CTR "Tester - Run MQTT over WiFi without LTE connected"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
@@ -2869,12 +2615,12 @@
   #define UART_CELLULAR_BAUD   115200
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
 #endif
-
 #ifdef SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
-  // #define DEVICENAME_CTR          "cellular_locator_01"
-  // #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
-  // #define DEVICENAME_ROOMHINT_CTR "testbed"
-  // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+  
+  // #define ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+  #define ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
@@ -2882,57 +2628,48 @@
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
-
-  #define ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
-
-/**
- * @brief 
- * 
- * 
-// Add function to "settime_update" ie with GPS ticks. When it happens, reset the 
-// update millis so it does not double update, same for uptime
- * 
- * 
- * If LTE connects, then set the mqtt retry counter to immediate
- * 
- */
-
-
-
-  #define ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
-
-
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
-  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-  // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
-  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
-  #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
-  #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
-  #define ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
-  #define ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
-  // #define ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
-  // #define ENABLE_DEVFEATURE__NTP_OVER_CELLULAR_TEST_WITHOUT_INTERFACE_INTEGRATION
-  #define ENABLE_DEVFEATURE__TIME_UPDATE_WITH_GPS_TIME
-  // #define ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
-  #define ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS 600
-
-  #ifdef ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+  #ifdef ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
     #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
     #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 10
-    #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+    
+    #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES    
     // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+    #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+    #define ENABLE_DEBUG_FUNCTION_NAMES
+    #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+    #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+    #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
+    #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
+    // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
+    #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+    #define ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
+    #define ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
+    // #define ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
+    // #define ENABLE_DEVFEATURE__NTP_OVER_CELLULAR_TEST_WITHOUT_INTERFACE_INTEGRATION
+    #define ENABLE_DEVFEATURE__TIME_UPDATE_WITH_GPS_TIME
+    // #define ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+    #define ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS 600
+
+
+
+  #endif // ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+
+  #ifdef ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+
+
+    #define ENABLE_ADVANCED_DEBUGGING
+    #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+
+
 
   #endif // ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
 
 
-  // #define USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
-  // #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+
 
   // *************************************************************************************
 
@@ -2955,7 +2692,7 @@
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define USE_MODULE_SENSORS_GPS_MODEM
   #endif 
-  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR 
     #define DISABLE_NETWORK_WIFI
     #define USE_MODULE_NETWORK_CELLULAR
     #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
@@ -3041,6 +2778,18 @@
 
 #endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
 
+
+/**
+ * @brief 
+ * 
+ * 
+// Add function to "settime_update" ie with GPS ticks. When it happens, reset the 
+// update millis so it does not double update, same for uptime
+ * 
+ * 
+ * If LTE connects, then set the mqtt retry counter to immediate
+ * 
+ */
 
 
 

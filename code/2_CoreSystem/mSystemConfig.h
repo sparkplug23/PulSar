@@ -18,13 +18,14 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes
+ * #115 : Improvements from networks and lighting merged into dev_main. dev_main will be primary focus of developing until LTE and multipin are stable.
  * #114 : Cleaned up mqtt topic for interface_## to keep all interface types together. Requires updating path.
  * #113 : Main development branch for 2023
  * #112 : After Colorado, still the lighting only branch
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    114 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    115 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #06 : New BME680 added, bme/p 180/280 manual without library
@@ -37,7 +38,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  *       Set WDT to 60 seconds on esp32
  * #26 : Enabled fastboot detection, OTA fallback and WDT on ESP32 devices as default
  */
-#define FIRMWARE_VERSION_CORE     6
+#define FIRMWARE_VERSION_CORE     0
 
 /**@@@@@ Module changes
  * #02 : db18 esp32 working
@@ -49,7 +50,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #30 : Added ultrasonic to unified sensor
  * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
  */
-#define FIRMWARE_VERSION_MODULE   3
+#define FIRMWARE_VERSION_MODULE   0
 
 
 #define FIRMWARE_BRANCH_NAME_STRING "development" // Additions from colorado and for december 2022, to be merged into main dev branch and then deleted

@@ -47,7 +47,7 @@ void mSettings::SettingsDefault(void)
 
   // DEBUG_LINE_HERE;
     #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
+    AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Loading any progmem templates"));
     #endif // ENABLE_LOG_LEVEL_INFO
 
     // pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM); // loading module, only interface modules will have these
@@ -56,17 +56,13 @@ void mSettings::SettingsDefault(void)
 
 
 
-    DEBUG_LINE;
+    DEBUG_LINE_HERE;
     // Clear module defaults
     pCONT->Tasker_Interface(FUNC_SETTINGS_DEFAULT); // replace with below?
-    DEBUG_LINE;
+    DEBUG_LINE_HERE;
     pCONT->Tasker_Interface(FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
     
-  // DEBUG_LINE_HERE;
-  //   pCONT_set->SettingsSave(2);
     
-  // DEBUG_LINE_HERE;
-  //   DEBUG_LINE;
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
     #endif// ENABLE_LOG_LEVEL_INFO

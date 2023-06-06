@@ -501,7 +501,8 @@ class mMQTT :
               #endif
               
             #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
-              if(packet_successfully_sent){
+              if(packet_successfully_sent)
+              {
                 #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
                 Serial.printf("^^^^^^^^^^^^^^^^^^^ packet_successfully_sent %s DONE \n\r",handler_ptr->postfix_topic);
                 #endif
@@ -513,7 +514,9 @@ class mMQTT :
                 handler_ptr->flags.SendNow = false;      // Only to be reset if it sent at least once
                 handler_ptr->tSavedLastSent = millis();  // Only to be reset if it sent at least once
 
-              }else{
+              }
+              else
+              {
                 #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
                 Serial.printf("------------------- packet_successfully_sent %s ERROR\n\r",handler_ptr->postfix_topic);
                 #endif

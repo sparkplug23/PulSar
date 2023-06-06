@@ -323,7 +323,7 @@ void mCellular::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8
   if(result2)
   {
     #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage"));
+    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage S %s"),result2);
     #endif
 
     const char* delims = "()"; //space + ,
@@ -367,7 +367,7 @@ void mCellular::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8
   }
 
     #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage"));
+    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage E"));
     #endif
 
 }

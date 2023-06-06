@@ -877,7 +877,7 @@
 #define D_FLASH_WRITE_COUNT "Flash write Count"
 #define D_MAC_ADDRESS "MAC Address"
 #define D_MQTT_HOST "MQTT Host"
-#define MQTT_PORT "MQTT Port"
+#define D_MQTT_PORT "MQTT Port"
 #define D_MQTT_CLIENT "MQTT Client"
 #define D_MQTT_USER "MQTT User"
 #define D_MQTT_TOPIC "MQTT Topic"

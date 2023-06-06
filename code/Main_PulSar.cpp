@@ -279,6 +279,9 @@ pCONT_sup->CmndCrash();
  ** Set boottime values *********************************************************************
  ********************************************************************************************/
 
+
+DEBUG_LINE_HERE;
+
   // Set boot method
   pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
@@ -355,7 +358,12 @@ pCONT_sup->CmndCrash();
  ** Settings ********************************************************************************
  ********************************************************************************************/
 
+DEBUG_LINE_HERE;
+
+delay(2000);
   pCONT_set->SettingsInit();
+
+DEBUG_LINE_HERE;
 
   #ifdef USE_EMERGENCY_RESET
     EmergencySerial_SettingsReset();
@@ -373,11 +381,11 @@ pCONT_sup->CmndCrash();
   // pCONT_set->TestSettingsLoad();
   // pCONT_set->TestSettings_ShowLocal_Header();
 
-  ALOG_DBM(PSTR("Loading minimal defaults"));
+  ALOG_DBG(PSTR("Loading minimal defaults"));
 
   pCONT_set->SettingsDefault(); //preload minimal required
 
-  ALOG_DBM(PSTR("Loading settings from saved memory"));
+  ALOG_DBG(PSTR("Loading settings from saved memory"));
   
   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults

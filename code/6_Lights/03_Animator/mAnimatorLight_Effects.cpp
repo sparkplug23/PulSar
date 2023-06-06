@@ -824,7 +824,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
 
   *indexes_counter_p ^= 1;
 
-  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"), shared_flasher_parameters_segments.indexes.active,index_1,index_2);
+  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "counter = %d/%d/%d"), counter,index_1,index_2);
 
   RgbcctColor colour;
 

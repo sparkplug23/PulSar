@@ -5,6 +5,7 @@
 #include "mBusNeoWrapper.h"
 #include "mBusManager.h"
 
+#ifdef USE_MODULE_LIGHTS_INTERFACE
 
 void ColorOrderMap::add(uint16_t start, uint16_t len, COLOUR_ORDER_T colorOrder) {
   if (_count >= WLED_MAX_COLOR_ORDER_MAPPINGS) {
@@ -704,3 +705,5 @@ int16_t Bus::_cct = -1;
 uint8_t Bus::_cctBlend = 0;
 uint8_t Bus::_gAWM = 255;
 
+
+#endif // USE_MODULE_LIGHTS_INTERFACE
