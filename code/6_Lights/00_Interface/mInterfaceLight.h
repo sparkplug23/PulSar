@@ -8,6 +8,37 @@
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+#include <freertos/task.h>
+#include <Arduino.h>
+
+typedef std::function<void(void)> CommitHandler;
+
+struct CommitParams
+{
+  CommitHandler handler;
+  xSemaphoreHandle semaphore = NULL;
+};
+
+class NeoPixelShowTask
+{
+private:
+  CommitParams _commit_params;
+  TaskHandle_t _commit_task;
+
+public:
+  NeoPixelShowTask() : _commit_task(NULL){}
+  void begin(CommitHandler handler, uint8_t core_id);
+  void execute();
+};
+
+#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+
+
   #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
   #include "6_Lights/00_Interface/mBusManager.h"
@@ -229,7 +260,7 @@ class mInterfaceLight :
 
     void parse_JSONCommand(JsonParserObject obj);
 
-    void ShowInterface();
+    // void ShowInterface();
 
   
   
@@ -263,6 +294,10 @@ class mInterfaceLight :
 *******************************************************************************************************************/
 
 
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    NeoPixelShowTask* neopixel_runner = nullptr;
+    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 

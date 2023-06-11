@@ -60,8 +60,8 @@ NeoPixelAnimator animations(PixelCount, NEO_CENTISECONDS);
 // see below for an example
 struct MyAnimationState
 {
-    RgbColor StartingColor;  // the color the animation starts at
-    RgbColor EndingColor; // the color the animation will end at
+    RgbcctColor StartingColor;  // the color the animation starts at
+    RgbcctColor EndingColor; // the color the animation will end at
     AnimEaseFunction Easeing; // the acceleration curve it will use 
 };
 
@@ -76,9 +76,9 @@ void AnimUpdate(const AnimationParam& param)
 
     // this gets called for each animation on every time step
     // progress will start at 0.0 and end at 1.0
-    // we use the blend function on the RgbColor to mix
+    // we use the blend function on the RgbcctColor to mix
     // color based on the progress given to us in the animation
-    RgbColor updatedColor = RgbColor::LinearBlend(
+    RgbcctColor updatedColor = RgbcctColor::LinearBlend(
         animationState[param.index].StartingColor,
         animationState[param.index].EndingColor,
         progress);
@@ -124,7 +124,7 @@ void setup()
     // just pick some colors
     for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
     {
-        RgbColor color = RgbColor(random(255), random(255), random(255));
+        RgbcctColor color = RgbcctColor(random(255), random(255), random(255));
         strip.SetPixelColor(pixel, color);
     }
 
@@ -161,9 +161,9 @@ void SetupAnimationSet()
         uint16_t time = random(100, 400);
 
         // each animation starts with the color that was present
-        RgbColor originalColor = strip.GetPixelColor(pixel);
+        RgbcctColor originalColor = strip.GetPixelColor(pixel);
         // and ends with a random color
-        RgbColor targetColor = RgbColor(random(peak), random(peak), random(peak));
+        RgbcctColor targetColor = RgbcctColor(random(peak), random(peak), random(peak),0,0);
         // with the random ease function
         AnimEaseFunction easing;
 
@@ -201,7 +201,7 @@ void SetupAnimationSet()
         // from 0.0 (start of animation) to 1.0 (end of animation)
         //
         // we use this progress value to define how we want to animate in this case
-        // we call RgbColor::LinearBlend which will return a color blended between
+        // we call RgbcctColor::LinearBlend which will return a color blended between
         // the values given, by the amount passed, hich is also a float value from 0.0-1.0.
         // then we set the color.
         //
@@ -214,7 +214,7 @@ void SetupAnimationSet()
             float progress = easing(param.progress);
 
             // use the curve value to apply to the animation
-            RgbColor updatedColor = RgbColor::LinearBlend(originalColor, targetColor, progress);
+            RgbcctColor updatedColor = RgbcctColor::LinearBlend(originalColor, targetColor, progress);
             strip.SetPixelColor(pixel, updatedColor);
         };
 

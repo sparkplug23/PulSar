@@ -936,7 +936,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 #define IS_SELECTED     ((SEGMENT_I(_segment_index_primary).options & SELECTED    ) == SELECTED    )
 
 // #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
-#define MINIMUM_SHOW_BACKOFF_PERIOD_MS 15
+#define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
 
 /* How much data bytes all segments combined may allocate */
 #ifdef ESP8266
@@ -1677,30 +1677,30 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   // uint8_t  paletteFade = 0;
   // uint8_t   paletteBlend = 0;
 
-  #define D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE 7
-  typedef union {
-    uint16_t data; // allows full manipulating using union memory overlap
-    struct { 
-      /** 3 bits of memory = 9 combinations
-       *  0 - channel 0 eg [R----]
-       *  1 - channel 1 eg [-G---]
-       *  2 - channel 2 eg [--B--]
-       *  3 - channel 3 eg [---WC-]
-       *  4 - channel 4 eg [----WW]
-       *  5 - not used - future led colour (eg another white, amber)
-       *  6 - not used - future led colour (eg another white, amber)
-       *  7 - DISABLED
-       * 
-       * default R,G,B,none,none : 0,1,2,7,7 dec : 000 001 010 111 111 R bits : 0000 0101 0111 111R bits and in reverse order R111 1110 1010 0000
-       * */
-      uint16_t red : 3;
-      uint16_t green : 3;
-      uint16_t blue : 3;
-      uint16_t white_cold : 3;      // Cold will take the FIRST white, as it is most likely as the 4th colour, warm_white will likely only exist when both whites do
-      uint16_t white_warm : 3;
-      uint16_t reserved : 1;
-    };
-  } HARDWARE_ELEMENT_COLOUR_ORDER;
+  // #define D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE 7
+  // typedef union {
+  //   uint16_t data; // allows full manipulating using union memory overlap
+  //   struct { 
+  //     /** 3 bits of memory = 9 combinations
+  //      *  0 - channel 0 eg [R----]
+  //      *  1 - channel 1 eg [-G---]
+  //      *  2 - channel 2 eg [--B--]
+  //      *  3 - channel 3 eg [---WC-]
+  //      *  4 - channel 4 eg [----WW]
+  //      *  5 - not used - future led colour (eg another white, amber)
+  //      *  6 - not used - future led colour (eg another white, amber)
+  //      *  7 - DISABLED
+  //      * 
+  //      * default R,G,B,none,none : 0,1,2,7,7 dec : 000 001 010 111 111 R bits : 0000 0101 0111 111R bits and in reverse order R111 1110 1010 0000
+  //      * */
+  //     uint16_t red : 3;
+  //     uint16_t green : 3;
+  //     uint16_t blue : 3;
+  //     uint16_t white_cold : 3;      // Cold will take the FIRST white, as it is most likely as the 4th colour, warm_white will likely only exist when both whites do
+  //     uint16_t white_warm : 3;
+  //     uint16_t reserved : 1;
+  //   };
+  // } HARDWARE_ELEMENT_COLOUR_ORDER;
 
 
   typedef union {

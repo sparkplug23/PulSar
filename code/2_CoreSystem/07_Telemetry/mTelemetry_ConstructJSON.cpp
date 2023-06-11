@@ -287,6 +287,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
      * @brief Show each instance info
      * 
     **/
+    #ifdef USE_MODULE_NETWORK_MQTT
     JBI->Array_Start("Instance");
     for(auto& con:pCONT_mqtt->brokers)
     {
@@ -321,6 +322,7 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
     }
     JBI->Array_End();
+    #endif // USE_MODULE_NETWORK_MQTT
   
   return JBI->End();
 

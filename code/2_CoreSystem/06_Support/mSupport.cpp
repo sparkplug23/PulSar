@@ -511,6 +511,23 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_INIT:
       // fSendTemplatesOnce = true;
 
+      #ifdef ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+
+        WiFi.begin(STA_SSID1, STA_PASS1);
+
+
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(500);
+            Serial.print(".");
+        }
+
+        Serial.println("");
+        Serial.println("WiFi connected.");
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
+
+      #endif // ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+
       
       #ifdef ESP8266
         randomSeed(analogRead(0));  // also check adc module is not active AND pin not in use
@@ -548,6 +565,16 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj){
 
     }break;
     case FUNC_EVERY_SECOND:{
+
+
+      #ifdef ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
+
+      #endif // ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+
+
 
 /**
  * @brief Turn this into a define for template for easy testing of pin
@@ -3081,8 +3108,10 @@ void mSupport::CheckResetConditions()
         #endif// ENABLE_LOG_LEVEL_INFO
     
         #ifdef USE_MODULE_NETWORK_WIFI   
+#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
         // THIS should be moved into this class
         pCONT_wif->EspRestart();        
+#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
         #endif USE_MODULE_NETWORK_WIFI
 
       }

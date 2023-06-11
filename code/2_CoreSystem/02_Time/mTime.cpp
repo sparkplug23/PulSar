@@ -6,6 +6,8 @@ const char* mTime::PM_MODULE_CORE_TIME_FRIENDLY_CTR = D_MODULE_CORE_TIME_FRIENDL
 int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
 {
 
+  
+
   switch(function){
     case FUNC_INIT:
       init();
@@ -41,10 +43,14 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
       SystemTime_NTPUpdate();
 
       #else
+      #ifdef USE_MODULE_NETWORK_WIFI
       if(pCONT_interface_network->Connected(mInterfaceNetwork::NETWORK_TYPE_WIFI))
       {
+#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
         WifiPollNtp();
+#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
       }
+      #endif // USE_MODULE_NETWORK_WIFI
       #endif // ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
 
     break;

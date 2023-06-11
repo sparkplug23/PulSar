@@ -302,6 +302,9 @@ struct RgbcctColor
         return RgbcctColor(red,green,blue,white);
     }
 
+
+// public: // not sure if this is needed?
+
     // Unions allow overlapping of parameters, size of parameters below is only 5 bytes, but can be accessed by multiple ways
     union {
 		struct {

@@ -251,7 +251,8 @@ T ArrayCountUntilNull(T* buffer, U buflen){
 }
 
 template <typename T>
-T GetRandomSaturationVariation(T mean, T standard_deviation, T constrained_min = 0, T constrained_max = 0){
+T GetRandomSaturationVariation(T mean, T standard_deviation, T constrained_min = 0, T constrained_max = 0)
+{
 
   // Get a value between (and inclusing zero) and the maximum range with SD as the centre point
   T random_value = random(0,standard_deviation);

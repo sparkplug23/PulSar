@@ -679,27 +679,31 @@ void LoopTasker()
 
 void SmartLoopDelay()
 {
-  #ifndef DISABLE_SLEEP
-  if(pCONT_set->Settings.enable_sleep){
-    if (pCONT_set->Settings.flag_network.sleep_normal) {
-      pCONT_sup->SleepDelay(pCONT_set->runtime_var.sleep);
-    } else {
-      // Loop time < sleep length of time
-      if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_var.sleep) {
-        //delay by loop time
-        pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_var.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
-      } else {
+  // #ifndef DISABLE_SLEEP
+  // if(pCONT_set->Settings.enable_sleep){
+  //   if (pCONT_set->Settings.flag_network.sleep_normal) {
+  //     pCONT_sup->SleepDelay(pCONT_set->runtime_var.sleep);
+  //   } else {
+  //     // Loop time < sleep length of time
+  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_var.sleep) {
+  //       //delay by loop time
+  //       pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_var.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+  //     } else {
 
-        // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect 
-        // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
-        if (pCONT_set->global_state.wifi_down) {
-          pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2);
-        }
+  //       // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect 
+  //       // If wifi down and loop_runtime_millis > setoption36 then force loop delay to 1/3 of loop_runtime_millis period
+  //       if (pCONT_set->global_state.wifi_down) {
+  //         pCONT_sup->SleepDelay(pCONT_sup->loop_runtime_millis /2);
+  //       }
 
-      }
-    }
-  }
-  #endif
+  //     }
+  //   }
+  // }
+
+  
+  pCONT_sup->SleepDelay(20);
+
+  // #endif
 }
 
 

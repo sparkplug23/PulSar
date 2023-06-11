@@ -110,7 +110,10 @@ void mTime::init(void){
 bool mTime::CheckOrStartNTPService(){
 
   #ifdef USE_MODULE_NETWORK_WIFI
-  if(pCONT_wif->WifiCheckIpConnected()){
+  // if(pCONT_wif->WifiCheckIpConnected()){
+
+
+  if(!pCONT_set->global_state.wifi_down){
     // If just connected, and not already started
     if(!settings.timeclient_is_started){ 
       // timeClient->begin();
@@ -1925,9 +1928,11 @@ void mTime::RtcInit(void)
       }
     );
   #else
+    #ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
     TickerRtc->attach_ms(1000, 
       +[](mTime* instance){ instance->RtcSecond(); }, this
     );
+    #endif
   #endif // ESP8266
 
 

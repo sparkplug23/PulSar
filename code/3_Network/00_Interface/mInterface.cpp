@@ -107,6 +107,9 @@ void mInterfaceNetwork::EveryLoop()
  */
 bool mInterfaceNetwork::Connected(uint8_t type)
 {
+  
+#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
+
   // ALOG_ERR(PSTR("mInterfaceNetwork::Connected"));
 
   #ifdef USE_MODULE_NETWORK_WIFI
@@ -140,6 +143,8 @@ bool mInterfaceNetwork::Connected(uint8_t type)
   }
   #endif // USE_MODULE_NETWORK_CELLULAR
 
+
+#endif //  ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
   return false;
 }

@@ -379,7 +379,7 @@
 #ifndef WLED_MAX_BUSSES
   #ifdef ESP8266
     #define WLED_MAX_BUSSES 3
-  #else
+  #else // esp32
     #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
       #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
     #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB

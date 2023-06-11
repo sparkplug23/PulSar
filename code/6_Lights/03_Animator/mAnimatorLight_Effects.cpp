@@ -6118,7 +6118,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
 
   SEGMENT.animation_has_anim_callback = false; // When no animation callback is needed
           Serial.print("@4");
- pCONT_iLight->ShowInterface();
+//  pCONT_iLight->ShowInterface();
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 

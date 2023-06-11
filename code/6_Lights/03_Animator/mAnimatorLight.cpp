@@ -67,34 +67,30 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_LOOP: 
       EveryLoop();
 
-
-  //LED settings have been saved, re-init busses
-  //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
-  if (doInitBusses) {
-    doInitBusses = false;
-    DEBUG_PRINTLN(F("Re-init busses."));
-    bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
-    pCONT_iLight->bus_manager->removeAll();
-    uint32_t mem = 0;
-    for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
-      if (pCONT_iLight->busConfigs[i] == nullptr) break;
-      mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
-      if (mem <= MAX_LED_MEMORY) {
-        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
+      //LED settings have been saved, re-init busses
+      //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
+      if (doInitBusses) {
+        doInitBusses = false;
+        DEBUG_PRINTLN(F("Re-init busses."));
+        bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
+        pCONT_iLight->bus_manager->removeAll();
+        uint32_t mem = 0;
+        for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
+          if (pCONT_iLight->busConfigs[i] == nullptr) break;
+          mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
+          if (mem <= MAX_LED_MEMORY) {
+            pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
+          }
+          delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
+        }
+        finalizeInit(); // also loads default ledmap if present
+        if (aligned) makeAutoSegments();
+        else fixInvalidSegments();
+        yield();
+        // serializeConfig();
       }
-      delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
-    }
-    finalizeInit(); // also loads default ledmap if present
-    if (aligned) makeAutoSegments();
-    else fixInvalidSegments();
-    yield();
-    // serializeConfig();
-  }
   
-
-
-    break;    
-    
+    break;        
     case FUNC_BOOT_MESSAGE:
       BootMessage();
     break;
@@ -2818,7 +2814,7 @@ void mAnimatorLight::EveryLoop()
         /**
          * @brief A Backoff time is needed per animation so the DMA is not overloaded
         **/
-        if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, 10))
+        if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, ANIMATION_UPDATOR_TIME_MINIMUM))
         {
           SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
           flag_animations_needing_updated++; // channels needing updated
@@ -2852,13 +2848,31 @@ void mAnimatorLight::EveryLoop()
     ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
     #endif
 
-    // some buses send asynchronously and this method will return before
-    // all of the data has been sent.
-    // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
-    if(pCONT_iLight->bus_manager)
-    {
-      pCONT_iLight->bus_manager->show();
-    }
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+      // some buses send asynchronously and this method will return before
+      // all of the data has been sent.
+      // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+      // if(pCONT_iLight->bus_manager)
+      // {
+      //   pCONT_iLight->bus_manager->show();
+      // }
+      
+      pCONT_iLight->neopixel_runner->execute();   
+
+    #else
+
+      // some buses send asynchronously and this method will return before
+      // all of the data has been sent.
+      // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+      if(pCONT_iLight->bus_manager)
+      {
+        pCONT_iLight->bus_manager->show();
+      }
+
+    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 

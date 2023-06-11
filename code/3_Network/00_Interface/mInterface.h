@@ -69,6 +69,11 @@ class mInterfaceNetwork :
     bool Connected(uint8_t type = NETWORK_TYPE_ANY);
 
     void parse_JSONCommand(JsonParserObject obj);
+
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
+    
+    #ifdef USE_MODULE_NETWORK_MQTT
   
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
@@ -76,14 +81,14 @@ class mInterfaceNetwork :
     void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
     
     struct handler<mInterfaceNetwork>  mqtthandler_settings_teleperiod;
-    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     struct handler<mInterfaceNetwork>  mqtthandler_state_ifchanged;
-    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
 
     struct handler<mInterfaceNetwork>* mqtthandler_list[2] = {
       &mqtthandler_settings_teleperiod,
       &mqtthandler_state_ifchanged
     };
+
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 
