@@ -1,8 +1,8 @@
 # PulSar
 
-Firmware for _ESP8266_ and _ESP32_ based devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity is intended to allow easy integration of additional sensors or drivers as the project grows. 
+Firmware for _ESP8266_ and _ESP32_ equiped devices for integration with smart home systems. The project has been written to be highly modular, but also includes some bespoke firmware options for specific use cases. The modularity is intended to allow easy integration of additional sensors or drivers as the project grows. 
 
-*The current release of this project into the public domain is to allow easy sharing with early adopters, who are helping to test and debug this project for future official public release.*
+*The current release of this project into the public domain is to allow easy sharing with early adopters who are helping to test and debug this project for future official public release.*
 
 Note: The documentation on this project is currently sparse and not maintained as significant changes are ongoing to the firmware. Credit to the developers who have inspired and contributed to this code will be added when documentation is added.
 
@@ -91,11 +91,20 @@ The modules are used to measure aspects of the surrounding environment, currentl
 - Sonoff iFan03
 - HVAC (capable of using an ambient climate sensor as input per each controlled zone, with timers, temperature programs included scheduling)
 - IR Projector
-- TankVolume (ie. using the ultrasonic sensor to estimate volume) [pn. change to just tank, so water can also be measured]
+- TankVolume (ie. using the ultrasonic sensor to estimate volume) [pn. change to just tank, so water can also be measured]. TBA: Create a json style layout of tank shape for easily adding segments/equation for volume. eg. top 50% is cylinder, bottom 50% is square
 - Radiator Fan (ie. use temperature sensor for enclosed radiators to activate ducted fans for improved room heating)
 - Scheduler (TBD. A method of holding tasks to be run at a later or exact time)
 - SD Card Logger
-- Treadmill ie Sensor readings mapped into estimated outputs (eg. Using linear voltage to mph conversion for treadmill distances) -->
+- Treadmill ie Sensor readings mapped into estimated outputs (eg. Using linear voltage to mph conversion for treadmill distances) 
+
+### Networking
+ - WiFi
+ - Ethernet
+ - Cellular
+ - MQTT 
+
+-->
+
 
 <!-- ## Features under development for future integration
 - TBA -->
@@ -110,7 +119,7 @@ The modules are used to measure aspects of the surrounding environment, currentl
 This program is licensed under GPL-3.0
 
 <!-- # How to use the project
-Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development time. Here, I will list the steps that are required to get the system running under different environments. 
+Since this project is still under development, it requires extra steps for others to deploy it in their network. This will become easier and eventually seamless with further development. The latest process (updated June 2023) that is required to get PulSar running is outlined below.
 
 ## Configure
 
@@ -178,11 +187,9 @@ The project has a layout with related code being grouped into classes, also reff
 ![image](https://user-images.githubusercontent.com/35019746/118510354-cc5aa700-b728-11eb-8245-7344dad1cb4a.png)
 
 These folders can be summarised as follows:
-  * `0_ConfigUser` - Allows configuration of the desired functioanility of the project, configurable by the user.
-  * `1_TaskerManager` - This is the primary entry point for all modules, together with the `loop()` and `setup()` from `HomeControlSystem.cpp`, the tasks, also known as "Functions" will be executed when needed. This is effectively a multitasking thread controller, as it allows each active module to share resources by limiting how long each function takes up in CPU time, including splitting functions into multiple split tasks where they would otherwise be "blocking" or waiting code. An example of this is requesting a sensor reading, then returning to the module to check for its result instead of waiting for the result. 
+  * `0_ConfigUser` - Allows configuration of the desired functionality of the project, configurable by the user.
+  * `1_TaskerManager` - This is the primary execution entry point for all modules, together with the `loop()` and `setup()` from `HomeControlSystem.cpp`, the tasks, also known as "Functions" will be called from this module. This is effectively a multitasking thread controller, as it allows each active module to share resources by limiting how long each function takes up in CPU time, including splitting functions into multiple split tasks where they would otherwise be "blocking" or waiting code. An example of this is requesting a sensor reading, then returning to the module to check for its result instead of waiting for the result. 
   * `2_CoreSystem` - This contains modules which are shared resources by all hardware, and are often all required for each project. 
-  * `2b_Internal_TaskerSystems` - Shared resources, but are not need for most builds (e.g. SolarLunar positions)
-  * `2c_Internal_IsolatedNoTaskerSystems` - Shared resources that can be used by other classes, but contains no "Tasker" calls.
   * `3_Network` - Includes all networking modules required for communicating with a host, this does not include any remote devices that would fall into a hardware addon (ie 433mhz radios).
   * `4_Drivers` - All modules which directly control an external device, connected via GPIO pins.
   * `5_Sensors` - All modules that receive data from external devices, connected via GPIO pins.
@@ -190,6 +197,7 @@ These folders can be summarised as follows:
   * `7_Energy` - All modules that receive energy data from connected hardware, connected via GPIO pins.
   * `8_Displays` - Special drivers for controlling connected displays.
   * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output. (Note: For simple reactive controls, rules may be used instead.)
+  * `10_ConSpec` - Similar to `9_Controller`, but typically specialised as one off hardware and likely not usuable by others.
 
 # Module Details
 
