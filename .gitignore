@@ -24,6 +24,8 @@ code/0_ConfigUser/G0_mFirmwareCustom_Secret.h
 *.bak
 
 
-build_output
+build_output/
+*.bin
+*.gz
 
 
