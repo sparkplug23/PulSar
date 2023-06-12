@@ -2770,10 +2770,13 @@
   #define DEVICENAME_ROOMHINT_CTR "roaming"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define SIM_CARD_PHONE_NUMBER "07518522105"
   #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
   #define UART_CELLULAR_BAUD   115200
   #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
   #define USE_GROUPFEATURE__MODEM_GPS
+  #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "1" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
+  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "60"
   #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
 #endif
 #ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
@@ -2958,7 +2961,8 @@
       "]"
     "},"   
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
-    "\"MQTT\":{\"RetrySecs\":20}"
+    "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
+    "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
 
 #endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
