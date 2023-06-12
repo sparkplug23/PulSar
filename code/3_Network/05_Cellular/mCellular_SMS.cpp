@@ -55,7 +55,7 @@ void mCellular::ModemUpdate_SMS()
       /**
        * @brief Check for waiting SMS messages
        **/
-      SendAT_ATParseResponse_F(100, LOG_LEVEL_DEBUG_MORE, PSTR("+CMGD=?"));
+      SendAT_ATParseResponse_F(200, LOG_LEVEL_DEBUG, PSTR("+CMGD=?"));
 
     }
   }
@@ -82,6 +82,9 @@ void mCellular::SMSReadAndEraseSavedSMS()
       if(SendAT_F(200, PSTR("+CMGD=%d"), id))
       {
         ALOG_INF(PSTR("SMSReadAndEraseSavedSMS %d deleted"), id);
+      }else{
+        ALOG_INF(PSTR("SMSReadAndEraseSavedSMS %d FAILED TO delete"), id);
+
       }
     }
   }

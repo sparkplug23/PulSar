@@ -325,10 +325,12 @@ void mSettings::Function_Template_Load(){
 
   #ifdef ENABLE_LOG_LEVEL_INFO
   // AddLog(LOG_LEVEL_DEBUG, PSTR("FUNCTION_TEMPLATE Load"));// = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
-  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  delay(1000);
 
   boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
