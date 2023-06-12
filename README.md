@@ -6,33 +6,102 @@ Firmware for _ESP8266_ and _ESP32_ equiped devices for integration with smart ho
 
 Note: The documentation on this project is currently sparse and not maintained as significant changes are ongoing to the firmware. Credit to the developers who have inspired and contributed to this code will be added when documentation is added.
 
-## Credits
+# Overview
 
-This project started as a bespoke controller for home heating, and slowly expanded with features and devices being added to control lights and add sensors for around the home. A year into the development, I discovered *Tasmota* and all it has to offer and have since started adding features found within Tasmota that are useful in my home automation environment. This has helped rapidly expand the scale of my project, but with continued development I aim to make this project unique as my skills as a programmer improves. Nevertheless, Tasmota has been and continues to be a great inspiration and I owe a great deal to their developer team ([Tasmota](https://github.com/arendst/Tasmota/releases/latest)). Additionally, the project *WLED*, has been extrememly useful learning resource and I equally am extremely grateful for the use of their software ([WLED](https://github.com/Aircoookie/WLED)). 
+The project has a layout with related code being grouped into classes, also reffered to as "modules", since each class performs a specialised task. The modules are further grouped by the type of task they perform (e.g., Networking, Sensors) and placed into their own folders [Figure 1].
 
-### Libraries Used (included in project)
-Libraries used are:
-- [ESP8266 core for Arduino](https://github.com/esp8266/Arduino)
-- [BME280](https://github.com/adafruit/Adafruit_BME280_Library)
-- [DallasTemperature]()
-- [DHTEsp]()
-- [ESP Async WebServer]()
-- [ESPAsyncTCP]()
-- [IRremoteEsp8266](https://github.com/markszabo/IRremoteESP8266)
-- [JSMN](https://github.com/zserge/jsmn)
-- [NeoPixelBus](https://github.com/Makuna/NeoPixelBus)<sup>1</sup>
-- [OneWire](https://github.com/PaulStoffregen/OneWire)
-- [PubSubClient]()
-- [TasmotaSerial]()
-- [TasmotaModbus]()
-- [rc-switch](https://github.com/sui77/rc-switch)
+![image](https://user-images.githubusercontent.com/35019746/118510354-cc5aa700-b728-11eb-8245-7344dad1cb4a.png)
 
-><sup>1</sup>Modified libraries include changes that make them operationally different to the original version, these changes are required for better integration with this project.
+These folders can be summarised as follows:
+  * `0_ConfigUser` - Allows configuration of the desired functionality of the project, configurable by the user.
+  * `1_TaskerManager` - This is the primary execution entry point for all modules, together with the `loop()` and `setup()` from `HomeControlSystem.cpp`, the tasks, also known as "Functions" will be called from this module. This is effectively a multitasking thread controller, as it allows each active module to share resources by limiting how long each function takes up in CPU time, including splitting functions into multiple split tasks where they would otherwise be "blocking" or waiting code. An example of this is requesting a sensor reading, then returning to the module to check for its result instead of waiting for the result. 
+  * `2_CoreSystem` - This contains modules which are shared resources by all hardware, and are often all required for each project. 
+  * `3_Network` - Includes all networking modules required for communicating with a host, this does not include any remote devices that would fall into a hardware addon (ie 433mhz radios).
+  * `4_Drivers` - All modules which directly control an external device, connected via GPIO pins.
+  * `5_Sensors` - All modules that receive data from external devices, connected via GPIO pins.
+  * `6_Lights` - Control any connected devices that control lights, including addressable leds or pwm controlled hardware. 
+  * `7_Energy` - All modules that receive energy data from connected hardware, connected via GPIO pins.
+  * `8_Displays` - Special drivers for controlling connected displays.
+  * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output. (Note: For simple reactive controls, rules may be used instead.)
+  * `10_ConSpec` - Similar to `9_Controller`, but typically specialised as one off hardware and likely not usuable by others.
 
-## Inspiration
-Projects which gave me invaluable ideas of code that aided development:
-- [Tasmota](https://github.com/arendst/Tasmota/releases/latest)
-- [WLED](https://github.com/Aircoookie/WLED)
+# Detailed Description
+
+## ConfigUser
+
+## TaskerManager
+
+## CoreSystem
+
+## Network
+
+## Drivers
+
+## Sensors
+
+This folder contains the code required to read all connected devices that report measurements from the real world. The first module in this folder, is the interface module, which contains shared resources that all sensors use and is responsible for enabling unified sensor readings. This module acts as an application layer so any other module can access sensor readings by type, without requiring knowledge of the physical connected hardware. 
+
+The complete list of sensors are:
+
+ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supply Voltage
+| :--- | :--- | :--- | :---  | :---  | :--- 
+`Interface` | Unifying resources and readings | |
+`ADS1115ADC` | Voltage | | I2C |
+`Analog` | Voltage | 0..1023 | Analog | |
+`APDS9960` | Proximity |  |
+`BH1750` | Light | | I2C
+`BME` | Temperature <BR> Humidity <BR> Pressure | -40…85°C (±1.0°C) <BR> 0..100 (±3%) <BR> 300...1100 hPa (±0.25%) | I2C <BR> SPI | `"I2C SCL"`, `"I2C SDA"` <BR> (GPIO_I2C_SCL_ID, GPIO_I2C_SDA_ID) | 3.3V
+`Buttons` | MomentaryChanges || Digital
+`Counters` | Counter <BR> Frequency
+`DB18x20` | Temperature
+`DHT` | Temperature <BR> Humidity || | | 3-5V
+`Door` | Open/Closed
+`Moisture` | Moisture
+`Motion` | Motion <BR> PIR <BR> Doppler
+`MOTION` | Occupancy
+`PulseCounter` | Counter^
+`RemoteSensor` | Any
+`Rotaty` | Rotational Counter?
+`SeeSawSoil` | Moisture
+`SR04` | Distance
+`Switches` | StateChanges
+`TSL2516` | Lux
+`Ultrasonic` | Distance <BR> same as SR04?
+
+ ### InterfaceSensor
+ Unifying resources and readings
+ 
+ ### ADS1115ADC (Voltage)
+ ### Analog (Voltage)
+ ### APDS9960 (Proximity)
+ ### BH1750 (Light)
+ ### BME (Temperature, Humidity, Pressure)
+ https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/
+
+`Buttons` (MomentaryChanges)
+`Counters` (Counter, Frequency)
+`DB18x20` (Temperature)
+`DHT` (Temperature, Humidity)
+`Door` (Open/Closed)
+`Moisture` (Moisture)
+`Motion` (Motion, PIR, Doppler)
+`MOTION` (Occupancy)
+`PulseCounter` (Counter^)
+`RemoteSensor` (Any)
+`Rotaty` (Rotational Counter?)
+`SeeSawSoil` (Moisture)
+`SR04` (Distance)
+`Switches` (StateChanges)
+`TSL2516` (Lux)
+`Ultrasonic` (Distance, same as SR04?)
+
+## Lights
+
+## Energy
+
+## Displays
+
+## Controller
 
 <!-- ## Features already supported by the project
 
@@ -176,108 +245,6 @@ upload_port = 192.168.1.79
 6) If more than one `default_envs` is uncommented, you can flash multiple devices. To do this, you must define the `DEVICENAME_x` in the `platformio_override` for the respective build, and not have it defined elsewhere. If another `DEVICE_x` meant for a different device is defined elsewhere, the compiler will complain, so you can't accidently flash code meant for another device by leaving a `DEVICE_x` set elsewhere. 
 7) I will be removing `platformio_override.ini` from git in the future, replacing it with `platformio_override_sample`. Since new files are generated by running the `ini` file, I can not generate the `platformio_override.ini` by compiling, instead you must rename the `_sample` file manually. For now, expect PULLING FROM GIT TO ERASE THIS FILE. 
 
-# Preliminary Documentation
-
-This file will be the outline of documentation to come later, with bullet points describing what each module can do, and plans for the future.
-
-# Overview
-
-The project has a layout with related code being grouped into classes, also reffered to as "modules", since each class performs a specialised task. The modules are further grouped by the type of task they perform (e.g., Networking, Sensors) and placed into their own folders [Figure 1].
-
-![image](https://user-images.githubusercontent.com/35019746/118510354-cc5aa700-b728-11eb-8245-7344dad1cb4a.png)
-
-These folders can be summarised as follows:
-  * `0_ConfigUser` - Allows configuration of the desired functionality of the project, configurable by the user.
-  * `1_TaskerManager` - This is the primary execution entry point for all modules, together with the `loop()` and `setup()` from `HomeControlSystem.cpp`, the tasks, also known as "Functions" will be called from this module. This is effectively a multitasking thread controller, as it allows each active module to share resources by limiting how long each function takes up in CPU time, including splitting functions into multiple split tasks where they would otherwise be "blocking" or waiting code. An example of this is requesting a sensor reading, then returning to the module to check for its result instead of waiting for the result. 
-  * `2_CoreSystem` - This contains modules which are shared resources by all hardware, and are often all required for each project. 
-  * `3_Network` - Includes all networking modules required for communicating with a host, this does not include any remote devices that would fall into a hardware addon (ie 433mhz radios).
-  * `4_Drivers` - All modules which directly control an external device, connected via GPIO pins.
-  * `5_Sensors` - All modules that receive data from external devices, connected via GPIO pins.
-  * `6_Lights` - Control any connected devices that control lights, including addressable leds or pwm controlled hardware. 
-  * `7_Energy` - All modules that receive energy data from connected hardware, connected via GPIO pins.
-  * `8_Displays` - Special drivers for controlling connected displays.
-  * `9_Controller` - Bespoke modules which use the other IO modules (eg drivers, sensors and displays) to perform as a unified system. Examples include HVAC controllers, which can use any sensor as input to control any driver as output. (Note: For simple reactive controls, rules may be used instead.)
-  * `10_ConSpec` - Similar to `9_Controller`, but typically specialised as one off hardware and likely not usuable by others.
-
-# Module Details
-
-## ConfigUser
-
-## TaskerManager
-
-## CoreSystem
-
-## Network
-
-## Drivers
-
-## Sensors
-
-This folder contains the code required to read all connected devices that report measurements from the real world. The first module in this folder, is the interface module, which contains shared resources that all sensors use and is responsible for enabling unified sensor readings. This module acts as an application layer so any other module can access sensor readings by type, without requiring knowledge of the physical connected hardware. 
-
-The complete list of sensors are:
-
-ModuleName | Measures | Range/Accuracy | Pin Interface | GPIO Name (Enum) | Supply Voltage
-| :--- | :--- | :--- | :---  | :---  | :--- 
-`Interface` | Unifying resources and readings | |
-`ADS1115ADC` | Voltage | | I2C |
-`Analog` | Voltage | 0..1023 | Analog | |
-`APDS9960` | Proximity |  |
-`BH1750` | Light | | I2C
-`BME` | Temperature <BR> Humidity <BR> Pressure | -40…85°C (±1.0°C) <BR> 0..100 (±3%) <BR> 300...1100 hPa (±0.25%) | I2C <BR> SPI | `"I2C SCL"`, `"I2C SDA"` <BR> (GPIO_I2C_SCL_ID, GPIO_I2C_SDA_ID) | 3.3V
-`Buttons` | MomentaryChanges || Digital
-`Counters` | Counter <BR> Frequency
-`DB18x20` | Temperature
-`DHT` | Temperature <BR> Humidity || | | 3-5V
-`Door` | Open/Closed
-`Moisture` | Moisture
-`Motion` | Motion <BR> PIR <BR> Doppler
-`MOTION` | Occupancy
-`PulseCounter` | Counter^
-`RemoteSensor` | Any
-`Rotaty` | Rotational Counter?
-`SeeSawSoil` | Moisture
-`SR04` | Distance
-`Switches` | StateChanges
-`TSL2516` | Lux
-`Ultrasonic` | Distance <BR> same as SR04?
-
- ### InterfaceSensor
- Unifying resources and readings
- 
- ### ADS1115ADC (Voltage)
- ### Analog (Voltage)
- ### APDS9960 (Proximity)
- ### BH1750 (Light)
- ### BME (Temperature, Humidity, Pressure)
- https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/
-
-`Buttons` (MomentaryChanges)
-`Counters` (Counter, Frequency)
-`DB18x20` (Temperature)
-`DHT` (Temperature, Humidity)
-`Door` (Open/Closed)
-`Moisture` (Moisture)
-`Motion` (Motion, PIR, Doppler)
-`MOTION` (Occupancy)
-`PulseCounter` (Counter^)
-`RemoteSensor` (Any)
-`Rotaty` (Rotational Counter?)
-`SeeSawSoil` (Moisture)
-`SR04` (Distance)
-`Switches` (StateChanges)
-`TSL2516` (Lux)
-`Ultrasonic` (Distance, same as SR04?)
-
-## Lights
-
-## Energy
-
-## Displays
-
-## Controller
-
-
 # Development Plans
 
 ## Release 1.0
@@ -297,3 +264,26 @@ Longer term planned features.
 
 
 
+
+## Credits
+
+This project started as a bespoke controller for home heating, and slowly expanded with features and devices being added to control lights and add sensors for around the home. A year into the development, I discovered *Tasmota* and all it has to offer and have since started adding features found within Tasmota that are useful in my home automation environment. This has helped rapidly expand the scale of my project, but with continued development I aim to make this project unique as my skills as a programmer improves. Nevertheless, Tasmota has been and continues to be a great inspiration and I owe a great deal to their developer team ([Tasmota](https://github.com/arendst/Tasmota/releases/latest)). Additionally, the project *WLED*, has been extrememly useful learning resource and I equally am extremely grateful for the use of their software ([WLED](https://github.com/Aircoookie/WLED)). 
+
+### Libraries Used (included in project)
+Libraries used are:
+- [ESP8266 core for Arduino](https://github.com/esp8266/Arduino)
+- [BME280](https://github.com/adafruit/Adafruit_BME280_Library)
+- [DallasTemperature]()
+- [DHTEsp]()
+- [ESP Async WebServer]()
+- [ESPAsyncTCP]()
+- [IRremoteEsp8266](https://github.com/markszabo/IRremoteESP8266)
+- [JSMN](https://github.com/zserge/jsmn)
+- [NeoPixelBus](https://github.com/Makuna/NeoPixelBus)<sup>1</sup>
+- [OneWire](https://github.com/PaulStoffregen/OneWire)
+- [PubSubClient]()
+- [TasmotaSerial]()
+- [TasmotaModbus]()
+- [rc-switch](https://github.com/sui77/rc-switch)
+
+><sup>1</sup>Modified libraries include changes that make them operationally different to the original version, these changes are required for better integration with this project.
