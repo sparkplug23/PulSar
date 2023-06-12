@@ -138,12 +138,13 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       }
       ALOG_INF(PSTR(D_LOG_CELLULAR "isGprsConnected %d"), modem->isGprsConnected());   
       ALOG_INF(PSTR(D_LOG_CELLULAR "Sim Connected %d"), modem->isNetworkConnected()); 
+      ALOG_INF(PSTR(D_LOG_CELLULAR "smsauto_gps_messages.rate_seconds %d"), smsauto_gps_messages.rate_seconds); 
       
       ALOG_INF(PSTR(D_LOG_CELLULAR "function_event_queue %d"), pCONT->function_event_queue.size()); 
 
       Serial.printf(PSTR("=========================EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n\r\n\r")); 
 
-      #endif 
+      #endif // ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
 
 
       #ifdef ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS
@@ -282,23 +283,30 @@ bool mCellular::Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_
     uint16_t buflen = 0;
     char buffer[300] = {0};
 
-    while(SerialAT.available())
+
+  // delay(50);
+
+
+    while(SerialAT.available() || ((millis()-receive_millis)<100)) // wait at least 100 between AT_Send and receive
     {
-      buffer[buflen++] = SerialAT.read();
-      if(buflen>(sizeof(buffer)-1))
+      if (SerialAT.available()) 
       {
-        ALOG_ERR(PSTR(D_LOG_CELLULAR "RX Overflow"));
-        break;
-      }
-      if((millis()-receive_millis)>100)
-      {
-        ALOG_ERR(PSTR(D_LOG_CELLULAR "RX Timeout"));
-        break;
+        buffer[buflen++] = SerialAT.read();
+        if(buflen>(sizeof(buffer)-1))
+        {
+          ALOG_ERR(PSTR(D_LOG_CELLULAR "RX Overflow"));
+          break;
+        }
+        // if
+        // {
+        //   ALOG_ERR(PSTR(D_LOG_CELLULAR "RX Timeout"));
+        //   break;
+        // }
       }
     }
 
-    AddLog(response_loglevel, PSTR(D_LOG_CELLULAR "Handler_ModemResponses %d>> Buffer[%d] \"%s\""),response_loglevel, buflen, buffer);
-    
+    AddLog(response_loglevel, PSTR(D_LOG_CELLULAR "Handler_ModemResponses %d>> Buffer[%d] \"%s\""), response_loglevel, buflen, buffer);
+     
     return parse_ATCommands(buffer, buflen, response_loglevel);
 
   }
@@ -515,6 +523,7 @@ bool mCellular::SendAT_ATParseResponse_F(uint16_t wait_millis, uint8_t response_
   uint32_t tSaved_millis = millis();
 
   modem->sendAT(command_buffer);
+  
 
   /**
    * @brief With timeout, expect response to be parsed

@@ -285,7 +285,7 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
           SMS_BatteryDetailed();
         }
         else
-        if (strcasecmp(sms_contents, "Command")>0)
+        if (strstr(sms_contents, "Command") != NULL)
         {
           ALOG_INF(PSTR(D_LOG_CELLULAR "Future Command with format \"Command KEY VALUE\" that will be shaped into JSON and send to parser"));
           SMS_CommandIntoJSONCommand(sms_contents);
@@ -306,9 +306,9 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
 
   if(strstr(buffer, "+CMGD:"))
   {
-    #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage"));
-    #endif
+    // #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+    ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage[%d] %s"), buflen , buffer);
+    // #endif
     ATParse_CMGD__CommandNameInTextDeleteMessage(buffer, buflen, response_loglevel);
   }
 
@@ -346,7 +346,7 @@ void mCellular::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8
 
         char buffer_id[100];
         snprintf(buffer_id, sizeof(buffer_id), tok); // 0,1,2,4,5
-        // AddLog(response_loglevel,PSTR("hereeeeeeeeeeeeeeeeeeeeeeeeee buffer_id = %s"), buffer_id);
+        AddLog(response_loglevel,PSTR("hereeeeeeeeeeeeeeeeeeeeeeeeee buffer_id = %s"), buffer_id);
 
         /**
          * @brief Splitting the Indexs out
@@ -356,7 +356,7 @@ void mCellular::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8
         uint8_t i = 0;
         sms.messages_incoming_index_list.clear();
         while(tok_ids){
-          AddLog(response_loglevel,PSTR("tok_ids[%d] = %s"), i++, tok_ids?tok_ids:"ERROR");
+          AddLog(response_loglevel,PSTR("CommandNameInTextDeleteMessage SMS IDs[%d] = %s"), i++, tok_ids?tok_ids:"ERROR");
           sms.messages_incoming_index_list.push_back(atoi(tok_ids));
           tok_ids = strtok(NULL, delims2);
         }

@@ -282,6 +282,32 @@ void mCellular::parse_JSONCommand(JsonParserObject obj)
 
   }
 
+  if(jtok = obj["ATCommandsParsing"]){
+    ALOG_INF( PSTR(D_LOG_CELLULAR "ATCommandsParsing"));
+    JsonParserArray array = jtok;
+    for(auto val : array) {
+      AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
+      SerialAT.println(val.getStr());  
+      delay(500);
+
+      uint32_t wait_millis = 1000;
+      
+      uint32_t tSaved_millis = millis();
+      uint32_t tSaved_Elapsed = millis()-tSaved_millis;
+      while(!Handler_ModemResponses(LOG_LEVEL_DEBUG))
+      {
+        if(
+          (tSaved_Elapsed = (millis()-tSaved_millis)) > wait_millis
+        ){
+          ALOG_ERR(PSTR(D_LOG_CELLULAR "No response (%dms)"), tSaved_Elapsed);
+        }
+
+      }
+
+    }
+
+  }
+
     
 }
 
