@@ -306,9 +306,9 @@ bool mCellular::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
 
   if(strstr(buffer, "+CMGD:"))
   {
-    // #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+    #ifdef ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
     ALOG_INF(PSTR("ATParse_CMGD__CommandNameInTextDeleteMessage[%d] %s"), buflen , buffer);
-    // #endif
+    #endif
     ATParse_CMGD__CommandNameInTextDeleteMessage(buffer, buflen, response_loglevel);
   }
 
@@ -344,15 +344,15 @@ void mCellular::ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8
       if(tok)
       {
 
-        char buffer_id[100];
-        snprintf(buffer_id, sizeof(buffer_id), tok); // 0,1,2,4,5
-        AddLog(response_loglevel,PSTR("hereeeeeeeeeeeeeeeeeeeeeeeeee buffer_id = %s"), buffer_id);
+        char buffer[100];
+        snprintf(buffer, sizeof(buffer), tok); // 0,1,2,4,5
+        AddLog(response_loglevel,PSTR("hereeeeeeeeeeeeeeeeeeeeeeeeee buffer split = %s"), buffer);
 
         /**
          * @brief Splitting the Indexs out
          **/
         const char* delims2 = ","; //space + ,
-        char* tok_ids = strtok(buffer_id, delims2); 
+        char* tok_ids = strtok(buffer, delims2); 
         uint8_t i = 0;
         sms.messages_incoming_index_list.clear();
         while(tok_ids){

@@ -14,9 +14,6 @@ const char* mWiFi::PM_MODULE_NETWORK_WIFI_FRIENDLY_CTR = D_MODULE_NETWORK_WIFI_F
 // Used for timed on or off events
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
-return 0;
-
-
   switch(function){
     case FUNC_INIT:
 

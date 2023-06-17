@@ -55,7 +55,7 @@ void mCellular::ModemUpdate_SMS()
       /**
        * @brief Check for waiting SMS messages
        **/
-      SendAT_ATParseResponse_F(200, LOG_LEVEL_DEBUG, PSTR("+CMGD=?"));
+      SendAT_ATParseResponse_F(200, LOG_LEVEL_DEBUG_MORE, PSTR("+CMGD=?"));
 
     }
   }

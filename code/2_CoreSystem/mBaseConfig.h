@@ -140,10 +140,10 @@
  *  MQTT
 \*********************************************************************************************/
 
-// #ifndef DISABLE_NETWORK
-// #define USE_MODULE_NETWORK_MQTT
+#ifndef DISABLE_NETWORK
+#define USE_MODULE_NETWORK_MQTT
 // #define USE_MODULE_NETWORK_WIFI
-// #endif // DISABLE_NETWORK
+#endif // DISABLE_NETWORK
 
 #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
