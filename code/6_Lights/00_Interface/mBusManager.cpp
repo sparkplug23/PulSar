@@ -5,28 +5,48 @@
 #include "mBusNeoWrapper.h"
 #include "mBusManager.h"
 
+#ifdef USE_MODULE_LIGHTS_INTERFACE
 
-void ColorOrderMap::add(uint16_t start, uint16_t len, COLOUR_ORDER_T colorOrder) {
+void ColorOrderMap::add(uint16_t start, uint16_t len, COLOUR_ORDER_T colorOrder) 
+{
+
+  // Serial.println("ColorOrderMap::add");
+
   if (_count >= WLED_MAX_COLOR_ORDER_MAPPINGS) {
+  // Serial.printf("ColorOrderMap::add %d return \n\r",_count);
     return;
   }
   if (len == 0) {
+  // Serial.printf("ColorOrderMap::add %d len == 0\n\r",_count);
     return;
   }
   _mappings[_count].start = start;
   _mappings[_count].len = len;  
   _mappings[_count].colorOrder = colorOrder;  
   _count++;
+  Serial.printf("ColorOrderMap::add %d\n\r",_count);
 }
 
 
 COLOUR_ORDER_T IRAM_ATTR ColorOrderMap::getPixelColorOrder(uint16_t pix, COLOUR_ORDER_T defaultColorOrder) const 
 {
+
+  // COLOUR_ORDER_T colourtmp = {COLOUR_ORDER_INIT_DISABLED};
+  // colourtmp.red = 0;
+  // colourtmp.green = 1;
+  // colourtmp.blue = 2;
+  // Serial.println("getPixelColorOrder");
+  // return colourtmp;
+
+
+
   if (_count == 0) return defaultColorOrder;
   for (uint8_t i = 0; i < _count; i++) 
   {
-    if (pix >= _mappings[i].start && pix < (_mappings[i].start + _mappings[i].len)) 
-    {
+    if(
+      pix >= _mappings[i].start && 
+      pix < (_mappings[i].start + _mappings[i].len)
+    ){
       return _mappings[i].colorOrder;
     }
   }
@@ -58,7 +78,7 @@ uint32_t Bus::autoWhiteCalc(uint32_t c)
  ***************************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/
 
-BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com) : Bus(bc.type, bc.start, bc.autoWhite), _colorOrderMap(com) 
+BusDigital::BusDigital(BusConfig &bc, uint8_t digital_bus_number, const ColorOrderMap &com) : Bus(bc.type, bc.start, bc.autoWhite), _colorOrderMap(com) 
 {
   if (!IS_BUSTYPE_DIGITAL(bc.type) || !bc.count) return;
   _pins[0] = bc.pins[0];
@@ -70,14 +90,14 @@ BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com) : Bu
   _needsRefresh = bc.refreshReq || bc.type == BUSTYPE_TM1814;
   _skip = bc.skipAmount;    //sacrificial pixels
   _len = bc.count + _skip;
-  _iType = PolyBus::getI(bc.type, _pins, nr);
+  _iType = PolyBus::getI(bc.type, _pins, digital_bus_number);
   if (_iType == BUSTYPE__NONE__ID) return;
   uint16_t lenToCreate = _len;
   if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus 
-  _busPtr = PolyBus::create(_iType, _pins, lenToCreate, nr);
+  _busPtr = PolyBus::create(_iType, _pins, lenToCreate, digital_bus_number);
   _valid = (_busPtr != nullptr);
   _colorOrder = bc.colorOrder;
-  DEBUG_PRINTF("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u)\n", _valid?"S":"Uns", nr, _len, bc.type, _pins[0],_pins[1],_iType);
+  DEBUG_PRINTF("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u)\n", _valid?"S":"Uns", digital_bus_number, _len, bc.type, _pins[0],_pins[1],_iType);
 }
 
 
@@ -591,17 +611,19 @@ int BusManager::add(BusConfig &bc)
     return -1;
   }
 
-  if (bc.type >= BUSTYPE_NET_DDP_RGB && bc.type < 96) 
+  if(
+    bc.type >= BUSTYPE_NET_DDP_RGB && 
+    bc.type < 96) 
   {
-    busses[numBusses] = new BusNetwork(bc);   // IP
+    busses[numBusses] = new BusNetwork(bc); // IP
   } 
-  else if (IS_BUSTYPE_DIGITAL(bc.type)) 
+  else if(IS_BUSTYPE_DIGITAL(bc.type)) 
   {
-    busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap);  // Neopixel
+    busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap); // Neopixel
   } 
-  else if (bc.type == BUSTYPE_ONOFF) 
+  else if(bc.type == BUSTYPE_ONOFF) 
   {
-    busses[numBusses] = new BusOnOff(bc);  // Relays
+    busses[numBusses] = new BusOnOff(bc); // Relays
   } 
   else 
   {
@@ -627,6 +649,7 @@ void BusManager::show()
   for (uint8_t i = 0; i < numBusses; i++) 
   {
     busses[i]->show();
+    // Serial.printf("busses[%d]->show()\n\r", i);
   }
 }
 
@@ -704,3 +727,5 @@ int16_t Bus::_cct = -1;
 uint8_t Bus::_cctBlend = 0;
 uint8_t Bus::_gAWM = 255;
 
+
+#endif // USE_MODULE_LIGHTS_INTERFACE

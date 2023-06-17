@@ -16,9 +16,39 @@
 /**
  * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
  * */
-#define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+// #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 // #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM800L
+// #define DEVICE_TESTBED_ESP32_BUZZER_TONES
 
+// #define DEVICE_TESTBED_MAVLINK_DECODER
+// #define DEVICE_TESTBED_MAVLINK_TELEMETRY_WIFI_01
+// #define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_FLIGHTREADY_01
+
+
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_01
+// #define DEVICE_TESTBED_ESP32_MQTT_MULTIPLE_01
+
+
+/**
+ * @brief Active SIM1
+ * 
+ */
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+
+/**
+ * @brief Active SIM2 105
+ * 
+ */
+// #define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
+
+#define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_01
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
 
 
 /**
@@ -129,6 +159,10 @@
 **/
 
 
+// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
+// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+
+
 // #define DEVICE_TESTBED_DS18XX
 // #define DEVICE_TESTBED_RGBCLOCK
 // #define DEVICE_TESTBED_GPS_SDCARD_LOGGER
@@ -145,8 +179,6 @@
 // #define DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC_WITH_WEBUI
 // #define DEVICE_TESTBED_MOTION_CLIMATE_SENSOR
 // #define DEVICE_TESTBED_HVAC_HEAT_ONLY_WITH_ENERGY_SENSOR
-// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
-// #define DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
 // #define DEVICE_TESTBED_WEBUI_FIRMWARE_UPDATE
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
 // #define DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS
@@ -258,7 +290,7 @@
   #define USE_MODULE_CORE_RULES
        
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
@@ -383,7 +415,7 @@
   #define USE_MODULE_CORE_RULES
        
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_MOTION
@@ -1005,9 +1037,30 @@
   #define DEVICENAME_CTR          "testbed_segment_multipin_esp32"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  //mqtt debug
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
   // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
@@ -1040,11 +1093,16 @@
     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
+    #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+    #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+    #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
     /********* Group: Debug options only ************************/
@@ -1057,26 +1115,28 @@
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
     #define ENABLE_DEBUG_SERIAL
+
+    // Needs significant change to merge WLED and HACS
+    #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
+    // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+
+    #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
+
+    #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+    
+
+    
+    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+
+    
     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
     // #define ENABLE_LOG_LEVEL_DEBUG
     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
 
-
-    // #define ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-
-
-    #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
-    #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-
-    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
-
-    #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
-
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    #define ENABLE_DEVFEATURE__PIXEL_USE_I2S_FOR_BUS
 
 
   #define USE_MODULE_TEMPLATE
@@ -1089,20 +1149,15 @@
       "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
       "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27,"               // Digital SK6812
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":[16,17,5,21,22],"  // PWM RGBCCT // needs fixing
+      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":16,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_B_CTR "\":17,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_C_CTR "\":5,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_D_CTR "\":21,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_05_E_CTR "\":22,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_A_CTR "\":16,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_B_CTR "\":17,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_C_CTR "\":5,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_D_CTR "\":21,"  // PWM RGBCCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_05_E_CTR "\":22,"  // PWM RGBCCT
 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_06_A_CTR "\":23"                // PWM CCT
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_06_A_CTR "\":23"                // PWM CCT
       #endif
     "},"
     "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1121,14 +1176,16 @@
  * @brief The issue is template loading is not boot safe.
  * I need to move this to init() and have it configure after boot has happened using the new segment method
  * */
-  #define STRIP_SIZE_MAX 50
   // #ifdef USE_MODULE_LIGHTS_INTERFACE
   #define USE_LIGHTING_TEMPLATE
   // #endif // USE_MODULE_LIGHTS_INTERFACE
 
-  #define USE_LIGHTING_TEMPLATE__SINGLE
-  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED
-  // #define USE_LIGHTING_TEMPLATE_3
+  // #define USE_LIGHTING_TEMPLATE__SINGLE
+  #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_SINGLE_RMT_ONLY_DEBUG
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FIVE_CHANNELS
+  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
 
   #ifdef USE_LIGHTING_TEMPLATE__SINGLE
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1149,7 +1206,7 @@
     )=====";
   #endif // USE_LIGHTING_TEMPLATE__SINGLE
 
-  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -1159,124 +1216,190 @@
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":50
+        "Length":16
       },
       {
         "Pin":13,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":50,
-        "Length":10
+        "Start":15,
+        "Length":3
       },
       {
         "Pin":14,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":60,
-        "Length":10
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":18,
+        "Length":3
       },
       {
         "Pin":27,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":70,
-        "Length":10
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":21,
+        "Length":3
       },
       {
         "Pin":[16,17,5,21,22],
         "ColourOrder":"RGBCW",
         "BusType":"ANALOG_5CH",
-        "Start":80,
+        "Start":24,
         "Length":1
       }
     ],
     "AnimationMode":"Effects",
     "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function":1,
+      "Function":11,
       "Intensity":50
     },
     "Transition": {
-      "TimeMs": 2000,
-      "RateMs": 2100
+      "TimeMs": 500,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 5
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
+
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_SINGLE_RMT_ONLY_DEBUG
+  #define STRIP_SIZE_MAX 1000
+
+
+  // Try my code without network to see if RMT and network is still the issue!
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"grb",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1000
+      }
+    ],
+    "AnimationMode":"Effects",
+    "ColourPalette":0,
+    "Effects": {
+      "Function":2,
+      "Intensity":255
+    },
+    "Transition": {
+      "TimeMs": 2500,
+      "RateMs": 5000
     },
     "BrightnessRGB": 10
   }
   )=====";
-  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_SINGLE_RMT_ONLY_DEBUG
 
-// {
-//   "ColourPalette": 11,
-//   "Effects": {
-//     "Function": 0,
-//     "Intensity": 127,
-//     "Speed": 255
-//   },
-//   "Transition": {
-//     "TimeMs": 0,
-//     "RateMs": 5000
-//   },
-//   "BrightnessRGB": 100,
-//   "SegColour1": {
-//     "Hue": 240,
-//     "Sat":70
-//   }
-// }
-
-
-
-    // ALOG_COM(PSTR("isObject %d"), jtok.isObject());
-    // ALOG_COM(PSTR("isArray %d"), jtok.isArray());
-    // ALOG_COM(PSTR("isStr %d"), jtok.isStr());
-    // ALOG_COM(PSTR("isNum %d"), jtok.isNum());
-
-    // ALOG_COM(PSTR("BusConfig match jtok.isArrayA() %d"), jtok.isArray());
-    //   ALOG_INF(PSTR("BusConfig **************A  \t%d"), jtok.getType());
-    // ALOG_COM(PSTR("BusConfig match jtok.isArrayB() %d"), jtok.isArray());
-    
-/*
-
-{
-  "HardwareType": "WS28XX",
-  "AnimationMode": "Effects",
-  "BrightnessRGB": 100,
-  "Segment0": {
-    "PixelRange": [
-      0,
-      5
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":16
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":15,
+        "Length":3
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":18,
+        "Length":3
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":21,
+        "Length":3
+      }
     ],
-    "ColourPalette": 10,
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function": 0,
-      "Intensity": 255
+      "Function":11,
+      "Intensity":50
     },
-    "SegColour":{"Hue":120,"Sat":100},
     "Transition": {
-      "TimeMs": 900,
+      "TimeMs": 500,
       "RateMs": 1000
-    }
-  },
-  "Segment1": {
-    "PixelRange": [
-      5,
-      10
+    },
+    "BrightnessRGB": 5
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
+
+
+  #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FIVE_CHANNELS
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":16
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":15,
+        "Length":3
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":18,
+        "Length":3
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGBW",
+        "BusType":"SK6812_RGBW",
+        "Start":21,
+        "Length":3
+      },
+      {
+        "Pin":[16,17,5,21,22],
+        "ColourOrder":"RGBCW",
+        "BusType":"ANALOG_5CH",
+        "Start":24,
+        "Length":1
+      }
     ],
-    "ColourPalette": "Christmas 01",
+    "AnimationMode":"Effects",
+    "ColourPalette":"Christmas 01",
     "Effects": {
-      "Function": 24,
-      "Speed": 255,
-      "Intensity": 255,
-      "SegBrightness":255
+      "Function":11,
+      "Intensity":50
     },
     "Transition": {
-      "TimeMs": 0,
-      "RateMs": 23
-    }
+      "TimeMs": 500,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100
   }
-}
-
-
-*/
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FIVE_CHANNELS
 
   #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -1353,296 +1476,1900 @@
   )=====";
   #endif // USE_LIGHTING_TEMPLATE_1
 
-
-//   // #define DISABLE_NETWORK
-
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-  
-//   #define USE_MODULE_DRIVERS_RELAY // using relays to disable other pins
-
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
-//     #define USE_LIGHTS_WS2812
-//     // #define USE_LIGHTS_SK6812
-//     #define STRIP_SIZE_MAX 100
-//     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-//     /********* Group: Testing ************************/
-//     // #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-//     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-//     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//   #define USE_MODULE_TEMPLATE
-//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-//   "{"
-//     "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_JSON_GPIOC "\":{"
-//       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-//       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\","  // Channel 1
-//       // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Channel 2
-//       // "\"44\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Channel 3
-//       // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Channel 4
-//       #endif 
-
-//       // Disable unused pins
-//       // "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","  // Channel 1
-//       "\"13\":\"" D_GPIO_FUNCTION_REL2_INV_CTR  "\"," // Channel 2
-//       "\"44\":\"" D_GPIO_FUNCTION_REL3_INV_CTR  "\"," // Channel 3
-//       "\"27\":\"" D_GPIO_FUNCTION_REL4_INV_CTR  "\"," // Channel 4
+#endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
 
 
-//       #ifdef USE_MODULE_LIGHTS_PWM
-//       "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"22\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","      
-//       #endif 
-//       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-//     "},"
-//     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-//     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-//   "}";
+
+
 
 /**
-//  * @brief The issue is template loading is not boot safe.
-//  * I need to move this to init() and have it configure after boot has happened using the new segment method
-//  * */
-//   #ifdef USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_LIGHTING_TEMPLATE
-//   #endif // USE_MODULE_LIGHTS_INTERFACE
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+  #define DEVICENAME_CTR          "testbed_sim7000g"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-//   #ifdef USE_LIGHTS_WS2812
-//   #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//   #define USE_LIGHTING_TEMPLATE__SINGLE_WS
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #endif 
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
 
-//     #define USE_SK6812_METHOD_DEFAULT
-//   // #define USE_LIGHTING_TEMPLATE__SINGLE_SK
-//   // #define USE_LIGHTING_TEMPLATE__SINGLE_WS
-//   // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
-//   // #define USE_LIGHTING_TEMPLATE_3
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
 
-//   #ifdef USE_LIGHTING_TEMPLATE__SINGLE_SK
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-  // {
-  //   "HardwareType":"SK6812",
-  //   "ColourOrder":"grbw",
-  //   "AnimationMode":"Effects",
-  //   "Segment0":{
-  //     "PixelRange": [
-  //       0,
-  //       100
-  //     ],
-  //     "ColourPalette":0,
-  //     "Effects": {
-  //       "Function":1,
-  //       "Intensity":50
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 800,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 10
-  //   }
-  // }
-//   )=====";
-//   #endif // USE_LIGHTING_TEMPLATE__SINGLE
+  // #define DISABLE_NETWORK
 
-//   #ifdef USE_LIGHTING_TEMPLATE__SINGLE_WS
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "HardwareType":"WS28XX",
-//     "AnimationMode":"Effects",
-//     "ColourOrder":"RGB",
-//     "ColourPalette":0,
-//     "Effects": {
-//       "Function":1,
-//       "Intensity":50
-//     },
-//     "Transition": {
-//       "TimeMs": 0,
-//       "RateMs": 1000
-//     },
-//     "BrightnessRGB": 100
-//   }
-//   )=====";
-//   #endif // USE_LIGHTING_TEMPLATE__SINGLE
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
 
-// // {
-// //   "ColourPalette": 11,
-// //   "Effects": {
-// //     "Function": 0,
-// //     "Intensity": 127,
-// //     "Speed": 255
-// //   },
-// //   "Transition": {
-// //     "TimeMs": 0,
-// //     "RateMs": 5000
-// //   },
-// //   "BrightnessRGB": 100,
-// //   "SegColour1": {
-// //     "Hue": 240,
-// //     "Sat":70
-// //   }
-// // }
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
 
 
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
 
-// // {
-// //   "HardwareType": "WS28XX",
-// //   "AnimationMode": "Effects",
-// //   "BrightnessRGB": 100,
-// //   "Segment0": {
-// //     "PixelRange": [
-// //       0,
-// //       5
-// //     ],
-// //     "ColourPalette": 10,
-// //     "Effects": {
-// //       "Function": 0,
-// //       "Intensity": 255
-// //     },
-// //     "SegColour":{"Hue":120,"Sat":100},
-// //     "Transition": {
-// //       "TimeMs": 900,
-// //       "RateMs": 1000
-// //     }
-// //   },
-// //   "Segment1": {
-// //     "PixelRange": [
-// //       5,
-// //       10
-// //     ],
-// //     "ColourPalette": "Christmas 01",
-// //     "Effects": {
-// //       "Function": 24,
-// //       "Speed": 255,
-// //       "Intensity": 255,
-// //       "SegBrightness":255
-// //     },
-// //     "Transition": {
-// //       "TimeMs": 0,
-// //       "RateMs": 23
-// //     }
-// //   }
-// // }
+    #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
 
-//   #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "HardwareType":"WS28XX",
-//     "AnimationMode":"Effects",
-//     "Segment0":{
-//       "PixelRange": [
-//         0,
-//         10
-//       ],
-//       "ColourPalette":"Christmas 01",
-//       "Effects": {
-//         "Function":1,
-//         "Intensity":255
-//       },
-//       "Transition": {
-//         "TimeMs": 900,
-//         "RateMs": 1000
-//       },
-//       "BrightnessRGB": 10
-//     },
-//     "Segment1": {
-//       "PixelRange": [
-//         10,
-//         20
-//       ],
-//       "ColourPalette": "Christmas 01",
-//       "Effects": {
-//         "Function": 24,
-//         "Speed":255,
-//         "Intensity":255
-//       },
-//       "Transition": {
-//         "TimeMs": 0,
-//         "RateMs": 23
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "Segment2": {
-//       "PixelRange": [
-//         20,
-//         80
-//       ],
-//       "ColourPalette": "Rainbow",
-//       "Effects": {
-//         "Function":1,
-//         "Speed":100
-//       },
-//       "Transition": {
-//         "TimeMs": 400,
-//         "RateMs": 500
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "Segment3": {
-//       "PixelRange": [
-//         80,
-//         100
-//       ],
-//       "ColourPalette": "Rainbow",
-//       "Effects": {
-//         "Function":22,
-//         "Speed":255
-//       },
-//       "Transition": {
-//         "TimeMs": 0,
-//         "RateMs": 23
-//       },
-//       "BrightnessRGB": 100
-//     }
-//   }
-//   )=====";
-//   #endif // USE_LIGHTING_TEMPLATE_1
 
-#endif // DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
+  #define DEVICENAME_CTR          "testbed_sim7000g_v2"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+    // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker02"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_01
+  #define DEVICENAME_CTR          "cellular_locator_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define MQTT_PORT 51884 //external mqtt broker on TOWER 
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+    // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02
+  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+    #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_MAVLINK_DECODE_R
+  #define DEVICENAME_CTR          "testbed_mavlink_decoder"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed MAVLink Decoder"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+    #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+    #define USE_DEVFEATURE_MAVLINK_DECOVER_SERIAL_NUMBER 2
+
+  #define USE_MODULE_CORE_SERIAL_UART
+    #define ENABLE_HARDWARE_UART_2
+    #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+  // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  // #define USE_MODULE_CORE_SERIAL_UART
+
+
+  //   #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\""   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+#endif // DEVICE_TESTBED_MAVLINK_DECODER
+
+
+
+/**
+ * @brief 
+ * 
+ * @brief 6P connector
+ * Green VIN (5v)
+ * Orange 18
+ * Yellow 19
+ * White 25
+ * Red 26
+ * Black gnd
+ *
+ *
+ * @brief 
+ * Connecting 6P to pixhawk 2.4.8 with Serial5 enabled will clash with modem serial
+ * 
+ *
+ * Next priority is getting cell/wifi mqtt swapping working well
+ * 
+ */
+#ifdef DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
+  #define DEVICENAME_CTR          "mavlink_cellular_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
+  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 100
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+
+
+  #define USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  // #define USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+  #define USE_GROUPFEATURE__MODEM_GPS
+  // #define USE_GROUPFEATURE__MAVLINK_DECODER
+  // #define USE_GROUPFEATURE__OLED_SH1106_MAVLINK
+  #define USE_GROUPFEATURE__MQTT_ON_WIFI_AND_CELLULAR
+
+  // *************************************************************************************
+
+  #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+    #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+  #endif
+ 
+  #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
+    #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+      #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+      #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+      #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+    #define USE_MODULE_CORE_SERIAL_UART
+      #define ENABLE_HARDWARE_UART_2
+      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MODEM_GPS
+    #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define USE_MODULE_SENSORS_GPS_MODEM
+  #endif 
+  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    // #define MQTT_SOCKET_TIMEOUT 1
+    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+     #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable
+    // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+    // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+    // #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+    // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+    #define ENABLE_DEVFEATURE_MQTT_ENABLE_CONSECUTIVE_TELEMETRY_TOPICS_SEND_LIMIT // ie if one sends, return early from sending others
+  #endif
+
+  #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #define USE_MODULE_SENSORS_INTERFACE
+    // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+    // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+  #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+
+  #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MQTT_ON_WIFI_AND_CELLULAR
+
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+
+  #endif
+
+  #ifdef USE_GROUPFEATURE__OLED_SH1106_MAVLINK
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_OLED_SH1106
+      #define SHOW_SPLASH
+    #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+  #endif
+
+
+// #define UART_BAUD   115200
+// #define PIN_DTR     25
+// #define PIN_TX      27
+// #define PIN_RX      26
+// #define PWR_PIN     4
+
+// #define SD_MISO     2
+// #define SD_MOSI     15
+// #define SD_SCLK     14
+// #define SD_CS       13
+// #define LED_PIN     12
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+
+/**
+ * @brief 
+ * Minimal ESP32 7000G Modem to log position in realtime and SMS readback
+ */
+#ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+  #define DEVICENAME_CTR          "cellular_locator_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+    #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
+  //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+/**
+ * @brief 
+ * 
+ * 
+// Add function to "settime_update" ie with GPS ticks. When it happens, reset the 
+// update millis so it does not double update, same for uptime
+ * 
+ * 
+ * If LTE connects, then set the mqtt retry counter to immediate
+ * 
+ */
+
+
+
+  #define ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+
+
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
+  #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
+  #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
+  #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+  #define ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
+  #define ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
+  #define ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
+
+  #ifdef ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 100
+  #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  #endif // ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+
+
+  // #define USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
+
+  // *************************************************************************************
+
+  #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+    #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+  #endif
+ 
+  #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
+    #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+      #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+      #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+      #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+    #define USE_MODULE_CORE_SERIAL_UART
+      #define ENABLE_HARDWARE_UART_2
+      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MODEM_GPS
+    #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define USE_MODULE_SENSORS_GPS_MODEM
+  #endif 
+  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    // #define MQTT_SOCKET_TIMEOUT 1
+    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+     #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
+    // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+    // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+    #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+    // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+  #endif
+
+  #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    // #define USE_MODULE_SENSORS_INTERFACE
+    // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+    // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+  #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
+
+  #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  #endif
+
+
+// #define UART_BAUD   115200
+// #define PIN_DTR     25
+// #define PIN_TX      27
+// #define PIN_RX      26
+// #define PWR_PIN     4
+
+// #define SD_MISO     2
+// #define SD_MOSI     15
+// #define SD_SCLK     14
+// #define SD_CS       13
+// #define LED_PIN     12
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":20}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+#endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+
+
+
+
+/**
+ * @brief 
+ * Minimal ESP32 7000G Modem to log position in realtime and SMS readback
+ */
+#ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_01
+  #define DEVICENAME_CTR          "cellular_locator_01"
+  #define DEVICENAME_FRIENDLY_CTR "Selfcontained tracker with SIM staying" // Antennas covers SIM, but flip the board later
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define UART_CELLULAR_BAUD   921600
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
+  #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "10" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
+  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "0"
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+#endif
+#ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
+  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_FRIENDLY_CTR "MAVlink ^Pin "
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define UART_CELLULAR_BAUD   921600
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+#endif
+#ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
+  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_FRIENDLY_CTR "Plane - Optional LIPO for weight on Plane"
+  #define DEVICENAME_ROOMHINT_CTR "roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define SIM_CARD_PHONE_NUMBER "07518522105"
+  #define USE_GROUPFEATURE__MQTT_AS_CELLULAR
+  #define UART_CELLULAR_BAUD   115200
+  #define USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+  #define USE_GROUPFEATURE__MODEM_GPS
+  #define TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR  "1" // On plane this needs to be much faster, as signal comes and goes quicker. Dont worry about repeated reconnects
+  #define SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR "60"
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+#endif
+#ifdef DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
+  /**
+   * @brief Device should run the same code designed for LTE MQTT devices, but connect via WiFi and therefore
+   * test that LTE network stuff is not breaking the normal WiFi stuff and stable code is being developed for both methods.
+   **/
+  #define DEVICENAME_CTR          "cellular_locator_04"
+  #define DEVICENAME_FRIENDLY_CTR "Tester - Run MQTT over WiFi without LTE connected"
+  #define DEVICENAME_ROOMHINT_CTR "roaming"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator02"
+  #define USE_GROUPFEATURE__MQTT_AS_WIFI
+  #define UART_CELLULAR_BAUD   115200
+  #define SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+#endif
+#ifdef SUBDEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH
+
+  
+  // #define ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+  #define ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+    #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
+  //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+  #ifdef ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+    #define ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
+    #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 10
+
+    
+    #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES    
+    // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+    #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+    #define ENABLE_DEBUG_FUNCTION_NAMES
+    #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+    // #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+    #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_TASKS
+    #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+    #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 300
+    // #define ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
+    #define ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+    #define ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
+    #define ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
+    // #define ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
+    // #define ENABLE_DEVFEATURE__NTP_OVER_CELLULAR_TEST_WITHOUT_INTERFACE_INTEGRATION
+    #define ENABLE_DEVFEATURE__TIME_UPDATE_WITH_GPS_TIME
+    // #define ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+    #define ENABLE_DEVFEATURE__MODEM_FORCE_RECONNECT_WHEN_MQTT_IS_DISCONNECTED_SECONDS 600
+
+
+
+  #endif // ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
+
+  #ifdef ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+
+
+    #define ENABLE_ADVANCED_DEBUGGING
+    #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+
+
+
+  #endif // ENABLE_GROUPFEATURE__DEBUG_CONNECTION_WITH_LOGGING
+
+
+  #define ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
+
+
+  // *************************************************************************************
+
+  #ifdef USE_GROUPFEATURE__FASTER_SERIAL_LOGGING
+    #define SERIAL_DEBUG_BAUD_DEFAULT 921600
+  #endif
+ 
+  #ifdef USE_GROUPFEATURE__MAVLINK_DECODER
+    #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+      #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+      #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+      #define ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
+    #define USE_MODULE_CORE_SERIAL_UART
+      #define ENABLE_HARDWARE_UART_2
+      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  #endif
+
+  #ifdef USE_GROUPFEATURE__MODEM_GPS
+    #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define USE_MODULE_SENSORS_GPS_MODEM
+  #endif 
+  #ifdef USE_GROUPFEATURE__MQTT_AS_CELLULAR 
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    #define USE_MODULE_NETWORK_MQTT
+    // #define MQTT_SOCKET_TIMEOUT 1
+    // #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+     #define MQTT_PORT_CELLULAR 51883 //external mqtt broker on TOWER  : Unstable 192.168.1.66
+    // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+    // #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+    #define ENABLE_DEVFEATURE_MQTT_BLOCK_TRANSMIT_IF_NOT_CONNECTED
+    // #define ENABLE_DEVFEATURE_CELLULAR_SMS__PDU_MODE  //no
+  #endif
+  #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
+    #define USE_MODULE_NETWORK_WIFI
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
+    #define MQTT_PORT     1883
+  #endif
+
+  #ifdef USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS
+    #define DISABLE_NETWORK_WIFI
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    // #define USE_MODULE_SENSORS_INTERFACE
+    // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    // #define MQTT_PORT 51883 // Temporary exposed primry broker : STABLE
+    // #define ENABLE_DEVFEATURE_STOP_MQTT_FROM_CONNECTING
+  #endif
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      #ifdef USE_MODULE_NETWORK_CELLULAR
+      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      #endif // USE_MODULE_NETWORK_CELLULAR   
+      #ifdef USE_MODULE_DRIVERS_SDCARD
+      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      #endif // USE_MODULE_DRIVERS_SDCARD   
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
+    "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
+  "}";
+
+#endif // DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+
+
+/**
+ * @brief 
+ * 
+ * 
+// Add function to "settime_update" ie with GPS ticks. When it happens, reset the 
+// update millis so it does not double update, same for uptime
+ * 
+ * 
+ * If LTE connects, then set the mqtt retry counter to immediate
+ * 
+ */
+
+
+
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_MAVLINK_TELEMETRY_WIFI_01
+  #define DEVICENAME_CTR          "testbed_mavlink_telemetry_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+  #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+  #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+
+  #define USE_DEVFEATURE_DEFINED_SERIAL2
+
+  #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
+  // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+  // // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // // #define USE_MODULE_NETWORK_MQTT
+  // // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // // #define USE_SSIDS_NONE_DEBUGGING
+  // // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // // #define DISABLE_NETWORK
+
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+
+  // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+
+
+  // #define USE_DEVFEATURE_DEFINED_SERIAL2
+
+ #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+//  #define MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // // #define USE_MODULE_NETWORK_MQTT
+  // // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // // #define USE_SSIDS_NONE_DEBUGGING
+  // // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // // #define DISABLE_NETWORK
+
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define MQTT_PORT 51884 //external mqtt broker on TOWER 
+
+  // /**
+  //  * @brief WiFi MQTT
+  //  * 
+  //  */
+  // // #define USE_MODULE_NETWORK_WIFI
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  // /**
+  //  * @brief Cellular MQTT
+  //  * 
+  //  */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  //   // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+  // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+
+//  6P connector
+
+//  Green VIN (5v)
+// Orange 18
+// Yellow 19
+// White 25
+// Red 26
+// Black gnd
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_BUZZER_TONES
+  #define DEVICENAME_CTR          "testbed_buzzer_tones"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE__DRIVERS_BUZZER_TONES
+
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_BUZZER_CTR   "\""
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker02"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+    "\"BuzzerMode\":{\"FreqMode\":1},"
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM800L
+  #define DEVICENAME_CTR          "testbed_sim800l"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  //   #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_JSON_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_JSON_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+
+
 
 
 
@@ -2163,10 +3890,10 @@
 /**
  * This will become the final version of a panel, but requires animation fixing first
  * */
-#ifdef DEVICE_TESTBED_USING_WEBSERVER_WEBUI_ESP32
-  #define DEVICENAME_CTR            "testbed_nextion_display"
-  #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+  #define DEVICENAME_CTR            "testbed_webui_esp32"
+  #define DEVICENAME_FRIENDLY_CTR   "Testbed webui_esp32"
+  #define DEVICENAME_ROOMHINT_CTR "Testbed"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
   #define USE_MODULE_NETWORK_WEBSERVER
@@ -2189,13 +3916,21 @@
 /**
  * This will become the final version of a panel, but requires animation fixing first
  * */
-#ifdef DEVICE_TESTBED_USING_WEBSERVER_WEBUI_ESP82
-  #define DEVICENAME_CTR            "testbed_nextion_display"
+#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
+  #define DEVICENAME_CTR            "testbed_webui_82"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
 
-  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2206,7 +3941,8 @@
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
 #endif
@@ -4293,87 +6029,6 @@
 
 
 
-/**
- * @brief Used to develop the core webui again, no extra functions/buttons, minimal page with console etc
- * 
- */
-#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
-  #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
-  #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  #define DEVICENAME_ROOMHINT_CTR "Testbed"                             // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  // #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 3
-  #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define USE_DEFAULT_FIRMWARE_SENSORS
-
-  // Step 1: Gaining ability to HTTP flash
-
-  // Step 2: Debug screen, really just print json messages from all templates out onto the window so I can view them
-             // LAter, introduce parsing of json for web html, so each key/valye pair becomes a line, and each json level becomes another indent ie "JsonPretty"
-
-  // Step 3: view module template configured, as if I am going to change it (this requires settings saving first)
-
-  // #define DISABLE_SLEEP
-
-  #undef ESP32
-  #define ESP8266
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    // "\"" D_JSON_GPIOC "\":{"
-    // #ifdef ESP8266 
-    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #else
-    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #endif
-    // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-#endif
-
-
-
-#ifdef DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
-  #define DEVICENAME_CTR          "testbed_webui_basic"               APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
-  #define DEVICENAME_FRIENDLY_CTR "Testbed for WebPageUI"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
-  #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
-
-  #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  #define DISABLE_SLEEP
-
-  // #define ESP32
-  // #undef ESP8266
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    // "\"" D_JSON_GPIOC "\":{"
-    // #ifdef ESP8266 
-    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #else
-    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    // #endif
-    // "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-#endif
 
 
 #ifdef DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS
@@ -7378,7 +9033,7 @@
      * Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
      * 
      */
-  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   
 
@@ -8463,7 +10118,6 @@
    */
 
   // #define DISABLE_WEBSERVER
-  //   #define USE_MODULE_NETWORK_WIFI_V2
   //   #define USE_DEVFEATURE_NETWORK_WIFI_VERSION2
 /**
  * @brief 
@@ -8942,11 +10596,11 @@
   #define USE_MODULE_CORE_RULES
 
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_DHT
 
   #define USE_MODULE_DRIVERS_INTERFACE
-    #define ENABLE_DEVFEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
+    #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
   #define USE_MODULE_DRIVERS_RELAY
 
   #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
@@ -9196,7 +10850,7 @@
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_SR04
     // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
     // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
@@ -10927,7 +12581,7 @@
   // #define ENABLE_HVAC_DEBUG_TIMES
   #define DISABLE_WEBSERVER
   
-  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
@@ -11092,7 +12746,7 @@
   // #define ENABLE_HVAC_DEBUG_TIMES
   // #define DISABLE_WEBSERVER
   
-  // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  // #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   // #define EMABLE_DEVFEATURE_HARDWAREPINS_CLEANED_UP
 
@@ -11889,263 +13543,6 @@
 #endif
 
 
-#ifdef DEVICE_RGBESP32_1_TESTER
-  #define DEVICENAME_CTR          "rgbesp32_1_tester"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Fire Place 32"
-
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  // #define DISABLE_WEBSERVER 
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  
-  // #define DISABLE_NETWORK
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING2
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  #define STRIP_SIZE_MAX 50//100//256
-  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      // "\"" D_JSON_TIME_MS "\":300,"
-      // "\"" D_JSON_RATE_MS "\":100,"
-      "\"" D_JSON_TIME_MS "\":4000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
-      // "\"" D_JSON_FUNCTION "\":"  "1"
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    // "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-    // "\"Brightness\":1"
-
-    
-
-    // command to enable random brightness from palette on generation
-    // command to set the max and min of those
-    // disable by defaultThanks
-  "}";
-
-#endif
-
-#ifdef DEVICE_RGBGAZEBO_ROOF
-  #define DEVICENAME_CTR          "rgbgazeboroof"
-  #define DEVICENAME_FRIENDLY_CTR "rgbgazeboroof"
-
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  // #define DISABLE_WEBSERVER 
-
-  #define ESP32
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  
-  // #define DISABLE_NETWORK
-
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING
-  // #define ENABLE_DEVFEATURE_FLICKER_TESTING2
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  // #define STRIP_SIZE_MAX 50//100//256
-  // // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES 256
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   #ifdef STRIP_SIZE_MAX
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   #else
-  //   "\"" D_JSON_STRIP_SIZE       "\":50,"
-  //   #endif //STRIP_SIZE_MAX
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     // "\"" D_JSON_TIME_MS "\":300,"
-  //     // "\"" D_JSON_RATE_MS "\":100,"
-  //     "\"" D_JSON_TIME_MS "\":4000,"
-  //     "\"" D_JSON_RATE_MS "\":1000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":10,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-  //   "},"
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     // "\"" D_JSON_FUNCTION "\":\"" "FirePlace01" "\""
-  //     // "\"" D_JSON_FUNCTION "\":"  "1"
-  //     "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-  //   "},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-  //   // "\"" D_JSON_COLOUR_PALETTE "\":\"Single Fire 01\","
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-  //   // "\"Brightness\":1"
-
-    
-
-  //   // command to enable random brightness from palette on generation
-  //   // command to set the max and min of those
-  //   // disable by defaultThanks
-  // "}";
-
-
-  #define STRIP_SIZE_MAX 100
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":1000,"
-      "\"" D_JSON_RATE_MS "\":2000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":66,"
-    "\"" D_JSON_BRIGHTNESS_RGB_255 "\":255"
-  "}";
-
-
-#endif
-
-
-
-#ifdef DEVICE_RGBMICRO4 //gazebo
-  #define DEVICENAME_CTR          "rgbmicro4"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Micro LED Lights 4"
-
-  //#define FORCE_TEMPLATE_LOADING
-  //#define SETTINGS_HOLDER 21
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_MODULE_LIGHTS_WLED_EFFECTS_FOR_CONVERSION
-  // #define WLED_DEFINE_GLOBAL_VARS //only in one source file, wled.cpp!
-  // #define DISABLE_PIXEL_FUNCTION_EFFECTS
-  // #define USE_MODULE_DRIVERS_LEDS
-  #define DISABLE_WEBSERVER
-  
-//   //#define USE_WEBSERVER_ADVANCED_MULTIPAGES // new develop option to limit scope to only include root page while testing
-  
-//   #define USE_MODULE_SENSORS_SWITCHES
-//   #define USE_MODULE_SENSORS_ANALOG
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
-    "},"
-  "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  
-  #define STRIP_SIZE_MAX 256
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":10000,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"" "Slow Glow" "\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":\"Christmas MultiColoured Warmer\","
-    "\"" D_JSON_BRIGHTNESS_RGB "\":10"
-  "}";
-
-#endif
-
 
 #ifdef DEVICE_ENSUITEFAN_SENSOR
   #define DEVICENAME_CTR          "ensuitefan_sensor"
@@ -12261,149 +13658,6 @@
 
 #endif
 
-
-//rgbmicro2/set/light///Scene
-//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
-#ifdef DEVICE_RGBOUTSIDETREE_TESTER
-  #define DEVICENAME_CTR          "rgboutsidetree_tester"
-  #define DEVICENAME_FRIENDLY_CTR "Outside Tree Tester"
-
-// #define ENABLE_BUG_TRACING
-// #define ENABLE_DEVFEATURE_FLICKER_TESTING
-// #define ENABLE_DEVFEATURE_FLICKERING_TEST2
-// #define ENABLE_DEVFEATURE_FLICKERING_TEST3
-#define ENABLE_DEVFEATURE_FLICKERING_TEST5
-
-
-/*
-
-
-  #ifdef ENABLE_DEVFEATURE_FLICKER_TESTING
-
-  #endif // ENABLE_DEVFEATURE_FLICKER_TESTING
-
-  */
-
-#define USE_PM_OUTSIDE_TREE_MIXER_DESCRIPTION
-DEFINE_PGM_CTR(PM_OUTSIDE_TREE_MIXER_DESCRIPTION)
-{  // trans method, flasher, colours,   rate/time, mutlipler
-  "Static/InOrder, SlowGlow, Few Colour, %d/%d, Single" "|" // 1
-  "Medium/Random, SlowGlow, Few Colour, %d/%d, Single" "|" // 2
-  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Single" "|" // 3
-  "Slow/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 4
-  "Fast/Random, SlowGlow, Many Colour 10, %d/%d, Rows" "|" // 5
-  "Static/InOrder, SlowGlow, Few Colour 9, %d/%d, Rows" "|" // 6
-  "Rotate/InOrder, Sequential, Many Colour 10, %d/%d, Rows" "|" // 7
-  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Rows" "|" // 8
-  "Static/InOrder, SlowGlow, Berry Green, %d/%d, Single" "|" // 9
-  "Fast/InOrder, TwinkleColour, Many Colour 10, %d/%d, Single" "|" // 10
-  "Slow/Random, SlowGlow, Partial Colours 5, %d/%d, Single" "|" // 11
-};
-
-
-
-#define ENABLE_FEATURE_PIXEL_GROUP_MULTIPLIERS
-#define USE_DEVFEATURE_PIXEL_OUTPUT_MULTIPLIER 2
-
-
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 1
-
-  // #define ENABLE_BUG_TRACING
-  #define DEBUG_PRINT_FUNCTION_NAME
-
-
-  //#define ENABLE_LOG_FILTERING_TEST_ONLY
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-  #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
-  
-  #define ENABLE_PIXEL_FUNCTION_MIXER
-  
-
-  #define STRIP_SIZE_MAX 1000// 750   *15 //changing gazebo to be 12v
-
-  #define DISABLE_WEBSERVER
-  #define DISABLE_NETWORK
-  // #define DISABLE_FOR_FAULTY_ESP32_FLICKERING
-
-
-  // Memory reduction techniques
-  // #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 10 
-  // #define WEB_LOG_SIZE 1
-  // #define LOG_BUFFER_SIZE 500
-
-  // #define DISABLE_SLEEP
-
-  // #define USE_WS28XX_METHOD_RMT0_800KBPS_ESP32
-
-  // #define ENABLE_DEVFEATURE_REPEAT_SETPIXELOUT_MULTIPLE_TIMES STRIP_SIZE_MAX
-  //#define ENABLE_PIXEL_LIGHTING_HARDWARE_WHITE_CHANNEL_CCT_SPACE
-  //#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-
-
-  #define USE_INTERFACE_NEW
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-
-  #define DISBALE_TEST_SECTION
-
-  // #define ENABLE_DEVFEATURE_LIGHTING_//Scene_OBJECT_TO_STRUCT "v78.24.11+" //only remove when all device exceed this
-  // #define ENABLE_DEVFEATURE_RGBCOLOR_DESIRED
-  //#define ENABLE_DEVFEATURE_SINGLE_ANIMATOR_INTERFACE   "v79.31.22+"   
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE)   
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" D_JSON_WS2812 "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRB\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":10,\"" D_JSON_RATE "\":20,\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\"},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"User 00\","
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_//Scene_COLOUR     "\":{\"" D_JSON_HSB    "\":[15,95,0]},"
-    // "\"" D_JSON_BRIGHTNESS       "\":0,"
-    // "\"" D_JSON_BRIGHTNESS_RGB          "\":0,"
-
-    // new commands I want to run during boot
-
-    "\"AnimationMode\":\"Flasher\","
-    // "\"Flasher\":{"
-    //   "\"Function\":11,"
-    //   "\"AgedColouring\":0"
-    // "},"
-    "\"Mixer\":{"
-      "\"Enabled\":1,"
-      // "\"" D_JSON_RUNNING_ID "\":7,"
-      "\"" D_JSON_TIME_SCALER_AS_PERCENTAGE "\":10"
-    "},"
-    "\"PixelGrouping\":{"
-      // "\"Enabled\":\"Off\","
-      "\"Mode\":3"
-    "},"
-    "\"Transition\":{\"Order\":\"Random\",\"PixelUpdatePerc\":100},"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-
-  "}";
-
-#endif
 
 
 #ifdef DEVICE_RGBDININGROOMTREE 

@@ -87,6 +87,18 @@ typedef enum
    * @brief Distance
    **/
   SENSOR_TYPE_PROXIMITY_ID,
+
+
+
+  SENSOR_TYPE_LATITUDE_ID,
+  SENSOR_TYPE_LONGITUDE_ID,
+  SENSOR_TYPE_ALTITUDE_ID,
+
+
+  /**
+   * @brief Speed
+   **/
+  SENSOR_TYPE_SPEED_ID,
   
   
   SENSOR_TYPE_GRAVITY_ID,
@@ -123,6 +135,13 @@ typedef enum
    **/
   SENSOR_TYPE_DOOR_POSITION_ID,
   SENSOR_TYPE_DOOR_LOCKED_ID,
+
+  /**
+   * @brief Basic logic
+   * 
+   */
+
+  SENSOR_TYPE_STATE_ACTIVE_ID, //ie on/off
 
 
 

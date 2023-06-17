@@ -36,6 +36,38 @@ void mInterfaceLight::Template_Load()
 void mInterfaceLight::Init(void) //LightInit(void)
 {
 
+  
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+    neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
+    // constexpr
+    // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
+    uint8_t kTaskRunnerCore = 1;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+
+    ALOG_INF(PSTR("kTaskRunnerCore=%d"),kTaskRunnerCore);
+
+
+
+    neopixel_runner->begin(
+        [this]() {
+          // stripbus->Show();
+
+          /**
+           * @brief Actual bit of the code that gets called each time
+           * 
+           */
+          if(bus_manager)
+          {
+            bus_manager->show();
+          }
+          // Serial.println("NeoPixelShowTask::Show");
+            
+        },
+        kTaskRunnerCore
+    );
+    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+
 }
 
 
@@ -103,13 +135,52 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-void mInterfaceLight::ShowInterface()
-{ 
-  if(bus_manager)
+#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+namespace
+{
+  void commitTaskProcedure(void *arg)
   {
-    bus_manager->show();
+    CommitParams *params = (CommitParams *)arg;
+
+    while (true)
+    {
+      while (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) != 1);
+      params->handler();
+      xSemaphoreGive(params->semaphore);
+    }
+  }
+} // namespace
+
+void NeoPixelShowTask::begin(CommitHandler handler, uint8_t core_id)
+{
+  _commit_params.handler = handler;
+
+  if (core_id < 2)
+  {
+    _commit_params.semaphore = xSemaphoreCreateBinary();
+
+    xTaskCreatePinnedToCore(commitTaskProcedure, /* Task function. */
+                            "NeoPixelShow",      /* name of task. */
+                            10000,               /* Stack size of task */
+                            &_commit_params,     /* parameter of the task */
+                            1,                   /* priority of the task */
+                            &_commit_task,       /* Task handle to keep track of created task */
+                            core_id);            /* pin task to core core_id */
   }
 }
+
+void NeoPixelShowTask::execute()
+{
+  // Trigger the pinned function to run at configured priority and wait for maximum time for it to finish
+  xTaskNotifyGive(_commit_task);
+  while (xSemaphoreTake(_commit_params.semaphore, portMAX_DELAY) != pdTRUE);
+}
+
+#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+
 
 
 void mInterfaceLight::EveryLoop()
@@ -577,14 +648,13 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     ALOG_COM(PSTR("bus_type %d"), bus_type);
   }
 
-  if(jtok = obj["ColourOrder"])
+  if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER])
   {
     if(jtok.isStr())
     {
       ColourOrder = GetColourOrder_FromName(jtok.getStr());
     }    
   }
-
 
   uint8_t bus_index = bus_count; // next bus space 
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
@@ -638,7 +708,7 @@ COLOUR_ORDER_T mInterfaceLight::GetColourOrder_FromName(const char* c)
   }
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  ALOG_INF( PSTR("colour_order == R=%d, G=%d, B=%d, CW=%d, WW=%d \n\r dec%d \n\r %X"),
+  ALOG_INF( PSTR("colour_order == R=%d, G=%d, B=%d, CW=%d, WW=%d, dec%d, %X"),
     colour_order.red,
     colour_order.green,
     colour_order.blue,
@@ -648,6 +718,8 @@ COLOUR_ORDER_T mInterfaceLight::GetColourOrder_FromName(const char* c)
     colour_order.data
   );
   #endif  
+
+  return colour_order;
 
 }
 

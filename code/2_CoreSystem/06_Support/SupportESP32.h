@@ -5,15 +5,101 @@
 #ifdef ESP32
 
 #include "stdint.h"
+#include <Arduino.h>
+
+// #include "bootloader_flash.h"
+#include "soc/soc.h"
+#include "soc/spi_reg.h"
+// ESP32_ARCH contains the name of the architecture (used by autoconf)
+#if CONFIG_IDF_TARGET_ESP32
+  #ifdef CORE32SOLO1
+    #define ESP32_ARCH            "esp32solo1"
+  #else
+    #define ESP32_ARCH            "esp32"
+  #endif
+#elif CONFIG_IDF_TARGET_ESP32S2
+  #define ESP32_ARCH              "esp32s2"
+#elif CONFIG_IDF_TARGET_ESP32S3
+  #define ESP32_ARCH              "esp32s3"
+#elif CONFIG_IDF_TARGET_ESP32C3
+  #define ESP32_ARCH              "esp32c3"
+#else
+  #define ESP32_ARCH              ""
+#endif
+
+// Handle 20k of NVM
+
+#include <nvs.h>
+
+// See libraries\ESP32\examples\ResetReason.ino
+#if ESP_IDF_VERSION_MAJOR > 3      // IDF 4+
+  #if CONFIG_IDF_TARGET_ESP32      // ESP32/PICO-D4
+    #include "esp32/rom/rtc.h"
+  #elif CONFIG_IDF_TARGET_ESP32S2  // ESP32-S2
+    #include "esp32s2/rom/rtc.h"
+  #elif CONFIG_IDF_TARGET_ESP32S3  // ESP32-S3
+    #include "esp32s3/rom/rtc.h"
+  #elif CONFIG_IDF_TARGET_ESP32C3  // ESP32-C3
+    #include "esp32c3/rom/rtc.h"
+  #else
+    #error Target CONFIG_IDF_TARGET is not supported
+  #endif
+#else // ESP32 Before IDF 4.0
+  #include "rom/rtc.h"
+#endif
+
+
+//
+// Flash memory mapping
+//
+
+// See Esp.cpp
+#include "Esp.h"
+#include "esp_spi_flash.h"
+#include <memory>
+#include <soc/soc.h>
+#include <soc/efuse_reg.h>
+#include <esp_partition.h>
+extern "C" {
+#include "esp_ota_ops.h"
+#include "esp_image_format.h"
+}
+#include "esp_system.h"
+#if ESP_IDF_VERSION_MAJOR > 3       // IDF 4+
+  #if CONFIG_IDF_TARGET_ESP32       // ESP32/PICO-D4
+    #include "esp32/rom/spi_flash.h"
+    #define ESP_FLASH_IMAGE_BASE 0x1000     // Flash offset containing magic flash size and spi mode
+  #elif CONFIG_IDF_TARGET_ESP32S2   // ESP32-S2
+    #include "esp32s2/rom/spi_flash.h"
+    #define ESP_FLASH_IMAGE_BASE 0x1000     // Flash offset containing magic flash size and spi mode
+  #elif CONFIG_IDF_TARGET_ESP32S3   // ESP32-S3
+    #include "esp32s3/rom/spi_flash.h"
+    #define ESP_FLASH_IMAGE_BASE 0x0000     // Esp32s3 is located at 0x0000
+  #elif CONFIG_IDF_TARGET_ESP32C3   // ESP32-C3
+    #include "esp32c3/rom/spi_flash.h"
+    #define ESP_FLASH_IMAGE_BASE 0x0000     // Esp32c3 is located at 0x0000
+  #else
+    #error Target CONFIG_IDF_TARGET is not supported
+  #endif
+#else // ESP32 Before IDF 4.0
+  #include "rom/spi_flash.h"
+  #define ESP_FLASH_IMAGE_BASE 0x1000
+#endif
+
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
 class SupportESP32{
   public:
     SupportESP32(){};
+    String GetDeviceHardware(void);
     
     void init(void);
 
     
     static uint32_t ESP_getChipId(void);
+    
+    static bool FoundPSRAM(void);
 
     
 // extern "C" {

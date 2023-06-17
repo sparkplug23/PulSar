@@ -21,9 +21,10 @@
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
+  #include <WiFi.h>
 
-const uint16_t PixelCount = 4; // make sure to set this to the number of pixels in your strip
-const uint8_t PixelPin = 2;  // make sure to set this to the correct pin, ignored for Esp8266
+const uint16_t PixelCount = 1000; // make sure to set this to the number of pixels in your strip
+const uint8_t PixelPin = 4;  // make sure to set this to the correct pin, ignored for Esp8266
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PixelCount, PixelPin);
 // For Esp8266, the Pin is omitted and it uses GPIO3 due to DMA hardware use.  
@@ -105,6 +106,11 @@ void SetRandomSeed()
     randomSeed(seed);
 }
 
+// Dedicated SSID for home controllers
+#define STA_SSID1            "HACS2400"                // [Ssid2] Optional alternate AP Wifi SSID
+#define STA_PASS1            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
+
+
 void setup()
 {
     Serial.begin(115200);
@@ -124,6 +130,22 @@ void setup()
 
     Serial.println();
     Serial.println("Running...");
+
+    
+        WiFi.begin(STA_SSID1, STA_PASS1);
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(500);
+            Serial.print(".");
+        }
+        Serial.println("");
+        Serial.println("WiFi connected.");
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
+
+
+
+
+
 }
 
 
@@ -219,4 +241,3 @@ void loop()
         SetupAnimationSet();
     }
 }
-

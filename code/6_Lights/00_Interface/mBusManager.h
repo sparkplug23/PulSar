@@ -91,6 +91,7 @@ struct BusConfig {
 // Defines an LED Strip and its color ordering.
 struct ColorOrderMapEntry 
 {
+  // Mappings here sets what order to use and between which index range
   uint16_t start;
   uint16_t len;
   COLOUR_ORDER_T colorOrder;
@@ -123,7 +124,7 @@ struct ColorOrderMap
     COLOUR_ORDER_T getPixelColorOrder(uint16_t pix, COLOUR_ORDER_T defaultColorOrder) const;
 
   private:
-    uint8_t _count;
+    uint8_t _count = 0;
     ColorOrderMapEntry _mappings[WLED_MAX_COLOR_ORDER_MAPPINGS];
 };
 
@@ -398,6 +399,7 @@ class BusManager
 
     inline void updateColorOrderMap(const ColorOrderMap &com) 
     {
+      Serial.println("updateColorOrderMap");
       memcpy(&colorOrderMap, &com, sizeof(ColorOrderMap));
     }
 
@@ -415,7 +417,7 @@ class BusManager
 
   private:
     uint8_t numBusses = 0;
-    ColorOrderMap colorOrderMap;
+    ColorOrderMap colorOrderMap;  // which contains all the maps, really this could just be held within the bus? Or is it since busses are different types?
 
     inline uint8_t getNumVirtualBusses() 
     {

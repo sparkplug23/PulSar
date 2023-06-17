@@ -129,7 +129,7 @@ class mSR04 :
     void SubTask_UpdateAmbientTemperature();
     #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
 
-    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return settings.fSensorCount;
@@ -145,7 +145,7 @@ class mSR04 :
       #endif
       value->sensor_id = index;
     };
-    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
 
 

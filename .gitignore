@@ -22,3 +22,10 @@ code/0_ConfigUser/G0_mFirmwareCustom_Secret.h
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 *.bak
+
+
+build_output/
+*.bin
+*.gz
+
+

@@ -38,15 +38,15 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case FUNC_EVERY_SECOND:{
 
-      // DEBUG_LINE_HERE;
-      
-      // Serial.printf("time_start1=%d\n\r",millis());
-
       #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
         ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_LOOPSSEC, pCONT_sup->activity.cycles_per_sec);
         ALOG_INF( PSTR(PM_JSON_COMMAND_SVALUE_NVALUE), PM_JSON_FREEHEAP, ESP.getFreeHeap());
       #endif // ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
 
+      // ALOG_INF( PSTR("loops_per_second %d"), pCONT_sup->loops_per_second);
+      // ALOG_INF( PSTR("this_cycle_ratio %d"), pCONT_sup->this_cycle_ratio);
+      // ALOG_INF( PSTR("loop_load_avg %d"), pCONT_set->loop_load_avg);
+    
     }break;
     case FUNC_EVERY_FIVE_SECOND:
 
@@ -160,7 +160,7 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #endif
   #ifdef ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
   #error "ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-  #endif 
+  #endif
 
 
 

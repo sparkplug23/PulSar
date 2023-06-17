@@ -783,7 +783,10 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
       
     // }
 
+    
+    #ifdef USE_MODULE_NETWORK_MQTT
     mqtthandler_state_ifchanged.flags.SendNow = true;
+    #endif // USE_MODULE_NETWORK_MQTT
 
   }
 

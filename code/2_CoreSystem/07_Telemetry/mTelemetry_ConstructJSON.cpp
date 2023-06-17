@@ -258,31 +258,21 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
+
+    /**
+     * @brief Show wrapper stuff
+     * 
+     */
+
     JBI->Add(PM_JSON_CLIENT_NAME, pCONT_set->Settings.mqtt.client_name);
-    // JBI->Level_Start(PM_JSON_PACKETS);
-    //   JBI->Add(PM_JSON_SENTCOUNT,      pCONT_mqtt->pubsub->stats.packets_sent_counter);
-    //   JBI->Add(PM_JSON_SENTPERMINUTE,  pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
-    // JBI->Level_End();
-    // JBI->Level_Start(PM_JSON_CONNECTS);
-    //   JBI->Add(PM_JSON_COUNT,          pCONT_mqtt->pubsub->stats.reconnects_counter);
-    //   JBI->Add(PM_JSON_DOWNSECS,       pCONT_mqtt->pubsub->stats.connection_downtime);
-    //   JBI->Add(PM_JSON_UPSECONDS,      pCONT_mqtt->pubsub->stats.connection_uptime);
-    //   JBI->Add(PM_JSON_BROKERHOSTNAME, pCONT_set->Settings.mqtt.hostname_ctr);
-    // JBI->Level_End();
+
+    JBI->Add("RetrySecs", pCONT_set->Settings.mqtt_retry);
 
     JBI->Level_Start(PM_JSON_REFRESH_RATES);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_set->Settings.sensors.ifchanged_secs);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_set->Settings.sensors.teleperiod_secs);
     JBI->Level_End();
     
-    //make mqtt commands to allow me to tweak and debug 
-    //  = 10;
-    // Settings.sensors.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
-    // Settings.sensors.teleperiod_secs = 120;
-    // Settings.sensors.teleperiod_json_level = JSON_LEVEL_DETAILED; //default
-    // Settings.sensors.flags.mqtt_retain = 1;// = JSON_METHOD_SHORT; //default
-    // Settings.sensors.configperiod_secs = SEC_IN_HOUR;
-
     JBI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
 
 
@@ -293,7 +283,47 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
     #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
 
 
+    /**
+     * @brief Show each instance info
+     * 
+    **/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    JBI->Array_Start("Instance");
+    for(auto& con:pCONT_mqtt->brokers)
+    {
+      
+      JBI->Array_Start();
+        JBI->Add("broker_url", con->broker_url);
+        JBI->Add("port", con->port);
 
+        JBI->Add("connect_count", con->connect_count);
+        JBI->Add("retry_counter", con->retry_counter);
+        JBI->Add("downtime_counter", con->downtime_counter);
+        // JBI->Add("initial_connection_state", con->initial_connection_state);
+        JBI->Add("connected", con->connected);
+        JBI->Add("allowed", con->allowed);
+        JBI->Add("mqtt_tls", con->mqtt_tls);
+
+        JBI->Add("mqtt_client_type", con->client_type);
+
+        JBI->Add("tSaved_LastOutGoingTopic", con->tSaved_LastOutGoingTopic);
+
+        JBI->Add("flag_start_reconnect", con->flag_start_reconnect);
+        JBI->Add("cConnectionAttempts", con->cConnectionAttempts);
+
+        JBI->Add("host_server_type", con->host_server_type);
+
+        #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+        JBI->Add("payload_publish_sent", con->debug_stats.payload_publish_sent);
+        JBI->Add("payload_publish_missed", con->debug_stats.payload_publish_missed);
+        JBI->Add("payload_publish_success_percentage", con->debug_stats.payload_publish_success_percentage);
+        #endif
+      JBI->Array_End();
+
+    }
+    JBI->Array_End();
+    #endif // USE_MODULE_NETWORK_MQTT
+  
   return JBI->End();
 
 }
@@ -692,3 +722,67 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
 
   return JBI->End();
 }
+
+
+#ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_level, bool json_appending)
+{
+
+  JBI->Start();
+
+  char buffer2[100];
+  
+  for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  {
+    JBI->Level_Start_P(pCONT->pModule[ii]->GetModuleFriendlyName());
+
+      JBI->Add("max_time", pCONT->debug_module_time[ii].max_time);
+      JBI->Add("avg_time", pCONT->debug_module_time[ii].avg_time);
+      JBI->Add("max_function_id", pCONT->debug_module_time[ii].max_function_id);
+
+    JBI->Level_End();
+
+
+
+
+  }
+
+
+
+
+
+
+
+  //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
+  //   // if(pCONT->GetClassSizeByID(i)>10000){
+  //   //   JBI->Add("bad",i);
+  //   // }
+
+
+
+  // }
+
+  // /**
+  //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
+  //  * I could also run a "append" id but check its not in it already (easier with vector?)
+  //  * 
+  //  */
+  // char buffer[100];
+
+
+
+  // JBI->Array_Start("ModuleIDs");
+  // for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  // {
+  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
+
+  //   JBI->Add(buffer);
+  // }
+  // JBI->Array_End();
+
+  // JBI->Level_End();
+
+
+  return JBI->End();
+}
+#endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES

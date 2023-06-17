@@ -118,7 +118,7 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-#include "2b_Internal_TaskerSystems/01_SolarLunar/mSolarLunar.h"
+#include "5_Sensors/22_SolarLunar/mSolarLunar.h"
 
 static const uint8_t kDaysInMonth[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
 static const char kMonthNamesEnglish[] PROGMEM = "JanFebMarAprMayJunJulAugSepOctNovDec";
@@ -149,6 +149,16 @@ class mTime :
     #endif
     void parse_JSONCommand(JsonParserObject obj);
 
+
+    void  SystemTime_Update(
+          uint16_t year,
+          uint8_t month,
+          uint8_t day,
+          uint8_t hour,
+          uint8_t minute,
+          uint8_t second,
+          uint16_t minimum_update_seconds = 0 // 0 means force the update
+        );
 
     void  SetUTCTime(
           uint16_t year,
@@ -233,6 +243,16 @@ class mTime :
     }settings;
 
     bool CheckOrStartNTPService();
+
+
+    #ifdef ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+    void SystemTime_NTPUpdate();
+    bool SystemTime_NTPUpdate_GetNTPTime(uint32_t* ntp_time);
+
+
+    #endif // ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
+
+
     void TickRTCVariablesWithUptime();
 
     

@@ -293,30 +293,30 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   // SERIAL_DEBUG.printf("%s %d\r\n","webserver",millis());
   // LOG : WEBSERVER
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  if(pCONT_web->fConsole_active && !pCONT_web->fConsole_history){ //only append values when active, however, this stops history
-    if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
-      // Delimited, zero-terminated buffer of log lines.
-      // Each entry has this format: [index][log data]['\1']
-      if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+  // #ifdef USE_MODULE_NETWORK_WEBSERVER
+  // if(pCONT_web->fConsole_active && !pCONT_web->fConsole_history){ //only append values when active, however, this stops history
+  //   if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
+  //     // Delimited, zero-terminated buffer of log lines.
+  //     // Each entry has this format: [index][log data]['\1']
+  //     if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
       
-      while (pCONT_set->web_log_index == pCONT_set->web_log[0] ||  // If log already holds the next index, remove it
-            strlen(pCONT_set->web_log) + strlen(pCONT_set->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
-      {
-        char* it = pCONT_set->web_log;
-        it++;                                  // Skip web_log_index
-        it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
-        it++;                                  // Skip delimiting "\1"
-        // circle uffer
-        memmove(pCONT_set->web_log, it, WEB_LOG_SIZE -(it-pCONT_set->web_log));  // Move buffer forward to remove oldest log line
-      }
-      // creates line formatted with \1 meaning EOL
-      snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
-      if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+  //     while (pCONT_set->web_log_index == pCONT_set->web_log[0] ||  // If log already holds the next index, remove it
+  //           strlen(pCONT_set->web_log) + strlen(pCONT_set->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
+  //     {
+  //       char* it = pCONT_set->web_log;
+  //       it++;                                  // Skip web_log_index
+  //       it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
+  //       it++;                                  // Skip delimiting "\1"
+  //       // circle uffer
+  //       memmove(pCONT_set->web_log, it, WEB_LOG_SIZE -(it-pCONT_set->web_log));  // Move buffer forward to remove oldest log line
+  //     }
+  //     // creates line formatted with \1 meaning EOL
+  //     snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+  //     if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
-    }
-  }
-  #endif  // USE_MODULE_NETWORK_WEBSERVER
+  //   }
+  // }
+  // #endif  // USE_MODULE_NETWORK_WEBSERVER
   
   // SERIAL_DEBUG.printf("%s %d\r\n","end",millis());
 

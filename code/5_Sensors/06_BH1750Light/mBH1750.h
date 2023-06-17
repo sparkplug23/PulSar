@@ -67,7 +67,7 @@ class mBH1750 :
       uint16_t level = 0;
     } device_data[D_SENSOR_BH1750_MAX_COUNT];
 
-    #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return settings.sensor_count;
@@ -81,7 +81,7 @@ class mBH1750 :
       value->data_f.push_back(device_data[index].illuminance);
       value->sensor_id = index;
     };
-    #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
         
     uint8_t Get_Resolution(uint32_t sensor_index);

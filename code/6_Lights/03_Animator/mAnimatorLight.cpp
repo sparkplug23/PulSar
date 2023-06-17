@@ -67,34 +67,30 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_LOOP: 
       EveryLoop();
 
-
-  //LED settings have been saved, re-init busses
-  //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
-  if (doInitBusses) {
-    doInitBusses = false;
-    DEBUG_PRINTLN(F("Re-init busses."));
-    bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
-    pCONT_iLight->bus_manager->removeAll();
-    uint32_t mem = 0;
-    for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
-      if (pCONT_iLight->busConfigs[i] == nullptr) break;
-      mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
-      if (mem <= MAX_LED_MEMORY) {
-        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
+      //LED settings have been saved, re-init busses
+      //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
+      if (doInitBusses) {
+        doInitBusses = false;
+        DEBUG_PRINTLN(F("Re-init busses."));
+        bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
+        pCONT_iLight->bus_manager->removeAll();
+        uint32_t mem = 0;
+        for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
+          if (pCONT_iLight->busConfigs[i] == nullptr) break;
+          mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
+          if (mem <= MAX_LED_MEMORY) {
+            pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
+          }
+          delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
+        }
+        finalizeInit(); // also loads default ledmap if present
+        if (aligned) makeAutoSegments();
+        else fixInvalidSegments();
+        yield();
+        // serializeConfig();
       }
-      delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
-    }
-    finalizeInit(); // also loads default ledmap if present
-    if (aligned) makeAutoSegments();
-    else fixInvalidSegments();
-    yield();
-    // serializeConfig();
-  }
   
-
-
-    break;    
-    
+    break;        
     case FUNC_BOOT_MESSAGE:
       BootMessage();
     break;
@@ -169,7 +165,8 @@ void mAnimatorLight::BootMessage()
 ********************************************************************************************************************/
 
 // Nothing is needed in "Pre_Init"
-void mAnimatorLight::Pre_Init(void){ 
+void mAnimatorLight::Pre_Init(void)
+{
   
 }
 
@@ -243,7 +240,7 @@ void mAnimatorLight::Init__Palettes()
   ALOG_DBM(PSTR("mPaletteI->init_PresetColourPalettes(); to be made internal to class"));
   #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
   mPaletteI->init_PresetColourPalettes();
-  #endif // ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+  #endif
 
   DEBUG_LINE_HERE;
   
@@ -251,7 +248,6 @@ void mAnimatorLight::Init__Palettes()
   // Default user names for palette
   for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID);ii++){ 
     sprintf(buffer, D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR, ii);
-    // DLI->AddDeviceName(buffer,E M_MODULE_LIGHTS_INTERFACE_ID,ii);
     DLI->AddDeviceName(buffer, GetModuleUniqueID(), ii + mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID);
   }
   for (int ii=0;ii<(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);ii++){ 
@@ -346,17 +342,6 @@ void mAnimatorLight::Init(void){
       //   settings.pins_used++;
       // }
     }
-
-DEBUG_LINE_HERE;
-  
-  
-
-
-
-DEBUG_LINE_HERE;
-  
-  
-
 
     ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
     Init_SegmentWS2812FxStrip();
@@ -591,8 +576,6 @@ void mAnimatorLight::RulesEvent_Set_Power()
   bool get_state = CommandGet_LightPowerState();
 
   AddLog(LOG_LEVEL_TEST, PSTR("CommandGet_LightPowerState() = %d"), get_state);
-
-  
 
   // get state
   ModifyStateNumberIfToggled(&state, CommandGet_LightPowerState());
@@ -1378,8 +1361,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
   for (segment_new &seg : segments) 
   {
     // #ifdef DEBUG_TARGET_ANIMATOR_SEGMENTS
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,_segments[_segment_index_primary].isActive());
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].pixel_range.start,_segments[_segment_index_primary].pixel_range.stop);
+      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].isActive()=%d"),_segment_index_primary,seg.isActive());
+      // AddLog(LOG_LEVEL_DEBUG, PSTR("_segments[%d].istart/stop=%d %d"),_segment_index_primary,_segments[_segment_index_primary].pixel_range.start,_segments[_segment_index_primary].pixel_range.stop);
     // #endif
 
     // reset the segment runtime data if needed, called before isActive to ensure deleted segment's buffers are cleared
@@ -1396,7 +1379,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
       if (seg.grouping == 0) seg.grouping = 1; //sanity check == move this into wherever it gets used (ie struct functions)
     
-      // ALOG_INF(PSTR("seg=%d,rate=%d,%d"),_segment_index_primary, seg.transition.rate_ms, seg.flags.fForceUpdate);
+      ALOG_INF(PSTR("seg=%d,rate=%d,%d"),_segment_index_primary, seg.transition.rate_ms, seg.flags.fForceUpdate);
 
       // if (!seg.freeze) { //only run effect function if not frozen
 
@@ -1432,8 +1415,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
       _virtualSegmentLength = seg.virtualLength();
 
-      // ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, _segments[_segment_index_primary].effect_id, millis()); 
-      // ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
+      ALOG_INF( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
 
       switch(seg.effect_id){
         default:
@@ -2832,7 +2814,7 @@ void mAnimatorLight::EveryLoop()
         /**
          * @brief A Backoff time is needed per animation so the DMA is not overloaded
         **/
-        if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, 10))
+        if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, ANIMATION_UPDATOR_TIME_MINIMUM))
         {
           SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
           flag_animations_needing_updated++; // channels needing updated
@@ -2866,13 +2848,31 @@ void mAnimatorLight::EveryLoop()
     ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
     #endif
 
-    // some buses send asynchronously and this method will return before
-    // all of the data has been sent.
-    // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
-    if(pCONT_iLight->bus_manager)
-    {
-      pCONT_iLight->bus_manager->show();
-    }
+
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+
+      // some buses send asynchronously and this method will return before
+      // all of the data has been sent.
+      // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+      // if(pCONT_iLight->bus_manager)
+      // {
+      //   pCONT_iLight->bus_manager->show();
+      // }
+      
+      pCONT_iLight->neopixel_runner->execute();   
+
+    #else
+
+      // some buses send asynchronously and this method will return before
+      // all of the data has been sent.
+      // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+      if(pCONT_iLight->bus_manager)
+      {
+        pCONT_iLight->bus_manager->show();
+      }
+
+    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 
@@ -3021,9 +3021,7 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
                                               SEGMENT.DataLength(),
                                               pixel, 
                                               SEGMENT.colour_type, 
-                                              // RgbcctColor(
-                                                SEGMENT.GetPixelColor(pixel)
-                                                // )
+                                              SEGMENT.GetPixelColor(pixel)
                                             );
   }
 

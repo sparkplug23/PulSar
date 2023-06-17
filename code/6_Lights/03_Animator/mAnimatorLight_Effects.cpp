@@ -824,7 +824,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
 
   *indexes_counter_p ^= 1;
 
-  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "shared_flasher_parameters = %d/%d/%d"), shared_flasher_parameters_segments.indexes.active,index_1,index_2);
+  AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "counter = %d/%d/%d"), counter,index_1,index_2);
 
   RgbcctColor colour;
 
@@ -6118,7 +6118,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
 
   SEGMENT.animation_has_anim_callback = false; // When no animation callback is needed
           Serial.print("@4");
- pCONT_iLight->ShowInterface();
+//  pCONT_iLight->ShowInterface();
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 

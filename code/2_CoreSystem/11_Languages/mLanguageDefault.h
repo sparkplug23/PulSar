@@ -34,6 +34,10 @@
 // Module names
 #define D_MODULE_CORE_HARDWAREPINS_CTR            "mHardwarePins"
 #define D_MODULE_CORE_HARDWAREPINS_FRIENDLY_CTR   "hardwarepins"
+
+  #define D_MODULE_CORE_SERIAL_UART_CTR           "serialuart"
+  #define D_MODULE_CORE_SERIAL_UART_FRIENDLY_CTR  "serialuart"
+
 #define D_MODULE_CORE_SETTINGS_CTR                "mSettings"
 #define D_MODULE_CORE_SETTINGS_FRIENDLY_CTR       "settings"
 #define D_MODULE_CORE_SUPPORT_CTR                  "mSupport"
@@ -54,15 +58,33 @@
 #define D_MODULE_CORE_UPDATES_CTR            "Updates"
 #define D_MODULE_CORE_UPDATES_FRIENDLY_CTR   "update"
 
-#define D_MODULE_SUBSYSTEM_SOLAR_LUNAR_CTR            "solarlunar"
-#define D_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR   "solarlunar"
+#define D_MODULE_SENSORS_SOLAR_LUNAR_CTR            "solarlunar"
+#define D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR   "solarlunar"
 
 
   
+#define D_MODULE__NETWORK_INTERFACE__CTR "interface_network"
+#define D_MODULE__NETWORK_INTERFACE__FRIENDLY_CTR "interface_network"
+
+
 #define D_MODULE_NETWORK_WIFI_CTR              "mWiFi"
 #define D_MODULE_NETWORK_WIFI_FRIENDLY_CTR              "wifi"
 #define D_MODULE_NETWORK_MQTT_CTR              "mMQTT"
 #define D_MODULE_NETWORK_MQTT_FRIENDLY_CTR              "system"
+
+#define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR              "mMQTT"
+#define D_MODULE_NETWORK_MQTT_MULTIPLE_FRIENDLY_CTR              "system"
+
+#define D_MODULE_NETWORK_MQTT_CELLULAR_CTR              "mMQTT_CELLULAR"
+#define D_MODULE_NETWORK_MQTT_FRIENDLY_CELLULAR_CTR              "mqtt_cellular"
+
+#define D_MODULE__NETWORK_CELLULAR__CTR "Cellular"
+#define D_MODULE__NETWORK_CELLULAR__FRIENDLY_CTR "cellular"
+
+
+
+
+
 //#ifdef USE_MODULE_NETWORK_WEBSERVER
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
@@ -117,8 +139,6 @@
   #define D_MODULE_DRIVERS_GPS_CTR           "GPS"
   #define D_MODULE_DRIVERS_GPS_FRIENDLY_CTR  "gps"
 
-  #define D_MODULE_DRIVERS_SERIAL_UART_CTR           "serialuart"
-  #define D_MODULE_DRIVERS_SERIAL_UART_FRIENDLY_CTR  "serialuart"
 
   #define D_MODULE_DRIVERS_SHELLY_DIMMER_CTR "shellydimmer"
   #define D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "shellydimmer"
@@ -137,6 +157,9 @@
 
   #define D_MODULE_DRIVERS_BUZZER_CTR "mBuzzer"
   #define D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR "buzzer"
+
+  #define D_MODULE__DRIVERS_BUZZER_TONES__CTR "buzzer"
+  #define D_MODULE__DRIVERS_BUZZER_TONES__FRIENDLY_CTR "buzzer"
   
   #define D_MODULE_DRIVERS_RF433_RCSWITCH_CTR "rcswitch"
   #define D_MODULE_DRIVERS_RF433_RCSWITCH_FRIENDLY_CTR "rcswitch"
@@ -148,11 +171,6 @@
   #define D_MODULE_DRIVERS_IRREMOTE_CTR "irremote"
   #define D_MODULE_DRIVERS_IRREMOTE_FRIENDLY_CTR "irremote"
 
-  #define D_MODULE_DRIVERS_FONA_CELLULAR_CTR "mFona_Cellular"
-  #define D_MODULE_DRIVERS_FONA_CELLULAR_FRIENDLY_CTR "fona"
-
-  #define D_MODULE_DRIVERS__CELLULAR_SIM7000__CTR          "CellularSIM7000"
-  #define D_MODULE_DRIVERS__CELLULAR_SIM7000__FRIENDLY_CTR "CellularSIM7000"
 
   #define D_MODULE_DRIVERS__CAMERA_ARDUINO__CTR          "camera_arduino"
   #define D_MODULE_DRIVERS__CAMERA_ARDUINO__FRIENDLY_CTR "camera_arduino"
@@ -160,6 +178,19 @@
   #define D_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR "camera_tas"
   #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__CTR          "camera_mulitclient"
   #define D_MODULE_DRIVERS__CAMERA_MULTICLIENT__FRIENDLY_CTR "camera_multiclient"
+
+  #define D_MODULE_DRIVERS__TINYGSM__CTR          "tinygsm"
+  #define D_MODULE_DRIVERS__TINYGSM__FRIENDLY_CTR "tinygsm"
+
+
+  #define D_MODULE__DRIVERS_MAVLINK_DECODER__CTR          "mavlink"
+  #define D_MODULE__DRIVERS_MAVLINK_DECODER__FRIENDLY_CTR "mavlink"
+
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_telemetry"
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__FRIENDLY_CTR "mavlink_telemetry"
+  
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__CTR "mavlink_telemetry"
+  #define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__FRIENDLY_CTR "mavlink_telemetry"
 
 //#ifdef USE_MODULE_DRIVERS_RF433MHZ
   // DEFINE_PGM_CTR(MSAW_MODULE_CTR              "mSAWMain"
@@ -265,6 +296,10 @@
 #define D_MODULE_SENSORS_MPU9250_CTR "mpu9250"
 #define D_MODULE_SENSORS_MPU9250_FRIENDLY_CTR "mpu9250"
 
+
+#define D_MODULE__SENSORS_BATTERY_MODEM__CTR "battery_modem"
+#define D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "battery_modem"
+
 //#endif
 //#ifdef USE_MODULE_SENSORS_MOISTURE
   #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR              "mMoistureSensor"
@@ -299,6 +334,9 @@
 
   #define D_MODULE_SENSORS__DS18X20_ESP8266_2023__CTR "db18_esp82_2023"
   #define D_MODULE_SENSORS__DS18X20_ESP8266_2023__FRIENDLY_CTR "db18_esp82_2023"
+
+  #define D_MODULE__SENSORS_GPS_MODEM__CTR "gps_modem"
+  #define D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "gps_modem"
 
 //#endif
 //#ifdef USE_MODULE_CONTROLLER_BLINDS
@@ -386,6 +424,14 @@
 
 #define D_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL_CTR "immersion_panel"
 #define D_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL_FRIENDLY_CTR "immersion_panel"
+
+
+#define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_CTR "blackbox"
+#define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_FRIENDLY_CTR "blackbox"
+
+#define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_FRIENDLY_CTR  "controller_mavlink_oled"
+#define D_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED_CTR "controller_mavlink_oled"
+
 
 
 /**
@@ -1100,6 +1146,8 @@
 #define D_GPIO_FUNCTION_DS18X20_CTR       "DS18x20"
 #define D_GPIO_FUNCTION_DS18X20_1_CTR       "DS18x20_1"
 #define D_GPIO_FUNCTION_DS18X20_2_CTR       "DS18x20_2"
+
+#define D_GPIO_FUNCTION_BUZZER_CTR "Buzzer"
 #define D_GPIO_FUNCTION_CHIME_RINGER_CTR  "Chime Ringer"
 #define D_GPIO_FUNCTION_CHIME_INPUT_CTR   "Chime Input"
 #define D_GPIO_FUNCTION_IRSEND_CTR        "IRsend"
@@ -1127,6 +1175,10 @@
 
 #define D_GPIO_FUNCTION_HWSERIAL0_TX_CTR "HWSERIAL0_TX"
 #define D_GPIO_FUNCTION_HWSERIAL0_RX_CTR "HWSERIAL0_RX"
+#define D_GPIO_FUNCTION_HWSERIAL1_TX_CTR "HWSERIAL1_TX"
+#define D_GPIO_FUNCTION_HWSERIAL1_RX_CTR "HWSERIAL1_RX"
+#define D_GPIO_FUNCTION_HWSERIAL2_TX_CTR "HWSERIAL2_TX"
+#define D_GPIO_FUNCTION_HWSERIAL2_RX_CTR "HWSERIAL2_RX"
 
 #define D_GPIO_FUNCTION_GPS_SERIAL0_TX_CTR "GPS Serial0 TX"
 #define D_GPIO_FUNCTION_GPS_SERIAL0_RX_CTR "GPS Serial0 RX"
@@ -1145,6 +1197,11 @@
 #define D_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR  "Fona RI"
 
 
+
+#define D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR "Modem DTR"
+#define D_GPIO_FUNCTION__MODEM_TX__CTR "Modem TX"
+#define D_GPIO_FUNCTION__MODEM_RX__CTR "Modem RX"
+#define D_GPIO_FUNCTION__MODEM_POWER__CTR "Modem PWR"
 
 
 #define D_GPIO_FUNCTION_BUILTIN_LED1_CTR              "Builtin LED 1" // only enabled if available and not being used by another pin
@@ -1387,6 +1444,7 @@
   #define D_LOG_BRIDGE "BRG: "       // Bridge
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_CELLULAR "CEL: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
   #define D_LOG_COMMAND "CMD: "      // Command
   #define D_LOG_DEBUG "DBG: "        // Debug
@@ -1445,6 +1503,7 @@
   #define D_LOG_BRIDGE "BRG: "       // Bridge
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_CELLULAR "CEL: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
   #define D_LOG_COMMAND "CMD: "      // Command
   #define D_LOG_DEBUG "DBG: "        // Debug

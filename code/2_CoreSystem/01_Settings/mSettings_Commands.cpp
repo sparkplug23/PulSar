@@ -32,6 +32,12 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+  if(jtok = obj["MQTT"].getObject()["RetrySecs"])
+  {
+    Settings.mqtt_retry = jtok.getInt();
+  }
+
+
 
   /**
    * Debug options
@@ -330,7 +336,11 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
 #ifdef USE_MODULE_NETWORK_WIFI
    
   if(value == 1){
+    
+#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
     pCONT_wif->EspRestart();
+#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
+
   }else
 
   if(value == 2){
@@ -364,8 +374,9 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
     // delay(5000);
 
 
-
+#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
     pCONT_wif->EspRestart();
+#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
   }
   
   #endif // ifdef USE_MODULE_NETWORK_WIFI

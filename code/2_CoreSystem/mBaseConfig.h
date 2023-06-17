@@ -93,6 +93,7 @@
 // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 // #endif
 
+#define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
 
 /*********************************************************************************************\
@@ -139,21 +140,12 @@
  *  MQTT
 \*********************************************************************************************/
 
-// #ifndef DISABLE_NETWORK
-// #define USE_MODULE_NETWORK_MQTT
+#ifndef DISABLE_NETWORK
+#define USE_MODULE_NETWORK_MQTT
 // #define USE_MODULE_NETWORK_WIFI
-// #endif // DISABLE_NETWORK
+#endif // DISABLE_NETWORK
 
-/**
- * FUTURE MQTT will use desktop mdns name, falling back to static IP
- * */
-
-#ifdef MQTT_HOST
-#warning "CAUTION: Using MQTT_HOST defined in templates, likely to be new MQTT broker"
-#endif
-#ifndef MQTT_HOST
-#define MQTT_HOST                     "192.168.1.65"    // [MqttHost] Defined as either "X.X.X.X" for IP, or "NAME" for MDNS. 
-#endif
+#define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
 // #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED       192,168,1,65   //TEMPORARY FIX, WILL BE REPLACED BY ABOVE PARSED STRING
 #define MQTT_HOST_DISCOVERY
@@ -163,7 +155,7 @@
 #define MDNS_MQTT_HOSTNAME2   "rasbpi.local" 
 #endif // #ifdef USE_NETWORK_MDNS
 
-#define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
+// #define MQTT_PORT                     1884              // [MqttPort] MQTT port (10123 on CloudMQTT)
 #define MQTT_USER                     "DVES_USER"       // [MqttUser] MQTT user
 #define MQTT_PASS                     "DVES_PASS"       // [MqttPassword] MQTT password
 
@@ -387,7 +379,7 @@
 #ifndef WLED_MAX_BUSSES
   #ifdef ESP8266
     #define WLED_MAX_BUSSES 3
-  #else
+  #else // esp32
     #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
       #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
     #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
