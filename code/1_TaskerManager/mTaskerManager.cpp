@@ -347,6 +347,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_LIGHTS_ANIMATOR
     pModule[EM_MODULE_LIGHTS_ANIMATOR_ID] = new mAnimatorLight();
   #endif
+
   // Sensors
   #ifdef USE_MODULE_SENSORS_INTERFACE
     pModule[EM_MODULE_SENSORS_INTERFACE_ID] = new mSensorsInterface();
@@ -369,7 +370,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS_BME
     pModule[EM_MODULE_SENSORS_BME_ID] = new mBME();
   #endif
-
   #ifdef USE_MODULE_SENSORS_ULTRASONICS
     pModule[EM_MODULE_SENSORS_ULTRASONIC_ID] = new mUltraSonicSensor();
   #endif
@@ -424,7 +424,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
     pModule[EM_MODULE_SENSORS__DS18X20__ID] = new mDB18x20_ESP32();
   #endif
-
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
     pModule[EM_MODULE__SENSORS_GPS_SERIAL__ID] = new mDB18x20_ESP32();
   #endif
