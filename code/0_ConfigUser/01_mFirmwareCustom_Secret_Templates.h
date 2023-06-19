@@ -232,7 +232,7 @@
   #define DEVICENAME_CTR          "testbed_shelly25_01"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Shelly 2.5 #01"
   #define DEVICENAME_ROOMHINT_CTR   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -611,7 +611,7 @@
   #define DEVICENAME_CTR          "testbed_4chpro"
   #define DEVICENAME_FRIENDLY_CTR "Sonoff 4CH Pro"
   #define DEVICENAME_ROOMHINT_CTR  "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   
   #define USE_MODULE_CORE_RULES
   
@@ -792,7 +792,7 @@
   #define DEVICENAME_CTR          "testbed_segment_effects"             APPEND_ESP_TYPE_MQTT_STRING
   #define DEVICENAME_FRIENDLY_CTR "Testbed Animation Segment"   APPEND_ESP_TYPE_NAME_STRING
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
   #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
@@ -999,7 +999,7 @@
   #define DEVICENAME_CTR          "testbed_segment_multipin"             APPEND_ESP_TYPE_MQTT_STRING
   #define DEVICENAME_FRIENDLY_CTR "Testbed Animation Segment"   APPEND_ESP_TYPE_NAME_STRING
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   // #define DISABLE_NETWORK
 
@@ -1195,7 +1195,7 @@
   #define DEVICENAME_CTR            "testbed_oled_sh1106"
   #define DEVICENAME_FRIENDLY_CTR   "TestBed SH1106"
   #define DEVICENAME_ROOMHINT_CTR   "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
@@ -1461,7 +1461,7 @@
   #define DEVICENAME_CTR          "hvac_template_hvac_portable"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Oil Radiator with Energy Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION

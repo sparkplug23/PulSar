@@ -24,7 +24,6 @@
 const char* mRCSwitch::PM_MODULE_DRIVERS_RF433_RCSWITCH_CTR = D_MODULE_DRIVERS_RF433_RCSWITCH_CTR;
 const char* mRCSwitch::PM_MODULE_DRIVERS_RF433_RCSWITCH_FRIENDLY_CTR = D_MODULE_DRIVERS_RF433_RCSWITCH_FRIENDLY_CTR;
 
-
 int8_t mRCSwitch::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){

@@ -9,6 +9,9 @@ const char* mWebCamera::PM_MODULE_DRIVERS__CAMERA_TASMOTA__FRIENDLY_CTR = D_MODU
  * @SECTION: Interface
 **********************************************************************************************/
 
+ESP8266WebServer *Webserver;
+
+
 int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
 {
 

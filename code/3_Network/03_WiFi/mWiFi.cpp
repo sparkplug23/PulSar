@@ -16,17 +16,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case FUNC_INIT:
-
-      #ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-
-
-
-      #else
-        WifiConnect();
-      #endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-
+      WifiConnect();
     break;
     case FUNC_LOOP: 
     
@@ -43,17 +33,12 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       // #ifdef ESP32
       // #endif
 
-
-// return 0;
-#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
       if (pCONT_set->Settings.flag_network.network_wifi) 
       {
         WifiCheck(pCONT_set->wifi_state_flag);
         pCONT_set->wifi_state_flag = WIFI_RESTART;
       }
             
-#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
       //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_WIFI "WifiCheck(pCONT_set->wifi_state_flag=%d)"),pCONT_set->wifi_state_flag);
 
     break;
@@ -67,31 +52,14 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 //       }
 // #endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
-#ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
+// #ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
       ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
 
-#endif
+// #endif
 
     break;
     case FUNC_EVERY_FIVE_MINUTE:
-
-#ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-      
-    WiFi.begin(STA_SSID1, STA_PASS1);
-
-
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-
-    Serial.println("");
-    Serial.println("WiFi connected.");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
-#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
       // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
     break;
     case FUNC_WIFI_CONNECTED:
@@ -100,13 +68,13 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
         StartMdns();
       #endif  // USE_NETWORK_MDNS
 
-      #ifdef ENABLE_DEVFEATURE_MQTT_USING_WIFI
+      #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
       ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
       #ifdef USE_MODULE_NETWORK_MQTT
       mqtt_client = new WiFiClient();
       pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
       #endif // USE_MODULE_NETWORK_MQTT
-      #endif // ENABLE_DEVFEATURE_MQTT_USING_WIFI
+      #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
       
     break;
   }
@@ -964,10 +932,10 @@ void mWiFi::WifiCheck(uint8_t param)
 
       } else {
 
-        DEBUG_LINE_HERE;
+        // DEBUG_LINE_HERE;
 
         if (connection.scan_state) { 
-        DEBUG_LINE_HERE;
+        // DEBUG_LINE_HERE;
           #ifdef ENABLE_LOG_LEVEL_INFO
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_WIFI D_JSON_COMMAND_NVALUE),"scan_state",connection.scan_state);
           #endif// ENABLE_LOG_LEVEL_INFO
@@ -980,7 +948,7 @@ void mWiFi::WifiCheck(uint8_t param)
     #endif// ENABLE_LOG_LEVEL_INFO
           connection.counter = WIFI_CHECK_SEC;
 // return ;
-        DEBUG_LINE_HERE;
+        // DEBUG_LINE_HERE;
           WifiCheckIp();
         }
 
@@ -1024,10 +992,10 @@ void mWiFi::WifiCheck(uint8_t param)
 
           if (is_connected) 
           {
-        DEBUG_LINE_HERE;
+        // DEBUG_LINE_HERE;
     //#endif /// LWIP_IPV6=1
     
-        DEBUG_PRINTF( " if ((WL_CONNECTED == WiFi.status())\n\r");
+        // DEBUG_PRINTF( " if ((WL_CONNECTED == WiFi.status())\n\r");
 
         //resting state, connected and healthy
 

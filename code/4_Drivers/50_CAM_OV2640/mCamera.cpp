@@ -1168,11 +1168,11 @@ void mCameraOV2640::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     //, &mqtthandler_scene_teleperiod, &mqtthandler_debug_teleperiod
   };
 
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids, 
-    sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
-    mqtt_handler_id
-  );
+  // pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_CAMERA_OV2640_ID,
+  //   mqtthandler_list_ptr, mqtthandler_list_ids, 
+  //   sizeof(mqtthandler_list_ids)/sizeof(mqtthandler_list_ids[0]),
+  //   mqtt_handler_id
+  // );
 
 }
 

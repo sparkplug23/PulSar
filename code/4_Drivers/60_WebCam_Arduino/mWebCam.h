@@ -1,13 +1,19 @@
-#ifndef _DRIVERS__CAMERA_ARDUINO_H
-#define _DRIVERS__CAMERA_ARDUINO_H
+#ifndef _DRIVERS__CAMERA_ARDUINO_H1
+#define _DRIVERS__CAMERA_ARDUINO_H1
 
-#define D_UNIQUE_MODULE_DRIVERS__CAMERA_ARDUINO__ID ((4*1000)+51)
+#define D_UNIQUE_MODULE_DRIVERS__CAMERA_ARDUINO__ID ((4*1000)+60)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
 
 #include "1_TaskerManager/mTaskerInterface.h"
+
+
+#include "esp_camera.h"
+#define CAMERA_MODEL_AI_THINKER // Has PSRAM
+#include "camera_pins.h"
+
 
 class mWebCamera :
   public mTaskerInterface
@@ -33,6 +39,12 @@ class mWebCamera :
     void EveryLoop();
     void Pre_Init();
     void Init();
+    void EverySecond();
+    void parse_JSONCommand(JsonParserObject obj);
+    
+    // void startCameraServer();
+    void setupLedFlash(int pin);
+
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);

@@ -60,6 +60,18 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define SETTINGS_HOLDER           1//                (random(1,1000))
 #endif
 
+/**
+ * @brief Depreciation code
+ **/
+#define DEPRECIATION_FIRMWARE_ERROR_MESSAGE "Depreciated Error: Must remove before compile should proceed"
+
+// #define DEPRECIATION_WARN(warning_firmware_version_minor, error_firmware_version_minor) \                          
+//                     if(FIRMWARE_VERSION_MINOR > 114)   \
+//                       #error "DEPRECIATION_ERROR"        \
+//                     if(FIRMWARE_VERSION_MINOR > 114)   \
+//                       #error "DEPRECIATION_ERROR"        \
+
+
 // #define ENABLE_BUG_TRACING
 
 // BUG TRACING

@@ -180,8 +180,12 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 }
 
 
+
 uint8_t mTaskerManager::Instance_Init(){
-  
+
+// I should add a check at the end of init that checks if all modules have been set, if not, immediately fallback to recovery
+
+
   // Core
   #ifdef USE_MODULE_CORE_HARDWAREPINS
   pModule[EM_MODULE_CORE_HARDWAREPINS_ID] = new mHardwarePins();
@@ -288,6 +292,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pModule[EM_MODULE_DRIVERS_FILESYSTEM_ID] = new mFileSystem();
+  #endif
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+    pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID] = new mBuzzer();
   #endif
   #ifdef USE_MODULE_DRIVERS_BUZZER
     pModule[EM_MODULE_DRIVERS_BUZZER_ID] = new mBuzzer();

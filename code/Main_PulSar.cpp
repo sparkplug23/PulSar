@@ -315,7 +315,7 @@ DEBUG_LINE_HERE;
     // }
     // #endif
   #else // ESP32
-    AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
+    // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
   #endif // ESP32
 
 /********************************************************************************************

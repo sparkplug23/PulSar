@@ -1,6 +1,6 @@
 #include "mBuzzer.h"
 
-#ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
+#ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
 
 const char* mBuzzer::PM_MODULE_DRIVERS_BUZZER_CTR = D_MODULE_DRIVERS_BUZZER_CTR;
 const char* mBuzzer::PM_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR = D_MODULE_DRIVERS_BUZZER_FRIENDLY_CTR;
@@ -352,78 +352,69 @@ uint8_t mBuzzer::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
  * MQTT
 *******************************************************************************************************************/
 
-void mBuzzer::MQTTHandler_Init(){
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mBuzzer::MQTTHandler_Init()
+{
 
   struct handler<mBuzzer>* ptr;
 
   ptr = &mqtthandler_settings_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
+  ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 60; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Settings;
 
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Sensor;
-
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBuzzer::ConstructJSON_Sensor;
-  
-} //end "MQTTHandler_Init"
-
-
-void mBuzzer::MQTTHandler_Set_RefreshAll(){
-
-  mqtthandler_settings_teleperiod.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
 } //end "MQTTHandler_Init"
 
 
-void mBuzzer::MQTTHandler_Set_DefaultPeriodRate(){
-
-  mqtthandler_settings_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-
-} //end "MQTTHandler_Set_DefaultPeriodRate"
-
-
-void mBuzzer::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mBuzzer>* list_ptr[] = {
-    &mqtthandler_settings_teleperiod,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  pCONT_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_DRIVERS_BUZZER_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
-
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mBuzzer::MQTTHandler_Set_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
 }
 
-////////////////////// END OF MQTT /////////////////////////
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mBuzzer::MQTTHandler_Set_DefaultPeriodRate()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
+}
+
+/**
+ * @brief MQTTHandler_Sender
+ * */
+void mBuzzer::MQTTHandler_Sender(uint8_t id)
+{
+  for(auto& handle:mqtthandler_list){
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE__DRIVERS_BUZZER_BASIC__ID, handle, id);
+  }
+}
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif
