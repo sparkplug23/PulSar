@@ -48,7 +48,7 @@ class Decounter{
         {
             counter = std::numeric_limits<T>::max(); // Not active at max value
             //ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("counter")), counter);
-        return false;
+            return false;
         }else{
             //ALOG_ERR( PSTR("Unknown State") );
             return false;
@@ -66,10 +66,27 @@ class Decounter{
     {
         counter = std::numeric_limits<T>::max();
     }
+    
+    bool IsRunning()
+    {
+        return counter != std::numeric_limits<T>::max();
+    }
+
+    // Easy way to check it is about to reset and likely to trigger with once
+    bool IsLastTick()
+    {
+        return counter == 0; // To be reset on next "UpdateTick" call
+    }
 
     T Value()
     {
         return counter;
+    }
+
+    // When disabled, show as zero for visual user data (e.g. mqtt output)
+    T ValueWithDisabledAsZero()
+    {
+        return counter != std::numeric_limits<T>::max() ? counter : 0;
     }
 
 };

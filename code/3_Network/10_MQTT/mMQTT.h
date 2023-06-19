@@ -531,6 +531,12 @@ class mMQTT :
             #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
             Serial.printf("last sent %d\n\r", millis()-con->tSaved_LastOutGoingTopic);
             #endif
+          
+            #else
+          
+              handler_ptr->flags.SendNow = false;      // Only to be reset if it sent at least once
+              handler_ptr->tSavedLastSent = millis();  // Only to be reset if it sent at least once
+          
             #endif // ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
 
           }

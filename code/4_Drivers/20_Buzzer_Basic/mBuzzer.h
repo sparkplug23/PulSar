@@ -5,7 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
+#ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
 
 class mBuzzer :
   public mTaskerInterface
@@ -73,12 +73,20 @@ class mBuzzer :
     struct handler<mBuzzer> mqtthandler_settings_teleperiod;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
     struct handler<mBuzzer> mqtthandler_sensor_ifchanged;
-    struct handler<mBuzzer> mqtthandler_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers example
     const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
     //with extra handlers example
+
+    
+    struct handler<mBuzzer>* mqtthandler_list[2] = {
+      &mqtthandler_settings_teleperiod,
+      &mqtthandler_sensor_ifchanged
+    };
+
+
+
     #endif // USE_MODULE_NETWORK_MQTT
 
 

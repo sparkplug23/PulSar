@@ -26,12 +26,15 @@ class NeoPixelShowTask
 {
 private:
   CommitParams _commit_params;
-  TaskHandle_t _commit_task;
+  // TaskHandle_t _commit_task;
 
 public:
+  TaskHandle_t _commit_task;
+
   NeoPixelShowTask() : _commit_task(NULL){}
   void begin(CommitHandler handler, uint8_t core_id);
   void execute();
+  bool IsBusy();
 };
 
 #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32

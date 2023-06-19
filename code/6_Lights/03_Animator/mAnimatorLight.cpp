@@ -1352,6 +1352,19 @@ void mAnimatorLight::resetSegments1()
 
 void mAnimatorLight::SubTask_Segments_Animation()
 {
+
+  #ifdef ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
+
+
+  // pCONT_iLight->neopixel_runner->IsBusy();
+
+  vTaskSuspend(pCONT_iLight->neopixel_runner->_commit_task);
+
+  
+
+  #endif // ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
+
+
   
   // Need to also have a general backoff timer so the outputs are never hit faster than neopixelbus can update
   if(!mTime::TimeReached(&tSaved_MinimumAnimateRunTime, MINIMUM_SHOW_BACKOFF_PERIOD_MS)){ return; } // Note: Override must still abide by this backoff
@@ -2035,6 +2048,18 @@ void mAnimatorLight::SubTask_Segments_Animation()
     _segment_index_primary++;
   
   } // END for
+
+  
+  #ifdef ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
+
+
+  // pCONT_iLight->neopixel_runner->IsBusy();
+
+  vTaskResume(pCONT_iLight->neopixel_runner->_commit_task);
+
+  
+
+  #endif // ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
 
 } // SubTask_Effects_PhaseOut
 

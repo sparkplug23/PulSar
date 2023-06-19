@@ -67,7 +67,7 @@
   #define DEVICENAME_CTR          "h801_bedroom_underdesk"
   #define DEVICENAME_FRIENDLY_CTR "H801 UnderDesk"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
 
@@ -128,7 +128,7 @@
   #define DEVICENAME_CTR          "hvac_bedroom_dryer"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Bedroom Hairdryer"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -296,7 +296,7 @@
   #define DEVICENAME_CTR          "hvac_oil_radiator"
   #define DEVICENAME_FRIENDLY_CTR "HVAC Oil Radiator with Energy Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -440,7 +440,7 @@
   #define DEVICENAME_CTR          "bedroom_controller_buttons_01"
   #define DEVICENAME_FRIENDLY_CTR "Bedside Controller for Room 01"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -508,7 +508,7 @@
   #define DEVICENAME_CTR          "desksensor"
   #define DEVICENAME_FRIENDLY_CTR "Desk Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   // I need to add a mqtt send limit to telemetry to prevent race conditions in OH. Add as option in configm with 0 meaning none and then MS values going up
   // mqtt.h will need to check if original is from telemetry type, then only permit sending when last was greater than config amount. 
@@ -958,7 +958,7 @@
   #define DEVICENAME_CTR          "portable_bath_sensor"
   #define DEVICENAME_FRIENDLY_CTR "Portable Bath Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Roaming"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1052,7 +1052,7 @@
   #define DEVICENAME_CTR          "h801_bedroom_wardrobe"
   #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -1254,7 +1254,7 @@
   #define DEVICENAME_CTR          "h801_mbedroom_wardrobe_uplight"
   #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1512,7 +1512,7 @@
   #define DEVICENAME_CTR          "stand_light"
   #define DEVICENAME_FRIENDLY_CTR "Stand Light"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1750,7 +1750,7 @@
   #define DEVICENAME_CTR          "bedroom_bedlight"
   #define DEVICENAME_FRIENDLY_CTR "Bedroom Bedlight H801"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -1829,7 +1829,7 @@
   #define DEVICENAME_CTR            "rgb_computer_display_u25"//"rgbdell"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell"
   #define DEVICENAME_ROOMHINT_CTR   "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   
 
   //#define FORCE_TEMPLATE_LOADING
@@ -1937,7 +1937,7 @@
   #define DEVICENAME_CTR            "rgb_computer_display_p32"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
   #define DEVICENAME_ROOMHINT_CTR   "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   
   // #define USE_BUILD_TYPE_LIGHTING
   // #define USE_MODULE_LIGHTS_INTERFACE
@@ -2056,7 +2056,7 @@
   #define DEVICENAME_CTR          "rgbdisplay_bedroom_outsidetemp"
   #define DEVICENAME_FRIENDLY_CTR "7-Segment White Display"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -2152,7 +2152,7 @@
   #define DEVICENAME_CTR          "rgbclock_bedroom_wall"
   #define DEVICENAME_FRIENDLY_CTR "RGB Clock 01"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -2228,7 +2228,7 @@
   #define DEVICENAME_CTR          "ambilight_spareroom"
   #define DEVICENAME_FRIENDLY_CTR "Ambilight Spareroom"
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -2287,7 +2287,7 @@
   #define DEVICENAME_CTR          "h801_tvroom_uplights"//"h801_spareroom_wardrobe"
   #define DEVICENAME_FRIENDLY_CTR "H801 Spareroom Wardrobe"
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
@@ -2348,7 +2348,7 @@
   #define DEVICENAME_CTR            "rgbfireplace"
   #define DEVICENAME_FRIENDLY_CTR   "RGB Fire Place"
   #define DEVICENAME_ROOMHINT_CTR   "Livingroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
   
   #define DISABLE_WEBSERVER
 

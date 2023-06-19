@@ -1940,8 +1940,9 @@ const char* SwitchMode_GetName_by_ID(uint8_t id, char* buffer, uint8_t buflen);
 #endif // LOG_BUFFER_SIZE
 char log_data[LOG_BUFFER_SIZE];                       // Logging
 char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
-// #define RESPONSE_MESSAGE_BUFFER_SIZE 100
-// char response_msg[RESPONSE_MESSAGE_BUFFER_SIZE];
+
+#define RESPONSE_MESSAGE_BUFFER_SIZE 100
+char response_msg[RESPONSE_MESSAGE_BUFFER_SIZE] = {0};
 
 
 const char* GetTelePeriodJsonLevelCtr(char* buffer);

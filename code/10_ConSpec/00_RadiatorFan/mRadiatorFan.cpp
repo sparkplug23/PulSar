@@ -113,13 +113,13 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appendin
       JsonBuilderI->Level_Start("InternalSensors");
         for(int sensor_id=0;sensor_id<3;sensor_id++)
         { 
-          // JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
-          JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_new[sensor_id].address_id,buffer,sizeof(buffer)));         
-
-
-          
-            JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_new[sensor_id].reading.val);
-          JsonBuilderI->Level_End();  
+          if(pCONT_db18->sensor_vector.size())
+          {
+            // JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
+            JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
+              JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
+            JsonBuilderI->Level_End();  
+          }
         }
       JsonBuilderI->Level_End();  
     JBI->Level_End();
@@ -204,12 +204,12 @@ void mRadiatorFan::MQTTHandler_Set_RefreshAll()
  * */
 void mRadiatorFan::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**

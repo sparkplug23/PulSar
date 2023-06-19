@@ -1445,6 +1445,7 @@
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CONFIG "CFG: "       // Settings
   #define D_LOG_CELLULAR "CEL: "
+  #define D_LOG_CAMERA "CAM: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
   #define D_LOG_COMMAND "CMD: "      // Command
   #define D_LOG_DEBUG "DBG: "        // Debug
@@ -1503,6 +1504,7 @@
   #define D_LOG_BRIDGE "BRG: "       // Bridge
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CONFIG "CFG: "       // Settings
+  #define D_LOG_CAMERA "CAM: "
   #define D_LOG_CELLULAR "CEL: "
   #define D_LOG_POINTERCONFIG "PCFG: "       // Settings
   #define D_LOG_COMMAND "CMD: "      // Command
@@ -1798,7 +1800,7 @@
 #define D_JSON_WIFICONFIG_STATE "WiFiConfig State"
 #define D_JSON_YESTERDAY "Yesterday"
 #define D_JSON_ZERO_POINT_CALIBRATION "Zero Point Calibration"
-#define D_JSON_ALTITUDE "altitude"
+#define D_JSON_ALTITUDE "Altitude"
 #define D_JSON_AGE "age"
 #define D_JSON_ANY "Any"
 #define D_JSON_ACTIVE_POWER "ActivePower"
@@ -2065,6 +2067,7 @@
 #define D_JSON_STATE "State"
 #define D_JSON_POWER "Power"
 #define D_JSON_FANSPEED "FanSpeed"
+#define D_JSON_FANTIMER "FanTimer"
 #define D_JSON_FANSPEED_MANUAL "FanSpeed_Manual"
 #define D_JSON_FANPWM "FanPWM"
 #define D_JSON_POWERONSTATE "PowerOnState"

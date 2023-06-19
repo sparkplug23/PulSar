@@ -41,7 +41,7 @@
   #define DEVICENAME_CTR          "xmas_livingroom_tree_water_level"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Tree Water"
   #define DEVICENAME_ROOMHINT_CTR "Living Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -119,7 +119,7 @@
   #define DEVICENAME_CTR          "devboard_string_segment_01"
   #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
   #define DEVICENAME_ROOMHINT_CTR "Testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   #define ENABLE_DEVFEATURE_SHOW_UPTIME_SECONDS
 
@@ -741,7 +741,7 @@
   #define DEVICENAME_CTR          "xmas_diningroom_tree_01"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Dining Room 2022"
   #define DEVICENAME_ROOMHINT_CTR "Dining Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -821,7 +821,7 @@
   #define DEVICENAME_CTR          "xmas_outsidetree_tester_blending"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree Tester Blending"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   //#define DISABLE_NETWORK
   #define DISABLE_SERIAL
@@ -909,7 +909,7 @@
   #define DEVICENAME_CTR          "xmas_diningroom_tree_01"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Dining Room 2022"
   #define DEVICENAME_ROOMHINT_CTR "Dining Room"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -989,7 +989,7 @@
   #define DEVICENAME_CTR          "xmas_outsidetree"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree Wifi Enabled"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   //#define DISABLE_NETWORK
 
@@ -1097,7 +1097,7 @@
   #define DEVICENAME_CTR          "xmas_outsidetree"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Outside Tree 03 Segment"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   // #define DISABLE_NETWORK
 
@@ -1300,7 +1300,7 @@
   #define DEVICENAME_CTR          "xmas_test_tree_01"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Test Tree"
   #define DEVICENAME_ROOMHINT_CTR "xmas"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   //#define DISABLE_NETWORK
 
@@ -1408,7 +1408,7 @@
   #define DEVICENAME_CTR          "xmas_bedroom_string"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Bedroom String"
   #define DEVICENAME_ROOMHINT_CTR "xmas"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   // #define DISABLE_NETWORK
 
@@ -1671,7 +1671,7 @@
   #define DEVICENAME_CTR          "testbed_rgb_node2"
   #define DEVICENAME_FRIENDLY_CTR "Testbed RGB Node 2"
   #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   // #define DISABLE_NETWORK
 
@@ -1873,7 +1873,7 @@
   #define DEVICENAME_CTR          "xmas_utility_tree"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Utility Tree"
   #define DEVICENAME_ROOMHINT_CTR "xmas"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   //#define DISABLE_NETWORK
 
@@ -1975,7 +1975,7 @@
   #define DEVICENAME_CTR          "xmas_utility_candle"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Utility Candle"
   #define DEVICENAME_ROOMHINT_CTR "xmas"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   //#define DISABLE_NETWORK
 
@@ -2079,7 +2079,7 @@
   #define DEVICENAME_CTR          "xmas_hallwaytree"
   #define DEVICENAME_FRIENDLY_CTR "XMAS Hallway Tree"
   #define DEVICENAME_ROOMHINT_CTR "Outside"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   192,168,1,70
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
   //#define DISABLE_NETWORK
 

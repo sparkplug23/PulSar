@@ -607,9 +607,9 @@ enum MODULE_IDS{
   #include "4_Drivers/04_Relays_v2/mRelays.h"
   #define pCONT_mry                                 static_cast<mRelays*>(pCONT->pModule[EM_MODULE_DRIVERS_RELAY_ID])
 #endif
-#ifdef USE_MODULE_DRIVERS_BUZZER_BASIC
-  #include "4_Drivers/05_Buzzer/mBuzzer.h"
-  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_BUZZER_ID])
+#ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+  #include "4_Drivers/20_Buzzer_Basic/mBuzzer.h"
+  #define pCONT_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_BASIC__ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
   #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
@@ -669,7 +669,7 @@ enum MODULE_IDS{
 
 
 #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
-  #include "4_Drivers/60_WebCam_Arduino/camera_index.h"
+  #include "4_Drivers/60_WebCam_Arduino/mWebCam.h"
   #define pCONT_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA

@@ -1,6 +1,6 @@
 #include "mOLED_SIM7000.h"
 
-#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
+#ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN_NOT
 
 void mOLED_SIM7000::parse_JSONCommand(JsonParserObject obj){
 

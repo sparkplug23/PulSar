@@ -34,8 +34,6 @@ const char kBmpTypes[] PROGMEM = "BMP180|BMP280|BME280|BME680";
 
 int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
 {
-  
-  // if (!I2cEnabled(XI2C_10)) { return false; }
 
   switch(function){
     case FUNC_PRE_INIT:
@@ -45,6 +43,7 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
       Init();
     break;
   }
+
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
@@ -56,11 +55,7 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     
     break;   
     case FUNC_EVERY_SECOND:
-
-        BmpRead();
-
-        Serial.println(bmp_sensors[0].temperature);
-
+      BmpRead();
     break;
     case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
       ShowSensor_AddLog();
@@ -96,13 +91,9 @@ void mBME::Pre_Init(){
 
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
-
   
   uint8_t bmp_addresses[] = { BMP_ADDR1, BMP_ADDR2 };
   
-  DEBUG_LINE_HERE;
-
-
   int bmp_sensor_size = BMP_MAX_SENSORS * sizeof(bmp_sensors_t);
   if (!bmp_sensors) {
     bmp_sensors = (bmp_sensors_t*)malloc(bmp_sensor_size);
@@ -110,10 +101,10 @@ void mBME::Pre_Init(){
   if (!bmp_sensors) { return; }
   memset(bmp_sensors, 0, bmp_sensor_size);  // Init defaults to 0
 
-  DEBUG_LINE_HERE;
+
   for (uint8_t i = 0; i < BMP_MAX_SENSORS; i++) 
   {
-  DEBUG_LINE_HERE;
+    
     // if (!pCONT_sup->I2cSetDevice(bmp_addresses[i])) 
     // {
     //   DEBUG_LINE_HERE;
@@ -132,6 +123,11 @@ void mBME::Pre_Init(){
       bmp_sensors[bmp_count].bmp_type = bmp_type;
       bmp_sensors[bmp_count].bmp_model = 0;
 
+      
+      ALOG_INF(PSTR("i2c_address %d"), bmp_sensors[bmp_count].i2c_address);
+      ALOG_INF(PSTR("bmp_type %d"), bmp_sensors[bmp_count].bmp_type);
+
+
       bool success = false;
       switch (bmp_type) {
         case BMP180_CHIPID:
@@ -139,11 +135,11 @@ void mBME::Pre_Init(){
           success = Bmp180Calibration(bmp_count);
           break;
         case BME280_CHIPID:
-          ALOG_INF(PSTR("bmp_type BME280_CHIPID"));
+          ALOG_INF(PSTR("bmp_type BME280_CHIPID 2"));
           bmp_sensors[bmp_count].bmp_model++;  // 2  
           // No break intentional
         case BMP280_CHIPID:
-          ALOG_INF(PSTR("bmp_type BMP280_CHIPID"));
+          ALOG_INF(PSTR("bmp_type BMP280_CHIPID 1"));
           bmp_sensors[bmp_count].bmp_model++;  // 1
           success = Bmx280Calibrate(bmp_count);
           break;
@@ -156,17 +152,13 @@ void mBME::Pre_Init(){
         #endif // ENABLE_DEVFEATURE_BME680
       }
       if (success) {
-        pCONT_sup->GetTextIndexed(bmp_sensors[bmp_count].bmp_name, sizeof(bmp_sensors[bmp_count].bmp_name), bmp_sensors[bmp_count].bmp_model, kBmpTypes);
+        pCONT_sup->GetTextIndexed_P(bmp_sensors[bmp_count].bmp_name, sizeof(bmp_sensors[bmp_count].bmp_name), bmp_sensors[bmp_count].bmp_model, kBmpTypes);
         pCONT_sup->I2cSetActiveFound(bmp_sensors[bmp_count].i2c_address, bmp_sensors[bmp_count].bmp_name);
         bmp_count++;
         settings.fSensorCount++;
       }
     }
   }
-
-
-
-
 
   #ifdef ESP32
   AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("getErrorText =\"%s\""), pCONT_sup->wire->getErrorText(pCONT_sup->wire->lastError()));
@@ -207,7 +199,7 @@ void mBME::BmpRead(void)
         break;
       #endif // ENABLE_DEVFEATURE_BME680
     }
-    sensor_old[bmp_idx].ischangedtLast = millis();
+    bmp_sensors[bmp_idx].ischangedtLast = millis();
   }
 }
 
@@ -567,15 +559,15 @@ void mBME::BMP_EnterSleep(void)
 
 uint8_t mBME::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
-    JsonBuilderI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
-  return JsonBuilderI->End();
+  JBI->Start();
+    JBI->Add(D_JSON_SENSOR_COUNT, settings.fSensorCount);
+  return JBI->End();
 
 }
 
 uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
-  JsonBuilderI->Start();
+  JBI->Start();
 
   char buffer[50];
 
@@ -585,26 +577,26 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       (json_level >  JSON_LEVEL_IFCHANGED) || 
       (json_level == JSON_LEVEL_SHORT)
     ){
-      JsonBuilderI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
-        JsonBuilderI->Add(D_JSON_TEMPERATURE, bmp_sensors[sensor_id].temperature);
-        JsonBuilderI->Add(D_JSON_HUMIDITY, bmp_sensors[sensor_id].humidity);
-        JsonBuilderI->Add(D_JSON_PRESSURE, bmp_sensors[sensor_id].pressure);
-        JsonBuilderI->Add(D_JSON_ALTITUDE, bmp_sensors[sensor_id].altitude);
+      JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));   
+        JBI->Add(D_JSON_TEMPERATURE, bmp_sensors[sensor_id].temperature);
+        JBI->Add(D_JSON_HUMIDITY, bmp_sensors[sensor_id].humidity);
+        JBI->Add(D_JSON_PRESSURE, bmp_sensors[sensor_id].pressure);
+        JBI->Add(D_JSON_ALTITUDE, bmp_sensors[sensor_id].altitude);
         #ifdef ENABLE_DEVFEATURE_BME680
-        JsonBuilderI->Add(D_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
+        JBI->Add(D_JSON_GAS, bmp_sensors[sensor_id].bmp_gas_resistance);
          #endif // ENABLE_DEVFEATURE_BME680
         if(json_level >=  JSON_LEVEL_DETAILED)
         {          
-          JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
-            JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
-            JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-bmp_sensors[sensor_id].ischangedtLast)/1000));
-          JsonBuilderI->Level_End();  
+          JBI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+            JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
+            JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-bmp_sensors[sensor_id].ischangedtLast)/1000));
+          JBI->Level_End();  
         }
-      JsonBuilderI->Level_End();
+      JBI->Level_End();
     }
   }
   
-  return JsonBuilderI->End();
+  return JBI->End();
 
 }
 
@@ -630,6 +622,7 @@ void mBME::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mBME::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = millis();
@@ -640,6 +633,7 @@ void mBME::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBME::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = millis();
@@ -650,6 +644,7 @@ void mBME::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBME::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } //end "MQTTHandler_Init"
 
