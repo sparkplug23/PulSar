@@ -64,6 +64,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * @brief Depreciation code
  **/
 #define DEPRECIATION_FIRMWARE_ERROR_MESSAGE "Depreciated Error: Must remove before compile should proceed"
+// https://en.cppreference.com/w/cpp/language/attributes/deprecated
 
 // #define DEPRECIATION_WARN(warning_firmware_version_minor, error_firmware_version_minor) \                          
 //                     if(FIRMWARE_VERSION_MINOR > 114)   \

@@ -175,7 +175,22 @@ void NeoPixelShowTask::execute()
   // Trigger the pinned function to run at configured priority and wait for maximum time for it to finish
   xTaskNotifyGive(_commit_task);
   while (xSemaphoreTake(_commit_params.semaphore, portMAX_DELAY) != pdTRUE);
+
+
+
+
+
 }
+
+
+bool NeoPixelShowTask::IsBusy()
+{
+  if(eTaskGetState(_commit_task) != 3)
+    Serial.println("_task " + (String)eTaskGetState(_commit_task)); 
+
+}
+
+
 
 #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 

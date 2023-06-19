@@ -26,13 +26,11 @@
 #ifdef USE_MODULE_SENSORS_BME
 
 #ifdef ENABLE_DEVFEATURE_BME680
-
 #include <bme68x.h>
-    // #include "bme68x_defs.h"
+// #include "bme68x_defs.h"
 #endif
 
 #include <Wire.h>
-// #include "5_Sensors/BME/internal/Adafruit_BME280.h"
 
 /*********************************************************************************************\
  * BMP085, BMP180, BMP280, BME280, BME680 - Pressure, Temperature, Humidity (BME280/BME680) and gas (BME680)
@@ -59,13 +57,7 @@
  * I2C Address: 0x76 or 0x77
 \*********************************************************************************************/
 
-// #define XSNS_09              9
-// #define XI2C_10              10  // See I2CDEVICES.md
-
-// #ifdef USE_BME680
 #define USE_BME68X
-// #endif
-
 
 #define BMP_ADDR1            0x76
 #define BMP_ADDR2            0x77
@@ -84,8 +76,6 @@
 #define BMP_MAX_SENSORS      2
 
 #define BMP_MAX_SENSORS      2
-
-// const char kBmpTypes[] PROGMEM = "BMP180|BMP280|BME280|BME680";
 
 class Adafruit_BME280;
 
@@ -132,31 +122,6 @@ class mBME :
     #define MAX_SENSORS 2
     void EveryLoop();
     void ShowSensor_AddLog();
-
-    struct SENSORDATA{
-      float temperature = 0;
-      float humidity = 0;
-      float pressure = 0;
-      float altitude = 0;
-      /**
-       * if change exceeds this, it is a significant change
-       * */
-      float temperature_threshold_value;
-      uint8_t isvalid=false;
-      uint8_t ischanged=false;
-      uint8_t ischanged_over_threshold=false;
-      uint32_t ischangedtLast = millis();
-      float heatIndex;
-      float dewPoint;
-      float cr;
-      uint32_t tSavedMeasureClimate;
-      uint8_t fWithinLimit;
-      unsigned long tWithinLimit;
-      uint8_t sReadSensor;
-      Adafruit_BME280* bme = nullptr;
-      uint8_t i2c_address = 0x00;
-    }sensor_old[MAX_SENSORS];
-
         
     typedef struct {
       
@@ -179,9 +144,6 @@ class mBME :
       uint8_t fWithinLimit;
       unsigned long tWithinLimit;
       uint8_t sReadSensor;
-
-      // Adafruit_BME280* bme = nullptr;
-
       uint8_t i2c_address = 0x00;
       char bmp_name[7];       // Sensor name - "BMPXXX"
       uint8_t bmp_type;
@@ -190,9 +152,6 @@ class mBME :
       uint8_t bme680_state;
       float bmp_gas_resistance;
     #endif  // USE_BME68X
-      // float bmp_temperature;
-      // float bmp_pressure;
-      // float bmp_humidity;
     } bmp_sensors_t;
 
     uint8_t bmp_count = 0;
@@ -384,14 +343,7 @@ class mBME :
     struct handler<mBME> mqtthandler_sensor_ifchanged;
     struct handler<mBME> mqtthandler_sensor_teleperiod;
  
-    struct handler<mBME>* mqtthandler_list[3] = {
-      &mqtthandler_settings_teleperiod,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
-    // No specialised payload therefore use system default instead of enum
-    const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
+    std::vector<struct handler<mBME>*> mqtthandler_list;
     
     #endif // USE_MODULE_NETWORK_MQTT
 

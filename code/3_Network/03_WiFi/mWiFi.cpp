@@ -95,8 +95,6 @@ void mWiFi::init(void){
 }
 
 
-#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
 // checked 
 void mWiFi::WifiConfig(uint8_t type)
 {
@@ -612,13 +610,6 @@ bool mWiFi::WifiCheckIpConnected(){
 
   // return false;
 
-#ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-  return !pCONT_set->global_state.wifi_down;
-
-
-#else
-
 
 
 
@@ -632,7 +623,6 @@ bool mWiFi::WifiCheckIpConnected(){
     DEBUG_LINE_HERE;
   return false;
 
-#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
 }
 
@@ -1408,6 +1398,5 @@ const char* mWiFi::GetWiFiConfigTypeCtr(void){
 //#endif
 
 
-#endif // ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
 #endif // USE_MODULE_NETWORK_WIFI

@@ -1800,7 +1800,7 @@
 #define D_JSON_WIFICONFIG_STATE "WiFiConfig State"
 #define D_JSON_YESTERDAY "Yesterday"
 #define D_JSON_ZERO_POINT_CALIBRATION "Zero Point Calibration"
-#define D_JSON_ALTITUDE "altitude"
+#define D_JSON_ALTITUDE "Altitude"
 #define D_JSON_AGE "age"
 #define D_JSON_ANY "Any"
 #define D_JSON_ACTIVE_POWER "ActivePower"

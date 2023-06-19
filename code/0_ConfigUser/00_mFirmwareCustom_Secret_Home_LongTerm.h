@@ -124,7 +124,7 @@ LivingRoom
   - 3 optional sockets for the corners
   - sensor = pir inside, bme..... ultrasonic, outside pir
 **/
-#define DEVICE_LIVINGROOMSENSOR
+// #define DEVICE_LIVINGROOMSENSOR
 // #define DEVICE_RGBFIREPLACE
 // #define DEVICE_DEFAULT_SONOFF_BASIC_LAMP1
 // #define DEVICE_DEFAULT_SONOFF_BASIC_LAMP2
@@ -2069,10 +2069,10 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Livingroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_CORE_RULES
      
@@ -5351,12 +5351,13 @@ Bathroom
       #ifdef USE_MODULE_SENSORS_MOTION
       "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
       #endif
-      // #ifdef USE_MODULE_SENSORS_DOOR
-      // "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
-      // "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      #ifdef USE_MODULE_SENSORS_DOOR
+      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      #else
       "\"18\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR "\","
       "\"19\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR "\","
-      // #endif
+      #endif
       #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  

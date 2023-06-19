@@ -26,7 +26,7 @@
 /**
  * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
  * */
-// #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+#define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 // #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
@@ -1036,7 +1036,7 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
-    multipin should only be tested in lighting branch, now to remove all blocking code in wifi etc
+    // multipin should only be tested in lighting branch, now to remove all blocking code in wifi etc
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
@@ -1121,6 +1121,7 @@
     #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
     #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+    #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
     
 
     
