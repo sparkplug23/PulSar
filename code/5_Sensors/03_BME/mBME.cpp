@@ -34,8 +34,6 @@ const char kBmpTypes[] PROGMEM = "BMP180|BMP280|BME280|BME680";
 
 int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
 {
-  
-  // if (!I2cEnabled(XI2C_10)) { return false; }
 
   switch(function){
     case FUNC_PRE_INIT:
@@ -45,6 +43,7 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
       Init();
     break;
   }
+
 
   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
@@ -57,9 +56,9 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     break;   
     case FUNC_EVERY_SECOND:
 
-        BmpRead();
+      BmpRead();
 
-        Serial.println(bmp_sensors[0].temperature);
+      Serial.println(bmp_sensors[0].temperature);
 
     break;
     case FUNC_SENSOR_SHOW_LATEST_LOGGED_ID:
@@ -96,13 +95,9 @@ void mBME::Pre_Init(){
 
   settings.fEnableSensor = false;
   settings.fSensorCount = 0;
-
   
   uint8_t bmp_addresses[] = { BMP_ADDR1, BMP_ADDR2 };
   
-  DEBUG_LINE_HERE;
-
-
   int bmp_sensor_size = BMP_MAX_SENSORS * sizeof(bmp_sensors_t);
   if (!bmp_sensors) {
     bmp_sensors = (bmp_sensors_t*)malloc(bmp_sensor_size);
@@ -110,10 +105,10 @@ void mBME::Pre_Init(){
   if (!bmp_sensors) { return; }
   memset(bmp_sensors, 0, bmp_sensor_size);  // Init defaults to 0
 
-  DEBUG_LINE_HERE;
+
   for (uint8_t i = 0; i < BMP_MAX_SENSORS; i++) 
   {
-  DEBUG_LINE_HERE;
+    
     // if (!pCONT_sup->I2cSetDevice(bmp_addresses[i])) 
     // {
     //   DEBUG_LINE_HERE;
@@ -132,6 +127,11 @@ void mBME::Pre_Init(){
       bmp_sensors[bmp_count].bmp_type = bmp_type;
       bmp_sensors[bmp_count].bmp_model = 0;
 
+      
+      ALOG_INF(PSTR("i2c_address %d"), bmp_sensors[bmp_count].i2c_address);
+      ALOG_INF(PSTR("bmp_type %d"), bmp_sensors[bmp_count].bmp_type);
+
+
       bool success = false;
       switch (bmp_type) {
         case BMP180_CHIPID:
@@ -139,11 +139,11 @@ void mBME::Pre_Init(){
           success = Bmp180Calibration(bmp_count);
           break;
         case BME280_CHIPID:
-          ALOG_INF(PSTR("bmp_type BME280_CHIPID"));
+          ALOG_INF(PSTR("bmp_type BME280_CHIPID 2"));
           bmp_sensors[bmp_count].bmp_model++;  // 2  
           // No break intentional
         case BMP280_CHIPID:
-          ALOG_INF(PSTR("bmp_type BMP280_CHIPID"));
+          ALOG_INF(PSTR("bmp_type BMP280_CHIPID 1"));
           bmp_sensors[bmp_count].bmp_model++;  // 1
           success = Bmx280Calibrate(bmp_count);
           break;
@@ -156,7 +156,7 @@ void mBME::Pre_Init(){
         #endif // ENABLE_DEVFEATURE_BME680
       }
       if (success) {
-        pCONT_sup->GetTextIndexed(bmp_sensors[bmp_count].bmp_name, sizeof(bmp_sensors[bmp_count].bmp_name), bmp_sensors[bmp_count].bmp_model, kBmpTypes);
+        pCONT_sup->GetTextIndexed_P(bmp_sensors[bmp_count].bmp_name, sizeof(bmp_sensors[bmp_count].bmp_name), bmp_sensors[bmp_count].bmp_model, kBmpTypes);
         pCONT_sup->I2cSetActiveFound(bmp_sensors[bmp_count].i2c_address, bmp_sensors[bmp_count].bmp_name);
         bmp_count++;
         settings.fSensorCount++;
