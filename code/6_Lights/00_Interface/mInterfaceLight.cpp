@@ -87,7 +87,7 @@ if(!neopixel_runner->flag_block_show)
 void mInterfaceLight::ShowInterface()
 {
 
-  if(pCONT_iLight->bus_manager){ pCONT_iLight->bus_manager->show(); }
+  if(bus_manager){ bus_manager->show(); }
         
 }
 
@@ -607,6 +607,39 @@ void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
 }
 
 
+void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
+{
+
+  const uint8_t defDataPins[] = {15,13,12,14,4};
+  const uint16_t defCounts[] = {STRIP_SIZE_MAX};
+  const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
+  const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
+
+  DEBUG_PRINTF("defDataPins %d, defCounts %d, defNumBusses %d, defNumCounts %d \n\r", defDataPins[0], defCounts[0], defNumBusses, defNumCounts);
+
+  uint16_t prevLen = 0;
+  for (uint8_t i = 0; i < defNumBusses && i < WLED_MAX_BUSSES; i++) 
+  {
+    uint8_t defPin[] = {defDataPins[i]};
+    uint16_t start = prevLen;
+    uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
+    prevLen += count;
+
+
+    BusConfig defCfg = BusConfig(BUSTYPE_ANALOG_4CH, defPin, start, count);
+    if(bus_manager->add(defCfg) == -1) 
+    {
+      ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
+      break;
+    }else{
+      ALOG_DBG(PSTR("bus_manager->add(defCfg) "));
+    }
+  }
+
+}
+
+
+
 /**
  * @brief Testing that each object passed into here is a new busconfig
  * 
@@ -690,6 +723,15 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     {
       ColourOrder = GetColourOrder_FromName(jtok.getStr());
     }    
+    /**
+     * @brief Possible breaking change, or maybe a fix. Right now just use the length of rgbcct colour to set the colourtype, but later parse the values to set the exact type (rgbw,ww/wc, white only etc)
+     * 
+     */
+    // uint8_t colour_byte_length = strlen(jtok.getStr());
+    // if(colour_byte_length == 3)
+    // {
+//cant do, no segment index as its bus related, needs to happen elsewhere
+    // }
   }
 
   uint8_t bus_index = bus_count; // next bus space 
@@ -980,8 +1022,47 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
 }
 #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
+#ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
+uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool json_appending)
+{
 
+  JBI->Start();
 
+  // for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
+  // {
+  //   JBI->Level_Start_F("Bus%d", bus_i);
+
+  //     JBI->Add("getLength", bus_manager->busses[bus_i]->getLength());
+
+  //     COLOUR_ORDER_T colour_order = bus_manager->busses[bus_i]->getColorOrder();
+  //     JBI->Array_Start("ColourOrder");
+  //       JBI->Add(colour_order.red);
+  //       JBI->Add(colour_order.green);
+  //       JBI->Add(colour_order.blue);
+  //       JBI->Add(colour_order.white_cold);
+  //       JBI->Add(colour_order.white_warm);
+  //     JBI->Array_End();
+
+  //     JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
+
+  //     uint8_t pins[5] = {0};
+  //     uint8_t pin_count = 0;
+  //     // pin_count = bus_manager->busses[bus_i]->getPins(pins);
+  //     // JBI->Array_Start("getPins");
+  //     // JBI->Add(pin_count);
+  //     // for(uint8_t ii=0;ii<5;ii++)//pin_count;ii++)
+  //     // {
+  //     //   JBI->Add(pins[ii]);
+  //     // }
+  //     // JBI->Array_End();
+
+  //   JBI->Level_End();
+  // }
+
+  return JBI->End();
+
+}
+#endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
 
 
 /******************************************************************************************************************
@@ -997,7 +1078,6 @@ void mInterfaceLight::MQTTHandler_Init()
   struct handler<mInterfaceLight>* ptr;  
 
   ptr = &mqtthandler__settings__teleperiod;
-  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -1006,9 +1086,9 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler__state__ifchanged;
-  ptr->handler_id = MQTT_HANDLER_MODULE__STATE__TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -1017,10 +1097,10 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_State;
+  mqtthandler_list.push_back(ptr);
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
   ptr = &mqtthandler__debug_module_config__teleperiod;
-  ptr->handler_id = MQTT_HANDLER_MODULE__DEBUG_MODULE_CONFIG__TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -1029,6 +1109,21 @@ void mInterfaceLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug_Module_Config;
+  mqtthandler_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
+
+  
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
+  ptr = &mqtthandler__debug_bus_config__teleperiod;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR;
+  ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug__BusConfig;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
 
@@ -1063,7 +1158,7 @@ void mInterfaceLight::MQTTHandler_Set_DefaultPeriodRate()
 void mInterfaceLight::MQTTHandler_Sender(uint8_t id)
 {    
   for(auto& handle:mqtthandler_list){
-    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_INTERFACE_ID, handle, id);
+    // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_INTERFACE_ID, handle, id);
   }
 }
   

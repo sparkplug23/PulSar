@@ -2,6 +2,148 @@
 
 
 
+
+
+/******************************************************************************************************************************************************************************
+********************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+*** USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS   ***************************************************************************************************************************************************************************
+**  @note:     **************************************************************************************************************************************************************************
+********************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+
+// #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+
+
+//   /**
+//    * Palettes 
+//    * */
+//   // uint8_t palette_options_ids[30] = 
+//   // {
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_01_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_02_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_03_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_04_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_05_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_06_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_07_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_08_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_09_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_10_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_11_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_12_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_13_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_14_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_15_ID,
+//   //   mPalette::PALETTELIST_STATIC_CHRISTMAS_16_ID,
+//   //   mPalette::PALETTELIST_STATIC_WINTER_ID,
+//   //   mPalette::PALETTELIST_STATIC_AUTUMN_ID,
+//   //   mPalette::PALETTELIST_STATIC_AUTUMN_RED_ID,
+//   //   mPalette::PALETTELIST_STATIC_FLOWER_SWEATPEAS_01_ID,
+//   //   mPalette::PALETTELIST_STATIC_FLOWER_SWEATPEAS_02_ID,
+//   //   mPalette::PALETTELIST_STATIC_HOLLOWEEN_OGP_ID,
+//   //   mPalette::PALETTELIST_STATIC_HOLLOWEEN_OP_ID,
+//   //   mPalette::PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID,
+//   //   mPalette::PALETTELIST_STATIC_PINK_PURPLE_01_ID,
+//   //   mPalette::PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY_ID,
+//   //   /**
+//   //    * Gradients applied across the output
+//   //    * */
+//   //   mPalette::PALETTELIST_STATIC_RAINBOW_ID,
+//   //   mPalette::PALETTELIST_STATIC_RAINBOW_INVERTED_ID,
+//   //   mPalette::PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE_ID,
+//   //   mPalette::PALETTELIST_STATIC_GRADIENT_FIRE_01_ID,
+//   // };
+
+//   /**
+//    * skewed brightness options
+//    * */
+//   uint8_t brightness_options_ids[10] = //as percentage
+//   {
+//     0,
+//     5,
+//     10,
+//     25,
+//     50,
+//     60,
+//     70,
+//     80,
+//     90,
+//     100
+//   };
+
+//   /**
+//    * Controller effects, limit to the ones most likely to be used
+//    * */
+//   uint8_t effects_options_ids[4] =
+//   {
+//     EFFECTS_FUNCTION_STATIC_PALETTE_ID,
+//     EFFECTS_FUNCTION_SEQUENTIAL_ID, //sequence after, so it takes the static pallette and moves it
+//     EFFECTS_FUNCTION_SLOW_GLOW_ID,
+//     EFFECTS_FUNCTION_STEPPING_PALETTE_ID,
+//   };
+
+//   /**
+//    * This will translate into rate/time_ms depending on select effects above, probably just mapping them as percentage scales
+//    * */
+//   uint8_t intensity_options_ids[7] = //as percentage
+//   {
+//     0,
+//     5,
+//     10,
+//     25,
+//     50,
+//     75,
+//     100
+//   };
+
+  
+// void CommandSet_Physical_UserInput_Buttons();
+// void PhysicalController_Convert_IDs_to_Internal_Parameters();
+
+// #ifdef ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+// void Physical_UserInput_Init();
+// void Physical_UserInput_Load();
+// void Physical_UserInput_Save();
+// #endif // ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
+
+
+// #define EEPROM_SIZE 12
+// #define USER_INPUT_BUTTON_1_LEFT 1
+// #define USER_INPUT_BUTTON_1_RIGHT 0
+// #define USER_INPUT_BUTTON_2_LEFT 3
+// #define USER_INPUT_BUTTON_2_RIGHT 2
+// #define USER_INPUT_BUTTON_3_LEFT 5
+// #define USER_INPUT_BUTTON_3_RIGHT 4
+// #define USER_INPUT_BUTTON_4_LEFT 7
+// #define USER_INPUT_BUTTON_4_RIGHT 6
+
+// /**
+//  * This will be saved and loaded from eeprom
+//  * */
+// struct USER_INPUT_SAVED_IN_EEPROM
+// { 
+//   struct ACTIVE_OPTION{
+//     uint8_t palette_id = 0;
+//     uint8_t brightness_id = 0;
+//     uint8_t effects_id = 0;
+//     uint8_t intensity_id = 0;
+//     uint8_t loaded_from_eeprom = 0; // only set when loaded succesfully
+//   }selected;
+
+// }user_input;
+
+
+// #endif // USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+    
 // /***
 
 

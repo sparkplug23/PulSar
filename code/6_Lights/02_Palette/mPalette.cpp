@@ -1309,6 +1309,53 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
 
   // }
 
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+   * 
+  ***************************************************************/
+  // if(
+  //   (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+  // ){  
+
+  //   uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID;
+  //   uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+
+  //   const HtmlColorPair* colorPair = HtmlColorNames::Pair(adjusted_id);
+  //   PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
+  //   RgbcctColor colour = (HtmlColor)colorPair->Color;
+  //   memcpy_P(buffer, searchName, sizeof(char)*strlen_P(searchName)+1);
+
+
+
+  //   // char buff[] = "lightyellow";
+    
+  //   // uint8_t buffSize = sizeof(buff);
+
+  //   // HtmlColor colour;
+  //   // colour.Parse<HtmlColorNames>(buff, sizeof(buff));
+    
+  //   // char name[50] = {0};
+  //   // for (uint8_t indexName = 0; indexName < HtmlColorNames::Count(); indexName++)
+  //   // {
+  //   //   const HtmlColorPair* colorPair = HtmlColorNames::Pair(indexName);
+  //   //   PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
+  //   //   RgbColor rgb = (HtmlColor)colorPair->Color;
+  //   //   ALOG_INF(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), indexName, searchName, colorPair->Color, rgb.R, rgb.G, rgb.B);
+  //   // }
+    
+  //   //     Serial.printf("ColourHTML=%s", colour.ToString<HtmlColorNames>(buff, buffSize));
+
+
+  //   // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "Segment Count %d "), segments.size());
+
+
+
+  //   ALOG_DBM(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), adjusted_id, searchName, colorPair->Color, colour.R, colour.G, colour.B);
+   
+  // }
+
   /**************************************************************
    * 
    * Final check, palette id was given as string number
@@ -1929,7 +1976,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     uint8_t adjusted_id = palette_id - PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
-    if(adjusted_id < pCONT_lAni->segments[segIdx].rgbcctcolors.size())
+    if(adjusted_id < RGBCCTCOLOURS_SIZE)
     {
       return pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
     }
@@ -1988,7 +2035,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     // else //standard WLED method
     // {
       
-      // if (SEGMENT.palette.id == 0 && mcol < 3) return SEGCOLOR(mcol); //WS2812FX default
+      // if (SEGMENT.palette.id == 0 && mcol < 3) return SEGCOLOR_U32(mcol); //WS2812FX default
       if(palette_id == 0 && _pixel_position < 3)
       {        
         ALOG_ERR(PSTR("PHASED OUT! Not sure it is still needed?"));

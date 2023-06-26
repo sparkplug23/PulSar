@@ -360,7 +360,7 @@ struct RgbcctColor
 
 
   // Using rgbcct partially, for RGB, RGBW, RGBWW, RGBCCT etc with the unused channel turned off
-  uint8_t  _subtype = LIGHT_TYPE__RGBCCT__ID;
+  uint8_t  _subtype = COLOUR_TYPE__RGBCCT__ID;
 
   
   // are RGB and CT linked, i.e. if we set CT then RGB channels are off
@@ -370,6 +370,15 @@ struct RgbcctColor
   uint16_t _cct = CCT_MIN_DEFAULT;  // 153..500, default to 153 (cold white)
   uint16_t _cct_min_range = CCT_MIN_DEFAULT;   // the minimum CT rendered range
   uint16_t _cct_max_range = CCT_MAX_DEFAULT;   // the maximum CT rendered range
+
+    uint16_t get_CTRangeMin(void)
+    {
+      return _cct_min_range;
+    }
+    uint16_t get_CTRangeMax(void)
+    {
+      return _cct_max_range;
+    }
 
       
   /***
@@ -420,33 +429,33 @@ struct RgbcctColor
 
     switch (_subtype) {
       // Use RGB brightness for all channels
-      case LIGHT_TYPE__SINGLE__ID:
+      case COLOUR_TYPE__SINGLE__ID:
         R = 255;//_briRGB;
         G = 255;//_briRGB;
         B = 255;//_briRGB;
         WC = 255;//_briRGB;
         WW = 255;//_briRGB;
         break;
-      case LIGHT_TYPE__COLDWARM__ID:
+      case COLOUR_TYPE__COLDWARM__ID:
         R = 0;
         G = 0;
         B = 0;
         WC = colour_out.WC;
         WW = colour_out.WW;
         break;
-      // case LIGHT_TYPE__RGBCW__ID:
+      // case COLOUR_TYPE__RGBCW__ID:
       default:
-      case LIGHT_TYPE__RGBCCT__ID:      
+      case COLOUR_TYPE__RGBCCT__ID:      
         R = colour_out.R;
         G = colour_out.G;
         B = colour_out.B;
         WC = colour_out.WC;
         WW = colour_out.WW;
-        // Serial.printf(PSTR("LIGHT_TYPE__RGBCCT__ID [%d,%d,%d,%d,%d]\n\r"), R, G, B, W1, W2);
+        // Serial.printf(PSTR("COLOUR_TYPE__RGBCCT__ID [%d,%d,%d,%d,%d]\n\r"), R, G, B, W1, W2);
   
       break;
-      case LIGHT_TYPE__RGBW__ID:  //white   "WHITE" as rgbW should be generic to any white
-        // Serial.println("LIGHT_TYPE__RGBW__ID");
+      case COLOUR_TYPE__RGBW__ID:  //white   "WHITE" as rgbW should be generic to any white
+        // Serial.println("COLOUR_TYPE__RGBW__ID");
 
         WC = 255;//briCCT;   // Since I am saving in full colour, these should be 100%: The getters later will add the brightness if a flag is set to use it
         WW = 255;//briCCT;
@@ -461,7 +470,7 @@ struct RgbcctColor
  * CW and WW, ie signel channel white should be handled here?
  * 
  */
-      case LIGHT_TYPE__RGBCW__ID: //cold white?
+      case COLOUR_TYPE__RGBCW__ID: //cold white?
         WC = 255;//briCCT;
         WW = 255;//briCCT;
         R = colour_out.R;
@@ -470,7 +479,7 @@ struct RgbcctColor
       break;
 
 
-      case LIGHT_TYPE__RGB__ID:
+      case COLOUR_TYPE__RGB__ID:
         WC = 0;
         WW = 0;
         R = colour_out.R;
@@ -505,17 +514,17 @@ struct RgbcctColor
 
 
 
-    enum LightSubType{ 
-        // LIGHT_TYPE__NONE__ID=0, 
-        LIGHT_TYPE__SINGLE__ID, // likely never used for me, remove
-        LIGHT_TYPE__COLDWARM__ID,  //CCT Only
-        LIGHT_TYPE__RGB__ID,   
-        LIGHT_TYPE__RGBW__ID, 
-        LIGHT_TYPE__RGBCCT__ID, // CW/WW 
+    enum ColourType{ 
+        // COLOUR_TYPE__NONE__ID=0, 
+        COLOUR_TYPE__SINGLE__ID, // likely never used for me, remove
+        COLOUR_TYPE__COLDWARM__ID,  //CCT Only
+        COLOUR_TYPE__RGB__ID,   
+        COLOUR_TYPE__RGBW__ID, 
+        COLOUR_TYPE__RGBCCT__ID, // CW/WW 
         
         // Previous methods that remember colour order, probably not needed or at least cct assume default of RGBWC
-        LIGHT_TYPE__RGBWC__ID, 
-        LIGHT_TYPE__RGBCW__ID
+        COLOUR_TYPE__RGBWC__ID, 
+        COLOUR_TYPE__RGBCW__ID
     };
 
     enum LightColorModes {
@@ -604,17 +613,17 @@ struct RgbcctColor
     uint8_t maxbri = (_briRGB >= _briCCT) ? _briRGB : _briCCT;
 
     switch (_subtype) {
-      case LIGHT_TYPE__COLDWARM__ID:
+      case COLOUR_TYPE__COLDWARM__ID:
         _color_mode = LIGHT_MODE_CCT;
         break;
-      case LIGHT_TYPE__SINGLE__ID:
-      case LIGHT_TYPE__RGB__ID:
+      case COLOUR_TYPE__SINGLE__ID:
+      case COLOUR_TYPE__RGB__ID:
       default:
         _color_mode = LIGHT_MODE_RGB;
         break;
-      case LIGHT_TYPE__RGBW__ID:
-      case LIGHT_TYPE__RGBCW__ID:
-      case LIGHT_TYPE__RGBCCT__ID:
+      case COLOUR_TYPE__RGBW__ID:
+      case COLOUR_TYPE__RGBCW__ID:
+      case COLOUR_TYPE__RGBCCT__ID:
         _color_mode = cm;
         break;
     }
@@ -845,6 +854,7 @@ void setSat255(uint8_t sat_new);
   ************************************************************************************************************************************/
 
   void setCCTRange(uint16_t cct_min_range, uint16_t cct_max_range) {
+    
     _cct_min_range = cct_min_range;
     _cct_max_range = cct_max_range;
   }
@@ -876,7 +886,7 @@ void setSat255(uint8_t sat_new);
       * ct = 500 = 2000K = Warm = CCWW = 00FF
       */
     // don't set CT if not supported
-    if ((LIGHT_TYPE__COLDWARM__ID != _subtype) && (LIGHT_TYPE__RGBW__ID > _subtype)) {
+    if ((COLOUR_TYPE__COLDWARM__ID != _subtype) && (COLOUR_TYPE__RGBW__ID > _subtype)) {
       return;
     }
     setCCT(new_cct);
@@ -888,7 +898,9 @@ void setSat255(uint8_t sat_new);
   void setCCT(uint16_t cct) 
   {
     
-Serial.printf("cct=%d\n\r",cct);
+Serial.printf("_cct_min_range=%d\n\r",_cct_min_range);
+Serial.printf("cct_max_range=%d\n\r",_cct_max_range);
+Serial.printf("cctA=%d\n\r",cct);
 
     if (0 == cct) {
       // disable cct mode
@@ -913,7 +925,7 @@ Serial.printf("cct=%d\n\r",cct);
 
   uint16_t getCTifEnabled(){
     // don't calculate CT for unsupported devices
-    if ((LIGHT_TYPE__COLDWARM__ID != _subtype) && (LIGHT_TYPE__RGBCW__ID != _subtype)) {
+    if ((COLOUR_TYPE__COLDWARM__ID != _subtype) && (COLOUR_TYPE__RGBCW__ID != _subtype)) {
       return 0;
     }
     return (getColorMode() & LIGHT_MODE_CCT) ? getCCT() : 0;

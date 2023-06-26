@@ -255,7 +255,7 @@ class BusDigital : public Bus {
     }
 
   private:
-    COLOUR_ORDER_T _colorOrder = {0};//COL_ORDER_GRB;
+    COLOUR_ORDER_T _colorOrder = {COLOUR_ORDER_INIT_DISABLED};
     uint8_t _pins[2] = {255, 255};
     uint8_t _iType = 0; //I_NONE;
     uint8_t _skip = 0;
@@ -284,6 +284,12 @@ class BusPwm : public Bus {
     {
       cleanup();
     }
+
+    void setColorOrder(COLOUR_ORDER_T colorOrder);
+    COLOUR_ORDER_T getColorOrder() 
+    {
+      return _colorOrder;
+    }
       
     byte allocateLedc(byte channels);
     void deallocateLedc(byte pos, byte channels);
@@ -296,6 +302,8 @@ class BusPwm : public Bus {
     uint8_t _ledcStart = 255;
     #endif
     uint8_t ledcAlloc[2] = {0x00, 0x00}; //16 LEDC channels
+
+    COLOUR_ORDER_T _colorOrder = {COLOUR_ORDER_INIT_DISABLED};
 
     void deallocatePins();
 };

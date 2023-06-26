@@ -224,7 +224,6 @@ byte BusPwm::allocateLedc(byte channels)
   }
   return 255; //not enough consecutive free LEDC channels
 }
-#endif
 
 void BusPwm::deallocateLedc(byte pos, byte channels)
 {
@@ -236,10 +235,13 @@ void BusPwm::deallocateLedc(byte pos, byte channels)
   }
 }
 
+#endif
+
+
 BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) 
 {
 
-  DEBUG_PRINTF("BusPwm bc.type %d\n\r", bc.type);
+  ALOG_DBM(PSTR("BusPwm bc.type %d"), bc.type);
 
   _valid = false;
   if (!IS_BUSTYPE_PWM(bc.type)) return;
@@ -259,140 +261,48 @@ BusPwm::BusPwm(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
   {
     uint8_t currentPin = bc.pins[i];
     _pins[i] = currentPin;
+    ALOG_HGL(PSTR("_pins[%d]=>%d"),i,_pins[i]);
     #ifdef ESP8266
     pinMode(_pins[i], OUTPUT);
     #else
-    ledcSetup(_ledcStart + i, WLED_PWM_FREQ, 10);//8); //10bit
+    ledcSetup(_ledcStart + i, WLED_PWM_FREQ, 10);
     ledcAttachPin(_pins[i], _ledcStart + i);
     #endif
-
-    bitSet(pCONT_set->pwm_inverted, i); //tmp fix
-
-
   }
   reversed = bc.reversed;
   _valid = true;
 }
 
+
 void BusPwm::setPixelColor(uint16_t pix, RgbcctColor c) 
 {
-
-  // Serial.printf("void BusPwm::setPixelColor(uint16_t %d, RgbcctColor c)\n\r",pix);
-
-  if (pix != 0 || !_valid) 
-  {
-    // Serial.println("RETURN");
-    return; //only react to first pixel
+  if (pix != 0 || !_valid){
+    return;
   }
-    // Serial.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOT RETURN");
-  // if (_type != TYPE_ANALOG_3CH) c = autoWhiteCalc(c);
-  // if (_cct >= 1900 && (_type == TYPE_ANALOG_3CH || _type == TYPE_ANALOG_4CH)) {
-  //   // c = colorBalanceFromKelvin(_cct, c); //color correction from CCT
-  // }
-  // uint8_t cct = 0; //0 - full warm white, 255 - full cold white
-
+  // ALOG_INF(PSTR("BusPwm::setPixelColor seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
   output_colour = c;
-
-  // ALOG_INF(PSTR(" pix %d. BusPwm::setPixelColor %d [%d,%d,%d,%d,%d]\n\r"), pix, _ledcStart, c.R, c.G, c.B, c.W1, c.W2);
-  // [0], colour10bit[1], colour10bit[2], colour10bit[3], colour10bit[4]);
-
-  // uint16_t r = c.R;
-  // uint16_t g = c.G;
-  // uint16_t b = c.B;
-  // uint16_t ww= c.WW;
-  // uint16_t cw = c.WC;
-
-  // /**
-  //  * @brief Calculate white value as maximum of channels etc
-  //  **/
-  // uint16_t w = c.W1;
-  // if (_type != TYPE_ANALOG_3CH)
-  // {
-  //   // c = autoWhiteCalc(c);
-  // }
-
-
-
-  // // _data10[0] = mapvalue(c.R,  0, 255, 0, 1023);
-  // // _data10[1] = mapvalue(c.G,  0, 255, 0, 1023);
-  // // _data10[2] = mapvalue(c.B,  0, 255, 0, 1023);
-  // // _data10[3] = mapvalue(c.WC, 0, 255, 0, 1023);
-  // // _data10[4] = mapvalue(c.WW, 0, 255, 0, 1023);
-
-
-
-
-  //       // // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION "Cur_Col%d 10 bits %d"), i, cur_col_10[i]);
-  //       // cur_col = cur_col_10[i + pCONT_iLight->settings.pwm_offset]; //leak chance
-        
-  //       // cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0;   
-                
-  //       // pwm_value = bitRead(pCONT_set->pwm_inverted, i) ? pCONT_set->Settings.pwm_range - cur_col : cur_col;
-
-
-  // switch (_type) {
-  //   case TYPE_ANALOG_1CH: //one channel (white), relies on auto white calculation
-  //     _data[0] = w;
-  //     break;
-  //   case TYPE_ANALOG_2CH: //warm white + cold white
-  //     _data[1] = cw;
-  //     _data[0] = ww;
-  //     break;
-  //   case TYPE_ANALOG_5CH: //RGB + warm white + cold white
-  //     _data[4] = cw;
-  //     w = ww;
-  //     // No Break
-  //   case TYPE_ANALOG_4CH: //RGBW
-  //     _data[3] = w;
-  //     // No Break
-  //   case TYPE_ANALOG_3CH: //standard dumb RGB
-  //     _data[0] = r; 
-  //     _data[1] = g; 
-  //     _data[2] = b;
-  //     break;
-  // }
-  
-  // _data[0] = c.R; 
-  // _data[1] = c.G; 
-  // _data[2] = c.B;
-  // _data[3] = c.W1; 
-  // _data[4] = c.W2;
-
-  // /**
-  //  * @brief Final conversions
-  //  * ** Upscale to 10 bit
-  //  * ** Shrink into desired PWM range limits
-  //  */
-  // uint16_t cur_col;
-  // uint8_t numPins = NUM_PWM_PINS(_type);
-  // for(uint8_t ii=0;ii<numPins;ii++)
-  // {
-  //   cur_col = _data[ii];
-  //   cur_col = mapvalue(cur_col, 0, 255, 0, 1023);
-  //   cur_col = cur_col > 0 ? mapvalue(cur_col, 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
-  //   _data[ii] = cur_col;
-  // }
-
-  // DEBUG_PRINTF("BusPwm::setPixelColor _type %d, data [%d,%d,%d,%d,%d]\n\r", _type, _data[0], _data[1], _data[2], _data[3], _data[4]);
-
-
 }
 
-//does no index check
+
 RgbcctColor BusPwm::getPixelColor(uint16_t pix) 
 {
   if (!_valid){
-   
-  //  Serial.println("INVALID=============================================================");
     return 0;
   }
-  //  Serial.println("VALID=============================================================");
   return output_colour;
 }
 
+
 void BusPwm::show() 
 {
-  if (!_valid) return;
+
+  ALOG_DBM(PSTR("BusPwm::show"));
+
+  if (!_valid) 
+  {
+    return;
+  }
+
   uint16_t pwm_value;
 
   uint16_t colour10bit[5];
@@ -404,26 +314,27 @@ void BusPwm::show()
   colour10bit[3] = mapvalue(output_colour.WC, 0, 255, 0, 1023);
   colour10bit[4] = mapvalue(output_colour.WW, 0, 255, 0, 1023);
   
-  // DEBUG_PRINTF("BusPwm::show %d [%d,%d,%d,%d,%d]\n\r", _ledcStart, colour10bit[0], colour10bit[1], colour10bit[2], colour10bit[3], colour10bit[4]);
+  ALOG_DBM(PSTR("BusPwm::show [%d,%d,%d,%d,%d]\n\r"), colour10bit[0], colour10bit[1], colour10bit[2], colour10bit[3], colour10bit[4]);
 
   /**
    * @brief Final conversions
    * ** Upscale to 10 bit
    * ** Shrink into desired PWM range limits
    */
-  uint16_t cur_col;
   uint8_t numPins = NUM_BUSTYPE_PWM_PINS(_type);
   for(uint8_t ii=0;ii<numPins;ii++)
   {
     colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
     pwm_value = bitRead(pCONT_set->pwm_inverted, ii) ? pCONT_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
+    ALOG_DBM(PSTR("BusPwm::pwm_value[%d] %d \n\r"), ii, pwm_value);
     #ifdef ESP8266
-    analogWrite(_pins[i], pwm_value);
+    analogWrite(_pins[ii], pwm_value);
     #else
     ledcWrite(_ledcStart + ii, pwm_value);
     #endif
   }
 }
+
 
 uint8_t BusPwm::getPins(uint8_t* pinArray) 
 {
@@ -434,6 +345,7 @@ uint8_t BusPwm::getPins(uint8_t* pinArray)
   }
   return numPins;
 }
+
 
 void BusPwm::deallocatePins() 
 {
@@ -450,6 +362,10 @@ void BusPwm::deallocatePins()
   #endif
 }
 
+void BusPwm::setColorOrder(COLOUR_ORDER_T colorOrder) 
+{
+  _colorOrder = colorOrder;
+}
 
 /*****************************************************************************************************************************************************************
  ***************************************************************************************************************************************************************** 
@@ -657,6 +573,7 @@ void BusManager::show()
 void IRAM_ATTR BusManager::setPixelColor(uint16_t pix, RgbcctColor c, int16_t cct) 
 {
   // ALOG_INF(PSTR("numBusses = %d"),numBusses);
+  // c.debug_print("BusManager::setPixelColor");
   for (uint8_t i = 0; i < numBusses; i++) 
   {
     Bus* b = busses[i];

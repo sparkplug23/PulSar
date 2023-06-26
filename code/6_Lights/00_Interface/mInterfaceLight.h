@@ -125,6 +125,7 @@ enum LightTypes_IDS{
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";  
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR) "debug/busconfig";
 
 enum LIHGT_POWER_STATE_IDS{
   LIGHT_POWER_STATE_OFF_ID=0,
@@ -295,15 +296,6 @@ class mInterfaceLight :
 
   
 /******************************************************************************************************************
- * ConstructJson
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * MQTT
-*******************************************************************************************************************/
-
-/******************************************************************************************************************
  * WebServer
 *******************************************************************************************************************/
 
@@ -333,6 +325,7 @@ class mInterfaceLight :
     BusManager* bus_manager = nullptr;
     BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
     void BusManager_Create_DefaultSingleNeoPixel();
+    void BusManager_Create_DefaultSinglePWM_5CH();
 
     // int8_t Get
 
@@ -370,13 +363,25 @@ class mInterfaceLight :
     RgbColor GetColourValueUsingMaps_FullBrightness(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     RgbColor GetColourValueUsingMaps_AdjustedBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     
+    /******************************************************************************************************************
+     * ConstructJson
+    *******************************************************************************************************************/
+
+  
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
     uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_level = 0, bool json_appending = true);
     #endif
 
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
+    uint8_t ConstructJSON_Debug__BusConfig(uint8_t json_level, bool json_appending);
+    #endif
   
+    /******************************************************************************************************************
+     * MQTT
+    *******************************************************************************************************************/
+
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
     void MQTTHandler_Set_RefreshAll();
@@ -386,28 +391,9 @@ class mInterfaceLight :
     struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;
     struct handler<mInterfaceLight> mqtthandler__state__ifchanged;
     struct handler<mInterfaceLight> mqtthandler__debug_module_config__teleperiod;
-        
-    enum MQTT_HANDLER_MODULE_IDS{
-      MQTT_HANDLER_MODULE__STATE__TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE__DEBUG_MODULE_CONFIG__TELEPERIOD_ID,
-      MQTT_HANDLER_MODULE_LENGTH_ID,
-    };
-    
-    // Could this be put into a function? to allow me to set things to all in this, or by ID
-    struct handler<mInterfaceLight>* mqtthandler_list[
-      1
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-        +1
-      #endif
-      +1 // settings at the end
-      ] = {        
-        &mqtthandler__state__ifchanged,
-        #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-        &mqtthandler__debug_module_config__teleperiod,
-        #endif
-        &mqtthandler__settings__teleperiod        
-    };
-
+    struct handler<mInterfaceLight> mqtthandler__debug_bus_config__teleperiod;
+                
+    std::vector<struct handler<mInterfaceLight>*> mqtthandler_list;
 
     #endif
 

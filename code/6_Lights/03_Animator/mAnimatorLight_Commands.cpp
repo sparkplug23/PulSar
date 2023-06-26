@@ -41,6 +41,8 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
         Segment_AppendNew(0, 0, segment_i+1);
       }
 
+    
+
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
 
       segments_found++;
@@ -535,6 +537,32 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)),SEGMENT_I(segment_index).transition.pixels_to_update_as_number);
     #endif
   }
+
+
+/**
+ * @brief Construct a new if object
+ * Although egcolour needs to know this for the internal colour mapping, it is also needed to properly get the effects working. Should be clariefied with a better name later. ColourType should rename internal 
+ * and not directly set by the user, but instead the colour order (ie type depends on what is set). ColourType should remain internal.
+ * ColourType (to be renamed) for the effect itself, needs to instead have RGB, RGBW etc
+ * 
+ */
+  
+  if(jtok = obj[PM_JSON_COLOUR_TYPE])
+  {
+    // if(jtok.isStr()){
+    //   if((tmp_id=mPaletteI->GetColourTypeIDbyName(jtok.getStr()))>=0){
+    //     CommandSet_ColourTypeID(tmp_id, segment_index);
+    //     data_buffer.isserviced++;
+    //   }
+    // }else
+    if(jtok.isNum()){
+      CommandSet_ColourTypeID(jtok.getInt(), segment_index);
+      data_buffer.isserviced++;
+    }
+    // ALOG_COM(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer))); // should be internal to rgbcct
+  }
+
+  
   
   
 
@@ -544,17 +572,23 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
     snprintf(buffer, sizeof(buffer), "SegColour%d", colour_index);
 
+    // ALOG_HGL(PSTR("SEGMENT_I(segment_index).rgbcctcolors[colour_index] length %d"), RGBCCTCOLOURS_SIZE);
+
+    
+
     if(seg_obj = obj[buffer].getObject())
     {
       
       ALOG_COM(PSTR(D_LOG_PIXEL "SegColour[%d] = %s"), colour_index, buffer);
 
+    
       if(jtok = seg_obj[PM_JSON_HUE]){ // Assume range 0-359
         CommandSet_SegColour_RgbcctColour_Hue_360(jtok.getInt(), colour_index, segment_index);
         data_buffer.isserviced++;
         ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getHue360());
       }
       
+    
       if(jtok = seg_obj[PM_JSON_SAT]){ // Assume range 0-100
         CommandSet_SegColour_RgbcctColour_Sat_255(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
         data_buffer.isserviced++; 
@@ -567,9 +601,20 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       }
 
 
+    
       if(jtok = seg_obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
-        CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(mapvalue(jtok.getInt(), 0,100, _ct_min_range, _ct_max_range), colour_index, segment_index);
-        data_buffer.isserviced++;
+    
+        CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(
+          mapvalue(
+            jtok.getInt(), 
+            0,100, 
+            CCT_MIN_DEFAULT, CCT_MAX_DEFAULT
+            // SEGMENT_I(segment_index).rgbcctcolors[colour_index].get_CTRangeMin(), SEGMENT_I(segment_index).rgbcctcolors[colour_index].get_CTRangeMax()
+
+          ), colour_index, segment_index);
+        
+    
+    data_buffer.isserviced++;
         ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_PERCENTAGE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getCCT());
       }else
       if(jtok = seg_obj[PM_JSON_CCT_TEMP]){ // Exact kelvin
@@ -578,6 +623,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_PERCENTAGE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getCCT());
       }
 
+    
 
       if(jtok = seg_obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
         CommandSet_SegColour_RgbcctColour_BrightnessRGB(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
@@ -591,6 +637,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       }
 
 
+    
       if(jtok = seg_obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
         CommandSet_SegColour_RgbcctColour_BrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
         data_buffer.isserviced++;
@@ -603,19 +650,22 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       }
 
 
+    
       if(jtok = seg_obj[D_JSON_SUBTYPE]){
         CommandSet_SegColour_RgbcctColour_LightSubType(jtok.getInt(), colour_index, segment_index);
         ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_SUBTYPE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getSubType());
         data_buffer.isserviced++;
       }
       
+    
 
       /**
        * @brief Kinda duplicate of what is stored inside rgbcctcontroller, but both must exist somehow, needs perfecting
        * OR, maybe it does not, as "colourtype" is part of bus? or maybe all 3 is needed?? yes, likely
        * 
        */
-      if(jtok = seg_obj[PM_JSON_COLOUR_TYPE]){
+      if(jtok = seg_obj[PM_JSON_COLOUR_TYPE])
+      {
         // if(jtok.isStr()){
         //   if((tmp_id=mPaletteI->GetColourTypeIDbyName(jtok.getStr()))>=0){
         //     CommandSet_ColourTypeID(tmp_id, segment_index);
@@ -626,9 +676,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
           CommandSet_ColourTypeID(jtok.getInt(), segment_index);
           data_buffer.isserviced++;
         }
-        #ifdef ENABLE_LOG_LEVEL_DEBUG
-        // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer)));
-        #endif // ENABLE_LOG_LEVEL_DEBUG
+        // ALOG_COM(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer))); // should be internal to rgbcct
       }
       
 
@@ -657,113 +705,10 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
 
 
-// Flip these so default is 0 to 100%, and the other is range controlled
-
-//   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
-//     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   } 
-
-
-// #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
-//     CommandSet_Global_BrtCCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCT());
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }else
-//   if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
-//     CommandSet_Global_BrtCCT_255(jtok.getInt());
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCT());
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }
-
-
-// // Flip these so default is 0 to 100%, and the other is range controlled
-//   if(jtok = obj[PM_JSON_CCT_PERCENTAGE]){ // Assume range 0-100
-//     CommandSet_ActiveSolidPalette_ColourTemp(mapvalue(jtok.getInt(), 0,100, _ct_min_range,_ct_max_range));
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }else
-//   if(jtok = obj[PM_JSON_CCT_TEMP]){ // Assume range 0-100
-//     CommandSet_ActiveSolidPalette_ColourTemp(jtok.getInt());
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_CCT_TEMP)), LightGetColorTemp());
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }
-
-//   if(jtok = obj[PM_JSON_RGBCCT_LINKED]){
-//     CommandSet_ActiveSolidPalette_RGBCT_Linked(jtok.getInt()); //needs function
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_RGBCCT_LINKED)), value);
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   } 
-
-
-
-//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
-//     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000);
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE)),SEGMENT_I(segment_index).transition.rate_ms);  
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }else
-//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE_MS]){
-//     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt());
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_RATE_MS)),SEGMENT_I(segment_index).transition.rate_ms);  
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }
-  
-//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_NUMBER]){
-//     CommandSet_LightsCountToUpdateAsNumber(jtok.getInt());
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)),SEGMENT_I(segment_index).transition.pixels_to_update_as_percentage.val);
-//     #endif
-//   }else
-//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
-//     CommandSet_LightsCountToUpdateAsPercentage(jtok.getInt());
-//     data_buffer.isserviced++;
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)),SEGMENT_I(segment_index).transition.pixels_to_update_as_number);
-//     #endif
-//   }
-  
-//   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_ORDER]){
-//     if(jtok.isStr()){
-//       if((tmp_id=GetTransitionOrderIDbyName(jtok.getStr()))>=0){
-//         CommandSet_TransitionOrderID(tmp_id);
-//         data_buffer.isserviced++;
-//       }
-//     }else
-//     if(jtok.isNum()){
-//       CommandSet_TransitionOrderID(jtok.getInt());
-//       data_buffer.isserviced++;
-//     }
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG
-//     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_SVALUE_K(D_JSON_TRANSITION,D_JSON_ORDER)), GetTransitionOrderName(buffer, sizeof(buffer)));
-//     #endif // ENABLE_LOG_LEVEL_DEBUG
-//   }
-// #endif // ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
-
-
-/**
- * @brief 
- * All PRESET options
- * 
- */
+  /**
+   * @brief 
+   * All PRESET options
+   **/
 
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   if(jtok = obj["Presets"].getObject()["SetPresetManual"]){  
@@ -982,11 +927,11 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
     // for (size_t s = 0; s < getSegmentsNum(); s++) {
     //     Segment_New &sg = getSegment(s);
-    //     DEBUG_LINE_HERE;
+    //     
     //     // if (sg.isSelected()) 
     //     // {
 
-    //       DEBUG_LINE_HERE;
+    //       
     //       // deserializeSegment(segVar, s, presetId);
 
     //       Segment_New& seg = getSegment(s);
@@ -994,7 +939,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
 
     //       // if using vectors use this code to append segment
     //       if (id >= getSegmentsNum()) {
-    //         DEBUG_LINE_HERE;
+    //         
     //         if (stop <= 0) return 0; // ignore empty/inactive segments
     //         appendSegment(Segment_New(0+id, getLengthTotal()));
     //         id = getSegmentsNum()-1; // segments are added at the end of list
@@ -1060,13 +1005,13 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
         deleted++;
         segments.erase(segments.begin() + i);
       }else{
-        DEBUG_LINE_HERE;
+        
       }
     if (deleted) {
-      DEBUG_LINE_HERE;
+      
       segments.shrink_to_fit();
       if (_mainSegment >= segments.size()){
-        DEBUG_LINE_HERE;
+        
         setMainSegmentId(0);
       }
     }
@@ -1366,8 +1311,8 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
   //   // bool result = v.isObject();
   //   Serial.println(v.isObject());
 
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
+  
+  
 
     ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(0).rgbcctcolors[0].getHue360());
 
@@ -1503,7 +1448,7 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
 void mAnimatorLight::CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index)
 {
   
-  SEGMENT_I(segment_index).colour_type = (RgbcctColor::LightSubType)id;
+  SEGMENT_I(segment_index).colour_type = (RgbcctColor::ColourType)id;
 
   ALOG_INF(PSTR("ColourType = %d"),SEGMENT_I(segment_index).colour_type);
 
@@ -1513,8 +1458,8 @@ const char* mAnimatorLight::GetColourTypeNameByID(uint8_t id, char* buffer, uint
 {
   // switch(id){  default:    
   
-  //   case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:    memcpy(buffer, "RGB", sizeof("RGB")); break;
-  //   case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:    memcpy(buffer, "RGBW", sizeof("RGBW")); break;
+  //   case RgbcctColor::ColourType::LIGHT_TYPE__RGB__ID:    memcpy(buffer, "RGB", sizeof("RGB")); break;
+  //   case RgbcctColor::ColourType::LIGHT_TYPE__RGBW__ID:    memcpy(buffer, "RGBW", sizeof("RGBW")); break;
   
   // }
   return buffer;
@@ -1691,7 +1636,7 @@ int8_t mAnimatorLight::GetAnimationModeIDbyName(const char* c){
 void mAnimatorLight::CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index)
 {
 
-  SEGMENT_I(segment_index).intensity_value = value;
+  SEGMENT_I(segment_index).set_intensity(value);
 
 }
 
@@ -1699,7 +1644,7 @@ void mAnimatorLight::CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_
 void mAnimatorLight::CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index)
 {
 
-  SEGMENT_I(segment_index).speed_value = value;
+  SEGMENT_I(segment_index).set_speed(value);
 
 }
 
@@ -1832,35 +1777,35 @@ uint8_t mAnimatorLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number,
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setHue360(hue_new);      
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setSat255(sat_new);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setCCT(ct);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessRGB(uint8_t brightness, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setBrightnessRGB255(brightness);    
 }
 
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t brightness, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setBrightnessCCT255(brightness);    
 }
 
@@ -1868,7 +1813,7 @@ void mAnimatorLight::CommandSet_SegColour_RgbcctColour_BrightnessCCT(uint8_t bri
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index, uint8_t segment_index)
 {
     
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setChannelsRaw(values);    // must be 5 for now, will consider less later
 
   #ifdef ENABLE_LOG_LEVEL_INFO
@@ -1881,7 +1826,7 @@ void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, u
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subtype, uint8_t colour_index, uint8_t segment_index)
 {
-  if(colour_index >= pCONT_lAni->SEGMENT_I(segment_index).rgbcctcolors.size()){ return; }
+  if(colour_index >= RGBCCTCOLOURS_SIZE){ return; }
   SEGMENT_I(segment_index).rgbcctcolors[colour_index].setSubType(subtype); 
 }
 
@@ -2119,7 +2064,7 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
     // Parse buffer data to correctly set data parameters
     mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);
 
-    // DEBUG_LINE_HERE;
+    // 
 
 
   }

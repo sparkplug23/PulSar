@@ -34,26 +34,6 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       EverySecond_AutoOff(); 
       
 
-    // char buff[] = "lightyellow";
-    
-    // uint8_t buffSize = sizeof(buff);
-
-    // HtmlColor colour;
-    // colour.Parse<HtmlColorNames>(buff, sizeof(buff));
-    
-    // char name[50] = {0};
-    // for (uint8_t indexName = 0; indexName < HtmlColorNames::Count(); indexName++)
-    // {
-    //   const HtmlColorPair* colorPair = HtmlColorNames::Pair(indexName);
-    //   PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
-    //   RgbColor rgb = (HtmlColor)colorPair->Color;
-    //   ALOG_INF(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), indexName, searchName, colorPair->Color, rgb.R, rgb.G, rgb.B);
-    // }
-    
-    //     Serial.printf("ColourHTML=%s", colour.ToString<HtmlColorNames>(buff, buffSize));
-
-
-    // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "Segment Count %d "), segments.size());
     
     
     if(segments.size()>0){
@@ -74,55 +54,8 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 
 
     }break;
-    case FUNC_LOOP: 
-    
-    // if(segments.size()>0){
-    //   ALOG_INF(PSTR("Segment Range [%d,%d] "), segments[0].pixel_range.start, segments[0].pixel_range.stop);
-    //   segments[0].rgbcctcolors[0].debug_print("Segment 0 colour");
-    // }
-
-    // if(segments.size()>1){
-    //   ALOG_INF(PSTR("Segment Range [%d,%d] "), segments[1].pixel_range.start, segments[1].pixel_range.stop);
-    //   segments[1].rgbcctcolors[0].debug_print("Segment 1 colour");
-    // }
-
-    // if(segments.size()>2){
-    //   ALOG_INF(PSTR("Segment Range [%d,%d] "), segments[2].pixel_range.start, segments[2].pixel_range.stop);
-    //   segments[2].rgbcctcolors[0].debug_print("Segment 2 colour");
-    // }
-
-    // if(segments.size()>3){
-    //   ALOG_INF(PSTR("Segment Range [%d,%d] "), segments[3].pixel_range.start, segments[3].pixel_range.stop);
-    //   segments[3].rgbcctcolors[0].debug_print("Segment 3 colour");
-    // }
-
-
-
-      EveryLoop();
-
-      //LED settings have been saved, re-init busses
-      //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
-      if (doInitBusses) {
-        doInitBusses = false;
-        DEBUG_PRINTLN(F("Re-init busses."));
-        bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
-        pCONT_iLight->bus_manager->removeAll();
-        uint32_t mem = 0;
-        for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
-          if (pCONT_iLight->busConfigs[i] == nullptr) break;
-          mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
-          if (mem <= MAX_LED_MEMORY) {
-            pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
-          }
-          delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
-        }
-        finalizeInit(); // also loads default ledmap if present
-        if (aligned) makeAutoSegments();
-        else fixInvalidSegments();
-        yield();
-        // serializeConfig();
-      }
-  
+    case FUNC_LOOP:     
+      EveryLoop();  
     break;        
     case FUNC_BOOT_MESSAGE:
       BootMessage();
@@ -185,6 +118,29 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
  * */
 void mAnimatorLight::EveryLoop()
 {
+  
+  //LED settings have been saved, re-init busses
+  //This code block causes severe FPS drop on ESP32 with the original "if (busConfigs[0] != nullptr)" conditional. Investigate!
+  if (doInitBusses) {
+    doInitBusses = false;
+    DEBUG_PRINTLN(F("Re-init busses."));
+    bool aligned = checkSegmentAlignment(); //see if old segments match old bus(ses)
+    pCONT_iLight->bus_manager->removeAll();
+    uint32_t mem = 0;
+    for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
+      if (pCONT_iLight->busConfigs[i] == nullptr) break;
+      mem += BusManager::memUsage(*pCONT_iLight->busConfigs[i]);
+      if (mem <= MAX_LED_MEMORY) {
+        pCONT_iLight->bus_manager->add(*pCONT_iLight->busConfigs[i]);
+      }
+      delete pCONT_iLight->busConfigs[i]; pCONT_iLight->busConfigs[i] = nullptr;
+    }
+    finalizeInit(); // also loads default ledmap if present
+    if (aligned) makeAutoSegments();
+    else fixInvalidSegments();
+    yield();
+    // serializeConfig();
+  }
 
   #ifdef USE_MODULE_LIGHTS_ANIMATOR  
   switch(pCONT_lAni->SEGMENT_I(0).animation_mode_id)    // needs to know the id 
@@ -546,7 +502,7 @@ void mAnimatorLight::Init(void)
 
   device = pCONT_set->devices_present;
   
-  subtype = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID;
+  subtype = RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID;
   
   pwm_multi_channels = 0;
 
@@ -624,9 +580,11 @@ void mAnimatorLight::Init(void)
 
   if(!flag_any_pin_set)
   {
-    ALOG_ERR(PSTR("NO PIN FOUND: STOPPING ANIMATOR"));
-    delay(5000);
-    return;
+    ALOG_ERR(PSTR("NO PIN FOUND: STOPPING ANIMATOR - overriding for h801, may cause issues"));
+    // delay(5000);
+    // return;
+
+
   }
 
 
@@ -1345,7 +1303,7 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
       DEBUG_LINE_HERE;
       
     segments[0].rgbcctcolors[0].debug_print(">B>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-    // if(SEGMENT_I(seg_index).rgbcctcolors.size()<5)
+    // if(SEGMENT_I(seg_index).RGBCCTCOLOURS_SIZE<5)
     // {
       DEBUG_LINE_HERE;
       DEBUG_LINE_HERE;
@@ -1355,12 +1313,16 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
       DEBUG_LINE_HERE;
       DEBUG_LINE_HERE;
       ALOG_INF(PSTR("seg_index=%d"),seg_index);
+    #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+
+    #else
       SEGMENT_I(seg_index).rgbcctcolors.clear();
       SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
       SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
       SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
       SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
       SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
+      #endif // ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
     // }
       DEBUG_LINE_HERE;
     segments[0].rgbcctcolors[0].debug_print(">C>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
@@ -1415,12 +1377,16 @@ void mAnimatorLight::resetSegments1()
      * @brief Adding 5 colours for each segment
      * 
      */
+    #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+
+    #else
     seg.rgbcctcolors.clear();
     seg.rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
     seg.rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
     seg.rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
     seg.rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
     seg.rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
+    #endif // ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
 
     seg.grouping = 1;
     // SEGMENT_I(i).setOption(SEG_OPTION_ON, 1);
@@ -2175,7 +2141,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
   
   updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);    
   
-  // ALOG_INF( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
+  ALOG_INF( PSTR("SEGMENT.colour_type=%d, desired_colour1=%d,%d,%d,%d,%d"),SEGMENT.colour_type,updatedColor.R,updatedColor.G,updatedColor.B,updatedColor.WC,updatedColor.WW);
 
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.StartingColour=%d,%d,%d,%d,%d"),colour_pairs.StartingColour.R,colour_pairs.StartingColour.G,colour_pairs.StartingColour.B,colour_pairs.StartingColour.WC,colour_pairs.StartingColour.WW);
   // AddLog(LOG_LEVEL_TEST, PSTR("Acolour_pairs.DesiredColour=%d,%d,%d,%d,%d"),colour_pairs.DesiredColour.R,colour_pairs.DesiredColour.G,colour_pairs.DesiredColour.B,colour_pairs.DesiredColour.WC,colour_pairs.DesiredColour.WW);
@@ -2185,6 +2151,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
                 pixel++
   ){  
     // ALOG_INF(PSTR("SEGMENT.pixel =%d"), pixel);
+    // updatedColor.setChannelsRaw(255,0,0,1,2);
     SEGMENT.SetPixelColor(pixel, updatedColor, false);
   }
   
@@ -2232,29 +2199,29 @@ void mAnimatorLight::Set_Segment_ColourType(uint8_t segment_index, uint8_t light
   // switch(light_type)
   // {
   //   case LT_PWM5:
-  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID; 
+  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID; 
   //   break;
   //   case LT_ADDRESSABLE_SK6812:
-  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID; 
+  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID; 
   //   break;
   //   default:
   //   case LT_ADDRESSABLE_WS281X:
-  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID;
+  //     SEGMENT_I(segment_index).colour_type = RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID;
   //   break;
   // }
 
 }
 
 
-uint8_t mAnimatorLight::GetSizeOfPixel(RgbcctColor::LightSubType colour_type)
+uint8_t mAnimatorLight::GetSizeOfPixel(RgbcctColor::ColourType colour_type)
 {
   switch(colour_type)
   {
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:     return 3;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:    
-    // case RgbcctColor::LightSubType::LIGHT_TYPE_RGBC__ID:      
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:     return 3;
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:    
+    // case RgbcctColor::ColourType::LIGHT_TYPE_RGBC__ID:      
     return 4;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:  return 5;
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:  return 5;
   }
 
 }
@@ -2263,7 +2230,7 @@ bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
-  RgbcctColor::LightSubType pixel_type, 
+  RgbcctColor::ColourType pixel_type, 
   RgbcctColor starting_colour
 ){
 
@@ -2282,7 +2249,7 @@ bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(
     // AddLog(LOG_LEVEL_TEST, PSTR("pixel_start_i/buflen=%d\t%d"),pixel_start_i,buflen);
   switch(pixel_type)
   {
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:
     
       pixel_start_i = pixel_index*6;
 
@@ -2300,7 +2267,7 @@ bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(
       }
 
     break;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:
     
       pixel_start_i = pixel_index*8;
 
@@ -2323,7 +2290,7 @@ bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(
       }
 
     break;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
@@ -2519,7 +2486,7 @@ void mAnimatorLight::fade_out(uint8_t rate, bool set_brightness)
 
 
 bool mAnimatorLight::SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, 
-RgbcctColor::LightSubType pixel_type, RgbcctColor desired_colour)
+RgbcctColor::ColourType pixel_type, RgbcctColor desired_colour)
 {   
   
   // #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
@@ -2544,7 +2511,7 @@ RgbcctColor::LightSubType pixel_type, RgbcctColor desired_colour)
 
   switch(pixel_type)
   {
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:
     
       pixel_start_i = pixel_index*6;
 
@@ -2562,7 +2529,7 @@ RgbcctColor::LightSubType pixel_type, RgbcctColor desired_colour)
       }
 
     break;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:
     
       pixel_start_i = pixel_index*8; // rgbw * 2
 
@@ -2581,7 +2548,7 @@ RgbcctColor::LightSubType pixel_type, RgbcctColor desired_colour)
       }
 
     break;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:
     
       pixel_start_i = pixel_index*10;
 
@@ -2668,7 +2635,7 @@ copies_of_that_pixel
 length_of_pixels
     number of pixel in that segment up to (100?) then replicate and wrap output*/
 
-bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, 
+bool mAnimatorLight::SetTransitionColourBuffer(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, 
 RgbcctColor starting_colour, RgbcctColor desired_colour)
 {
 
@@ -2743,7 +2710,7 @@ void mAnimatorLight::GetTransitionColourBuffer(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
-  RgbcctColor::LightSubType pixel_type, 
+  RgbcctColor::ColourType pixel_type, 
   mAnimatorLight::TransitionColourPairs* colour  // Get and Set colours will still only store in rgb or rgbw format, for now, limited to rgb
 ){
 
@@ -2768,19 +2735,19 @@ uint16_t pixel_start_i = 0;
   switch(pixel_type)
   {
     default: return;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID:
       pixel_start_i = pixel_index*6;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbColor(c[0], c[1], c[2]);
       colour->DesiredColour  = RgbColor(c[3], c[4], c[5]);
       break;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBW__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBW__ID:
       pixel_start_i = pixel_index*8;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbwColor(c[0], c[1], c[2], c[3]);
       colour->DesiredColour  = RgbwColor(c[4], c[5], c[6], c[7]);
       break;
-    case RgbcctColor::LightSubType::LIGHT_TYPE__RGBCCT__ID:
+    case RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID:
       pixel_start_i = pixel_index*10;
       c = &buffer[pixel_start_i];
       colour->StartingColour = RgbcctColor(c[0], c[1], c[2], c[3], c[4]);
@@ -2963,6 +2930,40 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 {
   if(f==0) return -2;
@@ -3045,7 +3046,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SPOTS__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PERCENT__ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PERCENT__ID; }
   #endif
   // One colour changes
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -4020,7 +4021,9 @@ bool mAnimatorLight::Segment_New::allocateData(size_t len) {
     data = (byte*) ps_malloc(len);
   else
   #endif
-    data = (byte*) malloc(len);
+  
+  data = (byte*) malloc(len);
+
   if (!data){
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
     effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
@@ -4184,7 +4187,7 @@ void mAnimatorLight::Segment_New::startTransition(uint16_t dur) {
   // starting a transition has to occur before change so we get current values 1st
   uint8_t _briT = currentBri(on ? opacity : 0);
   uint8_t _cctT = currentBri(cct, true);
-  CRGBPalette16 _palT; loadPalette(_palT, palette_wled);
+  CRGBPalette16 _palT; loadPalette(_palT, palette.id);
   uint8_t _modeP = effect_id;
   uint32_t _colorT[NUM_COLORS];
   
@@ -4634,7 +4637,7 @@ void mAnimatorLight::Segment_New::fade_out(uint8_t rate) {
   // rate = (255-rate) >> 1;
   // float mappedRate = float(rate) +1.1;
 
-  // uint32_t color = colors[1]; // SEGCOLOR(1); // target color
+  // uint32_t color = colors[1]; // SEGCOLOR_U32(1); // target color
   // int w2 = W(color);
   // int r2 = R(color);
   // int g2 = G(color);
@@ -4717,7 +4720,7 @@ void mAnimatorLight::Segment_New::blur(uint8_t blur_amount)
  * Inspired by the Adafruit examples.
  */
 uint32_t mAnimatorLight::Segment_New::color_wheel(uint8_t pos) { // TODO
-  if (palette_wled) return color_from_palette(pos, false, true, 0);
+  if (palette.id) return color_from_palette(pos, false, true, 0);
   pos = 255 - pos;
   if(pos < 85) {
     return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
@@ -4816,7 +4819,7 @@ uint32_t mAnimatorLight::Segment_New::color_from_palette(uint16_t i, bool mappin
 static const char _data_RESERVED[] PROGMEM = "RSVD";
 static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
 uint16_t mode_static(void) {
-  // SEGMENT.fill(SEGCOLOR(0));
+  // SEGMENT.fill(SEGCOLOR_U32(0));
   return 350;
 }
 
@@ -4919,7 +4922,7 @@ void mAnimatorLight::finalizeInit(void)
 
 
     #ifdef ESP8266
-    if ((!IS_DIGITAL(bus->getType()) || IS_2PIN(bus->getType()))) continue;
+    if ((!IS_BUSTYPE_DIGITAL(bus->getType()) || IS_BUSTYPE_2PIN(bus->getType()))) continue;
     uint8_t pins[5];
     if (!bus->getPins(pins)) continue;
     BusDigital* bd = static_cast<BusDigital*>(bus);
@@ -5876,12 +5879,21 @@ uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_app
 
     JBI->Add("light_size_count", settings.light_size_count);
 
+    JBI->Add("BriRGB_Global",  getBriRGB_Global());
+    JBI->Add("BriCCT_Global",  getBriCCT_Global());
+
   return JBI->End();
 
 }
 
-
-uint8_t mAnimatorLight::ConstructJSON_Animation_Active(uint8_t json_level, bool json_appending)
+/**
+ * @brief Unlike debug_segments, only the useful info here
+ * 
+ * @param json_level 
+ * @param json_appending 
+ * @return uint8_t 
+ */
+uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_appending)
 {
 
   JBI->Start();
@@ -6040,6 +6052,20 @@ JBI->Start();
     // }
     // JBI->Array_End();
     
+//   JsonBuilderI->Start();  
+//     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
+//     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
+//     JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette.id );
+//     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette.id, buffer, sizeof(buffer)));
+//     // JsonBuilderI->Array_Start("rgb");
+//     // for(int i=0;i<numpixels;i++){
+//     //   RgbTypeColor c = GetPixelColor(i);
+//     //   JsonBuilderI->Add_FV(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
+//     // }
+//     // JsonBuilderI->Array_End();
+//   return JsonBuilderI->End();
+
+
     /**
      * @brief Moving towards preloading palettes from memory into ram/heap for speed (then iram will work)
      * 
@@ -6058,177 +6084,74 @@ return JBI->End();
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
 
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-uint8_t mAnimatorLight::ConstructJSON_Debug_Hardware(uint8_t json_level, bool json_appending)
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+
+/**
+ * @brief Multiple large segments may require mutiple topics
+ */
+uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool json_appending)
 {
 
   JBI->Start();
 
-  for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
+  for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
   {
-    JBI->Level_Start_F("Segment%d", seg_i);
 
-    #ifndef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
-      JBI->Add("ColourOrderHex", SEGMENT_I(seg_i).hardware_element_colour_order.data);
-    
-      JBI->Array_Start("ColourOrder");
-        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.red);
-        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.green);
-        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.blue);
-        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.white_cold);
-        JBI->Add(SEGMENT_I(seg_i).hardware_element_colour_order.white_warm);
-      JBI->Array_End();
-    #endif // ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
-
-    JBI->Level_End();
-  }
-
-  return JBI->End();
-
-}
-
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool json_appending)
-{
-
-JBI->Start();
-
-  JBI->Add("millis", millis());
-
-  JBI->Add("EnableAnimation",SEGMENT_I(0).flags.fEnable_Animation);
-  JBI->Add("SEGMENT_I(0).flags.fRunning", SEGMENT_I(0).flags.fRunning);
-  // JBI->Add("CanShow",stripbus->CanShow());
-  JBI->Add("StripSize", STRIP_SIZE_MAX);
-
-
-// for(uint8_t seg_i = 0; seg_i<2; seg_i++)
-// {
-//   JBI->Level_Start_F("Segment%d",seg_i);
-
-//     JBI->Add("isActive", _segments[seg_i].isActive());
-//       JBI->Level_Start("Transition");
-//         JBI->Add("TimeMs", _segments[seg_i].transition.time_ms);
-//         JBI->Add("RateMs", _segments[seg_i].transition.rate_ms);
-//         JBI->Add("PixelStart", _segments[seg_i].pixel_range.start);
-//         JBI->Add("PixelStop", _segments[seg_i].pixel_range.stop);
-//       JBI->Level_End();
-//     JBI->Add("virtualLength", _segments[seg_i].virtualLength());
-    
-  
-//   JBI->Level_End();
-
-
-// }
-
-
-return JBI->End();
-
-}
-
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level, bool json_appending)
-{
-  char buffer[50];
-
-  JBI->Start(); 
-
-  // return 0;
-
-  JBI->Add("size", segments.size() );
-
-  for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
-  {
+    Segment_New &seg = getSegment(seg_i);
     JBI->Level_Start_F("Segment%d",seg_i);
 
-      // // Config of segment (New stuff)
-      // JBI->Add("sizeof", sizeof(segments[seg_i]));
-
-      // JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID(SEGMENT_I(seg_i).palette.id, buffer, sizeof(buffer)));
-
-      // // Same values as I am using
-      // JBI->Add("Start", segments[seg_i].pixel_range.start);
-      // JBI->Add("Stop", segments[seg_i].pixel_range.stop);
-      // JBI->Add("SEGLEN", SEGLEN);
-      // JBI->Add("virtualLength", segments[seg_i].virtualLength());
-      // JBI->Add("ColourType", (uint8_t)segments[seg_i].colour_type);
-      // JBI->Level_Start("Transition");
-      //   JBI->Add("rate", SEGMENT_I(seg_i).transition.rate_ms);
-      //   JBI->Add("time", SEGMENT_I(seg_i).transition.time_ms);
-      // JBI->Level_End();
-      // JBI->Level_Start("Effects");
-      //   JBI->Add("Function", SEGMENT_I(seg_i).effect_id);
-      //   JBI->Add("Speed", SEGMENT_I(seg_i).speed_value);
-      //   JBI->Add("Intensity", SEGMENT_I(seg_i).intensity_value);
-      //   JBI->Add("Grouping", SEGMENT_I(seg_i).grouping);
-      // JBI->Level_End();
-      // JBI->Level_Start("Palette");
-      //   JBI->Add("Size", SEGMENT_I(seg_i).palette_container->pData.size());
-      //   JBI->Array_Start("Data");
-      //     for(uint8_t i=0;i<SEGMENT_I(seg_i).palette_container->pData.size();i++)
-      //     {
-      //       JBI->Add(SEGMENT_I(seg_i).palette_container->pData[i]);
-      //     }ee
-      //   JBI->Array_End();
-      //   // DEBUG_LINE_HERE;
-      // JBI->Level_Start("DataBuffer");
-      //   // JBI->Array_Start("Data");
-      //   //   uint8_t *p = SEGMENT.Data();
-      //   //   uint8_t len = 5;//SEGMENT_I(seg_i).DataLength()>10?10:SEGMENT_I(seg_i).DataLength();
-      //   // DEBUG_LINE_HERE;
-      //   //   if(len)
-      //   //   {
-      //   // DEBUG_LINE_HERE;
-      //   //     for(uint8_t i=0;i<len;i++)
-      //   //     {
-      //   // DEBUG_LINE_HERE;
-      //   //       if(p==nullptr)
-      //   //         JBI->Add("n");
-      //   //       else
-      //   //         JBI->Add(p[i]);
-      //   //     }
-      //   // DEBUG_LINE_HERE;
-      //   //   }
-      //   // JBI->Array_End();
-
-      //   JBI->Add("DataLength", SEGMENT_I(seg_i).DataLength());
-  
-      
-      
-      
-      // JBI->Level_End();
-
-
-
-      // JBI->Level_End();
-
-
+      JBI->Array_Start("PixelRange");
+        JBI->Add(seg.pixel_range.start);
+        JBI->Add(seg.pixel_range.stop);
+      JBI->Array_End();
+      JBI->Add("Offset",    seg.offset);
+      JBI->Add("Speed",     seg.speed());
+      JBI->Add("Intensity", seg.intensity());
+      JBI->Level_Start("Options");
+        JBI->Add("Selected",     seg.selected);
+        JBI->Add("Reverse",      seg.reverse);
+        JBI->Add("On",           seg.on);
+        JBI->Add("Mirror",       seg.mirror);
+        JBI->Add("Freeze",       seg.freeze);
+        JBI->Add("Reset",        seg.reset);
+        JBI->Add("Transitional", seg.transitional);
+        JBI->Add("Reverse_y",    seg.reverse_y);
+        JBI->Add("Mirror_y",     seg.mirror_y);
+        JBI->Add("Transpose",    seg.transpose);
+        JBI->Add("Map1D2D",      seg.map1D2D);
+        JBI->Add("SoundSim",     seg.soundSim);
+      JBI->Level_End();
+      JBI->Add("ColourType",     (uint8_t)seg.colour_type);
+      JBI->Level_Start("Transition");
+        JBI->Add("Rate",         seg.transition.rate_ms);
+        JBI->Add("Time",         seg.transition.time_ms);
+        JBI->Add("Amount",       seg.transition.pixels_to_update_as_number);
+      JBI->Level_End();
       JBI->Level_Start("RgbcctColours");
-      for(uint8_t rgb_i = 0; rgb_i< 1; rgb_i++)// segments[seg_i].rgbcctcolors.size(); rgb_i++)
+      for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
       {
         JBI->Array_Start_P("Colour%d", rgb_i);
         for(uint8_t i=0;i<5;i++)
         {
-          JBI->Add(segments[seg_i].rgbcctcolors[rgb_i].raw[i]);
+          JBI->Add(seg.rgbcctcolors[rgb_i].raw[i]);
         }
         JBI->Array_End();
+        JBI->Level_Start("ColourTemp");
+          // JBI->Add("RangeMin",      seg.rgbcctcolors[rgb_i].get_CTRangeMin());
+          // JBI->Add("RangeMax",      seg.rgbcctcolors[rgb_i].get_CTRangeMax());
+        JBI->Level_End();
       }
       JBI->Level_End();
-    
-    JBI->Level_End(); // Segment
+        
+    JBI->Level_End();
 
-
-  }
+  } //END seg_i
 
   return JBI->End();
 
 }
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -6249,7 +6172,6 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments_New(uint8_t json_level, boo
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
 uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level, bool json_appending)
 {
 
@@ -6262,255 +6184,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_lev
   return false;
 
 }
-
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-
-
-
-
-
-// uint8_t mAnimatorLight::ConstructJSON_Animation(uint8_t json_level, bool json_appending){
-
-//   #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "f::ConstructJSON_Animation"));
-//   #endif
-  
-//   JBI->Start();
-
-//     JBI->Add("light_power_state", pCONT_iLight->light_power_state ? "ON" : "OFF");
-//     // JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
-
-//     JBI->Level_Start(D_JSON_TRANSITION);
-//     //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-//     //   // transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.time_ms.val,1000);
-    
-// #ifndef USE_DEVFEATURE_METHOD_WLED_BUILD
-//       JBI->Add(D_JSON_TIME_MS, SEGMENT_I(0).transition.time_ms);   
-// #endif //  USE_DEVFEATURE_METHOD_WLED_BUILD
-//     //   transitionobj[D_JSON_TIME_MS] = ;
-//     //   // transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(pCONT_iLight->animation.transition.rate_ms,1000);
-//     //   transitionobj[D_JSON_RATE_MS] = pCONT_iLight->animation.transition.rate_ms;
-//     //   // transitionobj[D_JSON_PIXELS_UPDATE_NUMBER] = GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val);
-//     //   transitionobj[D_JSON_PIXELS_UPDATE_PERCENTAGE] = pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val;
-//     //   transitionobj[D_JSON_ORDER] = GetTransitionOrderName();
-//     JBI->Level_End();
-
-
-
-
-//   return JBI->End();
-
-
-// }
-
-
-
-// uint8_t mAnimatorLight::ConstructJSON_Ambilight(uint8_t json_level, bool json_appending){
-//   // Awaiting total redesign
-  
-//   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   // ALOG_DBM( PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
-//   // #endif
-
-//   JBI->Start();
-
-//     // JBI->Add("light_power_state", pCONT_iLight->light_power_state ? "ON" : "OFF");
-//     // JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
-
-//   return JBI->End();
-// }
-
-
-// // unless this is a debug, only one needs to exist (animation)
-// uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_appending)
-// {
-//   // Awaiting total redesign
-
-//   char buffer[30];
-  
-//   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-//   // ALOG_DBM( PSTR(D_LOG_NEO "f::ConstructJSON_Ambilight"));
-//   // #endif
-
-//   JBI->Start();
-
-//     // JBI->Add("SegmentCount", )
-
-//     JBI->Array_Start("PixelRange");
-//     for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-//     {
-//       JBI->Add(_segments[i].pixel_range.start);
-//       JBI->Add(_segments[i].pixel_range.stop);
-//     }
-//     JBI->Array_End();
-
-
-//     JBI->Array_Start("SegmentActive");
-//     for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-//     {
-//       JBI->Add(_segments[i].isActive());
-//     }
-//     JBI->Array_End();
-
-//     JBI->Array_Start("PaletteID");
-//     for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-//     {
-//       JBI->Add(_segments[i].palette.id);
-//     }
-//     JBI->Array_End();
-
-
-//     // JBI->Array_Start("HardwareOrder");
-//     //   for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-//     //   {
-//     //     // sprintf(buffer, "%d", i);
-//     //     JBI->Array_Start();
-//     //       JBI->Add(_segments[i].hardware_element_colour_order.r);
-//     //       JBI->Add(_segments[i].hardware_element_colour_order.g);
-//     //       JBI->Add(_segments[i].hardware_element_colour_order.b);
-//     //       JBI->Add(_segments[i].hardware_element_colour_order.w1);
-//     //       JBI->Add(_segments[i].hardware_element_colour_order.w2);
-//     //     JBI->Array_End();
-//     //   }
-//     // JBI->Array_End();
-
-//     // JBI->Add("light_power_state", pCONT_iLight->light_power_state ? "ON" : "OFF");
-//     // JBI->Add("light_size_count", pCONT_iLight->settings.light_size_count);
-
-//   return JBI->End();
-// }
-
-
-
-
-// /**
-//  * @brief 
-//  * definitely remove "state" or make is something basic, minimal info should come from the light_interface not aniamtor
-//  * 
-//  *
-//  * @brief Fix this first, what is running all in here for now until I clean the others up (and remove topics not needed?)
-//  * 
-//  * @param json_level 
-//  * @return uint8_t 
-//  */
-// uint8_t mAnimatorLight::ConstructJSON_State(uint8_t json_level, bool json_appending)
-// {
-
-//   uint8_t numpixels = pCONT_iLight->settings.light_size_count<100?pCONT_iLight->settings.light_size_count:100;
-//   RgbTypeColor c;
-
-//   char buffer[100];
-  
-//   JsonBuilderI->Start();  
-//     JsonBuilderI->Add_P(PM_JSON_SIZE, pCONT_iLight->settings.light_size_count);
-//     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
-//     JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette.id );
-//     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette.id, buffer, sizeof(buffer)));
-//     // JsonBuilderI->Array_Start("rgb");
-//     // for(int i=0;i<numpixels;i++){
-//     //   RgbTypeColor c = GetPixelColor(i);
-//     //   JsonBuilderI->Add_FV(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
-//     // }
-//     // JsonBuilderI->Array_End();
-//   return JsonBuilderI->End();
-
-// }
-
-// // // Update struct that shows overview, always sends
-// uint8_t mAnimatorLight::ConstructJSON_Flasher(uint8_t json_level, bool json_appending)
-// {
-
-//   char buffer[100];
-
-//   JsonBuilderI->Start();
-
-  
-//     JsonBuilderI->Add_P(PM_JSON_HUE, _segment_runtimes[0].rgbcct_controller->getHue360());
-//     JsonBuilderI->Add_P(PM_JSON_SAT, _segment_runtimes[0].rgbcct_controller->getSat255());
-//     JsonBuilderI->Add_P(PM_JSON_BRIGHTNESS_RGB, _segment_runtimes[0].rgbcct_controller->getBrightnessRGB());
-
-//     JBI->Add("colour_type", (uint8_t)SEGMENT_I(0).colour_type);
-
-
-//   //   JBI->Level_Start("Segments");
-
-//   //   // limit the size of array
-//   //   uint16_t length = _segment_runtimes[0].DataLength();
-
-//   //   length = length < 100 ? length : 100;
-
-//   //   JBI->Array_Start("data0");
-//   //     for(int i=0;i<length;i++)
-//   //     {
-//   //       if(_segment_runtimes[0].Data() != nullptr)
-//   //       {
-//   //         JBI->Add(_segment_runtimes[0].Data()[i]);
-//   //       }
-//   //     }
-//   //   JBI->Array_End();
-
-//   //   length = _segment_runtimes[1].DataLength();
-//   //   length = length < 100 ? length : 100;
-
-//   //   JBI->Array_Start("data1");
-//   //   for(int i=0;i<length;i++)
-//   //   {
-//   //     if(_segment_runtimes[1].Data() != nullptr)
-//   //     {
-//   //       JBI->Add(_segment_runtimes[1].Data()[i]);
-//   //     }
-//   //   }
-//   //   JBI->Array_End();
-
-//   // JBI->Level_End();
-
-//   JBI->Add("segment_settings_size", sizeof(segment_settings));
-//   JBI->Add("segment_runtime_size", sizeof(segment_runtime));
-
-// //   JBI->Add("flashermillis",millis()-flashersettings.tSaved.Update);
-
-// // root[D_JSON_ONOFF] = pCONT_iLight->light_power_state ? "ON" : "OFF";
-// // JBI->Add(PM_JSON_MODE, pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-// // JBI->Add(PM_JSON_FUNCTION, GetFlasherFunctionName(buffer, sizeof(buffer)));
-// // root["region"] = GetFlasherRegionName();
-// // root[D_JSON_COLOUR_PALETTE] = GetPaletteFriendlyName();
-// // root[D_JSON_BRIGHTNESS_PERCENTAGE] = SEGMENT_I(0).brightness*100;
-// // root[D_JSON_BRIGHTNESS] = SEGMENT_I(0).brightness;
-
-// //   // JsonObject transitionobj = root.createNestedObject(D_JSON_TRANSITION);
-// //   //   transitionobj[D_JSON_METHOD] = GetTransitionMethodName();
-// //   //   transitionobj[D_JSON_TIME] = mSupport::safeDivideInt(SEGMENT_I(0).transition.time_ms,1000);
-// //   //   transitionobj[D_JSON_TIME_MS] = SEGMENT_I(0).transition.time_ms;
-// //   //   transitionobj[D_JSON_RATE] = mSupport::safeDivideInt(SEGMENT_I(0).transition.rate_ms,1000);
-// //   //   transitionobj[D_JSON_RATE_MS] = SEGMENT_I(0).transition.rate_ms;
-// //   //   transitionobj[D_JSON_FUNCTION] = GetFlasherFunctionName();
-
-// //   JsonObject seq_obj = root.createNestedObject("sequential");
-// //     seq_obj["rate_index"] = flashersettings.function_seq.rate_index;
-
-// // JsonBuilderI->Level_Start("slow_glow");
-// //   JsonBuilderI->Add("rate_index", flashersettings.function_slo_glo.rate_index);
-// // JsonBuilderI->Level_End();
-
-//   return JsonBuilderI->End();
-// }
-
-
-// #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-// uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level, bool json_appending)
-// {
-
-//   char buffer[100];
-
-//   JsonBuilderI->Start();
-
-  
-//   return JsonBuilderI->End();
-// }
-// #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-
-
 
 
 /******************************************************************************************************************
@@ -6526,7 +6200,6 @@ void mAnimatorLight::MQTTHandler_Init()
   struct handler<mAnimatorLight>* ptr;
   
   ptr = &mqtthandler_settings_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_SETTINGS_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6535,20 +6208,20 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
-  ptr = &mqtthandler_animation_active_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_MODULE__ANIMATION_ACTIVE_TELEPERIOD_ID;
+  ptr = &mqtthandler_segments_teleperiod;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATION_ACTIVE_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Animation_Active;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Segments;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_playlists_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_MODULE__PLAYLISTS_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6557,10 +6230,10 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Playlist;
+  mqtthandler_list.push_back(ptr);
   
   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   ptr = &mqtthandler_mode_ambilight_teleperiod;
-  ptr->handler_id = MQTT_HANDLER_MODULE__AMBILIGHT_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6569,11 +6242,11 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_Ambilight;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
 
   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   ptr = &mqtthandler_manual_setpixel;
-  ptr->handler_id = MQTT_HANDLER_MODULE__NOTIFICATION_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6582,11 +6255,11 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   ptr = &mqtthandler_automation_presets;
-  ptr->handler_id = MQTT_HANDLER_MODULE__AUTOMATION_PRESETS__ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6595,11 +6268,11 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
   ptr = &mqtthandler_manual_setpixel;
-  ptr->handler_id = MQTT_HANDLER_MODULE__NOTIFICATION_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6608,11 +6281,11 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
   ptr = &mqtthandler_debug_palette;
-  ptr->handler_id = MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6621,24 +6294,11 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-  ptr = &mqtthandler_debug_hardware;
-  ptr->handler_id = MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_HARDWARE__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Hardware;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
   ptr                         = &mqtthandler_debug_segments;
-  ptr->handler_id             = MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_TELEPERIOD_ID;
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
@@ -6647,24 +6307,11 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level             = JSON_LEVEL_DETAILED;
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Segments;
+  mqtthandler_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-  ptr                         = &mqtthandler_debug_segments_new;
-  ptr->handler_id             = MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_NEW_TELEPERIOD_ID;
-  ptr->tSavedLastSent         = millis();
-  ptr->flags.PeriodicEnabled  = true;
-  ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = pCONT_set->Settings.sensors.ifchanged_secs; 
-  ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level             = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS_NEW__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Segments_New;
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
 
   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
   ptr = &mqtthandler_debug_animations_progress;
-  ptr->handler_id = MQTT_HANDLER_MODULE__DEBUG_ANIMATOR_ANIMATION_PROGRESS_TELEPERIOD_ID;
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
@@ -6673,6 +6320,7 @@ void mAnimatorLight::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Animations_Progress;
+  mqtthandler_list.push_back(ptr);
   #endif
 
 } //end "MQTTHandler_Init"

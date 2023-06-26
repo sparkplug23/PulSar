@@ -21,10 +21,10 @@
 
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
@@ -109,7 +109,7 @@ class mPaletteContainer;
 #endif
 
 
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATION_ACTIVE_CTR)       "animation";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR)       "segments";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR)              "playlists";
 
 #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
@@ -129,14 +129,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PLAYLISTS_CTR)   "playl
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)         "debug/palette";
 #endif
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_HARDWARE__CTR)         "debug/hardware";
-#endif
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug/segments";
-#endif 
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS_NEW__CTR)        "debug/segments_new";
 #endif 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
@@ -304,25 +298,14 @@ class mAnimatorLight :
       _briCT_Global = bri_ct;
     }
 
-
-    
-    uint16_t get_CTRangeMin(void)
-    {
-      return _ct_min_range;
-    }
-    uint16_t get_CTRangeMax(void)
-    {
-      return _ct_max_range;
-    }
-
     // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
-    uint16_t _ct_min_range = 153;   // the minimum CT rendered range
-    uint16_t _ct_max_range = 500;   // the maximum CT rendered range
+    // uint16_t _ct_min_range = 153;   // the minimum CT rendered range
+    // uint16_t _ct_max_range = 500;   // the maximum CT rendered range
     uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
     uint8_t  _briCT_Global = 255;
 
-    void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
-    void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
+    // void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
+    // void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
    
     void EverySecond_AutoOff();
     void BootMessage();
@@ -335,12 +318,6 @@ class mAnimatorLight :
     
     const char* GetAnimationStatusCtr(char* buffer, uint8_t buflen);
             
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    void WebPage_Root_AddHandlers();
-    void WebAppend_JSON_RootPage_LiveviewPixels();
-    void WebPage_Root_SendInformationModule();
-    #endif // USE_MODULE_NETWORK_WEBSERVER
-
     #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     byte correctionRGB[4] = {0,0,0,0};
     uint16_t lastKelvin = 0;
@@ -388,6 +365,9 @@ class mAnimatorLight :
     void HandlePage_RGBLightSettings(AsyncWebServerRequest *request);
     void WebAppend_Root_Status_Table();
     void WebSave_RGBColourSelector(void);
+    void WebPage_Root_AddHandlers();
+    void WebAppend_JSON_RootPage_LiveviewPixels();
+    void WebPage_Root_SendInformationModule();
     #endif //USE_MODULE_NETWORK_WEBSERVER
 
     #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
@@ -420,471 +400,314 @@ class mAnimatorLight :
     uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_appending = true);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
-
     void LoadPalette(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer = nullptr, uint16_t palette_buflen = 0);
 
-  
-  uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-  uint8_t ConstructJSON_Animation_Active(uint8_t json_level = 0, bool json_appending = true);
-  uint8_t ConstructJSON_Playlist(uint8_t json_level = 0, bool json_appending = true);
-  /**
-   * @brief Each mode
-   */
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  uint8_t ConstructJSON_Mode_Ambilight(uint8_t json_level = 0, bool json_appending = true);
-  #endif
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-  uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0, bool json_appending = true); // probably falls into the E131 type, but here set my mqtt
-  #endif
-  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_appending = true);
-  #endif
-
-  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-  uint8_t ConstructJSON_Auto_Playlists(uint8_t json_level = 0, bool json_appending = true);
-  #endif  
-  /**
-   * @brief Debug 
-   */
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0, bool json_appending = true);
-  #endif
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-  uint8_t ConstructJSON_Debug_Hardware(uint8_t json_level = 0, bool json_appending = true);
-  #endif
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-  uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0, bool json_appending = true);
-  #endif
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-  uint8_t ConstructJSON_Debug_Segments_New(uint8_t json_level = 0, bool json_appending = true);
-  #endif
-  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-    uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
-    ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
-    mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
-  #endif
-  
-  #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    void MQTTHandler_Set_RefreshAll();
-    void MQTTHandler_Set_DefaultPeriodRate();  
-    void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
-  
-    // Are these really needed?? now I am use auto for loops
-    // Extra module only handlers
-    enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
-      MQTT_HANDLER_MODULE__ANIMATION_ACTIVE_TELEPERIOD_ID = MQTT_HANDLER_LENGTH_ID,
-      MQTT_HANDLER_MODULE__PLAYLISTS_TELEPERIOD_ID,
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      MQTT_HANDLER_MODULE__MODE_AMBILIGHT_TELEPERIOD_ID,
-      #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-      MQTT_HANDLER_MODULE__MODE_MANUAL_SETPIXEL_TELEPERIOD_ID,
-      #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-      
-      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-      MQTT_HANDLER_MODULE__AUTOMATION_PRESETS__ID,
-      #endif
-      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-      MQTT_HANDLER_MODULE__AUTOMATION_PLAYLSITS__ID,
-      #endif
-
-      /**
-       * @brief Debug
-       **/
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      MQTT_HANDLER_MODULE__DEBUG_PALETTE_TELEPERIOD_ID,
-      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-      MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_TELEPERIOD_ID,
-      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-      MQTT_HANDLER_MODULE__DEBUG_SEGMENTS_NEW_TELEPERIOD_ID,
-      #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-      MQTT_HANDLER_MODULE__DEBUG_ANIMATOR_ANIMATION_PROGRESS_TELEPERIOD_ID,
-      #endif
-      MQTT_HANDLER_MODULE_LENGTH_ID, // id count
-    };
-
-    struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;    
-    struct handler<mAnimatorLight> mqtthandler_animation_active_teleperiod;  
-    struct handler<mAnimatorLight> mqtthandler_playlists_teleperiod;
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Segments(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Playlist(uint8_t json_level = 0, bool json_appending = true);
     /**
      * @brief Each mode
-     **/
+     */
     #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-    struct handler<mAnimatorLight> mqtthandler_mode_ambilight_teleperiod;
-    #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    uint8_t ConstructJSON_Mode_Ambilight(uint8_t json_level = 0, bool json_appending = true);
+    #endif
     #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-    struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
-    #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0, bool json_appending = true); // probably falls into the E131 type, but here set my mqtt
+    #endif
     #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    struct handler<mAnimatorLight> mqtthandler_automation_presets;
+    uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_appending = true);
     #endif
     #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-    struct handler<mAnimatorLight> mqtthandler_automation_playlists;
+    uint8_t ConstructJSON_Auto_Playlists(uint8_t json_level = 0, bool json_appending = true);
+    #endif  
+    /**
+     * @brief Debug 
+     */
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    uint8_t ConstructJSON_Debug_Palette(uint8_t json_level = 0, bool json_appending = true);
+    #endif
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0, bool json_appending = true);
+    #endif
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
+      ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
+      mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
     #endif
     
-    /**
-     * @brief Debug
-     **/
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      struct handler<mAnimatorLight> mqtthandler_debug_palette;
-    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-      struct handler<mAnimatorLight> mqtthandler_debug_hardware;
-    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-      struct handler<mAnimatorLight> mqtthandler_debug_segments;
-    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-      struct handler<mAnimatorLight> mqtthandler_debug_segments_new;
-    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-      struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
-    #endif
-
-    // Could this be put into a function? to allow me to set things to all in this, or by ID
-    struct handler<mAnimatorLight>* mqtthandler_list[
-      2
+    #ifdef USE_MODULE_NETWORK_MQTT
+      void MQTTHandler_Init();
+      void MQTTHandler_Set_RefreshAll();
+      void MQTTHandler_Set_DefaultPeriodRate();  
+      void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+      
+      std::vector<struct handler<mAnimatorLight>*> mqtthandler_list;
+    
+      struct handler<mAnimatorLight> mqtthandler_settings_teleperiod;    
+      struct handler<mAnimatorLight> mqtthandler_segments_teleperiod;  
+      struct handler<mAnimatorLight> mqtthandler_playlists_teleperiod;
       /**
        * @brief Each mode
        **/
       #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      +1
-      #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+      struct handler<mAnimatorLight> mqtthandler_mode_ambilight_teleperiod;
+      #endif
       #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-      +1
+      struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
       #endif
       #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-        +1
+      struct handler<mAnimatorLight> mqtthandler_automation_presets;
       #endif
+      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+      struct handler<mAnimatorLight> mqtthandler_automation_playlists;
+      #endif    
       /**
        * @brief Debug
        **/
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-        +1
-      #endif
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-        +1
+      struct handler<mAnimatorLight> mqtthandler_debug_palette;
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-        +1
-      #endif
-      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-        +1
+      struct handler<mAnimatorLight> mqtthandler_debug_segments;
       #endif
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-        +1
+      struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
       #endif
-      +1 // settings at the end
-      ] = {
-        
-        &mqtthandler_animation_active_teleperiod,
-        &mqtthandler_playlists_teleperiod,
-        /**
-         * @brief Each mode
-         **/
-        #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-        &mqtthandler_mode_ambilight_teleperiod,
-        #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-        #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-        &mqtthandler_manual_setpixel,
-        #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-        #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-        &mqtthandler_automation_presets,
-        #endif
-        #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-        &mqtthandler_automation_playlists,
-        #endif
-        /**
-         * @brief Debug
-         **/
-        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-        &mqtthandler_debug_palette,
-        #endif
-        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-        &mqtthandler_debug_hardware,
-        #endif
-        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-        &mqtthandler_debug_segments,
-        #endif
-        #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-        &mqtthandler_debug_segments_new,
-        #endif
-        #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-        &mqtthandler_debug_animations_progress,
-        #endif
-        &mqtthandler_settings_teleperiod
-        
+    #endif // USE_MODULE_NETWORK_MQTT
+      
+
+    /*****************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Subtask:   Mixer (for changing animations)   *****************************************************************************************************************************
+    **  @note:     to be renamed, "profiles?"  ***********************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+    #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
+    #include "mAnimatorLight_Auto_Playlists.h"
+    #endif
+    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #include "mAnimatorLight_Auto_Presets.h"
+    #endif
+
+    /*****************************************************************************************************************************************************************************
+    ********************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Animation Effect:   Ambilight   ***************************************************************************************************************************************************************************
+    **  @note:     **************************************************************************************************************************************************************************
+    ************************************************************************************************************************************************************************************
+    **********************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+    #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+    // Move completely into its own class, with its own tasker
+    /**************
+     * Ambilight is light patterns around screens or pictures
+     * PRESETS - patterns
+     * INPUT_STREAM - set leds directly through mqtt (wallpaper) or serial lighting
+    **************/ 
+    enum AMBILIGHT_MODES_IDS{
+      AMBILIGHT_PRESETS_ID=0,
+      AMBILIGHT_SIDES_ID,
+      AMBILIGHT_INPUT_STREAM_ID,
+      AMBILIGHT_LENGTH_ID
     };
+    int8_t GetAmbilightModeIDbyName(const char* c);
+    const char* GetAmbilightModeName(char* buffer);
 
-  #endif // USE_MODULE_NETWORK_MQTT
- 
+    /*******AMBILIGHT*********************************************************************************************/
 
-/*****************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** Subtask:   Mixer (for changing animations)   *****************************************************************************************************************************
-**  @note:     to be renamed, "profiles?"  ***********************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************/
+    void SubTask_Ambilight_Main();
+    void Ambilight_Sides();
+    void Ambilight_Presets();
+    void Ambilight_InputStream();
+    void init_Ambilight();
+    #define AMBILIGHT_SCREENS_CONNECTED 1
 
-#ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
-#include "mAnimatorLight_Auto_Playlists.h"
-#endif
-#ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-#include "mAnimatorLight_Auto_Presets.h"
-#endif
+    /**
+     * 
+     * Long term, multiple screens will be used as their own subclass, containing all the info about that screen instead of struct arrays
+     * */
+    enum AMBILIGHT_SCREEN_INDEX{SCREEN_CENTRE=0,SCREEN_LEFT=1,SCREEN_RIGHT=2};
 
-
-
-/*****************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** Animation Effect:   Ambilight   ***************************************************************************************************************************************************************************
-**  @note:     **************************************************************************************************************************************************************************
-**************************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-**********************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************/
-
-#ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-// Move completely into its own class, with its own tasker
-/**************
- * Ambilight is light patterns around screens or pictures
- * PRESETS - patterns
- * INPUT_STREAM - set leds directly through mqtt (wallpaper) or serial lighting
-**************/ 
-enum AMBILIGHT_MODES_IDS{
-  AMBILIGHT_PRESETS_ID=0,
-  AMBILIGHT_SIDES_ID,
-  AMBILIGHT_INPUT_STREAM_ID,
-  AMBILIGHT_LENGTH_ID
-};
-int8_t GetAmbilightModeIDbyName(const char* c);
-const char* GetAmbilightModeName(char* buffer);
-
-/*******AMBILIGHT*********************************************************************************************/
-
-void SubTask_Ambilight_Main();
-void Ambilight_Sides();
-void Ambilight_Presets();
-void Ambilight_InputStream();
-void init_Ambilight();
-#define AMBILIGHT_SCREENS_CONNECTED 1
-
-/**
- * 
- * Long term, multiple screens will be used as their own subclass, containing all the info about that screen instead of struct arrays
- * */
-enum AMBILIGHT_SCREEN_INDEX{SCREEN_CENTRE=0,SCREEN_LEFT=1,SCREEN_RIGHT=2};
-
-// enum RgbColorTypeID{
-//   RgbColorTypeID_RGB=0,
-//   RgbColorTypeID_RGB_CW,
-//   RgbColorTypeID_RGB_WW,
-//   RgbColorTypeID_RGB_WW_CW}; 
+    // enum RgbColorTypeID{
+    //   RgbColorTypeID_RGB=0,
+    //   RgbColorTypeID_RGB_CW,
+    //   RgbColorTypeID_RGB_WW,
+    //   RgbColorTypeID_RGB_WW_CW}; 
 
 
-struct AMBILIGHT_SCREEN_SETTINGS{
-  uint8_t ambilight_mode=AMBILIGHT_SIDES_ID;
-  uint32_t tSavedUpdate = millis();
-  uint32_t ratemsSavedUpdate = 1000;
-  uint8_t fUpdate = false;
-  struct SCREENS{
-    struct EDGE{
-      RgbcctColor colour;
-      int8_t blend_between_sides_gradient_percentage = -1; // -1 is unset/none/solid, 0% is bottom/left, 100% is top/right
-      uint8_t size = 5;
-    };
-    struct EDGE top;
-    struct EDGE bottom;
-    struct EDGE left;
-    struct EDGE right;
-    struct FIRST_PIXEL{
-      //uint8_t bottom_right_clockwise = store as packed bit? 
-    }start_pixel;
-  }screens[AMBILIGHT_SCREENS_CONNECTED]; //0,1,2 where 0 is centre and only screen
+    struct AMBILIGHT_SCREEN_SETTINGS{
+      uint8_t ambilight_mode=AMBILIGHT_SIDES_ID;
+      uint32_t tSavedUpdate = millis();
+      uint32_t ratemsSavedUpdate = 1000;
+      uint8_t fUpdate = false;
+      struct SCREENS{
+        struct EDGE{
+          RgbcctColor colour;
+          int8_t blend_between_sides_gradient_percentage = -1; // -1 is unset/none/solid, 0% is bottom/left, 100% is top/right
+          uint8_t size = 5;
+        };
+        struct EDGE top;
+        struct EDGE bottom;
+        struct EDGE left;
+        struct EDGE right;
+        struct FIRST_PIXEL{
+          //uint8_t bottom_right_clockwise = store as packed bit? 
+        }start_pixel;
+      }screens[AMBILIGHT_SCREENS_CONNECTED]; //0,1,2 where 0 is centre and only screen
 
-}ambilightsettings;
+    }ambilightsettings;
 
-#endif
+    #endif
 
-/******************************************************************************************************************************************************************************
-********************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-****************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** Animation Effect:   Segments   ***************************************************************************************************************************************************************************
-**  @note:    New effect that merges HACS and WLED with segments and dynamic animation storage **************************************************************************************************************************************************************************
-********************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-****************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************/
+    /******************************************************************************************************************************************************************************
+    *******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Animation Effect:   Segments   ***************************************************************************************************************************************************************************
+    **  @note:    New effect that merges HACS and WLED with segments and dynamic animation storage **************************************************************************************************************************************************************************
+    ********************************************************************************************************************************************************************************
+    *****************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
 
-// #ifdef ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-// #include "6_Lights/03_Animator/mAnimatorLight_Segments.h"   
-// #endif // ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    #define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
 
+    #define MIN(a,b) ((a)<(b)?(a):(b))
+    #define MAX(a,b) ((a)>(b)?(a):(b))
 
-#define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
+    /* Not used in all effects yet */
+    #define WLED_FPS         42
+    #define FRAMETIME_FIXED  (1000/WLED_FPS)
+    #define FRAMETIME_MS     24
+    #define FRAMETIME        getFrameTime()
 
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#define MAX(a,b) ((a)>(b)?(a):(b))
+    /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
+      insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
+    #ifdef ESP8266
+      #define MAX_NUM_SEGMENTS    16
+      /* How much data bytes all segments combined may allocate */
+      #define MAX_SEGMENT_DATA  5120
+    #else
+      #ifndef MAX_NUM_SEGMENTS
+        #define MAX_NUM_SEGMENTS  6//32
+      #endif
+      #define MAX_SEGMENT_DATA  32767
+    #endif
 
-/* Not used in all effects yet */
-#define WLED_FPS         42
-#define FRAMETIME_FIXED  (1000/WLED_FPS)
-#define FRAMETIME_MS     24
-#define FRAMETIME        getFrameTime()
+    #define IBN 5100
 
-/* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
-  insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
-#ifdef ESP8266
-  #define MAX_NUM_SEGMENTS    16
-  /* How much data bytes all segments combined may allocate */
-  #define MAX_SEGMENT_DATA  5120
-#else
-  #ifndef MAX_NUM_SEGMENTS
-    #define MAX_NUM_SEGMENTS  6//32
-  #endif
-  #define MAX_SEGMENT_DATA  32767
-#endif
+    /* How much data bytes each segment should max allocate to leave enough space for other segments,
+      assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
+    // #define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
 
-#define IBN 5100
+    #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
 
-/* How much data bytes each segment should max allocate to leave enough space for other segments,
-  assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
-// #define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / strip.getMaxSegments())
+    #define SET_BRIGHTNESS true
 
-#define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
+    // options
+    // bit    7: segment is in transition mode
+    // bits 4-6: TBD
+    // bit    3: mirror effect within segment
+    // bit    2: segment is on
+    // bit    1: reverse segment
+    // bit    0: segment is selected
+    #define NO_OPTIONS   (uint8_t)0x00
+    #define TRANSITIONAL (uint8_t)0x80
+    #define MIRROR       (uint8_t)0x08
+    #define SEGMENT_ON   (uint8_t)0x04
+    #define REVERSE      (uint8_t)0x02
+    #define SELECTED     (uint8_t)0x01
+    #define IS_TRANSITIONAL ((SEGMENT_I(_segment_index_primary).options & TRANSITIONAL) == TRANSITIONAL)
+    #define IS_MIRROR       ((SEGMENT_I(_segment_index_primary).options & MIRROR      ) == MIRROR      )
+    #define IS_SEGMENT_ON   ((SEGMENT_I(_segment_index_primary).options & SEGMENT_ON  ) == SEGMENT_ON  )
+    #define IS_REVERSE      ((SEGMENT_I(_segment_index_primary).options & REVERSE     ) == REVERSE     )
+    #define IS_SELECTED     ((SEGMENT_I(_segment_index_primary).options & SELECTED    ) == SELECTED    )
 
-#define SET_BRIGHTNESS true
+    // #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
+    #define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
 
-// options
-// bit    7: segment is in transition mode
-// bits 4-6: TBD
-// bit    3: mirror effect within segment
-// bit    2: segment is on
-// bit    1: reverse segment
-// bit    0: segment is selected
-#define NO_OPTIONS   (uint8_t)0x00
-#define TRANSITIONAL (uint8_t)0x80
-#define MIRROR       (uint8_t)0x08
-#define SEGMENT_ON   (uint8_t)0x04
-#define REVERSE      (uint8_t)0x02
-#define SELECTED     (uint8_t)0x01
-#define IS_TRANSITIONAL ((SEGMENT_I(_segment_index_primary).options & TRANSITIONAL) == TRANSITIONAL)
-#define IS_MIRROR       ((SEGMENT_I(_segment_index_primary).options & MIRROR      ) == MIRROR      )
-#define IS_SEGMENT_ON   ((SEGMENT_I(_segment_index_primary).options & SEGMENT_ON  ) == SEGMENT_ON  )
-#define IS_REVERSE      ((SEGMENT_I(_segment_index_primary).options & REVERSE     ) == REVERSE     )
-#define IS_SELECTED     ((SEGMENT_I(_segment_index_primary).options & SELECTED    ) == SELECTED    )
+    /* How much data bytes all segments combined may allocate */
+    #ifdef ESP8266
+    #define MAX_SEGMENT_DATA 2048
+    #else
+    #define MAX_SEGMENT_DATA 8192
+    #endif
 
-// #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
-#define MINIMUM_SHOW_BACKOFF_PERIOD_MS 30//15
+    #define FLASH_COUNT 4 
+    #define LED_SKIP_AMOUNT  0
+    #define MIN_SHOW_DELAY  15
+    #define DEFAULT_LED_COUNT 30
 
-/* How much data bytes all segments combined may allocate */
-#ifdef ESP8266
-#define MAX_SEGMENT_DATA 2048
-#else
-#define MAX_SEGMENT_DATA 8192
-#endif
-
-#define FLASH_COUNT 4 
-#define LED_SKIP_AMOUNT  0
-#define MIN_SHOW_DELAY  15
-#define DEFAULT_LED_COUNT 30
-
-#define DEFAULT_BRIGHTNESS (uint8_t)127
-#define DEFAULT_MODE       (uint8_t)0
-#define DEFAULT_SPEED      (uint8_t)128
-#define DEFAULT_INTENSITY  (uint8_t)128
-#define DEFAULT_COLOR      (uint32_t)0xFFAA00
-#define DEFAULT_C1         (uint8_t)128
-#define DEFAULT_C2         (uint8_t)128
-#define DEFAULT_C3         (uint8_t)16
+    #define DEFAULT_BRIGHTNESS (uint8_t)127
+    #define DEFAULT_MODE       (uint8_t)0
+    #define DEFAULT_SPEED      (uint8_t)128
+    #define DEFAULT_INTENSITY  (uint8_t)128
+    #define DEFAULT_COLOR      (uint32_t)0xFFAA00
+    #define DEFAULT_C1         (uint8_t)128
+    #define DEFAULT_C2         (uint8_t)128
+    #define DEFAULT_C3         (uint8_t)16
 
 
-//Segment option byte bits
-#define SEG_OPTION_SELECTED       0
-#define SEG_OPTION_REVERSED       1
-#define SEG_OPTION_ON             2
-#define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
-#define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
-#define SEG_OPTION_TRANSITIONAL   7
+    //Segment option byte bits
+    #define SEG_OPTION_SELECTED       0
+    #define SEG_OPTION_REVERSED       1
+    #define SEG_OPTION_ON             2
+    #define SEG_OPTION_MIRROR         3            //Indicates that the effect will be mirrored within the segment
+    #define SEG_OPTION_NONUNITY       4            //Indicates that the effect does not use FRAMETIME_MS or needs getPixelColor
+    #define SEG_OPTION_TRANSITIONAL   7
 
-// some common colors
-// white, red, green, blue
-#define RED        (uint32_t)0xFF0000
-#define GREEN      (uint32_t)0x00FF00
-#define BLUE       (uint32_t)0x0000FF
-#define WHITE      (uint32_t)0xFFFFFF
-#define BLACK      (uint32_t)0x000000
-#define YELLOW     (uint32_t)0xFFFF00
-#define CYAN       (uint32_t)0x00FFFF
-#define MAGENTA    (uint32_t)0xFF00FF
-#define PURPLE     (uint32_t)0x400080
-#define ORANGE     (uint32_t)0xFF3000
-#define PINK       (uint32_t)0xFF1493
-#define ULTRAWHITE (uint32_t)0xFFFFFFFF
-#define DARKSLATEGRAY (uint32_t)0x2F4F4F
-#define DARKSLATEGREY (uint32_t)0x2F4F4F
+    // some common colors
+    // white, red, green, blue
+    #define RED        (uint32_t)0xFF0000
+    #define GREEN      (uint32_t)0x00FF00
+    #define BLUE       (uint32_t)0x0000FF
+    #define WHITE      (uint32_t)0xFFFFFF
+    #define BLACK      (uint32_t)0x000000
+    #define YELLOW     (uint32_t)0xFFFF00
+    #define CYAN       (uint32_t)0x00FFFF
+    #define MAGENTA    (uint32_t)0xFF00FF
+    #define PURPLE     (uint32_t)0x400080
+    #define ORANGE     (uint32_t)0xFF3000
+    #define PINK       (uint32_t)0xFF1493
+    #define ULTRAWHITE (uint32_t)0xFFFFFFFF
+    #define DARKSLATEGRAY (uint32_t)0x2F4F4F
+    #define DARKSLATEGREY (uint32_t)0x2F4F4F
 
-#define NUM_COLORS 3 
+    #define NUM_COLORS 3 
 
-#define SEGIDX           getCurrSegmentId()
+    #define SEGIDX           getCurrSegmentId()
 
-/**
- * @brief 
- * Note: WLED used full colour RGB SEGCOLOR, here SEGCOLOR going forward will also have brightness applied otherwise it is assumed as 100% brightness and therefore the same as WLED
- * 
- */
-#define SEGCOLOR(x)      RgbcctColor::GetU32ColourBrightnessApplied(segments[getCurrSegmentId()].rgbcctcolors[x])
+    /**
+     * @brief 
+     * Note: WLED used full colour RGB SEGCOLOR_U32, here SEGCOLOR_U32 going forward will also have brightness applied otherwise it is assumed as 100% brightness and therefore the same as WLED
+     * 
+     */
+    #define SEGCOLOR_U32(x)      RgbcctColor::GetU32ColourBrightnessApplied(segments[getCurrSegmentId()].rgbcctcolors[x])
+    #define SEGCOLOR_RGBCCT(x)      segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
+    // #define SEGCOLOR_U32(s,x)  RgbcctColor::GetU32Colour(segments[s].rgbcctcolors[x])
 
-#define SEGCOLOR_RGBCCT(x)      segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
+    #define SEGMENT          segments[getCurrSegmentId()]
+    #define SEGMENT_I(X)     segments[X]
+    #define SEGLEN           _virtualSegmentLength
 
-#define SEGCOLOR_U32(s,x)  RgbcctColor::GetU32Colour(segments[s].rgbcctcolors[x])
+    #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
 
+    void fill(uint32_t c, bool apply_brightness = false);
+    void fill_ranged(uint32_t c, bool apply_brightness = false); 
+    // void seg_fill_ranged(uint32_t c, bool apply_brightness = false);
 
+    uint32_t color_wheel(uint8_t pos);
+    uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
 
+    void Init_Segments();
 
-
-
-
-
-#define SEGMENT          segments[getCurrSegmentId()]
-#define SEGMENT_I(X)     segments[X]
-#define SEGLEN           _virtualSegmentLength
-
-#define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
-
-  void fill(uint32_t c, bool apply_brightness = false);
-  void fill_ranged(uint32_t c, bool apply_brightness = false); 
-  // void seg_fill_ranged(uint32_t c, bool apply_brightness = false);
-
-  uint32_t color_wheel(uint8_t pos);
-  uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
-
-  void Init_Segments();
-
-  /**
-   * Minor Code version 96 onwards requires names, as reshuffle is happening. Any old device will not respond to the correct command via number until remap is performed
-   * */
-  enum EFFECTS_FUNCTION__IDS
-  {
+    /**
+     * Minor Code version 96 onwards requires names, as reshuffle is happening. Any old device will not respond to the correct command via number until remap is performed
+     * */
+    enum EFFECTS_FUNCTION__IDS
+    {
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__SOLID_COLOUR__ID,
     #endif
@@ -1481,52 +1304,15 @@ struct AMBILIGHT_SCREEN_SETTINGS{
     EFFECTS_FUNCTION__LENGTH__ID
   };         
 
-
-
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   #define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
   #else
   #define DEFAULT_EFFECTS_FUNCTION    0
   #endif
 
-
-
-/*****************************************
- * To be absorbed by segment settings
- * END
- * *//////
-
-
   void SubTask_Segments_Animation();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
-  /**
-   * Create a duplicate of this in HACS, and slowly move HACS to follow this basic layout ("layout" = struct of what animation runs in that section)
-   * */
-
-  /**
-   * how a section (single animation) is configured -- my HACS needs to change to conform to this
-   * */
-
-  // options
-  // bit    7: segment is in transition mode
-  // bits 4-6: TBD
-  // bit    3: mirror effect within segment
-  // bit    2: segment is on
-  // bit    1: reverse segment
-  // // bit    0: segment is selected
-  // #define NO_OPTIONS2   (uint8_t)0x00
-  // #define TRANSITIONAL2 (uint8_t)0x80
-  // #define MIRROR2       (uint8_t)0x08
-  // #define SEGMENT_ON2   (uint8_t)0x04
-  // #define REVERSE2      (uint8_t)0x02
-  // #define SELECTED2     (uint8_t)0x01
-
-  // #define DEFAULT_BRIGHTNESS2 (uint8_t)127
-  // #define DEFAULT_MODE2       (uint8_t)0
-  // #define DEFAULT_SPEED2      (uint8_t)128
-  // #define DEFAULT_COLOR2      (uint32_t)0xFFAA00
-
-
+  
   //realtime modes
   #define REALTIME_MODE_INACTIVE    0
   #define REALTIME_MODE_GENERIC     1
@@ -1544,36 +1330,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 
   #define NUM_COLORS2       3 /* number of colors per segment */
 
-  // uint32_t _lastPaletteChange = 0; 
-  // uint8_t  paletteFade = 0;
-  // uint8_t   paletteBlend = 0;
-
-  // #define D_HARDWARE_ELEMENT_COLOUR_ORDER_DISABLED_STATE 7
-  // typedef union {
-  //   uint16_t data; // allows full manipulating using union memory overlap
-  //   struct { 
-  //     /** 3 bits of memory = 9 combinations
-  //      *  0 - channel 0 eg [R----]
-  //      *  1 - channel 1 eg [-G---]
-  //      *  2 - channel 2 eg [--B--]
-  //      *  3 - channel 3 eg [---WC-]
-  //      *  4 - channel 4 eg [----WW]
-  //      *  5 - not used - future led colour (eg another white, amber)
-  //      *  6 - not used - future led colour (eg another white, amber)
-  //      *  7 - DISABLED
-  //      * 
-  //      * default R,G,B,none,none : 0,1,2,7,7 dec : 000 001 010 111 111 R bits : 0000 0101 0111 111R bits and in reverse order R111 1110 1010 0000
-  //      * */
-  //     uint16_t red : 3;
-  //     uint16_t green : 3;
-  //     uint16_t blue : 3;
-  //     uint16_t white_cold : 3;      // Cold will take the FIRST white, as it is most likely as the 4th colour, warm_white will likely only exist when both whites do
-  //     uint16_t white_warm : 3;
-  //     uint16_t reserved : 1;
-  //   };
-  // } HARDWARE_ELEMENT_COLOUR_ORDER;
-
-
   typedef union {
     uint16_t data; // allows full manipulating
     struct { 
@@ -1587,7 +1343,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
     };
   } ANIMATION_FLAGS;
 
-  uint8_t GetSizeOfPixel(RgbcctColor::LightSubType colour_type);
+  uint8_t GetSizeOfPixel(RgbcctColor::ColourType colour_type);
 
 
   /**
@@ -1608,7 +1364,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
     uint16_t time_ms = 1000;    
   };
 
-     
 
   struct TransitionColourPairs
   {
@@ -1617,8 +1372,8 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   };
   
   // TransitionColourPairs* 
-  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
-  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
+  void GetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, mAnimatorLight::TransitionColourPairs* pair_test);
+  bool SetTransitionColourBuffer(byte* allocated_buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour, RgbcctColor desired_colour);
 
 
   /**
@@ -1634,7 +1389,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   };      
 
 
-
   void Init_Segments_RgbcctControllers();
   mAnimatorLight& SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
   void StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index = 0);
@@ -1645,8 +1399,8 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   void AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
   void AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSegColours(const AnimationParam& param);
 
-  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::LightSubType pixel_type, RgbcctColor starting_colour);
-  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::LightSubType pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
+  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
@@ -1672,9 +1426,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   void SubTask_Segment_Animation__Shimmering_Palette();
   void SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
   #endif
-
-
-
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
   #endif
@@ -1810,10 +1561,7 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   void SubTask_Segment_Animation__Dissolve_Random();
   void SubTask_Segment_Animation__ColourFul();
   void SubTask_Segment_Animation__Traffic_Light();
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-
-  // void SubTask_Segment_Animation__Fire_Flicker();
-  
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   // Blink/Strobe
   void SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
@@ -1860,7 +1608,6 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void SubTask_Flasher_Animate_Function_Tester_01();
   void SubTask_Flasher_Animate_Function_Tester_02();
@@ -1877,8 +1624,9 @@ struct AMBILIGHT_SCREEN_SETTINGS{
   uint16_t triwave16(uint16_t in);
   uint16_t mode_palette();
 
-
+  #ifdef ENABLE_DEVFEATURE_LIGHT__REQUIRE_MINIMUM_BACKOFF_ON_ANIMATION_TO_MAYBE_FIX_BUS_FLICKER
   uint32_t tSaved_MinimumAnimateRunTime = millis();
+  #endif
 
   void CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index = 0);
   const char* GetColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen);
@@ -1996,8 +1744,8 @@ struct AMBILIGHT_SCREEN_SETTINGS{
 
   void CommandSet_HardwareColourOrderTypeByStr(const char* value, uint8_t segment_index = 0);
   void CommandSet_ColourTypeByStr(const char* value, uint8_t segment_index = 0);
-  const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
-  const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
+  // const char* GetHardwareColourTypeName(char* buffer, uint8_t buflen, uint8_t segment_index= 0);
+  // const char* GetHardwareColourTypeNameByID(uint8_t id, char* buffer, uint8_t buflen, uint8_t segment_index= 0);
 
   void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
   void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
@@ -2084,13 +1832,11 @@ typedef struct Segment_New {
         uint16_t stop  = 0; // stop means total leds within the segment (not the index of last pixel) : stop index / stop X coordinate 2D (right); segment is invalid if stop == 0
     }pixel_range;
     uint16_t offset = 0;
-    uint8_t  speed_value = DEFAULT_SPEED; // rate/blend time
-    uint8_t  intensity_value = 127; //tmp value, as intensity/rate/time need to be make into a value (or optional link them together) 
-    uint8_t  palette_wled = 0; //PHASE OUT
+    uint8_t  _speed = DEFAULT_SPEED; // rate/blend time
+    uint8_t  _intensity = 127;
     /**
      * @brief Note with union here not having a name, all options are accesible directly in Segment_New
-     * 
-     */
+     **/
     union {
       uint16_t options; //bit pattern: msb first: [transposed mirrorY reverseY] transitional (tbd) paused needspixelstate mirrored on reverse selected
       struct {
@@ -2109,21 +1855,36 @@ typedef struct Segment_New {
       };
     };
 
-    // I dont need this as it is encoded inside the rgbcct colour, BUT, if not using that, I will still need it, so both must be updated!!!!
-    //default needs set back to RGB only later
-    RgbcctColor::LightSubType colour_type = RgbcctColor::LightSubType::LIGHT_TYPE__RGB__ID; // default is RGB, this is used by animations to know what method to generate
+    /**
+     * @brief Animation ColourType of the minimal output. Full Rgbcct is calculated anyway and then output bus type dictates this, so remove? 
+     * Although, it is used for saving of the buffer
+     * Rename this one to "AnimationColourType" "animation_colour_type"
+     * @NOTE: minimal/default should be RGB, only when white channels are needed should that also be computed
+     **/
+    RgbcctColor::ColourType colour_type = RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID; 
 
-    std::vector<RgbcctColor> rgbcctcolors; // new way of holding colours that will perhaps also replace WLED colors
+    /**
+     * @brief Stores at least 5 full RgbcctColours with all internal manipulations as needed
+     * @NOTE: Replaces WLED 3 colour options
+     **/
+    #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+    // std::vector<RgbcctColor> rgbcctcolors = {RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0)};// = RgbcctColor();
+    #define RGBCCTCOLOURS_SIZE 5
+    RgbcctColor rgbcctcolors[5] = {RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0)};// = RgbcctColor();
+    #else
+    std::vector<RgbcctColor> rgbcctcolors; // memory leak as size/memcpy is used with new segments. This needs to be predefined, so maybe move back to array?
+    #endif
 
     void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w )
     {
-      rgbcctcolors[index<rgbcctcolors.size()?index:0] = RgbcctColor(r,g,b,w,w);
+      uint8_t index_t = index<RGBCCTCOLOURS_SIZE?index:0;
+      if(index>RGBCCTCOLOURS_SIZE){ Serial.println("ERROR"); }
+      rgbcctcolors[index_t] = RgbcctColor(r,g,b,w,w);
     }
-
-    
 
     /**
      * values that are used as global iters rather than passing between each function
+     * likely phase out?
      * */
     struct segment_shared_iters
     {
@@ -2142,7 +1903,6 @@ typedef struct Segment_New {
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
       if(effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID)
       {
-
         return FRAMETIME_MS;
       }
       else
@@ -2151,27 +1911,17 @@ typedef struct Segment_New {
         return transition.rate_ms;
     };
 
-
-
     /**
      * Palette (Options on getting from palette)
      * */
     struct PALETTE{
-
-      // ID needs changed to uint16_t
       uint16_t id = 0; 
-
-
-
-
-      // uint8_t pattern = 0; //Single, Gradient 
       /**
        * Index range, ie with 50%, for palette with 10 colours will only use first 5 colours
        * Value '0': is unused
        * */
       uint8_t index_range_max_limit = 0; 
       uint8_t index_range_as_percentage = 0;
-
       /**
        * @brief Temporary solution to store palette info "loaded" here
        * 
@@ -2181,9 +1931,6 @@ typedef struct Segment_New {
       //   uint16_t buflen = 0;
       //   uint8_t buffer_static[200]; //tmp fixed buffer
       // }loaded;
-
-
-
     }palette;
     /**
      * This allows the segment to have optional brightness per segment, by default is set to maximum
@@ -2213,14 +1960,14 @@ typedef struct Segment_New {
       // uint16_t rate_ms = 1000;
     }single_animation_override_turning_off; // ie "oneshot" variables that get checked and executed one time only
     
-    uint8_t speed(){ return speed_value; }
-    void set_speed(uint8_t v){ speed_value = v; }
+    uint8_t speed(){ return _speed; }
+    void set_speed(uint8_t v){ _speed = v; }
 
-    uint8_t intensity(){ return intensity_value; }
-    void set_intensity(uint8_t v){ intensity_value = v; }
+    uint8_t intensity(){ return _intensity; }
+    void set_intensity(uint8_t v){ _intensity = v; }
 
-    uint8_t get_grouping(){ return speed_value; }
-    void set_grouping(uint8_t v){ speed_value = v; }
+    uint8_t get_grouping(){ return _speed; }
+    void set_grouping(uint8_t v){ _speed = v; }
 
     uint16_t groupLength() { return grouping + spacing; }
     uint16_t virtualLength()
@@ -2235,21 +1982,18 @@ typedef struct Segment_New {
     uint8_t  grouping = 1;
     uint8_t  spacing = 0;
     uint8_t opacity = 255; // ie opacity is the segment "brightness"
-
     uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
+
     uint8_t getBrightnessRGB();
     uint8_t getBrightnessCCT();
 
-    uint8_t effect_id = 0; //EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-    // Future edit maybe?
+    uint8_t effect_id = 0;
     /**
      * @brief Allow a second effect to be loaded at the same time, this will enable a single effect to show just once, and then the id_next will be loaded into the primary position
      * e.g. For rotating effect, preload the initial animation and then rotate it
      * 
      */
-      uint8_t effect_id_next = 0;  
-
-
+    uint8_t effect_id_next = 0;  
 
     #ifdef ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     uint8_t  cct;                 //0==1900K, 255==10091K
@@ -2394,8 +2138,8 @@ typedef struct Segment_New {
       // start(sStart),
       // stop(sStop),
       offset(0),
-      speed_value(DEFAULT_SPEED),
-      intensity_value(DEFAULT_INTENSITY),
+      _speed(DEFAULT_SPEED),
+      _intensity(DEFAULT_INTENSITY),
       effect_id(DEFAULT_MODE),
       options(SELECTED | SEGMENT_ON),
       grouping(1),
@@ -2436,7 +2180,7 @@ typedef struct Segment_New {
 
       DEBUG_LINE_HERE;
 
-      // if(rgbcctcolors.size() != 5) //minimum as default
+      // if(RGBCCTCOLOURS_SIZE != 5) //minimum as default
       // {
       //   rgbcctcolors.clear();
       //   rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
@@ -2974,148 +2718,6 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       estimateCurrentAndLimitBri(void);
   
 
-
-
-/******************************************************************************************************************************************************************************
-********************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-****************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-*** USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS   ***************************************************************************************************************************************************************************
-**  @note:     **************************************************************************************************************************************************************************
-********************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************
-****************************************************************************************************************************************************************************
-******************************************************************************************************************************************************************************/
-
-#ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-
-
-  /**
-   * Palettes 
-   * */
-  // uint8_t palette_options_ids[30] = 
-  // {
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_01_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_02_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_03_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_04_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_05_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_06_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_07_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_08_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_09_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_10_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_11_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_12_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_13_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_14_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_15_ID,
-  //   mPalette::PALETTELIST_STATIC_CHRISTMAS_16_ID,
-  //   mPalette::PALETTELIST_STATIC_WINTER_ID,
-  //   mPalette::PALETTELIST_STATIC_AUTUMN_ID,
-  //   mPalette::PALETTELIST_STATIC_AUTUMN_RED_ID,
-  //   mPalette::PALETTELIST_STATIC_FLOWER_SWEATPEAS_01_ID,
-  //   mPalette::PALETTELIST_STATIC_FLOWER_SWEATPEAS_02_ID,
-  //   mPalette::PALETTELIST_STATIC_HOLLOWEEN_OGP_ID,
-  //   mPalette::PALETTELIST_STATIC_HOLLOWEEN_OP_ID,
-  //   mPalette::PALETTELIST_STATIC_MICROLEDS_PASTEL_01_ID,
-  //   mPalette::PALETTELIST_STATIC_PINK_PURPLE_01_ID,
-  //   mPalette::PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY_ID,
-  //   /**
-  //    * Gradients applied across the output
-  //    * */
-  //   mPalette::PALETTELIST_STATIC_RAINBOW_ID,
-  //   mPalette::PALETTELIST_STATIC_RAINBOW_INVERTED_ID,
-  //   mPalette::PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE_ID,
-  //   mPalette::PALETTELIST_STATIC_GRADIENT_FIRE_01_ID,
-  // };
-
-  /**
-   * skewed brightness options
-   * */
-  uint8_t brightness_options_ids[10] = //as percentage
-  {
-    0,
-    5,
-    10,
-    25,
-    50,
-    60,
-    70,
-    80,
-    90,
-    100
-  };
-
-  /**
-   * Controller effects, limit to the ones most likely to be used
-   * */
-  uint8_t effects_options_ids[4] =
-  {
-    EFFECTS_FUNCTION_STATIC_PALETTE_ID,
-    EFFECTS_FUNCTION_SEQUENTIAL_ID, //sequence after, so it takes the static pallette and moves it
-    EFFECTS_FUNCTION_SLOW_GLOW_ID,
-    EFFECTS_FUNCTION_STEPPING_PALETTE_ID,
-  };
-
-  /**
-   * This will translate into rate/time_ms depending on select effects above, probably just mapping them as percentage scales
-   * */
-  uint8_t intensity_options_ids[7] = //as percentage
-  {
-    0,
-    5,
-    10,
-    25,
-    50,
-    75,
-    100
-  };
-
-  
-void CommandSet_Physical_UserInput_Buttons();
-void PhysicalController_Convert_IDs_to_Internal_Parameters();
-
-#ifdef ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
-void Physical_UserInput_Init();
-void Physical_UserInput_Load();
-void Physical_UserInput_Save();
-#endif // ENABLE_XMAS_CONTROLLER_SAVING_IN_EEPROM
-
-
-#define EEPROM_SIZE 12
-#define USER_INPUT_BUTTON_1_LEFT 1
-#define USER_INPUT_BUTTON_1_RIGHT 0
-#define USER_INPUT_BUTTON_2_LEFT 3
-#define USER_INPUT_BUTTON_2_RIGHT 2
-#define USER_INPUT_BUTTON_3_LEFT 5
-#define USER_INPUT_BUTTON_3_RIGHT 4
-#define USER_INPUT_BUTTON_4_LEFT 7
-#define USER_INPUT_BUTTON_4_RIGHT 6
-
-/**
- * This will be saved and loaded from eeprom
- * */
-struct USER_INPUT_SAVED_IN_EEPROM
-{ 
-  struct ACTIVE_OPTION{
-    uint8_t palette_id = 0;
-    uint8_t brightness_id = 0;
-    uint8_t effects_id = 0;
-    uint8_t intensity_id = 0;
-    uint8_t loaded_from_eeprom = 0; // only set when loaded succesfully
-  }selected;
-
-}user_input;
-
-
-#endif // USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-    
 
 
 

@@ -121,15 +121,15 @@ enum EM_BUS_TYPE
 #define NEOPIXELBUS_8266_DM_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266Dma400KbpsMethod>     //3 chan, esp8266, gpio3
 #define NEOPIXELBUS_8266_BB_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp8266BitBang400KbpsMethod> //3 chan, esp8266, bb (any pin)
 //TM1814 (RGBW)
-#define NEOPIXELBUS_8266_U0_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266Uart0Tm1814Method>
-#define NEOPIXELBUS_8266_U1_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266Uart1Tm1814Method>
-#define NEOPIXELBUS_8266_DM_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266DmaTm1814Method>
-#define NEOPIXELBUS_8266_BB_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266BitBangTm1814Method>
+// #define NEOPIXELBUS_8266_U0_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266Uart0Tm1814Method>
+// #define NEOPIXELBUS_8266_U1_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266Uart1Tm1814Method>
+// #define NEOPIXELBUS_8266_DM_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266DmaTm1814Method>
+// #define NEOPIXELBUS_8266_BB_TM1_4 NeoPixelBus<NeoWrgbTm1814Feature, NeoEsp8266BitBangTm1814Method>
 //TM1829 (RGB)
-#define NEOPIXELBUS_8266_U0_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266Uart0Tm1829Method>
-#define NEOPIXELBUS_8266_U1_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266Uart1Tm1829Method>
-#define NEOPIXELBUS_8266_DM_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266DmaTm1829Method>
-#define NEOPIXELBUS_8266_BB_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266BitBangTm1829Method>
+// #define NEOPIXELBUS_8266_U0_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266Uart0Tm1829Method>
+// #define NEOPIXELBUS_8266_U1_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266Uart1Tm1829Method>
+// #define NEOPIXELBUS_8266_DM_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266DmaTm1829Method>
+// #define NEOPIXELBUS_8266_BB_TM2_4 NeoPixelBus<NeoBrgFeature, NeoEsp8266BitBangTm1829Method>
 #endif
 
 /*** ESP32 Neopixel methods ***/
@@ -243,19 +243,19 @@ class PolyBus {
       case BUSTYPE__8266_U1_400_3__ID: (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->Begin(); break;
       case BUSTYPE__8266_DM_400_3__ID: (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->Begin(); break;
       case BUSTYPE__8266_BB_400_3__ID: (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->Begin(); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->Begin(); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->Begin(); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->Begin(); break;
-      case BUSTYPE__HS_DOT_3__ID: (static_cast<NEOPIXELBUS_HS_DOT_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__HS_LPD_3__ID: (static_cast<NEOPIXELBUS_HS_LPD_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__HS_LPO_3__ID: (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->Begin(); break;
-      case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: beginTM1814<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->Begin(); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->Begin(); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->Begin(); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->Begin(); break;
+      // case BUSTYPE__HS_DOT_3__ID: (static_cast<NEOPIXELBUS_HS_DOT_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__HS_LPD_3__ID: (static_cast<NEOPIXELBUS_HS_LPD_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__HS_LPO_3__ID: (static_cast<NEOPIXELBUS_HS_LPO_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__HS_WS1_3__ID: (static_cast<NEOPIXELBUS_HS_WS1_3*>(busPtr))->Begin(); break;
+      // case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Begin(); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->Begin(); break;
@@ -323,14 +323,14 @@ class PolyBus {
       case BUSTYPE__8266_U1_400_3__ID: busPtr = new NEOPIXELBUS_8266_U1_400_3(len, pins[0]); break;
       case BUSTYPE__8266_DM_400_3__ID: busPtr = new NEOPIXELBUS_8266_DM_400_3(len, pins[0]); break;
       case BUSTYPE__8266_BB_400_3__ID: busPtr = new NEOPIXELBUS_8266_BB_400_3(len, pins[0]); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_U0_TM1_4(len, pins[0]); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_U1_TM1_4(len, pins[0]); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_DM_TM1_4(len, pins[0]); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_BB_TM1_4(len, pins[0]); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_U0_TM2_4(len, pins[0]); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_U1_TM2_4(len, pins[0]); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_DM_TM2_4(len, pins[0]); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_BB_TM2_4(len, pins[0]); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_U0_TM1_4(len, pins[0]); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_U1_TM1_4(len, pins[0]); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_DM_TM1_4(len, pins[0]); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: busPtr = new NEOPIXELBUS_8266_BB_TM1_4(len, pins[0]); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_U0_TM2_4(len, pins[0]); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_U1_TM2_4(len, pins[0]); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_DM_TM2_4(len, pins[0]); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: busPtr = new NEOPIXELBUS_8266_BB_TM2_4(len, pins[0]); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: busPtr = new NEOPIXELBUS_32_RN_NEO_3(len, pins[0], (NeoBusChannel)channel); break;
@@ -400,14 +400,14 @@ class PolyBus {
       case BUSTYPE__8266_U1_400_3__ID: (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->Show(); break;
       case BUSTYPE__8266_DM_400_3__ID: (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->Show(); break;
       case BUSTYPE__8266_BB_400_3__ID: (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->Show(); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->Show(); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->Show(); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->Show(); break;
@@ -474,14 +474,14 @@ class PolyBus {
       case BUSTYPE__8266_U1_400_3__ID: return (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->CanShow(); break;
       case BUSTYPE__8266_DM_400_3__ID: return (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->CanShow(); break;
       case BUSTYPE__8266_BB_400_3__ID: return (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->CanShow(); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: return (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->CanShow(); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: return (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->CanShow(); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: return (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->CanShow(); break;
@@ -563,26 +563,26 @@ class PolyBus {
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
     #ifdef ESP8266
-      case BUSTYPE__8266_U0_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_U0_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_U1_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_U1_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_DM_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_DM_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_BB_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_BB_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_U0_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_U0_NEO_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_U1_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_U1_NEO_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_DM_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_DM_NEO_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_BB_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_BB_NEO_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_U0_400_3__ID: (static_cast<NEOPIXELBUS_8266_U0_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_U1_400_3__ID: (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_DM_400_3__ID: (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_BB_400_3__ID: (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(col.R,col.G,col.B)); break;
+      case BUSTYPE__8266_U0_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_U0_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_U1_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_U1_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_DM_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_DM_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_BB_NEO_3__ID: (static_cast<NEOPIXELBUS_8266_BB_NEO_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_U0_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_U0_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      case BUSTYPE__8266_U1_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_U1_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      case BUSTYPE__8266_DM_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_DM_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      case BUSTYPE__8266_BB_NEO_4__ID: (static_cast<NEOPIXELBUS_8266_BB_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      case BUSTYPE__8266_U0_400_3__ID: (static_cast<NEOPIXELBUS_8266_U0_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_U1_400_3__ID: (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_DM_400_3__ID: (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      case BUSTYPE__8266_BB_400_3__ID: (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->SetPixelColor(pix, RgbColor(colour_hardware.R,colour_hardware.G,colour_hardware.B)); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
@@ -652,14 +652,14 @@ class PolyBus {
       case BUSTYPE__8266_U1_400_3__ID: col = (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr))->GetPixelColor(pix); break;
       case BUSTYPE__8266_DM_400_3__ID: col = (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr))->GetPixelColor(pix); break;
       case BUSTYPE__8266_BB_400_3__ID: col = (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: col = (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr))->GetPixelColor(pix); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: col = (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->GetPixelColor(pix); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: col = (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->GetPixelColor(pix); break;
@@ -754,14 +754,14 @@ class PolyBus {
       case BUSTYPE__8266_U1_400_3__ID: delete (static_cast<NEOPIXELBUS_8266_U1_400_3*>(busPtr)); break;
       case BUSTYPE__8266_DM_400_3__ID: delete (static_cast<NEOPIXELBUS_8266_DM_400_3*>(busPtr)); break;
       case BUSTYPE__8266_BB_400_3__ID: delete (static_cast<NEOPIXELBUS_8266_BB_400_3*>(busPtr)); break;
-      case BUSTYPE__8266_U0_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr)); break;
-      case BUSTYPE__8266_U1_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr)); break;
-      case BUSTYPE__8266_DM_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr)); break;
-      case BUSTYPE__8266_BB_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr)); break;
-      case BUSTYPE__8266_U0_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr)); break;
-      case BUSTYPE__8266_U1_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr)); break;
-      case BUSTYPE__8266_DM_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr)); break;
-      case BUSTYPE__8266_BB_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr)); break;
+      // case BUSTYPE__8266_U0_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_U0_TM1_4*>(busPtr)); break;
+      // case BUSTYPE__8266_U1_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_U1_TM1_4*>(busPtr)); break;
+      // case BUSTYPE__8266_DM_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_DM_TM1_4*>(busPtr)); break;
+      // case BUSTYPE__8266_BB_TM1_4__ID: delete (static_cast<NEOPIXELBUS_8266_BB_TM1_4*>(busPtr)); break;
+      // case BUSTYPE__8266_U0_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_U0_TM2_4*>(busPtr)); break;
+      // case BUSTYPE__8266_U1_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_U1_TM2_4*>(busPtr)); break;
+      // case BUSTYPE__8266_DM_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_DM_TM2_4*>(busPtr)); break;
+      // case BUSTYPE__8266_BB_TM2_3__ID: delete (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr)); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
       case BUSTYPE__32_RN_NEO_3__ID: delete (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr)); break;
