@@ -1,0 +1,35 @@
+Copy "TemplateModule"
+"mClassExample" is the class, and should follow the convention "buzzer"
+"SENSORS_EXAMPLE" ie 1_2, where 1 = SENSORS/DRIVERS/ENERGY is the group, and 2 = Unique name e.g. BUZZER so "DRIVERS_BUZZER"
+
+Also need to add D_MODULE_DRIVERS_BUZZER_CTR naming, again, do this with custom files
+
+In file "1_TaskerManager/mTaskerManager.h"
+
+Add the header for the new file created above with the file directory relative to `HomeAutomationControlSystem` src folder.
+Add this to the respective group section
+
+```cpp
+#ifdef USE_MODULE_DRIVERS_EXAMPLE
+  #include "#_Drivers/Example/mExample.h"
+  #define pCONT_example                        static_cast<mExample*>(pCONT->pModule[EM_MODULE_DRIVERS_EXAMPLE_ID])
+#endif
+```
+
+Add to enum list the name
+```cpp
+  #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+    EM_MODULE_DRIVERS_BUZZER_ID,
+  #endif
+```
+
+
+"pCONT_example" naming convention is `pCONT`, abbrevaited from "pointer to tasker controller"
+
+
+
+
+#Idea, in the future, add these above via headers that make user optional values added only if the file exists
+#ifdef file_Exists
+	//add user_header_module
+#endif

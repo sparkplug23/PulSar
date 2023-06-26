@@ -1,0 +1,298 @@
+[env]
+platform = ${common.platform}
+platform_packages = ${common.platform_packages}
+framework = ${common.framework}
+board = ${common.board}
+board_build.ldscript  = ${common.board_build.ldscript}
+board_build.flash_mode = ${common.board_build.flash_mode}
+board_build.f_flash = ${common.board_build.f_flash}
+board_build.f_cpu = ${common.board_build.f_cpu}
+build_unflags = ${common.build_unflags}
+build_flags = ${common.build_flags}
+                                -D USER_MICHAEL
+monitor_speed = ${common.monitor_speed}
+upload_port = ${common.upload_port}
+upload_resetmethod = ${common.upload_resetmethod}
+upload_speed = ${common.upload_speed}
+extra_scripts = ${common.extra_scripts}
+lib_extra_dirs = ${common.lib_extra_dirs}
+; lib_deps = ${common.lib_deps}
+
+;;; HOME INSTALLED ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Hallway
+      
+
+[env:esp_8266_stairsensor]
+build_flags = ${common.build_flags} -D DEVICE_STAIRWAY_MOTION -w
+; upload_port = COM5
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.1.171
+; upload_port = radiatorfan
+lib_extra_dirs            = 
+                            lib/libesp8266/network 
+                            lib/lib_network 
+                            lib/libg_neopixel
+                            lib/lib_basic      
+                            lib/lib_sensor 
+
+
+
+[env:esp_8266_doorbellwallchime]
+build_flags = ${common.build_flags} -D DEVICE_DOORBELLWALLCHIME -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+extra_scripts   = gzip_fw.py
+upload_protocol = espota
+upload_port = 192.168.1.227
+; upload_port =  doorbellwallchime
+
+
+[env:esp_8266_socket_06_hallway_table]
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_SOCKET_NUMBERED 
+                                 -D DEVICENAME_SOCKET_NUMBER_CTR=6 -w
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.1.215
+; upload_port = socket_number_6.local
+; upload_port = COM20
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Ensuite
+    ; esp_8266_ensuitesensor
+    
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Kitchen
+    
+
+
+
+
+
+[env:esp_8266_hvac_kitchen]
+build_flags = ${common.build_flags} -D DEVICE_HVAC_KITCHEN -w 
+                                    -D D_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/lib_sensor
+; upload_port = COM34
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; ; upload_port = hvac_kitchen
+upload_port = 192.168.0.54
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = COM32
+
+
+[env:esp_8266_hvac_bedroom_rad]
+build_flags = ${common.build_flags} -D DEVICE_HVAC_BEDROOM_RAD -w 
+                                    -D D_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/lib_sensor
+; upload_port = COM5
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; ; upload_port = hvac_kitchen
+upload_port = 192.168.1.164
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = COM32
+
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Utility
+    ; 
+    
+
+
+[env:esp_8266_utilitysensor]
+build_flags = ${common.build_flags} -D DEVICE_UTILITYSENSOR -w
+; upload_port = utilitysensor
+upload_port = 192.168.0.7
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port = COM3
+
+[env:esp_8266_rgbutility]
+build_flags = ${common.build_flags} -D DEVICE_RGBUTILITY
+                                     -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+; upload_port = rgbutility.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.1.238
+; upload_port=COM3
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Livingroom
+
+
+[env:esp_8266_shellydimmer_livingroom_ceiling]
+build_flags = ${common.build_flags} -D DEVICE_SHELLYDIMMER_LIVINGROOM_CEILING -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+; upload_port = 192.168.1.94
+extra_scripts   =  gzip_fw.py
+upload_port = COM20
+
+
+[env:esp_8266_atticsensor]
+build_flags = ${common.build_flags} -D DEVICE_ATTICSENSOR -w
+upload_port = 192.168.1.180
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+; upload_port=COM19
+; upload_port = livingroomsensor.local
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Downstairs Toilet
+
+
+; [env:esp_8266_consumerunit]
+; build_flags = ${common.build_flags} -D DEVICE_CONSUMERUNIT -w
+; ;upload_port = consumerunit.local
+; lib_extra_dirs = ${common.lib_extra_dirs}
+;               lib/lib_energy
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; ; upload_port = 192.168.1.234
+; upload_port = consumerunit.local
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Bedroom 
+
+
+
+
+
+[env:esp_8266_dimmer_bedroom_lamp]
+build_flags = ${common.build_flags} 
+    -D DEVICE_SHELLYDIMMER_BEDROOM_LAMP -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.72
+extra_scripts   =  gzip_fw.py
+; upload_port = COM18
+
+
+[env:tb_dimtest]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE
+                                     -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+; upload_port = rgbshelf.local
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.144
+; upload_port=COM5
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+
+
+; to be living room ceiling later when no neutral works
+[env:esp_8266_dimmer_living_lamp]
+build_flags = ${common.build_flags} 
+    -D DEVICE_SHELLYDIMMER_LIVING_LAMP -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+upload_protocol = espota
+upload_port = 192.168.0.224
+extra_scripts   =  gzip_fw.py
+; upload_port = COM18
+
+  
+  
+    
+[env:esp_8266_socket_15]
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON 
+                                 -D DEVICENAME_SOCKET_NUMBER_CTR=15 -w
+                                 -D DISABLE_WEBSERVER
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = socket_number_11.local
+; upload_port = 192.168.1.69
+upload_port = COM18
+
+[env:esp_8266_socket_16]
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_SOCKET_NUMBERED_WITH_SERIAL_GPIO_BUTTON 
+                                 -D DEVICENAME_SOCKET_NUMBER_CTR=16 -w
+                                 -D DISABLE_WEBSERVER
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = socket_number_11.local
+; upload_port = 192.168.1.69
+upload_port = COM18
+
+
+
+
+
+
+
+[env:esp_8266_rgbnotifications_01]
+build_flags = ${common.build_flags} -D DEVICE_RGBNOTIFICATION_01 -w
+                    -D USE_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+            ;   lib/lib_boost
+; upload_protocol = espota
+; extra_scripts             =   gzip_fw.py
+; ; upload_port = 192.168.1.217 ; this was the breadbard one, to be renamed
+; upload_port = 192.168.1.195
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+upload_port = COM5
+
+
+
+[env:esp_8266_testbed_string_animator_01]
+build_flags = ${common.build_flags} -D DEVICE_RGBSTRING_ANIMATOR_01 -w
+                    -D USE_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+            ;   lib/lib_boost
+; upload_protocol = espota
+; extra_scripts             =   gzip_fw.py
+; upload_port = testbed_string_animator_01
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+upload_port = COM5
+
+
+
+
+[env:esp_8266_testbed_ultrasonic_01]
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_ULTRASONIC -w
+                    -D USE_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+            ;   lib/lib_boost
+upload_protocol = espota
+extra_scripts             =   gzip_fw.py
+; upload_port = testbed_ultrasonic
+upload_port = 192.168.1.79
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = COM5
+
+
+
+
+
+
+
+
+
+

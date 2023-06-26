@@ -1,0 +1,151 @@
+
+; ; ;;; HOME INSTALLED temporarily only for me ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+; ;     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+; ;     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+
+
+; [env:wht_br_but]
+; extends = env:whitehall_82
+; build_flags = ${common.build_flags} -D DEVICE_BEDROOM_CONTROLLER_BUTTONS_01 -w
+;                     -D USE_USER_MICHAEL
+; ; upload_protocol = espota
+; ; extra_scripts             =   gzip_fw.py
+; ; upload_port = 192.168.0.46
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; upload_port = COM8
+
+; [env:wht_black_stand]
+; extends = env:whitehall_32
+; build_unflags               = ${esp32_defaults.build_unflags}
+; build_flags                 = ${esp32_defaults.build_flags}
+;                                     -D DEVICE_BLACK_STAND_LIGHT
+;                                     -w                                     
+; lib_extra_dirs          = ${common32.lib_extra_dirs}              
+;                           lib/libesp32
+;                           lib/lib_basic
+;                           lib/lib_network
+;                           lib/lib_display
+;                           lib/lib_onewire2023 
+;                           lib/lib_sensor
+;                           lib/libg_neopixel
+; upload_protocol = espota
+; upload_port = 192.168.0.50
+; ; upload_port = testbed_animation_segment_01
+; ; upload_port = COM30
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+
+
+; [env:wht_rgbdesk]
+; extends = env:whitehall_82
+; build_flags = ${common.build_flags} -D DEVICE_RGBDESK -w
+;                     -D USE_USER_MICHAEL
+; upload_protocol = espota
+; extra_scripts             =   gzip_fw.py
+; upload_port = 192.168.0.151
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; ; upload_port = COM9
+
+
+; [env:wht_rgb_glassheart]
+; extends = env:whitehall_82
+; build_flags = ${common.build_flags} -D DEVICE_RGB_GLASSHEART -w
+;                     -D USE_USER_MICHAEL
+; ; upload_protocol = espota
+; ; extra_scripts             =   gzip_fw.py
+; ; upload_port = 192.168.0.151
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; upload_port = COM7
+
+
+; [env:wht_bedroom_bedlight]
+; extends = env:whitehall_82
+; build_flags = ${common.build_flags} -D DEVICE_BEDROOM_BEDLIGHT -w
+;                     -D USE_USER_MICHAEL
+; upload_protocol = espota
+; extra_scripts             =   gzip_fw.py
+; upload_port = 192.168.0.57
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; ; upload_port = COM9
+
+
+; [env:wht_computer_u25]
+; extends = env:whitehall_82
+; build_flags = ${common.build_flags} -D DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H -w
+;                     -D USE_USER_MICHAEL
+; upload_protocol = espota
+; extra_scripts             =   gzip_fw.py
+; upload_port = 192.168.0.202
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; ; upload_port = COM9
+
+
+; [env:wht_computer_p32]
+; extends = env:whitehall_32
+; build_flags = ${common.build_flags} -D DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE -w
+;                     -D USE_USER_MICHAEL
+; upload_protocol = espota
+; upload_port = 192.168.0.161
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; ; upload_port = COM26
+
+
+
+; [env:wht_bedr_wardrobe]
+; platform                  = ${core_2_6_1.platform}
+; build_flags               = ${core_2_6_1.build_flags}
+;                                 -D DEVICE_H801_INSIDE_BEDROOM_WARDROBE -w
+;                                 -D D_USER_MICHAEL
+; lib_extra_dirs              = ${library.lib_extra_dirs}
+;                               lib/libg_neopixel
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; ; upload_port = h801_sunlight_2
+; upload_port = 192.168.0.12
+; ; upload_port=COM18
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+
+; [env:wht_bedroom_desk]
+; platform                  = ${core_2_6_1.platform}
+; build_flags               = ${core_2_6_1.build_flags}
+;                                 -D DEVICE_H801_BEDROOM_UNDERDESK -w
+;                                 -D D_USER_MICHAEL
+                                
+; lib_extra_dirs              = ${library.lib_extra_dirs}
+;                               lib/libg_neopixel
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; ; upload_port = h801_sunlight_2
+; upload_port = 192.168.0.12
+; ; upload_port=COM18
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+
+; [env:wh_dr0]
+; extends = env:whitehall_32
+; build_flags = ${common.build_flags} -D DEVICE_DESKSENSOR_SLAVE_01 -w
+;                     -D USE_USER_MICHAEL            
+;                     ; -DCORE_DEBUG_LEVEL=5         
+; lib_extra_dirs  = lib/libesp32
+;                 lib/lib_basic
+;                 lib/lib_network
+;                 lib/lib_display
+;                 lib/lib_onewire2023 
+;                 lib/lib_sensor
+;                 lib/libg_neopixel
+;                 ; lib/libg_neopixel
+; ; upload_protocol = espota
+; ; upload_port = 192.168.0.79
+; ; upload_port = desksensor.local
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM5
+; ;${common32.lib_extra_dirs}    

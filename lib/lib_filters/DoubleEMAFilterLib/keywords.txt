@@ -1,0 +1,19 @@
+#######################################
+# Syntax Coloring Map DoubleEMAFilter
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+DoubleEMAFilter	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+AddValue	KEYWORD2
+GetBandPass	KEYWORD2
+DoubleEMAFilter	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

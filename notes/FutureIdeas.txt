@@ -1,0 +1,476 @@
+D=done,N=Not done,P=partially working,NF near future, FF far future
+Fix multiple repos "git push -f origin master"
+
+#Idea 001 (v1+)
+    ESP32 wifi support fully, with the same saving/SPIFFS etc 
+
+#Idea 002 (v1+)
+    ESP32 POE/ethernet
+
+#Idea 003 (v<1)
+    Night Mode = For lights with dimmers, optional lower settings during night hours
+    #Idea 003.2 (prev. #41)
+        Tweak scenes that use time_on, or mode_one_time_on? (maybe not)
+        Enable bi-scene modes, including the mqtt for it
+        This will be used first for landing light, brighter then dims to standby colour (ie dim)
+        Same method can be used where scene 2 option is pixel brt off
+
+#Idea 004
+    - New SModuleStatus for setting a module/class dynamically during run time
+
+#Idea 007
+    - Add new "WLED Animations" as led mode, or incorporate into "flasher" (do this, so mixer can be used)
+
+#Idea 009
+    - https://github.com/Aircoookie/WLED/wiki/E1.31-DMX#e131
+
+#Idea 012
+    - Add "reset user pallette" with optional selecting of copying a static palette
+    
+#Idea 013
+    - Use flag to set that palette should random generate in pairs ie
+
+        uint8_t colour_ids[] = {  
+            pair_id1_lower, pair_id1_upper, 
+            pair_id2_lower, pair_id2_upper,     
+        }; 
+
+        gives random(pair_id1_lower,pair_id1_upper) and therefore I can make random values of hue within a range, without including colour_ids
+        eg greens and reds, 120:130, 0:10, ignoring 11:119
+
+        equally, use the range of saturation AND brightness as guides for them as randoms
+
+#Idea 014
+    - make number generator, random, with skewness
+
+#Idea 015
+    - add saturation option on menu page that overrides output, as brightness does, and add optional flag to enable it/tick box
+
+#Idea 016
+    - add single pixel "flasher" animations, eg:
+        - "flare" random single pixels go from current to max brightness with a short ramp up/down (<90% longer speed, >90% half speed ie iradium flare)
+        - "twinkle" on off
+        - "lighting" flashes of varying brightness that last a few seconds
+
+#Idea 017
+    - Create template based addlog to print any array out in a nice format, with (defaulted) option of vertical or horizontal
+        AddLog_P_Arr(...., array_ptr,array_length,output_format = default_without_index, output_dir = default_horizontal)
+
+#Idea 018
+    - Specific Module Type (Car Sensor)
+        - monitor 12v (7v-15v range)
+        - canbus monitor
+        - gps listening
+        - sd card logging (logs gps values, uploading when network returns)
+        - gsm network for remote checking
+
+#Idea 019
+    - webpage mixer controls will include a table/grouped mixer values that can be configured
+        - flasher type (christmas animation)
+        - palette 
+        - duration
+        - speed/rate
+        - Global controls for on/off time for all mixer settings
+        - add tick box options on rows (enabled, time controlled, random saturation)
+        - or drop down menus (saturation as saved, random)
+
+#Idea 020
+    - Gradient rotate with "overscan" ie rainbow partial, rotate (or slider?) with inflated range (only show X% of gradient at any one time)
+        - New slider animation, that moves the pixels back and forth without wraparound (this requires overscan first). ie 25-75% becomes new length, then move from 0-50 and 50-100.
+
+#Idea 021
+    - Dump as much crash data into rtcmemory before device restarts, after safe boot (10 seconds) send it via mqtt for logging. Eventually,
+        send via http/ftp to a file server for logging
+
+    sparkplugToday at 9:54 AM
+    okay will try decode later, I have the hex values but I need a decoder formatted thing first with the right headers, remind me to make this automatic
+    and to print via my http method now
+    Can I can probe and get the exact crash log ready as a copy and paste http response, that would be awesome
+    
+#Idea 022
+    - ADD FUNC_SENSOR_SEARCH that will search for new sensors and re-enable module if found
+
+#Ides 023
+    - Add lighting demonstration that cycles across every pattern/animation, for <user_defined> seconds each, with options to simply "end" (returning to previous resting mode) or
+        stopping and using the current previewed animation as the new animation.
+
+#Idea 024
+    - Optional RGB_type as array to allow strings with different mappings to be used togehter
+        [1,1,1,1,1,2,2,2] 1=RGB and 2=GRB etc 
+        - probably {blocks,linear,follow_palette_style} for liveview type
+        - track which pixels change user bit packed number, so I can limit webpage sending to just those
+
+#Idea 027
+    Make one group call that will append multiple responses, but also, a single call that builds using it
+        - ie send palette, or, liveview, or, table, OR ALL TOGETHER
+
+#Idea 028
+    Make a class that is used to hold sensors, with ifdefs inside to give different sensor attributes (temp,pressure) ie my own "mAdafruit_Sensor.h"
+
+#Idea 030
+    Draw root "table" that includes unique names for rows and the number variable (ie send Temp/sensor name during draw and send data to that exact cell during data)
+
+#Idea 31
+    Energy Root Table will actually have its own table, drawn as rows as wide as sensors connected
+                                                                                                ^^Energy^^
+    Name/Phase      Voltage(V) Current(A) Apparent\Power(W) Reactive\Power(VA)  ^^Instantaneous    Hourly Average(kWh)     Daily Average(kWh)      Total^^
+    Mains 
+    Cooker
+    Immersion
+
+    actually do vertical and format like my thesis
+
+                            ^^^^^^^ Channels/Phases ^^^^^^^^^^
+    Name    Units        Mains  Cooker  Immersion   Dryer       Average Window
+    Voltage (V)            0                                    Instantaneous
+    Current (A)            0                                    Instantaneous
+    ___
+    ENERGY
+    ___
+    Hourly Average (kWh)   0                                    24 hours
+    Daily Average          0                                    7 days
+
+#Idea 32
+    Add array that holds regions of temp ranges, eg
+    {a,b,c,d}
+    a<b = low colour
+    b<c = med range
+    c<d = high range
+    if(climate.ptr->temperature<=25){
+
+#Idea 34
+    Add function in support that autocapitalises the first letter of any words, at the start of the string or after a space eg "this message" => "This Message"
+
+#Idea 35
+    Yes, you can do this; and for a few its fine.
+    DIB = Device Independent Bitmap = RgbColor encoded data strip. One for the Start stat, One for the end state, 
+    one animation channel to apply the transition. They replace the animation state that is used in the example you 
+    mention. The difference is that an animation channel requires tracking information for the time/progress, if all 
+    the channels are running at the same progress, then you should merge them, if you need different progress then you 
+    do need separate channels.
+
+#Idea 36
+    Add/create randomness to the progress of transitioning between pixels for a glimmer effect (probably only ideal for brightness changes)
+    For maybe brightness case, a fast changing (instant) randomness to brightness is better? (with a larger map applied to all other pixels)
+    ie 10 pixels total, flicker 2, have the effect on overall brightness applied to the other 8
+
+#Idea 37
+    Add range where scenes can be applied, ie only use last 4 pixels  ... this is regions/segments
+
+#Idea 39
+    Add "EndOfLoop" function that allows for resseting of all module flags after they should have been handled aka "Finally"
+
+
+#Idea 42
+    Add additional time_on option that allows for automatic rgb leds off to be more gradual, default 1sec, optional parameter
+    - Note: Make it so reseting time_on (of already set and RX new command) then do not force refresh on the leds
+
+#Idea 43
+    Add/fully support using relay driver with timed on periods that the heating can set directly eg On for X second, minutes, OR On until X time of day
+    Auto Shutoff needs 
+        - timelimit option (direct for lights than for heating relays)
+        - set by seconds_on, minutes_on etc
+        - pass DateTime (timeonly) for when it will shut off, 24 limit
+
+#Idea 44
+    Move Rate of change measurements for sensors into their own modules, but have ROC methods are extra build option for memory
+
+#Idea 45
+    Add that topbar turns red if connection of webpage has been lost, so its a js timeout
+
+#Idea 46
+    Add sizeof class to telemetry
+
+#Idea 47
+    Add version type "D0.67.0.1" as string to telemetry
+
+#Idea 48
+    additional tasker functions that allow "run once" timed events eg uptime==10s,1minute,10m,1hour 
+    use to have logging greater at start, then decrease, also sleep turn on, reduce debug health/minimal rates etc
+
+#Idea 49
+    Optional extra for relay web buttons, a duplicate row for "boost" times +60,+60m, not =60, but +60, pressing
+    the toggle will reset times to 0
+
+#Idea 50
+    Add flag to mqtt handler that allows overwrite and call for every mqtt to refresh once eg overwrite sendnow flag
+
+#Idea 57
+    Function that returns a number from different profiles along a progress (maybe use Ease from rgb)
+
+#Idea 58 
+    Add center text for titles of buttons/sliders (p=left, q=right, c=center)
+
+#Idea 63
+    Add effect called "flare" akin to solar flare that instead of twinkling, causes a slow ramp in brightness of random pixels with a quick burst in brightness to dim again
+
+#Idea 64
+    Add that all devices also listen to their macaddress with mqtt commands, so no matter the naming the device can still be targeted using their mac
+    Also, have the device report online with IP address to this macadress topic   eg   "mac807D3A35D60D/status/LWT" -m "{LWT":"online","IP":..,"uptime":...}"
+
+#Idea 68
+    Move heating time scale into seconds, rather than minutes ...ie Set by minutes, but internal is seconds and also reports seconds
+
+#Idea 70
+    Add console on root page as option, to left/right of main div, enable/disabled with tick option to show/hide in topbar
+    Use same console div name, so the same code can send it
+
+#Idea 73
+    Create buffer that will remember the last X(30?) reasons for boot using IDs and store in memory ie [hw, sw wdt etc]
+
+#Idea 74
+    Create mtime functions that take in weektime and datetime and return cstring DONE
+    - use IDs to get short/long time back (datatime, TIME_SHORT_ID) DONE
+    - also common names aka MM = months, ss = seconds etc hhmmssms==hour,minute,seconds,millis ie pass template which will return the correct numbers based on ascii
+
+#Idea 75
+    Create "operators" that allow me to assign datetime/weektime etc to each other and convert them
+
+#Idea 77
+    Create an 8 bit map for each GPIO pin/module which shows what a pin can/cannot do, boot limitations, change on boot etc (maybe just a documentation instead for memory reasons?)
+
+#Idea 78
+    Create command list method, the ability to pass around a command as a number_id instead of a string
+    Split the parsejson_Command to actually work out the command, then call another function which handles it. This will need the ability to pass complex commands (ctr or numbers etc)
+    parsejson_Command(){
+        if(json.thisarg)
+            Execute_Command(uint16_t command_id, T value) where T is multiple datatypes with template, using auto eg set HUE
+        if(json.anotherarg)
+            Execute_Command(uint16_t command_id, T value) eg set SAT            
+    }
+    This allows me to then call mrgb->ExecuteCommand(command_id, value) OR Execute_Command(class_id, command_id, value)
+
+    command_id and string key for it will need pairing
+
+#Idea 81
+    Splash telemetry on boot over serial
+
+#Idea 82
+    add array to webserver that holds get states (0=do nothing, 1= fetch once, 2=fetch repeated with timer)
+
+#Idea 83
+    linked list for url fetchers? {"new_url":"erase"} 
+        erase deletes
+        if not found, add it with ms timer, +ve repeated, -ve once
+
+#Idea 86
+    Store uptime in memory and show in telemetry, show the LAST uptime before a reset happened ()
+    
+#Idea 88
+    Add flag that enables/requires parsesub_scene commands to switch mode automatically, or, instead only updates values but remains in current mode
+    Ie, if I set a scene colour but flasher is enabled, it can stay or automatically switch
+
+#Idea 89
+    Add checking if class pointer is not null BEFORE calling within tasker as
+    prep for leaving multiple classes at built time but only create during runtime if needed
+    eg ws2812 class will be on device, but only enabled (class instance) if needed
+
+#Idea 90
+    Add notification check, if the mode was on another mode, AFTER notification flash is complete then return to previous mode (eg scenes)
+
+#Idea 91
+    Send packet to LWT with uptime and useful info PRIOR to OTA start in case it fails as useful debug
+
+#Idea 92
+    rev# leaning away from this idea
+    Create a short global buffer that is used when none is provided to streamline code
+        if(buffer == nullptr) { global_buffer and return it for use inline}
+
+#Idea 93
+    Add another "Upsecs" aka "StableUpSeconds" which counts, but is stored in memory and is only reset on boot when reason was crash
+    
+#Idea 94
+    Add that commands are non case senstitive, and also checked without spacing ie 
+    #define D_JSON_TIMEZONE "TimeZone" possible values are:
+        - "time zone"
+        - "timezone" ie automatically remove all spacing
+
+#Idea 95
+    The alternative way, which I may do myself now I think about it long term, is add a argument to addlog that passes the log type "WIF" etc as an enum list, 
+    thats only a single byte usage. Could probably save 4000 bytes of progmem memory, but at this point progmem is so big its just not needed.
+
+#Idea 96
+    Fix to allow progmem URLS with webserver->on(url)
+
+#103
+    Enable IP address flash over builtin led. After succesfull wifi connection flash..
+    2 fast, 2 slow, 2 fast, 2 slow.... wait 5, then pulse out the IP. 
+    192.168.1.123 = 1 second on then off, wait 2...    1 second flashed 2 times, wait 2
+    1 second flash (2 second period = a number) and 2 second pause between numbers
+    Repeat this sequence twice
+
+#Idea 104
+    Make a class wrapper that allows checks on a sensor value, setting limits and variable/static tolerances that can be checked for validity. 
+    rev# - This is probably my new averaging method, I can just turn it down to size = 1 but still use rejection testing
+
+#Idea 105
+    Add into system settings page, and use the settings struct for each module and include tick boxes or number boxes to configure
+
+#106
+    Add percentage of water tank full, ie 100% full is average of all water sensors is 45 or above. 
+    Shower with immersion, would look like probably 25%... while bath would be near 100%+ (map with no constrain)
+    This will be some math equation, putting "probability weights" on each region, where <30 = 0% and 60deg = 100, then the 5 regions (temp sensor blocks) will be multipled
+    tank_region1 = map(average(sens1,sens2),30,60,0,100)*0.2 ... tank_region2 etc
+    tank_percentage = sum(tank_regions)*100
+
+#Idea 107
+    Increase transition timebase to allow for up to hour long transition (ie sunset slow turn on)
+
+#Idea 108
+    "and to have them transition from a cooler white to warmer white later in the evening" - av
+    This could be like the phones, a seperate overlay on ALL effects which changes the "warmth" of colour based on TOD. ie "eye strain" or "flux"
+
+#Idea 109
+    Adding a "LinearBlend" animation that uses X pixels repeated on a string, but then blends them (e.g., 10 red, 10 green, 10 blue.... but red/green linearblend together, green/blue linearblend together)
+
+    I might do this later as a standalone animation like the other ones
+    When you think about it, red/green/blue at equal distances on the string
+    linearblended completely, is... a rainbow lol
+    but I mean, using the palettes to generate those colours, but then not blending completely, so it has chunks of solid colours with then blended colour too
+    will look best on larger strings
+    the amount of blend between pixels, I can make as a percentage ratio (100% equal full linear blend, 50% with 10 red and 10 green, only the 5 green/red nearest blend)
+    by making that ratio change, as an animation, it could be a cool pulsing effect
+    and then.... I could linear blend the colour as saturated.... or brightness changed too
+    revision# this is an effect
+
+#Idea 110
+    Add devicename on boot message
+
+#Idea 111
+    Add array that can store the segment the pixels are from. Ie pixels = 0,1,2,3,4,5,6,7 can be mapped into [0,1,2,3,0,1,2,3] that way I can set a segment (index) to be a set colour, should help with animations too. Also shelf hearts, where hearts are a different segment to the rest.
+    rev# WLED does this by saving start/end pixel indexs, but I will still want (using a pointer) a hard coded way of remapping the output
+
+
+#Idea 112
+    Use a flag (bigpacked) for bitset to set (as a user option) which rows appear on root page for lighting (ie hide, lighting power)
+
+#Idea 113
+
+You see, I plan on adding log level show methods as:
+- Show set and all levels above it (done)
+- Show ONLY the set level (good for debugging, done)
+- Use bitpacked value to turn on/off which levels to show regardless of heirachy
+
+#Idea 114
+    So rgbw addressable I will probably always require a code flash, as I need to change the animation type array
+though, remind me, I could possibly do it dynamically too
+For now, its so unlikely someone would be switching between both hardware its not worth my effort... yet
+
+#Idea 115
+    Add WW/CW pixel order command for output, useful when only single white channels are connected.
+
+#Idea 116
+    Disable effects which can't be displayed on hardware, and/or, do automatic switches to the equivalent eg normal blend to rgbcct_blend for h801
+
+#Idea 117
+    Adding an "exposure" type setting for the palettes. For palettes where blue/green were lowered in brightness to scale things to make reds the same brightness, have a way to push those brightness levels up
+
+#Idea 118
+    Add pixel RGB output sliders, to manually adjust red to blue shift for led hardware with apparent brightness difference 
+    between channels. ie, the same as phones selecting whitepoint.
+    Also, include 100+% option, to force say red of 127 in palette to be 20% more ie 120%
+
+    {"ColourPalette":15,"PaletteEdit":{"ColourPalette":15,"Data":
+    [
+        9,5,0,0,0,
+        255,0,153,255,
+        217,0,255,25,
+        204,0,128,255,
+        153,0,255,178,
+        127,0,255,76,
+        102,0,255,25,
+        64,0,255,51,
+        51,0,255,0,
+        0,26,255,0]
+    
+    
+    
+    },"AnimationMode":"Effects","Effects":{"Function":1},"BrightnessRGB":100,"Transition":{"RateMs":1000,"TimeMs":0,"Order":"InOrder"}}
+
+    {"ColourPalette":15,"PaletteEdit":{"ColourPalette":15,"Data":[3,5,0,0,0,0,255,0,0,127,0,255,0,255,0,0,255]},"AnimationMode":"Effects","Effects":{"Function":1},"BrightnessRGB":100,"Transition":{"RateMs":1000,"TimeMs":0,"Order":"InOrder"}}
+
+
+
+#Idea 119
+    All sensors (most) should include optional flag to enable smoothing, where previous valid sample(s) is used to get a smoothing window
+
+#Idea 120
+  /**
+   * Allow using notifications with pixel groupings, ie applying pixel notificaiton across entire strip or section with pixel_index ranges
+   * 
+   * */
+
+
+#Idea 121
+    Create a way to make animations linked by when they should change
+    eg. Solar ezimuth. 
+
+    Using a single palette of rgbcct, I can create the colour steps I want.. but how to know when to step through them aka ranges
+    Stepping through may still be the best way, then the animation itself will just have a defined range where each change happens!
+    This will be solar03 test 
+
+#Idea 122
+    Allow multiple animations to work at the same time, ie colour pattern and brightness pattern
+    Create brightness animations that run alongside
+
+        - brightness manual
+        - brightness by sun elevation
+        - brightness by time of day
+        
+
+#Idea 123 
+    Create longterm sunrise style animation to be triggered at ANY time. ie, When I wake up, even if nighttime, begin a 10m sunrise wakeup brightness routine to slowly wake me up that does not
+    use the elevation, but instead manually count up. It this that will later be triggered as part of an alarm (5 minute wakeup) or gradual (30 minute wakeup)
+
+#Idea 124
+
+Add sunelevation palette that is actually left on overnight, and is black when its nighttime
+
+#Idea 125
+
+    Effect animation, of mutliple group pixels that each section grows and shrinks
+    ie, say 50 leds, with 5 sections with 10 leds per section
+    Have the amount of leds per a section grow/shrink, with different intensities
+    The effect should be "bars" of growing and shrinking colours
+    Later, change the "colours in the section" to actually be palette, and hence a palette may be a single colour, or, a full rainbow
+    So a solid section, could have rainbows or another palette growing into/out of it
+
+#Idea 126
+
+    Create option that palette values can be turned off, ie, if 5 colours existed in a palette, have the option that I can select "on/off ratio" of that palette to be returned
+    So for 50%, 10 led length palette, then when showing that palette only half of them would be lit
+
+#Idea 127
+    Use "intensity" parameter as global option for all animations, with flag to set on/off
+    The should enable a basic/advanced user to have basic or granular control of effects
+
+#Idea 128 FI-128 ie FI, feature idea
+    Keep detailed RTC memory inside settings, but also add a basic version to read as part of fastboot.
+    Main "Setup" will have a threadsafe RTC read/write of fastboot times, and if something is wrong, use this to switch into optional boot code that
+        1) Connects to default SSID "DEBUG_SSID_AP", connect to my wifi, and wait for OTA
+        2) Create its own wifi, so desktop etc can connect directly (if no AP connection) so OTA can be recovered directly
+
+ * Ideas:
+ * Create two basic LCD numbers, one for outside and one for bedroom temperature
+ * Create world map (like I said to jess) that lights to show where the sun is, and day/night land-mass light up with cities being bright spots.
+
+#FI-129
+    MultiPin Support
+    Test Case #1
+     - No PWM type
+     - ESP32 
+     - WS2812/SK6812 RGB, RGBW on 4 different pins
+    Test Case #2
+     - Use a H801
+     - Segment0: RGB PWM
+     - Segment1: WW/CW as CCT Channel PWM
+     - Segment2: pin 2 on program header as 3 led RGBW SK6812 type
+
+
+#FI-130
+    Add new system (with vectors) that does delayed commands.
+    For example, the typical "pCONT->Tasker_Interface(FUNC_WIFI_CONNECTED)". This would need to called within the connection function leading to possible recursive calls.
+    Instead, have this command added to a vector that holds them all, and calls any at the end of the loop after connections are finished.
+    If it is done with a vectorised struct, then other parameters such as delays can be used to added wait times.
+
+    First use of this will be with CELLULAR_CONNECTION_ESTABLSIHED, CELLULAR_CONNECTION_LOST

@@ -1,0 +1,313 @@
+; ***  Example PlatformIO Project Configuration Override File   ***
+; ***  Changes done here override settings in platformio.ini    ***
+;
+; *****************************************************************
+; ***  to activate rename this file to platformio_override.ini  ***
+; *****************************************************************
+;
+; Please visit documentation for the options and examples
+; http://docs.platformio.org/en/stable/projectconf.html
+
+[platformio]
+; For best Gitpod performance remove the ";" in the next line. Needed Platformio files are cached and installed at first run
+;core_dir = .platformio
+; extra_configs = platformio_tasmota_cenv.ini
+
+; *** Build/upload environment
+default_envs =
+; *** Uncomment the line(s) below to select version(s)
+                ; tasmota
+            ;    tasmota-debug
+            ;    tasmota-ircustom
+            ; hacs82-h801
+            ; hacs32-debug
+            ; hacs32-sdlogger1
+            ; hacs32-pwmtest
+            ; hacs32-webcam1
+
+
+[common]
+platform_packages           = ${core.platform_packages}
+build_unflags               = ${core.build_unflags}
+build_flags                 = ${core.build_flags}
+; *** Optional Debug messages
+;                            -DDEBUG_TASMOTA_CORE
+;                            -DDEBUG_TASMOTA_DRIVER
+;                            -DDEBUG_TASMOTA_SENSOR
+
+; *** CAUTION *** This setting is ONLY possible since 12.01.2021 with development version !!!
+; *** Enable only if you exactly know what are you doing
+; *** If you try with earlier builds a serial erase and flash is probably needed
+;
+; Build variant 1MB = 1MB firmware no filesystem (default)
+;board_build.ldscript        = eagle.flash.1m.ld
+; Build variant 2MB = 1MB firmware, +744k OTA, 256k filesystem (Zigbee Bridge, most Shelly devices)
+;board_build.ldscript        = eagle.flash.2m256.ld
+; Build variant 4MB = 1MB firmware, +1MB OTA, 2MB filesystem (WEMOS D1 Mini, NodeMCU, Sonoff POW)
+;board_build.ldscript        = eagle.flash.4m2m.ld
+; Build variant 16MB = 1MB firmware, +1MB OTA, 14MB filesystem (WEMOS D1 Mini pro, Ledunia (=32MB))
+;board_build.ldscript        = eagle.flash.16m14m.ld
+
+; set CPU frequency to 80MHz (default) or 160MHz
+;board_build.f_cpu           = 160000000L
+
+; set Flash chip frequency to 40MHz (default), 20MHz, 26Mhz, 80Mhz
+;board_build.f_flash         = 20000000L
+;board_build.f_flash         = 26000000L
+;board_build.f_flash         = 80000000L
+
+; *** Upload Serial reset method for Wemos and NodeMCU
+upload_port                 = COM5
+
+extra_scripts               = ${scripts_defaults.extra_scripts}
+;                              pio-tools/obj-dump.py
+                            pio/strip-floats.py
+                            pio/name-firmware.py
+                            ; pio/gzip-firmware.py
+                            gzip_fw.py
+                            pio/override_copy.py
+
+lib_extra_dirs              = ${library.lib_extra_dirs}
+
+[core]
+; Activate only (one set) if you want to override the standard core defined in platformio.ini !!!
+
+;platform_packages           = ${core_stage.platform_packages}
+;build_unflags               = ${core_stage.build_unflags}
+;build_flags                 = ${core_stage.build_flags}
+
+[core_stage]
+; *** Esp8266 core for Arduino version stage
+platform_packages           = framework-arduinoespressif8266 @ https://github.com/esp8266/Arduino.git
+; *** Use Xtensa build chain 10.2. GNU13 from https://github.com/earlephilhower/esp-quick-toolchain
+                              mcspr/toolchain-xtensa @ 5.100200.201223
+build_unflags               = ${esp_defaults.build_unflags}
+                              -Wswitch-unreachable
+build_flags                 = ${esp82xx_defaults.build_flags}
+; *** Use ONE of the two PWM variants. Tasmota default is Locked PWM
+                              ;-DWAVEFORM_LOCKED_PHASE
+                              -DWAVEFORM_LOCKED_PWM
+                              -Wno-switch-unreachable
+
+[common32]
+platform_packages           = ${core32.platform_packages}
+build_unflags               = ${core32.build_unflags}
+build_flags                 = ${core32.build_flags}
+upload_port                 = COM4
+lib_extra_dirs              = ${library.lib_extra_dirs}
+; *** ESP32 lib. ALWAYS needed for ESP32 !!!
+                            ;   lib/libesp32
+; *** uncomment the following line if you want to use Bluetooth or Apple Homekit in a Tasmota32 build
+;                              lib/libesp32_div
+; *** uncomment the following line if you want to use Epaper driver epidy in your Tasmota32 build
+;                              lib/libesp32_epdiy
+; *** ESP32 lib. ALWAYS needed for ESP32 !!!
+                            lib/libesp32
+; *** ESP32 lib. ALWAYS needed for ESP32 !!!
+                            lib/libg_neopixel   
+; *** Only disabled for Tasmota minimal and Tasmota light. For all other variants needed!
+                            lib/lib_basic
+
+[core32]
+; Activate Stage Core32 by removing ";" in next 3 lines, if you want to override the standard core32
+;platform_packages           = ${core32_stage.platform_packages}
+;build_unflags               = ${core32_stage.build_unflags}
+;build_flags                 = ${core32_stage.build_flags}
+
+[core32_stage]
+platform_packages           = framework-arduinoespressif32 @ https://github.com/espressif/arduino-esp32.git
+                              platformio/tool-mklittlefs @ ~1.203.200522
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                              -DESP32_STAGE=true
+
+[library]
+shared_libdeps_dir          = lib
+; *** Library disable / enable for variant Tasmota(32). Disable reduces compile time
+; *** !!! Disabling needed libs will generate compile errors !!!
+; *** The resulting firmware will NOT be different if you leave all libs enabled
+; *** Disabling by putting a ";" in front of the lib name
+; *** If you dont know what it is all about, do not change
+lib_extra_dirs              =
+; ; *** Only disabled for Tasmota minimal and Tasmota light. For all other variants needed!
+;                               lib/lib_basic
+; ; **** I2C devices. Most sensors. Disable only if you dont have ANY I2C device enabled
+;                               lib/lib_i2c
+; ; *** Displays. Disable if you dont have any Display activated
+;                               lib/lib_display
+; ; *** Bear SSL and base64. Disable if you dont have SSL or TLS activated
+;                               lib/lib_ssl
+; ; *** Audio needs a lot of time to compile. Mostly not used functions. Recommended to disable
+;                               lib/lib_audio
+; ; *** RF 433 stuff (not RF Bridge). Recommended to disable
+;                               lib/lib_rf
+; ; *** Mostly not used functions. Recommended to disable
+;                               lib/lib_div
+                            lib/libesp8266/network 
+                            lib/lib_network 
+                            lib/libg_neopixel
+                            lib/lib_basic      
+                            lib/lib_sensor  
+
+; *** EXPERIMENTAL Tasmota version for ESP32solo1 (used in some Xiaomi devices)
+[env:tasmota32solo1]
+extends                     = env:tasmota32_base
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/esp32-arduino-lib-builder/raw/framework-arduinoespressif32/framework-arduinoespressif32-release_v3.3-solo1-bd65eb8d1.tar.gz
+                              platformio/tool-mklittlefs @ ~1.203.200522
+                              platformio/tool-esptoolpy @ ~1.30000.0
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${common32.build_flags}
+
+; *** EXPERIMENTAL Tasmota version for ESP32-S2
+[env:tasmota32s2]
+extends                     = env:tasmota32_base
+board                       = esp32s2
+board_build.flash_mode      = qio
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/esp32-arduino-lib-builder/releases/download/v.2.0.0.pre/framework-arduinoespressif32-master-cf457d412.tar.gz
+                              platformio/tool-mklittlefs @ ~1.203.200522
+                              platformio/tool-esptoolpy @ ~1.30000.0
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${common32.build_flags} -DFIRMWARE_LITE
+lib_extra_dirs              = lib/libesp32
+lib_ignore                  =
+    NimBLE-Arduino
+    Micro-RTSP
+    ESP32-HomeKit
+
+
+; *** EXPERIMENTAL Tasmota version for ESP32-C3
+[env:tasmota32c3]
+extends                     = env:tasmota32_base
+board                       = esp32c3
+platform                    = https://github.com/Jason2866/platform-espressif32.git#feature/arduino-c3
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/esp32-arduino-lib-builder/releases/download/v.2.0.0.pre/framework-arduinoespressif32-master-cf457d412.tar.gz
+                              ; needed toolchain for Windows
+                              toolchain-riscv32 @ https://github.com/Jason2866/platform-espressif32/releases/download/8.4.0/riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-win32.zip
+                              ; needed toolchain for Linux
+                              ;toolchain-riscv32 @ https://github.com/Jason2866/platform-espressif32/releases/download/8.4.0/riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-linux-amd64.tar.gz
+                              ; needed toolchain for MacOS
+                              ;toolchain-riscv32 @ https://github.com/Jason2866/platform-espressif32/releases/download/8.4.0/riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-macos.tar.gz
+                              platformio/tool-mklittlefs @ ~1.203.200522
+build_unflags               = ${esp32_defaults.build_unflags} -mtarget-align
+build_flags                 = ${esp32_defaults.build_flags} -DFIRMWARE_LITE
+                              ;-DESP32_STAGE=true
+lib_extra_dirs              = lib/libesp32
+lib_ignore                  =
+    NimBLE-Arduino
+    Micro-RTSP
+
+; *** EXPERIMENTAL Tasmota version for Arduino ESP32 IDF4.4. Linking not working.
+[env:tasmota32idf4]
+extends                     = env:tasmota32_base
+platform                    = https://github.com/Jason2866/platform-espressif32.git#feature/arduino-idf-v4.4
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/arduino-esp32/releases/download/esp32-2.0.0-pre/esp32-2.0.0-pre.zip
+                              platformio/tool-mklittlefs @ ~1.203.200522
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                              ;-DESP32_STAGE=true
+
+; *** Debug version used for PlatformIO Home Project Inspection
+[env:tasmota-debug]
+build_type                  = debug
+build_unflags               = ${esp_defaults.build_unflags}
+build_flags                 = ${esp82xx_defaults.build_flags}
+;                              -Wstack-usage=300
+                                    -D DEVICE_RG BDESK  
+                                    -w 
+
+[env:tasmota32-debug]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+;                              -Wstack-usage=300
+
+[env:hacs32-debug]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+;                              -Wstack-usage=300
+                                    -D DEVICE_SDLOGGER1_TESTER
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+
+[env:hacs32-sdlogger1]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+;                              -Wstack-usage=300
+                                    -D DEVICE_SDLOGGER1_TESTER
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+
+[env:hacs32-pwmtest]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_DEVKIT_BASIC
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+upload_port = COM5
+
+
+[env:hacs32-webcam1]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_WEBCAM1
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+upload_port = COM5
+
+[env:hacs32-webcam2]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_WEBCAM2
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+upload_port = COM33
+
+
+
+
+
+[env:hacs82-h801]
+build_unflags               = ${esp_defaults.build_unflags}
+build_flags                 = ${esp82xx_defaults.build_flags}
+                            ; Defining name here allows mdns upload_port to use it
+                            -D DEVICE_EXAMPLE_H801
+                            ; Define the device on the next line (remove ; to enable)
+                            ; -D DEVICE_EXAMPLE_H801
+; For Serial Uploads (remove ; to enable)
+upload_port = COM1
+; For OTA Uploads with IP (remove ; to enable)
+; upload_protocol = espota
+; extra_scripts   =  ${scripts_defaults.extra_scripts} 
+;                     gzip_fw.py
+; upload_port = 192.168.1.124
+; For OTA Uploads with MDNS Name eg DEVICE_EXAMPLE_H801 (remove ; to enable)
+; upload_protocol = espota
+; extra_scripts   =  ${scripts_defaults.extra_scripts} 
+;                     gzip_fw.py
+; upload_port = h801_tester

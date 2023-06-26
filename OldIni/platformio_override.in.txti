@@ -1,0 +1,2399 @@
+; ***  Example PlatformIO Project Configuration Override File   ***
+; ***  Changes done here override settings in platformio.ini    ***
+;
+; *****************************************************************
+; ***  to activate rename this file to platformio_override.ini  ***
+; *****************************************************************
+;
+; Please visit documentation for the options and examples
+; http://docs.platformio.org/en/stable/projectconf.html
+
+[platformio]
+
+; *** Build/upload environment
+default_envs =
+; *** Uncomment the line(s) below to select version(s)
+
+    ;;; Home Long Term (only active devices) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Hallway / UnderStairs
+    ; wh_radfan
+    ; wh_dhall
+
+    ;;; wh_hvac_home
+    ; wh_heatn1
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Landing
+    ; wh_lanpan
+    ; wh_immersion
+    ; wh_dimland
+    ; wh_slp
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; TV/Spare Room    
+    ; wh_dimmer_tvroom
+    ; wh_tvroom_uplights
+    ; wh_ambilight_spareroom
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Ensuite
+    ; whitehall_ensuitesensor         ;; not yet installed, do bathroom first, then use same method with google mini
+    ; wh_ceiling_ensuite
+    ; wh_ensuite_fan
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Master Bedroom
+    ; wh_ceiling_mbedroom
+    ; ; whitehall_masterbedroomsensor    ;; not yet created
+    ; wh_hvac_masterbedroom
+    ; wh_dresser_lights
+    ; wh_mbedroom_lamp1
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Kitchen
+    ; wh_kitsen
+    ; wh_kitchenlight1
+    ; wh_kitchenlight2
+    ; wh_kitchenlight3
+    ; wh_kitchenlight4
+    ; wh_cooker_fan
+    ; wh_rgbcooker
+    ; wh_rgbfridge 
+    ; wh_rgbglassbox
+    ; wh_rgbshelf
+    ; wh_kitpan
+    ; wh_hvac_kitchen
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Utility
+    ; wh_utilsens
+    ; wh_rgbutility
+    ; wh_rgblamp_cylinder
+    ; wh_utility_i4
+    ; tasmota32solo1
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Livingroom   ;socketp3/p4/p5, dimmerp1
+    ; wh_livingroom_lamp1
+    ; wh_livingroom_lamp2
+    ; wh_livingroomsensor
+    ; wh_rgbfireplace
+    ; whitehall_dimmer_living_lamp1
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Garage 
+    ; wh_oiltank
+    ; wh_oilfurnace
+    ; wh_garagelight
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Gazebo
+    ; wh_gazebo_4chpro
+    ; wh_gazebosensor
+    ; wh_h801_rgbgazebo
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Outside
+    ; wh_sidelight
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Downstairs Toilet
+    ; wh_consunit
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Attic
+    ; wh_attic
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Bedroom 
+    ; wh_bedrmsen
+    ; wh_ceilingfan
+    ; wh_dimbrc
+    ; tb_dimtest
+    ; wh_clockbed
+    ; wh_broom_louv_hub
+    ; wh_dr0
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Wireless/Roaming
+    ; wh_airpurifier
+    ; wh_floorfan1
+    ; wh_floorfan2
+    ; wh_sonoff_basic_number_01
+    ; wh_sonoff_number_02
+    ; wh_sonoff_number_06
+    ; wh_sonoff_number_12
+    ; wh_sonoff_number_16
+    ; wh_sonoff_number_20
+    ; wh_sonoff_number_21
+    ; wh_sonoff_number_20
+    ; wh_sonum_22
+    ; wh_hvac_broom_hairdryer
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Temporary
+    ; wht_br_but
+    ; wht_black_stand
+    ; wht_rgbdesk
+    ; wht_bedroom_bedlight
+    ; wht_computer_u25
+    ; wht_computer_p32
+    ; wht_display_outbedroom
+    ; wht_bedr_wardrobe
+    WTde
+    ; wht_bedroom_desk
+    ; wht_rgb_glassheart
+    ; wh_clock_tv
+
+
+
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Colorado Devices
+;    rw_garsen
+
+
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CHRISTMAS 2022
+    ; ch_garden
+    ; ch_drtree
+    ; ch_garden_tblend
+    ; ch_outside_tree01
+    ; ch_outside_tree03
+    ; ch_hallway_tree
+    ; ch_test_tree
+
+    ;;;;;;;;; ch_bedroom_string
+    ; ch_bstring
+    ; tb_rgbdev2
+
+    ; xm_water
+
+    ; ch_utility_tree
+    ; ch_utility_candle
+
+
+
+
+
+
+
+
+
+    ;;; Testbed Devices ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ; esp_8266_testbed_shelly1_01
+    ; esp_8266_testbed_shelly2p5_01
+    ; esp_8266_testbed_shelly2_dimmer_01 
+    ; esp_8266_testbed_motion
+    ; esp_32_testbed_motion
+    ; esp_8266_h801_tester
+    ; esp_8266_rgbnotification_tester
+    ; esp_8266_testbed_rgbclock
+    ; esp_8266_testbed_string_animator_01
+    ; esp_8266_testbed_ultrasonic_01
+    ; esp_32_testbed_gps_sdcard_logger
+    ; esp_8266_testbed_9axis_gyro
+    ; esp_32_testbed_9axis_gyro_mpu9250
+    ; esp_32_testbed_9axis_gyro_gy89
+    ; esp_32_testbed_ecompass_lsm303d
+    ; esp_32_testbed_ds18xx
+    ; esp_8266_testbed_segments_roof
+    ; esp_32_testbed_nextion_heating
+    ; esp_8266_bedroom_cont_button_01
+    ; esp_8266_testbed_segments_4pixel
+    ; esp_32_testbed_segments_4pixel
+    ; esp_8266_testbed_webui_4pixel
+    ; esp_32_testbed_nextion_display
+    ; esp_8266_testbed_motion_climate_sensor
+    ; esp_32_testbed_hvac_with_energy_sens
+    ; esp_32_testbed_nextion_display_web
+    ; esp_8266_testbed_webui_basic_gui
+    ; esp_32_testbed_webui_basic_gui
+    ; esp_8266_testbed_webui_segments_3pixels
+    ; esp_8266_testbed_webui_4pixel
+    ; esp_8266_testbed_4chpro    ; 
+    ; esp_32_testbed_matrix_3p_e131
+    ; esp_8266_testbed_status_leds
+    ; esp_32_testbed_climate_sensor
+    ; esp_8266_testbed_rtc_fastboot
+    ; esp_32_testbed_add_double_digit
+    ; esp_8266_testbed_hardware_bme
+    ; esp_32_testbed_hardware_bme
+    ; esp_8266_testbed_h801_pwm_manual
+    ; esp_8266_testbed_blending_variables
+    ; esp_8266_testbed_button_longpress
+    ; esp_82_tb_h801_sun
+    ; esp_8266_testbed_bme
+    ; esp_32_testbed_bme
+    ; esp_8266_testbed_sensor
+    ; esp_8266_testbed_rj45_toggle
+    ; esp_8266_testbed_pixel_heart
+    ; testbed_shelly2p5
+    ; esp_32_testbed_fona_basic
+    ; testbed_rcswitch_normal
+    ; testbed_rcs_ext
+    ; testbed_h801_desk
+    ; testbed_led_matrix_seg
+    ; hacs32_webcam3
+    ; hacs32_webcam4
+    ; testbed_fastboot82
+    ; devbed_hvac_home
+    ; testbed_crashreport_esp32
+    ; testbed_crashreport_esp82
+    ; tb_neopixel_pinned
+    ; tb_lilygo_sim7000
+    ; tb_oled_sh1106
+    ; tb_sim7000_oled
+    ; tas32s
+    ; tb_4chpro
+    ; tb_shelly25
+    ; dev_sdcard
+    ; tb32_basic_web
+    ; t_web
+    ; t_web8
+
+    ; tb_seg_82
+    ; tb_seg_32
+    ; tbSpin
+
+
+    ;;; Example Devices for others ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ; hacs82-h801
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Bedroom 
+    ; 
+    ; esp_8266_inside_bedroom_wardrobe
+    ; esp_32_7segment_white_outsidetemp
+
+
+    ;;; SAMPLING DEVICES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+    ; hacs32-sdlogger1
+    ; esp_32_gpsparser_tester_polling
+    ; esp_32_sdcardwriter_tester
+    ; esp_32_uart_tester
+    ; esp_32_uart_gpsnmea_tester
+    ; esp_32_uart_gpsubx_tester
+    ; esp_32_sdcard_tester
+    ; esp_32_gps_to_sdcard_tester
+    ; esp_32_sdcard_lipo_tester
+    ; esp_32_measurement_system_1_tester
+    ; trying full measurements with imu too for heading and pitch only
+    ; esp_32_measurement_system_1
+    ; esp_32_measurement_calib_system_1
+    ; esp_32_radiation_pattern_imu_sd_logger_1
+    ; esp_32_rad_imu_sd_logger_1
+
+    ;;; DEVELOPEMENT DEVICES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+    ; esp_8266_customuser_example_serial
+    ; esp_8266_customuser_example_ota
+     
+
+
+[common]
+platform_packages           = ${core.platform_packages}
+build_unflags               = ${core.build_unflags}
+build_flags                 = ${core.build_flags}
+
+; Build variant 1MB = 1MB firmware no filesystem (default)
+;board_build.ldscript        = eagle.flash.1m.ld
+; Build variant 2MB = 1MB firmware, +744k OTA, 256k filesystem (Zigbee Bridge, most Shelly devices)
+;board_build.ldscript        = eagle.flash.2m256.ld
+; Build variant 4MB = 1MB firmware, +1MB OTA, 2MB filesystem (WEMOS D1 Mini, NodeMCU, Sonoff POW)
+;board_build.ldscript        = eagle.flash.4m2m.ld
+; Build variant 16MB = 1MB firmware, +1MB OTA, 14MB filesystem (WEMOS D1 Mini pro, Ledunia (=32MB))
+;board_build.ldscript        = eagle.flash.16m14m.ld
+
+; set CPU frequency to 80MHz (default) or 160MHz
+;board_build.f_cpu           = 160000000L
+
+; set Flash chip frequency to 40MHz (default), 20MHz, 26Mhz, 80Mhz
+;board_build.f_flash         = 20000000L
+;board_build.f_flash         = 26000000L
+;board_build.f_flash         = 80000000L
+
+; *** Upload Serial reset method for Wemos and NodeMCU
+upload_port                 = COM5
+
+extra_scripts               = ${scripts_defaults.extra_scripts}
+;                              pio-tools/obj-dump.py
+                            pio/strip-floats.py
+                            pio/name-firmware.py
+                            ; pio/gzip-firmware.py
+                            gzip_fw.py
+                            pio/override_copy.py
+
+lib_extra_dirs              = ${library.lib_extra_dirs}
+
+[core]
+; Activate only (one set) if you want to override the standard core defined in platformio.ini !!!
+
+;platform_packages           = ${core_stage.platform_packages}
+;build_unflags               = ${core_stage.build_unflags}
+;build_flags                 = ${core_stage.build_flags}
+
+[core_stage]
+; *** Esp8266 core for Arduino version stage
+platform_packages           = framework-arduinoespressif8266 @ https://github.com/esp8266/Arduino.git
+; *** Use Xtensa build chain 10.2. GNU13 from https://github.com/earlephilhower/esp-quick-toolchain
+                              mcspr/toolchain-xtensa @ 5.100200.201223
+build_unflags               = ${esp_defaults.build_unflags}
+                              -Wswitch-unreachable
+build_flags                 = ${esp82xx_defaults.build_flags}
+; *** Use ONE of the two PWM variants. Tasmota default is Locked PWM
+                              ;-DWAVEFORM_LOCKED_PHASE
+                              -DWAVEFORM_LOCKED_PWM
+                              -Wno-switch-unreachable
+
+[common32]
+framework                   = ${common.framework}
+platform                    = ${core32.platform}
+platform_packages           = ${core32.platform_packages}
+build_unflags               = ${core32.build_unflags}
+build_flags                 = ${core32.build_flags}
+upload_port                 = COM4
+lib_extra_dirs              = ${library.lib_extra_dirs}
+; *** ESP32 lib. ALWAYS needed for ESP32 !!!
+                            ;   lib/libesp32
+; *** uncomment the following line if you want to use Bluetooth or Apple Homekit in a Tasmota32 build
+;                              lib/libesp32_div
+; *** uncomment the following line if you want to use Epaper driver epidy in your Tasmota32 build
+;                              lib/libesp32_epdiy
+; *** ESP32 lib. ALWAYS needed for ESP32 !!!
+                            lib/libesp32
+; *** ESP32 lib. ALWAYS needed for ESP32 !!!
+                            lib/libg_neopixel   
+; *** Only disabled for Tasmota minimal and Tasmota light. For all other variants needed!
+                            lib/lib_basic
+                            ; lib/lib_sensor_db
+                            ; lib/lib_sensor
+
+; [core32]
+; ; Activate Stage Core32 by removing ";" in next 3 lines, if you want to override the standard core32
+; ; platform_packages           = ${core32_stage.platform_packages}
+; ; build_unflags               = ${core32_stage.build_unflags}
+; ; build_flags                 = ${core32_stage.build_flags}
+
+; [core32_stage]
+; platform_packages           = framework-arduinoespressif32 @ https://github.com/espressif/arduino-esp32.git
+;                               platformio/tool-mklittlefs @ ~1.203.200522
+; build_unflags               = ${esp32_defaults.build_unflags}
+; build_flags                 = ${esp32_defaults.build_flags}
+;                               -DESP32_STAGE=true
+
+; this is the working "core32"
+[core32]
+platform                    = espressif32@3.5.0
+;@ 3.2.0
+platform_packages           = 
+;platformio/tool-mklittlefs @ ~1.203.200522
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+
+[library]
+shared_libdeps_dir          = lib
+; *** Library disable / enable for variant Tasmota(32). Disable reduces compile time
+; *** !!! Disabling needed libs will generate compile errors !!!
+; *** The resulting firmware will NOT be different if you leave all libs enabled
+; *** Disabling by putting a ";" in front of the lib name
+; *** If you dont know what it is all about, do not change
+lib_extra_dirs              =
+; ; *** Only disabled for Tasmota minimal and Tasmota light. For all other variants needed!
+;                               lib/lib_basic
+; ; **** I2C devices. Most sensors. Disable only if you dont have ANY I2C device enabled
+;                               lib/lib_i2c
+; ; *** Displays. Disable if you dont have any Display activated
+;                               lib/lib_display
+; ; *** Bear SSL and base64. Disable if you dont have SSL or TLS activated
+;                               lib/lib_ssl
+; ; *** Audio needs a lot of time to compile. Mostly not used functions. Recommended to disable
+;                               lib/lib_audio
+; ; *** RF 433 stuff (not RF Bridge). Recommended to disable
+;                               lib/lib_rf
+; ; *** Mostly not used functions. Recommended to disable
+;                               lib/lib_div
+                            lib/libesp8266/network 
+                            lib/lib_network 
+                            lib/libg_neopixel
+                            lib/lib_basic      
+                            ; lib/lib_sensor  
+
+; *** EXPERIMENTAL Tasmota version for ESP32solo1 (used in some Xiaomi devices)
+[env:tasmota32solo1]
+extends                     = env:tasmota32_base
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/esp32-arduino-lib-builder/raw/framework-arduinoespressif32/framework-arduinoespressif32-release_v3.3-solo1-bd65eb8d1.tar.gz
+                              platformio/tool-mklittlefs @ ~1.203.200522
+                              platformio/tool-esptoolpy @ ~1.30000.0
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${common32.build_flags}
+
+; *** EXPERIMENTAL Tasmota version for ESP32-S2
+[env:tasmota32s2]
+extends                     = env:tasmota32_base
+board                       = esp32s2
+board_build.flash_mode      = qio
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/esp32-arduino-lib-builder/releases/download/v.2.0.0.pre/framework-arduinoespressif32-master-cf457d412.tar.gz
+                              platformio/tool-mklittlefs @ ~1.203.200522
+                              platformio/tool-esptoolpy @ ~1.30000.0
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${common32.build_flags} -DFIRMWARE_LITE
+lib_extra_dirs              = lib/libesp32
+lib_ignore                  =
+    NimBLE-Arduino
+    Micro-RTSP
+    ESP32-HomeKit
+
+
+; *** EXPERIMENTAL Tasmota version for ESP32-C3
+[env:tasmota32c3]
+extends                     = env:tasmota32_base
+board                       = esp32c3
+platform                    = https://github.com/Jason2866/platform-espressif32.git#feature/arduino-c3
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/esp32-arduino-lib-builder/releases/download/v.2.0.0.pre/framework-arduinoespressif32-master-cf457d412.tar.gz
+                              ; needed toolchain for Windows
+                              toolchain-riscv32 @ https://github.com/Jason2866/platform-espressif32/releases/download/8.4.0/riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-win32.zip
+                              ; needed toolchain for Linux
+                              ;toolchain-riscv32 @ https://github.com/Jason2866/platform-espressif32/releases/download/8.4.0/riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-linux-amd64.tar.gz
+                              ; needed toolchain for MacOS
+                              ;toolchain-riscv32 @ https://github.com/Jason2866/platform-espressif32/releases/download/8.4.0/riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-macos.tar.gz
+                              platformio/tool-mklittlefs @ ~1.203.200522
+build_unflags               = ${esp32_defaults.build_unflags} -mtarget-align
+build_flags                 = ${esp32_defaults.build_flags} -DFIRMWARE_LITE
+                              ;-DESP32_STAGE=true
+lib_extra_dirs              = lib/libesp32
+lib_ignore                  =
+    NimBLE-Arduino
+    Micro-RTSP
+
+; *** EXPERIMENTAL Tasmota version for Arduino ESP32 IDF4.4. Linking not working.
+[env:tasmota32idf4]
+extends                     = env:tasmota32_base
+platform                    = https://github.com/Jason2866/platform-espressif32.git#feature/arduino-idf-v4.4
+platform_packages           = framework-arduinoespressif32 @ https://github.com/Jason2866/arduino-esp32/releases/download/esp32-2.0.0-pre/esp32-2.0.0-pre.zip
+                              platformio/tool-mklittlefs @ ~1.203.200522
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                              ;-DESP32_STAGE=true
+
+; *** Debug version used for PlatformIO Home Project Inspection
+[env:tasmota-debug]
+build_type                  = debug
+build_unflags               = ${esp_defaults.build_unflags}
+build_flags                 = ${esp82xx_defaults.build_flags}
+;                              -Wstack-usage=300
+                                    -D DEVI CE_RGBDESK  
+                                    -w 
+
+[env:tasmota32-debug]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+;                              -Wstack-usage=300
+
+[env:hacs32-debug]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+;                              -Wstack-usage=300
+                                    -D DEVICE_SDLOGGER1_TESTER
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+
+[env:hacs32-sdlogger1]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_SDLOGGER1_TESTER
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+                            lib/lib_display
+upload_port = COM5
+; upload_protocol = espota
+; upload_port = 192.168.1.114
+monitor_filters = esp32_exception_decoder
+; build_type = debug
+
+[env:hacs32-rgbfireplace_tester]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_RGBFIREPLACE_TESTER
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+                            lib/libg_neopixel
+; upload_port = 192.168.1.171
+; upload_port = rgbfireplace_tester.local
+; extra_scripts   = gzip_fw.py
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM5
+
+[env:hacs32-pwmtest]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_DEVKIT_BASIC
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+upload_port = COM5
+
+
+
+[env:testbed_shelly2p5]
+extends = env:whitehall_82
+platform                  = ${core_2_6_1_1m.platform}
+build_flags               = ${core_2_6_1_1m.build_flags}
+                                 -D DEVICE_TESTBED_SHELLY_2P5 
+                                 -w
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; upload_port = 192.168.0.242
+upload_port = COM18
+
+    
+
+
+[env:hacs32_webcam1]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_WEBCAM1
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+upload_port = COM5
+
+
+
+[env:hacs32_webcam2]
+extends                     = env:tasmota32_base
+; build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_WEBCAM2
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/lib_gps
+                            lib/libesp32/network
+                            lib/lib_network
+board = esp32cam
+upload_port = COM8
+monitor_filters = esp32_exception_decoder
+build_type = debug
+; upload_port = 192.168.1.114
+
+
+[env:hacs32_webcam3]
+extends                     = env:tasmota32_base
+; build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_WEBCAM3
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            ; lib/lib_gps
+                            ; lib/libesp32/network
+                            ; lib/lib_network
+                            ; lib/libesp32/esp32-camera
+board = esp32cam
+upload_port = COM28
+monitor_filters = esp32_exception_decoder
+build_type = debug
+; upload_port = 192.168.1.114
+
+[env:hacs32_webcam4]
+extends                     = env:tasmota32_base
+; build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_ESP32_WEBCAM4
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            ; lib/lib_gps
+                            ; lib/libesp32/network
+                            ; lib/lib_network
+                            lib/libesp32/esp32-camera
+                            ; ~/Documents/Arduino/libraries
+board = esp32cam
+upload_port = COM28
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platform = espressif32
+; upload_protocol = espota
+; upload_port = 192.168.1.114
+; lib_extra_dirs = ~/Documents/Arduino/libraries
+
+
+
+[env:hacs82-h801]
+build_unflags               = ${esp_defaults.build_unflags}
+build_flags                 = ${esp82xx_defaults.build_flags}
+                            ; Defining name here allows mdns upload_port to use it
+                            ; -D DEVICE_EXAMPLE_H801
+                            ; Define the device on the next line (remove ; to enable)
+                            ; -D DEVICE_EXAMPLE_H801
+; For Serial Uploads (remove ; to enable)
+upload_port = COM1
+; For OTA Uploads with IP (remove ; to enable)
+; upload_protocol = espota
+; extra_scripts   =  ${scripts_defaults.extra_scripts} 
+;                     gzip_fw.py
+; upload_port = 192.168.1.124
+; For OTA Uploads with MDNS Name eg DEVICE_EXAMPLE_H801 (remove ; to enable)
+; upload_protocol = espota
+; extra_scripts   =  ${scripts_defaults.extra_scripts} 
+;                     gzip_fw.py
+; upload_port = h801_tester
+
+
+
+[env:hacs32-bedroom_pzem_tester]
+extends                     = env:tasmota32_base
+build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_BEDROOM_PZEM_TESTER
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; upload_port = 192.168.1.137
+; upload_port = consumerunit.local
+upload_port = COM5
+monitor_filters = esp32_exception_decoder
+
+
+
+
+
+[env:esp_32_gpsparser_tester_polling]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_GPSPARSER_TESTER_POLLING -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+[env:esp_32_gpsparser_tester_interrupt]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_GPSPARSER_TESTER_INTERRUPT -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_gps
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM3
+; upload_port = 192.168.1.210
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_sdlogger1_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_SDLOGGER1_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_gps, lib/lib_display
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM5
+upload_port = sdlogger1_tester
+; upload_port = 192.168.1.210
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_uart_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_UART_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+[env:esp_32_uart_gpsnmea_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_UART_GPS_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+[env:esp_32_uart_gpsubx_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_UART_GPSUBX_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_sdcard_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_SDCARD_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+[env:esp_32_sdcard_lipo_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_SDCARD_LIPO_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_gps_to_sdcard_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -D DEVICE_GPS_TO_SDCARD_TESTER -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+; upload_port = 192.168.1.171
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_measurement_system_1_tester]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+monitor_speed             = 115200
+; upload_port = 192.168.1.125
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+[env:esp_32_measurement_system_1]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM5
+monitor_speed             = 115200
+; upload_port = 192.168.1.125
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+[env:esp_32_measurement_calib_system_1]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM5
+; monitor_speed             = 115200
+; upload_port = 192.168.1.125
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_rad_imu_sd_logger_1]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_UAV 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM18
+; monitor_speed             = 115200
+; upload_port = 192.168.1.129
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_testbed_ecompass_lsm303d]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_6DOF_ECOMPASS_LSM303D 
+                          ; -D ENABLE_BUG_TRACING
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM5
+; monitor_speed             = 115200
+; upload_port = 192.168.1.129
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+
+
+
+[env:esp_32_testbed_gps_sdcard_logger]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_GPS_SDCARD_LOGGER 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = COM14
+monitor_speed             = 115200
+; upload_port = 192.168.1.125
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+
+
+[env:devbed_hvac_home]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_TESTBED_HVAC_HEATING_DUPLICATE
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}              
+                          lib/libesp32
+                          lib/lib_basic
+                          lib/lib_network
+                          lib/lib_display
+                          lib/lib_onewire2023 
+                          lib/lib_sensor
+                          lib/libg_neopixel
+; upload_protocol = espota
+; upload_port = heating
+; upload_port = 192.168.0.34
+upload_port = COM5
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+    
+
+
+
+
+[env:esp_32_rgbgazebo_roof]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel   
+lib_deps =
+  # RECOMMENDED
+  # Accept new functionality in a backwards compatible manner and patches
+  ; slashdevin/NeoGPS @ ^4.2.9
+;  https://github.com/SlashDevin/NeoHWSerial
+;   PaulStoffregen/AltSoftSerial
+; , lib/lib_arduinojson
+; lib_extra_dirs          = lib/libesp32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM5
+upload_port = 192.168.1.167
+upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+    
+
+
+
+[env:esp_8266_testbed_9axis_gyro]
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_9AXIS_GRYO -w
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = 192.168.1.98
+upload_port = COM5
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; upload_port = 192.168.1.131
+
+
+
+[env:esp_32_testbed_9axis_gyro_mpu9250]
+; build_flags = ${common.build_flags} -D DEVICE_TESTBED_9AXIS_GRYO_MPU9250 -w
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_9AXIS_GRYO_MPU9250
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor
+lib_deps =
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = 192.168.1.98
+; upload_port = COM5
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; upload_port = 192.168.1.131
+extra_scripts   = gzip_fw.py
+upload_protocol = espota
+upload_port = 192.168.1.167
+
+
+
+[env:esp_32_testbed_9axis_gyro_gy89]
+; build_flags = ${common.build_flags} -D DEVICE_TESTBED_9AXIS_GRYO_MPU9250 -w
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_9AXIS_GRYO_GY89
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor
+lib_deps =
+monitor_filters = esp32_exception_decoder
+build_type = debug
+; upload_port = 192.168.1.98
+upload_port = COM31
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; upload_port = 192.168.1.131
+; extra_scripts   = gzip_fw.py
+; upload_protocol = espota
+; upload_port = 192.168.1.167
+
+
+
+[env:esp_32_outsidetree_basic_01]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_BASIC_01
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = 192.168.1.238
+; upload_port = outsidetree_01
+; upload_port = COM31
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+upload_protocol = espota
+
+[env:esp_32_outsidetree_basic_02]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_BASIC_02
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.1.238
+; upload_port = outsidetree_01
+upload_port = COM31
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+; upload_protocol = espota
+
+
+[env:esp_32_outsidetree_debug]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_ESP32_DEBUG
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.1.238
+; upload_port = outsidetree_01
+upload_port = COM5
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+; upload_protocol = espota
+
+[env:esp_32_outsidetree_advanced_01]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_OUTSIDETREE_CONTROLLER_ADVANCED_01
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.1.138
+upload_port = COM5
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+; upload_protocol = espota
+
+
+
+
+
+[env:xm_water]
+extends = env:whitehall_32
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_XMAS_LIVINGROOM_TREE_WATER_LEVEL
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                              lib/lib_filters
+                              lib/lib_onewire2023
+                              lib/lib_sensor
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM5
+upload_port = 192.168.0.215
+upload_protocol = espota
+
+
+
+
+
+[env:esp_8266_devboard_segment]
+build_flags = ${common.build_flags} 
+                -D DEVICE_RGBSTRING_DEVBOARD_SEGMENT -w
+                -D D_USER_MICHAEL
+                ;-D USE_BUILD_TYPE_LIGHTING
+                ;-w
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.1.181
+; upload_port = rgb_computer_display_p32
+; upload_port = COM33
+
+
+
+
+
+[env:esp_32_bucket_water_level]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_BUCKET_WATER_LEVEL 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM5
+; monitor_speed             = 115200
+upload_port = 192.168.0.46
+upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_tree_segment]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_RGBSTRING_DEVBOARD_SEGMENT_ESP32 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+;upload_port = COM5
+; monitor_speed             = 115200
+upload_port = 192.168.1.75
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+
+
+[env:esp_32_outside_tree_segments]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_RGBSTRING_OUTSIDE_TREE_SEGMENTS 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/libg_neopixel
+lib_deps =
+monitor_filters = esp32_exception_decoder, colorize
+build_type = debug
+upload_port = COM5
+; monitor_speed             = 115200
+; upload_port = 192.168.1.75
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+
+
+
+
+
+
+
+[env:esp_32_testbed_ds18xx]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_DS18XX
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_onewire2023
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+;upload_port = 192.168.1.93
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:esp_32_testbed_bme]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_BME_ESP32
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+;upload_port = 192.168.1.93
+upload_port = COM15
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:esp_32_testbed_fona_basic]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_FONA_800L_BASIC
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/lib_cellular
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+upload_port = 192.168.0.111
+; upload_port = COM15
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+upload_protocol = espota
+
+
+[env:testbed_rcswitch_normal]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_RCSWITCH_NORMAL
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/lib_cellular, lib/lib_rf
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.111
+upload_port = COM26
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:testbed_rcs_ext]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_testbed_rcs_ext
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_sensor, lib/lib_cellular, lib/lib_rf_extended
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.111
+upload_port = COM6
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:testbed_h801_desk]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_H801_LONGTERM_DESK  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.116
+; ; upload_port = rgbfridge
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.53
+; upload_port = COM18
+
+
+[env:testbed_crashreport_esp82]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_CRASHREPORT  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.116
+; ; upload_port = rgbfridge
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.0.53
+upload_port = COM18
+
+[env:testbed_crashreport_esp32]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_CRASHREPORT  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.116
+; ; upload_port = rgbfridge
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.0.53
+upload_port = COM18
+
+
+
+
+[env:testbed_fastboot82]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_FASTBOOT_ESP8266  -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.116
+; ; upload_port = rgbfridge
+upload_protocol = espota
+extra_scripts             = gzip_fw.py
+upload_port = 192.168.0.242
+; upload_port = COM29
+
+
+
+
+[env:esp_32_testbed_climate_sensor]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_CLIMATE_SENSOR_BREADBOARD
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network
+              lib/lib_display
+              lib/lib_onewire2023 
+              lib/lib_sensor
+              lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = COM19
+upload_protocol = espota
+upload_port = 192.168.0.180
+
+
+
+
+
+
+
+[env:esp_8266_testbed_segments_roof]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_ANIMATION_SEGMENTS_3PIXELS -w
+                -D D_USER_MICHAEL
+                ; -D 
+                ;-D USE_BUILD_TYPE_LIGHTING
+                ;-w
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.1.181
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+
+
+[env:esp_32_string_rosebud]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_STRING_ROSEBUD
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+
+
+
+[env:esp_8266_testbed_segments_4pixel]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS -w
+                -D D_USER_MICHAEL
+                ; -D 
+                ;-D USE_BUILD_TYPE_LIGHTING
+                ;-w
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.0.199
+; upload_port = testbed_animation_segment_01
+; upload_port = COM5
+
+
+[env:esp_8266_testbed_rtc_fastboot]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_RTC_FASTBOOT -w
+                -D D_USER_MICHAEL
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.199
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+
+
+[env:esp_8266_testbed_status_leds]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_STATUS_LEDS -w
+                -D D_USER_MICHAEL
+                ; -D 
+                ;-D USE_BUILD_TYPE_LIGHTING
+                ;-w
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.199
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+
+
+
+[env:esp_32_testbed_segments_4pixel]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+[env:esp_32_testbed_matrix_3p_e131]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_3PIXELS_MATRIX_E131_PROTOCOL
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM19
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+[env:esp_32_testbed_webui_4pixel]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_ANIMATION_SEGMENTS_4PIXELS_ENABLING_WEBUI
+; -D DEVICE_MEASUREMENT_SYSTEM_1 
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:esp_8266_testbed_webui_basic_gui]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266 -w
+                -D D_USER_MICHAEL
+lib_extra_dirs = ${library.lib_extra_dirs}
+                 lib/lib_basic
+                 lib/lib_network
+                 lib/lib_sensor
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+; upload_port = 192.168.0.213
+; upload_port = testbed_animation_segment_01
+upload_port = COM22
+
+[env:t_web]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/lib_display
+              lib/lib_onewire2023 
+              lib/lib_sensor
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+[env:t_web8]
+extends = env:whitehall_82
+build_flags             = ${common.build_flags} 
+                            -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP8266
+                            -w
+lib_extra_dirs = ${library.lib_extra_dirs}
+                 lib/lib_basic
+                 lib/lib_network
+                 lib/lib_sensor
+              ; lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+
+[env:ch_garden]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_DEVKIT1
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+upload_port = 192.168.0.230
+; upload_port = outsidetree_01
+; upload_port = COM4
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+upload_protocol = espota
+
+
+
+
+[env:ch_garden_tblend]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_TESTER_01_BLENDING_XMAS2022
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+upload_port = COM6
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:ch_outside_tree01]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_PRIMATY_WIFI_ENABLED_XMAS2022
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+upload_port = COM5
+;;;;;;;;;;; Outdoor Tree ONE = Last programmed December 13th and will remain unprogrammed as backup
+; upload_port = 192.168.0.242
+; upload_protocol = espota
+;;;;;;;;;;; Outdoor Tree TWO = NEW primary device that will continue to be updated
+; upload_port = 192.168.0.242
+; upload_protocol = espota
+
+
+[env:ch_outside_tree03]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_OUTSIDETREE_CONTROLLER_SEGMENTS
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = COM9
+;;;;;;;;;;; Outdoor Tree ONE = Last programmed December 13th and will remain unprogrammed as backup
+; upload_port = 192.168.0.242
+; upload_protocol = espota
+;;;;;;;;;;; Outdoor Tree TWO = NEW primary device that will continue to be updated
+; upload_port = 192.168.0.242
+; upload_protocol = espota
+;;;;;;;;;;; Outdoor Tree THREE = NEW primary device that will continue to be updated
+upload_port = 192.168.0.211
+upload_protocol = espota
+
+
+[env:ch_test_tree]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_TEST_TREE_XMAS2022
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+upload_port = COM5
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+
+[env:ch_bstring]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_BEDROOM_CEILING_STRING
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+monitor_filters = esp32_exception_decoder
+build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+upload_port = COM6
+; upload_protocol = espota
+; upload_port = 192.168.0.230
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+[env:tb_seg_32]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__BEDROOM_ROOF
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+monitor_filters = esp32_exception_decoder
+build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+upload_port = COM6
+; upload_protocol = espota
+; upload_port = 192.168.0.230
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:tbSpin]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+monitor_filters = esp32_exception_decoder
+build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+upload_port = COM10
+; upload_protocol = espota
+; upload_port = 192.168.0.230
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+
+
+
+[env:tb_seg_82]
+extends = env:whitehall_82
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_LIGHT_SEGMENT_ESP8266__BEDROOM_ROOF
+                                     -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libg_neopixel
+; upload_port = rgbshelf.local
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.0.60
+upload_port=COM5
+monitor_filters = esp8266_exception_decoder
+build_type = debug
+
+
+
+
+
+
+
+
+
+
+
+
+[env:tb_rgbdev2]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_DEVELOPMENT_NODE2
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+; upload_port = COM10
+; upload_protocol = espota
+; upload_port = 192.168.0.230
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+;;;;;;;;;;; TV Room ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+upload_port = 192.168.0.235
+upload_protocol = espota
+
+
+
+[env:ch_utility_tree]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_TREE
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = xmas_outsidetree_tester_blending
+; upload_port = COM8
+upload_protocol = espota
+upload_port = 192.168.0.125
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+[env:ch_utility_candle]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_UTILITY_CANDLE
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = xmas_outsidetree_tester_blending
+; upload_port = COM8
+upload_protocol = espota
+upload_port = 192.168.0.136
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+[env:ch_hallway_tree]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_HALLWAYTREE_XMAS2022
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; upload_port = 192.168.0.242
+; upload_port = xmas_outsidetree_tester_blending
+upload_port = COM7
+
+
+
+
+
+[env:ch_drtree]
+extends = env:whitehall_32
+build_flags             = ${esp32_defaults.build_flags} 
+                            -D DEVICE_RGBSTRING_CHRISTMAS_ESP32_DININGROOM_XMAS2022
+                            -w
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/libesp32
+              lib/lib_basic
+              lib/lib_network
+              lib/libg_neopixel
+              lib/lib_irremote
+              lib/lib_basic
+              lib/libesp32/network
+              lib/lib_network_test
+              lib/lib_network_web
+              lib/lib_async32
+; extends = env:tasmota32_base
+; build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_WEBUI_BASIC_GUI_ESP32
+; lib_extra_dirs          = lib/libesp32
+;                           lib/lib_basic
+;                           lib/libesp32/network
+;                           lib/lib_network_test
+; lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; platformio device mon
+; upload_port = 192.168.0.230
+; upload_port = outsidetree_01
+upload_port = COM8
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+
+
+[env:esp_8266_testbed_webui_segments_3pixels]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_3PIXELS -w
+                -D D_USER_MICHAEL
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.199
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+[env:esp_8266_testbed_webui_4pixel]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_WEBUI_ANIMATION_SEGMENTS_4PIXELS -w
+                -D D_USER_MICHAEL
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.199
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+
+[env:esp_8266_testbed_pixel_heart]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_PIXEL_HEART -w
+                -D D_USER_MICHAEL
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.15
+; upload_port = testbed_animation_segment_01
+upload_port = COM12
+
+
+[env:esp_8266_testbed_hardware_bme]
+build_flags = ${common.build_flags} 
+                -D DEVICE_TESTBED_HARDWARE_BME_ESP8266 -w
+                -D D_USER_MICHAEL
+lib_extra_dirs = ${common.lib_extra_dirs}
+              lib/lib_sensor
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.199
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+
+[env:esp_32_testbed_hardware_bme]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_HARDWARE_BME_ESP32
+lib_extra_dirs          = lib/libesp32
+                          lib/lib_basic
+                          lib/libesp32/network
+                          lib/lib_network_test
+                          lib/lib_sensor
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.0.174
+; upload_port = outsidetree_01
+upload_port = COM24
+; extra_scripts   = ${scripts_defaults.extra_scripts} 
+;                   gzip_fw.py
+; upload_protocol = espota
+
+
+
+
+
+
+[env:esp_8266_bedroom_wallclock_01]
+build_flags = ${common.build_flags} 
+                -D DEVICE_BEDROOM_WALLCLOCK_01 -w
+                -D D_USER_MICHAEL
+                ; -D 
+                ;-D USE_BUILD_TYPE_LIGHTING
+                ;-w
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.0.174
+; upload_port = testbed_animation_segment_01
+upload_port = COM5
+
+
+
+
+; [env:esp_8266_testbed_segments_roof]
+; build_flags = ${common.build_flags} 
+;                 -D DEVICE_TESTBED_ANIMATION_SEGMENTS_3PIXELS -w
+;                 -D D_USER_MICHAEL
+;                 ;-D USE_BUILD_TYPE_LIGHTING
+;                 ;-w
+; ; monitor_filters = esp8266_exception_decoder
+; ; build_type = debug
+; upload_protocol = espota
+; extra_scripts   = gzip_fw.py
+; upload_port = 192.168.1.181
+; ; upload_port = testbed_animation_segment_01
+; ; upload_port = COM34
+
+
+
+
+
+[env:esp_8266_testbed_button_longpress]
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_BUTTON_MULTIPRESS -w
+                    -D USE_USER_MICHAEL
+upload_protocol = espota
+extra_scripts             =   gzip_fw.py
+upload_port = 192.168.0.166
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = COM5
+
+
+
+
+
+[env:esp_8266_testbed_motion]
+build_flags = ${common.build_flags} -D DEVICE_TESTBED_MOTION -w
+                    -D USE_USER_MICHAEL
+upload_protocol = espota
+extra_scripts             =   gzip_fw.py
+upload_port = 192.168.1.18
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+; upload_port = COM5
+
+
+[env:esp_32_testbed_motion]
+extends = env:tasmota32_base
+build_flags             = ${esp32_defaults.build_flags} -Wcpp -w -Wconversion -Wpacked-bitfield-compat -D DEVICE_TESTBED_MOTION -D ESP32
+lib_extra_dirs          = lib/libesp32, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_display, lib/lib_onewire2023, lib/libg_neopixel
+lib_deps =
+; monitor_filters = esp32_exception_decoder
+; build_type = debug
+; upload_port = 192.168.1.93
+upload_port = COM6
+extra_scripts   = ${scripts_defaults.extra_scripts} 
+                  gzip_fw.py
+upload_protocol = espota
+
+
+
+[env:esp_32_testbed_nextion_heating]
+extends                     = env:tasmota32_base
+;build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_TESTBED_NEXTION_HEATING
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+upload_protocol = espota
+upload_port = 192.168.1.36
+; upload_port = COM7
+
+[env:esp_32_testbed_nextion_display]
+extends                     = env:tasmota32_base
+;build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+; upload_protocol = espota
+; upload_port = 192.168.0.99
+upload_port = COM5
+
+
+[env:esp_32_testbed_nextion_display_web]
+extends                     = env:tasmota32_base
+;build_type                  = debug
+build_unflags               = ${esp32_defaults.build_unflags}
+build_flags                 = ${esp32_defaults.build_flags}
+                                    -D DEVICE_TESTBED_NEXTION_DISPLAY_GENERIC_WITH_WEBUI
+                                    -w                                     
+lib_extra_dirs          = ${common32.lib_extra_dirs}
+                            lib/libesp32/network
+                            lib/lib_network
+; upload_protocol = espota
+; upload_port = 192.168.0.99
+upload_port = COM5
+
+
+
+
+
+[env:esp_8266_socket_numbered_20]
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_SOCKET_NUMBERED 
+                                 -D DEVICENAME_SOCKET_NUMBER_CTR=20 -w
+                                 -D DISABLE_WEBSERVER
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.1.209
+upload_port = COM18
+
+
+[env:esp_8266_socket_numbered_21]
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_SOCKET_NUMBERED 
+                                 -D DEVICENAME_SOCKET_NUMBER_CTR=21 -w
+                                 -D DISABLE_WEBSERVER
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.1.209
+upload_port = COM18
+
+
+[env:esp_8266_socket_numbered_22]
+platform                  = ${common.platform}
+build_flags               = ${common.build_flags}
+                                 -D DEVICE_SOCKET_NUMBERED 
+                                 -D DEVICENAME_SOCKET_NUMBER_CTR=22 -w
+                                 -D DISABLE_WEBSERVER
+; upload_protocol = espota
+; extra_scripts             = gzip_fw.py
+; upload_port = 192.168.1.209
+upload_port = COM18
+
+
+
+
+
+
+
+
+[env:esp_8266_testbed_h801_pwm_manual]
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                -D DEVICE_TESTBED_H801_PWM_MANUAL -w
+                                -D D_USER_MICHAEL
+                                ; for h801 boards
+                                -D USE_SERIAL_ALTERNATE_TX
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.0.153
+; upload_port=COM18
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+
+[env:esp_82_tb_h801_sun]
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                -D DEVICE_TESTBED_H801_SUNELEVATION_REACTIVE_PALETTES -w
+                                -D D_USER_MICHAEL
+                                ; for h801 boards
+                                -D USE_SERIAL_ALTERNATE_TX
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.0.202
+; upload_port=COM18
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+
+
+
+[env:esp_8266_testbed_blending_variables]
+platform                  = ${core_2_6_1.platform}
+build_flags               = ${core_2_6_1.build_flags}
+                                -D DEVICE_TESTBED_BLENDING_VARIABLES -w
+                                -D D_USER_MICHAEL
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+upload_port = 192.168.0.153
+; upload_port=COM5
+; monitor_filters = esp8266_exception_decoder
+; build_type = debug
+
+
+
+
+[env:esp_8266_testbed_4chpro]
+; platform                  = ${common.platform}
+build_flags               = ${core_2_6_1_1m.build_flags} -w
+                              -D DEVICE_TESTBED_SONOFF_4CHPRO
+                              -D DISABLE_WEBSERVER
+lib_extra_dirs              = ${library.lib_extra_dirs}
+                              lib/lib_rf
+; board = esp01_1m
+upload_port = 192.168.0.245
+upload_protocol = espota
+extra_scripts   = gzip_fw.py
+; upload_port = COM18
+
+
+
+
+
+[env:testbed_led_matrix_seg]
+extends = env:whitehall_32
+build_flags             = ${common32.build_flags} -D DEVICE_LED_MATRIX_SEGMENTS -Wcpp -w
+lib_extra_dirs          = lib/libesp32, lib/libg_neopixel, lib/lib_basic, lib/libesp32/network, lib/lib_network
+; lib_extra_dirs          = lib/libesp32
+monitor_filters = esp32_exception_decoder
+build_type = debug
+upload_port = COM26
+; upload_port = 192.168.0.109
+; upload_protocol = espota
+; upload_port = rgbfireplace
+
+                            
+
+
