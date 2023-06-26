@@ -279,6 +279,7 @@ void BusPwm::setPixelColor(uint16_t pix, RgbcctColor c)
   if (pix != 0 || !_valid){
     return;
   }
+  test
   // ALOG_INF(PSTR("BusPwm::setPixelColor seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
   output_colour = c;
 }
