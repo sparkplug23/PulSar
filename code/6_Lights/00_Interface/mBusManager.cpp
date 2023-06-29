@@ -279,17 +279,26 @@ void BusPwm::setPixelColor(uint16_t pix, RgbcctColor c)
   if (pix != 0 || !_valid){
     return;
   }
-  test
   // ALOG_INF(PSTR("BusPwm::setPixelColor seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
   output_colour = c;
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  output_colour.debug_print("BusPwm::setPixelColor::output_colour");
+  #endif
 }
 
 
 RgbcctColor BusPwm::getPixelColor(uint16_t pix) 
 {
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "BusPwm::getPixelColor ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^seg%d, pix%d"), pCONT_lAni->getCurrSegmentId(), pix);
+  #endif
   if (!_valid){
+    DEBUG_LINE_HERE;
     return 0;
   }
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  output_colour.debug_print("BusPwm::getPixelColor::output_colour");
+  #endif //  ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   return output_colour;
 }
 
@@ -297,7 +306,9 @@ RgbcctColor BusPwm::getPixelColor(uint16_t pix)
 void BusPwm::show() 
 {
 
-  ALOG_DBM(PSTR("BusPwm::show"));
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  ALOG_INF(PSTR("*********************************************************BusPwm::show"));
+  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
   if (!_valid) 
   {
@@ -306,28 +317,65 @@ void BusPwm::show()
 
   uint16_t pwm_value;
 
-  uint16_t colour10bit[5];
+  uint16_t colour10bit[5] = {0};
 
   // Convert into full range value
-  colour10bit[0] = mapvalue(output_colour.R, 0, 255, 0, 1023);
-  colour10bit[1] = mapvalue(output_colour.G, 0, 255, 0, 1023);
-  colour10bit[2] = mapvalue(output_colour.B, 0, 255, 0, 1023);
-  colour10bit[3] = mapvalue(output_colour.WC, 0, 255, 0, 1023);
-  colour10bit[4] = mapvalue(output_colour.WW, 0, 255, 0, 1023);
+  // // This depends on the type!
+  // colour10bit[0] = mapvalue(output_colour.R, 0, 255, 0, 1023);
+  // colour10bit[1] = mapvalue(output_colour.G, 0, 255, 0, 1023);
+  // colour10bit[2] = mapvalue(output_colour.B, 0, 255, 0, 1023);
+  // colour10bit[3] = mapvalue(output_colour.WC, 0, 255, 0, 1023);
+  // colour10bit[4] = mapvalue(output_colour.WW, 0, 255, 0, 1023);
+
+  uint16_t r = mapvalue(output_colour.R, 0, 255, 0, 1023);
+  uint16_t g = mapvalue(output_colour.G, 0, 255, 0, 1023);
+  uint16_t b = mapvalue(output_colour.B, 0, 255, 0, 1023);
+  uint16_t w1 = mapvalue(output_colour.W1, 0, 255, 0, 1023);
+  uint16_t w2 = mapvalue(output_colour.W2, 0, 255, 0, 1023);
   
-  ALOG_DBM(PSTR("BusPwm::show [%d,%d,%d,%d,%d]\n\r"), colour10bit[0], colour10bit[1], colour10bit[2], colour10bit[3], colour10bit[4]);
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  output_colour.debug_print_states("output_colour");
+  ALOG_INF(PSTR("w1[%d]=%d"), pCONT_lAni->getCurrSegmentId(), w1);
+  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
+  switch (_type) {
+    default:
+    case BUSTYPE_ANALOG_5CH: //RGB + warm white + cold white
+      colour10bit[4] = w2;
+      // NO BREAK
+    case BUSTYPE_ANALOG_4CH: //RGBW
+      colour10bit[3] = w1;
+      // NO BREAK
+    case BUSTYPE_ANALOG_3CH: //standard dumb RGB
+      colour10bit[0] = r; 
+      colour10bit[1] = g; 
+      colour10bit[2] = b;
+      break;
+    case BUSTYPE_ANALOG_2CH: //warm white + cold white
+      colour10bit[0] = w1;
+      colour10bit[1] = w2;
+      break;
+    case BUSTYPE_ANALOG_1CH: //one channel (white), relies on auto white calculation
+      colour10bit[0] = w1;
+      break;
+  }
+  
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  ALOG_INF(PSTR("BusPwm::show [%d,%d,%d,%d,%d]"), colour10bit[0], colour10bit[1], colour10bit[2], colour10bit[3], colour10bit[4]);
+  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
   /**
    * @brief Final conversions
    * ** Upscale to 10 bit
    * ** Shrink into desired PWM range limits
+   * Here colour is just a PWM value, the actual colour information is above and should be inserted correctly
    */
   uint8_t numPins = NUM_BUSTYPE_PWM_PINS(_type);
   for(uint8_t ii=0;ii<numPins;ii++)
   {
     colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
     pwm_value = bitRead(pCONT_set->pwm_inverted, ii) ? pCONT_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
-    ALOG_DBM(PSTR("BusPwm::pwm_value[%d] %d \n\r"), ii, pwm_value);
+    ALOG_DBM(PSTR("BusPwm[%d]::pwm_value[%d] %d"), pCONT_lAni->getCurrSegmentId(), ii, pwm_value);
     #ifdef ESP8266
     analogWrite(_pins[ii], pwm_value);
     #else
@@ -380,7 +428,7 @@ BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
   _valid = false;
   if (bc.type != BUSTYPE_ONOFF) return;
   uint8_t currentPin = bc.pins[0];
-  _pin = currentPin; //store only after allocatePin() succeeds
+  _pin = currentPin; // store only after allocatePin() succeeds
   pinMode(_pin, OUTPUT);
   reversed = bc.reversed;
   _valid = true;
@@ -388,7 +436,7 @@ BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
 
 void BusOnOff::setPixelColor(uint16_t pix, RgbcctColor c) 
 {
-  if (pix != 0 || !_valid) return; //only react to first pixel
+  if (pix != 0 || !_valid) return; // only react to first pixel
   uint32_t colour = RgbcctColor::GetU32Colour(c);
   _data = bool(colour && _bri) ? 0xFF : 0;
 }
@@ -546,8 +594,13 @@ int BusManager::add(BusConfig &bc)
   {
     busses[numBusses] = new BusPwm(bc); // H801
   }
+
+  numBusses++;
+
+  ALOG_INF(PSTR("BusManager::add::numBusses %d"), numBusses);
+
   
-  return numBusses++;
+  return numBusses;
 
 }
 
@@ -556,8 +609,30 @@ void BusManager::removeAll()
 {
   DEBUG_PRINTLN(F("Removing all."));
   //prevents crashes due to deleting busses while in use.
-  while (!canAllShow()) yield(); //potentially freezing code
-  for (uint8_t i = 0; i < numBusses; i++) delete busses[i];
+        DEBUG_LINE_HERE;
+  // while (!canAllShow()) yield(); //potentially freezing code YES, FREEZES ON BOOT
+        DEBUG_LINE_HERE;
+    ALOG_INF(PSTR("i < numBusses %d"), numBusses);
+
+  // Sanity check
+    ALOG_ERR(PSTR("numBusses exceed busses array size %d %d"), numBusses, ARRAY_SIZE(busses));
+  if(numBusses >= ARRAY_SIZE(busses))
+  {
+    ALOG_ERR(PSTR("numBusses exceed busses array size %d %d"), numBusses, ARRAY_SIZE(busses));
+    numBusses = ARRAY_SIZE(busses);
+  }
+
+  for (uint8_t i = 0; i < numBusses; i++) 
+  {
+    ALOG_INF(PSTR("i=>%d"), i);
+    if(busses[i]!=nullptr)
+    {
+      delete busses[i];
+    }
+  }
+  
+  DEBUG_LINE_HERE;
+  
   numBusses = 0;
 }
 
@@ -565,8 +640,10 @@ void BusManager::show()
 {
   for (uint8_t i = 0; i < numBusses; i++) 
   {
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+    Serial.printf("busses[%d|%d]->show()------------------------------------\n\r", i,numBusses);
+    #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
     busses[i]->show();
-    // Serial.printf("busses[%d]->show()\n\r", i);
   }
 }
 
@@ -598,13 +675,6 @@ RgbcctColor BusManager::getPixelColor(uint16_t pix)
 }
 
 
-
-
-
-
-
-
-
 void BusManager::setBrightness(uint8_t b) {
   for (uint8_t i = 0; i < numBusses; i++) {
     busses[i]->setBrightness(b);
@@ -622,8 +692,15 @@ void BusManager::setSegmentCCT(int16_t cct, bool allowWBCorrection) {
 
 
 bool BusManager::canAllShow() {
+  ALOG_INF(PSTR("BusManager::canAllShow::numBusses=%d"),numBusses);
   for (uint8_t i = 0; i < numBusses; i++) {
-    if (!busses[i]->canShow()) return false;
+    if(busses[i])
+    {
+      if (!busses[i]->canShow())
+      {
+        return false;
+      }
+    }
   }
   return true;
 }
@@ -641,9 +718,9 @@ uint16_t BusManager::getTotalLength() {
 }
 
 // Bus static member definition
-int16_t Bus::_cct = -1;
-uint8_t Bus::_cctBlend = 0;
-uint8_t Bus::_gAWM = 255;
+int16_t Bus::_cct = -1; // Phase out
+uint8_t Bus::_cctBlend = 0; // Phase out
+uint8_t Bus::_gAWM = 255; // auto white mode
 
 
 #endif // USE_MODULE_LIGHTS_INTERFACE

@@ -849,6 +849,12 @@ void setSat255(uint8_t sat_new);
     return _briCCT;
   }
 
+  // uint8_t getMaxWhiteness() {
+    
+  //   return max(W1,W2);
+      
+  // }
+
   /************************************************************************************************************************************
   ******* ColorTemperature *****************************************************************************************************************************
   ************************************************************************************************************************************/
@@ -999,6 +1005,11 @@ Serial.printf("cctA=%d\n\r",cct);
   void debug_print(char* name = nullptr)
   {
     Serial.printf("%s%s%d,%d,%d,%d,%d\n\r", name==nullptr?"":name, name==nullptr?"":"=",  R, G, B, WC, WW);
+  }
+
+  void debug_print_states(char* name = nullptr)
+  {
+    Serial.printf("%s%sHS(%d %d) briRGB(%d) briCCT(%d) cct(%d)\n\r", name==nullptr?"":name, name==nullptr?"":"=", _hue, _sat, _briRGB, _briCCT, _cct);
   }
 
 

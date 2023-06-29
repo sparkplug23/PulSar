@@ -6,6 +6,33 @@ Section Next, will always be "Development", which with copy and paste will becom
 
 ## [Unreleased] - Development
 
+## [D0.116.0.0] - Created 29-JUN-23
+### Milestone Point
+Created with Multipin support on I2S (dual neopixel) and PWM. Introduction of TestGroups.
+
+### Added
+- PWM support with segments
+- tested 5, 3, 2, 1 channel (rgbcct, rgb, ww_wc, white)
+- RGB (3 pins) as one segment and CW/WW as second segment
+- Two CW/WW channels (two 2 pins)
+- Colour (hue/sat) for RGB, and CCT Temp for white warm to cold.
+- Five white only outputs, as "pixels" 1-5 in a single segment. Visually the same as 5 ws2812b pixels but really 5 unique pins
+- Includes per segment brightness control, and a "master" brightness
+- per segment auto timeoff (eg. turn segment on for X seconds then turn off, that time also can be set up - to 1 minute of turning off)
+- All on the h801
+
+### Breaking Changed
+- template
+
+### Changed
+- template
+
+### Fixed
+- templete
+
+### Removed
+- template
+
 ## [D0.113.0.0] - Created 30-12-2022
 ### Milestone Point
 Created for the merge of all lighting branches into unified development branch for start of 2023

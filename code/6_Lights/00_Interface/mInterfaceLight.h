@@ -352,6 +352,38 @@ class mInterfaceLight :
     uint16_t HueF2N(float hue);
     uint8_t  SatF2N(float sat);
     uint8_t  BrtF2N(float brt);
+    
+
+    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
+    // uint16_t _ct_min_range = 153;   // the minimum CT rendered range
+    // uint16_t _ct_max_range = 500;   // the maximum CT rendered range
+    uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
+    uint8_t  _briCT_Global = 255;
+
+    uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
+      return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;
+    }
+    uint8_t getBriRGB_Global()
+    {
+      return _briRGB_Global;
+    }
+    uint8_t getBriCCT_Global()
+    {
+      return _briCT_Global;
+    }
+    void setBriRGB_Global(uint8_t bri_rgb) 
+    {
+      _briRGB_Global = bri_rgb;
+    }
+    void setBriCT_Global(uint8_t bri_ct) 
+    {
+      _briCT_Global = bri_ct;
+    }
+
+    void CommandSet_Brt_255(uint8_t value);
+    void CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
+    void CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index = 0);
+
 
     RgbcctColor GetRandomColour(RgbcctColor colour1, RgbcctColor colour2);
     HsbColor GetHSBColour();

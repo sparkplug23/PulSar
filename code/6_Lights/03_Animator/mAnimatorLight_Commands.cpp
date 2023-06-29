@@ -29,39 +29,50 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
     { 
 
       ALOG_INF(PSTR("Seg: \"%s\" with %d Slots Active"), buffer, pCONT_lAni->segments.size());
-
+DEBUG_LINE_HERE;
       /**
        * @brief Add check here that only sets the segment if it is already permitted
        * 
        */
     
-      if(segment_i > pCONT_lAni->segments.size()-1)
-      { 
-        ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
-        Segment_AppendNew(0, 0, segment_i+1);
-      }
+        ALOG_HGL(PSTR("CHECKING segment %d|%d"), segment_i, pCONT_lAni->segments.size());
 
-    
+      // if(segment_i > pCONT_lAni->segments.size()-1)
+      if(segment_i >= pCONT_lAni->segments.size())
+      { 
+DEBUG_LINE_HERE;
+        ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
+        // Segment_AppendNew(0, 0, segment_i+1);
+        Segment_AppendNew(0, STRIP_SIZE_MAX, segment_i);
+        ALOG_HGL(PSTR("size check Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
+      }
+DEBUG_LINE_HERE;
 
       data_buffer.isserviced += subparse_JSONCommand(jtok.getObject(), segment_i);
 
+DEBUG_LINE_HERE;
       segments_found++;
 
+DEBUG_LINE_HERE;
       // If segment commands updated, some effects may need reset
       SEGMENT_I(segment_i).call = 0; 
 
+DEBUG_LINE_HERE;
     }
   }
 
 
+DEBUG_LINE_HERE;
   /**
    * @brief If no segments have been directly set, then assume default of Segment0
    **/
   if(segments_found == 0)
   {
+DEBUG_LINE_HERE;
     data_buffer.isserviced += subparse_JSONCommand(obj); // Legacy commands
   }
 
+DEBUG_LINE_HERE;
   ALOG_DBM(PSTR(D_LOG_LIGHT D_TOPIC "mAnimatorLight::parse_JSONCommand::End"));
 
 }
@@ -80,12 +91,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   int16_t tmp_id = 0;
   char buffer[50];
 
+DEBUG_LINE_HERE;
   /**
    * @brief Critical this is always parsed first, as many other commands rely on this value
    **/
   if(segment_index == 255)
   {
     ALOG_COM( PSTR("Segment Index assumed \"0\"") );
+DEBUG_LINE_HERE;
     segment_index = 0;
 
     // purgeSegments(true); // reduce to single segment
@@ -93,6 +106,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
    
   }
 
+DEBUG_LINE_HERE;
   /**
    * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
    **/
@@ -122,6 +136,7 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(SEGMENT_I(segment_index).palette.id, buffer, sizeof(buffer)) );
   }
 
+DEBUG_LINE_HERE;
 
   if(jtok = obj[D_JSON_PIXELRANGE])
   { 
@@ -236,14 +251,14 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   }
 
 
-  if(jtok = obj[PM_JSON_EFFECTS].getObject()["SegBrightness"])
-  { 
-    SEGMENT_I(segment_index).seg_brightness = jtok.getInt();  
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K("SegBrightness")), SEGMENT_I(segment_index).seg_brightness);
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
+  // if(jtok = obj[PM_JSON_EFFECTS].getObject()["SegBrightness"])
+  // { 
+  //   SEGMENT_I(segment_index).setBrightnessRGB(jtok.getInt());  
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K("SegBrightness")), SEGMENT_I(segment_index).getBrightnessRGB());
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  // }
 
 
   
@@ -306,10 +321,10 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       }
     }
 
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(0).rgbcctcolors[0].getHue360());
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(0).rgbcctcolors[0].getBrightnessRGB());
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(1).rgbcctcolors[0].getHue360());
-    ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(1).rgbcctcolors[0].getBrightnessRGB());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(0).rgbcctcolors[0].getHue360());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(0).rgbcctcolors[0].getBrightnessRGB());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(1).rgbcctcolors[0].getHue360());
+    // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(1).rgbcctcolors[0].getBrightnessRGB());
 
 
     // "LightNotif":
@@ -523,21 +538,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     #endif
   }
   
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_NUMBER]){
-    CommandSet_LightsCountToUpdateAsNumber(jtok.getInt(), segment_index);
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)),SEGMENT_I(segment_index).transition.pixels_to_update_as_percentage.val);
-    #endif
-  }else
-  if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_PIXELS_UPDATE_PERCENTAGE]){ 
-    CommandSet_LightsCountToUpdateAsPercentage(jtok.getInt(), segment_index);
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)),SEGMENT_I(segment_index).transition.pixels_to_update_as_number);
-    #endif
-  }
-
 
 /**
  * @brief Construct a new if object
@@ -562,10 +562,68 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
     // ALOG_COM(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer))); // should be internal to rgbcct
   }
 
-  
-  
-  
+  /**
+   * @brief Segment colours
+   * 
+   */
+    if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
+      // CommandSet_SegColour_RgbcctColour_BrightnessRGB(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
+      SEGMENT_I(segment_index).setBrightnessRGB(mapvalue(jtok.getInt(), 0,100, 0,255));
+      data_buffer.isserviced++;
+      // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getBrightnessRGB());
+    }else
+    if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){
+      SEGMENT_I(segment_index).setBrightnessRGB( jtok.getInt() );
+      // CommandSet_SegColour_RgbcctColour_BrightnessRGB(jtok.getInt(), colour_index, segment_index);
+      data_buffer.isserviced++;
+      // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getBrightnessRGB());
+    }
 
+
+  
+    if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+      SEGMENT_I(segment_index).setBrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255));
+      // CommandSet_SegColour_RgbcctColour_BrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
+      data_buffer.isserviced++;
+      // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getBrightnessCCT());
+    }else
+    if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // Exact kelvin
+      SEGMENT_I(segment_index).setBrightnessCCT( jtok.getInt() );
+      // CommandSet_SegColour_RgbcctColour_BrightnessCCT(jtok.getInt(), colour_index, segment_index);
+      data_buffer.isserviced++;
+      // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getBrightnessCCT());
+    }
+  
+  
+      if(jtok = obj["TimeOnSecs"]){ // Assume range 0-359
+
+        SEGMENT_I(segment_index).auto_timeoff.Start(jtok.getInt());
+
+        ALOG_INF(PSTR("auto_timeoff %d"), SEGMENT_I(segment_index).auto_timeoff.Value());
+
+        // uint8_t colour_array[5];
+        // memset(colour_array,0,sizeof(colour_array));
+        // uint8_t jsonpair_count = jtok.size();
+
+        // for(int index = 0; index < jsonpair_count; index++){
+        //   jtok.nextOne(); //skip start of object
+        //   Serial.println(jtok.getInt());
+        //   colour_array[index] = jtok.getInt();
+        // }
+
+        // CommandSet_SegColour_RgbcctColour_Manual(colour_array, jsonpair_count, colour_index, segment_index);
+        // data_buffer.isserviced++;
+        // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K(D_JSON_HUE)), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getHue360());
+      }
+
+
+
+
+
+  /**
+   * @brief RgbcctColours
+   * 
+   */
   for(uint8_t colour_index=0;colour_index<6;colour_index++)
   {
     JsonParserObject seg_obj = 0;
@@ -700,6 +758,10 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
       }
 
 
+
+
+
+
     }
   
   }
@@ -780,45 +842,6 @@ uint8_t mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segme
   // #endif //ENABLE_PIXEL_AUTOMATION_PLAYLIST
 
   #endif //ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-
-  
-
-  if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Assume range 0-100
-    CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), jtok.getInt());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // alternate full range 0-255
-    CommandSet_Brt_255(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
-    #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
-    CommandSet_Global_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB_Global());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
-    CommandSet_Global_BrtRGB_255(jtok.getInt());
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB_Global());
-    data_buffer.isserviced++;
-  }
-
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
-    CommandSet_Global_BrtCCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCCT_Global());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
-    CommandSet_Global_BrtCCT_255(jtok.getInt());
-    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCCT_Global());
-    data_buffer.isserviced++;
-  }
 
 
   if(jtok = obj["Light"].getObject()[PM_JSON_TIME_ON]){ // default to secs
@@ -1711,69 +1734,6 @@ void mAnimatorLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uin
 
 
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** LightsCountToUpdateAsNumber DUPLICATED EFFECT 1/2*****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_LightsCountToUpdateAsNumber(uint16_t value, uint8_t segment_index)
-{
-  
-    SEGMENT_I(segment_index).transition.pixels_to_update_as_number = value;
-
-  // animation.transition.pixels_to_update_as_percentage.val = GetPixelsToUpdateAsPercentageFromNumber(value);
-
-  // Tmp fix until I merge them - UNTESTED HOW THIS WILL AFFECT CODE
-  // strip_size_requiring_update = animation.transition.pixels_to_update_as_number ;
-  // AddLog(LOG_LEVEL_WARN, PSTR("strip_size_requiring_update = animation.transition.pixels_to_update_as_number ; COULD CAUSE ERROR "));
-  // SetLEDOutAmountByPercentage(animation.transition.pixels_to_update_as_number)
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_NUMBER)), value);
-  #endif
-
-}
-
-
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** LightsCountToUpdateAsPercentage DUPLICATED EFFECT 2/2*****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_LightsCountToUpdateAsPercentage(uint8_t value, uint8_t segment_index)
-{
-    
-  SEGMENT_I(segment_index).transition.pixels_to_update_as_number = GetPixelsToUpdateAsPercentageFromNumber(value);
- 
-  ALOG_DBM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION,D_JSON_PIXELS_UPDATE_PERCENTAGE)), value);
-  
-}
-
-uint16_t mAnimatorLight::GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage, uint8_t segment_index)
-{
-  if(segment_index < segments.size()){
-    return mapvalue(percentage, 0,100, 0, SEGMENT_I(segment_index).length());
-    #ifdef ENABLE_DEVFEATURE_UNIFIED_SEGMENT_REMOVING_MY_CODE
-    return mapvalue(percentage, 0,100, 0,SEGMENT_I(segment_index).length());
-    #endif
-  }
-  return 0;
-}
-uint8_t mAnimatorLight::GetPixelsToUpdateAsPercentageFromNumber(uint16_t number, uint8_t segment_index)
-{
-  uint8_t percentage = 0; // currently scaled to 100, but will want to scale to 255 and change name away from "percentage" to "scaler?"
-  if(number != 0)
-  {
-    percentage = mapvalue(number ,0,SEGMENT_I(segment_index).length(), 0,100);
-    ALOG_DBM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_PIXELS_UPDATE_PERCENTAGE)), percentage);
-  }
-  return 1; // fallback
-
-}
-
-
 
 void mAnimatorLight::CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index, uint8_t segment_index)
 {
@@ -1832,39 +1792,6 @@ void mAnimatorLight::CommandSet_SegColour_RgbcctColour_LightSubType(uint8_t subt
 
 
 
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** BrtRGB *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index)
-{
-  // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessRGB255(bri);
- SEGMENT_I(segment_index).flags.fForceUpdate = true;
-
-  _briRGB_Global = bri;
-  setBriRGB_Global(bri);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-
-/******************************************************************************************************************************
-*******************************************************************************************************************************
-****************** BrtCCT *****************************************************************************************
-*******************************************************************************************************************************
-*******************************************************************************************************************************/
-
-void mAnimatorLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index) 
-{
-  pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true; 
-  setBriCT_Global(bri);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
-}
-
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************
@@ -1881,7 +1808,7 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
   if(state == LIGHT_POWER_STATE_OFF_ID) // turn off
   {
     // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(10000);
-    pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
+    SEGMENT_I(0).set_intensity(255);
     
     pCONT_lAni->SEGMENT_I(0).single_animation_override.time_ms =  pCONT_lAni->SEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
 
@@ -1889,7 +1816,7 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
 
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
 
-    CommandSet_Brt_255(0);
+    pCONT_iLight->CommandSet_Brt_255(0);
     
   }
   else
@@ -1905,7 +1832,7 @@ void mAnimatorLight::CommandSet_LightPowerState(uint8_t state){
     // pCONT_lAni->CommandSet_Animation_Transition_Rate_Ms(1000);
     // pCONT_lAni->CommandSet_LightsCountToUpdateAsPercentage(100);
     
-    CommandSet_Brt_255(255);
+    pCONT_iLight->CommandSet_Brt_255(255);
 
     //make sure both are set
     // CommandSet_Global_BrtRGB_255(255);
@@ -1928,20 +1855,6 @@ bool mAnimatorLight::CommandGet_LightPowerState()
   light_power_state
   // getBri_Global() 
   ? true : false;
-}
-
-
-void mAnimatorLight::CommandSet_Brt_255(uint8_t brt_new){
-    
-  // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightness255(brt_new);
-  pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
-  setBriRGB_Global(brt_new);
-  // probably needs to check if they are linked here, or internally
-  setBriCT_Global(brt_new);
-
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
-  // #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
 

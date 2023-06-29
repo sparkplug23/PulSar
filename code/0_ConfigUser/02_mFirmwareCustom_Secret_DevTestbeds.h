@@ -27,7 +27,7 @@
  * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
  * */
 // #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
-#define DEVICE_TESTBED_LIGHT_SEGMENT_ESP8266__MULTIPIN_H801
+// #define DEVICE_TESTBED_LIGHT_SEGMENT_ESP8266__MULTIPIN_H801
 // #define DEVICE_TESTBED_LIGHT__NOTIFICATIONS
 // #define DEVICE_RGB_SEVEN_SEGMENT_WEIGHT
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
@@ -1893,6 +1893,8 @@
 
     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
 
+    #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
+
     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
@@ -1912,7 +1914,7 @@
 
 // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
 
-
+// #define ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
 
 
@@ -1968,7 +1970,11 @@
 
   // #define USE_LIGHTING_TEMPLATE__SINGLE
   // #define USE_LIGHTING_TEMPLATE__SINGLE_H801
-  #define USE_LIGHTING_TEMPLATE__H801_SPLIT_RGB_WHITE_CHANNELS_TWO_SEGMENTS
+  // #define USE_LIGHTING_TEMPLATE__H801_SPLIT_RGB_WHITE_CHANNELS_TWO_SEGMENTS
+  // #define USE_LIGHTING_TEMPLATE__H801_SPLIT_DOUBLE_CCT_CHANNELS_TWO_SEGMENTS
+  // #define USE_LIGHTING_TEMPLATE__H801_SPLIT_DOUBLE_CCT_CHANNELS_ONE_WHITE_THREE_SEGMENTS
+  #define USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_FIVE_SEGMENTS
+  // #define USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_TWO_SEGMENTS //ie have 2 segments showing across 2+3 outputs
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_SINGLE_RMT_ONLY_DEBUG
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_FOUR_CHANNELS
@@ -2050,7 +2056,7 @@
 
   
   #ifdef USE_LIGHTING_TEMPLATE__H801_SPLIT_RGB_WHITE_CHANNELS_TWO_SEGMENTS
-  #define STRIP_SIZE_MAX 2
+  #define STRIP_SIZE_MAX 5
   #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
     DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
     R"=====(
@@ -2078,16 +2084,15 @@
         ],
         "ColourPalette":"Christmas 01",
         "SegColour0": {
-          "Hue": 240,
+          "Hue": 0,
           "Sat": 100,
           "BrightnessRGB": 100,
-          "BrightnessCCT": 100,
+          "BrightnessCCT": 0,
           "CCT_TempPercentage":100,
           "ColourType":4
         },
         "Effects": {
-          "Function":2,
-          "Intensity":255
+          "Function":0
         },
         "Transition": {
           "TimeMs": 900,
@@ -2102,26 +2107,86 @@
         ],
         "ColourPalette": "Orange White Blue",
         "SegColour0": {
-          "Hue": 330,
-          "Sat":0,
-          "BrightnessRGB":100
+          "Hue": 120,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":95,
+          "ColourType":4
         },
         "Effects": {
-          "Function": 1,
-          "Speed":1,
-          "Intensity":1
+          "Function": 0
         },
         "Transition": {
           "TimeMs": 0,
           "RateMs": 23
         },
-        "BrightnessRGB": 100
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100
       }
     }
     )=====";
 /**
  * @brief 
  * 
+ * 
+ * {
+  "Segment0": {
+    "PixelRange": [
+      0,
+      1
+    ],
+    "ColourPalette": 10,
+    "SegColour0": {
+      "Hue": 0,
+      "Sat": 100,
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0,
+      "CCT_TempPercentage": 0,
+      "ColourType": 4
+    },
+    "Effects": {
+      "Function": 0,
+      "Intensity": 255
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  },
+  "Segment1": {
+    "PixelRange": [
+      1,
+      2
+    ],
+    "ColourPalette": 10,
+    "SegColour0": {
+      "Hue": 0,
+      "Sat": 100,
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 100,
+      "CCT_TempPercentage": 50,
+      "ColourType": 4
+    },
+    "Effects": {
+      "Function": 0
+    },
+    "Transition": {
+      "TimeMs": 500,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 100
+  },
+  "BrightnessRGB":100,
+  "BrightnessCCT": 1
+}
+
+
+
+
  {
   "Segment0": {
     "PixelRange": [
@@ -2262,6 +2327,432 @@
 
 
   #endif // USE_LIGHTING_TEMPLATE__H801_SPLIT_RGB_WHITE_CHANNELS_TWO_SEGMENTS
+
+#ifdef USE_LIGHTING_TEMPLATE__H801_SPLIT_DOUBLE_CCT_CHANNELS_TWO_SEGMENTS
+
+
+  #define STRIP_SIZE_MAX 2
+  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":[15,13],
+          "ColourOrder":"CW",
+          "BusType":"ANALOG_2CH",
+          "Start":0,
+          "Length":1
+        },
+        {
+          "Pin":[14,4],
+          "ColourOrder":"CW",
+          "BusType":"ANALOG_2CH",
+          "Start":1,
+          "Length":1
+        }
+      ],      
+      "Segment0":{
+        "PixelRange": [
+          0,
+          1
+        ],
+        "ColourPalette":"Christmas 01",
+        "SegColour0": {
+          "Hue": 0,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 0,
+          "CCT_TempPercentage":100,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 900,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 5
+      },
+      "Segment1": {
+        "PixelRange": [
+          1,
+          2
+        ],
+        "ColourPalette": "Orange White Blue",
+        "SegColour0": {
+          "Hue": 120,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":95,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function": 0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 23
+        },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100
+      }
+    }
+    )=====";
+
+
+#endif // USE_LIGHTING_TEMPLATE__H801_SPLIT_DOUBLE_CCT_CHANNELS_TWO_SEGMENTS
+
+
+#ifdef USE_LIGHTING_TEMPLATE__H801_SPLIT_DOUBLE_CCT_CHANNELS_ONE_WHITE_THREE_SEGMENTS
+
+
+  #define STRIP_SIZE_MAX 3
+  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":[15,13],
+          "ColourOrder":"CW",
+          "BusType":"ANALOG_2CH",
+          "Start":0,
+          "Length":1
+        },
+        {
+          "Pin":[14,4],
+          "ColourOrder":"CW",
+          "BusType":"ANALOG_2CH",
+          "Start":1,
+          "Length":1
+        },
+        {
+          "Pin":[12],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":2,
+          "Length":1
+        }
+      ],      
+      "Segment0":{
+        "PixelRange": [
+          0,
+          1
+        ],
+        "ColourPalette":"Christmas 01",
+        "SegColour0": {
+          "Hue": 0,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 0,
+          "CCT_TempPercentage":100,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 900,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 5
+      },
+      "Segment1": {
+        "PixelRange": [
+          1,
+          2
+        ],
+        "ColourPalette": "Orange White Blue",
+        "SegColour0": {
+          "Hue": 120,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":95,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function": 0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 23
+        },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100
+      }
+    }
+    )=====";
+
+
+#endif // USE_LIGHTING_TEMPLATE__H801_SPLIT_DOUBLE_CCT_CHANNELS_ONE_WHITE_THREE_SEGMENTS
+
+
+#ifdef USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_ONE_SEGMENTS
+
+// #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
+#define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
+
+
+  #define STRIP_SIZE_MAX 5
+  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":[15],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":0,
+          "Length":1
+        },
+        {
+          "Pin":[13],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":1,
+          "Length":1
+        },
+        {
+          "Pin":[14],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":2,
+          "Length":1
+        },
+        {
+          "Pin":[4],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":3,
+          "Length":1
+        },
+        {
+          "Pin":[12],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":4,
+          "Length":1
+        }
+      ],      
+      "Segment0":{
+        "PixelRange": [
+          0,
+          5
+        ],
+        "ColourPalette":10,
+        "SegColour0": {
+          "Hue": 0,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":50,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 5
+      }
+    }
+    )=====";
+
+/*
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      5
+    ],
+    "ColourPalette": 10,
+    "SegColour0": {
+      "Hue": 240,
+      "Sat": 0,
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 100,
+      "CCT_TempPercentage": 100,
+      "ColourType": 4
+    },
+    "Effects": {
+      "Function": 0
+    },
+    "Transition": {
+      "TimeMs":0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT_255": 255,
+    "TimeOnSecs":10,
+    "Override":{"Animation_Off":{"TimeMs":10000}}
+  },
+  "BrightnessRGB":100,
+  "BrightnessCCT": 100
+}
+
+
+
+
+
+
+*/
+
+#endif // USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_ONE_SEGMENTS
+
+
+#ifdef USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_FIVE_SEGMENTS
+
+// #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
+#define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
+
+
+  #define STRIP_SIZE_MAX 5
+  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":[15],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":0,
+          "Length":1
+        },
+        {
+          "Pin":[13],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":1,
+          "Length":1
+        },
+        {
+          "Pin":[14],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":2,
+          "Length":1
+        },
+        {
+          "Pin":[4],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":3,
+          "Length":1
+        },
+        {
+          "Pin":[12],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":4,
+          "Length":1
+        }
+      ],      
+      "Segment0":{
+        "PixelRange": [
+          0,
+          2
+        ],
+        "ColourPalette":10,
+        "SegColour0": {
+          "Hue": 0,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":50,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 5,
+        "BrightnessCCT_255": 255,
+        "TimeOnSecs":20,
+        "Override":{"Animation_Off":{"TimeMs":10000}}
+      },      
+      "Segment1":{
+        "PixelRange": [
+          2,
+          5
+        ],
+        "ColourPalette":10,
+        "SegColour0": {
+          "Hue": 0,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":50,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 5,
+        "BrightnessCCT_255": 255,
+        "TimeOnSecs":10,
+        "Override":{"Animation_Off":{"TimeMs":10000}}
+      }
+    }
+    )=====";
+
+/*
+
+{
+  "Segment0": {
+    "PixelRange": [
+      0,
+      5
+    ],
+    "ColourPalette": 10,
+    "SegColour0": {
+      "Hue": 240,
+      "Sat": 0,
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 100,
+      "CCT_TempPercentage": 100,
+      "ColourType": 4
+    },
+    "Effects": {
+      "Function": 0
+    },
+    "Transition": {
+      "TimeMs":0,
+      "RateMs": 1000
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT_255": 255,
+    "TimeOnSecs":10,
+    "Override":{"Animation_Off":{"TimeMs":10000}}
+  },
+  "BrightnessRGB":100,
+  "BrightnessCCT": 100
+}
+
+
+
+
+
+
+*/
+
+#endif // USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_FIVE_SEGMENTS
+
 
   #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_CHANNELS
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 

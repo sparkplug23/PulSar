@@ -8,6 +8,11 @@ const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR = D_MODULE_
 void mInterfaceLight::Pre_Init(void)
 {
 
+  DEBUG_LINE_HERE;
+  bus_manager = new BusManager();
+  DEBUG_LINE_HERE;
+  ALOG_INF(PSTR("This needs a better location to be defined"));
+
 }
 
 
@@ -25,6 +30,8 @@ void mInterfaceLight::Template_Load()
   ALOG_DBM( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  DEBUG_LINE_HERE;
 
   // DEBUG_DELAY(5000);
 
@@ -56,22 +63,22 @@ void mInterfaceLight::Init(void) //LightInit(void)
            * 
            */
 
-if(!neopixel_runner->flag_block_show)
-{
-
-
-          if(bus_manager)
+          if(!neopixel_runner->flag_block_show)
           {
-            bus_manager->show();
-          }
-          // Serial.println("NeoPixelShowTask::Show Y");
 
-          // delay(10);
-}else
-{
-  
-          Serial.println("NeoPixelShowTask::Show --------------");
-}
+
+            if(bus_manager)
+            {
+              bus_manager->show();
+            }
+            // Serial.println("NeoPixelShowTask::Show Y");
+
+            // delay(10);
+          }else
+          {
+
+            Serial.println("NeoPixelShowTask::Show --------------");
+          }
           // I could also try a temporary way of adding a flag to the "runner", so its set when show is called and cleared after. or rahter, the reverse, have it only call show if the animation is now updating
             
         },
@@ -650,6 +657,8 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
   JsonParserToken jtok = 0;
   JsonParserToken jtok2 = 0;
 
+  DEBUG_LINE_HERE;
+
   // busConfigs
   uint8_t bus_count = 0;//bus_manager->getNumBusses();
   for(uint8_t ii=0;ii<(WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES);ii++)
@@ -685,22 +694,23 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     }
     else
     {
-      ALOG_ERR(PSTR("Invalid pin type A"));
+      ALOG_INF(PSTR("Invalid pin type A"));
     }  
-    ALOG_COM(PSTR("pins %d,%d,%d,%d,%d"), pins[0], pins[1], pins[2], pins[3], pins[4]);  
+    ALOG_INF(PSTR("pins %d,%d,%d,%d,%d"), pins[0], pins[1], pins[2], pins[3], pins[4]);  
   }
 
+  DEBUG_LINE_HERE;
 
   if(jtok = obj["Start"])
   {
     start = jtok.getInt();
-    ALOG_COM(PSTR("start %d"), start);
+    ALOG_INF(PSTR("start %d"), start);
   }
 
   if(jtok = obj["Length"])
   {
     length = jtok.getInt();
-    ALOG_COM(PSTR("length %d"), length);
+    ALOG_INF(PSTR("length %d"), length);
   }
 
   if(jtok = obj["BusType"])
@@ -714,7 +724,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     {
       bus_type = Get_BusTypeID_FromName(jtok.getStr());
     }
-    ALOG_COM(PSTR("bus_type %d"), bus_type);
+    ALOG_INF(PSTR("bus_type %d"), bus_type);
   }
 
   if(jtok = obj[PM_JSON_RGB_COLOUR_ORDER])
@@ -734,9 +744,11 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     // }
   }
 
+  DEBUG_LINE_HERE;
   uint8_t bus_index = bus_count; // next bus space 
   if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
 
+  DEBUG_LINE_HERE;
   busConfigs[bus_index] = new BusConfig(
     bus_type, 
     pins, 
@@ -748,10 +760,12 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     RGBW_MODE_MANUAL_ONLY
   );    
   
+  DEBUG_LINE_HERE;
   pCONT_lAni->doInitBusses = true; // adds checks
 
   
     ALOG_DBG( PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
+  DEBUG_LINE_HERE;
 
 }
 
@@ -857,9 +871,9 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok2 = 0; 
   int8_t tmp_id = 0;
 
-  // uint16_t isserviced_start_count = data_buffer.isserviced;
-  
+  // uint16_t isserviced_start_count = data_buffer.isserviced;  
 
+  DEBUG_LINE_HERE;
   
   /**
    * @brief Bus needs to be configured first, and probably built immediately from within here so plattes etc next are added properly, otherwise EVERY_LOOP would have to happen
@@ -878,10 +892,116 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
     }
   }
 
+  DEBUG_LINE_HERE;
+
+  /**
+   * @brief First thing after parsing the BusConfig, Segments should be created before any further commands
+   * 
+   */
+  pCONT_lAni->parse_JSONCommand(obj);
+  
+
+
+  /**
+   * @brief Master (previously global) shall control the final output, but per segment within animator can exist. 
+   * Ie the true colour out is 
+   * 
+   * SetBrightnessOutput <= Raw255Colour * MasterBrightness * SegmentBrightness
+   * 
+   */
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS]){ // Assume range 0-100
+    CommandSet_Brt_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), jtok.getInt());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_255]){ // alternate full range 0-255
+    CommandSet_Brt_255(jtok.getInt());
+    data_buffer.isserviced++;
+    #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_255)), getBri());
+    #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB]){ // Assume range 0-100
+    CommandSet_Global_BrtRGB_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB)), getBriRGB_Global());
+    data_buffer.isserviced++;
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_RGB_255]){ // alternate full range 0-255
+    CommandSet_Global_BrtRGB_255(jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_RGB_255)), getBriRGB_Global());
+    data_buffer.isserviced++;
+  }
+
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
+    CommandSet_Global_BrtCCT_255(mapvalue(jtok.getInt(), 0,100, 0,255));
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), getBriCCT_Global());
+    data_buffer.isserviced++;
+  }else
+  if(jtok = obj[PM_JSON_BRIGHTNESS_CCT_255]){ // alternate full range 0-255
+    CommandSet_Global_BrtCCT_255(jtok.getInt());
+    ALOG_INF(PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT_255)), getBriCCT_Global());
+    data_buffer.isserviced++;
+  }
+
+
+
+
+
   ALOG_DBM(PSTR("void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)======================"));
   
 }
 
+
+
+void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
+    
+  // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightness255(brt_new);
+  pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+  setBriRGB_Global(brt_new);
+  // probably needs to check if they are linked here, or internally
+  setBriCT_Global(brt_new);
+
+  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), pCONT_lAni->SEGMENT_I(0).rgbcct_controller->getBrightness255());
+  // #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** BrtRGB *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index)
+{
+  // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessRGB255(bri);
+ pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true;
+
+  _briRGB_Global = bri;
+  setBriRGB_Global(bri);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
+
+/******************************************************************************************************************************
+*******************************************************************************************************************************
+****************** BrtCCT *****************************************************************************************
+*******************************************************************************************************************************
+*******************************************************************************************************************************/
+
+void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index) 
+{
+  pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true; 
+  setBriCT_Global(bri);
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+}
 
 
 
@@ -1028,9 +1148,9 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
 
   JBI->Start();
 
-  // for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
-  // {
-  //   JBI->Level_Start_F("Bus%d", bus_i);
+  for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
+  {
+    JBI->Level_Start_F("Bus%d", bus_i);
 
   //     JBI->Add("getLength", bus_manager->busses[bus_i]->getLength());
 
@@ -1043,7 +1163,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
   //       JBI->Add(colour_order.white_warm);
   //     JBI->Array_End();
 
-  //     JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
+      JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
 
   //     uint8_t pins[5] = {0};
   //     uint8_t pin_count = 0;
@@ -1056,8 +1176,8 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
   //     // }
   //     // JBI->Array_End();
 
-  //   JBI->Level_End();
-  // }
+    JBI->Level_End();
+  }
 
   return JBI->End();
 
@@ -1158,7 +1278,7 @@ void mInterfaceLight::MQTTHandler_Set_DefaultPeriodRate()
 void mInterfaceLight::MQTTHandler_Sender(uint8_t id)
 {    
   for(auto& handle:mqtthandler_list){
-    // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_INTERFACE_ID, handle, id);
+    pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_INTERFACE_ID, handle, id);
   }
 }
   

@@ -255,7 +255,6 @@ class mAnimatorLight :
 
     void CommandSet_LightPowerState(uint8_t value);
     bool CommandGet_LightPowerState();
-    void CommandSet_Brt_255(uint8_t value);
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);    
     void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
@@ -280,29 +279,6 @@ class mAnimatorLight :
     void RulesEvent_Set_Power();
     #endif // rules
   
-
-    uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
-      return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;
-    }
-    uint8_t getBriRGB_Global(){
-      return _briRGB_Global;
-    }
-    uint8_t getBriCCT_Global(){
-      return _briCT_Global;
-    }
-
-    void setBriRGB_Global(uint8_t bri_rgb) {
-      _briRGB_Global = bri_rgb;
-    }
-    void setBriCT_Global(uint8_t bri_ct) {
-      _briCT_Global = bri_ct;
-    }
-
-    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
-    // uint16_t _ct_min_range = 153;   // the minimum CT rendered range
-    // uint16_t _ct_max_range = 500;   // the maximum CT rendered range
-    uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
-    uint8_t  _briCT_Global = 255;
 
     // void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
     // void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
@@ -692,7 +668,7 @@ class mAnimatorLight :
     #define SEGMENT_I(X)     segments[X]
     #define SEGLEN           _virtualSegmentLength
 
-    #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT.speed_value))/SEGLEN
+    #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT._speed))/SEGLEN
 
     void fill(uint32_t c, bool apply_brightness = false);
     void fill_ranged(uint32_t c, bool apply_brightness = false); 
@@ -1353,7 +1329,7 @@ class mAnimatorLight :
     /**
      * Pixels to change up to maximum of segment
      * */
-    uint16_t pixels_to_update_as_number  = 1;
+    // uint16_t pixels_to_update_as_number  = 1;     // Phase this out, it should be calculated from the Intensity option
     /**
      * Refresh rate, calculate new colours
      * */
@@ -1614,6 +1590,15 @@ class mAnimatorLight :
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void SubTask_Segment_Animate_Function__Static_Palette_New();
   void SubTask_Segment_Animate_Function__Slow_Glow_New();
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  void SubTask_Segment_Animate_Function__BoxEdge_TwoColour_Gradient();
+  void SubTask_Segment_Animate_Function__BoxEdge_FourColour_Gradient();
+  void SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid();
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+
+
+
+
 
   // Temporary helper functions to be cleaned up and converted
   void blur(uint8_t blur_amount, bool set_brightness = false);
@@ -1723,8 +1708,6 @@ class mAnimatorLight :
 
   void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
   void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
-  void resetSegments1();
-  
 
   /***************
    * 
@@ -1750,13 +1733,7 @@ class mAnimatorLight :
   void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
   void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
 
-  
-  void CommandSet_LightsCountToUpdateAsNumber(uint16_t value, uint8_t segment_index = 0);
-  void CommandSet_LightsCountToUpdateAsPercentage(uint8_t value, uint8_t segment_index = 0);
-  uint16_t GetPixelsToUpdateAsNumberFromPercentage(uint8_t percentage, uint8_t segment_index = 0);
-  uint8_t  GetPixelsToUpdateAsPercentageFromNumber(uint16_t number, uint8_t segment_index = 0);
-
-  
+   
   void CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index = 0);
   void CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index = 0);
   
@@ -1775,9 +1752,6 @@ class mAnimatorLight :
   void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
 
 
-
-  void CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
-  void CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index = 0);
 
   /***************
    * END
@@ -1936,7 +1910,31 @@ typedef struct Segment_New {
      * This allows the segment to have optional brightness per segment, by default is set to maximum
      * and will therefore have no effect 
      **/
-    uint8_t brightness_optional = 255;
+    uint8_t _brightness_rgb = 255;
+    uint8_t _brightness_cct = 255;
+    void setBrightnessRGB(uint8_t bri_rgb) 
+    {
+      _brightness_rgb = bri_rgb;
+    }
+    void setBrightnessCCT(uint8_t bri_ct) 
+    {
+      _brightness_cct = bri_ct;
+    }
+    uint8_t getBrightnessRGB()
+    {
+      return _brightness_rgb;
+    };
+    uint8_t getBrightnessCCT()
+    {
+      return _brightness_cct;
+    };
+    /**
+     * @brief Brightness applied in most cases should include the final (Segment+global) brightness level
+     * 
+     * @return uint8_t 
+     */
+    uint8_t getBrightnessRGB_WithGlobalApplied(); 
+    uint8_t getBrightnessCCT_WithGlobalApplied();
 
     TRANSITION_SETTINGS transition;
 
@@ -1950,6 +1948,11 @@ typedef struct Segment_New {
       uint16_t time_ms = 1000; //on boot
       // uint16_t rate_ms = 1000;
     }single_animation_override; // ie "oneshot" variables that get checked and executed one time only
+
+    /**
+     * @brief These should be moved elsewhere as the optional defaults for times, that are loaded into the above override when needed
+     * 
+     */
     struct ANIMATION_SINGLE_USE_OVERRIDES_TURNING_OFF
     {
       // uint8_t fRefreshAllPixels = false;
@@ -1981,11 +1984,9 @@ typedef struct Segment_New {
 
     uint8_t  grouping = 1;
     uint8_t  spacing = 0;
-    uint8_t opacity = 255; // ie opacity is the segment "brightness"
-    uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
+    uint8_t opacity = 255; // PHASE OUT ie opacity is the segment "brightness"
+    // uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
 
-    uint8_t getBrightnessRGB();
-    uint8_t getBrightnessCCT();
 
     uint8_t effect_id = 0;
     /**
@@ -2023,6 +2024,8 @@ typedef struct Segment_New {
     uint16_t aux1 = 0;  // custom var
     uint16_t aux2 = 0;
     uint16_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
+
+    Decounter<uint16_t> auto_timeoff = Decounter<uint16_t>();
 
     /**
      * @brief 
@@ -2260,9 +2263,12 @@ typedef struct Segment_New {
     Segment_New& operator= (Segment_New &&orig) noexcept; // move assignment
 
     #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
-    size_t getSize() const { return sizeof(Segment_New) + (data?_dataLen:0) + 
-    (name?strlen(name):0) + 
-    (_t?sizeof(Transition):0) + (!Segment_New::_globalLeds && leds?sizeof(CRGB)*length():0); }
+    size_t getSize() const 
+    { 
+      return sizeof(Segment_New) + (data?_dataLen:0) + 
+        (name?strlen(name):0) + 
+        (_t?sizeof(Transition):0) + (!Segment_New::_globalLeds && leds?sizeof(CRGB)*length():0); 
+    }
     #endif
 
     inline bool     getOption(uint8_t n) const { return ((options >> n) & 0x01); }

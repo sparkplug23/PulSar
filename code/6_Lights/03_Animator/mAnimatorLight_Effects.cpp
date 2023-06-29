@@ -29,20 +29,24 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Colour()
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type)*2) ){ return; }
 
-  ALOG_INF( PSTR("SEGMENT[%d].colour_type = %d"), getCurrSegmentId(), SEGMENT.colour_type);
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  ALOG_INF( PSTR("SEGMENT[%d].colour_type ===================================== %d"), getCurrSegmentId(), SEGMENT.colour_type);
+  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
   RgbcctColor desired_colour  = SEGMENT.GetColourFromPalette();
-  desired_colour.debug_print("before brightness");
-  desired_colour = ApplyBrightnesstoRgbcctColour( desired_colour, SEGMENT.getBrightnessRGB(), SEGMENT.getBrightnessCCT() );
-  desired_colour.debug_print("after brightness");
+  // desired_colour.debug_print("before brightness");
+  desired_colour = ApplyBrightnesstoRgbcctColour( desired_colour, SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
+  // desired_colour.debug_print("after brightness");
 
   RgbcctColor starting_colour = SEGMENT.GetPixelColor(0);
   
   SetTransitionColourBuffer_DesiredColour (SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type, desired_colour); 
   SetTransitionColourBuffer_StartingColour(SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type, starting_colour);
 
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   ALOG_INF( PSTR("startin_colour = %d,%d,%d,%d,%d"), starting_colour.R,starting_colour.G,starting_colour.B,starting_colour.WC,starting_colour.WW);
   ALOG_INF( PSTR("desired_colour = %d,%d,%d,%d,%d"), desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(param); } );
 
@@ -71,7 +75,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
   for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
   {
     colour = SEGMENT.GetColourFromPalette(pixel);      
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
   }
 
@@ -153,7 +157,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
     ); 
     #endif // ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
 
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_type, colour);
 
@@ -556,7 +560,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
           
           out_colour = RgbcctColor::LinearBlend(start_colour, end_colour, progress);
 
-          out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, SEGMENT.getBrightnessRGB());
+          out_colour = ApplyBrightnesstoDesiredColourWithGamma(out_colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
      
           SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), index, SEGMENT.colour_type, out_colour);
       }
@@ -612,7 +616,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette_New()
 
         colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
         
-        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         
         SEGMENT.SetPixelColor(pixel, colour, false);
 
@@ -685,7 +689,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 
         colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
         
-        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         
         SEGMENT.SetPixelColor(pixel, colour, false);
 
@@ -845,7 +849,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
     
     colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel, &pixel_position);
     
-    colour = ApplyBrightnesstoRgbcctColour(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoRgbcctColour(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.data, SEGMENT.DataLength(), index, SEGMENT.colour_type, colour);
         
@@ -920,7 +924,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
     colour_hsb.S = saturation;
     colour = colour_hsb;
     
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
 
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
@@ -1020,7 +1024,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
     AddLog(LOG_LEVEL_TEST, PSTR("desiredpixel%d, colour=%d,%d,%d"), desired_pixel, colour.R, colour.G, colour.B); 
     #endif // DEBUG_TRACE_ANIMATOR_SEGMENTS
 
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     
     // 2us
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_type, colour);
@@ -1083,7 +1087,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
 
     colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
@@ -1116,7 +1120,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
     // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
     
     // if(SEGMENT.flags.brightness_applied_during_colour_generation){
-    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     // }
 
     random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
@@ -1460,7 +1464,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       SEGMENT.rgbcct_controller->getBrightnessRGB(),
+//       SEGMENT.rgbcct_controller->getBrightnessRGB_WithGlobalApplied(),
 //       SEGMENT.rgbcct_controller->getBrightnessCCT255()
 //     );
 //   }
@@ -1557,7 +1561,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       SEGMENT.rgbcct_controller->getBrightnessRGB(),
+//       SEGMENT.rgbcct_controller->getBrightnessRGB_WithGlobalApplied(),
 //       SEGMENT.rgbcct_controller->getBrightnessCCT255()
 //     );
 //   }
@@ -1789,7 +1793,7 @@ void mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, byte
 
     RgbcctColor colour = RgbcctColor();
     colour = SEGMENT.GetColourFromPalette(color_index);      
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB());
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_type, colour);
 
 
@@ -1845,7 +1849,7 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
 //   RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(palette_id), desired_index);
 
 //   if(apply_global_brightness){
-//     colour = ApplyBrightnesstoRgbcctColour( colour, SEGMENT.getBrightnessRGB(), SEGMENT.getBrightnessCCT() );
+//     colour = ApplyBrightnesstoRgbcctColour( colour, SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
 //   }
 
 //   return colour;
@@ -2595,7 +2599,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 // //if already on, dont change the colour
 //             if(!animation_colours[random_pixel_index].DesiredColour.CalculateBrightness()){// if off, allow new colour 
 //               if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
-//                 colour_random = ApplyBrightnesstoRgbcctColour(colour_random,SEGMENT.getBrightnessRGB());
+//                 colour_random = ApplyBrightnesstoRgbcctColour(colour_random,SEGMENT.getBrightnessRGB_WithGlobalApplied());
 //               }
 //               animation_colours[random(0,10)].DesiredColour = colour_random;//RgbColor(0,0,255);//
 //             }else{
@@ -2981,7 +2985,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 
 //         // Global brightness is already applied, and will be known as "max range"
 //         // Min range will be another map change here
-//         uint8_t max_brightness = SEGMENT.rgbcct_controller->getBrightnessRGB();
+//         uint8_t max_brightness = SEGMENT.rgbcct_controller->getBrightnessRGB_WithGlobalApplied();
 //         uint8_t min_brightness = flashersettings.brightness_min;
 //         uint8_t random_brightness = 0;
 
@@ -3715,7 +3719,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       SEGMENT.rgbcct_controller->getBrightnessRGB(),
+//       SEGMENT.rgbcct_controller->getBrightnessRGB_WithGlobalApplied(),
 //       SEGMENT.rgbcct_controller->getBrightnessCCT255()
 //     );
 //   }
@@ -4155,7 +4159,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB(),
+//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
 //       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
@@ -4499,7 +4503,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB(),
+//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
 //       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
@@ -4978,7 +4982,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   if(!pCONT_iLight->rgbcct_controller.getApplyBrightnessToOutput()){ // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB(),
+//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
 //       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
@@ -5203,7 +5207,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB(),
+//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
 //       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
@@ -5428,7 +5432,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   { // If not already applied, do it using global values
 //     animation_colours_rgbcct.DesiredColour = ApplyBrightnesstoRgbcctColour(
 //       animation_colours_rgbcct.DesiredColour, 
-//       pCONT_iLight->rgbcct_controller.getBrightnessRGB(),
+//       pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(),
 //       pCONT_iLight->rgbcct_controller.getBrightnessCCT255()
 //     );
 //   }
@@ -5480,7 +5484,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 
 //   // As integer so the if statement checks will not fail due to rounding errors
 //   uint8_t progress_percentage = param.progress*100; 
-//   uint8_t brightness_as_percentage = map(pCONT_iLight->rgbcct_controller.getBrightnessRGB(), 0,255, 0,100);
+//   uint8_t brightness_as_percentage = map(pCONT_iLight->rgbcct_controller.getBrightnessRGB_WithGlobalApplied(), 0,255, 0,100);
 //   uint8_t random_amount = map(shared_flasher_parameters.alternate_random_amount_as_percentage, 0,100, 0,pCONT_iLight->settings.light_size_count);
 
 //   /*
@@ -7348,7 +7352,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Dissolve(uint32_t color)
 {
 
 //tmp added
-uint8_t _brightness = getBriRGB_Global();
+uint8_t _brightness = pCONT_iLight->getBriRGB_Global();
 
 // void mAnimatorLight::dissolve(uint32_t color) {
   bool wa = (SEGCOLOR_U32(1) != 0 && _brightness < 255); //workaround, can't compare getPixel to color if not full brightness
@@ -11092,11 +11096,40 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(bool fl
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : Box Gradient: Effect 1 (two edges are solid, with blending along the other edges. the solid/not edges are selectable via Val0)
+ * @note : Uses a segments four RGBCCT colours to describe the four corners of a rear/edge lit backlight (e.g. a gradient ambilight)
+ * 
+ * @param aux0 
+ * @param aux1 
+ * @param aux2 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_TwoColour_Gradient()
+{
+  
+}
+void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Gradient()
+{
+  
+}
+void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid() // No gradient
+{
+  
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+
 // /*******************************************************************************************************************
 // ********************************************************************************************************************
 // ************ START OF AMBILIGHT DEFINITIONS ********************************************************************************************
 // ********************************************************************************************************************
 // ********************************************************************************************************************/
+/**
+ * @brief
+ * Uses a segments four RGBCCT colours to describe the four corners of a rear/edge lit backlight (e.g. a gradient ambilight)
+ **/
 
 // // Limit ambilight to addressible type, else I will just use "scene"
 // void mAnimatorLight::init_Ambilight(){

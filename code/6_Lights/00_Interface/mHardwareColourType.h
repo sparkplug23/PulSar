@@ -28,4 +28,3 @@ typedef union {
   };
 } 
 COLOUR_ORDER_T;
-

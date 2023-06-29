@@ -31,9 +31,9 @@
 #define WS2812_2CH_3X_SPANS_2_ICS(i) ((i)&0x01)    // every other LED zone is on two different ICs
 
 
-
 // Temporary struct for passing bus configuration to bus
-struct BusConfig {
+struct BusConfig 
+{
   uint8_t type;
   uint16_t count;
   uint16_t start;
@@ -73,19 +73,20 @@ struct BusConfig {
 
   }
 
-  //validates start and length and extends total if needed
-  bool adjustBounds(uint16_t& total) {
+  // Validates start and length and extends total if needed
+  bool adjustBounds(uint16_t& total) 
+  {
     if (!count) count = 1;
     if (count > MAX_LEDS_PER_BUS) count = MAX_LEDS_PER_BUS;
     if (start >= MAX_LEDS) return false;
-    //limit length of strip if it would exceed total permissible LEDs
+    // Limit length of strip if it would exceed total permissible LEDs
     if (start + count > MAX_LEDS) count = MAX_LEDS - start;
-    //extend total count accordingly
+    // Extend total count accordingly
     if (start + count > total) total = start + count;
     return true;
   }
-};
 
+};
 
 
 // Defines an LED Strip and its color ordering.
@@ -223,10 +224,10 @@ class BusDigital : public Bus {
 
     void setBrightness(uint8_t b);
 
-    void setPixelColor(uint16_t pix, RgbcctColor c);
+    void        setPixelColor(uint16_t pix, RgbcctColor c);
     RgbcctColor getPixelColor(uint16_t pix);
 
-    void setColorOrder(COLOUR_ORDER_T colorOrder);
+    void           setColorOrder(COLOUR_ORDER_T colorOrder);
     COLOUR_ORDER_T getColorOrder() 
     {
       return _colorOrder;
@@ -238,7 +239,6 @@ class BusDigital : public Bus {
     }
 
     uint8_t getPins(uint8_t* pinArray);
-
 
     uint8_t skippedLeds() 
     {
@@ -256,11 +256,11 @@ class BusDigital : public Bus {
 
   private:
     COLOUR_ORDER_T _colorOrder = {COLOUR_ORDER_INIT_DISABLED};
-    uint8_t _pins[2] = {255, 255};
-    uint8_t _iType = 0; //I_NONE;
-    uint8_t _skip = 0;
-    void * _busPtr = nullptr;
     const ColorOrderMap &_colorOrderMap;
+    uint8_t _pins[2] = {255, 255};
+    uint8_t _iType = 0;
+    uint8_t _skip = 0;
+    void* _busPtr = nullptr;
 };
 
 
@@ -308,7 +308,10 @@ class BusPwm : public Bus {
     void deallocatePins();
 };
 
-
+/**
+ * @brief Potential use case, driven traditional christmas light controllers
+ * 
+ */
 class BusOnOff : public Bus {
   public:
     BusOnOff(BusConfig &bc);
@@ -421,7 +424,7 @@ class BusManager
       return numBusses;
     }
 
-    Bus* busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES];
+    Bus* busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
 
   private:
     uint8_t numBusses = 0;
