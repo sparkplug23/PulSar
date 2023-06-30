@@ -35,7 +35,7 @@
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 // //   #include <AsyncTCP.h>
 // // #include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+// #include <ESPAsyncWebServer.h>
 #endif // USE_MODULE_NETWORK_WEBSERVER
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
@@ -109,22 +109,22 @@ class mTelemetry :
     uint8_t ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_method = 0, bool json_appending = true);
     #endif
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Log_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Memory_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Network_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_MQTT_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Time_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Devices_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Reboot_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Debug_Minimal_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request);
-    void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
-    #endif // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // void Web_Status_Telemetry_Health_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Settings_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Firmware_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Log_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Memory_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Network_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_MQTT_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Time_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Devices_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Reboot_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Debug_Minimal_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Debug_Pins_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Debug_Template_JSON(AsyncWebServerRequest *request);
+    // void Web_Status_Telemetry_Debug_ModuleInterface_JSON(AsyncWebServerRequest *request);
+    // #endif // #ifdef USE_MODULE_NETWORK_WEBSERVER
     
     #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
     #define HARDWARE_STATUS_MAX_LENGTH 200

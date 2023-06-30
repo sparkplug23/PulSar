@@ -525,7 +525,8 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
     }
 
     // creates line formatted with \1 meaning EOL
-    snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+    snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, 
+    pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_set->log_data);
     if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
   
   // SERIAL_DEBUG.printf("WEBLOG");

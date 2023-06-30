@@ -206,7 +206,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
   // Displays
@@ -554,8 +554,8 @@ enum MODULE_IDS{
   #include "3_Network/00_Interface/mInterface.h"
   #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(pCONT->pModule[EM_MODULE__NETWORK_INTERFACE__ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include "3_Network/20_WebServer/mWebServer.h"
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #include "3_Network/21_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
 #ifdef USE_MODULE_NETWORK_WIFI
