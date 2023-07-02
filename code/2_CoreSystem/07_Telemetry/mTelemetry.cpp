@@ -55,24 +55,24 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
     #ifdef USE_MODULE_NETWORK_MQTT
     case FUNC_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
-      break;
+    break;
     case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Set_DefaultPeriodRate();
-      break;
+    break;
     case FUNC_MQTT_SENDER:
       #ifndef ENABLE_DEBUGFEATURE__MQTT_STOP_STATUS_BASE_TELEMETRY
       MQTTHandler_Sender();
       #endif
-      break;
+    break;
     case FUNC_MQTT_CONNECTED:
     case FUNC_MQTT_STATUS_REFRESH_SEND_ALL:
       MQTTHandler_Set_RefreshAll();
-      break;
+    break;
     #endif //USE_MODULE_NETWORK_MQTT
     /************
      * WEGPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
@@ -87,20 +87,187 @@ void mTelemetry::parse_JSONCommand(JsonParserObject obj){}
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 void mTelemetry::WebPage_Root_AddHandlers(){
 
+  // ALOG_HGL(PSTR("mTelemetry::WebPage_Root_AddHandlers"));
+
+  // delay(5000);
+
   /**
    *Add telemetry calls-- retrieve tele by http request and return as text 
    **/ 
-  /* 
-  pCONT_web->pWebServer->on("/status/telemetry/health.json", HTTP_GET, [this](AsyncWebServerRequest *request){  
-    ConstructJSON_Health(JSON_LEVEL_ALL);
-    pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+  // pCONT_web->server->on("/status/telemetry/health.json", HTTP_GET, [this](AsyncWebServerRequest *request)
+  // {  
+  //   ConstructJSON_Health(JSON_LEVEL_ALL);
+  //   request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+  // });
+
+
+
+
+
+  // char buffer[100] = {0};
+
+  // handler<mTelemetry>* ptr;
+  // ptr = &mqtthandler_debug_pins;
+  // // ptr->handler_id = MQTT_HANDLER_SYSTEM_HEALTH_ID;
+  // // ptr->tSavedLastSent = millis();
+  // // ptr->flags.PeriodicEnabled = true;
+  // // ptr->flags.SendNow = true;
+  // // #if defined(ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS) || defined(ENABLE_DEVFEATURE_DEBUG_POINT_EVERY_SECOND_HEALTH_PACKETS)
+  // // ptr->tRateSecs = 1; 
+  // // #else
+  // // ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS; 
+  // // #endif // ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
+  // // ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID;
+  // // ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  // // ptr->json_level = JSON_LEVEL_DETAILED;
+  // // ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR;
+  // // ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Health;
+  // // mqtthandler_list.push_back(ptr);
+
+
+  // PGM_P module_ctr = pCONT->GetModuleFriendlyName(EM_MODULE_CORE_TELEMETRY_ID);
+
+  // // bool sent_status = false;
+
+  // // sent_status =  publish_ft(
+  
+  // //           );
+
+  // char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
+  // char topic_ctr2[100]; memset(topic_ctr2,0,sizeof(topic_ctr2));
+
+  // pCONT_mqtt->brokers[0]->TopicFormatted(  module_ctr,
+  //            ptr->topic_type,
+  //            ptr->postfix_topic, topic_ctr, sizeof(topic_ctr));  
+
+
+  // snprintf(topic_ctr2, sizeof(topic_ctr), "/%s.json", topic_ctr);
+
+
+
+
+  // ALOG_INF(PSTR("topic_ctr2=%s"), topic_ctr2);
+
+
+  // pCONT_web->server->on(topic_ctr2, HTTP_GET, [this](AsyncWebServerRequest *request)
+  // {  
+
+  //   uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, ptr->ConstructJSON_function)(ptr->json_level, true);
+
+
+  //   ALOG_INF(PSTR("data_buffer.payload.ctr=%s"), data_buffer.payload.ctr);
+  //   // ConstructJSON_Health(JSON_LEVEL_ALL);
+  //   // request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+
+
+  //   // delay(5000);
+
+
+  //   // ConstructJSON_Health(JSON_LEVEL_ALL);
+  //   request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+  // });
+  // // pCONT_web->server->on("/status/telemetry/debug/pins.jsot", HTTP_GET, [this](AsyncWebServerRequest *request)
+  // // {  
+  // //   // ConstructJSON_Health(JSON_LEVEL_ALL);
+  // //   request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+  // // });
+
+
+  // for(auto& handle:mqtthandler_list)
+  // {
+
+
+
+
+  //   // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_TELEMETRY_ID, handle, id);
+
+
+
+
+  // }
+
+  pCONT_web->server->on("/mqtt/status/telemetry", HTTP_GET, [this](AsyncWebServerRequest *request)
+  {
+    const uint8_t uri_len = 22;
+
+
+
+    // ConstructJSON_Settings(JSON_LEVEL_ALL);
+    // pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
+
+
+    ALOG_INF(PSTR("/mqtt/status/telemetry -> %s"), request->url().c_str());
+
+  const String& url2 = request->url();
+    if(url2.indexOf("debug/pins") > 0)
+    {
+      // subJson = JSON_PATH_STATE;
+
+      
+    ALOG_INF(PSTR("/mqtt/status/telemetry \"debug/pins\" -> %s"), request->url().c_str());
+
+
+    }
+    
+
+
+    for(auto& handle:mqtthandler_list)
+    {
+
+      Serial.println(handle->postfix_topic);
+
+
+      const String& url2 = request->url().substring(uri_len);
+
+      
+      if(url2.indexOf(handle->postfix_topic) > 0)
+      {
+        // subJson = JSON_PATH_STATE;
+
+        
+        ALOG_INF(PSTR("IF== \"debug/pins\" -> %s"), request->url().c_str());
+
+            
+        uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, handle->ConstructJSON_function)(handle->json_level, true);
+
+
+        ALOG_INF(PSTR("data_buffer.payload.ctr=%s"), data_buffer.payload.ctr);
+        // ConstructJSON_Health(JSON_LEVEL_ALL);
+        request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+
+
+
+
+
+      }else
+      {
+        
+        ALOG_INF(PSTR("ELSE \"debug/pins\" -> %s"), request->url().c_str());
+      }
+
+
+
+      // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_CORE_TELEMETRY_ID, handle, id);
+
+
+
+
+    }
+
+
+
+
+
   });
+
+
+  /* 
   pCONT_web->pWebServer->on("/status/telemetry/settings.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
     ConstructJSON_Settings(JSON_LEVEL_ALL);
     pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
   });
   pCONT_web->pWebServer->on("/status/telemetry/firmware.json", HTTP_GET, [this](AsyncWebServerRequest *request){    
-    ConstructJSON_Firmware(JSON_LEVEL_ALL);
+    ConstructJSON_Firmware(JSON_LEVEL_ALL); 
     pCONT_web->WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr); 
   });
   pCONT_web->pWebServer->on("/status/telemetry/log.json", HTTP_GET, [this](AsyncWebServerRequest *request){  

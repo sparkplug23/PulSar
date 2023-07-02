@@ -189,6 +189,69 @@ void mMQTT::setprefixtopic(const char* _prefixtopic){
 }
 
 
+char* mMQTT::TopicFormatted(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, char* buffer, uint8_t buflen)
+{
+
+  char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
+  
+  //can be replaced with a function call
+  switch(topic_type_id){
+    case MQTT_TOPIC_TYPE_SYSTEM_ID: break; // nothing
+    case MQTT_TOPIC_TYPE_IFCHANGED_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
+    case MQTT_TOPIC_TYPE_ROC1M_ID: sprintf(topic_id_ctr,"%s/","roc1m"); break;
+    case MQTT_TOPIC_TYPE_ROC10M_ID: sprintf(topic_id_ctr,"%s/","roc10m"); break;
+    case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_TELEPERIOD_CTR); break;
+    case MQTT_TOPIC_TYPE__DEBUG__ID: sprintf(topic_id_ctr,"%s/","debug"); break;
+    default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
+  }
+
+  snprintf_P(buffer, buflen, "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
+
+  return buffer;
+
+}
+
+
+#ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+template<typename T>
+void mMQTT::MQTTHandler_AddWebURL(T& class_ptr, uint16_t class_id, handler<T>* handle)
+{
+
+  PGM_P module_ctr = pCONT->GetModuleFriendlyName(class_id);
+
+  char uri_buffer[70] = {0};
+  snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, module_ctr);
+  pCONT_web->server->on(uri_buffer, HTTP_GET, [this](AsyncWebServerRequest *request)
+  {
+    char handle_url[100] = {0};
+    // for(auto& handle:mqtthandler_list)
+    // {      
+    // PGM_P module_ctr = pCONT->GetModuleFriendlyName(class_id);
+
+    TopicFormatted(  class_ptr->GetModuleFriendlyName(),
+            handle->topic_type,
+            handle->postfix_topic, handle_url, sizeof(handle_url));  
+
+    ALOG_INF(PSTR("handle_url=%s"), handle_url);
+    ALOG_INF(PSTR("%s in %s?"), handle->postfix_topic, request->url().c_str());      
+
+    const String& incoming_uri = request->url();
+    if(incoming_uri.indexOf(handle_url) > 0)
+    {
+      ALOG_INF(PSTR("%s"), request->url().c_str());            
+      uint8_t fSendPayload = CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, true);
+      ALOG_INF(PSTR("data_buffer.payload.ctr=%s"), data_buffer.payload.ctr);
+      request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+      break; // to stop accidental double matches, only respond once
+    }
+    // }
+  });
+
+}
+#endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+
+
+
 
 /**
  * @brief This is not thread safe

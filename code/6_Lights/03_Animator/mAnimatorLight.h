@@ -416,6 +416,12 @@ class mAnimatorLight :
       void MQTTHandler_Set_RefreshAll();
       void MQTTHandler_Set_DefaultPeriodRate();  
       void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
+      #ifdef USE_MODULE_NETWORK_WEBSERVER23
+      void MQTTHandler_AddWebURL_PayloadRequests();
+      #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+      void MQTTHandler_AddWebURL_PayloadRequests2();
+      #endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+      #endif // USE_MODULE_NETWORK_WEBSERVER23
       
       std::vector<struct handler<mAnimatorLight>*> mqtthandler_list;
     

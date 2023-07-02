@@ -25,6 +25,8 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 
+// #include <AsyncTCP.h>
+// #include <ESPAsyncWebServer.h>
 
 /******************************************************************************************************************
  * 
@@ -517,6 +519,21 @@ DEBUG_LINE_HERE;
   // pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   // pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
     
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  bool fsinit = false;
+  DEBUG_PRINTLN(F("Mount FS"));
+#ifdef ARDUINO_ARCH_ESP32
+  fsinit = WLED_FS.begin(true);
+#else
+  fsinit = WLED_FS.begin();
+#endif
+  if (!fsinit) {
+    DEBUG_PRINTLN(F("FS failed!"));
+    // errorFlag = ERR_FS_BEGIN;
+  }
+  #endif // USE_MODULE_NETWORK_WEBSERVER23
+
+
   /********************************************************************************************
    ** Initialise System and Modules ***********************************************************
   ********************************************************************************************/

@@ -11,6 +11,9 @@
 #include <stdint.h>
 #include <string.h>
 
+
+
+
 #define SET_FLAG   true
 #define RESET_FLAG false
 
@@ -77,6 +80,59 @@
   #include "2_CoreSystem/06_Support/SupportESP32.h"
   #define mSupportHardware SupportESP32
 #endif
+
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+      
+    #define LOROL_LITTLEFS 
+
+    #ifdef ESP8266
+      #include <ESP8266WiFi.h>
+      #include <ESP8266mDNS.h>
+      #include <ESPAsyncTCP.h>
+      #include <LittleFS.h>
+      extern "C"
+      {
+      #include <user_interface.h>
+      }
+      #ifndef WLED_DISABLE_ESPNOW
+        #include <espnow.h>
+      #endif
+    #else // ESP32
+      #include <HardwareSerial.h>  // ensure we have the correct "Serial" on new MCUs (depends on ARDUINO_USB_MODE and ARDUINO_USB_CDC_ON_BOOT)
+      #include <WiFi.h>
+      #include <ETH.h>
+      #include "esp_wifi.h"
+      #include <ESPmDNS.h>
+      #include <AsyncTCP.h>
+      #ifdef LOROL_LITTLEFS
+        #ifndef CONFIG_LITTLEFS_FOR_IDF_3_2
+          #define CONFIG_LITTLEFS_FOR_IDF_3_2
+        #endif
+        #include <LITTLEFS.h>
+      #else
+        #include <LittleFS.h>
+      #endif
+      #include "esp_task_wdt.h"
+
+      #ifndef WLED_DISABLE_ESPNOW
+        #include <esp_now.h>
+      #endif
+    #endif
+
+
+    //Filesystem to use for preset and config files. SPIFFS or LittleFS on ESP8266, SPIFFS only on ESP32 (now using LITTLEFS port by lorol)
+    #ifdef ESP8266
+      #define WLED_FS LittleFS
+    #else
+      #ifdef LOROL_LITTLEFS
+        #define WLED_FS LITTLEFS
+      #else
+        #define WLED_FS LittleFS
+      #endif
+    #endif
+
+
+  #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 // #include <variant>
 
@@ -206,7 +262,7 @@ enum MODULE_IDS{
   #ifdef USE_MODULE_NETWORK_MQTT
     EM_MODULE_NETWORK_MQTT_ID,
   #endif 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
     EM_MODULE_NETWORK_WEBSERVER_ID,
   #endif
   // Displays
@@ -554,8 +610,8 @@ enum MODULE_IDS{
   #include "3_Network/00_Interface/mInterface.h"
   #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(pCONT->pModule[EM_MODULE__NETWORK_INTERFACE__ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include "3_Network/20_WebServer/mWebServer.h"
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #include "3_Network/21_WebServer/mWebServer.h"
   #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
 #endif
 #ifdef USE_MODULE_NETWORK_WIFI

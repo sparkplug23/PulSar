@@ -233,7 +233,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_NETWORK_MQTT
   pModule[EM_MODULE_NETWORK_MQTT_ID] = new mMQTT();
   #endif 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
   pModule[EM_MODULE_NETWORK_WEBSERVER_ID] = new mWebServer();
   #endif
 

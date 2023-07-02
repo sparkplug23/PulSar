@@ -84,9 +84,9 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
   /************
    * WEBPAGE SECTION * 
   *******************/  
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
   return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 } // END FUNCTION
 
@@ -6490,6 +6490,52 @@ void mAnimatorLight::MQTTHandler_Sender(uint8_t id)
     pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle, id);
   }
 }
+
+/**
+ * @brief MQTTHandler_AddWebURL_PayloadRequests
+ * */
+void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
+{    
+  char uri_buffer[70] = {0};
+  snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, GetModuleFriendlyName());
+  pCONT_web->server->on(uri_buffer, HTTP_GET, [this](AsyncWebServerRequest *request)
+  {
+    char handle_url[100] = {0};
+    pCONT_mqtt->TopicFormatted( GetModuleFriendlyName(), handle->topic_type, handle->postfix_topic, handle_url, sizeof(handle_url));  
+    
+    for(auto& handle:mqtthandler_list)
+    {      
+      ALOG_INF(PSTR("handle_url \"%s\" -> \"%s\""), request->url().c_str(), handle_url);
+      const String& incoming_uri = request->url();
+      if(incoming_uri.indexOf(handle_url) > 0)
+      {        
+        uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, handle->ConstructJSON_function)(handle->json_level, true);
+        ALOG_INF(PSTR("data_buffer=%s"), data_buffer.payload.ctr);
+        request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); 
+        break; // to stop accidental double matches, only respond once
+      }
+    }
+  });
+}
+
+
+#ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests2()
+{    
+  for(auto& handle:mqtthandler_list){
+    // pCONT_mqtt->MQTTHandler_Command(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle, id);
+
+    pCONT_mqtt->MQTTHandler_AddWebURL(*this, EM_MODULE_LIGHTS_ANIMATOR_ID, handle);
+
+
+  }
+}
+#endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+
+
+
+
+
   
 #endif// USE_MODULE_NETWORK_MQTT
 

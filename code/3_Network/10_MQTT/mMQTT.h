@@ -247,6 +247,8 @@ class MQTTConnection
     bool publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);
     void publish_status_module(const char* module_name, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag);
 
+    
+
     boolean ppublish(const char* topic, const char* payload, boolean retained = false);
     
     boolean ppublish_device_name_prefix_P(const char* topic, const char* payload, boolean retained = false);
@@ -277,6 +279,7 @@ class mMQTT :
     std::vector<MQTTConnection*> brokers;
     
 
+    char* TopicFormatted(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, char* buffer, uint8_t buflen);
     /**
      * @brief Create a Connection, only if it is new. Checks are needed
      * 
@@ -546,6 +549,24 @@ class mMQTT :
 
       }
     };
+
+    
+    #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+    /**
+     * @brief Function will take the struct storing the mqtt handler options, and check the variables, sending if required
+     * @param class_ptr Pointer to the instance of a class
+     * @param class_id  Numerical (Enum) value of the class, which is used to acquire the mqtt topic
+     * @param handler_ptr Pointer to the handler struct with timing and function to be called
+     * @param optional_desired_id Optional handler_id, if set (>=0) then only matching handler IDs will be sent. Used for group triggering by a type.
+     * @note  Optional desired_id will check if the handler id was set, and if it does not match, will return without servicing handler
+     * */
+    template<typename T>
+    void MQTTHandler_AddWebURL(T& class_ptr, uint16_t class_id, handler<T>* handler_ptr);
+    // {
+
+
+    // }
+    #endif // ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
 
 };
 
