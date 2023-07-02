@@ -10,6 +10,35 @@
 const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
 const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR;
 
+bool doReboot = false;
+
+
+//realtime modes
+#define REALTIME_MODE_INACTIVE    0
+#define REALTIME_MODE_GENERIC     1
+#define REALTIME_MODE_UDP         2
+#define REALTIME_MODE_HYPERION    3
+#define REALTIME_MODE_E131        4
+#define REALTIME_MODE_ADALIGHT    5
+#define REALTIME_MODE_ARTNET      6
+#define REALTIME_MODE_TPM2NET     7
+#define REALTIME_MODE_DDP         8
+
+# define WLED_GLOBAL
+# define _INIT(x) = x
+
+byte realtimeMode = REALTIME_MODE_INACTIVE;
+// User Interface CONFIG
+#ifndef SERVERNAME
+WLED_GLOBAL char serverDescription[33] _INIT("WLED");  // Name of module - use default
+#else
+WLED_GLOBAL char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
+#endif
+WLED_GLOBAL bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
+WLED_GLOBAL bool simplifiedUI          _INIT(false);   // enable simplified UI
+WLED_GLOBAL byte cacheInvalidate       _INIT(0);       // used to invalidate browser cache when switching from regular to simplified UI
+
+
 
 // uint8_t webserver_state = HTTP_OFF;
 
@@ -380,28 +409,70 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 // }
 
 
-// // Handle all webpage sends to allow for checking of freespace
-// void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType_id, char* content_ptr){
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @param buffer 
+ * @param buflen 
+ * @return char* 
+ * 
+ * I dont need to copy as its progmem
+ */
+const char* mWebServer::GetContentTypeCtrP_By_ID(uint8_t id)
+{
+  
+  // switch(_contentType_id){
+  //   default:
+  //   case CONTENT_TYPE_TEXT_HTML_ID: 
+  //     // snprintf_P(buffer, sizeof(PM_WEB_CONTENT_TYPE_TEXT_HTML), PM_WEB_CONTENT_TYPE_TEXT_HTML); 
+  //     return PM_WEB_CONTENT_TYPE_TEXT_HTML;
+  //   break; // Necessary casts and dereferencing, just copy.
+  //   case CONTENT_TYPE_TEXT_JAVASCRIPT_ID: 
+  //     // memcpy_P(buffer, PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT, sizeof(PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT)); 
+  //     return PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT;
+  //   break;
+  //   case CONTENT_TYPE_APPLICATION_JSON_ID: 
+  //     // memcpy_P(buffer, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, sizeof(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT));
+  //     return PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT;
+  //   break;
+  //   case CONTENT_TYPE_TEXT_CSS_ID: 
+  //     // memcpy_P(buffer, PM_WEB_CONTENT_TYPE_TEXT_CSS, sizeof(PM_WEB_CONTENT_TYPE_TEXT_CSS)); 
+  //     return PM_WEB_CONTENT_TYPE_TEXT_CSS;
+  //   break;
 
-//   // Work out memory needed relative to body we want to send?
-//   // Serial.println("HERE"); Serial.flush();
+  // }
+  
 
-//   // char content_type[30]; // Should exist until send completes, might not as its async though
-//   #ifdef DEBUG_WEBSERVER_MEMORY
-//     FreeMem_Usage_Before(&freemem_usage_json_shared);
-//   #endif
-//   // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
+  // return buffer;
+
+}
+
+
+
+
+// Handle all webpage sends to allow for checking of freespace
+void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType_id, char* content_ptr){
+
+  // Work out memory needed relative to body we want to send?
+  // Serial.println("HERE"); Serial.flush();
+
+  // char content_type[30]; // Should exist until send completes, might not as its async though
+  #ifdef DEBUG_WEBSERVER_MEMORY
+    FreeMem_Usage_Before(&freemem_usage_json_shared);
+  #endif
+  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
  
-//   // Check if there is enough RAM space, or else respond with 
-//   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
-//   // Contine to send requested data 
-//   request->send(code, contentType_id, content_ptr); 
+  // Check if there is enough RAM space, or else respond with 
+  // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
+  // Contine to send requested data 
+  // request->send(code, contentType_id, content_ptr); 
 
-//    #ifdef DEBUG_WEBSERVER_MEMORY
-//     FreeMem_Usage_After(&freemem_usage_json_shared);
-//   #endif 
+   #ifdef DEBUG_WEBSERVER_MEMORY
+    FreeMem_Usage_After(&freemem_usage_json_shared);
+  #endif 
 
-// }
+}
 
 
 // #ifdef DEBUG_WEBSERVER_MEMORY
@@ -1102,7 +1173,7 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 // #include <ESPAsyncWebServer.h>
 
 // #if defined(ESP32)
-AsyncWebServer server(80);
+// AsyncWebServer server(80);
 // #endif  // ESP32
 
 // define flash strings once (saves flash memory)
@@ -1111,7 +1182,6 @@ static const char s_content_enc[] PROGMEM = "Content-Encoding";
 static const char s_unlock_ota [] PROGMEM = "Please unlock OTA in security settings!";
 static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN code!";
 
-byte cacheInvalidate  = 0;       // used to invalidate browser cache when switching from regular to simplified UI
 
 String messageHead, messageSub;
 byte optionType;
@@ -1163,7 +1233,7 @@ void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& h
 AsyncWebHandler *editHandler = nullptr;
 
 void createEditHandler(bool enable) {
-  if (editHandler != nullptr) server.removeHandler(editHandler);
+  if (editHandler != nullptr) pCONT_web->server->removeHandler(editHandler);
   if (enable) {
     #ifdef WLED_ENABLE_FS_EDITOR
       #ifdef ARDUINO_ARCH_ESP32
@@ -1172,12 +1242,12 @@ void createEditHandler(bool enable) {
       editHandler = &server.addHandler(new SPIFFSEditor("","",WLED_FS));//http_username,http_password));
       #endif
     #else
-      editHandler = &server.on("/edit", HTTP_GET, [](AsyncWebServerRequest *request){
+      editHandler = &pCONT_web->server->on("/edit", HTTP_GET, [](AsyncWebServerRequest *request){
         serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
       });
     #endif
   } else {
-    editHandler = &server.on("/edit", HTTP_ANY, [](AsyncWebServerRequest *request){
+    editHandler = &pCONT_web->server->on("/edit", HTTP_ANY, [](AsyncWebServerRequest *request){
       serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);
     });
   }
@@ -1889,6 +1959,46 @@ bool handleFileRead(AsyncWebServerRequest* request, String path){
   return false;
 }
 
+
+void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
+  if (!correctPIN) {
+    if (final) request->send(500, "text/plain", FPSTR(s_unlock_cfg));
+    return;
+  }
+  if (!index) {
+    String finalname = filename;
+    if (finalname.charAt(0) != '/') {
+      finalname = '/' + finalname; // prepend slash if missing
+    }
+
+    request->_tempFile = WLED_FS.open(finalname, "w");
+    DEBUG_PRINT(F("Uploading "));
+    DEBUG_PRINTLN(finalname);
+    if (finalname.equals("/presets.json"))
+    { 
+      // presetsModifiedTime = toki.second();
+    }
+  }
+  if (len) {
+    request->_tempFile.write(data,len);
+  }
+  if (final) {
+    request->_tempFile.close();
+    if (filename.indexOf(F("cfg.json")) >= 0) { // check for filename with or without slash
+      doReboot = true;
+      request->send(200, "text/plain", F("Configuration restore successful.\nRebooting..."));
+    } else {
+      if (filename.indexOf(F("palette")) >= 0 && filename.indexOf(F(".json")) >= 0)
+      {
+        // strip.loadCustomPalettes();
+      }
+      request->send(200, "text/plain", F("File Uploaded!"));
+    }
+    cacheInvalidate++;
+  }
+}
+
+
 // Size of buffer for API JSON object (increase for more segments)
 #ifdef ESP8266
   #define JSON_BUFFER_SIZE 10240
@@ -1928,6 +2038,12 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 StaticJsonDocument<JSON_BUFFER_SIZE> doc;
 volatile uint8_t jsonBufferLock = 0;
 
+// void serializeSegment(JsonObject& root, Segment& seg, byte id, bool forPreset = false, bool segmentBounds = true);
+void serializeState(JsonObject root, bool forPreset = false, bool includeBri = true, bool segmentBounds = true, bool selectedSegmentsOnly = false);
+void serializeInfo(JsonObject root);
+void serializeModeNames(JsonArray root);
+void serializeModeData(JsonArray root);
+
 //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
 bool requestJSONBufferLock(uint8_t module)
 {
@@ -1951,63 +2067,513 @@ bool requestJSONBufferLock(uint8_t module)
   return true;
 }
 
+bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request)
+{
+  AsyncWebHeader* header = request->getHeader("If-None-Match");
+  if (header && header->value() == String(PROJECT_VERSION)) {
+    request->send(304);
+    return true;
+  }
+  return false;
+}
 
 
-void serializeState(JsonObject root, bool forPreset = false, bool includeBri = true, bool segmentBounds = true, bool selectedSegmentsOnly = false);
+// void serializeSegment(JsonObject& root, Segment& seg, byte id, bool forPreset, bool segmentBounds)
+// {
+//   root["id"] = id;
+//   if (segmentBounds) {
+//     root["start"] = seg.start;
+//     root["stop"] = seg.stop;
+//     if (strip.isMatrix) {
+//       root[F("startY")] = seg.startY;
+//       root[F("stopY")]  = seg.stopY;
+//     }
+//   }
+//   if (!forPreset) root["len"] = seg.stop - seg.start;
+//   root["grp"]    = seg.grouping;
+//   root[F("spc")] = seg.spacing;
+//   root[F("of")]  = seg.offset;
+//   root["on"]     = seg.on;
+//   root["frz"]    = seg.freeze;
+//   byte segbri    = seg.opacity;
+//   root["bri"]    = (segbri) ? segbri : 255;
+//   root["cct"]    = seg.cct;
+//   root[F("set")] = seg.set;
+
+//   if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
+
+//   // to conserve RAM we will serialize the col array manually
+//   // this will reduce RAM footprint from ~300 bytes to 84 bytes per segment
+//   char colstr[70]; colstr[0] = '['; colstr[1] = '\0';  //max len 68 (5 chan, all 255)
+//   const char *format = strip.hasWhiteChannel() ? PSTR("[%u,%u,%u,%u]") : PSTR("[%u,%u,%u]");
+//   for (size_t i = 0; i < 3; i++)
+//   {
+//     byte segcol[4]; byte* c = segcol;
+//     segcol[0] = R(seg.colors[i]);
+//     segcol[1] = G(seg.colors[i]);
+//     segcol[2] = B(seg.colors[i]);
+//     segcol[3] = W(seg.colors[i]);
+//     char tmpcol[22];
+//     sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
+//     strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);
+//   }
+//   strcat(colstr, "]");
+//   root["col"] = serialized(colstr);
+
+//   root["fx"]  = seg.mode;
+//   root["sx"]  = seg.speed;
+//   root["ix"]  = seg.intensity;
+//   root["pal"] = seg.palette;
+//   root["c1"]  = seg.custom1;
+//   root["c2"]  = seg.custom2;
+//   root["c3"]  = seg.custom3;
+//   root["sel"] = seg.isSelected();
+//   root["rev"] = seg.reverse;
+//   root["mi"]  = seg.mirror;
+//   #ifndef WLED_DISABLE_2D
+//   if (strip.isMatrix) {
+//     root["rY"] = seg.reverse_y;
+//     root["mY"] = seg.mirror_y;
+//     root[F("tp")] = seg.transpose;
+//   }
+//   #endif
+//   root["o1"]  = seg.check1;
+//   root["o2"]  = seg.check2;
+//   root["o3"]  = seg.check3;
+//   root["si"]  = seg.soundSim;
+//   root["m12"] = seg.map1D2D;
+// }
+
 void serializeState(JsonObject root, bool forPreset, bool includeBri, bool segmentBounds, bool selectedSegmentsOnly)
 {
-  // if (includeBri) {
-  //   root["on"] = (bri > 0);
-  //   root["bri"] = briLast;
-  //   root[F("transition")] = transitionDelay/100; //in 100ms
+//   if (includeBri) {
+//     root["on"] = (bri > 0);
+//     root["bri"] = briLast;
+//     root[F("transition")] = transitionDelay/100; //in 100ms
+//   }
+
+//   if (!forPreset) {
+//     if (errorFlag) {root[F("error")] = errorFlag; errorFlag = ERR_NONE;} //prevent error message to persist on screen
+
+//     root["ps"] = (currentPreset > 0) ? currentPreset : -1;
+    root[F("pl")] = "currentPlaylist";
+
+//     usermods.addToJsonState(root);
+
+//     JsonObject nl = root.createNestedObject("nl");
+//     nl["on"] = nightlightActive;
+//     nl["dur"] = nightlightDelayMins;
+//     nl["mode"] = nightlightMode;
+//     nl[F("tbri")] = nightlightTargetBri;
+//     if (nightlightActive) {
+//       nl[F("rem")] = (nightlightDelayMs - (millis() - nightlightStartTime)) / 1000; // seconds remaining
+//     } else {
+//       nl[F("rem")] = -1;
+//     }
+
+//     JsonObject udpn = root.createNestedObject("udpn");
+//     udpn["send"] = notifyDirect;
+//     udpn["recv"] = receiveNotifications;
+
+//     root[F("lor")] = realtimeOverride;
+//   }
+
+//   root[F("mainseg")] = strip.getMainSegmentId();
+
+//   JsonArray seg = root.createNestedArray("seg");
+//   for (size_t s = 0; s < strip.getMaxSegments(); s++) {
+//     if (s >= strip.getSegmentsNum()) {
+//       if (forPreset && segmentBounds && !selectedSegmentsOnly) { //disable segments not part of preset
+//         JsonObject seg0 = seg.createNestedObject();
+//         seg0["stop"] = 0;
+//         continue;
+//       } else
+//         break;
+//     }
+//     Segment &sg = strip.getSegment(s);
+//     if (forPreset && selectedSegmentsOnly && !sg.isSelected()) continue;
+//     if (sg.isActive()) {
+//       JsonObject seg0 = seg.createNestedObject();
+//       serializeSegment(seg0, sg, s, forPreset, segmentBounds);
+//     } else if (forPreset && segmentBounds) { //disable segments not part of preset
+//       JsonObject seg0 = seg.createNestedObject();
+//       seg0["stop"] = 0;
+//     }
+//   }
+}
+
+void serializeInfo(JsonObject root)
+{
+  root[F("ver")] = "versionString";
+  root[F("vid")] = PROJECT_VERSION;
+  //root[F("cn")] = WLED_CODENAME;
+
+  JsonObject leds = root.createNestedObject("leds");
+  leds[F("count")] = 123;//strip.getLengthTotal();
+  leds[F("pwr")] = 123;//strip.currentMilliamps;
+  // leds["fps"] = strip.getFps();
+  // leds[F("maxpwr")] = (strip.currentMilliamps)? strip.ablMilliampsMax : 0;
+  // leds[F("maxseg")] = strip.getMaxSegments();
+  //leds[F("actseg")] = strip.getActiveSegmentsNum();
+  //leds[F("seglock")] = false; //might be used in the future to prevent modifications to segment config
+
+  #ifndef WLED_DISABLE_2D
+  // if (strip.isMatrix) {
+  //   JsonObject matrix = leds.createNestedObject("matrix");
+  //   matrix["w"] = 1;//Segment::maxWidth;
+  //   matrix["h"] = 2;//Segment::maxHeight;
+  // }
+  #endif
+
+  uint8_t totalLC = 0;
+  JsonArray lcarr = leds.createNestedArray(F("seglc"));
+  // size_t nSegs = strip.getSegmentsNum();
+  // for (size_t s = 0; s < nSegs; s++) {
+  //   if (!strip.getSegment(s).isActive()) continue;
+  //   uint8_t lc = strip.getSegment(s).getLightCapabilities();
+  //   totalLC |= lc;
+  //   lcarr.add(lc);
   // }
 
-  // if (!forPreset) {
-  //   if (errorFlag) {root[F("error")] = errorFlag; errorFlag = ERR_NONE;} //prevent error message to persist on screen
+  leds["lc"] = totalLC;
 
-  //   root["ps"] = (currentPreset > 0) ? currentPreset : -1;
-  //   root[F("pl")] = currentPlaylist;
+  // leds[F("rgbw")] = strip.hasRGBWBus(); // deprecated, use info.leds.lc
+  leds[F("wv")]   = totalLC & 0x02;     // deprecated, true if white slider should be displayed for any segment
+  leds["cct"]     = totalLC & 0x04;     // deprecated, use info.leds.lc
 
-  //   usermods.addToJsonState(root);
+  #ifdef WLED_DEBUG
+  JsonArray i2c = root.createNestedArray(F("i2c"));
+  i2c.add(i2c_sda);
+  i2c.add(i2c_scl);
+  JsonArray spi = root.createNestedArray(F("spi"));
+  spi.add(spi_mosi);
+  spi.add(spi_sclk);
+  spi.add(spi_miso);
+  #endif
 
-  //   JsonObject nl = root.createNestedObject("nl");
-  //   nl["on"] = nightlightActive;
-  //   nl["dur"] = nightlightDelayMins;
-  //   nl["mode"] = nightlightMode;
-  //   nl[F("tbri")] = nightlightTargetBri;
-  //   if (nightlightActive) {
-  //     nl[F("rem")] = (nightlightDelayMs - (millis() - nightlightStartTime)) / 1000; // seconds remaining
-  //   } else {
-  //     nl[F("rem")] = -1;
+  root[F("str")] = syncToggleReceive;
+
+  root[F("name")] = serverDescription;
+  root[F("udpport")] = 123;//udpPort;
+  root["live"] = (bool)realtimeMode;
+  root[F("liveseg")] = -1;//useMainSegmentOnly ? strip.getMainSegmentId() : -1;  // if using main segment only for live
+
+  switch (realtimeMode) {
+    case REALTIME_MODE_INACTIVE: root["lm"] = ""; break;
+    case REALTIME_MODE_GENERIC:  root["lm"] = ""; break;
+    case REALTIME_MODE_UDP:      root["lm"] = F("UDP"); break;
+    case REALTIME_MODE_HYPERION: root["lm"] = F("Hyperion"); break;
+    case REALTIME_MODE_E131:     root["lm"] = F("E1.31"); break;
+    case REALTIME_MODE_ADALIGHT: root["lm"] = F("USB Adalight/TPM2"); break;
+    case REALTIME_MODE_ARTNET:   root["lm"] = F("Art-Net"); break;
+    case REALTIME_MODE_TPM2NET:  root["lm"] = F("tpm2.net"); break;
+    case REALTIME_MODE_DDP:      root["lm"] = F("DDP"); break;
+  }
+
+  // if (realtimeIP[0] == 0)
+  // {
+  //   root[F("lip")] = "";
+  // } else {
+  //   root[F("lip")] = realtimeIP.toString();
+  // }
+
+  #ifdef WLED_ENABLE_WEBSOCKETS
+  root[F("ws")] = ws.count();
+  #else
+  root[F("ws")] = -1;
+  #endif
+
+  // root[F("fxcount")] = strip.getModeCount();
+  // root[F("palcount")] = strip.getPaletteCount();
+  // root[F("cpalcount")] = strip.customPalettes.size(); //number of custom palettes
+
+  JsonArray ledmaps = root.createNestedArray(F("maps"));
+  // for (size_t i=0; i<WLED_MAX_LEDMAPS; i++) {
+  //   if ((ledMaps>>i) & 0x00000001U) {
+  //     JsonObject ledmaps0 = ledmaps.createNestedObject();
+  //     ledmaps0["id"] = i;
+  //     #ifndef ESP8266
+  //     if (i && ledmapNames[i-1]) ledmaps0["n"] = ledmapNames[i-1];
+  //     #endif
   //   }
-
-  //   JsonObject udpn = root.createNestedObject("udpn");
-  //   udpn["send"] = notifyDirect;
-  //   udpn["recv"] = receiveNotifications;
-
-  //   root[F("lor")] = realtimeOverride;
   // }
 
-  root[F("mainseg")] = "strip.getMainSegmentId()";
+  JsonObject wifi_info = root.createNestedObject("wifi");
+  wifi_info[F("bssid")] = WiFi.BSSIDstr();
+  int qrssi = WiFi.RSSI();
+  wifi_info[F("rssi")] = qrssi;
+  wifi_info[F("signal")] = 126;//getSignalQuality(qrssi);
+  wifi_info[F("channel")] = WiFi.channel();
 
-  // JsonArray seg = root.createNestedArray("seg");
-  // for (size_t s = 0; s < strip.getMaxSegments(); s++) {
-  //   if (s >= strip.getSegmentsNum()) {
-  //     if (forPreset && segmentBounds && !selectedSegmentsOnly) { //disable segments not part of preset
-  //       JsonObject seg0 = seg.createNestedObject();
-  //       seg0["stop"] = 0;
-  //       continue;
-  //     } else
+  JsonObject fs_info = root.createNestedObject("fs");
+  fs_info["u"] = 123;//fsBytesUsed / 1000;
+  fs_info["t"] = 123;//fsBytesTotal / 1000;
+  fs_info[F("pmt")] = 123;//presetsModifiedTime;
+
+  root[F("ndc")] =123;// nodeListEnabled ? (int)Nodes.size() : -1;
+
+  #ifdef ARDUINO_ARCH_ESP32
+  #ifdef WLED_DEBUG
+    wifi_info[F("txPower")] = (int) WiFi.getTxPower();
+    wifi_info[F("sleep")] = (bool) WiFi.getSleep();
+  #endif
+  #if !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32S3)
+    root[F("arch")] = "esp32";
+  #else
+    root[F("arch")] = ESP.getChipModel();
+  #endif
+  root[F("core")] = ESP.getSdkVersion();
+  //root[F("maxalloc")] = ESP.getMaxAllocHeap();
+  #ifdef WLED_DEBUG
+    root[F("resetReason0")] = (int)rtc_get_reset_reason(0);
+    root[F("resetReason1")] = (int)rtc_get_reset_reason(1);
+  #endif
+  root[F("lwip")] = 0; //deprecated
+  #else
+  root[F("arch")] = "esp8266";
+  root[F("core")] = ESP.getCoreVersion();
+  //root[F("maxalloc")] = ESP.getMaxFreeBlockSize();
+  #ifdef WLED_DEBUG
+    root[F("resetReason")] = (int)ESP.getResetInfoPtr()->reason;
+  #endif
+  root[F("lwip")] = LWIP_VERSION_MAJOR;
+  #endif
+
+  root[F("freeheap")] = ESP.getFreeHeap();
+  #if defined(ARDUINO_ARCH_ESP32) && defined(BOARD_HAS_PSRAM)
+  if (psramFound()) root[F("psram")] = ESP.getFreePsram();
+  #endif
+  // root[F("uptime")] = millis()/1000 + rolloverMillis*4294967;
+
+  // usermods.addToJsonInfo(root);
+
+  uint16_t os = 0;
+  #ifdef WLED_DEBUG
+  os  = 0x80;
+    #ifdef WLED_DEBUG_HOST
+    os |= 0x0100;
+    if (!netDebugEnabled) os &= ~0x0080;
+    #endif
+  #endif
+  #ifndef WLED_DISABLE_ALEXA
+  os += 0x40;
+  #endif
+
+  //os += 0x20; // indicated now removed Blynk support, may be reused to indicate another build-time option
+
+  #ifdef USERMOD_CRONIXIE
+  os += 0x10;
+  #endif
+  #ifndef WLED_DISABLE_FILESYSTEM
+  os += 0x08;
+  #endif
+  #ifndef WLED_DISABLE_HUESYNC
+  os += 0x04;
+  #endif
+  #ifdef WLED_ENABLE_ADALIGHT
+  os += 0x02;
+  #endif
+  #ifndef WLED_DISABLE_OTA
+  os += 0x01;
+  #endif
+  root[F("opt")] = os;
+
+  root[F("brand")] = "WLED";
+  root[F("product")] = F("FOSS");
+  // root["mac"] = escapedMac;
+  char s[16] = "";
+  // if (Network.isConnected())
+  // {
+  //   IPAddress localIP = Network.localIP();
+  //   sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
+  // }
+  root["ip"] = s;
+}
+
+// void setPaletteColors(JsonArray json, CRGBPalette16 palette)
+// {
+//     for (int i = 0; i < 16; i++) {
+//       JsonArray colors =  json.createNestedArray();
+//       CRGB color = palette[i];
+//       colors.add(i<<4);
+//       colors.add(color.red);
+//       colors.add(color.green);
+//       colors.add(color.blue);
+//     }
+// }
+
+// void setPaletteColors(JsonArray json, byte* tcp)
+// {
+//     TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
+//     TRGBGradientPaletteEntryUnion u;
+
+//     // Count entries
+//     uint16_t count = 0;
+//     do {
+//         u = *(ent + count);
+//         count++;
+//     } while ( u.index != 255);
+
+//     u = *ent;
+//     int indexstart = 0;
+//     while( indexstart < 255) {
+//       indexstart = u.index;
+
+//       JsonArray colors =  json.createNestedArray();
+//       colors.add(u.index);
+//       colors.add(u.r);
+//       colors.add(u.g);
+//       colors.add(u.b);
+
+//       ent++;
+//       u = *ent;
+//     }
+// }
+
+void serializePalettes(JsonObject root, int page)
+{
+  byte tcp[72];
+  #ifdef ESP8266
+  int itemPerPage = 5;
+  #else
+  int itemPerPage = 8;
+  #endif
+
+  // int palettesCount = 12;//strip.getPaletteCount();
+  // int customPalettes = 12;//strip.customPalettes.size();
+
+  // int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
+  // if (page > maxPage) page = maxPage;
+
+  // int start = itemPerPage * page;
+  // int end = start + itemPerPage;
+  // if (end > palettesCount + customPalettes) end = palettesCount + customPalettes;
+
+  // root[F("m")] = maxPage; // inform caller how many pages there are
+  JsonObject palettes  = root.createNestedObject("p");
+
+  // for (int i = start; i < end; i++) {
+  //   JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
+  //   switch (i) {
+  //     case 0: //default palette
+  //       setPaletteColors(curPalette, PartyColors_p);
+  //       break;
+  //     case 1: //random
+  //         curPalette.add("r");
+  //         curPalette.add("r");
+  //         curPalette.add("r");
+  //         curPalette.add("r");
+  //       break;
+  //     case 2: //primary color only
+  //       curPalette.add("c1");
+  //       break;
+  //     case 3: //primary + secondary
+  //       curPalette.add("c1");
+  //       curPalette.add("c1");
+  //       curPalette.add("c2");
+  //       curPalette.add("c2");
+  //       break;
+  //     case 4: //primary + secondary + tertiary
+  //       curPalette.add("c3");
+  //       curPalette.add("c2");
+  //       curPalette.add("c1");
+  //       break;
+  //     case 5: //primary + secondary (+tert if not off), more distinct
+  //       curPalette.add("c1");
+  //       curPalette.add("c1");
+  //       curPalette.add("c1");
+  //       curPalette.add("c1");
+  //       curPalette.add("c1");
+  //       curPalette.add("c2");
+  //       curPalette.add("c2");
+  //       curPalette.add("c2");
+  //       curPalette.add("c2");
+  //       curPalette.add("c2");
+  //       curPalette.add("c3");
+  //       curPalette.add("c3");
+  //       curPalette.add("c3");
+  //       curPalette.add("c3");
+  //       curPalette.add("c3");
+  //       curPalette.add("c1");
+  //       break;
+  //     case 6: //Party colors
+  //       setPaletteColors(curPalette, PartyColors_p);
+  //       break;
+  //     case 7: //Cloud colors
+  //       setPaletteColors(curPalette, CloudColors_p);
+  //       break;
+  //     case 8: //Lava colors
+  //       setPaletteColors(curPalette, LavaColors_p);
+  //       break;
+  //     case 9: //Ocean colors
+  //       setPaletteColors(curPalette, OceanColors_p);
+  //       break;
+  //     case 10: //Forest colors
+  //       setPaletteColors(curPalette, ForestColors_p);
+  //       break;
+  //     case 11: //Rainbow colors
+  //       setPaletteColors(curPalette, RainbowColors_p);
+  //       break;
+  //     case 12: //Rainbow stripe colors
+  //       setPaletteColors(curPalette, RainbowStripeColors_p);
+  //       break;
+  //     default:
+  //       {
+  //       if (i>=palettesCount) {
+  //         setPaletteColors(curPalette, strip.customPalettes[i - palettesCount]);
+  //       } else {
+  //         memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
+  //         setPaletteColors(curPalette, tcp);
+  //       }
+  //       }
   //       break;
   //   }
-  //   Segment &sg = strip.getSegment(s);
-  //   if (forPreset && selectedSegmentsOnly && !sg.isSelected()) continue;
-  //   if (sg.isActive()) {
-  //     JsonObject seg0 = seg.createNestedObject();
-  //     serializeSegment(seg0, sg, s, forPreset, segmentBounds);
-  //   } else if (forPreset && segmentBounds) { //disable segments not part of preset
-  //     JsonObject seg0 = seg.createNestedObject();
-  //     seg0["stop"] = 0;
+  // }
+}
+
+void serializeNetworks(JsonObject root)
+{
+  JsonArray networks = root.createNestedArray(F("networks"));
+  int16_t status = WiFi.scanComplete();
+
+  switch (status) {
+    case WIFI_SCAN_FAILED:
+      WiFi.scanNetworks(true);
+      return;
+    case WIFI_SCAN_RUNNING:
+      return;
+  }
+
+  for (int i = 0; i < status; i++) {
+    JsonObject node = networks.createNestedObject();
+    node["ssid"]    = WiFi.SSID(i);
+    node["rssi"]    = WiFi.RSSI(i);
+    node["bssid"]   = WiFi.BSSIDstr(i);
+    node["channel"] = WiFi.channel(i);
+    node["enc"]     = WiFi.encryptionType(i);
+  }
+
+  WiFi.scanDelete();
+
+  if (WiFi.scanComplete() == WIFI_SCAN_FAILED) {
+    WiFi.scanNetworks(true);
+  }
+}
+
+void serializeNodes(JsonObject root)
+{
+  JsonArray nodes = root.createNestedArray("nodes");
+
+  // for (NodesMap::iterator it = Nodes.begin(); it != Nodes.end(); ++it)
+  // {
+  //   if (it->second.ip[0] != 0)
+  //   {
+  //     JsonObject node = nodes.createNestedObject();
+  //     node[F("name")] = it->second.nodeName;
+  //     node["type"]    = it->second.nodeType;
+  //     node["ip"]      = it->second.ip.toString();
+  //     node[F("age")]  = it->second.age;
+  //     node[F("vid")]  = it->second.build;
   //   }
   // }
 }
@@ -2026,6 +2592,19 @@ void serializeModeData(JsonArray fxdata)
   // }
 }
 
+// deserializes mode names string into JsonArray
+// also removes effect data extensions (@...) from deserialised names
+void serializeModeNames(JsonArray arr) {
+  char lineBuffer[128];
+  // for (size_t i = 0; i < strip.getModeCount(); i++) {
+  //   strncpy_P(lineBuffer, strip.getModeData(i), 127);
+  //   if (lineBuffer[0] != 0) {
+  //     char* dataPtr = strchr(lineBuffer,'@');
+  //     if (dataPtr) *dataPtr = 0; // terminate mode data after name
+  //     arr.add(lineBuffer);
+  //   }
+  // }
+}
 
 void serveJson(AsyncWebServerRequest* request)
 {
@@ -2079,8 +2658,8 @@ void serveJson(AsyncWebServerRequest* request)
     //   serializeModeNames(lDoc); break;
     case JSON_PATH_FXDATA:
       serializeModeData(lDoc); break;
-    // case JSON_PATH_NETWORKS:
-    //   serializeNetworks(lDoc); break;
+    case JSON_PATH_NETWORKS:
+      serializeNetworks(lDoc); break;
     default: //all
       JsonObject state = lDoc.createNestedObject("state");
       serializeState(state);
@@ -2204,14 +2783,14 @@ void serveSettings(AsyncWebServerRequest* request, bool post)
     case SUBPAGE_SYNC    : response = request->beginResponse_P(200, "text/html", PAGE_settings_sync, PAGE_settings_sync_length); break;
     case SUBPAGE_TIME    : response = request->beginResponse_P(200, "text/html", PAGE_settings_time, PAGE_settings_time_length); break;
     case SUBPAGE_SEC     : response = request->beginResponse_P(200, "text/html", PAGE_settings_sec,  PAGE_settings_sec_length);  break;
-#ifdef WLED_ENABLE_DMX
+    #ifdef WLED_ENABLE_DMX
     case SUBPAGE_DMX     : response = request->beginResponse_P(200, "text/html", PAGE_settings_dmx,  PAGE_settings_dmx_length);  break;
-#endif
+    #endif
     case SUBPAGE_UM      : response = request->beginResponse_P(200, "text/html", PAGE_settings_um,   PAGE_settings_um_length);   break;
     case SUBPAGE_UPDATE  : response = request->beginResponse_P(200, "text/html", PAGE_update,        PAGE_update_length);        break;
-#ifndef WLED_DISABLE_2D
+    #ifndef WLED_DISABLE_2D
     case SUBPAGE_2D      : response = request->beginResponse_P(200, "text/html", PAGE_settings_2D,   PAGE_settings_2D_length);   break;
-#endif
+    #endif
     case SUBPAGE_LOCK    : {
       correctPIN = !strlen(settingsPIN); // lock if a pin is set
       createEditHandler(correctPIN);
@@ -2229,6 +2808,36 @@ void serveSettings(AsyncWebServerRequest* request, bool post)
   request->send(response);
 }
 
+#define MDNS_NAME DEVICENAME_CTR ".local"
+char cmDNS[] = MDNS_NAME;           
+
+//Is this an IP?
+bool isIp(String str) {
+  for (size_t i = 0; i < str.length(); i++) {
+    int c = str.charAt(i);
+    if (c != '.' && (c < '0' || c > '9')) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool captivePortal(AsyncWebServerRequest *request)
+{
+  if (ON_STA_FILTER(request)) return false; //only serve captive in AP mode
+  String hostH;
+  if (!request->hasHeader("Host")) return false;
+  hostH = request->getHeader("Host")->value();
+
+  if (!isIp(hostH) && hostH.indexOf("wled.me") < 0 && hostH.indexOf(cmDNS) < 0) {
+    DEBUG_PRINTLN("Captive portal");
+    AsyncWebServerResponse *response = request->beginResponse(302);
+    response->addHeader(F("Location"), F("http://4.3.2.1"));
+    request->send(response);
+    return true;
+  }
+  return false;
+}
 
 //This function provides a json with info on the number of LEDs connected
 // it is needed by artemis to know how many LEDs to display on the surface
@@ -2269,7 +2878,7 @@ void notFound(AsyncWebServerRequest *request) {
 }
 
 
-
+bool otaLock = false;
 
 void initServer()
 {
@@ -2280,7 +2889,7 @@ void initServer()
 
 #ifdef WLED_ENABLE_WEBSOCKETS
   #ifndef WLED_DISABLE_2D
-  server.on("/liveview2D", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/liveview2D", HTTP_GET, [](AsyncWebServerRequest *request){
     if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_liveviewws2D, PAGE_liveviewws2D_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
@@ -2289,8 +2898,8 @@ void initServer()
   });
   #endif
 #endif
-  server.on("/liveview", HTTP_GET, [](AsyncWebServerRequest *request){
-    // if (handleIfNoneMatchCacheHeader(request)) return;
+  pCONT_web->server->on("/liveview", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_liveview, PAGE_liveview_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     setStaticContentCacheHeaders(response);
@@ -2298,41 +2907,41 @@ void initServer()
   });
 
   //settings page
-  server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request){
-    // serveSettings(request);
+  pCONT_web->server->on("/settings", HTTP_GET, [](AsyncWebServerRequest *request){
+    serveSettings(request);
   });
 
   // "/settings/settings.js&p=x" request also handled by serveSettings()
 
-  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
-    // if (handleIfNoneMatchCacheHeader(request)) return;
+  pCONT_web->server->on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", PAGE_settingsCss, PAGE_settingsCss_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     setStaticContentCacheHeaders(response);
     request->send(response);
   });
 
-  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
-    // if(!handleFileRead(request, "/favicon.ico"))
-    // {
-    //   request->send_P(200, "image/x-icon", favicon, 156);
-    // }
+  pCONT_web->server->on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
+    if(!handleFileRead(request, "/favicon.ico"))
+    {
+      request->send_P(200, "image/x-icon", favicon, 156);
+    }
   });
 
-  server.on("/welcome", HTTP_GET, [](AsyncWebServerRequest *request){
-    // serveSettings(request);
+  pCONT_web->server->on("/welcome", HTTP_GET, [](AsyncWebServerRequest *request){
+    serveSettings(request);
   });
 
-  server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request){
-    // serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
+  pCONT_web->server->on("/reset", HTTP_GET, [](AsyncWebServerRequest *request){
+    serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
     // doReboot = true;
   });
 
-  server.on("/settings", HTTP_POST, [](AsyncWebServerRequest *request){
-    // serveSettings(request, true);
+  pCONT_web->server->on("/settings", HTTP_POST, [](AsyncWebServerRequest *request){
+    serveSettings(request, true);
   });
 
-  server.on("/json", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/json", HTTP_GET, [](AsyncWebServerRequest *request){
     serveJson(request);
   });
 
@@ -2381,22 +2990,22 @@ void initServer()
   //   }
   //   request->send(200, "application/json", F("{\"success\":true}"));
   // }, JSON_BUFFER_SIZE);
-  // server.addHandler(handler);
+  // pCONT_web->server->addHandler(handler);
 
-  server.on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", (String)PROJECT_VERSION);
   });
 
-  server.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", (String)millis());
   });
 
-  server.on("/freeheap", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/freeheap", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", (String)ESP.getFreeHeap());
   });
 
 #ifdef WLED_ENABLE_USERMOD_PAGE
-  server.on("/u", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/u", HTTP_GET, [](AsyncWebServerRequest *request){
     if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_usermod, PAGE_usermod_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
@@ -2405,17 +3014,17 @@ void initServer()
   });
 #endif
 
-  // server.on("/teapot", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
-  // });
+  pCONT_web->server->on("/teapot", HTTP_GET, [](AsyncWebServerRequest *request){
+    serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
+  });
 
-  // server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request) {},
-  //       [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data,
-  //                     size_t len, bool final) {handleUpload(request, filename, index, data, len, final);}
-  // );
+  pCONT_web->server->on("/upload", HTTP_POST, [](AsyncWebServerRequest *request) {},
+        [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data,
+                      size_t len, bool final) {handleUpload(request, filename, index, data, len, final);}
+  );
 
 #ifdef WLED_ENABLE_SIMPLE_UI
-  server.on("/simple.htm", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/simple.htm", HTTP_GET, [](AsyncWebServerRequest *request){
     if (handleFileRead(request, "/simple.htm")) return;
     if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_simple, PAGE_simple_L);
@@ -2425,14 +3034,14 @@ void initServer()
   });
 #endif
 
-  server.on("/iro.js", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/iro.js", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", iroJs, iroJs_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     setStaticContentCacheHeaders(response);
     request->send(response);
   });
 
-  server.on("/rangetouch.js", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/rangetouch.js", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", rangetouchJs, rangetouchJs_length);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     setStaticContentCacheHeaders(response);
@@ -2443,26 +3052,28 @@ void initServer()
 
 #ifndef WLED_DISABLE_OTA
   //init ota page
-  server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
+    ALOG_INF(PSTR("URL HTTP_GET \"/update\""));
     // if (otaLock) {
     //   serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_ota), 254);
     // } else
-    //   serveSettings(request); // checks for "upd" in URL and handles PIN
+      serveSettings(request); // checks for "upd" in URL and handles PIN
   });
 
-  server.on("/update", HTTP_POST, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/update", HTTP_POST, [](AsyncWebServerRequest *request){
+    ALOG_INF(PSTR("URL HTTP_POST \"/update\""));
     // if (!correctPIN) {
     //   serveSettings(request, true); // handle PIN page POST request
     //   return;
     // }
-    // if (Update.hasError() || otaLock) {
-    //   serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
-    // } else {
-    //   serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
-    //   doReboot = true;
-    // }
+    if (Update.hasError() || otaLock) {
+      serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
+    } else {
+      serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
+      // doReboot = true;
+    }
   },[](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-    // if (!correctPIN || otaLock) return;
+    if (!correctPIN || otaLock) return;
     if(!index){
       DEBUG_PRINTLN(F("OTA Update Start"));
       // WLED::instance().disableWatchdog();
@@ -2485,23 +3096,23 @@ void initServer()
     }
   });
 #else
-  server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
     serveMessage(request, 501, "Not implemented", F("OTA updating is disabled in this build."), 254);
   });
 #endif
 
 
   #ifdef WLED_ENABLE_DMX
-  server.on("/dmxmap", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/dmxmap", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", PAGE_dmxmap     , dmxProcessor);
   });
   #else
-  server.on("/dmxmap", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/dmxmap", HTTP_GET, [](AsyncWebServerRequest *request){
     // serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
   });
   #endif
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     // if (captivePortal(request)) return;
     bool showWelcomePage = false;
     if (!showWelcomePage || request->hasArg(F("sliders"))){
@@ -2512,7 +3123,7 @@ void initServer()
   });
 
   #ifdef WLED_ENABLE_PIXART
-  server.on("/pixart.htm", HTTP_GET, [](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/pixart.htm", HTTP_GET, [](AsyncWebServerRequest *request){
     if (handleFileRead(request, "/pixart.htm")) return;
     if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_pixart, PAGE_pixart_L);
@@ -2523,9 +3134,9 @@ void initServer()
   #endif
 
   #ifndef WLED_DISABLE_PXMAGIC
-  server.on("/pxmagic.htm", HTTP_GET, [](AsyncWebServerRequest *request){
-    // if (handleFileRead(request, "/pxmagic.htm")) return;
-    // if (handleIfNoneMatchCacheHeader(request)) return;
+  pCONT_web->server->on("/pxmagic.htm", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (handleFileRead(request, "/pxmagic.htm")) return;
+    if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_pxmagic, PAGE_pxmagic_L);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     setStaticContentCacheHeaders(response);
@@ -2533,9 +3144,9 @@ void initServer()
   });
   #endif
 
-  server.on("/cpal.htm", HTTP_GET, [](AsyncWebServerRequest *request){
-    // if (handleFileRead(request, "/cpal.htm")) return;
-    // if (handleIfNoneMatchCacheHeader(request)) return;
+  pCONT_web->server->on("/cpal.htm", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (handleFileRead(request, "/cpal.htm")) return;
+    if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_cpal, PAGE_cpal_L);
     response->addHeader(FPSTR(s_content_enc),"gzip");
     setStaticContentCacheHeaders(response);
@@ -2543,14 +3154,18 @@ void initServer()
   });
 
   #ifdef WLED_ENABLE_WEBSOCKETS
-  server.addHandler(&ws);
+  pCONT_web->server->addHandler(&ws);
   #endif
 
+
+  // pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);/
+  pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
+
   //called when the url is not defined here, ajax-in; get-settings
-  server.onNotFound([](AsyncWebServerRequest *request){
+  pCONT_web->server->onNotFound([](AsyncWebServerRequest *request){
     DEBUG_PRINTLN("Not-Found HTTP call:");
     DEBUG_PRINTLN("URI: " + request->url());
-    // if (captivePortal(request)) return;
+    if (captivePortal(request)) return;
 
     //make API CORS compatible
     if (request->method() == HTTP_OPTIONS)
@@ -2588,11 +3203,18 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 // DEBUG_LINE_HERE;
 
+  switch(function)
+  {
+    case FUNC_INIT:
+      server = new AsyncWebServer(80);
+    break;
+  }
+
+
   switch(function){
     case FUNC_INIT:
       // init();
 
-initServer();
 
 // DEBUG_LINE_HERE;
           
@@ -2669,6 +3291,7 @@ initServer();
 // return 0;
     // server.begin();
     
+initServer();
 
 // DEBUG_LINE_HERE;
           
@@ -2733,7 +3356,7 @@ initServer();
 
 DEBUG_LINE_HERE;
 
-    server.begin();
+    pCONT_web->server->begin();
 
 DEBUG_LINE_HERE;
 

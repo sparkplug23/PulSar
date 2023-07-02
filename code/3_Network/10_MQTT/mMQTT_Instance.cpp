@@ -290,9 +290,13 @@ bool MQTTConnection::MQTTHandler_Send_Formatted(uint8_t topic_type, uint16_t mod
 }
 
 
+
 bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, const char* payload_ctr, uint8_t retain_flag){
 
+  char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
   char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
+
+  // pCONT_mqtt->TopicFormatted(module_name, topic_type_id, topic_postfix, topic_ctr, sizeof(topic_ctr));  // Needs fixed
   
   //can be replaced with a function call
   switch(topic_type_id){
@@ -305,8 +309,7 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
     default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
   }
 
-  char topic_ctr[100]; memset(topic_ctr,0,sizeof(topic_ctr));
-  snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS,module_name,topic_id_ctr,topic_postfix);  //PSTR may broke this?
+  snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
 
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
   ALOG_TRA( PSTR(D_LOG_MQTT "topic_ctr=\"%s\""), topic_ctr );

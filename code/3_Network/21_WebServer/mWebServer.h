@@ -24,23 +24,15 @@ typedef struct  FREEMEM_HANDLER{
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
 #ifdef ESP32
-  // #include <WiFi.h>
-  // #include <WiFiClient.h>
-  // #include <WebServer.h>
-  // #include <HTTPClient.h>
-  // #include <AsyncTCP.h>
-  // #include <ESPAsyncWebServer.h>
-  
   #include <AsyncTCP.h>
   #include <ESPAsyncWebServer.h>
-
 #endif
 #ifdef ESP8266
-//   #include <ESP8266WiFi.h>
-//   #include <ESP8266HTTPClient.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>
 #endif
+
+#include <stdint.h>
 
 #include "html_ui.h"
 #ifdef WLED_ENABLE_SIMPLE_UI
@@ -55,6 +47,11 @@ typedef struct  FREEMEM_HANDLER{
   #include "html_pxmagic.h"
 #endif
 #include "html_cpal.h"
+
+const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
+const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
+DEFINE_PGM_CTR(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT) "application/json";
+const char PM_WEB_CONTENT_TYPE_TEXT_CSS[] PROGMEM = "text/css";
 
 // #include <DNSServer.h>
 // #include "2_CoreSystem/02_Time/mTime.h"
@@ -1324,9 +1321,26 @@ public mTaskerInterface{
     #endif
 
 
+    AsyncWebServer* server = nullptr; //(80);
+
+
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
+
+
+
+    enum CONTENT_TYPE_IDS{
+      // 0 is unset
+      CONTENT_TYPE_TEXT_HTML_ID=1,
+      CONTENT_TYPE_TEXT_JAVASCRIPT_ID,
+      CONTENT_TYPE_APPLICATION_JSON_ID,
+      CONTENT_TYPE_TEXT_CSS_ID,
+    };
+
+
+    const char* GetContentTypeCtrP_By_ID(uint8_t id);
+
 
     // /***************
     //  * 
@@ -1368,7 +1382,7 @@ public mTaskerInterface{
     // void WebPage_Root_AddHandlers();
     // void WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...);
     // bool RespondWebSend_UnableToAllocateBuffer(AsyncWebServerRequest *request);
-    // void WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
+    void WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
     // void HandleSystemSettings(AsyncWebServerRequest *request);
     // void WebRestart(AsyncWebServerRequest *request,uint8_t type);
     // void HandleWifiLogin(AsyncWebServerRequest *request);
