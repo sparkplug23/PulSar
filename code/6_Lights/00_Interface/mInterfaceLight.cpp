@@ -158,9 +158,18 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       MQTTHandler_Set_RefreshAll();
     break;
     #endif //USE_MODULE_NETWORK_MQTT
+    /************
+     * WEB SECTION * 
+    *******************/   
+    case FUNC_WEB_ADD_HANDLER:    
+      MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
+    break;
+
   } // end switch
   
 } // END function
+
+
 
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
@@ -1282,9 +1291,14 @@ void mInterfaceLight::MQTTHandler_Sender(uint8_t id)
   }
 }
   
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
+void mInterfaceLight::MQTTHandler_AddWebURL_PayloadRequests()
+{    
+  CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests();
+}
+#endif // USE_MODULE_NETWORK_WEBSERVER23
+
 #endif// USE_MODULE_NETWORK_MQTT
-
-
 
 
 #endif // USE_DRIVER

@@ -428,6 +428,16 @@ class mInterfaceLight :
     std::vector<struct handler<mInterfaceLight>*> mqtthandler_list;
 
     #endif
+    
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+
+/**
+ * @brief MQTTHandler_AddWebURL_PayloadRequests
+ * */
+void MQTTHandler_AddWebURL_PayloadRequests();
+
+  #endif // USE_MODULE_NETWORK_WEBSERVER23
+
 
 
 };

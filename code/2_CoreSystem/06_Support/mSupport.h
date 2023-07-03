@@ -385,6 +385,18 @@ extern void SafeMode_CellularConnectionAndSendLocation();
 #include <Ticker.h>
 
 
+#ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
+enum HARDWARE_STATUS_IMPORTANCE_IDS{
+  // No risk to remain on
+  HARDWARE_STATUS_IMPORTANCE_LOW_ID=0,
+  // RGB leds, not high voltage
+  HARDWARE_STATUS_IMPORTANCE_MEDIUM_ID,
+  // Plugs/sockets, mains running
+  HARDWARE_STATUS_IMPORTANCE_HIGHEST_ID,
+};
+#endif // ENABLE_DEVFEATURE_HARDWARE_STATUS
+
+
 #include "1_TaskerManager/mTaskerInterface.h"
 
 
@@ -544,6 +556,17 @@ class mSupport :
 
     }
 
+    
+    #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS
+    #define HARDWARE_STATUS_MAX_LENGTH 200
+    struct STATUSHARDWARE{
+      //make function that appends pretty simple message
+      char ctr[HARDWARE_STATUS_MAX_LENGTH];
+      uint8_t len = 0;
+      uint8_t importance = 0; //0 low, 1 med, 2 high
+    }hardwarestatus;
+    void ConstructCtr_HardwareStatus();
+    #endif // ENABLE_DEVFEATURE_HARDWARE_STATUS
 
 
 char* GetTextIndexedTemp(char* destination, size_t destination_size, uint16_t index, const char* haystack);

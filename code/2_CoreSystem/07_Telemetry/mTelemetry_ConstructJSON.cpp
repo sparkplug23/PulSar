@@ -147,7 +147,6 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     // JBI->Add(PM_JSON_DRIVERS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
     // JBI->Add(PM_JSON_SENSORS,         "1,2,3,4,5,6,7,8,9,10,12,14,16,17,18,19,20,21,22,24,26,30");
     JBI->Add_FV(PM_JSON_FEATURES,     PSTR("[\"%08X\",\"%08X\",\"%08X\",\"%08X\"]"), 0,0,0,0);
-
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     
     #ifdef ESP8266
@@ -218,8 +217,9 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appending){ // Debug info not just wifi, might be ethernet later
-  
+uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appending)
+{
+   
   IPAddress localip   = WiFi.localIP();
   IPAddress staticip  = IPAddress(pCONT_set->Settings.ip_address[0]);
   IPAddress gatewayip = IPAddress(pCONT_set->Settings.ip_address[1]);
@@ -373,13 +373,12 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_appending){
       JBI->Add("toffset[0]", pCONT_set->Settings.toffset[0]);
       JBI->Add("toffset[1]", pCONT_set->Settings.toffset[1]);
     JBI->Level_End();    
-  #endif //  DEBUG_MODULE_TIME_STD
-
     // JBI->Level_Start("RtcTime");
     //   JBI->Add("valid",pCONT_time->RtcTime.valid);
     //   JBI->Add_FV("time","\"%02d:%02d:%02d\"",pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);
     // JBI->End();
-// #endif // ENABLE_DEVFEATURE_RTC_TIME_V2_MQTT_DEBUG
+  #endif //  DEBUG_MODULE_TIME_STD
+
   return JBI->End();
 
 }
@@ -389,7 +388,8 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_appending){
  * should this be renamed, as "devices" needs to refer to the internal list, 
  * but, I also want to have a list of connected hardware, so that might be better suited to devices (combining for now)
  * */
-uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level, bool json_appending){ 
+uint8_t mTelemetry::ConstructJSON_Devices(uint8_t json_level, bool json_appending)
+{ 
 
   JBI->Start();
     JBI->Add(PM_JSON_MODULENAME,          pCONT_set->Settings.module);
