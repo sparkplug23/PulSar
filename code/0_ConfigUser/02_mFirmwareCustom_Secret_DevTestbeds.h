@@ -6714,6 +6714,10 @@
     #define MQTT_PORT     1883
 
 
+// Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
+// Gain complete understanding/implemenation as is, only then start changes. 
+// WebUI of WLED style should become its own webserver option (not just the debug version).
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
@@ -6729,9 +6733,10 @@
   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-  #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
 
-  #define USE_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER
+  // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
+  #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
 
 
 

@@ -1,6 +1,6 @@
 #include "mWLEDWebUI.h"
 
-#ifdef USE_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
 
 const char* mWLEDWebUI::PM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__CTR = D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__CTR;
 const char* mWLEDWebUI::PM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__FRIENDLY_CTR = D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__FRIENDLY_CTR;
@@ -19,10 +19,31 @@ bool doReboot = false;
 #define REALTIME_MODE_TPM2NET     7
 #define REALTIME_MODE_DDP         8
 
+#ifndef WLED_MAX_BUTTONS
+  #ifdef ESP8266
+    #define WLED_MAX_BUTTONS 2
+  #else
+    #define WLED_MAX_BUTTONS 4
+  #endif
+#endif
+
+#define WLED_GLOBAL
+
+// #ifndef WLED_DEFINE_GLOBAL_VARS
+// # define WLED_GLOBAL extern
+// # define _INIT(x)
+// # define _INIT_N(x)
+// #else
 # define WLED_GLOBAL
 # define _INIT(x) = x
 
-byte realtimeMode = REALTIME_MODE_INACTIVE;
+//needed to ignore commas in array definitions
+#define UNPACK( ... ) __VA_ARGS__
+# define _INIT_N(x) UNPACK x
+// #endif
+
+#define WLED_ENABLE_JSONLIVE     // peek LED output via /json/live (WS binary peek is always enabled)
+
 // User Interface CONFIG
 #ifndef SERVERNAME
 WLED_GLOBAL char serverDescription[33] _INIT("WLED");  // Name of module - use default
@@ -33,6 +54,535 @@ WLED_GLOBAL bool syncToggleReceive     _INIT(false);   // UIs which only have a 
 WLED_GLOBAL bool simplifiedUI          _INIT(false);   // enable simplified UI
 WLED_GLOBAL byte cacheInvalidate       _INIT(0);       // used to invalidate browser cache when switching from regular to simplified UI
 
+#ifndef WLED_DISABLE_ESPNOW
+WLED_GLOBAL bool enable_espnow_remote _INIT(false);
+WLED_GLOBAL char linked_remote[13]   _INIT("");
+WLED_GLOBAL char last_signal_src[13]   _INIT("");
+#endif
+
+
+WLED_GLOBAL char ntpServerName[33] _INIT("0.wled.pool.ntp.org");   // NTP server to use
+
+#define MDNS_NAME DEVICENAME_CTR ".local"
+#define CLIENT_SSID "HACS2400"
+#define CLIENT_PASS "af4d8bc9ab"
+//Access point behavior
+#define AP_BEHAVIOR_BOOT_NO_CONN          0     //Open AP when no connection after boot
+#define AP_BEHAVIOR_NO_CONN               1     //Open when no connection (either after boot or if connection is lost)
+#define AP_BEHAVIOR_ALWAYS                2     //Always open
+#define AP_BEHAVIOR_BUTTON_ONLY           3     //Only when button pressed for 6 sec
+
+// AP and OTA default passwords (for maximum security change them!)
+WLED_GLOBAL char apPass[65]  _INIT(CLIENT_SSID);
+WLED_GLOBAL char otaPass[33] _INIT("");
+
+// WiFi CONFIG (all these can be changed via web UI, no need to set them here)
+WLED_GLOBAL char clientSSID[33] _INIT(CLIENT_SSID);
+WLED_GLOBAL char clientPass[65] _INIT(CLIENT_PASS);
+WLED_GLOBAL char cmDNS[] _INIT(MDNS_NAME);                       // mDNS address (*.local, replaced by wledXXXXXX if default is used)
+WLED_GLOBAL char apSSID[33] _INIT("");                             // AP off by default (unless setup)
+WLED_GLOBAL byte apChannel _INIT(1);                               // 2.4GHz WiFi AP channel (1-13)
+WLED_GLOBAL byte apHide    _INIT(0);                               // hidden AP SSID
+WLED_GLOBAL byte apBehavior _INIT(AP_BEHAVIOR_BOOT_NO_CONN);       // access point opens when no connection after boot by default
+WLED_GLOBAL IPAddress staticIP      _INIT_N(((  0,   0,  0,  0))); // static IP of ESP
+WLED_GLOBAL IPAddress staticGateway _INIT_N(((  0,   0,  0,  0))); // gateway (router) IP
+WLED_GLOBAL IPAddress staticSubnet  _INIT_N(((255, 255, 255, 0))); // most common subnet in home networks
+#ifdef ARDUINO_ARCH_ESP32
+WLED_GLOBAL bool noWifiSleep _INIT(true);                          // disabling modem sleep modes will increase heat output and power usage, but may help with connection issues
+#else
+WLED_GLOBAL bool noWifiSleep _INIT(false);
+#endif
+
+
+// Settings sub page IDs
+#define SUBPAGE_MENU              0
+#define SUBPAGE_WIFI              1
+#define SUBPAGE_LEDS              2
+#define SUBPAGE_UI                3
+#define SUBPAGE_SYNC              4
+#define SUBPAGE_TIME              5
+#define SUBPAGE_SEC               6
+#define SUBPAGE_DMX               7
+#define SUBPAGE_UM                8
+#define SUBPAGE_UPDATE            9
+#define SUBPAGE_2D               10
+#define SUBPAGE_LOCK            251
+#define SUBPAGE_PINREQ          252
+#define SUBPAGE_CSS             253
+#define SUBPAGE_JS              254
+#define SUBPAGE_WELCOME         255
+
+// string temp buffer (now stored in stack locally)
+#ifdef ESP8266
+#define SETTINGS_STACK_BUF_SIZE 2048
+#else
+#define SETTINGS_STACK_BUF_SIZE 3608  // warning: quite a large value for stack
+#endif
+
+
+
+#ifdef WLED_USE_ETHERNET
+  #ifdef WLED_ETH_DEFAULT                                          // default ethernet board type if specified
+    WLED_GLOBAL int ethernetType _INIT(WLED_ETH_DEFAULT);          // ethernet board type
+  #else
+    WLED_GLOBAL int ethernetType _INIT(WLED_ETH_NONE);             // use none for ethernet board type if default not defined
+  #endif
+#endif
+
+// LED CONFIG
+WLED_GLOBAL bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
+WLED_GLOBAL byte bootPreset   _INIT(0);                   // save preset to load after power-up
+
+//if true, a segment per bus will be created on boot and LED settings save
+//if false, only one segment spanning the total LEDs is created,
+//but not on LED settings save if there is more than one segment currently
+WLED_GLOBAL bool autoSegments    _INIT(false);
+WLED_GLOBAL bool correctWB       _INIT(false); // CCT color correction of RGB color
+WLED_GLOBAL bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
+WLED_GLOBAL bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
+WLED_GLOBAL bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
+WLED_GLOBAL float gammaCorrectVal _INIT(2.8f); // gamma correction value
+
+WLED_GLOBAL byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
+WLED_GLOBAL byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
+WLED_GLOBAL byte briS     _INIT(128);                     // default brightness
+
+WLED_GLOBAL byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
+WLED_GLOBAL byte nightlightDelayMins _INIT(60);
+WLED_GLOBAL byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
+WLED_GLOBAL bool fadeTransition      _INIT(true);   // enable crossfading color transition
+WLED_GLOBAL uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
+
+WLED_GLOBAL byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
+
+// // User Interface CONFIG
+// #ifndef SERVERNAME
+// WLED_GLOBAL char serverDescription[33] _INIT("WLED");  // Name of module - use default
+// #else
+// WLED_GLOBAL char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
+// #endif
+
+// // Sync CONFIG
+// WLED_GLOBAL NodesMap Nodes;
+WLED_GLOBAL bool nodeListEnabled _INIT(true);
+WLED_GLOBAL bool nodeBroadcastEnabled _INIT(true);
+
+WLED_GLOBAL byte buttonType[WLED_MAX_BUTTONS]  _INIT({BTN_TYPE_PUSH});
+#if defined(IRTYPE) && defined(IRPIN)
+WLED_GLOBAL byte irEnabled      _INIT(IRTYPE); // Infrared receiver
+#else
+WLED_GLOBAL byte irEnabled      _INIT(0);     // Infrared receiver disabled
+#endif
+WLED_GLOBAL bool irApplyToAllSelected _INIT(true); //apply IR to all selected segments
+
+WLED_GLOBAL uint16_t udpPort    _INIT(21324); // WLED notifier default port
+WLED_GLOBAL uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
+WLED_GLOBAL uint16_t udpRgbPort _INIT(19446); // Hyperion port
+
+WLED_GLOBAL uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
+WLED_GLOBAL uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
+WLED_GLOBAL bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
+WLED_GLOBAL bool receiveNotificationColor      _INIT(true);       // apply color
+WLED_GLOBAL bool receiveNotificationEffects    _INIT(true);       // apply effects setup
+WLED_GLOBAL bool receiveSegmentOptions         _INIT(false);      // apply segment options
+WLED_GLOBAL bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
+WLED_GLOBAL bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
+WLED_GLOBAL bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
+WLED_GLOBAL bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
+WLED_GLOBAL bool notifyMacro  _INIT(false);                       // send notification for macro
+WLED_GLOBAL bool notifyHue    _INIT(true);                        // send notification if Hue light changes
+WLED_GLOBAL uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
+
+WLED_GLOBAL bool alexaEnabled _INIT(false);                       // enable device discovery by Amazon Echo
+WLED_GLOBAL char alexaInvocationName[33] _INIT("Light");          // speech control name of device. Choose something voice-to-text can understand
+WLED_GLOBAL byte alexaNumPresets _INIT(0);                        // number of presets to expose to Alexa, starting from preset 1, up to 9
+
+WLED_GLOBAL uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
+WLED_GLOBAL int arlsOffset _INIT(0);                              // realtime LED offset
+WLED_GLOBAL bool receiveDirect _INIT(true);                       // receive UDP realtime
+WLED_GLOBAL bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
+WLED_GLOBAL bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
+
+#ifdef WLED_ENABLE_DMX
+ #ifdef ESP8266
+  WLED_GLOBAL DMXESPSerial dmx;
+ #else //ESP32
+  WLED_GLOBAL SparkFunDMX dmx;
+ #endif
+WLED_GLOBAL uint16_t e131ProxyUniverse _INIT(0);                  // output this E1.31 (sACN) / ArtNet universe via MAX485 (0 = disabled)
+#endif
+WLED_GLOBAL uint16_t e131Universe _INIT(1);                       // settings for E1.31 (sACN) protocol (only DMX_MODE_MULTIPLE_* can span over consequtive universes)
+WLED_GLOBAL uint16_t e131Port _INIT(5568);                        // DMX in port. E1.31 default is 5568, Art-Net is 6454
+// WLED_GLOBAL byte e131Priority _INIT(0);                           // E1.31 port priority (if != 0 priority handling is active)
+// WLED_GLOBAL E131Priority highPriority _INIT(3);                   // E1.31 highest priority tracking, init = timeout in seconds
+WLED_GLOBAL byte DMXMode _INIT(DMX_MODE_MULTIPLE_RGB);            // DMX mode (s.a.)
+WLED_GLOBAL uint16_t DMXAddress _INIT(1);                         // DMX start address of fixture, a.k.a. first Channel [for E1.31 (sACN) protocol]
+WLED_GLOBAL uint16_t DMXSegmentSpacing _INIT(0);                  // Number of void/unused channels between each segments DMX channels
+WLED_GLOBAL byte e131LastSequenceNumber[E131_MAX_UNIVERSE_COUNT]; // to detect packet loss
+WLED_GLOBAL bool e131Multicast _INIT(false);                      // multicast or unicast
+WLED_GLOBAL bool e131SkipOutOfSequence _INIT(false);              // freeze instead of flickering
+WLED_GLOBAL uint16_t pollReplyCount _INIT(0);                     // count number of replies for ArtPoll node report
+
+// mqtt
+WLED_GLOBAL unsigned long lastMqttReconnectAttempt _INIT(0);  // used for other periodic tasks too
+#ifndef WLED_DISABLE_MQTT
+// WLED_GLOBAL AsyncMqttClient *mqtt _INIT(NULL);
+WLED_GLOBAL bool mqttEnabled _INIT(false);
+WLED_GLOBAL char mqttStatusTopic[40] _INIT("");            // this must be global because of async handlers
+WLED_GLOBAL char mqttDeviceTopic[33] _INIT("");            // main MQTT topic (individual per device, default is wled/mac)
+WLED_GLOBAL char mqttGroupTopic[33] _INIT("wled/all");     // second MQTT topic (for example to group devices)
+WLED_GLOBAL char mqttServer[33] _INIT("");                 // both domains and IPs should work (no SSL)
+WLED_GLOBAL char mqttUser[41] _INIT("");                   // optional: username for MQTT auth
+WLED_GLOBAL char mqttPass[65] _INIT("");                   // optional: password for MQTT auth
+WLED_GLOBAL char mqttClientID[41] _INIT("");               // override the client ID
+WLED_GLOBAL uint16_t mqttPort _INIT(1883);
+WLED_GLOBAL bool retainMqttMsg _INIT(false);               // retain brightness and color
+#define WLED_MQTT_CONNECTED (mqtt != nullptr && mqtt->connected())
+#else
+#define WLED_MQTT_CONNECTED false
+#endif
+
+#ifndef WLED_DISABLE_HUESYNC
+WLED_GLOBAL bool huePollingEnabled _INIT(false);           // poll hue bridge for light state
+WLED_GLOBAL uint16_t huePollIntervalMs _INIT(2500);        // low values (< 1sec) may cause lag but offer quicker response
+WLED_GLOBAL char hueApiKey[47] _INIT("api");               // key token will be obtained from bridge
+WLED_GLOBAL byte huePollLightId _INIT(1);                  // ID of hue lamp to sync to. Find the ID in the hue app ("about" section)
+WLED_GLOBAL IPAddress hueIP _INIT_N(((0, 0, 0, 0))); // IP address of the bridge
+WLED_GLOBAL bool hueApplyOnOff _INIT(true);
+WLED_GLOBAL bool hueApplyBri _INIT(true);
+WLED_GLOBAL bool hueApplyColor _INIT(true);
+#endif
+
+WLED_GLOBAL uint16_t serialBaud _INIT(1152); // serial baud rate, multiply by 100
+
+// Time CONFIG
+WLED_GLOBAL bool ntpEnabled _INIT(false);    // get internet time. Only required if you use clock overlays or time-activated macros
+WLED_GLOBAL bool useAMPM _INIT(false);       // 12h/24h clock format
+WLED_GLOBAL byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
+WLED_GLOBAL int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
+
+WLED_GLOBAL byte overlayCurrent _INIT(0);    // 0: no overlay 1: analog clock 2: was single-digit clock 3: was cronixie
+WLED_GLOBAL byte overlayMin _INIT(0), overlayMax _INIT(DEFAULT_LED_COUNT - 1);   // boundaries of overlay mode
+
+WLED_GLOBAL byte analogClock12pixel _INIT(0);               // The pixel in your strip where "midnight" would be
+WLED_GLOBAL bool analogClockSecondsTrail _INIT(false);      // Display seconds as trail of LEDs instead of a single pixel
+WLED_GLOBAL bool analogClock5MinuteMarks _INIT(false);      // Light pixels at every 5-minute position
+
+WLED_GLOBAL bool countdownMode _INIT(false);                         // Clock will count down towards date
+WLED_GLOBAL byte countdownYear _INIT(20), countdownMonth _INIT(1);   // Countdown target date, year is last two digits
+WLED_GLOBAL byte countdownDay  _INIT(1) , countdownHour  _INIT(0);
+WLED_GLOBAL byte countdownMin  _INIT(0) , countdownSec   _INIT(0);
+
+
+WLED_GLOBAL byte macroNl   _INIT(0);        // after nightlight delay over
+WLED_GLOBAL byte macroCountdown _INIT(0);
+WLED_GLOBAL byte macroAlexaOn _INIT(0), macroAlexaOff _INIT(0);
+WLED_GLOBAL byte macroButton[WLED_MAX_BUTTONS]        _INIT({0});
+WLED_GLOBAL byte macroLongPress[WLED_MAX_BUTTONS]     _INIT({0});
+WLED_GLOBAL byte macroDoublePress[WLED_MAX_BUTTONS]   _INIT({0});
+
+// Security CONFIG
+WLED_GLOBAL bool otaLock     _INIT(false);  // prevents OTA firmware updates without password. ALWAYS enable if system exposed to any public networks
+WLED_GLOBAL bool wifiLock    _INIT(false);  // prevents access to WiFi settings when OTA lock is enabled
+WLED_GLOBAL bool aOtaEnabled _INIT(true);   // ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
+WLED_GLOBAL char settingsPIN[5] _INIT("");  // PIN for settings pages
+WLED_GLOBAL bool correctPIN     _INIT(true);
+WLED_GLOBAL unsigned long lastEditTime _INIT(0);
+
+WLED_GLOBAL uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
+
+#ifdef WLED_ENABLE_DMX
+  // dmx CONFIG
+  WLED_GLOBAL byte DMXChannels _INIT(7);        // number of channels per fixture
+  WLED_GLOBAL byte DMXFixtureMap[15] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+  // assigns the different channels to different functions. See wled21_dmx.ino for more information.
+  WLED_GLOBAL uint16_t DMXGap _INIT(10);          // gap between the fixtures. makes addressing easier because you don't have to memorize odd numbers when climbing up onto a rig.
+  WLED_GLOBAL uint16_t DMXStart _INIT(10);        // start address of the first fixture
+  WLED_GLOBAL uint16_t DMXStartLED _INIT(0);      // LED from which DMX fixtures start
+#endif
+
+// internal global variable declarations
+// wifi
+WLED_GLOBAL bool apActive _INIT(false);
+WLED_GLOBAL bool forceReconnect _INIT(false);
+WLED_GLOBAL uint32_t lastReconnectAttempt _INIT(0);
+WLED_GLOBAL bool interfacesInited _INIT(false);
+WLED_GLOBAL bool wasConnected _INIT(false);
+
+// color
+WLED_GLOBAL byte lastRandomIndex _INIT(0);        // used to save last random color so the new one is not the same
+
+// transitions
+WLED_GLOBAL bool          transitionActive        _INIT(false);
+WLED_GLOBAL uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
+WLED_GLOBAL uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
+WLED_GLOBAL unsigned long transitionStartTime;
+WLED_GLOBAL float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
+WLED_GLOBAL bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
+WLED_GLOBAL uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
+
+// nightlight
+WLED_GLOBAL bool nightlightActive _INIT(false);
+WLED_GLOBAL bool nightlightActiveOld _INIT(false);
+WLED_GLOBAL uint32_t nightlightDelayMs _INIT(10);
+WLED_GLOBAL byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
+WLED_GLOBAL unsigned long nightlightStartTime;
+WLED_GLOBAL byte briNlT _INIT(0);                     // current nightlight brightness
+WLED_GLOBAL byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
+
+// brightness
+WLED_GLOBAL unsigned long lastOnTime _INIT(0);
+WLED_GLOBAL bool offMode             _INIT(!turnOnAtBoot);
+WLED_GLOBAL byte bri                 _INIT(briS);          // global brightness (set)
+WLED_GLOBAL byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
+WLED_GLOBAL byte briT                _INIT(0);             // global brightness during transition
+WLED_GLOBAL byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
+WLED_GLOBAL byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
+
+// button
+WLED_GLOBAL bool buttonPublishMqtt                            _INIT(false);
+WLED_GLOBAL bool buttonPressedBefore[WLED_MAX_BUTTONS]        _INIT({false});
+WLED_GLOBAL bool buttonLongPressed[WLED_MAX_BUTTONS]          _INIT({false});
+WLED_GLOBAL unsigned long buttonPressedTime[WLED_MAX_BUTTONS] _INIT({0});
+WLED_GLOBAL unsigned long buttonWaitTime[WLED_MAX_BUTTONS]    _INIT({0});
+WLED_GLOBAL bool disablePullUp                                _INIT(false);
+WLED_GLOBAL byte touchThreshold                               _INIT(TOUCH_THRESHOLD);
+
+//Notifier callMode
+#define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
+#define CALL_MODE_DIRECT_CHANGE  1
+#define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
+#define CALL_MODE_NOTIFICATION   3
+#define CALL_MODE_NIGHTLIGHT     4
+#define CALL_MODE_NO_NOTIFY      5
+#define CALL_MODE_FX_CHANGED     6     //no longer used
+#define CALL_MODE_HUE            7
+#define CALL_MODE_PRESET_CYCLE   8
+#define CALL_MODE_BLYNK          9     //no longer used
+#define CALL_MODE_ALEXA         10
+#define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
+#define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
+
+WLED_GLOBAL unsigned long lastInterfaceUpdate _INIT(0);
+WLED_GLOBAL byte interfaceUpdateCallMode _INIT(CALL_MODE_INIT);
+
+
+// notifications
+WLED_GLOBAL bool notifyDirectDefault _INIT(notifyDirect);
+WLED_GLOBAL bool receiveNotifications _INIT(true);
+WLED_GLOBAL unsigned long notificationSentTime _INIT(0);
+WLED_GLOBAL byte notificationSentCallMode _INIT(CALL_MODE_INIT);
+WLED_GLOBAL uint8_t notificationCount _INIT(0);
+
+// effects
+WLED_GLOBAL byte effectCurrent _INIT(0);
+WLED_GLOBAL byte effectSpeed _INIT(128);
+WLED_GLOBAL byte effectIntensity _INIT(128);
+WLED_GLOBAL byte effectPalette _INIT(0);
+WLED_GLOBAL bool stateChanged _INIT(false);
+
+// network
+WLED_GLOBAL bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
+
+// ui style
+WLED_GLOBAL bool showWelcomePage _INIT(false);
+
+// hue
+WLED_GLOBAL byte hueError _INIT(HUE_ERROR_INACTIVE);
+// WLED_GLOBAL uint16_t hueFailCount _INIT(0);
+WLED_GLOBAL float hueXLast _INIT(0), hueYLast _INIT(0);
+WLED_GLOBAL uint16_t hueHueLast _INIT(0), hueCtLast _INIT(0);
+WLED_GLOBAL byte hueSatLast _INIT(0), hueBriLast _INIT(0);
+WLED_GLOBAL unsigned long hueLastRequestSent _INIT(0);
+WLED_GLOBAL bool hueAuthRequired _INIT(false);
+WLED_GLOBAL bool hueReceived _INIT(false);
+WLED_GLOBAL bool hueStoreAllowed _INIT(false), hueNewKey _INIT(false);
+
+// countdown
+WLED_GLOBAL unsigned long countdownTime _INIT(1514764800L);
+WLED_GLOBAL bool countdownOverTriggered _INIT(true);
+
+//timer
+WLED_GLOBAL byte lastTimerMinute  _INIT(0);
+WLED_GLOBAL byte timerHours[]     _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+WLED_GLOBAL int8_t timerMinutes[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+WLED_GLOBAL byte timerMacro[]     _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+//weekdays to activate on, bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
+WLED_GLOBAL byte timerWeekday[]   _INIT_N(({ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 }));
+//upper 4 bits start, lower 4 bits end month (default 28: start month 1 and end month 12)
+WLED_GLOBAL byte timerMonth[]     _INIT_N(({28,28,28,28,28,28,28,28}));
+WLED_GLOBAL byte timerDay[]       _INIT_N(({1,1,1,1,1,1,1,1}));
+WLED_GLOBAL byte timerDayEnd[]		_INIT_N(({31,31,31,31,31,31,31,31}));
+
+//improv
+WLED_GLOBAL byte improvActive _INIT(0); //0: no improv packet received, 1: improv active, 2: provisioning
+WLED_GLOBAL byte improvError _INIT(0);
+
+//playlists
+WLED_GLOBAL int16_t currentPlaylist _INIT(-1);
+//still used for "PL=~" HTTP API command
+WLED_GLOBAL byte presetCycCurr _INIT(0);
+WLED_GLOBAL byte presetCycMin _INIT(1);
+WLED_GLOBAL byte presetCycMax _INIT(5);
+
+// realtime
+WLED_GLOBAL byte realtimeMode _INIT(REALTIME_MODE_INACTIVE);
+WLED_GLOBAL byte realtimeOverride _INIT(REALTIME_OVERRIDE_NONE);
+WLED_GLOBAL IPAddress realtimeIP _INIT_N(((0, 0, 0, 0)));
+WLED_GLOBAL unsigned long realtimeTimeout _INIT(0);
+WLED_GLOBAL uint8_t tpmPacketCount _INIT(0);
+WLED_GLOBAL uint16_t tpmPayloadFrameSize _INIT(0);
+WLED_GLOBAL bool useMainSegmentOnly _INIT(false);
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+// Timer mode types
+#define NL_MODE_SET               0            //After nightlight time elapsed, set to target brightness
+#define NL_MODE_FADE              1            //Fade to target brightness gradually
+#define NL_MODE_COLORFADE         2            //Fade to target brightness and secondary color gradually
+#define NL_MODE_SUN               3            //Sunrise/sunset. Target brightness is set immediately, then Sunrise effect is started. Max 60 min.
+
+// presets
+WLED_GLOBAL byte currentPreset _INIT(0);
+
+WLED_GLOBAL byte errorFlag _INIT(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Temp buffer
+char* obuf;
+uint16_t olen = 0;
+
+
+//macro to convert F to const
+#define SET_F(x)  (const char*)F(x)
+
+bool oappend(const char* txt)
+{
+  uint16_t len = strlen(txt);
+  if (olen + len >= SETTINGS_STACK_BUF_SIZE)
+    return false;        // buffer full
+  strcpy(obuf + olen, txt);
+  olen += len;
+  return true;
+}
+
+
+bool oappendi(int i)
+{
+  char s[11];
+  sprintf(s, "%d", i);
+  return oappend(s);
+}
+
+//append a string setting to buffer
+void sappends(char stype, const char* key, char* val)
+{
+  switch(stype)
+  {
+    case 's': {//string (we can interpret val as char*)
+      String buf = val;
+      //convert "%" to "%%" to make EspAsyncWebServer happy
+      //buf.replace("%","%%");
+      oappend("d.Sf.");
+      oappend(key);
+      oappend(".value=\"");
+      oappend(buf.c_str());
+      oappend("\";");
+      break;}
+    case 'm': //message
+      oappend(SET_F("d.getElementsByClassName"));
+      oappend(key);
+      oappend(SET_F(".innerHTML=\""));
+      oappend(val);
+      oappend("\";");
+      break;
+  }
+}
+
+//append a numeric setting to string buffer
+void sappend(char stype, const char* key, int val)
+{
+  char ds[] = "d.Sf.";
+
+  switch(stype)
+  {
+    case 'c': //checkbox
+      oappend(ds);
+      oappend(key);
+      oappend(".checked=");
+      oappendi(val);
+      oappend(";");
+      break;
+    case 'v': //numeric
+      oappend(ds);
+      oappend(key);
+      oappend(".value=");
+      oappendi(val);
+      oappend(";");
+      break;
+    case 'i': //selectedIndex
+      oappend(ds);
+      oappend(key);
+      oappend(SET_F(".selectedIndex="));
+      oappendi(val);
+      oappend(";");
+      break;
+  }
+}
+
+
+
+          
+
+
+#define Network WiFi
 
 
 
@@ -128,122 +678,95 @@ void createEditHandler(bool enable) {
   }
 }
 
+//Un-comment any file types you need
+static String getContentType(AsyncWebServerRequest* request, String filename){
+  if(request->hasArg("download")) return "application/octet-stream";
+  else if(filename.endsWith(".htm")) return "text/html";
+  else if(filename.endsWith(".html")) return "text/html";
+  else if(filename.endsWith(".css")) return "text/css";
+  else if(filename.endsWith(".js")) return "application/javascript";
+  else if(filename.endsWith(".json")) return "application/json";
+  else if(filename.endsWith(".png")) return "image/png";
+  else if(filename.endsWith(".gif")) return "image/gif";
+  else if(filename.endsWith(".jpg")) return "image/jpeg";
+  else if(filename.endsWith(".ico")) return "image/x-icon";
+//  else if(filename.endsWith(".xml")) return "text/xml";
+//  else if(filename.endsWith(".pdf")) return "application/x-pdf";
+//  else if(filename.endsWith(".zip")) return "application/x-zip";
+//  else if(filename.endsWith(".gz")) return "application/x-gzip";
+  return "text/plain";
+}
+
+
+bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request)
+{
+  AsyncWebHeader* header = request->getHeader("If-None-Match");
+  if (header && header->value() == String(PROJECT_VERSION)) {
+    request->send(304);
+    return true;
+  }
+  return false;
+}
+
 void setStaticContentCacheHeaders(AsyncWebServerResponse *response)
 {
-  char tmp[12];
+  char tmp[40];
   // https://medium.com/@codebyamir/a-web-developers-guide-to-browser-caching-cc41f3b73e7c
   #ifndef WLED_DEBUG
-  //this header name is misleading, "no-cache" will not disable cache,
-  //it just revalidates on every load using the "If-None-Match" header with the last ETag value
+  // This header name is misleading, "no-cache" will not disable cache,
+  // it just revalidates on every load using the "If-None-Match" header with the last ETag value
   response->addHeader(F("Cache-Control"),"no-cache");
   #else
   response->addHeader(F("Cache-Control"),"no-store,max-age=0"); // prevent caching if debug build
   #endif
-  // sprintf_P(tmp, PSTR("%8d-%02x"), PROJECT_VERSION, cacheInvalidate);
-  sprintf_P(tmp, PSTR("%8d-%02x"), 123, 1);
+  snprintf_P(tmp, sizeof(tmp), PSTR("%d-%02x"), PROJECT_VERSION, cacheInvalidate);
   response->addHeader(F("ETag"), tmp);
 }
 
+
+bool handleFileRead(AsyncWebServerRequest* request, String path){
+  DEBUG_PRINTLN("WS FileRead: " + path);
+  if(path.endsWith("/")) path += "index.htm";
+  if(path.indexOf("sec") > -1) return false;
+  String contentType = getContentType(request, path);
+  /*String pathWithGz = path + ".gz";
+  if(WLED_FS.exists(pathWithGz)){
+    request->send(WLED_FS, pathWithGz, contentType);
+    return true;
+  }*/
+  if(WLED_FS.exists(path)) {
+    request->send(WLED_FS, path, contentType);
+    return true;
+  }
+  return false;
+}
+
+
+
 void serveIndex(AsyncWebServerRequest* request)
 {
-  // if (handleFileRead(request, "/index.htm")) return;
+  if (handleFileRead(request, "/index.htm"))
+  {
+    return;
+  }
 
-  // if (handleIfNoneMatchCacheHeader(request)) return;
+  if (handleIfNoneMatchCacheHeader(request))
+  {
+    return;
+  }
 
   AsyncWebServerResponse *response;
-#ifdef WLED_ENABLE_SIMPLE_UI
+  #ifdef WLED_ENABLE_SIMPLE_UI
   if (simplifiedUI)
     response = request->beginResponse_P(200, "text/html", PAGE_simple, PAGE_simple_L);
   else
-#endif
+  #endif
     response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
 
   response->addHeader(FPSTR(s_content_enc),"gzip");
   setStaticContentCacheHeaders(response);
   request->send(response);
 }
-
-
-// Settings sub page IDs
-#define SUBPAGE_MENU              0
-#define SUBPAGE_WIFI              1
-#define SUBPAGE_LEDS              2
-#define SUBPAGE_UI                3
-#define SUBPAGE_SYNC              4
-#define SUBPAGE_TIME              5
-#define SUBPAGE_SEC               6
-#define SUBPAGE_DMX               7
-#define SUBPAGE_UM                8
-#define SUBPAGE_UPDATE            9
-#define SUBPAGE_2D               10
-#define SUBPAGE_LOCK            251
-#define SUBPAGE_PINREQ          252
-#define SUBPAGE_CSS             253
-#define SUBPAGE_JS              254
-#define SUBPAGE_WELCOME         255
-
-// string temp buffer (now stored in stack locally)
-#ifdef ESP8266
-#define SETTINGS_STACK_BUF_SIZE 2048
-#else
-#define SETTINGS_STACK_BUF_SIZE 3608  // warning: quite a large value for stack
-#endif
-
-bool correctPIN = true;
-char settingsPIN[5] = {"1234"};  // PIN for settings pages
-
-
-// Temp buffer
-char* obuf;
-uint16_t olen = 0;
-
-
-//macro to convert F to const
-#define SET_F(x)  (const char*)F(x)
-
-bool oappend(const char* txt)
-{
-  uint16_t len = strlen(txt);
-  if (olen + len >= SETTINGS_STACK_BUF_SIZE)
-    return false;        // buffer full
-  strcpy(obuf + olen, txt);
-  olen += len;
-  return true;
-}
-
-
-bool oappendi(int i)
-{
-  char s[11];
-  sprintf(s, "%d", i);
-  return oappend(s);
-}
-
-//append a string setting to buffer
-void sappends(char stype, const char* key, char* val)
-{
-  switch(stype)
-  {
-    case 's': {//string (we can interpret val as char*)
-      String buf = val;
-      //convert "%" to "%%" to make EspAsyncWebServer happy
-      //buf.replace("%","%%");
-      oappend("d.Sf.");
-      oappend(key);
-      oappend(".value=\"");
-      oappend(buf.c_str());
-      oappend("\";");
-      break;}
-    case 'm': //message
-      oappend(SET_F("d.getElementsByClassName"));
-      oappend(key);
-      oappend(SET_F(".innerHTML=\""));
-      oappend(val);
-      oappend("\";");
-      break;
-  }
-}
-
 
 //get values for settings form in javascript
 void getSettingsJS(byte subPage, char* dest)
@@ -270,88 +793,88 @@ void getSettingsJS(byte subPage, char* dest)
   {
     sappends('s',SET_F("CS"),"clientSSID");
 
-    // byte l = strlen(clientPass);
-    // char fpass[l+1]; //fill password field with ***
-    // fpass[l] = 0;
-    // memset(fpass,'*',l);
-    // sappends('s',SET_F("CP"),fpass);
+    byte l = strlen(clientPass);
+    char fpass[l+1]; //fill password field with ***
+    fpass[l] = 0;
+    memset(fpass,'*',l);
+    sappends('s',SET_F("CP"),fpass);
 
-    // char k[3]; k[2] = 0; //IP addresses
-    // for (int i = 0; i<4; i++)
-    // {
-    //   k[1] = 48+i; //ascii 0,1,2,3
-    //   k[0] = 'I'; sappend('v',k,staticIP[i]);
-    //   k[0] = 'G'; sappend('v',k,staticGateway[i]);
-    //   k[0] = 'S'; sappend('v',k,staticSubnet[i]);
-    // }
+    char k[3]; k[2] = 0; //IP addresses
+    for (int i = 0; i<4; i++)
+    {
+      k[1] = 48+i; //ascii 0,1,2,3
+      k[0] = 'I'; sappend('v',k,staticIP[i]);
+      k[0] = 'G'; sappend('v',k,staticGateway[i]);
+      k[0] = 'S'; sappend('v',k,staticSubnet[i]);
+    }
 
-    // sappends('s',SET_F("CM"),cmDNS);
-    // sappend('i',SET_F("AB"),apBehavior);
-    // sappends('s',SET_F("AS"),apSSID);
-    // sappend('c',SET_F("AH"),apHide);
+    sappends('s',SET_F("CM"),cmDNS);
+    sappend('i',SET_F("AB"),apBehavior);
+    sappends('s',SET_F("AS"),apSSID);
+    sappend('c',SET_F("AH"),apHide);
 
-    // l = strlen(apPass);
-    // char fapass[l+1]; //fill password field with ***
-    // fapass[l] = 0;
-    // memset(fapass,'*',l);
-    // sappends('s',SET_F("AP"),fapass);
+    l = strlen(apPass);
+    char fapass[l+1]; //fill password field with ***
+    fapass[l] = 0;
+    memset(fapass,'*',l);
+    sappends('s',SET_F("AP"),fapass);
 
-    // sappend('v',SET_F("AC"),apChannel);
-    // sappend('c',SET_F("WS"),noWifiSleep);
+    sappend('v',SET_F("AC"),apChannel);
+    sappend('c',SET_F("WS"),noWifiSleep);
 
-    // #ifndef WLED_DISABLE_ESPNOW
-    // sappend('c',SET_F("RE"),enable_espnow_remote);
-    // sappends('s',SET_F("RMAC"),linked_remote);
-    // #else
-    // //hide remote settings if not compiled
-    // oappend(SET_F("document.getElementById('remd').style.display='none';"));
-    // #endif
+    #ifndef WLED_DISABLE_ESPNOW
+    sappend('c',SET_F("RE"),enable_espnow_remote);
+    sappends('s',SET_F("RMAC"),linked_remote);
+    #else
+    //hide remote settings if not compiled
+    oappend(SET_F("document.getElementById('remd').style.display='none';"));
+    #endif
 
-    // #ifdef WLED_USE_ETHERNET
-    // sappend('v',SET_F("ETH"),ethernetType);
-    // #else
-    // //hide ethernet setting if not compiled in
-    // oappend(SET_F("document.getElementById('ethd').style.display='none';"));
-    // #endif
+    #ifdef WLED_USE_ETHERNET
+    sappend('v',SET_F("ETH"),ethernetType);
+    #else
+    //hide ethernet setting if not compiled in
+    oappend(SET_F("document.getElementById('ethd').style.display='none';"));
+    #endif
 
-    // if (Network.isConnected()) //is connected
-    // {
-    //   char s[32];
-    //   IPAddress localIP = Network.localIP();
-    //   sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
+    if (Network.isConnected()) //is connected
+    {
+      char s[32];
+      IPAddress localIP = Network.localIP();
+      sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
 
-    //   #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_ETHERNET)
-    //   if (Network.isEthernet()) strcat_P(s ,SET_F(" (Ethernet)"));
-    //   #endif
-    //   sappends('m',SET_F("(\"sip\")[0]"),s);
-    // } else
-    // {
-    //   sappends('m',SET_F("(\"sip\")[0]"),(char*)F("Not connected"));
-    // }
+      #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_ETHERNET)
+      if (Network.isEthernet()) strcat_P(s ,SET_F(" (Ethernet)"));
+      #endif
+      sappends('m',SET_F("(\"sip\")[0]"),s);
+    } else
+    {
+      sappends('m',SET_F("(\"sip\")[0]"),(char*)F("Not connected"));
+    }
 
-    // if (WiFi.softAPIP()[0] != 0) //is active
-    // {
-    //   char s[16];
-    //   IPAddress apIP = WiFi.softAPIP();
-    //   sprintf(s, "%d.%d.%d.%d", apIP[0], apIP[1], apIP[2], apIP[3]);
-    //   sappends('m',SET_F("(\"sip\")[1]"),s);
-    // } else
-    // {
-    //   sappends('m',SET_F("(\"sip\")[1]"),(char*)F("Not active"));
-    // }
+    if (WiFi.softAPIP()[0] != 0) //is active
+    {
+      char s[16];
+      IPAddress apIP = WiFi.softAPIP();
+      sprintf(s, "%d.%d.%d.%d", apIP[0], apIP[1], apIP[2], apIP[3]);
+      sappends('m',SET_F("(\"sip\")[1]"),s);
+    } else
+    {
+      sappends('m',SET_F("(\"sip\")[1]"),(char*)F("Not active"));
+    }
 
-    // #ifndef WLED_DISABLE_ESPNOW
-    // if (last_signal_src[0] != 0) //Have seen an ESP-NOW Remote
-    // {
-    //   sappends('m',SET_F("(\"rlid\")[0]"),last_signal_src);
-    // } else if (!enable_espnow_remote)
-    // {
-    //   sappends('m',SET_F("(\"rlid\")[0]"),(char*)F("(Enable remote to listen)"));
-    // } else 
-    // {
-    //   sappends('m',SET_F("(\"rlid\")[0]"),(char*)F("None"));
-    // }
-    // #endif
+    #ifndef WLED_DISABLE_ESPNOW
+    if (last_signal_src[0] != 0) //Have seen an ESP-NOW Remote
+    {
+      sappends('m',SET_F("(\"rlid\")[0]"),last_signal_src);
+    } else if (!enable_espnow_remote)
+    {
+      sappends('m',SET_F("(\"rlid\")[0]"),(char*)F("(Enable remote to listen)"));
+    } else 
+    {
+      sappends('m',SET_F("(\"rlid\")[0]"),(char*)F("None"));
+    }
+    #endif
   }
 
   if (subPage == SUBPAGE_LEDS)
@@ -372,10 +895,10 @@ void getSettingsJS(byte subPage, char* dest)
   //   sappend('c',SET_F("MS"),autoSegments);
   //   sappend('c',SET_F("CCT"),correctWB);
   //   sappend('c',SET_F("CR"),cctFromRgb);
-  //   sappend('v',SET_F("CB"),strip.cctBlending);
-  //   sappend('v',SET_F("FR"),strip.getTargetFps());
+  //   sappend('v',SET_F("CB"),pCONT_lAni->cctBlending);
+  //   sappend('v',SET_F("FR"),pCONT_lAni->getTargetFps());
   //   sappend('v',SET_F("AW"),Bus::getGlobalAWMode());
-  //   sappend('c',SET_F("LD"),strip.useLedsArray);
+  //   sappend('c',SET_F("LD"),pCONT_lAni->useLedsArray);
 
   //   for (uint8_t s=0; s < busses.getNumBusses(); s++) {
   //     Bus* bus = busses.getBus(s);
@@ -429,13 +952,13 @@ void getSettingsJS(byte subPage, char* dest)
   //     }
   //     sappend('v',sp,speed);
   //   }
-  //   sappend('v',SET_F("MA"),strip.ablMilliampsMax);
-  //   sappend('v',SET_F("LA"),strip.milliampsPerLed);
-  //   if (strip.currentMilliamps)
+  //   sappend('v',SET_F("MA"),pCONT_lAni->ablMilliampsMax);
+  //   sappend('v',SET_F("LA"),pCONT_lAni->milliampsPerLed);
+  //   if (pCONT_lAni->currentMilliamps)
   //   {
   //     sappends('m',SET_F("(\"pow\")[0]"),(char*)"");
   //     olen -= 2; //delete ";
-  //     oappendi(strip.currentMilliamps);
+  //     oappendi(pCONT_lAni->currentMilliamps);
   //     oappend(SET_F("mA\";"));
   //   }
 
@@ -462,13 +985,13 @@ void getSettingsJS(byte subPage, char* dest)
   //   dtostrf(gammaCorrectVal,3,1,nS); sappends('s',SET_F("GV"),nS);
   //   sappend('c',SET_F("TF"),fadeTransition);
   //   sappend('v',SET_F("TD"),transitionDelayDefault);
-  //   sappend('c',SET_F("PF"),strip.paletteFade);
+  //   sappend('c',SET_F("PF"),pCONT_lAni->paletteFade);
   //   sappend('v',SET_F("TP"),randomPaletteChangeTime);
   //   sappend('v',SET_F("BF"),briMultiplier);
   //   sappend('v',SET_F("TB"),nightlightTargetBri);
   //   sappend('v',SET_F("TL"),nightlightDelayMinsDefault);
   //   sappend('v',SET_F("TW"),nightlightMode);
-  //   sappend('i',SET_F("PB"),strip.paletteBlend);
+  //   sappend('i',SET_F("PB"),pCONT_lAni->paletteBlend);
   //   sappend('v',SET_F("RL"),rlyPin);
   //   sappend('c',SET_F("RM"),rlyMde);
   //   for (uint8_t i=0; i<WLED_MAX_BUTTONS; i++) {
@@ -483,10 +1006,10 @@ void getSettingsJS(byte subPage, char* dest)
   //   sappend('v',SET_F("IR"),irPin);
   //   sappend('v',SET_F("IT"),irEnabled);
   //   sappend('c',SET_F("MSO"),!irApplyToAllSelected);
-  // }
+  }
 
-  // if (subPage == SUBPAGE_UI)
-  // {
+  if (subPage == SUBPAGE_UI)
+  {
   //   sappends('s',SET_F("DS"),serverDescription);
   //   sappend('c',SET_F("ST"),syncToggleReceive);
   // #ifdef WLED_ENABLE_SIMPLE_UI
@@ -494,10 +1017,10 @@ void getSettingsJS(byte subPage, char* dest)
   // #else
   //   oappend(SET_F("toggle('Simple');"));    // hide Simplified UI settings
   // #endif
-  // }
+  }
 
-  // if (subPage == SUBPAGE_SYNC)
-  // {
+  if (subPage == SUBPAGE_SYNC)
+  {
   //   sappend('v',SET_F("UP"),udpPort);
   //   sappend('v',SET_F("U2"),udpPort2);
   //   sappend('v',SET_F("GS"),syncGroups);
@@ -589,8 +1112,8 @@ void getSettingsJS(byte subPage, char* dest)
   //   sappend('v',SET_F("BD"),serialBaud);
   }
 
-  // if (subPage == SUBPAGE_TIME)
-  // {
+  if (subPage == SUBPAGE_TIME)
+  {
   //   sappend('c',SET_F("NT"),ntpEnabled);
   //   sappends('s',SET_F("NS"),ntpServerName);
   //   sappend('c',SET_F("CF"),!useAMPM);
@@ -651,10 +1174,10 @@ void getSettingsJS(byte subPage, char* dest)
 	// 			k[0] = 'E'; sappend('v',k,timerDayEnd[i]);
   //     }
   //   }
-  // }
+  }
 
-  // if (subPage == SUBPAGE_SEC)
-  // {
+  if (subPage == SUBPAGE_SEC)
+  {
   //   byte l = strlen(settingsPIN);
   //   char fpass[l+1]; //fill PIN field with 0000
   //   fpass[l] = 0;
@@ -699,11 +1222,11 @@ void getSettingsJS(byte subPage, char* dest)
   //   sappend('i',SET_F("CH13"),DMXFixtureMap[12]);
   //   sappend('i',SET_F("CH14"),DMXFixtureMap[13]);
   //   sappend('i',SET_F("CH15"),DMXFixtureMap[14]);
-  // }
+  }
   // #endif
 
-  // if (subPage == SUBPAGE_UM) //usermods
-  // {
+  if (subPage == SUBPAGE_UM) //usermods
+  {
   //   appendGPIOinfo();
   //   oappend(SET_F("numM="));
   //   oappendi(usermods.getModCount());
@@ -739,18 +1262,18 @@ void getSettingsJS(byte subPage, char* dest)
 
   // if (subPage == SUBPAGE_2D) // 2D matrices
   // {
-  //   sappend('v',SET_F("SOMP"),strip.isMatrix);
+  //   sappend('v',SET_F("SOMP"),pCONT_lAni->isMatrix);
   //   #ifndef WLED_DISABLE_2D
   //   oappend(SET_F("maxPanels=")); oappendi(WLED_MAX_PANELS); oappend(SET_F(";"));
   //   oappend(SET_F("resetPanels();"));
-  //   if (strip.isMatrix) {
-  //     if(strip.panels>0){
-  //       sappend('v',SET_F("PW"),strip.panel[0].width); //Set generator Width and Height to first panel size for convenience
-  //       sappend('v',SET_F("PH"),strip.panel[0].height);
+  //   if (pCONT_lAni->isMatrix) {
+  //     if(pCONT_lAni->panels>0){
+  //       sappend('v',SET_F("PW"),pCONT_lAni->panel[0].width); //Set generator Width and Height to first panel size for convenience
+  //       sappend('v',SET_F("PH"),pCONT_lAni->panel[0].height);
   //     }
-  //     sappend('v',SET_F("MPC"),strip.panels);
+  //     sappend('v',SET_F("MPC"),pCONT_lAni->panels);
   //     // panels
-  //     for (uint8_t i=0; i<strip.panels; i++) {
+  //     for (uint8_t i=0; i<pCONT_lAni->panels; i++) {
   //       char n[5];
   //       oappend(SET_F("addPanel("));
   //       oappend(itoa(i,n,10));
@@ -760,20 +1283,20 @@ void getSettingsJS(byte subPage, char* dest)
   //       pO[7] = '\0';
   //       uint8_t l = strlen(pO);
   //       // create P0B, P1B, ..., P63B, etc for other PxxX
-  //       pO[l] = 'B'; sappend('v',pO,strip.panel[i].bottomStart);
-  //       pO[l] = 'R'; sappend('v',pO,strip.panel[i].rightStart);
-  //       pO[l] = 'V'; sappend('v',pO,strip.panel[i].vertical);
-  //       pO[l] = 'S'; sappend('c',pO,strip.panel[i].serpentine);
-  //       pO[l] = 'X'; sappend('v',pO,strip.panel[i].xOffset);
-  //       pO[l] = 'Y'; sappend('v',pO,strip.panel[i].yOffset);
-  //       pO[l] = 'W'; sappend('v',pO,strip.panel[i].width);
-  //       pO[l] = 'H'; sappend('v',pO,strip.panel[i].height);
+  //       pO[l] = 'B'; sappend('v',pO,pCONT_lAni->panel[i].bottomStart);
+  //       pO[l] = 'R'; sappend('v',pO,pCONT_lAni->panel[i].rightStart);
+  //       pO[l] = 'V'; sappend('v',pO,pCONT_lAni->panel[i].vertical);
+  //       pO[l] = 'S'; sappend('c',pO,pCONT_lAni->panel[i].serpentine);
+  //       pO[l] = 'X'; sappend('v',pO,pCONT_lAni->panel[i].xOffset);
+  //       pO[l] = 'Y'; sappend('v',pO,pCONT_lAni->panel[i].yOffset);
+  //       pO[l] = 'W'; sappend('v',pO,pCONT_lAni->panel[i].width);
+  //       pO[l] = 'H'; sappend('v',pO,pCONT_lAni->panel[i].height);
   //     }
   //   }
   //   #else
   //   oappend(SET_F("gId(\"somp\").remove(1);")); // remove 2D option from dropdown
   //   #endif
-  // }
+  }
 }
 
 #define JSON_PATH_STATE      1
@@ -788,7 +1311,7 @@ void getSettingsJS(byte subPage, char* dest)
 
 const char JSON_mode_names[] PROGMEM = R"=====(["FX names moved"])=====";
 const char JSON_palette_names[] PROGMEM = R"=====([
-"Default","* Random Cycle","* Color 1","* Colors 1&2","* Color Gradient","* Colors Only","Party","Cloud","Lava","Ocean",
+"Default Michael","* Random Cycle","* Color 1","* Colors 1&2","* Color Gradient","* Colors Only","Party","Cloud","Lava","Ocean",
 "Forest","Rainbow","Rainbow Bands","Sunset","Rivendell","Breeze","Red & Blue","Yellowout","Analogous","Splash",
 "Pastel","Sunset 2","Beach","Vintage","Departure","Landscape","Beech","Sherbet","Hult","Hult 64",
 "Drywet","Jul","Grintage","Rewhi","Tertiary","Fire","Icefire","Cyane","Light Pink","Autumn",
@@ -797,43 +1320,6 @@ const char JSON_palette_names[] PROGMEM = R"=====([
 "Semi Blue","Pink Candy","Red Reaf","Aqua Flash","Yelblu Hot","Lite Light","Red Flash","Blink Red","Red Shift","Red Tide",
 "Candy2"
 ])=====";
-
-//Un-comment any file types you need
-static String getContentType(AsyncWebServerRequest* request, String filename){
-  if(request->hasArg("download")) return "application/octet-stream";
-  else if(filename.endsWith(".htm")) return "text/html";
-  else if(filename.endsWith(".html")) return "text/html";
-  else if(filename.endsWith(".css")) return "text/css";
-  else if(filename.endsWith(".js")) return "application/javascript";
-  else if(filename.endsWith(".json")) return "application/json";
-  else if(filename.endsWith(".png")) return "image/png";
-  else if(filename.endsWith(".gif")) return "image/gif";
-  else if(filename.endsWith(".jpg")) return "image/jpeg";
-  else if(filename.endsWith(".ico")) return "image/x-icon";
-//  else if(filename.endsWith(".xml")) return "text/xml";
-//  else if(filename.endsWith(".pdf")) return "application/x-pdf";
-//  else if(filename.endsWith(".zip")) return "application/x-zip";
-//  else if(filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
-}
-
-bool handleFileRead(AsyncWebServerRequest* request, String path){
-  DEBUG_PRINTLN("WS FileRead: " + path);
-  if(path.endsWith("/")) path += "index.htm";
-  if(path.indexOf("sec") > -1) return false;
-  String contentType = getContentType(request, path);
-  /*String pathWithGz = path + ".gz";
-  if(WLED_FS.exists(pathWithGz)){
-    request->send(WLED_FS, pathWithGz, contentType);
-    return true;
-  }*/
-  // if(WLED_FS.exists(path)) {
-  //   request->send(WLED_FS, path, contentType);
-  //   return true;
-  // }
-  return false;
-}
-
 
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
   if (!correctPIN) {
@@ -865,7 +1351,7 @@ void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t
     } else {
       if (filename.indexOf(F("palette")) >= 0 && filename.indexOf(F(".json")) >= 0)
       {
-        // strip.loadCustomPalettes();
+        // pCONT_lAni->loadCustomPalettes();
       }
       request->send(200, "text/plain", F("File Uploaded!"));
     }
@@ -913,7 +1399,7 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 StaticJsonDocument<JSON_BUFFER_SIZE> doc;
 volatile uint8_t jsonBufferLock = 0;
 
-// void serializeSegment(JsonObject& root, Segment& seg, byte id, bool forPreset = false, bool segmentBounds = true);
+void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte id, bool forPreset = false, bool segmentBounds = true);
 void serializeState(JsonObject root, bool forPreset = false, bool includeBri = true, bool segmentBounds = true, bool selectedSegmentsOnly = false);
 void serializeInfo(JsonObject root);
 void serializeModeNames(JsonArray root);
@@ -942,139 +1428,133 @@ bool requestJSONBufferLock(uint8_t module)
   return true;
 }
 
-bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request)
+
+void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte id, bool forPreset, bool segmentBounds)
 {
-  AsyncWebHeader* header = request->getHeader("If-None-Match");
-  if (header && header->value() == String(PROJECT_VERSION)) {
-    request->send(304);
-    return true;
+  root["id"] = id;
+  if (segmentBounds) {
+    root["start"] = seg.pixel_range.start;
+    root["stop"] = seg.pixel_range.stop;
+    if (pCONT_lAni->isMatrix) {
+      root[F("startY")] = seg.startY;
+      root[F("stopY")]  = seg.stopY;
+    }
   }
-  return false;
+  if (!forPreset) root["len"] = seg.pixel_range.stop - seg.pixel_range.start;
+  root["grp"]    = seg.grouping;
+  root[F("spc")] = seg.spacing;
+  root[F("of")]  = seg.offset;
+  root["on"]     = seg.on;
+  root["frz"]    = seg.freeze;
+  byte segbri    = seg.opacity;
+  root["bri"]    = (segbri) ? segbri : 255;
+  root["cct"]    = seg.cct;
+  root[F("set")] = 0;//seg.set;
+
+  if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
+
+  // to conserve RAM we will serialize the col array manually
+  // this will reduce RAM footprint from ~300 bytes to 84 bytes per segment
+  char colstr[70]; colstr[0] = '['; colstr[1] = '\0';  //max len 68 (5 chan, all 255)
+  const char *format = pCONT_lAni->hasWhiteChannel() ? PSTR("[%u,%u,%u,%u]") : PSTR("[%u,%u,%u]");
+  for (size_t i = 0; i < 3; i++)
+  {
+    byte segcol[4]; byte* c = segcol;
+    segcol[0] = seg.rgbcctcolors[i].R;
+    segcol[1] = seg.rgbcctcolors[i].G;
+    segcol[2] = seg.rgbcctcolors[i].B;
+    segcol[3] = seg.rgbcctcolors[i].W1;
+    char tmpcol[22];
+    // sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
+    sprintf_P(tmpcol, format, 255, (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
+    strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);
+  }
+  strcat(colstr, "]");
+  ALOG_INF(PSTR("colstr = %s"), colstr);
+  root["col"] = serialized(colstr);
+
+  root["fx"]  = seg.effect_id;
+  root["sx"]  = seg.speed();
+  root["ix"]  = seg.intensity();
+  root["pal"] = seg.palette.id;
+  root["c1"]  = seg.custom1;
+  root["c2"]  = seg.custom2;
+  root["c3"]  = seg.custom3;
+  root["sel"] = seg.isSelected();
+  root["rev"] = seg.reverse;
+  root["mi"]  = seg.mirror;
+  #ifndef WLED_DISABLE_2D
+  if (pCONT_lAni->isMatrix) {
+    root["rY"] = seg.reverse_y;
+    root["mY"] = seg.mirror_y;
+    root[F("tp")] = seg.transpose;
+  }
+  #endif
+  root["o1"]  = seg.check1;
+  root["o2"]  = seg.check2;
+  root["o3"]  = seg.check3;
+  root["si"]  = seg.soundSim;
+  root["m12"] = seg.map1D2D;
 }
-
-
-// void serializeSegment(JsonObject& root, Segment& seg, byte id, bool forPreset, bool segmentBounds)
-// {
-//   root["id"] = id;
-//   if (segmentBounds) {
-//     root["start"] = seg.start;
-//     root["stop"] = seg.stop;
-//     if (strip.isMatrix) {
-//       root[F("startY")] = seg.startY;
-//       root[F("stopY")]  = seg.stopY;
-//     }
-//   }
-//   if (!forPreset) root["len"] = seg.stop - seg.start;
-//   root["grp"]    = seg.grouping;
-//   root[F("spc")] = seg.spacing;
-//   root[F("of")]  = seg.offset;
-//   root["on"]     = seg.on;
-//   root["frz"]    = seg.freeze;
-//   byte segbri    = seg.opacity;
-//   root["bri"]    = (segbri) ? segbri : 255;
-//   root["cct"]    = seg.cct;
-//   root[F("set")] = seg.set;
-
-//   if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
-
-//   // to conserve RAM we will serialize the col array manually
-//   // this will reduce RAM footprint from ~300 bytes to 84 bytes per segment
-//   char colstr[70]; colstr[0] = '['; colstr[1] = '\0';  //max len 68 (5 chan, all 255)
-//   const char *format = strip.hasWhiteChannel() ? PSTR("[%u,%u,%u,%u]") : PSTR("[%u,%u,%u]");
-//   for (size_t i = 0; i < 3; i++)
-//   {
-//     byte segcol[4]; byte* c = segcol;
-//     segcol[0] = R(seg.colors[i]);
-//     segcol[1] = G(seg.colors[i]);
-//     segcol[2] = B(seg.colors[i]);
-//     segcol[3] = W(seg.colors[i]);
-//     char tmpcol[22];
-//     sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
-//     strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);
-//   }
-//   strcat(colstr, "]");
-//   root["col"] = serialized(colstr);
-
-//   root["fx"]  = seg.mode;
-//   root["sx"]  = seg.speed;
-//   root["ix"]  = seg.intensity;
-//   root["pal"] = seg.palette;
-//   root["c1"]  = seg.custom1;
-//   root["c2"]  = seg.custom2;
-//   root["c3"]  = seg.custom3;
-//   root["sel"] = seg.isSelected();
-//   root["rev"] = seg.reverse;
-//   root["mi"]  = seg.mirror;
-//   #ifndef WLED_DISABLE_2D
-//   if (strip.isMatrix) {
-//     root["rY"] = seg.reverse_y;
-//     root["mY"] = seg.mirror_y;
-//     root[F("tp")] = seg.transpose;
-//   }
-//   #endif
-//   root["o1"]  = seg.check1;
-//   root["o2"]  = seg.check2;
-//   root["o3"]  = seg.check3;
-//   root["si"]  = seg.soundSim;
-//   root["m12"] = seg.map1D2D;
-// }
 
 void serializeState(JsonObject root, bool forPreset, bool includeBri, bool segmentBounds, bool selectedSegmentsOnly)
 {
-//   if (includeBri) {
-//     root["on"] = (bri > 0);
-//     root["bri"] = briLast;
-//     root[F("transition")] = transitionDelay/100; //in 100ms
-//   }
+  if (includeBri) {
+    root["on"] = (bri > 0);
+    root["bri"] = briLast;
+    root[F("transition")] = transitionDelay/100; //in 100ms
+  }
 
-//   if (!forPreset) {
-//     if (errorFlag) {root[F("error")] = errorFlag; errorFlag = ERR_NONE;} //prevent error message to persist on screen
+  if (!forPreset) {
+    if (errorFlag) {root[F("error")] = errorFlag; errorFlag = ERR_NONE;} //prevent error message to persist on screen
 
-//     root["ps"] = (currentPreset > 0) ? currentPreset : -1;
-    root[F("pl")] = "currentPlaylist";
+    root["ps"] = (currentPreset > 0) ? currentPreset : -1;
+    root[F("pl")] = currentPlaylist;
 
 //     usermods.addToJsonState(root);
 
-//     JsonObject nl = root.createNestedObject("nl");
-//     nl["on"] = nightlightActive;
-//     nl["dur"] = nightlightDelayMins;
-//     nl["mode"] = nightlightMode;
-//     nl[F("tbri")] = nightlightTargetBri;
-//     if (nightlightActive) {
-//       nl[F("rem")] = (nightlightDelayMs - (millis() - nightlightStartTime)) / 1000; // seconds remaining
-//     } else {
-//       nl[F("rem")] = -1;
-//     }
+    JsonObject nl = root.createNestedObject("nl");
+    nl["on"] = nightlightActive;
+    nl["dur"] = nightlightDelayMins;
+    nl["mode"] = nightlightMode;
+    nl[F("tbri")] = nightlightTargetBri;
+    if (nightlightActive) {
+      nl[F("rem")] = (nightlightDelayMs - (millis() - nightlightStartTime)) / 1000; // seconds remaining
+    } else {
+      nl[F("rem")] = -1;
+    }
 
-//     JsonObject udpn = root.createNestedObject("udpn");
-//     udpn["send"] = notifyDirect;
-//     udpn["recv"] = receiveNotifications;
+    JsonObject udpn = root.createNestedObject("udpn");
+    udpn["send"] = notifyDirect;
+    udpn["recv"] = receiveNotifications;
 
-//     root[F("lor")] = realtimeOverride;
-//   }
+    root[F("lor")] = realtimeOverride;
+  }
 
-//   root[F("mainseg")] = strip.getMainSegmentId();
+  root[F("mainseg")] = pCONT_lAni->getMainSegmentId();
 
-//   JsonArray seg = root.createNestedArray("seg");
-//   for (size_t s = 0; s < strip.getMaxSegments(); s++) {
-//     if (s >= strip.getSegmentsNum()) {
-//       if (forPreset && segmentBounds && !selectedSegmentsOnly) { //disable segments not part of preset
-//         JsonObject seg0 = seg.createNestedObject();
-//         seg0["stop"] = 0;
-//         continue;
-//       } else
-//         break;
-//     }
-//     Segment &sg = strip.getSegment(s);
-//     if (forPreset && selectedSegmentsOnly && !sg.isSelected()) continue;
-//     if (sg.isActive()) {
-//       JsonObject seg0 = seg.createNestedObject();
-//       serializeSegment(seg0, sg, s, forPreset, segmentBounds);
-//     } else if (forPreset && segmentBounds) { //disable segments not part of preset
-//       JsonObject seg0 = seg.createNestedObject();
-//       seg0["stop"] = 0;
-//     }
-//   }
+  JsonArray seg = root.createNestedArray("seg");
+  for (size_t s = 0; s < pCONT_lAni->getMaxSegments(); s++) {
+    if (s >= pCONT_lAni->getSegmentsNum()) {
+      if (forPreset && segmentBounds && !selectedSegmentsOnly) { //disable segments not part of preset
+        JsonObject seg0 = seg.createNestedObject();
+        seg0["stop"] = 0;
+        continue;
+      } else
+        break;
+    }
+    mAnimatorLight::Segment_New &sg = pCONT_lAni->getSegment(s);
+    if (forPreset && selectedSegmentsOnly && !sg.isSelected()) continue;
+    if (sg.isActive()) {
+      JsonObject seg0 = seg.createNestedObject();
+      serializeSegment(seg0, sg, s, forPreset, segmentBounds);
+    } else if (forPreset && segmentBounds) { //disable segments not part of preset
+      JsonObject seg0 = seg.createNestedObject();
+      seg0["stop"] = 0;
+    }
+  }
+
+
 }
 
 void serializeInfo(JsonObject root)
@@ -1084,16 +1564,16 @@ void serializeInfo(JsonObject root)
   //root[F("cn")] = WLED_CODENAME;
 
   JsonObject leds = root.createNestedObject("leds");
-  leds[F("count")] = 123;//strip.getLengthTotal();
-  leds[F("pwr")] = 123;//strip.currentMilliamps;
-  // leds["fps"] = strip.getFps();
-  // leds[F("maxpwr")] = (strip.currentMilliamps)? strip.ablMilliampsMax : 0;
-  // leds[F("maxseg")] = strip.getMaxSegments();
-  //leds[F("actseg")] = strip.getActiveSegmentsNum();
+  leds[F("count")] = 123;//pCONT_lAni->getLengthTotal();
+  leds[F("pwr")] = 123;//pCONT_lAni->currentMilliamps;
+  // leds["fps"] = pCONT_lAni->getFps();
+  // leds[F("maxpwr")] = (pCONT_lAni->currentMilliamps)? pCONT_lAni->ablMilliampsMax : 0;
+  // leds[F("maxseg")] = pCONT_lAni->getMaxSegments();
+  //leds[F("actseg")] = pCONT_lAni->getActiveSegmentsNum();
   //leds[F("seglock")] = false; //might be used in the future to prevent modifications to segment config
 
   #ifndef WLED_DISABLE_2D
-  // if (strip.isMatrix) {
+  // if (pCONT_lAni->isMatrix) {
   //   JsonObject matrix = leds.createNestedObject("matrix");
   //   matrix["w"] = 1;//Segment::maxWidth;
   //   matrix["h"] = 2;//Segment::maxHeight;
@@ -1102,17 +1582,17 @@ void serializeInfo(JsonObject root)
 
   uint8_t totalLC = 0;
   JsonArray lcarr = leds.createNestedArray(F("seglc"));
-  // size_t nSegs = strip.getSegmentsNum();
-  // for (size_t s = 0; s < nSegs; s++) {
-  //   if (!strip.getSegment(s).isActive()) continue;
-  //   uint8_t lc = strip.getSegment(s).getLightCapabilities();
-  //   totalLC |= lc;
-  //   lcarr.add(lc);
-  // }
+  size_t nSegs = pCONT_lAni->getSegmentsNum();
+  for (size_t s = 0; s < nSegs; s++) {
+    if (!pCONT_lAni->getSegment(s).isActive()) continue;
+    uint8_t lc = pCONT_lAni->getSegment(s).getLightCapabilities();
+    totalLC |= lc;
+    lcarr.add(lc);  // This is what enable colour picker!!!
+  }
 
   leds["lc"] = totalLC;
 
-  // leds[F("rgbw")] = strip.hasRGBWBus(); // deprecated, use info.leds.lc
+  // leds[F("rgbw")] = pCONT_lAni->hasRGBWBus(); // deprecated, use info.leds.lc
   leds[F("wv")]   = totalLC & 0x02;     // deprecated, true if white slider should be displayed for any segment
   leds["cct"]     = totalLC & 0x04;     // deprecated, use info.leds.lc
 
@@ -1131,7 +1611,7 @@ void serializeInfo(JsonObject root)
   root[F("name")] = serverDescription;
   root[F("udpport")] = 123;//udpPort;
   root["live"] = (bool)realtimeMode;
-  root[F("liveseg")] = -1;//useMainSegmentOnly ? strip.getMainSegmentId() : -1;  // if using main segment only for live
+  root[F("liveseg")] = -1;//useMainSegmentOnly ? pCONT_lAni->getMainSegmentId() : -1;  // if using main segment only for live
 
   switch (realtimeMode) {
     case REALTIME_MODE_INACTIVE: root["lm"] = ""; break;
@@ -1158,9 +1638,9 @@ void serializeInfo(JsonObject root)
   root[F("ws")] = -1;
   #endif
 
-  // root[F("fxcount")] = strip.getModeCount();
-  // root[F("palcount")] = strip.getPaletteCount();
-  // root[F("cpalcount")] = strip.customPalettes.size(); //number of custom palettes
+  root[F("fxcount")] = pCONT_lAni->getModeCount();
+  root[F("palcount")] = pCONT_lAni->getPaletteCount();
+  root[F("cpalcount")] = pCONT_lAni->customPalettes.size(); //number of custom palettes
 
   JsonArray ledmaps = root.createNestedArray(F("maps"));
   // for (size_t i=0; i<WLED_MAX_LEDMAPS; i++) {
@@ -1314,8 +1794,8 @@ void serializePalettes(JsonObject root, int page)
   int itemPerPage = 8;
   #endif
 
-  // int palettesCount = 12;//strip.getPaletteCount();
-  // int customPalettes = 12;//strip.customPalettes.size();
+  // int palettesCount = 12;//pCONT_lAni->getPaletteCount();
+  // int customPalettes = 12;//pCONT_lAni->customPalettes.size();
 
   // int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
   // if (page > maxPage) page = maxPage;
@@ -1395,7 +1875,7 @@ void serializePalettes(JsonObject root, int page)
   //     default:
   //       {
   //       if (i>=palettesCount) {
-  //         setPaletteColors(curPalette, strip.customPalettes[i - palettesCount]);
+  //         setPaletteColors(curPalette, pCONT_lAni->customPalettes[i - palettesCount]);
   //       } else {
   //         memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
   //         setPaletteColors(curPalette, tcp);
@@ -1457,29 +1937,105 @@ void serializeNodes(JsonObject root)
 void serializeModeData(JsonArray fxdata)
 {
   char lineBuffer[128];
-  // for (size_t i = 0; i < strip.getModeCount(); i++) {
-  //   strncpy_P(lineBuffer, strip.getModeData(i), 127);
-  //   if (lineBuffer[0] != 0) {
-  //     char* dataPtr = strchr(lineBuffer,'@');
-  //     if (dataPtr) fxdata.add(dataPtr+1);
-  //     else         fxdata.add("");
-  //   }
-  // }
+  for (size_t i = 0; i < pCONT_lAni->getModeCount(); i++) {
+    strncpy_P(lineBuffer, pCONT_lAni->getModeData(i), 127);
+    if (lineBuffer[0] != 0) {
+      char* dataPtr = strchr(lineBuffer,'@');
+      if (dataPtr) fxdata.add(dataPtr+1);
+      else         fxdata.add("");
+    }
+  }
 }
 
 // deserializes mode names string into JsonArray
 // also removes effect data extensions (@...) from deserialised names
 void serializeModeNames(JsonArray arr) {
   char lineBuffer[128];
-  // for (size_t i = 0; i < strip.getModeCount(); i++) {
-  //   strncpy_P(lineBuffer, strip.getModeData(i), 127);
+  for (size_t i = 0; i < pCONT_lAni->getModeCount(); i++) {
+    strncpy_P(lineBuffer, pCONT_lAni->getModeData(i), 127);
+    if (lineBuffer[0] != 0) {
+      char* dataPtr = strchr(lineBuffer,'@');
+      if (dataPtr) *dataPtr = 0; // terminate mode data after name
+      arr.add(lineBuffer);
+    }
+  }
+}
+
+// deserializes mode names string into JsonArray
+// also removes effect data extensions (@...) from deserialised names
+void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only = true);
+void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) {
+  char lineBuffer[128];
+  // for (size_t i = 0; i < pCONT_lAni->getModeCount(); i++) {
+  //   strncpy_P(lineBuffer, pCONT_lAni->getModeData(i), 127);
   //   if (lineBuffer[0] != 0) {
   //     char* dataPtr = strchr(lineBuffer,'@');
   //     if (dataPtr) *dataPtr = 0; // terminate mode data after name
   //     arr.add(lineBuffer);
   //   }
   // }
+
+  for(uint16_t i = 0; i < pCONT_lAni->getEffectsFunctionCount(); i++)
+  {
+    pCONT_lAni->GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer));
+    if(flag_get_first_name_only)
+    {    
+      char* dataPtr = strchr(lineBuffer,'|');
+      if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+    }
+    arr.add(lineBuffer);
+  }
+
+
 }
+
+
+#ifdef WLED_ENABLE_JSONLIVE
+#define MAX_LIVE_LEDS 180
+
+bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
+bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
+{
+  #ifdef WLED_ENABLE_WEBSOCKETS
+  AsyncWebSocketClient * wsc = nullptr;
+  if (!request) { //not HTTP, use Websockets
+    wsc = ws.client(wsClient);
+    if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
+  }
+  #endif
+
+  uint16_t used = pCONT_lAni->getLengthTotal();
+  uint16_t n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
+  char buffer[2000];
+  strcpy_P(buffer, PSTR("{\"leds\":["));
+  obuf = buffer;
+  olen = 9;
+
+  for (size_t i= 0; i < used; i += n)
+  {
+    uint32_t c = pCONT_lAni->getPixelColor(i);
+    uint8_t r = qadd8(W(c), R(c)); //add white channel to RGB channels as a simple RGBW -> RGB map
+    uint8_t g = qadd8(W(c), G(c));
+    uint8_t b = qadd8(W(c), B(c));
+    olen += sprintf(obuf + olen, "\"%06X\",", RGBW32(r,g,b,0));
+  }
+  olen -= 1;
+  oappend((const char*)F("],\"n\":"));
+  oappendi(n);
+  oappend("}");
+  if (request) {
+    request->send(200, "application/json", buffer);
+  }
+  #ifdef WLED_ENABLE_WEBSOCKETS
+  else {
+    wsc->text(obuf, olen);
+  }
+  #endif
+  return true;
+}
+#endif
+
+
 
 void serveJson(AsyncWebServerRequest* request)
 {
@@ -1511,42 +2067,51 @@ void serveJson(AsyncWebServerRequest* request)
     return;
   }
 
-  if (!requestJSONBufferLock(17)) {
-    request->send(503, "application/json", F("{\"error\":3}"));
-    return;
-  }
+  // if (!requestJSONBufferLock(17)) {
+  //   request->send(503, "application/json", F("{\"error\":3}"));
+  //   return;
+  // }
   AsyncJsonResponse *response = new AsyncJsonResponse(&doc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
   JsonVariant lDoc = response->getRoot();
 
   switch (subJson)
   {
-    // case JSON_PATH_STATE:
-    //   serializeState(lDoc); break;
-    // case JSON_PATH_INFO:
-    //   serializeInfo(lDoc); break;
+    case JSON_PATH_STATE:
+      serializeState(lDoc); break;
+    case JSON_PATH_INFO:
+      serializeInfo(lDoc); break;
     // case JSON_PATH_NODES:
     //   serializeNodes(lDoc); break;
-    // case JSON_PATH_PALETTES:
-    //   serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); break;
-    // case JSON_PATH_EFFECTS:
-    //   serializeModeNames(lDoc); break;
+    case JSON_PATH_PALETTES:
+      serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); break;
+    case JSON_PATH_EFFECTS:
+      serializeModeNames2(lDoc); break;
     case JSON_PATH_FXDATA:
       serializeModeData(lDoc); break;
     case JSON_PATH_NETWORKS:
       serializeNetworks(lDoc); break;
-    default: //all
+    default: // All
       JsonObject state = lDoc.createNestedObject("state");
       serializeState(state);
-      // JsonObject info = lDoc.createNestedObject("info");
-      // serializeInfo(info);
-      // if (subJson != JSON_PATH_STATE_INFO)
-      // {
-      //   JsonArray effects = lDoc.createNestedArray(F("effects"));
-      //   serializeModeNames(effects); // remove WLED-SR extensions from effect names
-      //   lDoc[F("palettes")] = serialized((const __FlashStringHelper*)JSON_palette_names);
-      // }
-      //lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
+      JsonObject info = lDoc.createNestedObject("info");
+      serializeInfo(info);
+      if (subJson != JSON_PATH_STATE_INFO)
+      {
+        JsonArray effects = lDoc.createNestedArray(F("effects"));
+        serializeModeNames2(effects); // remove WLED-SR extensions from effect names
+
+        lDoc[F("palettes")] = serialized((const __FlashStringHelper*)JSON_palette_names);
+
+        // char buffer[100] = {0};
+        // JsonArray pal = lDoc.createNestedArray(F("palettes"));
+        // for(size_t i = 0; i < 10; i++)
+        // {
+        //   pal.add(pCONT_lAni->GetPaletteNameByID(i, buffer, sizeof(buffer)));
+        // }
+
+      }
+      lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
   }
 
   DEBUG_PRINTF("JSON buffer size: %u for request: %d\n", lDoc.memoryUsage(), subJson);
@@ -1683,9 +2248,6 @@ void serveSettings(AsyncWebServerRequest* request, bool post)
   request->send(response);
 }
 
-#define MDNS_NAME DEVICENAME_CTR ".local"
-char cmDNS[] = MDNS_NAME;           
-
 //Is this an IP?
 bool isIp(String str) {
   for (size_t i = 0; i < str.length(); i++) {
@@ -1752,8 +2314,6 @@ void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
 }
 
-
-bool otaLock = false;
 
 void initServer()
 {
@@ -2094,7 +2654,7 @@ int8_t mWLEDWebUI::Tasker(uint8_t function, JsonParserObject obj)
       break;
   }
 
-  if(!settings.enabled_module){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(!settings.enabled_module){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
     case FUNC_WIFI_CONNECTED:

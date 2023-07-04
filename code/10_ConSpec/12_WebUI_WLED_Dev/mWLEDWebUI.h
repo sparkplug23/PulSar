@@ -1,11 +1,28 @@
-#ifndef _mWLEDWebUI_H
-#define _mWLEDWebUI_H
+#ifndef _mWLEDWebUI_DEVELOPER_H
+#define _mWLEDWebUI_DEVELOPER_H
 
-#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__ID   ((10*1000)+11)
+#define D_UNIQUE_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__ID   ((10*1000)+12)
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
+
+
+#include "webpages/html_ui.h"
+#ifdef WLED_ENABLE_SIMPLE_UI
+  #include "webpages/html_simple.h"
+#endif
+#include "webpages/html_settings.h"
+#include "webpages/html_other.h"
+#ifdef WLED_ENABLE_PIXART
+  #include "webpages/html_pixart.h"
+#endif
+#ifndef WLED_DISABLE_PXMAGIC
+  #include "webpages/html_pxmagic.h"
+#endif
+#include "webpages/html_cpal.h"
+
+
 
 class mWLEDWebUI :
   public mTaskerInterface

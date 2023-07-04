@@ -580,6 +580,9 @@ class mPalette
     #define PALETTELIST_COLOUR_AMOUNT_MAX 20//15 new max
 
 
+    uint16_t GetPaletteListLength(){ PALETTELIST_HTML_COLOUR__LENGTH__ID; }
+
+
     typedef union {
       uint16_t data; // allows full manipulating
       struct { 

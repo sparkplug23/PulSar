@@ -1286,11 +1286,14 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__LENGTH__ID
   };         
 
+
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   #define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
   #else
   #define DEFAULT_EFFECTS_FUNCTION    0
   #endif
+
+  uint16_t getEffectsFunctionCount(){ return EFFECTS_FUNCTION__LENGTH__ID; }
 
   void SubTask_Segments_Animation();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
@@ -2285,7 +2288,7 @@ typedef struct Segment_New {
     inline uint16_t height(void)         const { return stopY - startY; }     // segment height (if 2D) in physical pixels
     inline uint16_t length(void)         const { return width() * height(); } // segment length (count) in physical pixels
     inline uint16_t groupLength(void)    const { return grouping + spacing; }
-    inline uint8_t  getLightCapabilities(void) const { return _capabilities; }
+    inline uint8_t  getLightCapabilities(void) const { return 0xFF; }// force all default on _capabilities; }
 
     static uint16_t getUsedSegmentData(void)    { return _usedSegmentData; }
     static void     addUsedSegmentData(int len) { _usedSegmentData += len; }

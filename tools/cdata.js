@@ -22,6 +22,8 @@ const CleanCSS = require("clean-css");
 const MinifyHTML = require("html-minifier-terser").minify; // npm install html-minifier-terser
 const packageJson = require("../package.json");
 
+let source_path      = "code/10_ConSpec/12_WebUI_WLED_Dev/source"
+let destination_path = "code/10_ConSpec/12_WebUI_WLED_Dev/webpages/"
 
 /**
  *
@@ -219,11 +221,12 @@ function writeChunks(srcDir, specs, resultFile) {
   fs.writeFileSync(resultFile, src);
 }
 
-writeHtmlGzipped("code/data23/index.htm", "code/html_ui.h", 'index');
-writeHtmlGzipped("code/data23/simple.htm", "code/html_simple.h", 'simple');
-writeHtmlGzipped("code/data23/pixart/pixart.htm", "code/html_pixart.h", 'pixart');
-writeHtmlGzipped("code/data23/cpal/cpal.htm", "code/html_cpal.h", 'cpal');
-writeHtmlGzipped("code/data23/pxmagic/pxmagic.htm", "code/html_pxmagic.h", 'pxmagic');
+
+writeHtmlGzipped(source_path + "/index.htm", destination_path + "html_ui.h", 'index');
+writeHtmlGzipped(source_path + "/simple.htm", destination_path + "html_simple.h", 'simple');
+writeHtmlGzipped(source_path + "/pixart/pixart.htm", destination_path + "html_pixart.h", 'pixart');
+writeHtmlGzipped(source_path + "/cpal/cpal.htm", destination_path + "html_cpal.h", 'cpal');
+writeHtmlGzipped(source_path + "/pxmagic/pxmagic.htm", destination_path + "html_pxmagic.h", 'pxmagic');
 /*
 writeChunks(
   "code/data23",
@@ -251,7 +254,7 @@ writeChunks(
 );
 */
 writeChunks(
-  "code/data23",
+  source_path,
   [
     {
       file: "style.css",
@@ -329,11 +332,11 @@ writeChunks(
       filter: "html-minify"
     }
   ],
-  "code/html_settings.h"
+  destination_path + "html_settings.h"
 );
 
 writeChunks(
-  "code/data23",
+  source_path,
   [
     {
       file: "usermod.htm",
@@ -419,5 +422,5 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
       method: "gzip"
     }
   ],
-  "code/html_other.h"
+  destination_path + "html_other.h"
 );

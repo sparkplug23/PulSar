@@ -34,19 +34,6 @@ typedef struct  FREEMEM_HANDLER{
 
 #include <stdint.h>
 
-#include "html_ui.h"
-#ifdef WLED_ENABLE_SIMPLE_UI
-  #include "html_simple.h"
-#endif
-#include "html_settings.h"
-#include "html_other.h"
-#ifdef WLED_ENABLE_PIXART
-  #include "html_pixart.h"
-#endif
-#ifndef WLED_DISABLE_PXMAGIC
-  #include "html_pxmagic.h"
-#endif
-#include "html_cpal.h"
 
 const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
 const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
