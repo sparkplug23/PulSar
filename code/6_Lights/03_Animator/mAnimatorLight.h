@@ -1997,6 +1997,9 @@ typedef struct Segment_New {
     // uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
 
 
+void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1);
+    
+
     uint8_t effect_id = 0;
     /**
      * @brief Allow a second effect to be loaded at the same time, this will enable a single effect to show just once, and then the id_next will be loaded into the primary position
@@ -2294,6 +2297,7 @@ typedef struct Segment_New {
     static void     addUsedSegmentData(int len) { _usedSegmentData += len; }
 
     bool    setColor(uint8_t slot, uint32_t c); //returns true if changed
+    bool    setColor(uint8_t slot, RgbcctColor c); //returns true if changed
     void    setCCT(uint16_t k);
     void    setOpacity(uint8_t o);
     void    setOption(uint8_t n, bool val);

@@ -16,7 +16,7 @@ DEFINE_PGM_CTR(PM_EFFECTS_REGION_ANIMATE__NAME_CTR)                            D
  * Effects Function names (Giving multiple names using delimeter)
  * */
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR)                        D_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR; 
-DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)                   "Static Glow|Static|Static Palette";     
+DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)                   "Static Palette|Static Glow|Static";     
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION__SEQUENTIAL__NAME_CTR)                       "Sequential"; 
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR)                     D_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR;//"Solid RGBCCT"; 
 DEFINE_PGM_CTR(PM_EFFECTS_FUNCTION__STEP_THROUGH_PALETTE__NAME_CTR)                  "Step Palette";

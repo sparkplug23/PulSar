@@ -6893,28 +6893,27 @@
   {
     "BusConfig":[
       {
-        "Pin":13,
-        "ColourOrder":"GRBW",
-        "BusType":"SK6812_RGBW",
-        "Start":0,
-        "Length":3
-      },
-      {
         "Pin":4,
-        "ColourOrder":"GRB",
+        "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":3,
+        "Start":0,
         "Length":117
       }
     ],
-    "Segment0":{
+    "Segment0": {
       "PixelRange": [
         0,
-        3
+        90
       ],
-      "ColourPalette":"Christmas 01",
+      "ColourPalette":0,
+      "SegColour0": {
+        "Hue": 330,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
       "Effects": {
-        "Function":1,
+        "Function": 0,
+        "Speed":1,
         "Intensity":255
       },
       "Transition": {
@@ -6926,17 +6925,17 @@
     },
     "Segment1": {
       "PixelRange": [
-        3,
+        90,
         120
       ],
-      "ColourPalette":"Christmas 01",
+      "ColourPalette":0,
       "SegColour0": {
         "Hue": 330,
-        "Sat":0,
+        "Sat":100,
         "BrightnessRGB":5
       },
       "Effects": {
-        "Function": 2,
+        "Function": 0,
         "Speed":1,
         "Intensity":255
       },

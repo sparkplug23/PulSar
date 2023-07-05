@@ -201,6 +201,7 @@ function loadSkinCSS(cId)
 }
 
 function getURL(path) {
+	console.log("getURL "+ (loc ? locproto + "//" + locip : "") + path);
 	return (loc ? locproto + "//" + locip : "") + path;
 }
 function onLoad()

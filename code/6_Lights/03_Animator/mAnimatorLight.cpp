@@ -4350,7 +4350,61 @@ void mAnimatorLight::Segment_New::handleTransition() {
   // }
 }
 
+void mAnimatorLight::Segment_New::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8_t spc, uint16_t ofs, uint16_t i1Y, uint16_t i2Y) {
+  //return if neither bounds nor grouping have changed
+  bool boundsUnchanged = (pixel_range.start == i1 && pixel_range.stop == i2);
+  #ifndef WLED_DISABLE_2D
+  if (Segment_New::maxHeight>1) boundsUnchanged &= (startY == i1Y && stopY == i2Y); // 2D
+  #endif
+  if (boundsUnchanged
+      && (!grp || (grouping == grp && spacing == spc))
+      && (ofs == UINT16_MAX || ofs == offset)) return;
+
+  if (pixel_range.stop) fill(BLACK); //turn old segment range off
+  if (i2 <= i1) { //disable segment
+    pixel_range.stop = 0;
+    markForReset();
+    return;
+  }
+  if (i1 < Segment_New::maxWidth || (i1 >= Segment_New::maxWidth*Segment_New::maxHeight && i1 < pCONT_lAni->getLengthTotal())) pixel_range.start = i1; // Segment_New::maxWidth equals strip.getLengthTotal() for 1D
+  pixel_range.stop = i2 > Segment_New::maxWidth*Segment_New::maxHeight ? MIN(i2,pCONT_lAni->getLengthTotal()) : (i2 > Segment_New::maxWidth ? Segment_New::maxWidth : MAX(1,i2));
+  startY = 0;
+  stopY  = 1;
+  #ifndef WLED_DISABLE_2D
+  if (Segment_New::maxHeight>1) { // 2D
+    if (i1Y < Segment_New::maxHeight) startY = i1Y;
+    stopY = i2Y > Segment_New::maxHeight ? Segment_New::maxHeight : MAX(1,i2Y);
+  }
+  #endif
+  if (grp) {
+    grouping = grp;
+    spacing = spc;
+  }
+  if (ofs < UINT16_MAX) offset = ofs;
+  markForReset();
+  if (!boundsUnchanged) refreshLightCapabilities();
+}
+
+
+
+
 bool mAnimatorLight::Segment_New::setColor(uint8_t slot, uint32_t c) { //returns true if changed
+
+
+  rgbcctcolors[slot] = RgbcctColor::GetRgbcctFromU32Colour(c); 
+
+  // if (slot >= NUM_COLORS || c == colors[slot]) return false;
+  // if (fadeTransition) startTransition(strip.getTransition()); // start transition prior to change
+  // colors[slot] = c;
+  // stateChanged = true; // send UDP/WS broadcast
+  // return true;
+}
+
+bool mAnimatorLight::Segment_New::setColor(uint8_t slot, RgbcctColor c) { //returns true if changed
+
+
+  rgbcctcolors[slot] = c;
+
   // if (slot >= NUM_COLORS || c == colors[slot]) return false;
   // if (fadeTransition) startTransition(strip.getTransition()); // start transition prior to change
   // colors[slot] = c;
@@ -4386,13 +4440,14 @@ void mAnimatorLight::Segment_New::setOption(uint8_t n, bool val) {
 }
 
 void mAnimatorLight::Segment_New::setMode(uint8_t fx, bool loadDefaults) {
-  // // if we have a valid mode & is not reserved
-  // if (fx < strip.getModeCount() && strncmp_P("RSVD", strip.getModeData(fx), 4)) {
+  // if we have a valid mode & is not reserved
+  // if (fx < pCONT_lAni->getModeCount() && strncmp_P("RSVD", pCONT_lAni->getModeData(fx), 4)) {
   //   if (fx != mode) {
   //     startTransition(strip.getTransition()); // set effect transitions
   //     //markForReset(); // transition will handle this
-  //     mode = fx;
+      effect_id = fx;
 
+    ALOG_INF(PSTR("setMode %d"), effect_id);
   //     // load default values from effect string
   //     if (loadDefaults) {
   //       int16_t sOpt;
@@ -4471,6 +4526,10 @@ void mAnimatorLight::Segment_New::setPalette(uint8_t pal) {
   // if (pal != palette) {
   //   if (strip.paletteFade) startTransition(strip.getTransition());
   //   palette = pal;
+  palette.id = pal;
+  
+  ALOG_INF(PSTR("setPalette(%d)"), palette.id);
+  
   //   stateChanged = true; // send UDP/WS broadcast
   // }
 }

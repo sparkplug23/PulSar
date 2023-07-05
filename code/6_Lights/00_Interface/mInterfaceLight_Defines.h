@@ -15,7 +15,7 @@
 #define D_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR "FirePlace01"
 
 #define D_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR      "Shimmering Palette|Candle Multi"
-#define D_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR      "Shimmering Palette To Another|Candle Multi Another"
+#define D_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR      "Shimmering Two Palettes"
 
 
 

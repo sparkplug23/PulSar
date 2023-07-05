@@ -763,7 +763,7 @@ void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index
   palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA;
   palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA);
   palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__CTR;
 }
 
 void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_02(){
@@ -772,7 +772,7 @@ void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index
   palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA;
   palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA);
   palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__CTR;
 }
 
 void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03(){
@@ -781,7 +781,7 @@ void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index
   palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA;
   palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA);
   palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__CTR;
 }
 
 void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04(){
@@ -790,7 +790,7 @@ void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index
   palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA;
   palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA);
   palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA;
+  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__CTR;
 }
 
 
