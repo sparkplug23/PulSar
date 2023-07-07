@@ -57,6 +57,7 @@ class mPalette
 
     void init_PresetColourPalettes(); 
     // First bytes stores length 
+    #ifndef ENABLE_DEVFEATURE_PALETTE__VECTORED
     void init_ColourPalettes_Party_Default();
     void init_ColourPalettes_Autumn_Red();
     void init_ColourPalettes_Autumn_Green();
@@ -135,6 +136,7 @@ class mPalette
     void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04();
     void init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01();
 
+    #endif // ENABLE_DEVFEATURE_PALETTE__VECTORED
     
     /**************
      * COLOUR Designs by name
@@ -160,6 +162,8 @@ class mPalette
     /**
      * @brief Variable lengths to be moved to end once things are stable
      * 
+     * I want to move these variable types to after the static ones, since they can be actively pushed/popped when the user wants more/less
+     * 
      */
     enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
       PALETTELIST_VARIABLE_HSBID_01__ID = 0,
@@ -184,7 +188,6 @@ class mPalette
       PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
     };
 
-    
     // One special buffer, block of memory allows any format of pallete (eg)
     // This will also require encoding of type of palette into the buffer somehow
     // shared, with overlapping memory
@@ -194,7 +197,41 @@ class mPalette
       // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
       PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
     };
+
+    /**
+     * @brief These below to become fully added into my methods as another encoding type
+     * to be merged and named in my static list
+     * 
+     * 
+     * These need to be added into my palette method at least by name only, data can be ignored
+     * Or, the data for CRGB16 is saved in the data field and then cast back to use?? This would reduce the need to keep 
+     * a static version of it. OR, simply do the math in C16 but convert back? or, do equivalent of these with mine.
+     */
+    enum PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,
+      
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID,
+
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID,
+      PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID    
+    };
+    #define PALETTELIST_CRGBPALETTE_FIRST_ID PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID
+
+
     
+
+    /************************************************************************************************************************************
+     * ************************************************************************************************************************************
+     * @brief  Static palettes read from inside this class
+     ************************************************************************************************************************************
+     ***************************************************************************************************************************************/
+   
     enum PALETTELIST_STATIC__IDS
     {
       PALETTELIST_STATIC_PARTY_DEFAULT__ID = PALETTELIST_VARIABLE_GENERIC_LENGTH__ID,
@@ -314,6 +351,14 @@ class mPalette
       // Count of total handlers and starting point for other modules
       PALETTELIST_STATIC_LENGTH__ID 
     };
+
+    /**
+     * @brief 
+     * @NOTE: Only palettes below this are fixed in memory (WLED types)
+     */
+
+
+
     
     /**
      * @brief Only the static/progmem stuff below will be taken from inside palette.cpp
@@ -402,30 +447,10 @@ class mPalette
     };
 
 
-    /**
-     * @brief These below to become fully added into my methods as another encoding type
-     * to be merged and named in my static list
-     * 
-     */
-    enum PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID,
-      
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID,
-
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID,
-      PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID    
-    };
-    #define PALETTELIST_CRGBPALETTE_FIRST_ID PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS__ID
 
 
     enum  PALETTELIST_HTML_COLOUR__IDS{      
-      PALETTELIST_HTML_COLOUR__AliceBlue__ID = PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID,
+      PALETTELIST_HTML_COLOUR__AliceBlue__ID = PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID,
       PALETTELIST_HTML_COLOUR__AntiqueWhite__ID,
       PALETTELIST_HTML_COLOUR__Aqua__ID,
       PALETTELIST_HTML_COLOUR__Aquamarine__ID,
@@ -595,7 +620,7 @@ class mPalette
         /**
          * @brief Index can take up to three bytes
          **/
-        uint16_t index_byte_width : 3; // 3 bits wide, or 0b000 gives 9 value options
+        uint16_t encoded_value_byte_width : 3; // 3 bits wide, or 0b000 gives 9 value options
 
         uint16_t index_exact : 1;
         uint16_t index_scaled_to_segment : 1;
@@ -613,105 +638,129 @@ class mPalette
      * @brief Should this really be its own list, its already inside the palette class?
      * 
      */
-    struct PALETTELIST{
+    
+      #ifdef ENABLE_DEVFEATURE_PALETTE__VECTORED
       struct PALETTE{ //6 bytes per palette
         // enum: Used to call for ctr of friendly name
-        uint8_t id = 0;
+        uint8_t id;
         // Pointer to name
-        char* friendly_name_ctr = nullptr;
+        char* friendly_name_ctr;
         // Map IDs
         uint8_t* data; // pointer to saved memory (inc. progmem)
         // Active pixels
-        uint8_t  data_length = 0; // total bytes in palette (includes index information)
+        uint8_t  data_length; // total bytes in palette (includes index information)
         // Contains information on formatting of data buffer
         PALETTE_ENCODING_DATA encoding;
       };
-      // Add static palettes here
-      PALETTE party_default;
-      PALETTE holloween_op;
-      PALETTE holloween_ogp;
-      PALETTE hot_pink_neon_with_navy;
-      PALETTE single_fire_01;
-      PALETTE flower_sweetpeas_01;
-      PALETTE flower_sweetpeas_02;
-      PALETTE pink_purple_01;
-      PALETTE pink_purple_02;
-      PALETTE pink_purple_03;
-      PALETTE winter;
-      PALETTE autumn_green;
-      PALETTE autumn_red;
-      PALETTE rainbow;
-      PALETTE rainbow_inverted;
-      PALETTE pastel_01;
-      PALETTE pastel_02;
-      PALETTE ocean_01;
-      PALETTE gradient_01;
-      PALETTE gradient_02;
-      PALETTE gradient_fire_01;
-      PALETTE gradient_pastel_tones_purple;
-      PALETTE sunrise_01;
-      PALETTE sunrise_02;
-      PALETTE sunrise_03;
-      PALETTE sunrise_04;
-      PALETTE sunset_01;
-      PALETTE sunset_02;
-      PALETTE sky_glow_01;
-      PALETTE candle_flame_01;
-      PALETTE berry_green;
-      PALETTE gradient_sunlevel_group01_01;
-      PALETTE gradient_sunlevel_group01_02;
-      PALETTE gradient_sunlevel_group01_03;
-      PALETTE gradient_sunlevel_group01_04;
-      PALETTE gradient_sunlevel_group01_05;
-      PALETTE gradient_sunlevel_group01_06;
-      PALETTE gradient_sunlevel_group01_07;
-      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;
-      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;
-      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;
-      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;
-      PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
-      // Christmas static patterns
-      PALETTE christmas_01;
-      PALETTE christmas_02;
-      PALETTE christmas_03;
-      PALETTE christmas_04;
-      PALETTE christmas_05;
-      PALETTE christmas_06;
-      PALETTE christmas_07;
-      PALETTE christmas_08;
-      PALETTE christmas_09;
-      PALETTE christmas_10;
-      PALETTE christmas_11;
-      PALETTE christmas_12;
-      PALETTE christmas_13;
-      PALETTE christmas_14;
-      PALETTE christmas_15;
-      PALETTE christmas_16;
-      PALETTE christmas_17;
-      PALETTE christmas_18;
-      PALETTE christmas_19;
-      PALETTE christmas_20;
-      PALETTE christmas_21;
-      PALETTE christmas_22;
-      PALETTE christmas_23;
-      PALETTE christmas_24;
-      PALETTE christmas_25;
-      PALETTE christmas_26;
-      PALETTE christmas_27;
-      PALETTE christmas_28;
-      PALETTE christmas_29;
-      PALETTE christmas_30;
-      // Created for other people
-      PALETTE custom_user_01;
-      // Can be edited
-      PALETTE hsbid_users[10];
-      // Can be edited
-      PALETTE rgbcct_segment_colour_users[5];    // Now contained within segment so is not needed here! (at least data is not, but name may be)
-      // Generic variable palette 
-      PALETTE encoded_users; // Should remain only option, to permit the largest buffer. Long term, it could be made dynamic
-      // Active
-      PALETTE *ptr = &rainbow;
-    }palettelist;
+
+      std::vector<PALETTE> palettelist;
+      #endif // ENABLE_DEVFEATURE_PALETTE__VECTORED
+
+
+
+    // struct PALETTELIST{
+    //   struct PALETTE{ //6 bytes per palette
+    //     // enum: Used to call for ctr of friendly name
+    //     uint8_t id;
+    //     // Pointer to name
+    //     char* friendly_name_ctr;
+    //     // Map IDs
+    //     uint8_t* data; // pointer to saved memory (inc. progmem)
+    //     // Active pixels
+    //     uint8_t  data_length; // total bytes in palette (includes index information)
+    //     // Contains information on formatting of data buffer
+    //     PALETTE_ENCODING_DATA encoding;
+    //   };
+    //   // Add static palettes here
+
+    //   // PALETTE party_default;
+    //   // PALETTE holloween_op;
+    //   // PALETTE holloween_ogp;
+    //   // PALETTE hot_pink_neon_with_navy;
+    //   // PALETTE single_fire_01;
+    //   // PALETTE flower_sweetpeas_01;
+    //   // PALETTE flower_sweetpeas_02;
+    //   // PALETTE pink_purple_01;
+    //   // PALETTE pink_purple_02;
+    //   // PALETTE pink_purple_03;
+    //   // PALETTE winter;
+    //   // PALETTE autumn_green;
+    //   // PALETTE autumn_red;
+    //   // PALETTE rainbow;
+    //   // PALETTE rainbow_inverted;
+    //   // PALETTE pastel_01;
+    //   // PALETTE pastel_02;
+    //   // PALETTE ocean_01;
+    //   // PALETTE gradient_01;
+    //   // PALETTE gradient_02;
+    //   // PALETTE gradient_fire_01;
+    //   // PALETTE gradient_pastel_tones_purple;
+    //   // PALETTE sunrise_01;
+    //   // PALETTE sunrise_02;
+    //   // PALETTE sunrise_03;
+    //   // PALETTE sunrise_04;
+    //   // PALETTE sunset_01;
+    //   // PALETTE sunset_02;
+    //   // PALETTE sky_glow_01;
+    //   // PALETTE candle_flame_01;
+    //   // PALETTE berry_green;
+    //   // PALETTE gradient_sunlevel_group01_01;
+    //   // PALETTE gradient_sunlevel_group01_02;
+    //   // PALETTE gradient_sunlevel_group01_03;
+    //   // PALETTE gradient_sunlevel_group01_04;
+    //   // PALETTE gradient_sunlevel_group01_05;
+    //   // PALETTE gradient_sunlevel_group01_06;
+    //   // PALETTE gradient_sunlevel_group01_07;
+    //   // PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;
+    //   // PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;
+    //   // PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;
+    //   // PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;
+    //   // PALETTE gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
+    //   // // Christmas static patterns
+    //   // PALETTE christmas_01;
+    //   // PALETTE christmas_02;
+    //   // PALETTE christmas_03;
+    //   // PALETTE christmas_04;
+    //   // PALETTE christmas_05;
+    //   // PALETTE christmas_06;
+    //   // PALETTE christmas_07;
+    //   // PALETTE christmas_08;
+    //   // PALETTE christmas_09;
+    //   // PALETTE christmas_10;
+    //   // PALETTE christmas_11;
+    //   // PALETTE christmas_12;
+    //   // PALETTE christmas_13;
+    //   // PALETTE christmas_14;
+    //   // PALETTE christmas_15;
+    //   // PALETTE christmas_16;
+    //   // PALETTE christmas_17;
+    //   // PALETTE christmas_18;
+    //   // PALETTE christmas_19;
+    //   // PALETTE christmas_20;
+    //   // PALETTE christmas_21;
+    //   // PALETTE christmas_22;
+    //   // PALETTE christmas_23;
+    //   // PALETTE christmas_24;
+    //   // PALETTE christmas_25;
+    //   // PALETTE christmas_26;
+    //   // PALETTE christmas_27;
+    //   // PALETTE christmas_28;
+    //   // PALETTE christmas_29;
+    //   // PALETTE christmas_30;
+    //   // // Created for other people
+    //   // PALETTE custom_user_01;
+    //   // // Can be edited
+    //   // PALETTE hsbid_users[10]; // how would vectors work here, I guess just push 10 times??
+    //   // // Can be edited
+    //   // PALETTE rgbcct_segment_colour_users[5];    // Now contained within segment so is not needed here! (at least data is not, but name may be)
+    //   // // Generic variable palette 
+    //   // PALETTE encoded_users; // Should remain only option, to permit the largest buffer. Long term, it could be made dynamic
+    //   // //^^ New methods will allow user palettes (encoded) to be popped and removed from the end of this
+
+
+    //   // Active
+    //   PALETTE *ptr = &rainbow;
+    // }palettelist;
 
 
     RgbcctColor GetActiveFirstColourFromCurrentPalette();    
@@ -728,7 +777,7 @@ class mPalette
           
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
     uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0);
-    uint16_t GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
+    // uint16_t GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
 
     #ifdef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
     void LoadPalette(uint16_t palette_id);
@@ -741,6 +790,12 @@ class mPalette
     CRGBPalette16 currentPalette;    
 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
+
+    // RgbcctColor GetColourElementsFromUnloadedPalette(
+    //   uint16_t palette_id,
+    //   uint16_t _pixel_position,//desired_index_from_palette,  
+    //   uint8_t* encoded_value = nullptr  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    // );
 
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
@@ -778,14 +833,14 @@ class mPalette
 
 
     void LoadPalette_CRGBPalette16_Static(uint8_t palette_id);
-    PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
+    // PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
           
-    void init_PresetColourPalettes_HSBID_UserFill(uint8_t id);
-    void init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id);
-    void init_PresetColourPalettes_User_Generic_Fill(uint8_t id);
+    // void init_PresetColourPalettes_HSBID_UserFill(uint8_t id);
+    // void init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id);
+    // void init_PresetColourPalettes_User_Generic_Fill(uint8_t id);
    
-    bool CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr);
-    bool CheckPaletteByIDIsEditable(uint8_t id);
+    // bool CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr);
+    // bool CheckPaletteByIDIsEditable(uint8_t id);
 
     void SetPaletteListPtrFromID(uint8_t id);
 
