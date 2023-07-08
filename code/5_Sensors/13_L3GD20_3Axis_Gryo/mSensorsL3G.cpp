@@ -178,13 +178,13 @@ uint8_t mSensorsL3G::ConstructJSON_Sensor(uint8_t json_level){
   JsonBuilderI->Start();
   
   
-    JBI->Level_Start("Gyro");
-      JBI->Level_Start("Instant");
+    JBI->Object_Start("Gyro");
+      JBI->Object_Start("Instant");
         JBI->Add("x", sensor.gyro.instant.x);
         JBI->Add("y", sensor.gyro.instant.y);
         JBI->Add("z", sensor.gyro.instant.z);
-      JBI->Level_End();
-    JBI->Level_End();
+      JBI->Object_End();
+    JBI->Object_End();
 
 
   return JsonBuilderI->End();

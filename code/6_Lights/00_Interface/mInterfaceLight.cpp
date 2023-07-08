@@ -1090,16 +1090,16 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
   
   JsonBuilderI->Start();
 
-  JsonBuilderI->Level_Start("RgbcctController");
+  JsonBuilderI->Object_Start("RgbcctController");
   
-    // JsonBuilderI->Level_Start("raw");
+    // JsonBuilderI->Object_Start("raw");
     //   JsonBuilderI->Add("R", rgbcct_controller.R); 
     //   JsonBuilderI->Add("G", rgbcct_controller.G); 
     //   JsonBuilderI->Add("B", rgbcct_controller.B); 
     //   JsonBuilderI->Add("WW", rgbcct_controller.WW); 
     //   JsonBuilderI->Add("WC", rgbcct_controller.WC); 
-    // JsonBuilderI->Level_End();
-    JsonBuilderI->Level_Start("type");
+    // JsonBuilderI->Object_End();
+    JsonBuilderI->Object_Start("type");
     
     JsonBuilderI->Add("R", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.r); 
     JsonBuilderI->Add("G", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.g); 
@@ -1108,11 +1108,11 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
     JsonBuilderI->Add("WC", pCONT_lAni->SEGMENT_I(0).hardware_element_colour_order.c); 
 
 
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
     // JsonBuilderI->Add("mPaletteI->active_scene_palette_id",mPaletteI->active_scene_palette_id);
 
-  JsonBuilderI->Level_End();
+  JsonBuilderI->Object_End();
 
 
   if(pCONT_lAni->SEGMENT_I(0).palette.id == mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)
@@ -1123,28 +1123,28 @@ uint8_t mInterfaceLight::ConstructJSON_Debug_Module_Config(uint8_t json_level, b
   }
 
 
-  // JsonBuilderI->Level_Start("singlecolour");
+  // JsonBuilderI->Object_Start("singlecolour");
   //   JsonBuilderI->Add_P(PM_R", mode_singlecolour.colour.R);
   //   JsonBuilderI->Add_P(PM_G", mode_singlecolour.colour.G);
   //   JsonBuilderI->Add_P(PM_B", mode_singlecolour.colour.B);
   //   JsonBuilderI->Add_P(PM_WW", mode_singlecolour.colour.WW);
   //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
   //   JsonBuilderI->Add_P(PM_WC", mode_singlecolour.colour.WC);
-  // JsonBuilderI->Level_End();
-  // JsonBuilderI->Level_Start("active_rgbcct_colour_p");
+  // JsonBuilderI->Object_End();
+  // JsonBuilderI->Object_Start("active_rgbcct_colour_p");
   //   JsonBuilderI->Add_P(PM_R", active_rgbcct_colour_p->R);
   //   JsonBuilderI->Add_P(PM_G", active_rgbcct_colour_p->G);
   //   JsonBuilderI->Add_P(PM_B", active_rgbcct_colour_p->B);
   //   JsonBuilderI->Add_P(PM_WW", active_rgbcct_colour_p->WW);
   //   JsonBuilderI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
   //   JsonBuilderI->Add_P(PM_WC", active_rgbcct_colour_p->WC);
-  // JsonBuilderI->Level_End();
+  // JsonBuilderI->Object_End();
 
   // JsonBuilderI->Array_AddArray("singlecolour", current_color, 5);   
 
-  // JsonBuilderI->Level_Start("fade");
+  // JsonBuilderI->Object_Start("fade");
   //   JsonBuilderI->Add("running", fade.running);
-  // JsonBuilderI->Level_End();
+  // JsonBuilderI->Object_End();
 
   return JsonBuilderI->End();
 
@@ -1159,7 +1159,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
 
   for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
   {
-    JBI->Level_Start_F("Bus%d", bus_i);
+    JBI->Object_Start_F("Bus%d", bus_i);
 
   //     JBI->Add("getLength", bus_manager->busses[bus_i]->getLength());
 
@@ -1185,7 +1185,7 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
   //     // }
   //     // JBI->Array_End();
 
-    JBI->Level_End();
+    JBI->Object_End();
   }
 
   return JBI->End();

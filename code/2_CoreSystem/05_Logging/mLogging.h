@@ -223,7 +223,7 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 
 //For single test use, no ifdefs
 // #ifdef USE_DEBUG_LINE
-#if !defined(USE_SOFTWARE_SERIAL_DEBUG)
+#if defined(ENABLE_DEBUG_LINE_HERE)
   #define DEBUG_LINE_HERE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
                         SERIAL_DEBUG.print(__FILE__);\
                         SERIAL_DEBUG.println(__LINE__);\

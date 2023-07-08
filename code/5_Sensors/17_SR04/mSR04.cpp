@@ -392,12 +392,12 @@ uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
     JsonBuilderI->Add(D_JSON_TYPE, sr04_type);
     
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
-    JBI->Level_Start("Filtered_EMA");
+    JBI->Object_Start("Filtered_EMA");
       JBI->Add("alpha", readings.average_EMA.alpha);
-    JBI->Level_End();
+    JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
-    JBI->Level_Start("Filtered_DEMA");
+    JBI->Object_Start("Filtered_DEMA");
       JBI->Add("alpha1", readings.average_DEMA.alpha1);
       JBI->Add("alpha2", readings.average_DEMA.alpha1);
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
@@ -412,28 +412,28 @@ uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
     JsonBuilderI->Add("Ping", readings.raw.ping_value);
     JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.raw.distance_cm);
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
-    JBI->Level_Start("Filtered_EMA");
+    JBI->Object_Start("Filtered_EMA");
       JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.average_EMA.distance_cm);
       JsonBuilderI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
       JsonBuilderI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
-    JBI->Level_End();
+    JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
-    JBI->Level_Start("Filtered_DEMA");
+    JBI->Object_Start("Filtered_DEMA");
       JsonBuilderI->Add(D_JSON_DISTANCE "_cm", readings.average_DEMA.distance_cm);
       JsonBuilderI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
       JsonBuilderI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
-    JBI->Level_End();
+    JBI->Object_End();
     #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
-    JBI->Level_Start("Temperature");
+    JBI->Object_Start("Temperature");
       JBI->Add("Enabled", readings.temp_adj.flag_enabled);
       JBI->Add("Ambient", readings.temp_adj.ambient_temperature);
-    JBI->Level_End();
-    JBI->Level_Start("Conversion");
+    JBI->Object_End();
+    JBI->Object_Start("Conversion");
       JBI->Add("speed_of_sound", readings.conversion_settings.speed_of_sound);
       JBI->Add("flag_distance_conversion_method", readings.conversion_settings.flag_distance_conversion_method);
-    JBI->Level_End();
+    JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
   return JsonBuilderI->End();    
 }

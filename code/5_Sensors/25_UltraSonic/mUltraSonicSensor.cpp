@@ -614,7 +614,7 @@ void mUltraSonicSensor::WebAppend_Root_Status_Table_Data(){
 
   JsonBuilderI->Array_Start("tab_ult");// Class name
   for(int row=0;row<2;row++){
-    JsonBuilderI->Level_Start();
+    JsonBuilderI->Object_Start();
       JsonBuilderI->Add("id",row);
       switch(row){
         default:
@@ -624,7 +624,7 @@ void mUltraSonicSensor::WebAppend_Root_Status_Table_Data(){
         break;
         case 1: JsonBuilderI->Add_P("ih",motion_detect.detected_rtc_ctr); break;
       }  
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
   }
   JsonBuilderI->Array_End();
 
@@ -731,7 +731,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_Settings(uint8_t json_level){
 uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
 
   JsonBuilderI->Start(); 
-    JsonBuilderI->Level_Start(D_JSON_SENSOR);
+    JsonBuilderI->Object_Start(D_JSON_SENSOR);
       JsonBuilderI->Add(D_JSON_ISVALID, ultrasonic.isvalid);
       JsonBuilderI->Add(D_JSON_DURATION, ultrasonic.duration);
       JsonBuilderI->Add(D_JSON_DURATION_RAW, ultrasonic.duration_raw);
@@ -740,11 +740,11 @@ uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
       JsonBuilderI->Add(D_JSON_SPEEDOFSOUND, ultrasonic.speedofsound);
       JsonBuilderI->Add(D_JSON_LASTREAD, abs(millis()-ultrasonic.tUltraSonicSensorReadLast));
       if(json_level >= JSON_LEVEL_DETAILED){
-        JsonBuilderI->Level_Start(D_JSON_ACCURACY);
+        JsonBuilderI->Object_Start(D_JSON_ACCURACY);
           JsonBuilderI->Add(D_JSON_INSIDE, ultrasonic.accuracy.insidecount);
           JsonBuilderI->Add(D_JSON_OUTSIDE, ultrasonic.accuracy.outsidecount);
           JsonBuilderI->Add(D_JSON_PERCENTAGE, ultrasonic.accuracy.percent);
-        JsonBuilderI->Level_End(); // D_JSON_ACCURACY
+        JsonBuilderI->Object_End(); // D_JSON_ACCURACY
         JsonBuilderI->Level_Start_P(  PSTR(D_JSON_THRESHOLD));
           JsonBuilderI->Add_P(          PSTR(D_JSON_SET     D_JSON_PERCENT), ultrasonic.threshold.setpercent);
           JsonBuilderI->Add_P(          PSTR(D_JSON_NARROW  D_JSON_PERCENT), ultrasonic.threshold.narrowpercent);
@@ -757,15 +757,15 @@ uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
             JsonBuilderI->Add_P(          PSTR(D_JSON_POSITIVE),   ultrasonic.threshold.ratio_pos);
             JsonBuilderI->Add_P(          PSTR(D_JSON_NEGATIVE),   ultrasonic.threshold.ratio_pos);
             JsonBuilderI->Add_P(          PSTR(D_JSON_RELATIVE),   ultrasonic.threshold.ratio_pos);
-          JsonBuilderI->Level_End(); // D_JSON_RATIO
-        JsonBuilderI->Level_End(); // D_JSON_THRESHOLD
+          JsonBuilderI->Object_End(); // D_JSON_RATIO
+        JsonBuilderI->Object_End(); // D_JSON_THRESHOLD
       }
-    JsonBuilderI->Level_End(); // D_JSON_SENSOR
-    JsonBuilderI->Level_Start(D_JSON_INSTANT);
+    JsonBuilderI->Object_End(); // D_JSON_SENSOR
+    JsonBuilderI->Object_Start(D_JSON_INSTANT);
       JsonBuilderI->Add(D_JSON_ISVALID, averaged.instant.isvalid);
       JsonBuilderI->Add(D_JSON_DISTANCE "_mm", averaged.instant.final.distance_mm);
-    JsonBuilderI->Level_End();   // D_JSON_INSTANT 
-    JsonBuilderI->Level_Start(D_JSON_SMOOTH "_1m");
+    JsonBuilderI->Object_End();   // D_JSON_INSTANT 
+    JsonBuilderI->Object_Start(D_JSON_SMOOTH "_1m");
       JsonBuilderI->Add(D_JSON_ISVALID, averaged.smooth_1m.isvalid);
       JsonBuilderI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1m.final.distance_mm);
       if(json_level >= JSON_LEVEL_DETAILED){
@@ -773,8 +773,8 @@ uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
       JsonBuilderI->Add(D_JSON_OUTLIERS, averaged.smooth_1m.averaging.outliercount);
       JsonBuilderI->Add(D_JSON_RATIO, averaged.smooth_1m.averaging.usableratio);
       }
-    JsonBuilderI->Level_End();  // D_JSON_SMOOTH "_1m"
-    JsonBuilderI->Level_Start(D_JSON_SMOOTH "_1hr");
+    JsonBuilderI->Object_End();  // D_JSON_SMOOTH "_1m"
+    JsonBuilderI->Object_Start(D_JSON_SMOOTH "_1hr");
       JsonBuilderI->Add(D_JSON_ISVALID, averaged.smooth_1hr.isvalid);
       JsonBuilderI->Add(D_JSON_DISTANCE "_mm", averaged.smooth_1hr.final.distance_mm);
       if(json_level >= JSON_LEVEL_DETAILED){
@@ -782,7 +782,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_Sensors(uint8_t json_level){
       JsonBuilderI->Add(D_JSON_OUTLIERS, averaged.smooth_1hr.averaging.outliercount);
       JsonBuilderI->Add(D_JSON_RATIO, averaged.smooth_1hr.averaging.usableratio);
       }
-    JsonBuilderI->Level_End(); // D_JSON_SMOOTH "_1hr"
+    JsonBuilderI->Object_End(); // D_JSON_SMOOTH "_1hr"
 
   return JsonBuilderI->End();
 

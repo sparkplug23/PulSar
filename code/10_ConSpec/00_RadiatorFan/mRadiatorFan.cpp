@@ -103,32 +103,32 @@ uint8_t mRadiatorFan::ConstructJSON_State(uint8_t json_level, bool json_appendin
   char buffer[100];
 
   JBI->Start();
-    JBI->Level_Start("Temperature");
+    JBI->Object_Start("Temperature");
       JBI->Add("IsWithinLimit", state.iswithin_temperature_limit);
-      JBI->Level_Start("Threshold");
+      JBI->Object_Start("Threshold");
         JBI->Add("Maximum", state.threshold_maximum_temperature);
         JBI->Add("Minimum", state.threshold_minimum_temperature);
-      JBI->Level_End();
+      JBI->Object_End();
       JBI->Add("TriggerTemperature", state.temperature_current);
-      JsonBuilderI->Level_Start("InternalSensors");
+      JsonBuilderI->Object_Start("InternalSensors");
         for(int sensor_id=0;sensor_id<3;sensor_id++)
         { 
           if(pCONT_db18->sensor_vector.size())
           {
-            // JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
-            JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
+            // JsonBuilderI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DB18S20_ID,pCONT_db18->sensor[sensor_id].address_id,buffer,sizeof(buffer)));    
+            JsonBuilderI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( pCONT_db18->GetModuleUniqueID() ,pCONT_db18->sensor_vector[sensor_id].device_name_index,buffer,sizeof(buffer)));         
               JsonBuilderI->Add(D_JSON_TEMPERATURE, pCONT_db18->sensor_vector[sensor_id].reading.val);
-            JsonBuilderI->Level_End();  
+            JsonBuilderI->Object_End();  
           }
         }
-      JsonBuilderI->Level_End();  
-    JBI->Level_End();
+      JsonBuilderI->Object_End();  
+    JBI->Object_End();
     
-    JBI->Level_Start("Fan"); // Based on relay controls
+    JBI->Object_Start("Fan"); // Based on relay controls
       JBI->Add("State",                  pCONT_mry->CommandGet_Relay_Power(0));
       JBI->Add("TimeOnSeconds",          pCONT_mry->CommandGet_SecondsRelayHasBeenOn(0));          // total time on
       JBI->Add("TimeOnDecounterSeconds", pCONT_mry->CommandGet_SecondsToRemainOn(0)); // time to stay on
-    JBI->Level_End();
+    JBI->Object_End();
   return JBI->End();
 }
 

@@ -6738,6 +6738,7 @@
   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
   #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
 
+  #define ENABLE_DEVFEATURE_PALETTE__VECTORED
 
 
   // #define ENABLE_ADVANCED_DEBUGGING
@@ -6814,6 +6815,7 @@
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
     #define ENABLE_DEBUG_SERIAL
 
@@ -6825,12 +6827,14 @@
 
     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
 
+    #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
+
     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
     // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
     
-
+    #define ENABLE_DEBUG_LINE_HERE
     
     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
@@ -6887,7 +6891,7 @@
   #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
 
   #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
-  #define STRIP_SIZE_MAX 120
+  #define STRIP_SIZE_MAX 100
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -6897,36 +6901,13 @@
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":117
+        "Length":100
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        90
-      ],
-      "ColourPalette":0,
-      "SegColour0": {
-        "Hue": 330,
-        "Sat":100,
-        "BrightnessRGB":5
-      },
-      "Effects": {
-        "Function": 0,
-        "Speed":1,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 900,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "Segment1": {
-      "PixelRange": [
-        90,
-        120
+        100
       ],
       "ColourPalette":0,
       "SegColour0": {

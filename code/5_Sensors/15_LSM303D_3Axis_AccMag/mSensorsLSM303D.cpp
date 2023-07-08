@@ -625,29 +625,29 @@ uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level){
   for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++)
   { //db18_sensors_active
    
-  //  JsonBuilderI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
+  //  JsonBuilderI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
    
-   JsonBuilderI->Level_Start( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));         
+   JsonBuilderI->Object_Start( DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));         
    
 
 
 
-    JBI->Level_Start("Mag");
+    JBI->Object_Start("Mag");
       // #ifdef ENABLE_SENSOR_LSM303D_READING_AVERAGING
-      // JBI->Level_Start("Average");
+      // JBI->Object_Start("Average");
       //   JBI->Add("x", sensor.mag.average.x->Mean());
       //   JBI->Add("y", sensor.mag.average.y->Mean());
       //   JBI->Add("z", sensor.mag.average.z->Mean());
-      // JBI->Level_End();
+      // JBI->Object_End();
       // #endif // ENABLE_SENSOR_LSM303D_READING_AVERAGING
-      JBI->Level_Start("Instant");
+      JBI->Object_Start("Instant");
         JBI->Add("x", sensor[sensor_id].mag.instant.x);
         JBI->Add("y", sensor[sensor_id].mag.instant.y);
         JBI->Add("z", sensor[sensor_id].mag.instant.z);
-      JBI->Level_End();
-    JBI->Level_End();
+      JBI->Object_End();
+    JBI->Object_End();
 
-    // JBI->Level_Start("Orientation");
+    // JBI->Object_Start("Orientation");
     
     //   float heading;
     //   float roll;
@@ -660,15 +660,15 @@ uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level){
     //     sensor[sensor_id].mag.instant.y, 
     //     sensor[sensor_id].mag.instant.z, &heading, &roll, &pitch);
 
-    //   JBI->Level_Start("Instant");
+    //   JBI->Object_Start("Instant");
     //     JBI->Add("Heading", heading);
     //     JBI->Add("Roll", roll);
     //     JBI->Add("Pitch", pitch);
-    //   JBI->Level_End();
+    //   JBI->Object_End();
       
-    // JBI->Level_End();
+    // JBI->Object_End();
 
-    JBI->Level_End();
+    JBI->Object_End();
   }
   
   return JsonBuilderI->End();

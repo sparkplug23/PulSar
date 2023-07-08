@@ -316,7 +316,7 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
   //    */
   //   if(flag_level_ended_needed)
   //   {
-  //     JBI->Level_End();
+  //     JBI->Object_End();
   //     flag_level_ended_needed = false;
   //     flag_level_started = false;     // closed level
   //   }

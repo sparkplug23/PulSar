@@ -899,9 +899,11 @@ function populateEffects()
 
 function populatePalettes()
 {
-	lJson.shift(); // temporary remove default
-	lJson.sort((a,b) => (a[1]).localeCompare(b[1]));
-	lJson.unshift([0,"Default"]);
+	// lJson.shift(); // temporary remove default
+	// lJson.sort((a,b) => (a[1]).localeCompare(b[1]));
+	// lJson.unshift([0,"Default"]);
+
+	console.log("populatePalettes")
 
 	var html = "";
 	for (let pa of lJson) {
@@ -1629,7 +1631,9 @@ function requestJson(command=null)
 		if (json.success) return;
 		if (json.info) {
 			let i = json.info;
+			console.log("parseInfo");
 			parseInfo(i);
+			console.log("populatePalettes");
 			populatePalettes(i);
 			if (isInfo) populateInfo(i);
 		}

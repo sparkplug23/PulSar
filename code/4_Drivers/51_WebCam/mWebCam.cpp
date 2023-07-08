@@ -1857,7 +1857,7 @@ void mWebCam::Pre_Init(void){
 //     // for(int device_id=0;device_id<settings.relays_connected;device_id++){
 //     //   if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
         
-//     //     JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+//     //     JsonBuilderI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
 //     //     //phase onoff out
 //     //       JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
 //     //       JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
@@ -1875,7 +1875,7 @@ void mWebCam::Pre_Init(void){
 //     //         JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
 //     //         snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
 //     //         JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
-//     //       JsonBuilderI->Level_End();
+//     //       JsonBuilderI->Object_End();
         
 //     //     // Schedules time periods the relays are allowed to run (or should this be locking off?)
 //     //     JsonBuilderI->Level_Start_P("RelayEnabled");
@@ -1893,11 +1893,11 @@ void mWebCam::Pre_Init(void){
 //     //         // Add if relay is within window etc here
 //     //         JBI->Add("IsRelayTimeWindowAllowed", IsRelayTimeWindowAllowed(device_id));
 
-//     //       JsonBuilderI->Level_End();
+//     //       JsonBuilderI->Object_End();
 //     //     }
-//     //     JsonBuilderI->Level_End();
+//     //     JsonBuilderI->Object_End();
 
-//     //     JsonBuilderI->Level_End();
+//     //     JsonBuilderI->Object_End();
         
 //     //   }
 //     // }
@@ -1918,8 +1918,8 @@ void mWebCam::Pre_Init(void){
 //     // for(int device_id=0;device_id<settings.relays_connected;device_id++){
 //     //   if(relay_status[device_id].ischanged||(json_level>JSON_LEVEL_IFCHANGED)){ relay_status[device_id].ischanged=false;
         
-//     //     JsonBuilderI->Level_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
-//     //       JsonBuilderI->Level_Start("enabled_ranges");
+//     //     JsonBuilderI->Object_Start(GetRelayNamebyIDCtr(device_id,buffer,sizeof(buffer)));
+//     //       JsonBuilderI->Object_Start("enabled_ranges");
 
 //     //         JsonBuilderI->Array_Start("ontime");
 //     //           JsonBuilderI->Add(mTime::ConvertShortTimetoCtr(&relay_status[device_id].enabled_ranges[0].ontime, buffer, sizeof(buffer)));
@@ -1937,7 +1937,7 @@ void mWebCam::Pre_Init(void){
 
 
 
-//     //       JsonBuilderI->Level_End();
+//     //       JsonBuilderI->Object_End();
 
 //     //       // JsonBuilderI->Add_P(PM_JSON_ONOFF,        CommandGet_Relay_Power(device_id));
 //     //       // JsonBuilderI->Add_P(PM_JSON_ONOFF_NAME,   CommandGet_Relay_Power(device_id)?"ON":"OFF");
@@ -1947,8 +1947,8 @@ void mWebCam::Pre_Init(void){
 //     //       //   JsonBuilderI->Add_P(PM_JSON_ONTIME, buffer);
 //     //       //   snprintf(buffer, sizeof(buffer), "\"%02d:%02d:%02d\"", relay_status[device_id].last.offtime.hour,relay_status[device_id].last.offtime.minute,relay_status[device_id].last.offtime.second);
 //     //       //   JsonBuilderI->Add_P(PM_JSON_OFFTIME, buffer);
-//     //       // JsonBuilderI->Level_End();
-//     //     JsonBuilderI->Level_End();
+//     //       // JsonBuilderI->Object_End();
+//     //     JsonBuilderI->Object_End();
         
 //     //   }
 //     // }

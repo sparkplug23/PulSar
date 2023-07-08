@@ -681,7 +681,7 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Settings(uint8_t json_level, bool json_a
   JBI->Start();
 
   char buffer[100];
-  JBI->Level_Start("MessageID");
+  JBI->Object_Start("MessageID");
     
     JBI->Add("UniqueCount", unique_msg_id_list.size());
 
@@ -719,7 +719,7 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Settings(uint8_t json_level, bool json_a
     }
     JBI->Array_End();
 
-  JBI->Level_End();
+  JBI->Object_End();
 
 
   return JBI->End();
@@ -737,15 +737,15 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Settings(uint8_t json_level, bool json_a
 uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-  JBI->Level_Start("heartbeat");
+  JBI->Object_Start("heartbeat");
     JBI->Add("t", pkt.heartbeat.tUpdate);
     JBI->Add("system_status", pkt.heartbeat.data.system_status); /*< System status flag, as defined by MAV_STATE enum*/
-  JBI->Level_End();
-  JBI->Level_Start("statustext");
+  JBI->Object_End();
+  JBI->Object_Start("statustext");
     JBI->Add("severity", pkt.statustext.data.severity);/*< Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.*/
     JBI->Add("text", pkt.statustext.data.text);/*< Status text message, without null termination character*/
-  JBI->Level_End();
-  JBI->Level_Start("ahrs2");
+  JBI->Object_End();
+  JBI->Object_Start("ahrs2");
     JBI->Add("roll", pkt.ahrs2.data.roll);
     JBI->Add("pitch", pkt.ahrs2.data.pitch);
     JBI->Add("yaw", pkt.ahrs2.data.yaw);
@@ -760,16 +760,16 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool jso
     #else
     JBI->Add("lng", pkt.ahrs2.data.lng);
     #endif
-  JBI->Level_End();
-  JBI->Level_Start("attitude");
+  JBI->Object_End();
+  JBI->Object_Start("attitude");
     JBI->Add("roll", pkt.attitude.data.roll);/*< Roll angle (rad, -pi..+pi)*/
     JBI->Add("pitch", pkt.attitude.data.pitch); /*< Pitch angle (rad, -pi..+pi)*/
     JBI->Add("yaw", pkt.attitude.data.yaw);/*< Yaw angle (rad, -pi..+pi)*/
     JBI->Add("rollspeed", pkt.attitude.data.rollspeed);/*< Roll angular speed (rad/s)*/
     JBI->Add("pitchspeed", pkt.attitude.data.pitchspeed);/*< Pitch angular speed (rad/s)*/
     JBI->Add("yawspeed", pkt.attitude.data.yawspeed);/*< Yaw angular speed (rad/s)*/
-  JBI->Level_End();
-  JBI->Level_Start("battery_status");
+  JBI->Object_End();
+  JBI->Object_Start("battery_status");
     JBI->Add("current_consumed", pkt.battery_status.data.current_consumed); /*< Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate*/
     JBI->Add("energy_consumed", pkt.battery_status.data.energy_consumed);/*< Consumed energy, in HectoJoules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate*/
     JBI->Add("temperature", pkt.battery_status.data.temperature);/*< Temperature of the battery in centi-degrees celsius. INT16_MAX for unknown temperature.*/
@@ -781,16 +781,16 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool jso
     JBI->Add("battery_remaining", pkt.battery_status.data.battery_remaining);/*< Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery*/
     JBI->Add("time_remaining", pkt.battery_status.data.time_remaining);/*< Remaining battery time, in seconds (1 = 1s = 0% energy left), 0: autopilot does not provide remaining battery time estimate*/
     JBI->Add("charge_state", pkt.battery_status.data.charge_state);/*< State for extent of discharge, provided by autopilot for warning or external reactions*/
-  JBI->Level_End();
-  JBI->Level_Start("fence_status");
+  JBI->Object_End();
+  JBI->Object_Start("fence_status");
     JBI->Add("breach_status", pkt.fence_status.data.breach_status);/*< 0 if currently inside fence, 1 if outside*/
-  JBI->Level_End();
-  JBI->Level_Start("gimbal_report");
+  JBI->Object_End();
+  JBI->Object_Start("gimbal_report");
     JBI->Add("joint_roll", pkt.gimbal_report.data.joint_roll);/*< Joint ROLL (radians)*/
     JBI->Add("joint_el", pkt.gimbal_report.data.joint_el); /*< Joint EL (radians)*/
     JBI->Add("joint_az", pkt.gimbal_report.data.joint_az);/*< Joint AZ (radians)*/
-  JBI->Level_End();
-  JBI->Level_Start("global_position_int"); 
+  JBI->Object_End();
+  JBI->Object_Start("global_position_int"); 
   JBI->Add("lat", pkt.global_position_int.data.lat);/*< Latitude, expressed as degrees * 1E7*/
     JBI->Add("lon", pkt.global_position_int.data.lon);/*< Longitude, expressed as degrees * 1E7*/
     JBI->Add("alt", pkt.global_position_int.data.alt);/*< Altitude in meters, expressed as * 1000 (millimeters), AMSL (not WGS84 - note that virtually all GPS modules provide the AMSL as well)*/
@@ -799,12 +799,12 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool jso
     JBI->Add("vy", pkt.global_position_int.data.vy); /*< Ground Y Speed (Longitude, positive east), expressed as m/s * 100*/
     JBI->Add("vz", pkt.global_position_int.data.vz);/*< Ground Z Speed (Altitude, positive down), expressed as m/s * 100*/
     JBI->Add("hdg", pkt.global_position_int.data.hdg);/*< Vehicle heading (yaw angle) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
-  JBI->Level_End();
-  JBI->Level_Start("gopro_heartbeat");
+  JBI->Object_End();
+  JBI->Object_Start("gopro_heartbeat");
     JBI->Add("status", pkt.gopro_heartbeat.data.status);
     JBI->Add("capture_mode", pkt.gopro_heartbeat.data.capture_mode);
-  JBI->Level_End();
-  JBI->Level_Start("gps_raw_int");
+  JBI->Object_End();
+  JBI->Object_Start("gps_raw_int");
     JBI->Add("lat", pkt.gps_raw_int.data.lat);/*< Latitude (WGS84, EGM96 ellipsoid), in degrees * 1E7*/
     JBI->Add("lon", pkt.gps_raw_int.data.lon);/*< Longitude (WGS84, EGM96 ellipsoid), in degrees * 1E7*/
     JBI->Add("alt", pkt.gps_raw_int.data.alt);/*< Altitude (AMSL, NOT WGS84), in meters * 1000 (positive for up). Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude.*/
@@ -819,18 +819,18 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool jso
     JBI->Add("v_acc", pkt.gps_raw_int.data.v_acc);/*< Altitude uncertainty in meters * 1000 (positive for up).*/
     JBI->Add("vel_acc", pkt.gps_raw_int.data.vel_acc);/*< Speed uncertainty in meters * 1000 (positive for up).*/
     JBI->Add("hdg_acc", pkt.gps_raw_int.data.hdg_acc);/*< Heading / track uncertainty in degrees * 1e5.*/
-  JBI->Level_End();
-  JBI->Level_Start("hwstatus");
+  JBI->Object_End();
+  JBI->Object_Start("hwstatus");
     JBI->Add("Vcc", pkt.hwstatus.data.Vcc);/*< board voltage (mV)*/
-  JBI->Level_End();
-  JBI->Level_Start("meminfo");
+  JBI->Object_End();
+  JBI->Object_Start("meminfo");
     JBI->Add("brkval", pkt.meminfo.data.brkval);/*< heap top*/
     JBI->Add("freemem", pkt.meminfo.data.freemem);/*< free memory*/
     JBI->Add("freemem32", pkt.meminfo.data.freemem32);/*< free memory (32 bit)*/
-  JBI->Level_End();
-  JBI->Level_Start("mission_current");
+  JBI->Object_End();
+  JBI->Object_Start("mission_current");
     JBI->Add("seq", pkt.mission_current.data.seq);/*< Sequence*/
-  JBI->Level_End();
+  JBI->Object_End();
 
   return JBI->End();
     
@@ -847,7 +847,7 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_01(uint8_t json_level, bool jso
 uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-  JBI->Level_Start("nav_controller_output");
+  JBI->Object_Start("nav_controller_output");
     JBI->Add("nav_roll", pkt.nav_controller_output.data.nav_roll);/*< Current desired roll in degrees*/
     JBI->Add("nav_pitch", pkt.nav_controller_output.data.nav_pitch); /*< Current desired pitch in degrees*/
     JBI->Add("alt_error", pkt.nav_controller_output.data.alt_error);/*< Current altitude error in meters*/
@@ -856,12 +856,12 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool jso
     JBI->Add("nav_bearing", pkt.nav_controller_output.data.nav_bearing);/*< Current desired heading in degrees*/
     JBI->Add("target_bearing", pkt.nav_controller_output.data.target_bearing);/*< Bearing to current waypoint/target in degrees*/
     JBI->Add("wp_dist", pkt.nav_controller_output.data.wp_dist); /*< Distance to active waypoint in meters*/
-  JBI->Level_End();
-  JBI->Level_Start("rc_channels");
+  JBI->Object_End();
+  JBI->Object_Start("rc_channels");
     JBI->Add("chancount", pkt.rc_channels.data.chancount);/*< Total number of RC channels being received. This can be larger than 18, indicating that more channels are available but not given in this message. This value should be 0 when no RC channels are available.*/
     JBI->Add("rssi", pkt.rc_channels.data.rssi);/*< Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.*/
-  JBI->Level_End();
-  JBI->Level_Start("scaled_imu2");
+  JBI->Object_End();
+  JBI->Object_Start("scaled_imu2");
     JBI->Add("xacc", pkt.scaled_imu2.data.xacc); /*< X acceleration (mg)*/
     JBI->Add("yacc", pkt.scaled_imu2.data.yacc); /*< y acceleration (mg)*/
     JBI->Add("zacc", pkt.scaled_imu2.data.zacc); /*< Z acceleration (mg)*/
@@ -871,13 +871,13 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool jso
     JBI->Add("xmag", pkt.scaled_imu2.data.xmag);/*< X Magnetic field (milli tesla)*/
     JBI->Add("ymag", pkt.scaled_imu2.data.ymag);/*<   y Magnetic field (milli tesla)*/
     JBI->Add("zmag", pkt.scaled_imu2.data.zmag);/*< Z Magnetic field (milli tesla)*/
-  JBI->Level_End();
-  JBI->Level_Start("scaled_pressure");
+  JBI->Object_End();
+  JBI->Object_Start("scaled_pressure");
     JBI->Add("press_abs", pkt.scaled_pressure.data.press_abs);/*< Absolute pressure (hectopascal)*/
     JBI->Add("press_diff", pkt.scaled_pressure.data.press_diff);/*< Differential pressure 1 (hectopascal)*/
     JBI->Add("temperature", pkt.scaled_pressure.data.temperature);/*< Temperature measurement (0.01 degrees celsius)*/
-  JBI->Level_End();
-  JBI->Level_Start("sys_status");
+  JBI->Object_End();
+  JBI->Object_Start("sys_status");
     JBI->Add("sensorsC", pkt.sys_status.data.onboard_control_sensors_present);/*< Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
     JBI->Add("sensorsE", pkt.sys_status.data.onboard_control_sensors_enabled);/*< Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
     JBI->Add("sensorsH", pkt.sys_status.data.onboard_control_sensors_health);/*< Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR*/
@@ -887,8 +887,8 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool jso
     JBI->Add("drop_rate_comm", pkt.sys_status.data.drop_rate_comm);/*< Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)*/
     JBI->Add("errors_comm", pkt.sys_status.data.errors_comm);/*< Communication errors (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)*/
     JBI->Add("battery_remaining", pkt.sys_status.data.battery_remaining);/*< Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery*/
-  JBI->Level_End();
-  JBI->Level_Start("terrain_report"); 
+  JBI->Object_End();
+  JBI->Object_Start("terrain_report"); 
     JBI->Add("lat", pkt.terrain_report.data.lat); /*< Latitude (degrees *10^7)*/
     JBI->Add("lon", pkt.terrain_report.data.lon); /*< Longitude (degrees *10^7)*/
     JBI->Add("terrain_height", pkt.terrain_report.data.terrain_height); /*< Terrain height in meters AMSL*/
@@ -896,15 +896,15 @@ uint8_t mMAVLink_Decoder::ConstructJSON_Overview_02(uint8_t json_level, bool jso
     JBI->Add("spacing", pkt.terrain_report.data.spacing); /*< grid spacing (zero if terrain at this location unavailable)*/
     JBI->Add("pending", pkt.terrain_report.data.pending); /*< Number of 4x4 terrain blocks waiting to be received or read from disk*/
     JBI->Add("loaded", pkt.terrain_report.data.loaded); /*< Number of 4x4 terrain blocks in memory*/
-  JBI->Level_End();
-  JBI->Level_Start("vfr_hud");
+  JBI->Object_End();
+  JBI->Object_Start("vfr_hud");
     JBI->Add("airspeed", pkt.vfr_hud.data.airspeed);/*< Current airspeed in m/s*/
     JBI->Add("groundspeed", pkt.vfr_hud.data.groundspeed);/*< Current ground speed in m/s*/
     JBI->Add("alt", pkt.vfr_hud.data.alt);/*< Current altitude (MSL), in meters*/
     JBI->Add("climb", pkt.vfr_hud.data.climb);/*< Current climb rate in meters/second*/
     JBI->Add("heading", pkt.vfr_hud.data.heading);/*< Current heading in degrees, in compass units (0..360, 0=north)*/
     JBI->Add("throttle", pkt.vfr_hud.data.throttle);/*< Current throttle setting in integer percent, 0 to 100*/
-  JBI->Level_End();
+  JBI->Object_End();
 
   return JBI->End();
     

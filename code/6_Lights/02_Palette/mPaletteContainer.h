@@ -5,6 +5,9 @@
 
 #include "6_Lights/02_Palette/mPalette.h"
 
+#define FASTLED_INTERNAL // suppress pragma warning messages
+#include "6_Lights/00_Interface/FastLED/FastLED.h"
+
 #include <vector>
 
 // uint16_t mPaletteContainer::_usedSegmentData = 0;
@@ -19,7 +22,7 @@ class mPaletteContainer
     // uint8_t* data = nullptr;
     // uint16_t _dataLen = 0;
 	
-	uint8_t palette_id = 0;
+	uint8_t loaded_palette_id = 0; // Loaded
 
 // public:
     mPaletteContainer(uint16_t buffer_size = 0)
@@ -36,6 +39,7 @@ class mPaletteContainer
     ~mPaletteContainer(){};
 
 	std::vector<uint8_t> pData;
+	CRGBPalette16 crgb16_palette;
 
 	void LoadPaletteI();
 

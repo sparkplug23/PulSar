@@ -122,7 +122,7 @@ DEBUG_LINE_HERE;
       if(strcmp(jtok.getStr(),"-")==0){
         SEGMENT_I(segment_index).palette.id--;
       }else
-      if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+      if((tmp_id=GetPaletteIDbyName((char*)jtok.getStr()))>=0){
         ALOG_DBG(PSTR("tmp_id=%d"),tmp_id);
         CommandSet_PaletteID(tmp_id, segment_index);
         data_buffer.isserviced++;
@@ -1917,13 +1917,13 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
   // delay(3000);
 
   // Check if palette can be edited
-  if(!mPaletteI->CheckPaletteByIDIsEditable(palette_id)){ 
+  // if(!mPaletteI->CheckPaletteByIDIsEditable(palette_id)){ 
     
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("Palette can not be edited"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-      return; 
-  }
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //     AddLog(LOG_LEVEL_TEST, PSTR("Palette can not be edited"));
+  //   #endif // ENABLE_LOG_LEVEL_INFO
+  //     return; 
+  // }
 
   // Convert id into array index if needed
   uint8_t palette_id_adjusted_to_array_index = 0;
@@ -1932,7 +1932,8 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
 
   if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
     palette_id_adjusted_to_array_index = palette_id;
-    palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
+    // palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
+    palette_buffer = & mPaletteI->hsbid_pals[palette_id_adjusted_to_array_index].encoded_data[0];  //pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
     // Clear the entire new colour to the "unset" values
     memset(palette_buffer,COLOUR_MAP_NONE__ID,20); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
     
@@ -1975,7 +1976,7 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
     // Write new palette data into buffer space
     memcpy(palette_buffer,buffer,buflen);
     // Parse buffer data to correctly set data parameters
-    mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);
+    ALOG_ERR(PSTR(" FORCED REMOVED DURING PALETTE CHANGE mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);"));
 
     // 
 

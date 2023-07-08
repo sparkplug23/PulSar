@@ -459,7 +459,7 @@
   
 // //   JsonBuilderI->Array_Start("oil_table");// Class name
 // //   for(int row=0;row<8;row++){
-// //     JsonBuilderI->Level_Start();
+// //     JsonBuilderI->Object_Start();
 // //       JsonBuilderI->Add("id",row);
 // //       switch(row){
 // //         default:
@@ -491,7 +491,7 @@
 // //         // break;
 // //       } //switch
     
-// //     JsonBuilderI->Level_End();
+// //     JsonBuilderI->Object_End();
 // //   }
 // //   JsonBuilderI->Array_End();
   
@@ -510,10 +510,10 @@
 // //   //   }else{
 // //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
 // //   //   }        
-// //   //   JsonBuilderI->Level_Start();
+// //   //   JsonBuilderI->Object_Start();
 // //   //     JsonBuilderI->Add("id",row);
 // //   //     JsonBuilderI->Add("bc",colour_button);
-// //   //   JsonBuilderI->Level_End();
+// //   //   JsonBuilderI->Object_End();
 // //   // }  
 // //   // JsonBuilderI->Array_End();
 
@@ -728,7 +728,7 @@
 //   // // Only send when more than short is asked for
 //   // if(json_method > JSON_LEVEL_SHORT){
 
-//   JBI->Level_Start("instant");
+//   JBI->Object_Start("instant");
 //     JsonBuilderI->Add("isvalid", mSupport::roundfloat(oiltank.instant.isvalid,1));
 //     JsonBuilderI->Add("height_cm", mSupport::roundfloat(oiltank.instant.final.distance_from_bottom_cm,1));
 //     JsonBuilderI->Add("litres_usable", mSupport::roundfloat(oiltank.instant.final.litres_of_usable_oil,1));
@@ -737,7 +737,7 @@
 //       JsonBuilderI->Add("litres_total", mSupport::roundfloat(oiltank.instant.final.litres_in_tank,1));
 //       JsonBuilderI->Add("last_changed", abs(millis()-oiltank.instant.final.tLastChanged));
 //     }
-//   JBI->Level_End();
+//   JBI->Object_End();
 
 //   // JsonObject smooth1mobj = root.createNestedObject("smooth_1m"));
 //   //   smooth1mobj["isvalid", oiltank.smooth_1m.isvalid);

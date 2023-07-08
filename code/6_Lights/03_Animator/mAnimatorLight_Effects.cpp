@@ -114,7 +114,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
                                         0,SEGMENT.virtualLength() // scaled over the virtual length
                                       );
 
-  uint16_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(SEGMENT.palette.id);
+  uint16_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette.id);
 
   uint16_t pixel_index = 0;
   RgbcctColor colour;
@@ -225,7 +225,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette_To_Another_Pa
 void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uint16_t flicker_palette_id )
 {
 
-  uint8_t pixels_in_palette = mPaletteI->GetNumberOfColoursInPalette(SEGMENT.palette.id);
+  uint8_t pixels_in_palette = GetNumberOfColoursInPalette(SEGMENT.palette.id);
 
   RgbcctColor colour_pri;
   RgbcctColor colour_sec;
@@ -324,8 +324,10 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
      **/
     if(i > 0) 
     {
+      DEBUG_LINE_HERE;
    
       colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);
+      DEBUG_LINE_HERE;
       colour_sec = RgbColor(0);
       // char buffer[100];
       // LoadPalette(flicker_palette_id, SEGIDX, buffer, sizeof(buffer));
@@ -340,6 +342,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
 
       SEGMENT.SetPixelColor(SEGMENT.pixel_range.start + i, colour_out);
 
+      DEBUG_LINE_HERE;
       SEGMENT.data[d  ] = s; 
       SEGMENT.data[d+1] = s_target; 
       SEGMENT.data[d+2] = fadeStep;
@@ -356,14 +359,17 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
                  p++
       ){
    
+      DEBUG_LINE_HERE;
         colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);
         colour_sec = RgbColor(0);
         // char buffer[100];
         // LoadPalette(flicker_palette_id, SEGIDX, buffer, sizeof(buffer));
         // colour_pri = mPaletteI->GetColourFromPreloadedPaletteBuffer(flicker_palette_id, buffer, pixel_palette_counter);
 
+      DEBUG_LINE_HERE;
         colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
+      DEBUG_LINE_HERE;
         if(pixel_palette_counter++ >= pixels_in_palette-1)
         {
           pixel_palette_counter = 0;
@@ -380,6 +386,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
     }
   }
 
+      DEBUG_LINE_HERE;
   SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
 
 }
@@ -499,7 +506,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
   RgbcctColor out_colour = RgbcctColor(0);
   uint8_t start_pixel_position = 255, end_pixel_position = 255;
 
-  uint16_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(SEGMENT.palette.id);
+  uint16_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette.id);
 
 
   /**
@@ -621,7 +628,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette_New()
         SEGMENT.SetPixelColor(pixel, colour, false);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
         #endif
 
       }
@@ -694,7 +701,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
         SEGMENT.SetPixelColor(pixel, colour, false);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
         #endif
 
       }
@@ -807,7 +814,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
   desired_pixel=0;
     
   uint8_t pixel_position = 0;
-  uint8_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(SEGMENT.palette.id);
+  uint8_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette.id);
 
   // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
   
@@ -929,7 +936,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -986,7 +993,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
                                         0,SEGMENT.length()
                                       );
 
-  uint16_t pixels_in_map = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+  uint16_t pixels_in_map = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 
   uint16_t pixel_index = 0;
   RgbcctColor colour = RgbcctColor(0);
@@ -1092,7 +1099,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -1128,7 +1135,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
     #endif
 
   }
@@ -1311,7 +1318,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(SEGMENT.palette.id);
-//   uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -1637,7 +1644,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   }
 
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
-//   uint8_t pixels = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+//   uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 //   uint8_t desired_pixel;
   
 //   // 25 to 100%
@@ -1839,7 +1846,7 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
   
 //   mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
 
-//   uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(ptr);
+//   uint8_t pixels_max = GetNumberOfColoursInPalette(ptr);
 
 //   if(desired_index >= pixels_max){
 //     desired_index %= pixels_max;
@@ -2554,7 +2561,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 
 //         // Go through strip, randomly change some to coloured or black
 //         mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
-//         uint8_t pixels = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+//         uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 //         RgbTypeColor colour_random = RgbTypeColor(0);
 
 //         uint16_t random_pixel_index = 0;
@@ -2784,7 +2791,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 
 //         // Go through strip, randomly change some to coloured or black
 //         mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
-//         uint8_t pixels = mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+//         uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
 //         RgbTypeColor colour_random = RgbTypeColor(0);
 
 //         uint16_t random_pixel_index = 0;
@@ -3559,7 +3566,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(pCONT_iLight->animation.palette.id);
-//   uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -4608,7 +4615,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID);
-//   uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -5055,7 +5062,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //    * Get total pixels in palette
 //    * */
 //   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(pCONT_iLight->animation.palette.id);
-//   uint8_t pixels_max = mPaletteI->GetNumberOfColoursInPalette(palette_p);
+//   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
 //   // Lets assume we need a zero crossing index, thus, we can use it to identity AS and DE modes
@@ -5604,7 +5611,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //         for (uint16_t ii = 0; ii < random_amount; ii++){
 //           flashed_brightness = random(0,shared_flasher_parameters.alternate_brightness_max);        
 //           // For random, desired pixel from map will also be random
-//           desired_pixel = random(0,mPaletteI->GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr));
+//           desired_pixel = random(0,GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr));
 //           // get colour from palette
 //           flash_colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
 //           flash_colour = ApplyBrightnesstoRgbcctColour(flash_colour,flashed_brightness);
@@ -6421,7 +6428,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks()
       // AddLog(LOG_LEVEL_TEST, "index=%d\t%d",i,index);
       #ifdef ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES
       mPaletteI->SetPaletteListPtrFromID(SEGMENT.palette.id);
-      uint8_t pixels_in_palette = mPaletteI->GetNumberOfColoursInPalette();
+      uint8_t pixels_in_palette = GetNumberOfColoursInPalette();
       SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1)), true);
       #else // wled way for now
       SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, random8(), nullptr, false, false, 0), SET_BRIGHTNESS);

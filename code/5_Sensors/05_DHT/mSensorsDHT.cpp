@@ -314,12 +314,12 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
         JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
         if(json_level >=  JSON_LEVEL_DETAILED)
         {     
-          JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+          JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
             JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
             JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
-          JsonBuilderI->Level_End();   
+          JsonBuilderI->Object_End();   
         }
-      JsonBuilderI->Level_End(); 
+      JsonBuilderI->Object_End(); 
     }
 
   }
@@ -489,11 +489,11 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Data(){
         //   table_row, colour_ctr
         // );
         
-        JsonBuilderI->Level_Start();
+        JsonBuilderI->Object_Start();
           JsonBuilderI->Add("id",row);
           JsonBuilderI->Add("ih",table_row);
           JsonBuilderI->Add("fc",colour_ctr);
-        JsonBuilderI->Level_End();
+        JsonBuilderI->Object_End();
 
       }break;
       case 1:{      
@@ -518,11 +518,11 @@ void mSensorsDHT::WebAppend_Root_Status_Table_Data(){
         //   table_row, colour_ctr
         // );
         
-        JsonBuilderI->Level_Start();
+        JsonBuilderI->Object_Start();
           JsonBuilderI->Add("id",row);
           JsonBuilderI->Add("ih",table_row);
           JsonBuilderI->Add("fc",colour_ctr);
-        JsonBuilderI->Level_End();
+        JsonBuilderI->Object_End();
 
         sensor_counter++;
       }break;

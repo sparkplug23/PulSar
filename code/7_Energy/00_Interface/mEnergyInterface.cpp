@@ -1356,14 +1356,14 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_app
   // JsonBuilderI->Add(D_JSON_ENERGYLAST,           Energy.last_energy);
   
   // if(json_method >= JSON_LEVEL_DETAILED){
-  //   JsonBuilderI->Level_Start(D_JSON_KWH_STATS);
+  //   JsonBuilderI->Object_Start(D_JSON_KWH_STATS);
   //     JsonBuilderI->Add(D_JSON_INDEX, Energy.stats.kwh_per_minute_index);
   //     JsonBuilderI->Add(D_JSON_ENERGY "LastMinute", Energy.stats.last_minutes_energy);
   //     JsonBuilderI->Add(D_JSON_ENERGY "Currently",  Energy.stats.current_energy);
   //     JsonBuilderI->Add(D_JSON_ENERGY "ThisMinute", Energy.stats.this_minutes_energy);
   //     JsonBuilderI->Array_AddArray_F("kwh_per_minute",           Energy.stats.kwh_per_minute,     sizeof(Energy.stats.kwh_per_minute)/4);
   //     JsonBuilderI->Array_AddArray_F("kwh_each_minute",          Energy.stats.kwh_each_minute,    sizeof(Energy.stats.kwh_each_minute)/4);
-  //   JsonBuilderI->Level_End();
+  //   JsonBuilderI->Object_End();
   // }
 
   // Serial.println(JBI->GetBufferPtr()); Serial.flush();
@@ -1382,7 +1382,7 @@ uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_level, bool
 
   // Create a new "Array" method that just lets me pass infinite amount of parameters using vsprintf
 
-    JsonBuilderI->Level_Start("Current");
+    JsonBuilderI->Object_Start("Current");
     
       JsonBuilderI->Array_Start("IsExceeded"); //show value right now
       for(int ii=0;ii<Energy.phase_count;ii++){
@@ -1420,7 +1420,7 @@ uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_level, bool
       // }
       // JsonBuilderI->Array_End();
 
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
 
     // Voltage
@@ -1459,14 +1459,14 @@ uint8_t mEnergyInterface::ConstructJSON_ThresholdLimits(uint8_t json_level, bool
     // parameter_thresholds[ii].energy.over_limit_seconds_counter = 0;
     // parameter_thresholds[ii].energy.over_limit_seconds_trigger_value = 120;
   // if(json_method >= JSON_LEVEL_DETAILED){
-  //   JsonBuilderI->Level_Start(D_JSON_KWH_STATS);
+  //   JsonBuilderI->Object_Start(D_JSON_KWH_STATS);
   //     JsonBuilderI->Add(D_JSON_INDEX, Energy.stats.kwh_per_minute_index);
   //     JsonBuilderI->Add(D_JSON_ENERGY "LastMinute", Energy.stats.last_minutes_energy);
   //     JsonBuilderI->Add(D_JSON_ENERGY "Currently",  Energy.stats.current_energy);
   //     JsonBuilderI->Add(D_JSON_ENERGY "ThisMinute", Energy.stats.this_minutes_energy);
   //     JsonBuilderI->Array_AddArray_F("kwh_per_minute",           Energy.stats.kwh_per_minute,     sizeof(Energy.stats.kwh_per_minute)/4);
   //     JsonBuilderI->Array_AddArray_F("kwh_each_minute",          Energy.stats.kwh_each_minute,    sizeof(Energy.stats.kwh_each_minute)/4);
-  //   JsonBuilderI->Level_End();
+  //   JsonBuilderI->Object_End();
   // }
 
   return JsonBuilderI->End();
@@ -1483,7 +1483,7 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_level, bool json_a
 
     // JsonBuilderI->Add(D_JSON_CHANNELCOUNT"232",         0);
     
-    JBI->Level_Start("Address");
+    JBI->Object_Start("Address");
     // for(int ii=0;ii<pCONT_iEnergy->Energy.phase_count;ii++)
     for(int ii=0;ii<address.size();ii++)
     {
@@ -1494,7 +1494,7 @@ uint8_t mEnergyInterface::ConstructJSON_Settings(uint8_t json_level, bool json_a
         // }
       JBI->Array_End();
     }
-    JBI->Level_End();
+    JBI->Object_End();
 
 
   
@@ -1850,7 +1850,7 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
   JsonBuilderI->Array_Start("ener_tab");// Class name
   for(int row=0;row<6;row++){
     for(int device=0;device<Energy.phase_count;device++){//Energy.phase_count;device++){
-      JsonBuilderI->Level_Start();
+      JsonBuilderI->Object_Start();
         JsonBuilderI->Add("id",count++);
         //add for flag, to highlight row where power is "in use"/high
         if(pCONT_pzem->data_modbus[device].active_power>30){
@@ -1867,7 +1867,7 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
           case 4: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].power_factor); break;
           case 5: JsonBuilderI->Add("ih",pCONT_pzem->data_modbus[device].energy); break;
         } //switch      
-      JsonBuilderI->Level_End();
+      JsonBuilderI->Object_End();
     }
   }//end for
   JsonBuilderI->Array_End();
@@ -1887,10 +1887,10 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
   //   }else{
   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
   //   }        
-  //   JsonBuilderI->Level_Start();
+  //   JsonBuilderI->Object_Start();
   //     JsonBuilderI->Add("id",row);
   //     JsonBuilderI->Add("bc",colour_button);
-  //   JsonBuilderI->Level_End();
+  //   JsonBuilderI->Object_End();
   // }  
   // JsonBuilderI->Array_End();
 

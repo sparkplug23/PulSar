@@ -952,7 +952,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
 
-  ALOG_DBM(PSTR("LoadPalette %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
+  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
 
   /**
    * @brief My palettes
@@ -963,7 +963,10 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
     ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
   ){   
 
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);  
+    // mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);  
+
+    mPalette::PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+
 
     #ifdef ESP32
     SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
@@ -1003,7 +1006,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->currentPalette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 192, random8(128, 255)),
@@ -1018,7 +1021,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->currentPalette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
@@ -1035,7 +1038,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->currentPalette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
@@ -1053,7 +1056,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->currentPalette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
@@ -1071,7 +1074,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          mPaletteI->currentPalette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
                           CHSV(random8(), random8(0, 255), 255),
                           CHSV(random8(), random8(0, 255), 255),
                           CHSV(random8(), random8(0, 255), 255),
@@ -1087,7 +1090,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
       { //primary color only
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0])); //is this stable to do? maybe since its not a pointer but instead an instance of a class
-        mPaletteI->currentPalette = CRGBPalette16(prim); 
+        SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim); 
         // length = 1;
       }
       break;
@@ -1095,7 +1098,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
       { //primary + secondary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-        mPaletteI->currentPalette = CRGBPalette16(prim,prim,sec,sec); 
+        SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim,prim,sec,sec); 
         // length = 4;
       }
       break;
@@ -1104,7 +1107,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
         CRGB ter  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-        mPaletteI->currentPalette = CRGBPalette16(ter,sec,prim); 
+        SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(ter,sec,prim); 
         // length = 3; // 3 unique colours
       }
       break;    
@@ -1115,9 +1118,9 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         if (RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]))
         {
           CRGB ter = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-          mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
         } else {
-          mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
+          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
         }
         // length = 16;
       }
@@ -1131,10 +1134,219 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
   ){   
-    mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id); // ie WLED22 "loadPalette"
+    mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id, segment_index); // ie WLED22 "loadPalette"
   }
 
 }
+
+
+
+/**
+ * @brief Function to load palette_id into the segment
+ *   (lets just use largest possible byte value without making it dynamic for now)
+ * 
+ * For now, calling this function will take all data from the palette (rgb data) and 
+ * move it into the array
+ * 
+ * Later, GetColourFromPreloadedPalette will retreive data from ram array, NEVER progmem
+ * 
+ * loadPalette 
+ *  ** create buffer into heap, save pointer
+ * 
+ * unloadPalette
+ *  ** delete buffer data from heap, reset to nullptr
+ * 
+ * should load even be here? surely into palette container
+ * 
+ */
+// void mAnimatorLight::LoadPalette_Into_PaletteContainer(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer, uint16_t palette_buflen)
+// {
+
+//   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
+
+//   ALOG_DBM(PSTR("LoadPalette %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
+
+//   /**
+//    * @brief My palettes
+//    **/
+//   if(
+//     ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)) ||
+//     ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
+//     ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
+//   ){   
+
+//     mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);  
+
+//     #ifdef ESP32
+//     SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
+//     #else // ESP8266 requires safe reading out of progmem first
+//     uint8_t buffer[ptr->data_length];
+//     memcpy_P(buffer, ptr->data, sizeof(uint8_t)*ptr->data_length);
+//     SEGMENT_I(segment_index).palette_container->pData.assign(buffer, buffer + ptr->data_length);
+//     #endif  
+ 
+//   }
+//   else
+//   if(
+//     (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+//   ){  
+//     // Does not need loaded, contained in segment
+//   }
+//   else
+//   if(
+//     (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+//   ){  
+//     // Does not need loaded, contained in segment
+//   }
+//   else
+//   if(
+//     (palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID)
+//   ){  
+
+//     /**
+//      * @brief These pri/sec/ter should really be merged into my palettes as another encoded type, thus, removing colors[x] from palette.cpp
+//      * 
+//      */
+//     switch(palette_id)
+//     {
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID: // Original WLED random
+//       {        
+//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
+//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         {
+//           mPaletteI->currentPalette = CRGBPalette16(
+//                           CHSV(random8(), 255, random8(128, 255)),
+//                           CHSV(random8(), 255, random8(128, 255)),
+//                           CHSV(random8(), 192, random8(128, 255)),
+//                           CHSV(random8(), 255, random8(128, 255)));
+//           SEGMENT_I(segment_index).aux3 = millis();
+//         }
+//       }
+//       break;
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
+//       {        
+//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
+//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         {
+//           mPaletteI->currentPalette = CRGBPalette16(
+//                           CHSV(random8(), random8(204, 255), 255),
+//                           CHSV(random8(), random8(204, 255), 255),
+//                           CHSV(random8(), random8(204, 255), 255),
+//                           CHSV(random8(), random8(204, 255), 255)
+//                           );
+                          
+//           SEGMENT_I(segment_index).aux3 = millis();
+//         }
+//       }
+//       break;
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
+//       {        
+//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
+//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         {
+//           mPaletteI->currentPalette = CRGBPalette16(
+//                           CHSV(random8(), random8(153, 255), 255),
+//                           CHSV(random8(), random8(153, 255), 255),
+//                           CHSV(random8(), random8(153, 255), 255),
+//                           CHSV(random8(), random8(153, 255), 255)
+//                           );
+                          
+//           SEGMENT_I(segment_index).aux3 = millis();
+//         }
+//       }
+//       break;
+
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
+//       {        
+//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
+//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         {
+//           mPaletteI->currentPalette = CRGBPalette16(
+//                           CHSV(random8(), random8(153, 217), 255),
+//                           CHSV(random8(), random8(153, 217), 255),
+//                           CHSV(random8(), random8(153, 217), 255),
+//                           CHSV(random8(), random8(153, 217), 255)
+//                           );
+                          
+//           SEGMENT_I(segment_index).aux3 = millis();
+//         }
+//       }
+//       break;
+
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
+//       {        
+//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
+//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
+//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         {
+//           mPaletteI->currentPalette = CRGBPalette16(
+//                           CHSV(random8(), random8(0, 255), 255),
+//                           CHSV(random8(), random8(0, 255), 255),
+//                           CHSV(random8(), random8(0, 255), 255),
+//                           CHSV(random8(), random8(0, 255), 255)
+//                           );
+                          
+//           SEGMENT_I(segment_index).aux3 = millis();
+//         }
+//       }
+//       break;
+
+    
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
+//       { //primary color only
+//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0])); //is this stable to do? maybe since its not a pointer but instead an instance of a class
+//         mPaletteI->currentPalette = CRGBPalette16(prim); 
+//         // length = 1;
+//       }
+//       break;
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID:
+//       { //primary + secondary
+//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
+//         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
+//         mPaletteI->currentPalette = CRGBPalette16(prim,prim,sec,sec); 
+//         // length = 4;
+//       }
+//       break;
+//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID:
+//       { //primary + secondary + tertiary
+//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
+//         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
+//         CRGB ter  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
+//         mPaletteI->currentPalette = CRGBPalette16(ter,sec,prim); 
+//         // length = 3; // 3 unique colours
+//       }
+//       break;    
+//       case  mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID:
+//       { //primary + secondary (+tert if not off), more distinct
+//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
+//         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
+//         if (RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]))
+//         {
+//           CRGB ter = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
+//           mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
+//         } else {
+//           mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
+//         }
+//         // length = 16;
+//       }
+//       break;
+
+//     } //end switch
+    
+//   }
+//   else
+//   if(
+//     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+//     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+//   ){   
+//     mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id); // ie WLED22 "loadPalette"
+//   }
+
+// }
 
 
 /**
@@ -1148,6 +1360,9 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
 const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer, uint8_t buflen)
 {
 
+  // ALOG_INF(PSTR("GetPaletteNameByID %d"), palette_id);
+  // Serial.flush();
+
   /**************************************************************
    * 
    * Dynamic User Defined Names
@@ -1158,13 +1373,15 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
    * 
   ***************************************************************/
   if(
-    ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
+    ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) && 
+    (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
   ){  
     uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;
     DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
   }
+  // DEBUG_LINE_HERE;
     
-  #ifdef ENABLE_DEVFEATURE_PALETTE_GET_NAMES_FROM_PALETTE_WHEN_STATIC
+    
   /**
    * @brief All static (progmem) palette names are stored in palette class
    * 
@@ -1175,85 +1392,78 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
    * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
    */
   if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_TOTAL_LENGTH))
+    ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID) && (palette_id < mPalette::PALETTELIST_TOTAL_LENGTH))
   ){       
+  // DEBUG_LINE_HERE;
     mPaletteI->GetPaletteNameByID(palette_id, buffer, buflen);
   }
-  #else
-  /**************************************************************
-   * 
-   * PALETTELIST_STATIC__IDS
-   * 
-  ***************************************************************/
-  if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))
-  ){       
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id); 
-    ALOG_DBM( PSTR("Name \"%S\""), ptr->friendly_name_ctr );
-    snprintf_P(buffer, buflen, ptr->friendly_name_ctr);
-  }
   
-  /**************************************************************
-   * 
-   * PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS
-   * 
-  ***************************************************************/
-  if(
-    ((palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
-  ){  
-    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;
-    pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES_NAMES_CTR);   
-  }
-   
-  /**************************************************************
-   * 
-   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
-   * 
-  ***************************************************************/
-  if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
-  ){  
-    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID;
-    pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
-  }
-
-  /**************************************************************
-   * 
-   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
-   * 
-  ***************************************************************/
-  if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  ){  
-    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR);   
-  }
-
-  /**************************************************************
-   * 
-   * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
-   * 
-  ***************************************************************/
-  if(
-    (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
-  ){  
-
-    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID;
-    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
-
-    const HtmlColorPair* colorPair = HtmlColorNames::Pair(adjusted_id);
-    PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
-    RgbcctColor colour = (HtmlColor)colorPair->Color;
-    memcpy_P(buffer, searchName, sizeof(char)*strlen_P(searchName)+1);
-
-    ALOG_DBM(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), adjusted_id, searchName, colorPair->Color, colour.R, colour.G, colour.B);
-   
-  }
-  #endif
+  // DEBUG_LINE_HERE;
 
   return buffer;
 
 }
+
+
+
+/**
+ * @brief Gets palette names directly or from palette class when needed
+ * 
+ * @param palette_id 
+ * @param buffer 
+ * @param buflen 
+ * @return const char* 
+ */
+int16_t mAnimatorLight::GetPaletteIDbyName(char* buffer)
+{
+
+  // ALOG_INF(PSTR("GetPaletteNameByID %d"), palette_id);
+  // Serial.flush();
+  int16_t found_id = -1;
+
+  /**************************************************************
+   * Check variables first
+   * Dynamic User Defined Names
+   * 
+   * PALETTELIST_VARIABLE_HSBID__IDS
+   * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * PALETTELIST_VARIABLE_GENERIC__IDS
+   * 
+   * 
+   * check the user defined range
+   * 
+  ***************************************************************/
+  if((found_id = DLI->GetDeviceIDbyName(buffer, GetModuleUniqueID()))>=0)
+  {
+    ALOG_INF(PSTR("FOUND Var Name(%s) -> %d"), buffer, found_id);
+  }
+  /**
+   * @brief All static (progmem) palette names are stored in palette class
+   * 
+   * PALETTELIST_STATIC__IDS
+   * PALETTELIST_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES__IDS
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+   */
+  else
+  if((found_id=mPaletteI->Get_Static_PaletteIDbyName(buffer))>=0)
+  {
+    ALOG_INF(PSTR("FOUND STATIC Name(%s) -> %d"), buffer, found_id);
+  }
+  else
+  {
+    ALOG_INF(PSTR("ERROR NO PALETTE ID FOUND FOR Name(%s)"), buffer);
+
+  }
+  
+  DEBUG_LINE_HERE;
+
+  return found_id;
+
+}
+
+
 
 
 //get RGB values from color temperature in K (https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
@@ -1550,6 +1760,8 @@ void mAnimatorLight::SubTask_Segments_Animation()
         seg.flags.fForceUpdate = false;
         seg.tSaved_AnimateRunTime = millis(); // Not reset inside TimeReached when fForceUpdate is triggered
       }
+
+      DEBUG_LINE_HERE;
       
       #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
       // if(!seg.transitional)  // Needs better integration before it can be used
@@ -1559,6 +1771,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
       #endif // ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
 
       
+      DEBUG_LINE_HERE;
       // This maybe cant be global and needs placed inside each effect?
       // Not valid for long term, needs to be changed
       Set_Segment_ColourType(_segment_index_primary, pCONT_set->Settings.light_settings.type);
@@ -1574,6 +1787,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
       ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
 
+      DEBUG_LINE_HERE;
       switch(seg.effect_id)
       {
         default:
@@ -2448,6 +2662,98 @@ bool mAnimatorLight::SetTransitionColourBuffer_StartingColour(
 
 
 }
+
+
+
+
+uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
+{
+
+  uint8_t palette_colour_count = 0;
+
+  // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
+
+  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
+
+  /**
+   * @brief PaletteList Vectors should have the length stored in it. Actual pixel count depends on encoding type
+   **/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
+  ){   
+
+    uint16_t encoded_colour_width = 0;
+
+    mPalette::PALETTE pal = mPaletteI->palettelist[palette_id];
+
+    // Serial.println(ptr->encoding.data, BIN);
+
+    // With this enabled, only the christmas palettes will be stable!!
+
+    if(pal.encoding.red_enabled){ encoded_colour_width++; }
+    if(pal.encoding.green_enabled){ encoded_colour_width++; }
+    if(pal.encoding.blue_enabled){ encoded_colour_width++; }
+    if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
+
+    if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
+    if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
+
+    if(pal.encoding.index_exact){ encoded_colour_width++; }
+    if(pal.encoding.index_scaled_to_segment){ encoded_colour_width++; }
+    if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
+    if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
+    
+    if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
+    if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
+    if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
+    if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
+
+
+    if(encoded_colour_width==0)
+    {
+      ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
+      return palette_colour_count;
+    }
+  
+    palette_colour_count = pal.data_length/encoded_colour_width; 
+ 
+  }
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+  ){
+    palette_colour_count = 1;
+  }
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+  ){  
+    palette_colour_count = 1;
+  }
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID)
+  ){  
+    palette_colour_count = 16;    
+  }
+  else
+  if(
+    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  ){   
+    palette_colour_count = 16;
+  }
+
+  return palette_colour_count;
+
+}
+
+
+
+
+
 
 
 /*
@@ -4197,6 +4503,9 @@ void mAnimatorLight::Segment_New::setUpLeds() {
 CRGBPalette16 &mAnimatorLight::Segment_New::loadPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
   static unsigned long _lastPaletteChange = 0; // perhaps it should be per segment
   static CRGBPalette16 randomPalette = CRGBPalette16(DEFAULT_COLOR);
+
+  ALOG_INF(PSTR("&mAnimatorLight::Segment_New::loadPalette"));
+
   // byte tcp[72];
   // if (pal < 245 && pal > GRADIENT_PALETTE_COUNT+13) pal = 0;
   // if (pal > 245 && (strip.customPalettes.size() == 0 || 255U-pal > strip.customPalettes.size()-1)) pal = 0;
@@ -5734,6 +6043,7 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
   // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
+      // DEBUG_LINE_HERE;
 
 /**
  * @brief Notice how I can automatically pass the one buffer, or my own to load additional palettes
@@ -6148,7 +6458,7 @@ JBI->Start();
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
     for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
     {
-      JBI->Level_Start_F("Segment%d",seg_i);      
+      JBI->Object_Start_F("Segment%d",seg_i);      
         JBI->Add("dataLen", SEGMENT_I(seg_i).palette_container->pData.size());
         JBI->Array_Start("data");
         for(uint8_t i=0;i<SEGMENT_I(seg_i).palette_container->pData.size();i++)
@@ -6156,13 +6466,13 @@ JBI->Start();
           JBI->Add(SEGMENT_I(seg_i).palette_container->pData[i]);
         }
         JBI->Array_End();
-      JBI->Level_End();
+      JBI->Object_End();
     }
     #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
 
 
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    JBI->Level_Start("Encoding");
+    JBI->Object_Start("Encoding");
       for(uint8_t palette_id=mPalette::PALETTELIST_STATIC_HOLLOWEEN_OP__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_01__ID;palette_id++)
       {
         // JBI->Array_Start_P("%s", mPaletteI->GetPaletteNameByID( palette_id, buffer, sizeof(buffer) ));
@@ -6177,7 +6487,7 @@ JBI->Start();
           JBI->Add(buffer);
         JBI->Array_End();
       }
-    JBI->Level_End();
+    JBI->Object_End();
     #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
 
 
@@ -6252,11 +6562,11 @@ JBI->Start();
      * @brief Moving towards preloading palettes from memory into ram/heap for speed (then iram will work)
      * 
      */
-    JBI->Level_Start("LoadPalette");
+    JBI->Object_Start("LoadPalette");
 
       uint8_t segment_index = 0;
 
-    JBI->Level_End();
+    JBI->Object_End();
     
 
 return JBI->End();
@@ -6284,7 +6594,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
   {
 
     Segment_New &seg = getSegment(seg_i);
-    JBI->Level_Start_F("Segment%d",seg_i);
+    JBI->Object_Start_F("Segment%d",seg_i);
 
       JBI->Add("BrightnessRGB", seg.getBrightnessRGB());
       JBI->Add("BrightnessCCT", seg.getBrightnessCCT());
@@ -6299,7 +6609,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
       JBI->Add("Offset",    seg.offset);
       JBI->Add("Speed",     seg.speed());
       JBI->Add("Intensity", seg.intensity());
-      JBI->Level_Start("Options");
+      JBI->Object_Start("Options");
         JBI->Add("Selected",     seg.selected);
         JBI->Add("Reverse",      seg.reverse);
         JBI->Add("On",           seg.on);
@@ -6312,13 +6622,13 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
         JBI->Add("Transpose",    seg.transpose);
         JBI->Add("Map1D2D",      seg.map1D2D);
         JBI->Add("SoundSim",     seg.soundSim);
-      JBI->Level_End();
+      JBI->Object_End();
       JBI->Add("ColourType",     (uint8_t)seg.colour_type);
-      JBI->Level_Start("Transition");
+      JBI->Object_Start("Transition");
         JBI->Add("Rate",         seg.transition.rate_ms);
         JBI->Add("Time",         seg.transition.time_ms);
-      JBI->Level_End();
-      JBI->Level_Start("RgbcctColours");
+      JBI->Object_End();
+      JBI->Object_Start("RgbcctColours");
       for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
       {
         JBI->Array_Start_P("Colour%d", rgb_i);
@@ -6327,15 +6637,15 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
           JBI->Add(seg.rgbcctcolors[rgb_i].raw[c_i]);
         }
         JBI->Array_End();
-        JBI->Level_Start("ColourTemp");
+        JBI->Object_Start("ColourTemp");
           JBI->Add("Min",      seg.rgbcctcolors[rgb_i].get_CTRangeMin());
           JBI->Add("Max",      seg.rgbcctcolors[rgb_i].get_CTRangeMax());
           JBI->Add("Set",      seg.rgbcctcolors[rgb_i].getCCT());
-        JBI->Level_End();
+        JBI->Object_End();
       }
-      JBI->Level_End();
+      JBI->Object_End();
         
-    JBI->Level_End();
+    JBI->Object_End();
 
   } // END seg_i
 
@@ -6344,6 +6654,74 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
 }
 
 #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+
+
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+
+/**
+ * @brief Multiple large segments may require mutiple topics
+ */
+uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, bool json_appending)
+{
+
+  JBI->Start();
+  JBI->Add("size", mPaletteI->palettelist.size());
+
+
+    char lineBuffer[100] = {0};
+    bool flag_get_first_name_only = true;
+
+    JBI->Array_Start("pals");
+    // for(uint8_t i=0;i<20;i++)//auto& pal: mPaletteI->palettelist)
+
+    uint16_t i = 0;
+
+    for(auto& pal: mPaletteI->palettelist)
+    {
+      // mPalette::PALETTE pal = mPaletteI->palettelist[i];
+      JBI->Object_Start();
+          
+          // pCONT_lAni->GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
+          // // snprintf_P(lineBuffer,sizeof(lineBuffer),"%S",pal.friendly_name_ctr); 
+          // if(flag_get_first_name_only)
+          // {    
+          //   char* dataPtr = strchr(lineBuffer,'|');
+          //   if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+          // }
+          // // ALOG_INF(PSTR("pal=\"%s\""), lineBuffer);
+          // // ALOG_INF(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
+          // if(i<10)
+          //   JBI->Add("n",lineBuffer);
+
+
+
+        // JBI->Add("n", pal.friendly_name_ctr);
+        // JBI->Add("i", pal.id);
+        
+    uint8_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(pal.id);
+        JBI->Add("s",colours_in_palette);
+
+
+
+    
+        // JBI->Add_FV("e", "%4X", pal.encoding);
+        // JBI->Array_Start("d");
+        //   for(uint8_t i=0;i<pal.data_length;i++)
+        //   {
+        //     JBI->Add(pal.data[i]);
+        //   }
+        // JBI->Array_End();
+      JBI->Object_End();
+
+      i++;
+    }
+    JBI->Array_End();
+
+  return JBI->End();
+
+}
+
+#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -6515,6 +6893,19 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif
 
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+  ptr                         = &mqtthandler_debug_palette_vector;
+  ptr->tSavedLastSent         = millis();
+  ptr->flags.PeriodicEnabled  = true;
+  ptr->flags.SendNow          = true;
+  ptr->tRateSecs              = 1; 
+  ptr->topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level             = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette_Vector;
+  mqtthandler_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+
 } //end "MQTTHandler_Init"
 
 /**
@@ -6532,12 +6923,12 @@ void mAnimatorLight::MQTTHandler_Set_RefreshAll()
  * */
 void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 {
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
 }
 
 /**

@@ -296,7 +296,7 @@ uint32_t i = 0;
 void mSettings::SettingsMerge(SYSCFG* s, SYSCFG* l)
 {
   #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "SettingsMerge: Only using loaded settings currently tested %d"), l->animation_settings.xmas_controller_params[0]);
+  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "SettingsMerge: Only using loaded settings currently tested %d"), l->animation_settings.xmas_controller_params[0]);
   #endif // ENABLE_LOG_LEVEL_INFO
 
   // Header
@@ -308,12 +308,12 @@ void mSettings::SettingsMerge(SYSCFG* s, SYSCFG* l)
   s->cfg_crc = l->cfg_crc;
 
   // Xmas Controller
-  s->animation_settings.xmas_controller_params[0] = l->animation_settings.xmas_controller_params[0];
-  s->animation_settings.xmas_controller_params[1] = l->animation_settings.xmas_controller_params[1];
-  s->animation_settings.xmas_controller_params[2] = l->animation_settings.xmas_controller_params[2];
-  s->animation_settings.xmas_controller_params[3] = l->animation_settings.xmas_controller_params[3];
-  s->animation_settings.xmas_controller_params[4] = l->animation_settings.xmas_controller_params[4];
-  s->animation_settings.xmas_controller_params[5] = l->animation_settings.xmas_controller_params[5];
+  // s->animation_settings.xmas_controller_params[0] = l->animation_settings.xmas_controller_params[0];
+  // s->animation_settings.xmas_controller_params[1] = l->animation_settings.xmas_controller_params[1];
+  // s->animation_settings.xmas_controller_params[2] = l->animation_settings.xmas_controller_params[2];
+  // s->animation_settings.xmas_controller_params[3] = l->animation_settings.xmas_controller_params[3];
+  // s->animation_settings.xmas_controller_params[4] = l->animation_settings.xmas_controller_params[4];
+  // s->animation_settings.xmas_controller_params[5] = l->animation_settings.xmas_controller_params[5];
 
 }
 

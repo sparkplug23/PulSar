@@ -30,831 +30,77 @@ void mPalette::init_PresetColourPalettes()
   
   ALOG_DBM( PSTR("init_PresetColourPalettes") );
   
+  PALETTE pal = {0};
+  uint8_t adjusted_id = 0;
+
+  if(palettelist.size() > 0)
+  {    
+    ALOG_INF( PSTR("init_PresetColourPalettes - ALREADY SET, DO NOT RUN AGAIN") );
+    return;
+  }
+  
   /**
    *  Static 
+   * 
+   * Move these all into this function directly, no more subfunctions, will make adding more easier and take up less codes
+   * 
+   * Similar to mqtt handler, can this also be vectorised? or like WLED effects?
+   * ie push a new palette into the vectorised version. This would make all of the palette and functions much easier to get with functions without long switch cases
+   * 
    * */
-  init_ColourPalettes_Party_Default();
-  init_ColourPalettes_Autumn_Red();
-  init_ColourPalettes_Autumn_Green();
-  init_ColourPalettes_Winter(); 
-  init_ColourPalettes_Ocean_01();
-  init_ColourPalettes_Rainbow();
-  init_ColourPalettes_RainbowInverted();
-  init_ColourPalettes_Holloween_OP();
-  init_ColourPalettes_Holloween_OGP();
-  init_ColourPalettes_Hot_Neon_Pink_With_Navy();
-  init_ColourPalettes_Single_Fire_01();
-  init_ColourPalettes_Flower_SweetPeas_01();
-  init_ColourPalettes_Flower_SweetPeas_02();
-  init_ColourPalettes_Pink_Purple_01();
-  init_ColourPalettes_Pink_Purple_02();
-  init_ColourPalettes_Pink_Purple_03();
-  init_ColourPalettes_Pastel_01();
-  init_ColourPalettes_Pastel_02();
-  init_ColourPalettes_Gradient_01();
-  init_ColourPalettes_Gradient_02();
-  init_ColourPalettes_Gradient_Fire_01();
-  init_ColourPalettes_Gradient_Pastel_Tones_Purple();
-  init_ColourPalettes_Berry_Green();
-  init_ColourPalettes_Christmas_01();
-  init_ColourPalettes_Christmas_02();
-  init_ColourPalettes_Christmas_03();
-  init_ColourPalettes_Christmas_04();
-  init_ColourPalettes_Christmas_05();
-  init_ColourPalettes_Christmas_06();
-  init_ColourPalettes_Christmas_07();
-  init_ColourPalettes_Christmas_08();
-  init_ColourPalettes_Christmas_09();
-  init_ColourPalettes_Christmas_10();
-  init_ColourPalettes_Christmas_11();
-  init_ColourPalettes_Christmas_12();
-  init_ColourPalettes_Christmas_13();
-  init_ColourPalettes_Christmas_14();
-  init_ColourPalettes_Christmas_15();
-  init_ColourPalettes_Christmas_16();
-  init_ColourPalettes_Christmas_17();
-  init_ColourPalettes_Christmas_18();
-  init_ColourPalettes_Christmas_19();
-  init_ColourPalettes_Christmas_20();
-  init_ColourPalettes_Christmas_21();
-  init_ColourPalettes_Christmas_22();
-  init_ColourPalettes_Christmas_23();
-  init_ColourPalettes_Christmas_24();
-  init_ColourPalettes_Christmas_25();
-  init_ColourPalettes_Christmas_26();
-  init_ColourPalettes_Christmas_27();
-  init_ColourPalettes_Christmas_28();
-  init_ColourPalettes_Christmas_29();
-  init_ColourPalettes_Christmas_30();
-  init_ColourPalettes_Sky_Glow_01();
-  init_ColourPalettes_Sunrise_01();
-  init_ColourPalettes_Sunrise_02();
-  init_ColourPalettes_Sunrise_03();
-  init_ColourPalettes_Sunrise_04();
-  init_ColourPalettes_Sunset_01();
-  init_ColourPalettes_Sunset_02();
-  init_ColourPalettes_Candle_Flame_01();
-  init_ColourPalettes_Custom_User_01();
-  init_ColourPalettes_Gradient_SunLevel_Group01_01();
-  init_ColourPalettes_Gradient_SunLevel_Group01_02();
-  init_ColourPalettes_Gradient_SunLevel_Group01_03();
-  init_ColourPalettes_Gradient_SunLevel_Group01_04();
-  init_ColourPalettes_Gradient_SunLevel_Group01_05();
-  init_ColourPalettes_Gradient_SunLevel_Group01_06();
-  init_ColourPalettes_Gradient_SunLevel_Group01_07();
-  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_01();
-  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_02();
-  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03();
-  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04();
-  init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01();
-  
-  /**
-   *  Variable HSBID 
-   * */
-  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID-PALETTELIST_VARIABLE_HSBID_01__ID);id++){
-    init_PresetColourPalettes_HSBID_UserFill(id);
+
+  for(
+    uint8_t id=0; 
+            id<(PALETTELIST_VARIABLE_HSBID_LENGTH__ID-PALETTELIST_VARIABLE_HSBID_01__ID);
+            id++
+  ){
+          
+    // Step 1: Set the memory location that holds the palette
+    pal.id = id+PALETTELIST_VARIABLE_HSBID_01__ID;
+    pal.friendly_name_ctr = nullptr; // Saved in DeviceName
+    pal.data = &hsbid_pals[id].encoded_data[0];     // Point to memory location
+    pal.data_length = 20;
+    pal.encoding.data       = D_PALETTE_HSBID_01_ENCODING;
+
+    // Step 2: Load in the default states (step 3 later will override these from filesystem read)
+    auto    default_data_ptr    = GetDefaultColourPaletteUserIDs_P(id);
+    uint8_t default_data_length = GetDefaultColourPaletteUserIDsCount(id);    
+    memset(pal.data, COLOUR_MAP_NONE__ID, sizeof(uint8_t)*20); // Clear back to none_id    
+    memcpy_P(pal.data, default_data_ptr, sizeof(uint8_t)*default_data_length); // Read from PROGMEM the defaults
+    pal.data_length = default_data_length; // set pixels in palette
+
+    palettelist.push_back(pal); ALOG_INF( PSTR("palettelist %d|%d"), __LINE__, palettelist.size() );
+
   }
 
   /**
-   *  Variable HSBID 
+   *  Static 
+   * 
+   * init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id)
+   * 
    * */
-  for(uint8_t id=0;id<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);id++){
-    init_PresetColourPalettes_User_RGBCCT_Fill(id);
+
+  for(
+    uint8_t id=0; 
+            id<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID); 
+            id++
+  ){
+
+    ALOG_ERR(PSTR("THESE ARE NOT HERE ANYMORE, keeping to permit compile"));
+
+    pal.id = id+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    pal.friendly_name_ctr = nullptr;
+    pal.data = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[id*5]; // Point to memory location
+    pal.data_length = 5; // each is 5 bytes wide, 1 pixel = 5 bytes total    
+    pal.encoding.data       = PALETTE_ENCODING_INCLUDES_RGBCCT_NO_INDEX;
+
+    palettelist.push_back(pal); ALOG_INF( PSTR("palettelist %d|%d"), __LINE__, palettelist.size() );
+
   }
 
-  /**
-   *  Variable Encoded Generic 
-   * */
-  for(uint8_t id=0;id<(PALETTELIST_VARIABLE_GENERIC_LENGTH__ID-PALETTELIST_VARIABLE_GENERIC_01__ID);id++){
-    init_PresetColourPalettes_User_Generic_Fill(0);
-  }
 
-  // DEBUG_LINE_HERE;
-}
-
-
-void mPalette::init_ColourPalettes_Party_Default(){
-  palettelist.ptr                      = &palettelist.party_default;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_PARTY_DEFAULT__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_PARTY_DEFAULT_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PARTY_DEFAULT_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Holloween_OP(){
-  palettelist.ptr                      = &palettelist.holloween_op;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_HOLLOWEEN_OP__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_HOLLOWEEN_OP_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_HOLLOWEEN_OP_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_HOLLOWEEN_OP_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_HOLLOWEEN_OP_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Holloween_OGP(){
-  palettelist.ptr                      = &palettelist.holloween_ogp;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_HOLLOWEEN_OGP__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_HOLLOWEEN_OGP_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_HOLLOWEEN_OGP_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_HOLLOWEEN_OGP_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_HOLLOWEEN_OGP_NAME_CTR; 
-}
-
-
-void mPalette::init_ColourPalettes_Hot_Neon_Pink_With_Navy(){
-  palettelist.ptr                      = &palettelist.hot_pink_neon_with_navy;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_HOT_PINK_NEON_WITH_NAVY_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Single_Fire_01(){
-  palettelist.ptr                      = &palettelist.single_fire_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SINGLE_FIRE_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SINGLE_FIRE_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SINGLE_FIRE_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Flower_SweetPeas_01(){
-  palettelist.ptr                      = &palettelist.flower_sweetpeas_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_FLOWER_SWEATPEAS_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_FLOWER_SWEATPEAS_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_FLOWER_SWEATPEAS_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_FLOWER_SWEATPEAS_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Flower_SweetPeas_02(){
-  palettelist.ptr                      = &palettelist.flower_sweetpeas_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_FLOWER_SWEATPEAS_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_FLOWER_SWEATPEAS_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_FLOWER_SWEATPEAS_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_FLOWER_SWEATPEAS_02_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Pink_Purple_01(){
-  palettelist.ptr                      = &palettelist.pink_purple_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_PINK_PURPLE_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_PINK_PURPLE_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PINK_PURPLE_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Pink_Purple_02(){
-  palettelist.ptr                      = &palettelist.pink_purple_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_PINK_PURPLE_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_PINK_PURPLE_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PINK_PURPLE_02_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Pink_Purple_03(){
-  palettelist.ptr                      = &palettelist.pink_purple_03;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_PINK_PURPLE_03__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PINK_PURPLE_03_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PINK_PURPLE_03_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_PINK_PURPLE_03_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PINK_PURPLE_03_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Pastel_01(){
-  palettelist.ptr                      = &palettelist.pastel_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_PASTEL_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PASTEL_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PASTEL_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_PASTEL_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PASTEL_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Pastel_02(){
-  palettelist.ptr                      = &palettelist.pastel_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_PASTEL_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_PASTEL_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_PASTEL_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_PASTEL_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_PASTEL_02_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Gradient_01(){
-  palettelist.ptr                      = &palettelist.gradient_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_GRADIENT_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_GRADIENT_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_GRADIENT_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_GRADIENT_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Gradient_02(){
-  palettelist.ptr                      = &palettelist.gradient_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_GRADIENT_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_GRADIENT_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_GRADIENT_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_GRADIENT_02_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_Fire_01(){
-  palettelist.ptr                      = &palettelist.gradient_fire_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_FIRE_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_GRADIENT_FIRE_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_GRADIENT_FIRE_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_GRADIENT_FIRE_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_GRADIENT_FIRE_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_Pastel_Tones_Purple(){  
-  palettelist.ptr                      = &palettelist.gradient_pastel_tones_purple;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Berry_Green(){
-  palettelist.ptr                      = &palettelist.berry_green;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_BERRY_GREEN__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_BERRY_GREEN_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_BERRY_GREEN_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_BERRY_GREEN_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_BERRY_GREEN_NAME_CTR; 
-}
-
-
-void mPalette::init_ColourPalettes_Christmas_01(){
-  palettelist.ptr                      = &palettelist.christmas_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_02(){
-  palettelist.ptr                      = &palettelist.christmas_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_02_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_03(){
-  palettelist.ptr                      = &palettelist.christmas_03;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_03__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_03_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_03_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_03_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_03_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_04(){
-  palettelist.ptr                      = &palettelist.christmas_04;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_04__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_04_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_04_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_04_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_04_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_05(){
-  palettelist.ptr                      = &palettelist.christmas_05;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_05__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_05_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_05_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_05_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_05_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_06(){
-  palettelist.ptr                      = &palettelist.christmas_06;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_06__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_06_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_06_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_06_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_06_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_07(){
-  palettelist.ptr                      = &palettelist.christmas_07;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_07__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_07_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_07_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_07_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_07_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_08(){
-  palettelist.ptr                      = &palettelist.christmas_08;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_08__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_08_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_08_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_08_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_08_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_09(){
-  palettelist.ptr                      = &palettelist.christmas_09;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_09__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_09_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_09_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_09_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_09_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_10(){
-  palettelist.ptr                      = &palettelist.christmas_10;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_10__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_10_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_10_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_10_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_10_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_11(){
-  palettelist.ptr                      = &palettelist.christmas_11;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_11__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_11_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_11_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_11_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_11_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_12(){
-  palettelist.ptr                      = &palettelist.christmas_12;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_12__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_12_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_12_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_12_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_12_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_13(){
-  palettelist.ptr                      = &palettelist.christmas_13;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_13__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_13_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_13_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_13_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_13_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_14(){
-  palettelist.ptr                      = &palettelist.christmas_14;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_14__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_14_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_14_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_14_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_14_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_15(){
-  palettelist.ptr                      = &palettelist.christmas_15;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_15__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_15_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_15_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_15_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_15_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_16(){
-  palettelist.ptr                      = &palettelist.christmas_16;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_16__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_16_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_16_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_16_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_16_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_17(){
-  palettelist.ptr                      = &palettelist.christmas_17;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_17__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_17_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_17_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_17_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_17_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_18(){
-  palettelist.ptr                      = &palettelist.christmas_18;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_18__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_18_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_18_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_18_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_18_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_19(){
-  palettelist.ptr                      = &palettelist.christmas_19;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_19__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_19_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_19_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_19_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_19_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_20(){
-  palettelist.ptr                      = &palettelist.christmas_20;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_20__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_20_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_20_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_20_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_20_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_21(){
-  palettelist.ptr                      = &palettelist.christmas_21;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_21__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_21_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_21_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_21_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_21_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_22(){
-  palettelist.ptr                      = &palettelist.christmas_22;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_22__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_22_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_22_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_22_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_22_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_23(){
-  palettelist.ptr                      = &palettelist.christmas_23;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_23__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_23_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_23_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_23_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_23_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_24(){
-  palettelist.ptr                      = &palettelist.christmas_24;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_24__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_24_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_24_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_24_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_24_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_25(){
-  palettelist.ptr                      = &palettelist.christmas_25;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_25__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_25_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_25_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_25_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_25_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_26(){
-  palettelist.ptr                      = &palettelist.christmas_26;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_26__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_26_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_26_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_26_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_26_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_27(){
-  palettelist.ptr                      = &palettelist.christmas_27;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_27__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_27_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_27_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_27_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_27_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_28(){
-  palettelist.ptr                      = &palettelist.christmas_28;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_28__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_28_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_28_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_28_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_28_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_29(){
-  palettelist.ptr                      = &palettelist.christmas_29;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_29__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_29_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_29_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Christmas_30(){
-  palettelist.ptr                      = &palettelist.christmas_30;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CHRISTMAS_30__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CHRISTMAS_30_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CHRISTMAS_30_NAME_CTR; 
-}
-
-
-void mPalette::init_ColourPalettes_Sunrise_01(){  
-  palettelist.ptr                      = &palettelist.sunrise_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SUNRISE_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SUNRISE_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SUNRISE_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SUNRISE_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SUNRISE_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Sunrise_02(){
-  palettelist.ptr                      = &palettelist.sunrise_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SUNRISE_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SUNRISE_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SUNRISE_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SUNRISE_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SUNRISE_02_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Sunrise_03(){
-  palettelist.ptr                      = &palettelist.sunrise_03;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SUNRISE_03__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SUNRISE_03_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SUNRISE_03_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SUNRISE_03_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SUNRISE_03_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Sunrise_04(){
-  palettelist.ptr                      = &palettelist.sunrise_04;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SUNRISE_04__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SUNRISE_04_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SUNRISE_04_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SUNRISE_04_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SUNRISE_04_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Sunset_01(){
-  palettelist.ptr                      = &palettelist.sunset_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SUNSET_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SUNSET_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SUNSET_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SUNSET_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SUNSET_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Sunset_02(){
-  palettelist.ptr                      = &palettelist.sunset_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SUNSET_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SUNSET_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SUNSET_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SUNSET_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SUNSET_02_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Sky_Glow_01(){
-  palettelist.ptr                      = &palettelist.sky_glow_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_SKY_GLOW_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_SKY_GLOW_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_SKY_GLOW_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Candle_Flame_01(){
-  palettelist.ptr                      = &palettelist.candle_flame_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CANDLE_FLAME_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CANDLE_FLAME_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CANDLE_FLAME_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Custom_User_01(){
-  palettelist.ptr                      = &palettelist.custom_user_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_CUSTOM_USER_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_CUSTOM_USER_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_CUSTOM_USER_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Autumn_Red(){
-  palettelist.ptr                      = &palettelist.autumn_red;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_AUTUMN_RED__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_AUTUMN_RED_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_AUTUMN_RED_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_AUTUMN_RED_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_AUTUMN_RED_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Autumn_Green(){
-  palettelist.ptr                      = &palettelist.autumn_green;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_AUTUMN_GREEN__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_AUTUMN_GREEN_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_AUTUMN_GREEN_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_AUTUMN_GREEN_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_AUTUMN_GREEN_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Winter(){  
-  palettelist.ptr                      = &palettelist.winter;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_WINTER__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_WINTER_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_WINTER_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_WINTER_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_WINTER_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Ocean_01(){
-  palettelist.ptr                      = &palettelist.ocean_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_OCEAN_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_OCEAN_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_OCEAN_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_OCEAN_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_OCEAN_01_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Rainbow(){
-  palettelist.ptr                      = &palettelist.rainbow;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_RAINBOW__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_RAINBOW_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_RAINBOW_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_RAINBOW_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_RAINBOW_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_RainbowInverted(){
-  palettelist.ptr                      = &palettelist.rainbow_inverted;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_RAINBOW_INVERTED__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_RAINBOW_INVERTED_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_RAINBOW_INVERTED_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_RAINBOW_INVERTED_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_RAINBOW_INVERTED_NAME_CTR; 
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_01(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_02(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_03(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_03;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_04(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_04;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_04__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_05(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_05;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_05__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_06(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_06;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_06__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Gradient_SunLevel_Group01_07(){
-  palettelist.ptr                      = &palettelist.gradient_sunlevel_group01_07;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07__ID;
-  palettelist.ptr->data                = (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_COLOUR_MAP__DATA;
-  palettelist.ptr->data_length         = sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_COLOUR_MAP__DATA);
-  palettelist.ptr->encoding.data       = D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_NAME_CTR;
-}
-
-void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_01(){
-  palettelist.ptr                      = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA;
-  palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA);
-  palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__CTR;
-}
-
-void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_02(){
-  palettelist.ptr                      = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02__ID;
-  palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA;
-  palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA);
-  palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__CTR;
-}
-
-void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_03(){
-  palettelist.ptr                      = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03__ID;
-  palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA;
-  palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA);
-  palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__CTR;
-}
-
-void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_04(){
-  palettelist.ptr                      = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04__ID;
-  palettelist.ptr->data                = (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA;
-  palettelist.ptr->data_length         = sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA);
-  palettelist.ptr->encoding.data       = D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__CTR;
-}
-
-
-void mPalette::init_ColourPalettes_Solid_RGBCCT_Sun_Elevation_With_Degrees_Index_Dual_Colours_01(){
-  palettelist.ptr                      = &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;  
-  palettelist.ptr->id                  = PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID;
-  palettelist.ptr->data                = (uint8_t*)PM__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__DATA;
-  palettelist.ptr->data_length         = sizeof(PM__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__DATA);
-  palettelist.ptr->encoding.data       = D__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ENCODING;
-  palettelist.ptr->friendly_name_ctr   = (char*)PM__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__CTR;
-}
-
-
-void mPalette::init_PresetColourPalettes_HSBID_UserFill(uint8_t id){
-
-  palettelist.ptr     = &palettelist.hsbid_users[id];
-  palettelist.ptr->id = id+PALETTELIST_VARIABLE_HSBID_01__ID;
-
-  // Point to memory location
-  // This should be changed, the settings removed out of this. Instead, have them preloaded with internal (to palette.h) defaults and then another function that loads in these (double load, but makes the class self contained!!)
-  palettelist.ptr->data = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[id*20];
-
-  palettelist.ptr->data_length = 20;//Get
-
-  // to be moved into devicelist
-  palettelist.ptr->friendly_name_ctr = nullptr; // Used DeviceName
-  
-  palettelist.ptr->encoding.data       = D_PALETTE_HSBID_01_ENCODING;
-  // fill memory location to defaults
-  uint8_t get_pixels_used = GetDefaultColourPaletteUserIDsCount(id);
-
-  auto id_ptr = GetDefaultColourPaletteUserIDs_P(id);
-
-  //clear back to none_id
-  memset(palettelist.ptr->data,COLOUR_MAP_NONE__ID,sizeof(uint8_t)*20);
-
-  // Read from PROGMEM the defaults
-  memcpy_P(palettelist.ptr->data,id_ptr,sizeof(uint8_t)*get_pixels_used);
-
-  //set pixels in palette
-  palettelist.ptr->data_length = get_pixels_used;
-
-}
-
-
-void mPalette::init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id){
-
-  palettelist.ptr     = &palettelist.rgbcct_segment_colour_users[id];
-  palettelist.ptr->id = id+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
-
-  // Point to memory location
-  palettelist.ptr->data = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[id*5];
-  palettelist.ptr->data_length = 5; // each is 5 bytes wide, 1 pixel = 5 bytes total
-
-  // to be moved into devicelist
-  palettelist.ptr->friendly_name_ctr = nullptr;
-  
-  palettelist.ptr->encoding.data       = PALETTE_ENCODING_INCLUDES_RGBCCT_NO_INDEX;
-
-}
-
-
-void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id)
-{
+// void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id)
+// {
 
 /*
 {
@@ -889,172 +135,892 @@ void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id)
    * [5->length] Encoded palette colour values
    * */
 
-  palettelist.ptr     = &palettelist.encoded_users;
-  palettelist.ptr->id = id+PALETTELIST_VARIABLE_GENERIC_01__ID;
-
-  //colour map size be calculated by map type * pixel count?
-
-  // palettelist.ptr->data_length = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] < 100 ?  pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] : 0; 
-  // palettelist.ptr->flags.fMapIDs_Type = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[1]; 
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ This will need to be extended to probably use both of the first bytes
-
-  uint8_t pixel_width = GetEncodedColourWidth(palettelist.ptr->encoding);
-  // AddLog(LOG_LEVEL_TEST, PSTR("pixel_width %d"),pixel_width);
-  palettelist.ptr->data_length = pixel_width*pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0];
-  
-
-
-  // 
-  // palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID;
-
-  //need to create "palette encoded" to "saved buffer" function ie decoder
-  //Starts after the encoded info is taken out
-  palettelist.ptr->data = &pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[5];//id*5];
-
-  // to be moved into devicelist
-  palettelist.ptr->friendly_name_ctr = nullptr;//pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;//&palettelist_variable_users_ctr[ptr->id][0];
-  
-  // AddLog(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill %d"),palettelist.ptr->data[0]);
-  // AddLog(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill size %d"),palettelist.ptr->data_length);
-
-  // AddLog(LOG_LEVEL_TEST, PSTR("pixels in map test size %d"),GetNumberOfColoursInPalette(palettelist.ptr));
-  
-  //     RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(15),0);
-
-  //     AddLog(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
-
-
-}
-
-
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ START OF Shared functions ********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
-
-
-mPalette::PALETTELIST::PALETTE* mPalette::GetPalettePointerByID(uint8_t id)
-{
-
-    // ALOG_INF(PSTR("GetPalettePointerByID=%d DEFAULT"),id);
-
-  switch(id){
-    default:
+  for(
+    uint8_t id=0; 
+            id<(PALETTELIST_VARIABLE_GENERIC_LENGTH__ID-PALETTELIST_VARIABLE_GENERIC_01__ID); 
+            id++
+  ){
     
-    #ifdef ENABLE_LOG_LEVEL_ERROR
-    ALOG_DBM(PSTR("GetPalettePointerByID=%d DEFAULT"),id);
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // palettelist.ptr     = &palettelist.encoded_users;
+    pal.id = id+PALETTELIST_VARIABLE_GENERIC_01__ID;
 
+    // palettelist.ptr->data_length = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] < 100 ?  pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0] : 0; 
+    // palettelist.ptr->flags.fMapIDs_Type = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[1]; 
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ This will need to be extended to probably use both of the first bytes
 
+    uint8_t pixel_width = GetEncodedColourWidth(pal.encoding);
+    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_width %d"),pixel_width);
+    pal.data_length = pixel_width*pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[0];
     
-    /**
-     * Variable User HSBID
-     * */
-    case PALETTELIST_VARIABLE_HSBID_01__ID: return &palettelist.hsbid_users[0];
-    case PALETTELIST_VARIABLE_HSBID_02__ID: return &palettelist.hsbid_users[1];
-    case PALETTELIST_VARIABLE_HSBID_03__ID: return &palettelist.hsbid_users[2];
-    case PALETTELIST_VARIABLE_HSBID_04__ID: return &palettelist.hsbid_users[3];
-    case PALETTELIST_VARIABLE_HSBID_05__ID: return &palettelist.hsbid_users[4];
-    case PALETTELIST_VARIABLE_HSBID_06__ID: return &palettelist.hsbid_users[5];
-    case PALETTELIST_VARIABLE_HSBID_07__ID: return &palettelist.hsbid_users[6];
-    case PALETTELIST_VARIABLE_HSBID_08__ID: return &palettelist.hsbid_users[7];
-    case PALETTELIST_VARIABLE_HSBID_09__ID: return &palettelist.hsbid_users[8];
-    case PALETTELIST_VARIABLE_HSBID_10__ID: return &palettelist.hsbid_users[9];
-    /**
-     * Variable User RGBCCT
-     * */
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID: return &palettelist.rgbcct_segment_colour_users[0];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID: return &palettelist.rgbcct_segment_colour_users[1];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID: return &palettelist.rgbcct_segment_colour_users[2];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID: return &palettelist.rgbcct_segment_colour_users[3];
-    case PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID: return &palettelist.rgbcct_segment_colour_users[4];
-    /**
-     * Variable User Encoded Generic
-     * */
-    case PALETTELIST_VARIABLE_GENERIC_01__ID:       return &palettelist.encoded_users;
 
-    /**
-     * Static Encoded Palettes
-     * */
-    case PALETTELIST_STATIC_PARTY_DEFAULT__ID:    return &palettelist.party_default;
-    case PALETTELIST_STATIC_HOLLOWEEN_OP__ID:    return &palettelist.holloween_op;
-    case PALETTELIST_STATIC_HOLLOWEEN_OGP__ID:   return &palettelist.holloween_ogp;
-    case PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID:    return &palettelist.hot_pink_neon_with_navy;
-    case PALETTELIST_STATIC_SINGLE_FIRE_01__ID:    return &palettelist.single_fire_01;
-    case PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID:    return &palettelist.flower_sweetpeas_01;
-    case PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID:    return &palettelist.flower_sweetpeas_02;
-    case PALETTELIST_STATIC_PINK_PURPLE_01__ID:    return &palettelist.pink_purple_01;
-    case PALETTELIST_STATIC_PINK_PURPLE_02__ID:    return &palettelist.pink_purple_02;
-    case PALETTELIST_STATIC_PINK_PURPLE_03__ID:    return &palettelist.pink_purple_03;
-    case PALETTELIST_STATIC_RAINBOW__ID:         return &palettelist.rainbow;
-    case PALETTELIST_STATIC_RAINBOW_INVERTED__ID:return &palettelist.rainbow_inverted;
-    case PALETTELIST_STATIC_PASTEL_01__ID:          return &palettelist.pastel_01;
-    case PALETTELIST_STATIC_PASTEL_02__ID:          return &palettelist.pastel_02;
-    case PALETTELIST_STATIC_WINTER__ID:          return &palettelist.winter;
-    case PALETTELIST_STATIC_AUTUMN_GREEN__ID:          return &palettelist.autumn_green;
-    case PALETTELIST_STATIC_AUTUMN_RED__ID:      return &palettelist.autumn_red;
-    case PALETTELIST_STATIC_OCEAN_01__ID:        return &palettelist.ocean_01;
-    case PALETTELIST_STATIC_GRADIENT_01__ID:     return &palettelist.gradient_01;
-    case PALETTELIST_STATIC_GRADIENT_02__ID:     return &palettelist.gradient_02;
-    case PALETTELIST_STATIC_GRADIENT_FIRE_01__ID:     return &palettelist.gradient_fire_01;
-    case PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID:     return &palettelist.gradient_pastel_tones_purple;
-    case PALETTELIST_STATIC_BERRY_GREEN__ID:     return &palettelist.berry_green;
-    case PALETTELIST_STATIC_SUNRISE_01__ID:      return &palettelist.sunrise_01;
-    case PALETTELIST_STATIC_SUNRISE_02__ID:      return &palettelist.sunrise_02;
-    case PALETTELIST_STATIC_SUNRISE_03__ID:      return &palettelist.sunrise_03;
-    case PALETTELIST_STATIC_SUNRISE_04__ID:      return &palettelist.sunrise_04;
-    case PALETTELIST_STATIC_SUNSET_01__ID:      return &palettelist.sunset_01;
-    case PALETTELIST_STATIC_SUNSET_02__ID:      return &palettelist.sunset_02;
-    case PALETTELIST_STATIC_SKY_GLOW_01__ID:      return &palettelist.sky_glow_01;
-    case PALETTELIST_STATIC_CANDLE_FLAME_01__ID:      return &palettelist.candle_flame_01;
-    case PALETTELIST_STATIC_CHRISTMAS_01__ID:     return &palettelist.christmas_01;
-    case PALETTELIST_STATIC_CHRISTMAS_02__ID:     return &palettelist.christmas_02;
-    case PALETTELIST_STATIC_CHRISTMAS_03__ID:     return &palettelist.christmas_03;
-    case PALETTELIST_STATIC_CHRISTMAS_04__ID:     return &palettelist.christmas_04;
-    case PALETTELIST_STATIC_CHRISTMAS_05__ID:     return &palettelist.christmas_05;
-    case PALETTELIST_STATIC_CHRISTMAS_06__ID:     return &palettelist.christmas_06;
-    case PALETTELIST_STATIC_CHRISTMAS_07__ID:     return &palettelist.christmas_07;
-    case PALETTELIST_STATIC_CHRISTMAS_08__ID:     return &palettelist.christmas_08;
-    case PALETTELIST_STATIC_CHRISTMAS_09__ID:     return &palettelist.christmas_09;
-    case PALETTELIST_STATIC_CHRISTMAS_10__ID:     return &palettelist.christmas_10;
-    case PALETTELIST_STATIC_CHRISTMAS_11__ID:     return &palettelist.christmas_11;
-    case PALETTELIST_STATIC_CHRISTMAS_12__ID:     return &palettelist.christmas_12;
-    case PALETTELIST_STATIC_CHRISTMAS_13__ID:     return &palettelist.christmas_13;
-    case PALETTELIST_STATIC_CHRISTMAS_14__ID:     return &palettelist.christmas_14;
-    case PALETTELIST_STATIC_CHRISTMAS_15__ID:     return &palettelist.christmas_15;
-    case PALETTELIST_STATIC_CHRISTMAS_16__ID:     return &palettelist.christmas_16;
-    case PALETTELIST_STATIC_CHRISTMAS_17__ID:     return &palettelist.christmas_17;
-    case PALETTELIST_STATIC_CHRISTMAS_18__ID:     return &palettelist.christmas_18;
-    case PALETTELIST_STATIC_CHRISTMAS_19__ID:     return &palettelist.christmas_19;
-    case PALETTELIST_STATIC_CHRISTMAS_20__ID:     return &palettelist.christmas_20;
-    case PALETTELIST_STATIC_CHRISTMAS_21__ID:     return &palettelist.christmas_21;
-    case PALETTELIST_STATIC_CHRISTMAS_22__ID:     return &palettelist.christmas_22;
-    case PALETTELIST_STATIC_CHRISTMAS_23__ID:     return &palettelist.christmas_23;
-    case PALETTELIST_STATIC_CHRISTMAS_24__ID:     return &palettelist.christmas_24;
-    case PALETTELIST_STATIC_CHRISTMAS_25__ID:     return &palettelist.christmas_25;
-    case PALETTELIST_STATIC_CHRISTMAS_26__ID:     return &palettelist.christmas_26;
-    case PALETTELIST_STATIC_CHRISTMAS_27__ID:     return &palettelist.christmas_27;
-    case PALETTELIST_STATIC_CHRISTMAS_28__ID:     return &palettelist.christmas_28;
-    case PALETTELIST_STATIC_CHRISTMAS_29__ID:     return &palettelist.christmas_29;
-    case PALETTELIST_STATIC_CHRISTMAS_30__ID:     return &palettelist.christmas_30;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01__ID:     return &palettelist.gradient_sunlevel_group01_01;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02__ID:     return &palettelist.gradient_sunlevel_group01_02;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03__ID:     return &palettelist.gradient_sunlevel_group01_03;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_04__ID:     return &palettelist.gradient_sunlevel_group01_04;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_05__ID:     return &palettelist.gradient_sunlevel_group01_05;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_06__ID:     return &palettelist.gradient_sunlevel_group01_06;
-    case PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07__ID:     return &palettelist.gradient_sunlevel_group01_07;
-    case PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_01;
-    case PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_02;
-    case PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_03;
-    case PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_04;
-    case PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID:     return &palettelist.gradient_solid_rgbcct_sun_elevation_with_degrees_in_index_dual_colours_01;
-    case PALETTELIST_STATIC_CUSTOM_USER_01__ID: return &palettelist.custom_user_01;
+
+    // 
+    // palettelist.ptr->flags.fMapIDs_Type = MAPIDS_TYPE_RGBCCTCOLOUR_NOINDEX__ID;
+
+    //need to create "palette encoded" to "saved buffer" function ie decoder
+    //Starts after the encoded info is taken out
+    pal.data = &pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map[5];//id*5];
+        
+    // to be moved into devicelist
+    pal.friendly_name_ctr = nullptr;//pCONT_set->Settings.animation_settings.palette_user_variable_name_list_ctr;//&palettelist_variable_users_ctr[ptr->id][0];
     
+    // AddLog(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill %d"),palettelist.ptr->data[0]);
+    // AddLog(LOG_LEVEL_TEST, PSTR("init_PresetColourPalettes_User_Generic_Fill size %d"),palettelist.ptr->data_length);
+
+    // AddLog(LOG_LEVEL_TEST, PSTR("pixels in map test size %d"),GetNumberOfColoursInPalette(palettelist.ptr));
+    
+    //     RgbcctColor colour = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(15),0);
+
+    //     AddLog(LOG_LEVEL_TEST, PSTR("colour_pal  =%d,%d,%d,%d,%d"), colour.R, colour.G, colour.B, colour.WW, colour.WC);
+
+    palettelist.push_back(pal); ALOG_INF( PSTR("palettelist %d|%d"), __LINE__, palettelist.size() );
+
   }
 
+  /**
+   * @brief These below to become fully added into my methods as another encoding type
+   * to be merged and named in my static list
+   * 
+   * 
+   * These need to be added into my palette method at least by name only, data can be ignored
+   * Or, the data for CRGB16 is saved in the data field and then cast back to use?? This would reduce the need to keep 
+   * a static version of it. OR, simply do the math in C16 but convert back? or, do equivalent of these with mine.
+   */
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID, 
+      (char*)PM_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID, 
+      (char*)D_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEAT_NAME_CTR,
+      nullptr, // Calculated at runtime
+      0,       // Calculated at runtime
+      D_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEAT_ENCODING
+    }
+  );
+
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PARTY_DEFAULT__ID, 
+      (char*)PM_PALETTE_PARTY_DEFAULT_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PARTY_DEFAULT_COLOUR_MAP__DATA),
+      D_PALETTE_PARTY_DEFAULT_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_HOLLOWEEN_OP__ID, 
+      (char*)PM_PALETTE_HOLLOWEEN_OP_NAME_CTR,
+      (uint8_t*)PM_PALETTE_HOLLOWEEN_OP_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_HOLLOWEEN_OP_COLOUR_MAP__DATA),
+      D_PALETTE_HOLLOWEEN_OP_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_HOLLOWEEN_OGP__ID, 
+      (char*)PM_PALETTE_HOLLOWEEN_OGP_NAME_CTR,
+      (uint8_t*)PM_PALETTE_HOLLOWEEN_OGP_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_HOLLOWEEN_OGP_COLOUR_MAP__DATA),
+      D_PALETTE_HOLLOWEEN_OGP_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID, 
+      (char*)PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_NAME_CTR,
+      (uint8_t*)PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_COLOUR_MAP__DATA),
+      D_PALETTE_HOT_PINK_NEON_WITH_NAVY_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_RAINBOW__ID, 
+      (char*)PM_PALETTE_RAINBOW_NAME_CTR,
+      (uint8_t*)PM_PALETTE_RAINBOW_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_RAINBOW_COLOUR_MAP__DATA),
+      D_PALETTE_RAINBOW_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_RAINBOW_INVERTED__ID, 
+      (char*)PM_PALETTE_RAINBOW_INVERTED_NAME_CTR,
+      (uint8_t*)PM_PALETTE_RAINBOW_INVERTED_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_RAINBOW_INVERTED_COLOUR_MAP__DATA),
+      D_PALETTE_RAINBOW_INVERTED_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PASTEL_01__ID, 
+      (char*)PM_PALETTE_PASTEL_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PASTEL_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PASTEL_01_COLOUR_MAP__DATA),
+      D_PALETTE_PASTEL_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PASTEL_02__ID, 
+      (char*)PM_PALETTE_PASTEL_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PASTEL_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PASTEL_02_COLOUR_MAP__DATA),
+      D_PALETTE_PASTEL_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_WINTER__ID, 
+      (char*)PM_PALETTE_WINTER_NAME_CTR,
+      (uint8_t*)PM_PALETTE_WINTER_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_WINTER_COLOUR_MAP__DATA),
+      D_PALETTE_WINTER_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_AUTUMN_GREEN__ID, 
+      (char*)PM_PALETTE_AUTUMN_GREEN_NAME_CTR,
+      (uint8_t*)PM_PALETTE_AUTUMN_GREEN_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_AUTUMN_GREEN_COLOUR_MAP__DATA),
+      D_PALETTE_AUTUMN_GREEN_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_AUTUMN_RED__ID, 
+      (char*)PM_PALETTE_AUTUMN_RED_NAME_CTR,
+      (uint8_t*)PM_PALETTE_AUTUMN_RED_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_AUTUMN_RED_COLOUR_MAP__DATA),
+      D_PALETTE_AUTUMN_RED_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_01__ID, 
+      (char*)PM_PALETTE_GRADIENT_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_GRADIENT_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_GRADIENT_01_COLOUR_MAP__DATA),
+      D_PALETTE_GRADIENT_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_02__ID, 
+      (char*)PM_PALETTE_GRADIENT_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_GRADIENT_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_GRADIENT_02_COLOUR_MAP__DATA),
+      D_PALETTE_GRADIENT_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID, 
+      (char*)PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_NAME_CTR,
+      (uint8_t*)PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_COLOUR_MAP__DATA),
+      D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_BERRY_GREEN__ID, 
+      (char*)PM_PALETTE_BERRY_GREEN_NAME_CTR,
+      (uint8_t*)PM_PALETTE_BERRY_GREEN_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_BERRY_GREEN_COLOUR_MAP__DATA),
+      D_PALETTE_BERRY_GREEN_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_01__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_01_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_02__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_02_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_03__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_03_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_03_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_03_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_03_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_04__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_04_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_04_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_04_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_04_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_05__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_05_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_05_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_05_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_05_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_06__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_06_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_06_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_06_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_06_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_07__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_07_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_07_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_07_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_07_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_08__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_08_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_08_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_08_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_08_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_09__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_09_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_09_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_09_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_09_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_10__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_10_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_10_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_10_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_10_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_11__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_11_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_11_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_11_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_11_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_12__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_12_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_12_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_12_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_12_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_13__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_13_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_13_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_13_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_13_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_14__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_14_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_14_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_14_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_14_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_15__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_15_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_15_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_15_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_15_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_16__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_16_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_16_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_16_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_16_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_17__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_17_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_17_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_17_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_17_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_18__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_18_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_18_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_18_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_18_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_19__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_19_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_19_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_19_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_19_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_20__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_20_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_20_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_20_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_20_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_21__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_21_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_21_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_21_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_21_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_22__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_22_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_22_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_22_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_22_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_23__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_23_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_23_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_23_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_23_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_24__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_24_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_24_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_24_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_24_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_25__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_25_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_25_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_25_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_25_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_26__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_26_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_26_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_26_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_26_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_27__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_27_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_27_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_27_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_27_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_28__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_28_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_28_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_28_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_28_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_29__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_29_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_29_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_29_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CHRISTMAS_30__ID, 
+      (char*)PM_PALETTE_CHRISTMAS_30_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CHRISTMAS_30_COLOUR_MAP__DATA),
+      D_PALETTE_CHRISTMAS_30_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SUNRISE_01__ID, 
+      (char*)PM_PALETTE_SUNRISE_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SUNRISE_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SUNRISE_01_COLOUR_MAP__DATA),
+      D_PALETTE_SUNRISE_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SUNRISE_02__ID, 
+      (char*)PM_PALETTE_SUNRISE_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SUNRISE_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SUNRISE_02_COLOUR_MAP__DATA),
+      D_PALETTE_SUNRISE_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SUNRISE_03__ID, 
+      (char*)PM_PALETTE_SUNRISE_03_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SUNRISE_03_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SUNRISE_03_COLOUR_MAP__DATA),
+      D_PALETTE_SUNRISE_03_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SUNRISE_04__ID, 
+      (char*)PM_PALETTE_SUNRISE_04_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SUNRISE_04_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SUNRISE_04_COLOUR_MAP__DATA),
+      D_PALETTE_SUNRISE_04_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SUNSET_01__ID, 
+      (char*)PM_PALETTE_SUNSET_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SUNSET_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SUNSET_01_COLOUR_MAP__DATA),
+      D_PALETTE_SUNSET_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SUNSET_02__ID, 
+      (char*)PM_PALETTE_SUNSET_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SUNSET_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SUNSET_02_COLOUR_MAP__DATA),
+      D_PALETTE_SUNSET_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CANDLE_FLAME_01__ID, 
+      (char*)PM_PALETTE_CANDLE_FLAME_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CANDLE_FLAME_01_COLOUR_MAP__DATA),
+      D_PALETTE_CANDLE_FLAME_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_FIRE_01__ID, 
+      (char*)PM_PALETTE_GRADIENT_FIRE_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_GRADIENT_FIRE_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_GRADIENT_FIRE_01_COLOUR_MAP__DATA),
+      D_PALETTE_GRADIENT_FIRE_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SKY_GLOW_01__ID, 
+      (char*)PM_PALETTE_SKY_GLOW_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SKY_GLOW_01_COLOUR_MAP__DATA),
+      D_PALETTE_SKY_GLOW_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01__ID, 
+      (char*)PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_COLOUR_MAP__DATA),
+      D_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_02__ID, 
+      (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_COLOUR_MAP__DATA),
+      D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_03__ID, 
+      (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_NAME_CTR,
+      (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_COLOUR_MAP__DATA),
+      D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_03_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_04__ID, 
+      (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_NAME_CTR,
+      (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_COLOUR_MAP__DATA),
+      D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_04_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_05__ID, 
+      (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_NAME_CTR,
+      (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA),
+      D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_06__ID, 
+      (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_NAME_CTR,
+      (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_COLOUR_MAP__DATA),
+      D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_06_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07__ID, 
+      (char*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_NAME_CTR,
+      (uint8_t*)PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_COLOUR_MAP__DATA),
+      D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_OCEAN_01__ID, 
+      (char*)PM_PALETTE_OCEAN_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_OCEAN_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_OCEAN_01_COLOUR_MAP__DATA),
+      D_PALETTE_OCEAN_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_CUSTOM_USER_01__ID, 
+      (char*)PM_PALETTE_CUSTOM_USER_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_CUSTOM_USER_01_COLOUR_MAP__DATA),
+      D_PALETTE_CUSTOM_USER_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_SINGLE_FIRE_01__ID, 
+      (char*)PM_PALETTE_SINGLE_FIRE_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA),
+      D_PALETTE_SINGLE_FIRE_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID, 
+      (char*)PM_PALETTE_FLOWER_SWEATPEAS_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_FLOWER_SWEATPEAS_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_FLOWER_SWEATPEAS_01_COLOUR_MAP__DATA),
+      D_PALETTE_FLOWER_SWEATPEAS_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID, 
+      (char*)PM_PALETTE_FLOWER_SWEATPEAS_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_FLOWER_SWEATPEAS_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_FLOWER_SWEATPEAS_02_COLOUR_MAP__DATA),
+      D_PALETTE_FLOWER_SWEATPEAS_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PINK_PURPLE_01__ID, 
+      (char*)PM_PALETTE_PINK_PURPLE_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PINK_PURPLE_01_COLOUR_MAP__DATA),
+      D_PALETTE_PINK_PURPLE_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PINK_PURPLE_02__ID, 
+      (char*)PM_PALETTE_PINK_PURPLE_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PINK_PURPLE_02_COLOUR_MAP__DATA),
+      D_PALETTE_PINK_PURPLE_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PINK_PURPLE_03__ID, 
+      (char*)PM_PALETTE_PINK_PURPLE_03_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PINK_PURPLE_03_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PINK_PURPLE_03_COLOUR_MAP__DATA),
+      D_PALETTE_PINK_PURPLE_03_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID, 
+      (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__CTR,
+      (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA, 
+      sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__DATA),
+      D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_01__ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_02__ID, 
+      (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__CTR,
+      (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA, 
+      sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__DATA),
+      D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_02__ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_03__ID, 
+      (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__CTR,
+      (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA, 
+      sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__DATA),
+      D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_03__ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_04__ID, 
+      (char*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__CTR,
+      (uint8_t*)PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA, 
+      sizeof(PM__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__DATA),
+      D__SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_IN_INDEX_04__ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID, 
+      (char*)PM__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__CTR,
+      (uint8_t*)PM__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__DATA, 
+      sizeof(PM__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__DATA),
+      D__DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ENCODING
+    }
+  );
+
+
+
+  // DEBUG_LINE_HERE;
 }
 
 
@@ -1139,69 +1105,36 @@ HsbColor mPalette::GetHsbColour(uint8_t id){
 }
 
 
-bool mPalette::CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr)
-{
-  return CheckPaletteByIDIsEditable(ptr->id);
-}
-bool mPalette::CheckPaletteByIDIsEditable(uint8_t id)
-{
-  if(( (id>=PALETTELIST_VARIABLE_HSBID_01__ID)&&
-      (id<PALETTELIST_VARIABLE_HSBID_LENGTH__ID) )
-    || 
-    ( (id>=PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&
-      (id<PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID) )
-    ){
-    return true;
-  }
-  return false;
-}
+// bool mPalette::CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr)
+// {
+//   return CheckPaletteByIDIsEditable(ptr->id);
+// }
+// bool mPalette::CheckPaletteByIDIsEditable(uint8_t id)
+// {
+//   if(( (id>=PALETTELIST_VARIABLE_HSBID_01__ID)&&
+//       (id<PALETTELIST_VARIABLE_HSBID_LENGTH__ID) )
+//     || 
+//     ( (id>=PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&
+//       (id<PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID) )
+//     ){
+//     return true;
+//   }
+//   return false;
+// }
 
 
-int16_t mPalette::GetPaletteIDbyName(const char* c){
+int16_t mPalette::Get_Static_PaletteIDbyName(const char* c){
   if(*c=='\0'){
     return -1;
   }
 
-  PALETTELIST::PALETTE *ptr = nullptr;
+  // PALETTELIST::PALETTE *ptr = nullptr;
   char buffer[100] = {0};
   int16_t index_found = -1;
 
   /**************************************************************
    * 
-   * PALETTELIST_STATIC__IDS
-   * 
-  ***************************************************************/
-
-  for( // loops relative to exact palette id
-    uint8_t ii=PALETTELIST_STATIC_PARTY_DEFAULT__ID;
-            ii<(PALETTELIST_STATIC_LENGTH__ID - PALETTELIST_STATIC_PARTY_DEFAULT__ID);
-            ii++
-  ){
-    ptr = GetPalettePointerByID(ii);
-
-    // DEBUG_LINE_HERE;
-
-    // ALOG_INF( PSTR("Name \"%s\"=?\"%S\""), c, ptr->friendly_name_ctr );
-
-    if(ptr->friendly_name_ctr == nullptr)
-    {
-      ALOG_DBM( PSTR("ptr->friendly_name_ctr == nullptr %d %s"), ii, c );
-    }
-
-    if(ptr->friendly_name_ctr != nullptr)
-    { 
-      ALOG_DBM( PSTR("ptr->friendly_name_ctr == %d %s %S"), ii, c, ptr->friendly_name_ctr );
-      if(mSupport::CheckCommand_P(c, ptr->friendly_name_ctr))
-      {
-        ALOG_DBM( PSTR("MATCH \"%c\" %d"), c, ii ); 
-        return ii;            
-      }
-    }
-  }
-
-  /**************************************************************
-   * 
-   * PALETTELIST_VARIABLE_HSBID__IDS
+   * PALETTELIST_VARIABLE_HSBID__IDS - undefined user names, default naming
    * 
   ***************************************************************/
   
@@ -1230,7 +1163,7 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
   
   /**************************************************************
    * 
-   * PALETTELIST_VARIABLE_GENERIC__IDS
+   * PALETTELIST_VARIABLE_GENERIC__IDS - undefined user names, default naming
    * 
   ***************************************************************/
   for( // loops relative to 0
@@ -1252,7 +1185,7 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
 
   /**************************************************************
    * 
-   * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS - undefined user names, default naming
    * 
   ***************************************************************/ 
   for(
@@ -1270,6 +1203,47 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
       return ii+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
     }
   }
+
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC__IDS
+   * 
+  ***************************************************************/
+
+  for( // loops relative to exact palette id
+    uint8_t ii=PALETTELIST_STATIC_PARTY_DEFAULT__ID;
+            ii<(PALETTELIST_STATIC_LENGTH__ID - PALETTELIST_STATIC_PARTY_DEFAULT__ID);
+            ii++
+  ){
+    // ptr = GetPalettePointerByID(ii);
+
+    // // DEBUG_LINE_HERE;
+
+    // // ALOG_INF( PSTR("Name \"%s\"=?\"%S\""), c, ptr->friendly_name_ctr );
+
+    // if(ptr->friendly_name_ctr == nullptr)
+    // {
+    //   ALOG_DBM( PSTR("ptr->friendly_name_ctr == nullptr %d %s"), ii, c );
+    // }
+
+    // if(ptr->friendly_name_ctr != nullptr)
+    // { 
+      // ALOG_DBM( PSTR("ptr->friendly_name_ctr == %d %s %S"), ii, c, ptr->friendly_name_ctr );
+
+
+      if(mSupport::CheckCommand_P(c, palettelist[ii].friendly_name_ctr))
+      {
+        ALOG_DBM( PSTR("MATCH \"%c\" %d"), c, ii ); 
+        return ii;            
+      }
+    // }
+
+
+
+
+  }
+
     
   /**************************************************************
    * 
@@ -1361,10 +1335,10 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
    * Final check, palette id was given as string number
    * 
   ***************************************************************/
-  uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
-  if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH__ID)){
-    return found_index;
-  }
+  // uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
+  // if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_STATIC_LENGTH__ID)){
+  //   return found_index;
+  // }
 
   return -1; // Must be -1 to show name not found
 }
@@ -1373,12 +1347,14 @@ int16_t mPalette::GetPaletteIDbyName(const char* c){
 const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8_t buflen)
 {
 
-  if(palette_id < PALETTELIST_STATIC_PARTY_DEFAULT__ID)
-  {
-    ALOG_ERR(PSTR("Function must be called from AnimatorLight"));
-    return PM_SEARCH_NOMATCH;
-  }
+  // if(palette_id < PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)
+  // {
+  //   ALOG_ERR(PSTR("Function must be called from AnimatorLight"));
+  //   return PM_SEARCH_NOMATCH;
+  // }
     
+    // ALOG_ERR(PSTR("palette_id = %d of %d"), palette_id, palettelist.size());
+    // DEBUG_LINE_HERE;
   /**************************************************************
    * 
    * PALETTELIST_STATIC__IDS
@@ -1387,9 +1363,14 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   if(
     ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))
   ){       
-    mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id); 
-    ALOG_DBM( PSTR("Name \"%S\""), ptr->friendly_name_ctr );
-    snprintf_P(buffer, buflen, ptr->friendly_name_ctr);
+    // mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id); 
+
+    // ALOG_ERR(PSTR("palette_id = %d of %d"), palette_id, palettelist.size());
+    // DEBUG_LINE_HERE;
+
+    ALOG_DBM( PSTR("Name \"%S\""), palettelist[palette_id].friendly_name_ctr );
+    // DEBUG_LINE_HERE;
+    snprintf_P(buffer, buflen, palettelist[palette_id].friendly_name_ctr);
   }
   
   /**************************************************************
@@ -1398,10 +1379,17 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * 
   ***************************************************************/
   if(
-    ((palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
+    (
+      (palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+      (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
   ){  
-    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;
-    pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES_NAMES_CTR);   
+    // uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;
+    // pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_SEGMENTS_STORED_VARIABLE_CRGBPALETTE16_PALETTES_NAMES_CTR);   
+    
+    ALOG_DBM( PSTR("Name \"%S\""), palettelist[palette_id].friendly_name_ctr );
+    // DEBUG_LINE_HERE;
+    snprintf_P(buffer, buflen, palettelist[palette_id].friendly_name_ctr);
+
   }
    
   /**************************************************************
@@ -1453,9 +1441,88 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
 
 }
 
-uint16_t mPalette::GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit){
+uint16_t mPalette::GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit)
+{
 
-  return GetNumberOfColoursInPalette(GetPalettePointerByID(palette_id), pixel_width_contrained_limit);
+  // return GetNumberOfColoursInPalette(GetPalettePointerByID(palette_id), pixel_width_contrained_limit);
+
+
+
+// /**
+//  * @brief Get elements in a colour type
+//  * 
+//  * @param ptr 
+//  * @param pixel_width_contrained_limit 
+//  * @return uint16_t 
+//  */
+// uint16_t mPalette::GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit){
+  
+  uint16_t encoded_colour_width = 0;
+  uint16_t pixel_length = 0;
+
+  //   // DEBUG_LINE_HERE; // this should be a fallback only
+  // if(ptr == nullptr)
+  // {
+  //   // DEBUG_LINE_HERE; // this should be a fallback only
+  //   ptr = palettelist.ptr; // use internal if not set already
+  // }
+
+  PALETTE pal = palettelist[palette_id];
+
+  // Serial.println(ptr->encoding.data, BIN);
+
+    // With this enabled, only the christmas palettes will be stable!!
+
+    if(pal.encoding.red_enabled){ encoded_colour_width++; }
+    if(pal.encoding.green_enabled){ encoded_colour_width++; }
+    if(pal.encoding.blue_enabled){ encoded_colour_width++; }
+    if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
+
+    if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
+    if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
+
+    if(pal.encoding.index_exact){ encoded_colour_width++; }
+    if(pal.encoding.index_scaled_to_segment){ encoded_colour_width++; }
+    if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
+    if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
+    
+    if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
+    if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
+    if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
+    if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
+
+    // ALOG_INF(PSTR("encoded_colour_width = %d"),encoded_colour_width);
+   
+
+  // recalculate size, it might not be the same
+  // ptr->data_length = 
+  // GetDefaultColourPaletteUserIDsCount
+  // GetColourMapSize()
+  // Dont do this everytime, as its costly on memory, only update on change
+
+  if(encoded_colour_width==0)
+  {
+    ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
+    return 1;
+  }
+  
+  // Serial.println(encoded_colour_width); Serial.flush();
+  // if(encoded_colour_width){ //so we can divide if not 0
+    pixel_length = pal.data_length/encoded_colour_width; 
+    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_length=%d %d %d ID%d"),pixel_length,ptr->data_length,encoded_colour_width, ptr->id);
+  // }else{
+  //   pixel_length = ptr->data_length/encoded_colour_width
+  // }
+  //constrain limit if max
+  // if(encoded_colour_width_contrained_limit>=0){
+  //   pixel_length = constrain(pixel_length,1,encoded_colour_width_contrained_limit);
+  //   // AddLog(LOG_LEVEL_TEST, PSTR("encoded_colour_width_contrained_limit=%d, pixel_length=%d"),encoded_colour_width_contrained_limit, pixel_length);
+  // }
+  return pixel_length;
+// }
+
+
+
 
 }
 
@@ -1478,7 +1545,7 @@ uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
   if(encoding.white_warm_enabled){ encoded_colour_width++; }
 
   if(encoding.white_cold_enabled){ encoded_colour_width++; }
-  if(encoding.index_byte_width){ encoded_colour_width += encoding.index_byte_width; }
+  if(encoding.encoded_value_byte_width){ encoded_colour_width += encoding.encoded_value_byte_width; }
 
   if(encoding.index_exact){ encoded_colour_width++; }
   if(encoding.index_scaled_to_segment){ encoded_colour_width++; }
@@ -1496,77 +1563,6 @@ uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
 
 }
 
-/**
- * @brief Get elements in a colour type
- * 
- * @param ptr 
- * @param pixel_width_contrained_limit 
- * @return uint16_t 
- */
-uint16_t mPalette::GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr, uint8_t pixel_width_contrained_limit){
-  
-  uint16_t encoded_colour_width = 0;
-  uint16_t pixel_length = 0;
-
-    // DEBUG_LINE_HERE; // this should be a fallback only
-  if(ptr == nullptr)
-  {
-    // DEBUG_LINE_HERE; // this should be a fallback only
-    ptr = palettelist.ptr; // use internal if not set already
-  }
-
-  // Serial.println(ptr->encoding.data, BIN);
-
-    // With this enabled, only the christmas palettes will be stable!!
-
-    if(ptr->encoding.red_enabled){ encoded_colour_width++; }
-    if(ptr->encoding.green_enabled){ encoded_colour_width++; }
-    if(ptr->encoding.blue_enabled){ encoded_colour_width++; }
-    if(ptr->encoding.white_warm_enabled){ encoded_colour_width++; }
-
-    if(ptr->encoding.white_cold_enabled){ encoded_colour_width++; }
-    if(ptr->encoding.index_byte_width){ encoded_colour_width += ptr->encoding.index_byte_width; }
-
-    if(ptr->encoding.index_exact){ encoded_colour_width++; }
-    if(ptr->encoding.index_scaled_to_segment){ encoded_colour_width++; }
-    if(ptr->encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
-    if(ptr->encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
-    
-    if(ptr->encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
-    if(ptr->encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
-    if(ptr->encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
-    if(ptr->encoding.palette_can_be_modified){ encoded_colour_width++; }
-
-    // ALOG_INF(PSTR("encoded_colour_width = %d"),encoded_colour_width);
-   
-
-  // recalculate size, it might not be the same
-  // ptr->data_length = 
-  // GetDefaultColourPaletteUserIDsCount
-  // GetColourMapSize()
-  // Dont do this everytime, as its costly on memory, only update on change
-
-  if(encoded_colour_width==0)
-  {
-    ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), ptr->friendly_name_ctr);
-    return 1;
-  }
-  
-  // Serial.println(encoded_colour_width); Serial.flush();
-  // if(encoded_colour_width){ //so we can divide if not 0
-    pixel_length = ptr->data_length/encoded_colour_width; 
-    // AddLog(LOG_LEVEL_TEST, PSTR("pixel_length=%d %d %d ID%d"),pixel_length,ptr->data_length,encoded_colour_width, ptr->id);
-  // }else{
-  //   pixel_length = ptr->data_length/encoded_colour_width
-  // }
-  //constrain limit if max
-  // if(encoded_colour_width_contrained_limit>=0){
-  //   pixel_length = constrain(pixel_length,1,encoded_colour_width_contrained_limit);
-  //   // AddLog(LOG_LEVEL_TEST, PSTR("encoded_colour_width_contrained_limit=%d, pixel_length=%d"),encoded_colour_width_contrained_limit, pixel_length);
-  // }
-  return pixel_length;
-}
-
 
 /**
  * Refresh value stored in palette, and return new value
@@ -1574,7 +1570,10 @@ uint16_t mPalette::GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr, uint8_
 uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
   
   uint8_t new_size = 1; // assumed 1 at least
-  PALETTELIST::PALETTE *ptr_tmp = GetPalettePointerByID(palette_id);
+  // PALETTELIST::PALETTE *ptr_tmp = GetPalettePointerByID(palette_id);
+
+  
+    mPalette::PALETTE *ptr_tmp = &mPaletteI->palettelist[palette_id];
 
   if((palette_id>=PALETTELIST_VARIABLE_HSBID_01__ID)&&(palette_id<PALETTELIST_VARIABLE_HSBID_LENGTH__ID))
   {
@@ -1585,7 +1584,8 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
     uint8_t byte_read = 0;
     while(pixel_active<20){
       // byte_read = pgm_read_byte(id_ptr+pixel_active); // This doesnt seem right??
-      byte_read = pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(20*palette_id)+pixel_active];
+      // byte_read = pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(20*palette_id)+pixel_active];
+      byte_read = hsbid_pals[palette_id].encoded_data[pixel_active];// pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(20*palette_id)+pixel_active];
       // Serial.printf("byte_read=%d",byte_read);
       if(byte_read!=COLOUR_MAP_NONE__ID){//} && byte_read<COLOUR_MAP_PALETTE_OPTIONS_END__ID){
         pixel_active++;
@@ -1645,7 +1645,6 @@ const uint8_t* mPalette::GetDefaultColourPaletteUserIDs_P(uint8_t id){
   }
 }
 
-
 uint8_t mPalette::GetDefaultColourPaletteUserIDsCount(uint8_t id){
 
 
@@ -1678,10 +1677,10 @@ uint8_t mPalette::GetDefaultColourPaletteUserIDsCount(uint8_t id){
 }
 
 
-void mPalette::SetPaletteListPtrFromID(uint8_t id){
-  //AddLog(LOG_LEVEL_TEST,PSTR("SetPaletteListPtrFromID(%d)"),id);
-  palettelist.ptr = GetPalettePointerByID(id);
-}
+// void mPalette::SetPaletteListPtrFromID(uint8_t id){
+//   //AddLog(LOG_LEVEL_TEST,PSTR("SetPaletteListPtrFromID(%d)"),id);
+//   palettelist.ptr = GetPalettePointerByID(id);
+// }
 
 
 
@@ -1715,6 +1714,64 @@ const char* mPalette::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buf
   
 }
 
+// /**
+//  * @brief Used for webui, gets the base colours and length of palette (no wraps)
+//  * 
+//  * @param palette_id 
+//  * @param _pixel_position 
+//  * @param encoded_value 
+//  * @return RgbcctColor 
+//  */
+// RgbcctColor mPalette::GetColourElementsFromUnloadedPalette(
+//   uint16_t palette_id,
+//   uint16_t _pixel_position,//desired_index_from_palette,  
+//   uint8_t* encoded_value  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+// ){ 
+  
+//   uint8_t* palette_elements = pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
+
+
+
+
+// std::vector<uint8_t> pData;
+
+
+
+//   /**
+//    * @brief If requested palette_id does not match preloaded, make sure to reload first
+//    **/
+//   if(palette_id != pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->loaded_palette_id)
+//   {
+//     pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->loaded_palette_id = palette_id;
+//     ALOG_INF(PSTR("GetColourFromPreloadedPalette Reload"));
+//   }
+
+//   return mPaletteI->GetColourFromPreloadedPaletteBuffer( //"buffer" name to be removed when properly integrated
+//     palette_id,
+//     palette_elements,
+//     _pixel_position,//desired_index_from_palette,  
+//     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+//     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+//     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+//     mcol, // will be phased out
+//     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+//     brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+//     // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+//   );
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 // Legacy method to phase out!
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
@@ -1733,6 +1790,15 @@ mPalette::GetColourFromPreloadedPalette(
 ){ 
   
   uint8_t* palette_elements = pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
+
+  /**
+   * @brief If requested palette_id does not match preloaded, make sure to reload first
+   **/
+  if(palette_id != pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->loaded_palette_id)
+  {
+    pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->loaded_palette_id = palette_id;
+    ALOG_INF(PSTR("GetColourFromPreloadedPalette Reload"));
+  }
 
   return mPaletteI->GetColourFromPreloadedPaletteBuffer( //"buffer" name to be removed when properly integrated
     palette_id,
@@ -1796,6 +1862,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
   DEBUG_LINE_HERE;
   #endif
 
+    // ALOG_INF(PSTR("palette_id %d"), palette_id);
   /**************************************************************
    * 
    * PALETTELIST_STATIC__IDS
@@ -1812,7 +1879,17 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     // ALOG_INF(PSTR("MINE %d"), palette_id);
 
-    PALETTELIST::PALETTE *ptr = GetPalettePointerByID(palette_id);
+    // PALETTELIST::PALETTE *ptr = GetPalettePointerByID(palette_id);
+
+    if(palette_id>mPaletteI->palettelist.size())
+    {
+      ALOG_ERR(PSTR("PALETTE EXCEEDS VECTOR SIZE")); delay(2000);
+      return colour;
+    }
+
+
+    PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+
 
     // this will not work, since each segment will need its preloaded. 
     // Need a drastic rethink on this, perhaps another subpalette class that stores the "runtime palette"
@@ -1828,10 +1905,14 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
       return RgbcctColor(0);
     }
 
-    uint8_t pixels_in_map = GetNumberOfColoursInPalette(ptr);  
+    uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_id);  
     uint8_t colour_width  = GetEncodedColourWidth(ptr->encoding); 
     // Serial.println(pixels_in_map);
-    uint8_t remainder = _pixel_position%pixels_in_map;  // /ERROR, REUSING NAME!!!
+    uint8_t remainder = 0;
+    if(pixels_in_map != 0)
+    {
+      remainder = _pixel_position%pixels_in_map;  // /ERROR, REUSING NAME!!!
+    }
     // uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255);
     uint16_t pixel_position = remainder;   // THIS IS BEING PASSED IN AND REUSED??
 
@@ -1850,8 +1931,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
       (ptr->encoding.encoded_as_hsb_ids)
     ){
 
-    // DEBUG_LINE_HERE;
-      // DEBUG_LINE_HERE;
       // Serial.println("MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID"); 
 
       // Get Start of Colour Information by adjusting for indexing
@@ -1873,8 +1952,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
       // if(pixel_position==0)
       // Serial.printf("%d|%d c %d %d %d\n\r", palette_id, pCONT_lAni->_segment_index_primary, colour.R, colour.G, colour.B);
-      // DEBUG_LINE_HERE;
-            
+      
     }
 
     /**
@@ -1890,9 +1968,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
       
       // ALOG_INF(PSTR("enabled %d,%d,%d,%d,%d"), ptr->encoding.red_enabled, ptr->encoding.green_enabled, ptr->encoding.blue_enabled, ptr->encoding.white_cold_enabled, ptr->encoding.white_warm_enabled);
       // ALOG_INF(PSTR("palette_elements %d"), palette_elements[0]);
-
-    // DEBUG_LINE_HERE;
-      // DEBUG_LINE_HERE;      
+   
       // ALOG_INF(PSTR("p = %d, r = %d, v = %d|%d, w=%d"), pixel_position, index_relative, palette_elements[index_relative], palette_elements[index_relative+1],colour_width);
 
       // Get Start of Colour Information by adjusting for indexing
@@ -1900,7 +1976,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
         // ALOG_INF(PSTR("index_relative=%d"),index_relative);
       if(ptr->encoding.index_scaled_to_segment)
       {
-    // DEBUG_LINE_HERE;
     //     ALOG_INF(PSTR("index_relative=%d"),index_relative);
         // If desired, return the index value
         // if(encoded_value != nullptr){ 
@@ -1912,7 +1987,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
         index_relative++;
       }
       
-    // DEBUG_LINE_HERE;
       // Get colour
       colour = RgbcctColor(
         ptr->encoding.red_enabled         ? palette_buffer[index_relative  ] : 0,
@@ -1924,7 +1998,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     }
 
-    // DEBUG_LINE_HERE;
 
     // if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = 1; } //phase out
 
@@ -1995,6 +2068,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     ((palette_id >= PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
   ){  
 
+      // DEBUG_LINE_HERE;
     // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
     // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
 
@@ -2019,6 +2093,8 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     uint8_t pixel_position_adjust = _pixel_position;
 
+    // DEBUG_LINE_HERE;
+
     
     // if(flag_convert_pixel_index_to_get_exact_crgb_colour)  // change this to auto switch between mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID && _pixel_position < 3) and this new method
     // {
@@ -2041,11 +2117,16 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
         ALOG_ERR(PSTR("PHASED OUT! Not sure it is still needed?"));
         // return pCONT_lAni->SEGMENT_I(pCONT_lAni->getCurrSegmentId()).rgbcctcolors[_pixel_position]; 
       }
-      
+      // 
+      // DEBUG_LINE_HERE;
       if (flag_map_scaling) pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+      
+      // DEBUG_LINE_HERE;
+      
       // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
       if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
 
+    // DEBUG_LINE_HERE;
     // }
     
     
@@ -2070,11 +2151,14 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
   //     currentPalette = CRGBPalette16(prim,sec,tri); 
 
 
+    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
+    // DEBUG_LINE_HERE;
     // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
     // FastLED Get ColorFromPalette that is CRGBPalette16
-    fastled_col = ColorFromPalette( currentPalette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
+    fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->crgb16_palette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
+    // DEBUG_LINE_HERE;
     // uint32_t fastled_col32 = 0;
     // fastled_col32 = fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
     
@@ -2082,14 +2166,19 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
 
+    
+        // ALOG_ERR(PSTR("colour[%d] = %d,%d,%d"),pixel_position_adjust,colour.R,colour.G,colour.B);
+
   } // END of CRGBPalette's
 
   return colour;
 }
 
 
-void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id)
+void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id, uint8_t seg_i)
 {
+
+  ALOG_INF(PSTR("LoadPalette_CRGBPalette16_Static %d"), palette_id);
 
   /******************************************************
    * PALETTELIST_STATIC_CRGBPALETTE16__IDS
@@ -2097,13 +2186,13 @@ void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id)
   switch (palette_id)
   {
     default:
-    case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    currentPalette = PartyColors_p;   break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   currentPalette = CloudColors_p;   break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    currentPalette = LavaColors_p;    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    currentPalette = OceanColors_p;   break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   currentPalette = ForestColors_p;  break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  currentPalette = RainbowColors_p; break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: currentPalette = RainbowStripeColors_p; break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    pSEGMENT_I(seg_i).palette_container->crgb16_palette = PartyColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   pSEGMENT_I(seg_i).palette_container->crgb16_palette = CloudColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    pSEGMENT_I(seg_i).palette_container->crgb16_palette = LavaColors_p;    break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    pSEGMENT_I(seg_i).palette_container->crgb16_palette = OceanColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   pSEGMENT_I(seg_i).palette_container->crgb16_palette = ForestColors_p;  break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  pSEGMENT_I(seg_i).palette_container->crgb16_palette = RainbowColors_p; break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: pSEGMENT_I(seg_i).palette_container->crgb16_palette = RainbowStripeColors_p; break;
   }
 
   /******************************************************
@@ -2114,7 +2203,9 @@ void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id)
     uint16_t gradient_id = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
     byte tcp[72]; //support gradient palettes with up to 18 entries
     memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
-    currentPalette.loadDynamicGradientPalette(tcp);
+    pSEGMENT_I(seg_i).palette_container->crgb16_palette.loadDynamicGradientPalette(tcp);
+
+    ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, pSEGMENT_I(seg_i).palette_container->crgb16_palette[0].r, pSEGMENT_I(seg_i).palette_container->crgb16_palette[0].g, pSEGMENT_I(seg_i).palette_container->crgb16_palette[0].b );
   }
   
 }

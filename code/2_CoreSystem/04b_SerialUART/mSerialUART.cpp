@@ -1768,7 +1768,7 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_level, bool json_append
 
     JsonBuilderI->Add_P(PM_JSON_TIME, 1000);
 
-    // JBI->Level_Start("UART1");
+    // JBI->Object_Start("UART1");
     //   JBI->Add("receive_interrupts_enable", settings.uart1.receive_interrupts_enable);
       
     //   JBI->Array_Start("Buffer1");
@@ -1777,9 +1777,9 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_level, bool json_append
     //   JBI->Array_End();
       
 
-    // JBI->Level_End();
+    // JBI->Object_End();
 
-    JBI->Level_Start("UART2");
+    JBI->Object_Start("UART2");
       JBI->Add("receive_interrupts_enable", settings.uart2.receive_interrupts_enable);
       
       // JBI->Array_Start("Buffer1");
@@ -1788,7 +1788,7 @@ uint8_t mSerialUART::ConstructJSON_UARTInfo(uint8_t json_level, bool json_append
       // JBI->Array_End();
       
 
-    JBI->Level_End();
+    JBI->Object_End();
 
     // JsonBuilderI->Add_P(PM_JSON_TIME_MS, animation.transition.time_ms);
   return JsonBuilderI->End();

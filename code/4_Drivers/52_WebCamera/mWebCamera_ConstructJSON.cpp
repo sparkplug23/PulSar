@@ -17,10 +17,10 @@ uint8_t mWebCamera::ConstructJSON_State(uint8_t json_level, bool json_appending)
 
   JBI->Start();
 
-    JBI->Level_Start(D_JSON_RFRECEIVED);
+    JBI->Object_Start(D_JSON_RFRECEIVED);
   
     
-    JBI->Level_End();
+    JBI->Object_End();
   
   
 

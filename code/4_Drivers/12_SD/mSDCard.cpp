@@ -822,12 +822,12 @@ uint8_t mSDCard::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
   
   JBI->Start();  
 
-    JBI->Level_Start("Debug");
+    JBI->Object_Start("Debug");
       JBI->Array_Start("message1");
           for(int i=0;i<debug.write_time.opened.size();i++)
               JBI->Add(debug.write_time.closed[i]-debug.write_time.opened[i]);
       JBI->Array_End();
-    JBI->Level_End();
+    JBI->Object_End();
   
     JBI->Add_P(PM_JSON_TIME, 1000);
   return JBI->End();
@@ -859,10 +859,10 @@ uint8_t mSDCard::ConstructJSON_Debug_WriteTimes(uint8_t json_level, bool json_ap
   
   JBI->Start();  
 
-    JBI->Level_Start("512B");
+    JBI->Object_Start("512B");
       JBI->Add("CompleteWriteTime", debug_write_times.complete_write_duration);
       JBI->Add("BytesWritten", debug_write_times.write_byte_count);
-    JBI->Level_End();
+    JBI->Object_End();
 
 
   return JBI->End();

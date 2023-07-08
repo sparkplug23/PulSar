@@ -717,15 +717,15 @@ uint8_t mButtons::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
   JsonBuilderI->Start();
     // JsonBuilderI->Array_AddArray("lastbutton", lastbutton, sizeof(lastbutton));
 
-    JBI->Level_Start("ButtonPressed");
+    JBI->Object_Start("ButtonPressed");
       JBI->Add("IsButtonActiveCtr", buttons[0].isactive);
-    JBI->Level_End();
+    JBI->Object_End();
 
 
     /**
      * @brief New method to show type of press (short/long/multi)
      **/
-    JBI->Level_Start("Event"); // asumes only one button at a time, will need nicer formatting later (arrays?)
+    JBI->Object_Start("Event"); // asumes only one button at a time, will need nicer formatting later (arrays?)
       JBI->Add("ID", pCONT_rules->event_triggered.device_id);
       // JBI->Add("func", pCONT_rules->event_triggered.function_id);
       // JBI->Array_AddArray("data1", pCONT_rules->event_triggered.value.data, pCONT_rules->event_triggered.value.length);
@@ -861,7 +861,7 @@ void mButtons::WebAppend_Root_Status_Table(){
 
   JsonBuilderI->Array_Start_P(PM_WEB_HANDLE_DIV_NAME_BUTTON_TABLE_CTR);// Class name
   for(int row=0;row<settings.buttons_found;row++){
-    JsonBuilderI->Level_Start();
+    JsonBuilderI->Object_Start();
       JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,row);
       JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_IH,IsButtonActiveCtr(row, buffer, sizeof(buffer)));//"\"%s\"", IsButtonActiveCtr(row, buffer, sizeof(buffer)));
       if(IsButtonActive(row)){
@@ -870,7 +870,7 @@ void mButtons::WebAppend_Root_Status_Table(){
         JsonBuilderI->Add_P(PM_WEB_JSON_FORMAT_KEY_FC,"#ff0000");
       }
     
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
   }
   JsonBuilderI->Array_End();
   

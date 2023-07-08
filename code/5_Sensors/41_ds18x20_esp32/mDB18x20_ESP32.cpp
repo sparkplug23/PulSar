@@ -383,7 +383,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
 
       alias_i = sensor_vector[sensor_id].device_name_index;
   
-      JBI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), alias_i, buffer, sizeof(buffer)));         
+      JBI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), alias_i, buffer, sizeof(buffer)));         
         JBI->Add(PM_JSON_TEMPERATURE, sensor_vector[sensor_id].reading.val);
         JBI->Add(PM_JSON_ADDRESS,     sensor_vector[sensor_id].address[7]);
 
@@ -400,7 +400,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
             for(int a=0;a<8;a++){ JBI->Add(sensor_vector[sensor_id].address[a]); }
           JBI->Array_End();
         }
-      JBI->Level_End(); 
+      JBI->Object_End(); 
 
     }
 
@@ -417,7 +417,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_append
 
   JBI->Start();
   
-  JBI->Level_Start("Addresses");
+  JBI->Object_Start("Addresses");
   for(int sens_i=0;sens_i<DS18X20_MAX_SENSORS;sens_i++)
   {
     JBI->Array_Start_P("%0d", sens_i);
@@ -427,7 +427,7 @@ uint8_t mDB18x20_ESP32::ConstructJSON_Debug(uint8_t json_level, bool json_append
     }
     JBI->Array_End();
   }
-  JBI->Level_End();
+  JBI->Object_End();
 
   return JBI->End();
 

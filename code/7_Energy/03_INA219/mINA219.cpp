@@ -231,7 +231,7 @@ void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
   JsonBuilderI->Array_Start("ina219_tab");// Class name
   for(int row=0;row<6;row++){
     for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++){
-      JsonBuilderI->Level_Start();
+      JsonBuilderI->Object_Start();
         JsonBuilderI->Add("id",count++);
         if(sensor[sensor_id].power_mw>30){ JsonBuilderI->Add("fc","#ff0000");
         }else{ JsonBuilderI->Add("fc","#ffffff"); }
@@ -242,7 +242,7 @@ void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
           case 3: JsonBuilderI->Add("ih",sensor[sensor_id].current_ma); break;
           case 4: JsonBuilderI->Add("ih",sensor[sensor_id].power_mw); break;
         } //switch      
-      JsonBuilderI->Level_End();
+      JsonBuilderI->Object_End();
     }
   }//end for
   JsonBuilderI->Array_End();
@@ -398,14 +398,14 @@ uint8_t mEnergyINA219::ConstructJSON_Sensor(uint8_t json_level){
         // JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
         // JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
         // JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
-        // JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+        // JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
         //   JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
         //   JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
-        // JsonBuilderI->Level_End(); 
+        // JsonBuilderI->Object_End(); 
 
 
 
-      JsonBuilderI->Level_End();
+      JsonBuilderI->Object_End();
     // }
   }
   

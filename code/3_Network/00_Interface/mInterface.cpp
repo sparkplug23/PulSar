@@ -189,9 +189,9 @@ uint8_t mInterfaceNetwork::ConstructJSON_State(uint8_t json_level, bool json_app
 
   JBI->Start();
 
-    // JBI->Level_Start("GPRS");
+    // JBI->Object_Start("GPRS");
     //     JBI->Add("ConSec", gprs.connected_seconds);
-    // JBI->Level_End();  
+    // JBI->Object_End();  
 
   return JBI->End();
 

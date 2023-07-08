@@ -17,7 +17,7 @@ uint8_t mLDRBasic::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    JBI->Level_Start("LDR_Raw");
+    JBI->Object_Start("LDR_Raw");
   
       JBI->Add("analog", ldr[0].analog_reading);
       JBI->Add("digital", ldr[0].digital_reading);
@@ -28,7 +28,7 @@ uint8_t mLDRBasic::ConstructJSON_State(uint8_t json_level, bool json_appending){
       // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
-    JBI->Level_End();
+    JBI->Object_End();
   
   
 

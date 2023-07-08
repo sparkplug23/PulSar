@@ -526,7 +526,7 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
   for(uint8_t sensor_id=0;sensor_id<settings.switches_found;sensor_id++){
     if(switches[sensor_id].ischanged || (json_level>JSON_LEVEL_IFCHANGED) ){ 
       
-      JsonBuilderI->Level_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
+      JsonBuilderI->Object_Start(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(), sensor_id, buffer, sizeof(buffer)));
         JsonBuilderI->Add(D_JSON_STATE, IsSwitchActive(sensor_id));
         JsonBuilderI->Add(D_JSON_STATE "_ctr", IsSwitchActive(sensor_id)?"On":"Off");
 
@@ -543,7 +543,7 @@ uint8_t mSwitches::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
         JsonBuilderI->Add("switch_virtual", switches[sensor_id].switch_virtual);
         // JsonBuilderI->Add("is_linked_to_internal_relay", switches[sensor_id].is_linked_to_internal_relay);
         JsonBuilderI->Add("linked_internal_relay_id", switches[sensor_id].linked_internal_relay_id);
-      JsonBuilderI->Level_End();
+      JsonBuilderI->Object_End();
       
     }
 
@@ -672,7 +672,7 @@ void mSwitches::WebAppend_Root_Status_Table(){
   
   JsonBuilderI->Array_Start("switch_table");// Class name
   for(int row=0;row<settings.switches_found;row++){
-    JsonBuilderI->Level_Start();
+    JsonBuilderI->Object_Start();
       JsonBuilderI->Add("id",row);
       JsonBuilderI->Add_FV("ih","\"%s\"", IsSwitchActive(row)?"On":"Off");
       if(IsSwitchActive(row)){
@@ -681,7 +681,7 @@ void mSwitches::WebAppend_Root_Status_Table(){
         JsonBuilderI->Add("fc","#ff0000");
       }
     
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
   }
   JsonBuilderI->Array_End();
   

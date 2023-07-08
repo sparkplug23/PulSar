@@ -25,7 +25,7 @@
 
 //   JsonBuilderI->Array_Start("tab_pir");// Class name
 //   for(int sensor_id=0;sensor_id<settings.sensors_active;sensor_id++){
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->Add("id",sensor_id);
 
 //         char colour_ctr[8];
@@ -57,7 +57,7 @@
       
 //       //detected_rtc_ctr);
 //       JsonBuilderI->Add("fc",colour_ctr);    
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   }
 
 //   JsonBuilderI->Array_End();

@@ -183,7 +183,7 @@ void JsonBuilder::Level_Start_P(const char* keyP, ...)
   writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\":{");
 }
 
-void JsonBuilder::Level_Start_F(const char* keyP, ...)
+void JsonBuilder::Object_Start_F(const char* keyP, ...)
 {
 
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }
@@ -199,14 +199,14 @@ void JsonBuilder::Level_Start_F(const char* keyP, ...)
   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\":{");
 }
 
-void JsonBuilder::Level_Start(const char* key)
+void JsonBuilder::Object_Start(const char* key)
 {
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }
   if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')&&(writer.buffer[writer.length-1]!='[')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":{",key);
 }
 
-void JsonBuilder::Level_Start()
+void JsonBuilder::Object_Start()
 {
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }
   if((writer.length>1)&&(writer.buffer[writer.length-1]!='{')&&(writer.buffer[writer.length-1]!='[')){ writer.length += sprintf_P(&writer.buffer[writer.length],","); }
@@ -220,7 +220,7 @@ void JsonBuilder::AddKey(const char* key)
   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":",key);
 }
 
-void JsonBuilder::Level_End()
+void JsonBuilder::Object_End()
 {
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }
   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s","}");

@@ -73,21 +73,21 @@
 //   if(settings.fShowTable){
 //     JsonBuilderI->Array_Start("relpow_tab");// Class name
 //     for(int row=0;row<settings.relays_connected;row++){  
-//       JsonBuilderI->Level_Start();
+//       JsonBuilderI->Object_Start();
 //         JsonBuilderI->Add("id",row);
 //         JsonBuilderI->Add("ih",CommandGet_Relay_Power(row) ? PSTR("ON") : PSTR("Off"));
-//       JsonBuilderI->Level_End();
+//       JsonBuilderI->Object_End();
 //     }
 //     JsonBuilderI->Array_End();  
 //   }
 
 //   JsonBuilderI->Array_Start("reltog");// Class name
 //   for(int row=0;row<settings.relays_connected;row++){  
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->Add("id",row);
 //       JsonBuilderI->Add("ih",GetRelayNameWithStateLongbyIDCtr(row, buffer, sizeof(buffer)));
 //       JsonBuilderI->Add("bc",CommandGet_Relay_Power(row) ? "#00ff00" : "#ee2200");    
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   }  
 //   JsonBuilderI->Array_End();
 

@@ -25,41 +25,41 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_level, bool json_appe
   JsonBuilderI->Start();  
 
   // #ifdef ENABLE_GPS_PARSER_NMEA
-    JsonBuilderI->Level_Start("Location");
+    JsonBuilderI->Object_Start("Location");
       JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
       JsonBuilderI->Add("latitude", gps_result_stored.latitude());
       JsonBuilderI->Add("longitudeL", gps_result_stored.longitudeL());
       JsonBuilderI->Add("longitude", gps_result_stored.longitude());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Altitude");
+    JsonBuilderI->Object_Start("Altitude");
       JsonBuilderI->Add("altitude_cm", gps_result_stored.altitude_cm()); 
       JsonBuilderI->Add("altitude", gps_result_stored.altitude());
       JsonBuilderI->Add("altitude_ft", gps_result_stored.altitude_ft());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
 
-    JsonBuilderI->Level_Start("Speed");
+    JsonBuilderI->Object_Start("Speed");
       JsonBuilderI->Add("speed_mkn", gps_result_stored.speed_mkn()); 
       JsonBuilderI->Add("speed", gps_result_stored.speed());
       JsonBuilderI->Add("speed_kph", gps_result_stored.speed_kph());
       JsonBuilderI->Add("speed_metersph", gps_result_stored.speed_metersph());
       JsonBuilderI->Add("speed_mph", gps_result_stored.speed_mph());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Heading");
+    JsonBuilderI->Object_Start("Heading");
       JsonBuilderI->Add("heading_cd", gps_result_stored.heading_cd()); 
       JsonBuilderI->Add("heading", gps_result_stored.heading());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("geoidHt");
+    JsonBuilderI->Object_Start("geoidHt");
       JsonBuilderI->Add("geoidHeight_cm", gps_result_stored.geoidHeight_cm()); 
       JsonBuilderI->Add("geoidHeight", gps_result_stored.geoidHeight());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
     JsonBuilderI->Add("satellites", gps_result_stored.satellites); 
 
-    JsonBuilderI->Level_Start("Dilution");
+    JsonBuilderI->Object_Start("Dilution");
       JsonBuilderI->Add("hdop", gps_result_stored.hdop); 
       JsonBuilderI->Add("vdop", gps_result_stored.vdop);
       JsonBuilderI->Add("pdop", gps_result_stored.pdop);
@@ -70,7 +70,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Minimal(uint8_t json_level, bool json_appe
       JsonBuilderI->Add("hdg_err", gps_result_stored.hdg_err());
       JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
       JsonBuilderI->Add("time_err", gps_result_stored.time_err());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
   // #endif // ENABLE_GPS_PARSER_NMEA
   
@@ -91,40 +91,40 @@ uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_appendin
   JsonBuilderI->Start();  
 
   #ifdef ENABLE_GPS_PARSER_NMEA
-    JsonBuilderI->Level_Start("Location");
+    JsonBuilderI->Object_Start("Location");
       JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
       JsonBuilderI->Add("latitude", gps_result_stored.latitude());
       JsonBuilderI->Add("longitudeL", gps_result_stored.longitudeL());
       JsonBuilderI->Add("longitude", gps_result_stored.longitude());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Altitude");
+    JsonBuilderI->Object_Start("Altitude");
       JsonBuilderI->Add("altitude_cm", gps_result_stored.altitude_cm()); 
       JsonBuilderI->Add("altitude", gps_result_stored.altitude());
       JsonBuilderI->Add("altitude_ft", gps_result_stored.altitude_ft());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Speed");
+    JsonBuilderI->Object_Start("Speed");
       JsonBuilderI->Add("speed_mkn", gps_result_stored.speed_mkn()); 
       JsonBuilderI->Add("speed", gps_result_stored.speed());
       JsonBuilderI->Add("speed_kph", gps_result_stored.speed_kph());
       JsonBuilderI->Add("speed_metersph", gps_result_stored.speed_metersph());
       JsonBuilderI->Add("speed_mph", gps_result_stored.speed_mph());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Heading");
+    JsonBuilderI->Object_Start("Heading");
       JsonBuilderI->Add("heading_cd", gps_result_stored.heading_cd()); 
       JsonBuilderI->Add("heading", gps_result_stored.heading());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("geoidHt");
+    JsonBuilderI->Object_Start("geoidHt");
       JsonBuilderI->Add("geoidHeight_cm", gps_result_stored.geoidHeight_cm()); 
       JsonBuilderI->Add("geoidHeight", gps_result_stored.geoidHeight());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
     JsonBuilderI->Add("satellites", gps_result_stored.satellites); 
 
-    JsonBuilderI->Level_Start("Dilution");
+    JsonBuilderI->Object_Start("Dilution");
       JsonBuilderI->Add("hdop", gps_result_stored.hdop); 
       JsonBuilderI->Add("vdop", gps_result_stored.vdop);
       JsonBuilderI->Add("pdop", gps_result_stored.pdop);
@@ -135,7 +135,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_All(uint8_t json_level, bool json_appendin
       JsonBuilderI->Add("hdg_err", gps_result_stored.hdg_err());
       JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
       JsonBuilderI->Add("time_err", gps_result_stored.time_err());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
 
 
@@ -171,25 +171,25 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json_append
   JsonBuilderI->Start();  
 
   #ifdef ENABLE_GPS_PARSER_NMEA
-  JBI->Level_Start("SequenceNumber");
+  JBI->Object_Start("SequenceNumber");
     JBI->Add("GPSCount", 0);
     JBI->Add("RSSCount", 0);
-  JBI->Level_End();
+  JBI->Object_End();
 
-  JBI->Level_Start("Quality");
+  JBI->Object_Start("Quality");
     JBI->Add("Fix", gps_result_stored.status);
     JsonBuilderI->Add("satellites", gps_result_stored.satellites); 
     JBI->Add("SatelleteCount", gps_result_stored.satellites);
     JBI->Add("SatelleteThreshold", 0); //minimal fix to be considered enough
     JBI->Add("UptimeSeconds", 0); 
     JBI->Add("DowntimeSeconds", 0); 
-  JBI->Level_End();
+  JBI->Object_End();
 
-  JBI->Level_Start("Time");
+  JBI->Object_Start("Time");
     JBI->Add("UTC", "0");
     JBI->Add("TimeOfDay", 0);
     JBI->Add("TimeOfDayMillis", gps_latest.milliseconds_of_day);
-    JBI->Level_Start("Parts");
+    JBI->Object_Start("Parts");
       JBI->Add("hours", gps_result_stored.dateTime.hours);
       JBI->Add("minutes", gps_result_stored.dateTime.minutes);
       JBI->Add("seconds", gps_result_stored.dateTime.seconds);
@@ -199,25 +199,25 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json_append
       JBI->Add("year", gps_result_stored.dateTime.year);
       JBI->Add("dateTime_us", gps_result_stored.dateTime_us());
       JBI->Add("dateTime_ms", gps_result_stored.dateTime_ms());
-    JBI->Level_End();
-  JBI->Level_End();
+    JBI->Object_End();
+  JBI->Object_End();
 
-  JBI->Level_Start("Location");
+  JBI->Object_Start("Location");
     // JsonBuilderI->Add("latitudeL", gps_result_stored.latitudeL()); 
     JsonBuilderI->Add("latitude", gps_result_stored.latitude());
     // JsonBuilderI->Add("longitudeL", gps_result_stored.longitudeL());
     JsonBuilderI->Add("longitude", gps_result_stored.longitude());
-  JBI->Level_End();
+  JBI->Object_End();
 
-  JBI->Level_Start("Altitude");
+  JBI->Object_Start("Altitude");
     JBI->Add("hMSL_mm", 0);
     JBI->Add("height_mm", 0);
       JsonBuilderI->Add("altitude_cm", gps_result_stored.altitude_cm()); 
       JsonBuilderI->Add("altitude", gps_result_stored.altitude());
       JsonBuilderI->Add("altitude_ft", gps_result_stored.altitude_ft());
-  JBI->Level_End();
+  JBI->Object_End();
 
-  JBI->Level_Start("Velocity");
+  JBI->Object_Start("Velocity");
     JBI->Add("speed3D", 0);
     JBI->Add("speed2D", 0);
       JsonBuilderI->Add("speed_mkn", gps_result_stored.speed_mkn()); 
@@ -225,21 +225,21 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json_append
       JsonBuilderI->Add("speed_kph", gps_result_stored.speed_kph());
       JsonBuilderI->Add("speed_metersph", gps_result_stored.speed_metersph());
       JsonBuilderI->Add("speed_mph", gps_result_stored.speed_mph());
-  JBI->Level_End();
+  JBI->Object_End();
 
-  JBI->Level_Start("Velocity");
+  JBI->Object_Start("Velocity");
 
       JsonBuilderI->Add("heading_cd", gps_result_stored.heading_cd()); 
       JsonBuilderI->Add("heading", gps_result_stored.heading());
 
-  JBI->Level_End();
+  JBI->Object_End();
 
-    JsonBuilderI->Level_Start("geoidHt");
+    JsonBuilderI->Object_Start("geoidHt");
       JsonBuilderI->Add("geoidHeight_cm", gps_result_stored.geoidHeight_cm()); 
       JsonBuilderI->Add("geoidHeight", gps_result_stored.geoidHeight());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Dilution");
+    JsonBuilderI->Object_Start("Dilution");
       JsonBuilderI->Add("hdop", gps_result_stored.hdop); 
       JsonBuilderI->Add("vdop", gps_result_stored.vdop);
       JsonBuilderI->Add("pdop", gps_result_stored.pdop);
@@ -250,7 +250,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Micro(uint8_t json_level, bool json_append
       JsonBuilderI->Add("hdg_err", gps_result_stored.hdg_err());
       JsonBuilderI->Add("spd_err", gps_result_stored.spd_err());
       JsonBuilderI->Add("time_err", gps_result_stored.time_err());
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
   #endif // ENABLE_GPS_PARSER_NMEA
 
@@ -265,7 +265,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json_append
   JsonBuilderI->Start();  
 
   #ifdef ENABLE_GPS_PARSER_NMEA
-    JsonBuilderI->Level_Start("Millis");
+    JsonBuilderI->Object_Start("Millis");
       JsonBuilderI->Add("GGA",nmea_parser->active_millis.GGA);
       JsonBuilderI->Add("GLL",nmea_parser->active_millis.GLL);
       JsonBuilderI->Add("GSA",nmea_parser->active_millis.GSA);
@@ -274,9 +274,9 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json_append
       JsonBuilderI->Add("RMC",nmea_parser->active_millis.RMC);
       JsonBuilderI->Add("VTG",nmea_parser->active_millis.VTG);
       JsonBuilderI->Add("ZDA",nmea_parser->active_millis.ZDA);
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
-    JsonBuilderI->Level_Start("Millis2");
+    JsonBuilderI->Object_Start("Millis2");
       JsonBuilderI->Add("GGA",millis()-nmea_parser->active_millis.GGA);
       JsonBuilderI->Add("GLL",millis()-nmea_parser->active_millis.GLL);
       JsonBuilderI->Add("GSA",millis()-nmea_parser->active_millis.GSA);
@@ -285,12 +285,12 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json_append
       JsonBuilderI->Add("RMC",mTime::MillisElapsed(nmea_parser->active_millis.RMC));
       JsonBuilderI->Add("VTG",millis()-nmea_parser->active_millis.VTG);
       JsonBuilderI->Add("ZDA",millis()-nmea_parser->active_millis.ZDA);
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
   #endif // ENABLE_GPS_PARSER_NMEA
 
 
-    JsonBuilderI->Level_Start("UBX_Parsed_Millis");
+    JsonBuilderI->Object_Start("UBX_Parsed_Millis");
       JsonBuilderI->Add("status",millis()-gps.debug_millis_last_parsed.status);
       JsonBuilderI->Add("posllh",millis()-gps.debug_millis_last_parsed.posllh);
       JsonBuilderI->Add("pvt",millis()-gps.debug_millis_last_parsed.pvt);
@@ -299,7 +299,7 @@ uint8_t mGPS::ConstructJSON_GPSPacket_Debug(uint8_t json_level, bool json_append
       JsonBuilderI->Add("timegps",mTime::MillisElapsed(gps.debug_millis_last_parsed.timegps));
       JsonBuilderI->Add("timeutc",millis()-gps.debug_millis_last_parsed.timeutc);
       JsonBuilderI->Add("svinfo",millis()-gps.debug_millis_last_parsed.svinfo);
-    JsonBuilderI->Level_End();
+    JsonBuilderI->Object_End();
 
 
 

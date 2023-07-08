@@ -227,16 +227,16 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   //     JsonBuilderI->Level_Start_P(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
   //       JsonBuilderI->Add(D_JSON_TEMPERATURE, sensor[sensor_id].instant.temperature);
   //       JsonBuilderI->Add(D_JSON_HUMIDITY,    sensor[sensor_id].instant.humidity);
-  //       JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+  //       JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
   //         JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
   //         JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
-  //       JsonBuilderI->Level_End();   
-  //     JsonBuilderI->Level_End(); 
+  //       JsonBuilderI->Object_End();   
+  //     JsonBuilderI->Object_End(); 
   //   }
 
   // }
   //   for(int dht_id=0;dht_id<2;dht_id++){
-  //   JBI->Level_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
+  //   JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_DHT_ID, dht_id, name_buffer_tmp, sizeof(name_buffer_tmp)));
   //     JBI->Add(D_JSON_TEMPERATURE, pCONT_dht->sensor[dht_id].instant.temperature);
   //     JBI->Add(D_JSON_HUMIDITY, pCONT_dht->sensor[dht_id].instant.humidity);
   //     JBI->Add(D_JSON_ISVALID, pCONT_dht->sensor[dht_id].instant.isvalid);
@@ -245,7 +245,7 @@ uint8_t mRemoteDevice::ConstructJSON_Sensor(uint8_t json_level, bool json_append
   //     // json1[D_JSON_SECS] = (int)abs(pCONT_time->uptime.seconds_nonreset-pCONT->mhs->climate.ptr->raw.captureupsecs);
   //     // json1["heatindex"] = pCONT->mhs->climate.ptr->raw.heatIndex; // DONT KNOW WHAT THEY ARE
   //     // json1["dewpoint"] = pCONT->mhs->climate.ptr->raw.dewPoint;
-  //   JBI->Level_End();
+  //   JBI->Object_End();
   // }
   
   return JsonBuilderI->End();

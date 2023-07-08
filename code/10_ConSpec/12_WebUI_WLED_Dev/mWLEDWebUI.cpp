@@ -2300,6 +2300,9 @@ const char JSON_palette_names[] PROGMEM = R"=====([
 "Semi Blue","Pink Candy","Red Reaf","Aqua Flash","Yelblu Hot","Lite Light","Red Flash","Blink Red","Red Shift","Red Tide",
 "Candy2"
 ])=====";
+#define PALETTE_NAMES_COUNT_WLED 64
+
+
 
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
   if (!correctPIN) {
@@ -2765,6 +2768,21 @@ void serializeInfo(JsonObject root)
 //     }
 // }
 
+#ifdef ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
+
+void setPaletteColors(JsonArray json, CRGBPalette16 palette)
+{
+    for (int i = 0; i < 16; i++) {
+      JsonArray colors =  json.createNestedArray();
+      CRGB color = palette[i];
+      colors.add(i<<4);
+      colors.add(color.red);
+      colors.add(color.green);
+      colors.add(color.blue);
+    }
+}
+
+
 void serializePalettes(JsonObject root, int page)
 {
   byte tcp[72];
@@ -2774,100 +2792,290 @@ void serializePalettes(JsonObject root, int page)
   int itemPerPage = 8;
   #endif
 
-  // int palettesCount = 12;//pCONT_lAni->getPaletteCount();
-  // int customPalettes = 12;//pCONT_lAni->customPalettes.size();
+  int palettesCount = mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID;//pCONT_lAni->getPaletteCount();
+  int customPalettes = pCONT_lAni->customPalettes.size();
 
-  // int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
-  // if (page > maxPage) page = maxPage;
+  int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
+  if (page > maxPage) page = maxPage;
 
-  // int start = itemPerPage * page;
-  // int end = start + itemPerPage;
-  // if (end > palettesCount + customPalettes) end = palettesCount + customPalettes;
+  int start = itemPerPage * page;
+  int end = start + itemPerPage;
+  if (end > palettesCount + customPalettes) end = palettesCount + customPalettes;
 
-  // root[F("m")] = maxPage; // inform caller how many pages there are
+  root[F("m")] = maxPage; // inform caller how many pages there are
+  JsonObject palettes  = root.createNestedObject("p");
+
+/**
+ * @brief 
+ * Start by sending the current palette loaded
+ */
+
+  for (int i = start; i < end; i++) 
+  {
+
+    ALOG_INF(PSTR("i=%d|p%d|m%d"),i,page,maxPage);
+    
+    uint16_t palette_id = i;// < palettesCount ? i : 0;
+
+    // DEBUG_LINE_HERE;
+
+    pCONT_lAni->LoadPalette(palette_id); // Assume segment 1 exists, and use it to load all palettes. Effect should reset to active palette in main loop. Or here, have it then flip back. Though this may cause flickering midanimation. Animation may also need paused on esp32.
+
+    // DEBUG_LINE_HERE;
+    uint16_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(palette_id);
+    // if(colours_in_palette < 16)
+    // {
+
+    // DEBUG_LINE_HERE;
+        JsonArray curPalette_obj = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
+
+    // DEBUG_LINE_HERE;
+        for (int j = 0; j < colours_in_palette; j++) {
+
+    // DEBUG_LINE_HERE;
+          RgbcctColor color = 
+          // pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()].GetColourFromPalette(j);  
+
+          
+        mPaletteI->GetColourFromPreloadedPaletteBuffer(
+          palette_id,
+          pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
+          j,
+          nullptr,
+          false,
+          true
+        );
+
+
+
+
+        
+          JsonArray colors =  curPalette_obj.createNestedArray();
+          // CRGB color = palette[i];
+          // colors.add(i<<4); // all colour sent should probably scale into the 255 range
+
+          colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
+
+          colors.add(color.red);
+          colors.add(color.green);
+          colors.add(color.blue);
+        }
+
+    // }
+
+  }
+
+
+
+
+// return;
+
+//   for (int i = start; i < end; i++) {
+//     JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
+//     switch (i) {
+//       case 0: //default palette
+//         setPaletteColors(curPalette, PartyColors_p);
+//         break;
+//       case 1: //random
+//           curPalette.add("r");
+//           curPalette.add("r");
+//           curPalette.add("r");
+//           curPalette.add("r");
+//         break;
+//       case 2: //primary color only
+//         curPalette.add("c1");
+//         break;
+//       case 3: //primary + secondary
+//         curPalette.add("c1");
+//         curPalette.add("c1");
+//         curPalette.add("c2");
+//         curPalette.add("c2");
+//         break;
+//       case 4: //primary + secondary + tertiary
+//         curPalette.add("c3");
+//         curPalette.add("c2");
+//         curPalette.add("c1");
+//         break;
+//       case 5: //primary + secondary (+tert if not off), more distinct
+//         curPalette.add("c1");
+//         curPalette.add("c1");
+//         curPalette.add("c1");
+//         curPalette.add("c1");
+//         curPalette.add("c1");
+//         curPalette.add("c2");
+//         curPalette.add("c2");
+//         curPalette.add("c2");
+//         curPalette.add("c2");
+//         curPalette.add("c2");
+//         curPalette.add("c3");
+//         curPalette.add("c3");
+//         curPalette.add("c3");
+//         curPalette.add("c3");
+//         curPalette.add("c3");
+//         curPalette.add("c1");
+//         break;
+//       case 6: //Party colors
+//         setPaletteColors(curPalette, PartyColors_p);
+//         break;
+//       case 7: //Cloud colors
+//         setPaletteColors(curPalette, CloudColors_p);
+//         break;
+//       case 8: //Lava colors
+//         setPaletteColors(curPalette, LavaColors_p);
+//         break;
+//       case 9: //Ocean colors
+//         setPaletteColors(curPalette, OceanColors_p);
+//         break;
+//       case 10: //Forest colors
+//         setPaletteColors(curPalette, ForestColors_p);
+//         break;
+//       case 11: //Rainbow colors
+//         setPaletteColors(curPalette, RainbowColors_p);
+//         break;
+//       case 12: //Rainbow stripe colors
+//         setPaletteColors(curPalette, RainbowStripeColors_p);
+//         break;
+//       default:
+//         {
+//         if (i>=palettesCount) {
+//           setPaletteColors(curPalette, pCONT_lAni->customPalettes[i - palettesCount]);
+//         } else {
+//           memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
+//           setPaletteColors(curPalette, tcp);
+//         }
+//         }
+//         break;
+//     }
+//   }
+
+
+
+}
+
+
+#else // ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
+
+
+void setPaletteColors(JsonArray json, CRGBPalette16 palette)
+{
+    for (int i = 0; i < 16; i++) {
+      JsonArray colors =  json.createNestedArray();
+      CRGB color = palette[i];
+      colors.add(i<<4);
+      colors.add(color.red);
+      colors.add(color.green);
+      colors.add(color.blue);
+    }
+}
+
+
+void serializePalettes(JsonObject root, int page)
+{
+  byte tcp[72];
+  #ifdef ESP8266
+  int itemPerPage = 5;
+  #else
+  int itemPerPage = 8;
+  #endif
+
+  int palettesCount = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID;//pCONT_lAni->getPaletteCount();
+  int customPalettes = pCONT_lAni->customPalettes.size();
+
+  int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
+  if (page > maxPage) page = maxPage;
+
+  int start = itemPerPage * page;
+  int end = start + itemPerPage;
+  if (end > palettesCount + customPalettes) end = palettesCount + customPalettes;
+
+  root[F("m")] = maxPage; // inform caller how many pages there are
   JsonObject palettes  = root.createNestedObject("p");
 
 
 
 
-  // for (int i = start; i < end; i++) {
-  //   JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
-  //   switch (i) {
-  //     case 0: //default palette
-  //       setPaletteColors(curPalette, PartyColors_p);
-  //       break;
-  //     case 1: //random
-  //         curPalette.add("r");
-  //         curPalette.add("r");
-  //         curPalette.add("r");
-  //         curPalette.add("r");
-  //       break;
-  //     case 2: //primary color only
-  //       curPalette.add("c1");
-  //       break;
-  //     case 3: //primary + secondary
-  //       curPalette.add("c1");
-  //       curPalette.add("c1");
-  //       curPalette.add("c2");
-  //       curPalette.add("c2");
-  //       break;
-  //     case 4: //primary + secondary + tertiary
-  //       curPalette.add("c3");
-  //       curPalette.add("c2");
-  //       curPalette.add("c1");
-  //       break;
-  //     case 5: //primary + secondary (+tert if not off), more distinct
-  //       curPalette.add("c1");
-  //       curPalette.add("c1");
-  //       curPalette.add("c1");
-  //       curPalette.add("c1");
-  //       curPalette.add("c1");
-  //       curPalette.add("c2");
-  //       curPalette.add("c2");
-  //       curPalette.add("c2");
-  //       curPalette.add("c2");
-  //       curPalette.add("c2");
-  //       curPalette.add("c3");
-  //       curPalette.add("c3");
-  //       curPalette.add("c3");
-  //       curPalette.add("c3");
-  //       curPalette.add("c3");
-  //       curPalette.add("c1");
-  //       break;
-  //     case 6: //Party colors
-  //       setPaletteColors(curPalette, PartyColors_p);
-  //       break;
-  //     case 7: //Cloud colors
-  //       setPaletteColors(curPalette, CloudColors_p);
-  //       break;
-  //     case 8: //Lava colors
-  //       setPaletteColors(curPalette, LavaColors_p);
-  //       break;
-  //     case 9: //Ocean colors
-  //       setPaletteColors(curPalette, OceanColors_p);
-  //       break;
-  //     case 10: //Forest colors
-  //       setPaletteColors(curPalette, ForestColors_p);
-  //       break;
-  //     case 11: //Rainbow colors
-  //       setPaletteColors(curPalette, RainbowColors_p);
-  //       break;
-  //     case 12: //Rainbow stripe colors
-  //       setPaletteColors(curPalette, RainbowStripeColors_p);
-  //       break;
-  //     default:
-  //       {
-  //       if (i>=palettesCount) {
-  //         setPaletteColors(curPalette, pCONT_lAni->customPalettes[i - palettesCount]);
-  //       } else {
-  //         memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
-  //         setPaletteColors(curPalette, tcp);
-  //       }
-  //       }
-  //       break;
-  //   }
-  // }
+  for (int i = start; i < end; i++) {
+    JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
+    switch (i) {
+      case 0: //default palette
+        setPaletteColors(curPalette, PartyColors_p);
+        break;
+      case 1: //random
+          curPalette.add("r");
+          curPalette.add("r");
+          curPalette.add("r");
+          curPalette.add("r");
+        break;
+      case 2: //primary color only
+        curPalette.add("c1");
+        break;
+      case 3: //primary + secondary
+        curPalette.add("c1");
+        curPalette.add("c1");
+        curPalette.add("c2");
+        curPalette.add("c2");
+        break;
+      case 4: //primary + secondary + tertiary
+        curPalette.add("c3");
+        curPalette.add("c2");
+        curPalette.add("c1");
+        break;
+      case 5: //primary + secondary (+tert if not off), more distinct
+        curPalette.add("c1");
+        curPalette.add("c1");
+        curPalette.add("c1");
+        curPalette.add("c1");
+        curPalette.add("c1");
+        curPalette.add("c2");
+        curPalette.add("c2");
+        curPalette.add("c2");
+        curPalette.add("c2");
+        curPalette.add("c2");
+        curPalette.add("c3");
+        curPalette.add("c3");
+        curPalette.add("c3");
+        curPalette.add("c3");
+        curPalette.add("c3");
+        curPalette.add("c1");
+        break;
+      case 6: //Party colors
+        setPaletteColors(curPalette, PartyColors_p);
+        break;
+      case 7: //Cloud colors
+        setPaletteColors(curPalette, CloudColors_p);
+        break;
+      case 8: //Lava colors
+        setPaletteColors(curPalette, LavaColors_p);
+        break;
+      case 9: //Ocean colors
+        setPaletteColors(curPalette, OceanColors_p);
+        break;
+      case 10: //Forest colors
+        setPaletteColors(curPalette, ForestColors_p);
+        break;
+      case 11: //Rainbow colors
+        setPaletteColors(curPalette, RainbowColors_p);
+        break;
+      case 12: //Rainbow stripe colors
+        setPaletteColors(curPalette, RainbowStripeColors_p);
+        break;
+      default:
+        {
+        if (i>=palettesCount) {
+          setPaletteColors(curPalette, pCONT_lAni->customPalettes[i - palettesCount]);
+        } else {
+          memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
+          setPaletteColors(curPalette, tcp);
+        }
+        }
+        break;
+    }
+  }
 }
+
+
+#endif // ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
+
 
 void serializeNetworks(JsonObject root)
 {
@@ -3052,14 +3260,17 @@ void serveJson(AsyncWebServerRequest* request)
 char lineBuffer[100] = {0};
       bool flag_get_first_name_only = true;
         
-        for(uint16_t i = 0; i < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID; i++)
+        // for(uint16_t i = 0; i < 10; i++)//< mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID; i++)
+        for(uint16_t i = 0; i < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID; i++)
         {
+
           pCONT_lAni->GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
           if(flag_get_first_name_only)
           {    
             char* dataPtr = strchr(lineBuffer,'|');
             if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
           }
+          ALOG_INF(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
           JBI->Add(lineBuffer);
         }
 
@@ -3622,7 +3833,8 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
 
 
     // if (!presetId && currentPlaylist>=0) unloadPlaylist();
-    if (fx != seg.animation_mode_id) seg.setMode(fx, elem[F("fxdef")]);
+    // if (fx != seg.animation_mode_id) 
+    seg.setMode(fx, elem[F("fxdef")]);
   }
 
   //getVal also supports inc/decrementing and random
@@ -4359,8 +4571,8 @@ uint8_t mWLEDWebUI::ConstructJSON_State(uint8_t json_level, bool json_appending)
   char buffer[100];
 
   JBI->Start();
-    JBI->Level_Start("Temperature");
-    JBI->Level_End();
+    JBI->Object_Start("Temperature");
+    JBI->Object_End();
   return JBI->End();
 }
 

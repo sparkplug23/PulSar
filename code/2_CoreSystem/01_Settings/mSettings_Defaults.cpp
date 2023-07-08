@@ -298,12 +298,12 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   // memset(Settings.animation_settings.palette_user_colour_map_ids,0,sizeof(Settings.animation_settings.palette_user_colour_map_ids)); // [][]
   // memset(Settings.animation_settings.palette_user_variable_name_ctr,0,sizeof(Settings.animation_settings.palette_user_variable_name_ctr)); // [][]
   // memset(Settings.animation_settings.palette_user_amounts,0,sizeof(Settings.animation_settings.palette_user_amounts)); // [][]
-  Settings.animation_settings.animation_mode = 2;
-  Settings.animation_settings.animation_palette = 0;
-  Settings.animation_settings.animation_transition_order = 2;
-  Settings.animation_settings.animation_transition_method = 0;
-  Settings.animation_settings.animation_transition_time_ms = 10000; //TBD save as seconds
-  Settings.animation_settings.animation_transition_rate_ms = 10000; //TBD save as seconds
+  // Settings.animation_settings.animation_mode = 2;
+  // Settings.animation_settings.animation_palette = 0;
+  // Settings.animation_settings.animation_transition_order = 2;
+  // Settings.animation_settings.animation_transition_method = 0;
+  // Settings.animation_settings.animation_transition_time_ms = 10000; //TBD save as seconds
+  // Settings.animation_settings.animation_transition_rate_ms = 10000; //TBD save as seconds
   // Settings.animation_settings.animation_transition_pixels_to_update_as_number = 1;
   // Settings.animation_settings.animation_transition_pixels_to_update_as_percentage = 100;
 
@@ -360,7 +360,7 @@ void mSettings::SystemSettings_DefaultBody_Lighting(){
   uint8_t init_colours2[30] = {
     // map_size, map_id_type, 0, 0, 0,
     5*5, 9, 0, 0, 0,
-     255,0,0,255,0,
+    255,0,0,255,0,
     0,255,0,127,255,
     0,0,255,0,127,
     255,0,255,0,0,

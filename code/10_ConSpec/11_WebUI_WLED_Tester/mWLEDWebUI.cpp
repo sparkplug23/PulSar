@@ -2716,8 +2716,8 @@ uint8_t mWLEDWebUI::ConstructJSON_State(uint8_t json_level, bool json_appending)
   char buffer[100];
 
   JBI->Start();
-    JBI->Level_Start("Temperature");
-    JBI->Level_End();
+    JBI->Object_Start("Temperature");
+    JBI->Object_End();
   return JBI->End();
 }
 

@@ -70,7 +70,7 @@
   
 //   JsonBuilderI->Array_Start("rgb_table");// Class name
 //   for(int row=0;row<8;row++){
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->Add("id",row);
 //       switch(row){
 //         case 0: JsonBuilderI->Add("ih",GetAnimationStatusCtr(buffer, sizeof(buffer))); break;
@@ -103,7 +103,7 @@
 //         // case 7: JsonBuilderI->Add_FV("ih",PSTR("\"%d (%s) | %d (mA)\""), (int)power_rating.power,"W",123); break;
 //       } //switch
     
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   }
 //   JsonBuilderI->Array_End();
   
@@ -122,10 +122,10 @@
 //   //   }else{
 //   //     sprintf(colour_button,"%s\0",COLOR_BUTTON); //NOT selected
 //   //   }        
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->Add("id",row);
 //   //     JsonBuilderI->Add("bc",colour_button);
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // }  
 //   // JsonBuilderI->Array_End();
 
@@ -1499,11 +1499,11 @@
 // void mAnimatorLight::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request){
   
 //   JsonBuilderI->Start();
-//     JsonBuilderI->Level_Start("function");
-//       JsonBuilderI->Level_Start("Parse_Urls");        
+//     JsonBuilderI->Object_Start("function");
+//       JsonBuilderI->Object_Start("Parse_Urls");        
 //         JsonBuilderI->Add("/fetch/animation_control_list_options.json",-1);
-//       JsonBuilderI->Level_End();
-//     JsonBuilderI->Level_End();
+//       JsonBuilderI->Object_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->End();
 
 //   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
@@ -1549,7 +1549,7 @@
 //   pCONT_sup->AppendDList(dlist, D_JSON_MODE);
 
 //   JsonBuilderI->Array_Start("container_1");//animation_options_container");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("ihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");
 
@@ -1576,19 +1576,19 @@
 //         JsonBuilderI->AppendBuffer(PM_HTTP_FORM_SELECTOR_END_WITH_SAVE_VARIABLE_JSON, "bgrn", ("Save"));
 
 //       JsonBuilderI->AppendBuffer("\"");
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
 //   JsonBuilderI->Array_Start("function");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("Parse_AddScript");
 //         JsonBuilderI->AppendBuffer("\"");
 //         JsonBuilderI->AppendBuffer(PSTR(
 //           "start_form_listener();"
 //         ));
 //       JsonBuilderI->AppendBuffer("\"");
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
@@ -1597,26 +1597,26 @@
 // void mAnimatorLight::WebAppend_RGBLightSettings_Draw_Flasher_Options(){
 
 //   JsonBuilderI->Array_Start("container_2");//flasher_options_container");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("ihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");
 //         // pCONT->Tasker_Interface(FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER);
 //       JsonBuilderI->AppendBuffer("\"");
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 // }
 
 // void mAnimatorLight::WebAppend_RGBLightSettings_Draw_PageButtons(){
 
 //   JsonBuilderI->Array_Start("container_3");//page_button_container");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("ihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");
 //         pCONT_web->WebAppend_Button_Spaced(PM_BUTTON_NAME_RGB_PALETTE_EDITOR_CTR, D_WEB_HANDLE_PALETTE_EDITOR_PAGE_CTR);
 //         pCONT_web->WebAppend_Button(PM_BUTTON_NAME_RGB_ANIMATION_MIXER_EDITOR_CTR, PM_WEB_HANDLE_RGB_ANIMATION_MIXER_EDITOR_CTR);
 //         // pCONT_web->WebAppend_Button_Spaced(BUTTON_MAIN);
 //       JsonBuilderI->AppendBuffer("\"");
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 // }
@@ -1652,7 +1652,7 @@
 
 
 //   JsonBuilderI->Array_Start("container_1");//animation_options_container");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("ihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");
 
@@ -1788,7 +1788,7 @@
 //       }
 
 //       JsonBuilderI->AppendBuffer("\"");
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
@@ -1799,12 +1799,12 @@
     
 
 //   JsonBuilderI->Array_Start("container_3");//page_button_container");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("ihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");
 //         pCONT_web->WebAppend_Button_Spaced(BUTTON_MAIN);
 //       JsonBuilderI->AppendBuffer("\"");
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
@@ -1817,11 +1817,11 @@
 // void mAnimatorLight::Web_PaletteEditor_UpdateURLs(AsyncWebServerRequest *request){
   
 //   JsonBuilderI->Start();
-//     JsonBuilderI->Level_Start("function");
-//       JsonBuilderI->Level_Start("Parse_Urls");        
+//     JsonBuilderI->Object_Start("function");
+//       JsonBuilderI->Object_Start("Parse_Urls");        
 //         JsonBuilderI->Add("/fetch/colour_palette_list_options.json",-1);
-//       JsonBuilderI->Level_End();
-//     JsonBuilderI->Level_End();
+//       JsonBuilderI->Object_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->End();
 
 //   request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
@@ -1846,7 +1846,7 @@
 
   
 //   JsonBuilderI->Array_Start("g99"); // Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("eihr"); // function
 //         JsonBuilderI->AppendBuffer("\"");      
 //         for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -1857,13 +1857,13 @@
 //         }
 //         JsonBuilderI->AppendBuffer("\"");
 //       JsonBuilderI->Add("evl",1);
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
   
 
 
 //   // JsonBuilderI->Array_Start("g0"); // Class name
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->AddKey("eihr"); // function
 //   //       JsonBuilderI->AppendBuffer("\"");      
 //   //       for (uint8_t row_id = 0; row_id < sizeof(PROGMEM pixels_to_update_as_percentage_map); row_id++) {  
@@ -1878,7 +1878,7 @@
 
 //   //       JsonBuilderI->AppendBuffer("\"");
 //   //     JsonBuilderI->Add("evl",1);
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // JsonBuilderI->Array_End();
 
 
@@ -2022,7 +2022,7 @@
 //   char buffer2[50];
 
 //   // JsonBuilderI->Array_Start("g0"); // Class name
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->AddKey("eihr"); // function
 //   //       JsonBuilderI->AppendBuffer("\"");      
 //   //       for (uint8_t row_id = 0; row_id < sizeof(PROGMEM pixels_to_update_as_percentage_map); row_id++) {  
@@ -2037,12 +2037,12 @@
 //   //       }
 //   //       JsonBuilderI->AppendBuffer("\"");
 //   //     JsonBuilderI->Add("evl",GetPixelsToUpdateAsNumberFromPercentage(pCONT_iLight->animation.transition.pixels_to_update_as_percentage.val));
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // JsonBuilderI->Array_End();
 
 
 //   JsonBuilderI->Array_Start("g1");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("eihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");
 //         for (uint8_t row_id = 0; row_id < TRANSITION_ORDER_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2053,12 +2053,12 @@
 //         }
 //         JsonBuilderI->AppendBuffer("\"");
 //       JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionOrderName(buffer, sizeof(buffer)));
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
   
 
 //   // JsonBuilderI->Array_Start("g2");// Class name
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->AddKey("eihr");           // function
 //   //       JsonBuilderI->AppendBuffer("\"");      
 //   //       for (uint8_t row_id = 0; row_id < sizeof(PROGMEM rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2069,12 +2069,12 @@
 //   //       }
 //   //       JsonBuilderI->AppendBuffer("\"");
 //   //     JsonBuilderI->Add("evl",(uint16_t)round(pCONT_iLight->animation.transition.rate_ms/1000));
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // JsonBuilderI->Array_End();
 
  
 //   // JsonBuilderI->Array_Start("g3");// Class name
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->AddKey("eihr");           // function
 //   //       JsonBuilderI->AppendBuffer("\"");    
 //   //       for (uint8_t row_id = 0; row_id < sizeof(PROGMEM rate_map_secs); row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2085,12 +2085,12 @@
 //   //       }
 //   //       JsonBuilderI->AppendBuffer("\"");
 //   //     JsonBuilderI->Add("evl",(uint16_t)round(pCONT_iLight->animation.transition.time_ms.val/1000));
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // JsonBuilderI->Array_End();
   
 
 //   JsonBuilderI->Array_Start("g4");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("eihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");    
 //         for (uint8_t row_id = 0; row_id < TRANSITION_METHOD_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2101,12 +2101,12 @@
 //         }
 //         JsonBuilderI->AppendBuffer("\"");
 //       JsonBuilderI->Add("evl", pCONT_iLight->GetTransitionMethodName(buffer, sizeof(buffer)));
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
 //   JsonBuilderI->Array_Start("g5");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("eihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");    
 //         for (uint8_t row_id = 0; row_id < pCONT_iLight->ANIMATION_MODE_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2117,12 +2117,12 @@
 //         }
 //         JsonBuilderI->AppendBuffer("\"");
 //       JsonBuilderI->Add("evl",pCONT_iLight->GetAnimationModeName(buffer, sizeof(buffer)));
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
 //   JsonBuilderI->Array_Start("g6");// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->AddKey("eihr");           // function
 //         JsonBuilderI->AppendBuffer("\"");    
 //         for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2133,13 +2133,13 @@
 //         }
 //         JsonBuilderI->AppendBuffer("\"");
 //       JsonBuilderI->Add("evl",pCONT_iLight->GetPaletteFriendlyName(buffer, sizeof(buffer)));
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
 //   #ifdef ENABLE_PIXEL_FUNCTION_HACS_EFFECTS_PHASEOUT
 //   // JsonBuilderI->Array_Start("g7");// Class name
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->AddKey("eihr");           // function
 //   //       JsonBuilderI->AppendBuffer("\""); 
 //   //       for (uint8_t row_id = 0; row_id < EFFECTS_FUNCTION_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2150,11 +2150,11 @@
 //   //       }
 //   //       JsonBuilderI->AppendBuffer("\"");
 //   //     JsonBuilderI->Add("evl",1);
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // JsonBuilderI->Array_End();
 
 //   // JsonBuilderI->Array_Start("g8");// Class name
-//   //   JsonBuilderI->Level_Start();
+//   //   JsonBuilderI->Object_Start();
 //   //     JsonBuilderI->AddKey("eihr");           // function
 //   //       JsonBuilderI->AppendBuffer("\""); 
 //   //       for (uint8_t row_id = 0; row_id < 6; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
@@ -2165,7 +2165,7 @@
 //   //       }
 //   //       JsonBuilderI->AppendBuffer("\"");
 //   //     JsonBuilderI->Add("evl",1);
-//   //   JsonBuilderI->Level_End();
+//   //   JsonBuilderI->Object_End();
 //   // JsonBuilderI->Array_End();
 //   #endif
 
@@ -2210,7 +2210,7 @@
 //   // JsonBuilderI->Start();
   
 //   JsonBuilderI->Array_Start(WEB_CLASS_RGB_LIVE);// Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->Array_Start(type_ctr);
 //       RgbTypeColor c;
 //       for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
@@ -2218,13 +2218,13 @@
 //         JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c.R,c.G,c.B);
 //       }  
 //       JsonBuilderI->Array_End();
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 
 
 //   #ifdef ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW
 //   JsonBuilderI->Array_Start("wrapper"); // Class name
-//     JsonBuilderI->Level_Start();
+//     JsonBuilderI->Object_Start();
 //       JsonBuilderI->Array_Start(type_ctr);
 //       RgbTypeColor c2;
 //       for (uint16_t i= 0; i < leds_max_to_show; i += pixels_to_iter){ 
@@ -2232,7 +2232,7 @@
 //         JsonBuilderI->Add_FV(PSTR("\"%02X%02X%02X\""),c2.R,c2.G,c2.B);
 //       }  
 //       JsonBuilderI->Array_End();
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 //   JsonBuilderI->Array_End();
 //   #endif // ENABLE_DEVFEATURE_PIXEL_LIVEVIEW_IN_PAGE_ROW
 

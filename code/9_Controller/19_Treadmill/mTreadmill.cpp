@@ -300,7 +300,7 @@ uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_level, bool json_appending
     JsonBuilderI->Add_P("voltage_raw", pCONT_mina219->sensor[0].bus_voltage_mv);  
     JsonBuilderI->Add_P("voltage_average", pCONT_mina219->sensor_averages[0].bus_voltage_mv);  
 
-    JBI->Level_Start("AveragingStats");
+    JBI->Object_Start("AveragingStats");
       JBI->Add("last_updated",measured.millis_last_updated);
       JBI->Add("indexes_used",measured.averaging->indexes_used);
       JBI->Add("index",measured.averaging->index);
@@ -310,26 +310,26 @@ uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_level, bool json_appending
         JBI->Add(measured.averaging->data[i]);
       }
       JBI->Array_End();
-    JBI->Level_End();
+    JBI->Object_End();
 
 
     
     JsonBuilderI->Add("MPH_Linear", GetSpeed_Mph(0));
     JsonBuilderI->Add("MPH_Mapped", GetSpeed_Mph(1));
 
-    JBI->Level_Start("Measured");
+    JBI->Object_Start("Measured");
       JBI->Add("MPH", measured.mph);
       JBI->Add("MPS", measured.mps);
       JBI->Add("MetresResetting", measured.metres_reseting);
       JBI->Add("MetresNonResetting", measured.metres_nonreseting);
       JBI->Add("ResetSecondsDecounter", measured.reset_seconds_decounter);
       JBI->Add("ResetSecondsPeriod", measured.reset_seconds_reset_period);
-    JBI->Level_End();
+    JBI->Object_End();
 
 
     
 
-    JsonBuilderI->Level_Start("calib");
+    JsonBuilderI->Object_Start("calib");
       JBI->Add("mx_in", av.mx_in);
       JBI->Add("input_cal_l", av.input_cal_l);
       JBI->Add("input_cal_h", av.input_cal_h);
@@ -337,7 +337,7 @@ uint8_t mTreadmill::ConstructJSON_Sensor(uint8_t json_level, bool json_appending
       JBI->Add("output_cal_h", av.output_cal_h);
       JBI->Add("calib", av.calib);
       JBI->Add("isfound", av.isfound);
-    JBI->Level_End();
+    JBI->Object_End();
 
 
 

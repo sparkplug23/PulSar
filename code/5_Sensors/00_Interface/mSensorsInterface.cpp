@@ -503,7 +503,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
      */
     if(flag_level_ended_needed)
     {
-      JBI->Level_End();
+      JBI->Object_End();
       flag_level_ended_needed = false;
       flag_level_started = false;     // closed level
     }
@@ -556,7 +556,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //               // Only add sensor type if any has been found
 //               if(flag_level_started != true)
 //               {     
-//                 JBI->Level_Start("TemperatureHeatMapBrightness");//PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
+//                 JBI->Object_Start("TemperatureHeatMapBrightness");//PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
 //                 flag_level_started = true;
 //                 flag_level_ended_needed = true;
 //               }
@@ -648,7 +648,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //      */
 //     if(flag_level_ended_needed)
 //     {
-//       JBI->Level_End();
+//       JBI->Object_End();
 //       flag_level_ended_needed = false;
 //       flag_level_started = false;     // closed level
 //     }
@@ -791,7 +791,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //      */
 //     if(flag_level_ended_needed)
 //     {
-//       JBI->Level_End();
+//       JBI->Object_End();
 //       flag_level_ended_needed = false;
 //       flag_level_started = false;     // closed level
 //     }
@@ -911,7 +911,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
               // Only add sensor type if any has been found
               if(flag_level_started != true)
               {     
-                JBI->Level_Start(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
+                JBI->Object_Start(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
                 flag_level_started = true;
                 flag_level_ended_needed = true;
               }
@@ -1005,7 +1005,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
      */
     if(flag_level_ended_needed)
     {
-      JBI->Level_End();
+      JBI->Object_End();
       flag_level_ended_needed = false;
       flag_level_started = false;     // closed level
     }
@@ -1150,7 +1150,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
      */
     if(flag_level_ended_needed)
     {
-      JBI->Level_End();
+      JBI->Object_End();
       flag_level_ended_needed = false;
       flag_level_started = false;     // closed level
     }
@@ -1205,7 +1205,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 // //           );
 // //         }
 // //       }
-// //       JBI->Level_End();
+// //       JBI->Object_End();
 // //     }
 // //   }
 
@@ -1242,7 +1242,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
 //   //     //   }
 //   //     // }
-//   //     // JBI->Level_End();
+//   //     // JBI->Object_End();
 
 //     // Need to loop for each type of sensor
 //     for(auto& pmod:pCONT->pModule)
@@ -1271,7 +1271,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 //             );
 //           }
 //         }
-//       // JBI->Level_End();
+//       // JBI->Object_End();
 
 //       }
 

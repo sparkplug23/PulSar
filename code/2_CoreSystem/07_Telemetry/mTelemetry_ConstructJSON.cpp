@@ -19,7 +19,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
   JBI->Start();
   
     // //test devices
-    // JBI->Level_Start("Test");
+    // JBI->Object_Start("Test");
     //   JBI->Add("activity.loop_counter", pCONT_sup->activity.loop_counter);
     // //   JBI->Add("sleep", pCONT_set->sleep);
     // //   JBI->Add("loop_runtime_millis", pCONT_sup->loop_runtime_millis);
@@ -27,7 +27,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     // //   JBI->Add("this_cycle_ratio", pCONT_sup->this_cycle_ratio);
     // //   JBI->Add("loop_load_avg", pCONT_set->loop_load_avg);
     // //   JBI->Add("enable_sleep", pCONT_set->Settings.enable_sleep);
-    // JBI->Level_End();
+    // JBI->Object_End();
     // // test end
 
     JBI->Add(PM_JSON_TIME,           pCONT_time->RtcTime.hhmmss_ctr);
@@ -39,7 +39,7 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     JBI->Add(PM_JSON_LOADAVERAGE,    pCONT_set->loop_load_avg); // average loops_per_second
     JBI->Add(PM_JSON_FREEHEAP,       ESP.getFreeHeap());
     JBI->Add(PM_JSON_DEVICEFRIENDLYNAME, pCONT_set->Settings.system_name.friendly);
-    JBI->Level_Start(PM_JSON_NETWORK);
+    JBI->Object_Start(PM_JSON_NETWORK);
       JBI->Add_FV(PM_JSON_IPADDRESS, PSTR("\"%d.%d.%d.%d\""), localip[0],localip[1],localip[2],localip[3]);
       JBI->Add(PM_JSON_SSID,         WiFi.SSID().c_str());
       JBI->Add(PM_JSON_RSSI,         WiFi.RSSI());
@@ -48,22 +48,22 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
       JBI->Add(PM_JSON_DOWNTIME,     "00T00:00:00");
       JBI->Add(PM_JSON_DOWNSECS,     (uint8_t)0);
       #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    JBI->Level_End();
+    JBI->Object_End();
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-    // JBI->Level_Start(PM_JSON_MQTT);
+    // JBI->Object_Start(PM_JSON_MQTT);
     //   JBI->Add(PM_JSON_SENTCOUNT,       pCONT_mqtt->pubsub->stats.packets_sent_counter);
     //   JBI->Add(PM_JSON_RECEIVEDCOUNT,   pCONT_mqtt->pubsub->stats.packets_sent_counter);
     //   JBI->Add(PM_JSON_SENTPERMINUTE,   pCONT_mqtt->pubsub->stats.packets_sent_per_minute);
-    // JBI->Level_End();
+    // JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     #ifdef ENABLE_DEVFEATURE_HARDWARE_STATUS // Generate status message from all modules for human readable message
     // 2023, keep this, its for others to read, a simple ~100 char max message to say "Stable/Working/Boot Loops/Unstable/Sensor Error etc"
     memset(&hardwarestatus,0,sizeof(hardwarestatus));
     pCONT->Tasker_Interface(FUNC_STATUS_MESSAGE_APPEND);
-    JBI->Level_Start(PM_JSON_STATUS);
+    JBI->Object_Start(PM_JSON_STATUS);
       JBI->Add(PM_JSON_MESSAGE,         hardwarestatus.ctr); //this can be turned into a subadd method
       JBI->Add(PM_JSON_LEVEL,           hardwarestatus.importance);
-    JBI->Level_End();
+    JBI->Object_End();
     #endif// ENABLE_DEVFEATURE_HARDWARE_STATUS
     // JBI->Add(PM_JSON_PAYLOAD_RATE,      pCONT_time->RtcTime.hhmmss_ctr);
     // ALOG_INF(PSTR("JBI=\"%s\""),JBI->GetPtr());
@@ -125,22 +125,22 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     JBI->Add(PM_JSON_VERSION_NUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
     JBI->Add(PM_JSON_VERSION_NUMBER_NOTYPE,   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
 
-    JBI->Level_Start(PM_JSON_VERSION_PARTS);
-      JBI->Level_Start(PM_JSON_CURRENT);
+    JBI->Object_Start(PM_JSON_VERSION_PARTS);
+      JBI->Object_Start(PM_JSON_CURRENT);
         JBI->Add(PM_JSON_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE);
         JBI->Add(PM_JSON_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR);
         JBI->Add(PM_JSON_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR);
         JBI->Add(PM_JSON_CORE,   (uint8_t)FIRMWARE_VERSION_CORE);
         JBI->Add(PM_JSON_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE);
-      JBI->Level_End();
-      JBI->Level_Start(PM_JSON_MINIMAL);
+      JBI->Object_End();
+      JBI->Object_Start(PM_JSON_MINIMAL);
         JBI->Add(PM_JSON_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE_MINIMAL);
         JBI->Add(PM_JSON_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR_MINIMAL);
         JBI->Add(PM_JSON_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR_MINIMAL);
         JBI->Add(PM_JSON_CORE,   (uint8_t)FIRMWARE_VERSION_CORE_MINIMAL);
         JBI->Add(PM_JSON_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE_MINIMAL);
-      JBI->Level_End();
-    JBI->Level_End();
+      JBI->Object_End();
+    JBI->Object_End();
 
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     JBI->Add(PM_JSON_ARDUINO_CORE,     ARDUINO_ESP8266_RELEASE); 
@@ -186,12 +186,12 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
 uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level, bool json_appending){ 
   char buffer[30];
   JBI->Start();
-    JBI->Level_Start(PM_JSON_LOGLEVELS);
+    JBI->Object_Start(PM_JSON_LOGLEVELS);
       JBI->Add(PM_JSON_SERIAL, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level, buffer, sizeof(buffer)));
       JBI->Add(PM_JSON_SYSTEM, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.syslog_level, buffer, sizeof(buffer)));
       JBI->Add(PM_JSON_WEB,    pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.weblog_level, buffer, sizeof(buffer)));
       JBI->Add(PM_JSON_TELNET, pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.telnetlog_level, buffer, sizeof(buffer)));
-    JBI->Level_End();
+    JBI->Object_End();
   return JBI->End();
 }
 
@@ -268,18 +268,18 @@ uint8_t mTelemetry::ConstructJSON_MQTT(uint8_t json_level, bool json_appending){
 
     JBI->Add("RetrySecs", pCONT_set->Settings.mqtt_retry);
 
-    JBI->Level_Start(PM_JSON_REFRESH_RATES);
+    JBI->Object_Start(PM_JSON_REFRESH_RATES);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_IFCHANGED, pCONT_set->Settings.sensors.ifchanged_secs);
       JBI->Add(PM_JSON_MQTT_REFRESH_RATE_TELEPERIOD, pCONT_set->Settings.sensors.teleperiod_secs);
-    JBI->Level_End();
+    JBI->Object_End();
     
     JBI->Add(PM_JSON_MQTT_ENABLE_RESTART,   (uint8_t)0);
 
 
     #ifdef ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
-    JBI->Level_Start("Interface_Priority");
+    JBI->Object_Start("Interface_Priority");
       JBI->Add(D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR, pCONT_set->Settings.mqtt.interface_reporting_priority.energy);
-    JBI->Level_End();
+    JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY
 
 
@@ -343,7 +343,7 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_appending){
     JBI->Add(PM_JSON_SUNSET,     pCONT_time->GetDateAndTimeCtr(DT_SUNSET, buffer, sizeof(buffer)));
 
     #ifdef DEBUG_MODULE_TIME_STD
-    JBI->Level_Start("debug_v2");
+    JBI->Object_Start("debug_v2");
       JBI->Add("utc_time",pCONT_time->Rtc.utc_time);
       JBI->Add("local_time",pCONT_time->Rtc.local_time);
       JBI->Add("daylight_saving_time",pCONT_time->Rtc.daylight_saving_time);
@@ -360,7 +360,7 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_appending){
       JBI->Add("ntp_last_active_secs", (millis()-pCONT_time->Rtc.ntp_last_active)/1000);
       JBI->Add("last_sync_secs", (pCONT_time->Rtc.utc_time-pCONT_time->Rtc.last_sync)/1000);
       JBI->Add("GetUptime",pCONT_time->GetUptime().c_str());
-      JBI->Level_Start("DST");
+      JBI->Object_Start("DST");
         JBI->Add("IsDst", pCONT_time->IsDst());
         int32_t dstoffset = pCONT_set->Settings.toffset[1] * pCONT_time->SECS_PER_MIN;
         int32_t stdoffset = pCONT_set->Settings.toffset[0] * pCONT_time->SECS_PER_MIN;
@@ -369,11 +369,11 @@ uint8_t mTelemetry::ConstructJSON_Time(uint8_t json_level, bool json_appending){
 
         JBI->Add("diff_sod", pCONT_time->Rtc.utc_time - (pCONT_time->Rtc.daylight_saving_time - stdoffset));
         JBI->Add("dif_eod",pCONT_time->Rtc.utc_time - (pCONT_time->Rtc.standard_time - dstoffset));
-      JBI->Level_End();
+      JBI->Object_End();
       JBI->Add("toffset[0]", pCONT_set->Settings.toffset[0]);
       JBI->Add("toffset[1]", pCONT_set->Settings.toffset[1]);
-    JBI->Level_End();    
-    // JBI->Level_Start("RtcTime");
+    JBI->Object_End();    
+    // JBI->Object_Start("RtcTime");
     //   JBI->Add("valid",pCONT_time->RtcTime.valid);
     //   JBI->Add_FV("time","\"%02d:%02d:%02d\"",pCONT_time->RtcTime.hour,pCONT_time->RtcTime.minute,pCONT_time->RtcTime.second);
     // JBI->End();
@@ -452,17 +452,17 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
                       pCONT_time->RtcTime.Mday, pCONT_time->RtcTime.month, pCONT_time->RtcTime.year,
                       pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second
                     );
-  JBI->Level_Start(PM_JSON_COUNTER);
+  JBI->Object_Start(PM_JSON_COUNTER);
     JBI->Add("All", (uint8_t)0);
     // JBI->Add("WDT", (uint8_t)0);
-  JBI->Level_End();
+  JBI->Object_End();
 
   // if (pCONT_sup->CrashFlag()) {
     
-  JBI->Level_Start(PM_JSON_CRASHDUMP);
+  JBI->Object_Start(PM_JSON_CRASHDUMP);
     pCONT_sup->WriteBuffer_P(PSTR(","));
     pCONT_sup->CrashDump_AddJson();
-  JBI->Level_End();
+  JBI->Object_End();
 
   // } else {
   //   char buffer[30];
@@ -517,15 +517,15 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
   char buffer[30];
   JBI->Start();
   JBI->Add("flag_serial_set_tx_set",pCONT_pins-> flag_serial_set_tx_set);
-    // JBI->Level_Start(PM_JSON_GPIO);
+    // JBI->Object_Start(PM_JSON_GPIO);
     // for(uint16_t i=0;i<sizeof(pCONT_set->pin);i++){ 
     //   if(pCONT_pins->PinUsed(i)){ // skip pins not configured
     //     sprintf_P(buffer, PSTR("FUNC_%d"), i);
     //     JBI->Add(buffer, pCONT_pins->GetPin(i));
     //   }
     // }
-    // JBI->Level_End();
-    JBI->Level_Start(PM_JSON_GPIO);
+    // JBI->Object_End();
+    JBI->Object_Start(PM_JSON_GPIO);
     for(uint16_t i=0;i<ARRAY_SIZE(pCONT_pins->pin_attached_gpio_functions);i++){ 
       if(pCONT_pins->PinUsed(pCONT_pins->pin_attached_gpio_functions[i])){ // skip pins not configured
 
@@ -542,8 +542,8 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
       }
     }
     
-    JBI->Level_End();
-    // JBI->Level_Start(D_JSON_GPIO "_map");
+    JBI->Object_End();
+    // JBI->Object_Start(D_JSON_GPIO "_map");
     // for(uint16_t i=0;i<MAX_USER_PINS;i++){ 
     //   sprintf_P(buffer, PSTR("%d"),
       
@@ -552,7 +552,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
     //    );
     //   JBI->Add(buffer, pCONT_pins->GetPin(i));
     // }
-    // JBI->Level_End();
+    // JBI->Object_End();
 
     // Debug by printing all arrays out
     JBI->Array_Start("pin_attached_gpio_functions");
@@ -613,13 +613,13 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool
   
   #ifdef DEBUG_EXECUTION_TIME
     char buffer[50];
-    JBI->Level_Start(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[ii], buffer));
+    JBI->Object_Start(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[ii], buffer));
       JBI->Array_AddArray("average", pCONT->module_settings.execution_time_average_ms, sizeof(pCONT->module_settings.execution_time_average_ms));
       JBI->Array_AddArray("max",     pCONT->module_settings.execution_time_max_ms,     sizeof(pCONT->module_settings.execution_time_max_ms));
-    JBI->Level_End();
+    JBI->Object_End();
   #endif
 
-  JBI->Level_Start("ModuleSize");
+  JBI->Object_Start("ModuleSize");
 
   
   // for(uint8_t i=0;i<pCONT->module_settings.count;i++){
@@ -645,7 +645,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool
   }
   JBI->Array_End();
 
-  JBI->Level_End();
+  JBI->Object_End();
 
 
   return JBI->End();
@@ -661,33 +661,33 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
   char buffer[50];
   JBI->Start();
 
-  JBI->Level_Start("Header");
+  JBI->Object_Start("Header");
     JBI->Add("cfg_holder", pCONT_set->Settings.cfg_holder);
     JBI->Add("cfg_size", pCONT_set->Settings.cfg_size);
     JBI->Add("save_flag", pCONT_set->Settings.save_flag);
     JBI->Add("version", pCONT_set->Settings.version);
     JBI->Add("bootcount", pCONT_set->Settings.bootcount);
     JBI->Add("cfg_crc", pCONT_set->Settings.cfg_crc);
-  JBI->Level_End();
+  JBI->Object_End();
 
 
-  JBI->Level_Start("Animations");
+  JBI->Object_Start("Animations");
   //   JBI->Array_AddArray("controller", 
   //   &pCONT_set->Settings.animation_settings.xmas_controller_params, 
   //   sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
-  // JBI->Level_End();
-  // JBI->Level_Start("Animations1");
-    JBI->Array_Start("controller"); 
+  // JBI->Object_End();
+  // JBI->Object_Start("Animations1");
+    // JBI->Array_Start("controller"); 
     // &pCONT_set->Settings.animation_settings.xmas_controller_params, 
     // sizeof(pCONT_set->Settings.animation_settings.xmas_controller_params));
 
-    for(int i=0;i<10;i++)
-    {
-      JBI->Add(pCONT_set->Settings.animation_settings.xmas_controller_params[i]);
-    }
+    // for(int i=0;i<10;i++)
+    // {
+    //   JBI->Add(pCONT_set->Settings.animation_settings.xmas_controller_params[i]);
+    // }
 
-    JBI->Array_End();
-  JBI->Level_End();
+    // JBI->Array_End();
+  JBI->Object_End();
 
   /**
    * Read stored values into temp struct, not use local variables
@@ -740,7 +740,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
       JBI->Add("avg_time", pCONT->debug_module_time[ii].avg_time);
       JBI->Add("max_function_id", pCONT->debug_module_time[ii].max_function_id);
 
-    JBI->Level_End();
+    JBI->Object_End();
 
 
 
@@ -780,7 +780,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
   // }
   // JBI->Array_End();
 
-  // JBI->Level_End();
+  // JBI->Object_End();
 
 
   return JBI->End();

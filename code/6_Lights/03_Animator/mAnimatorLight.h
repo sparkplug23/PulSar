@@ -132,6 +132,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR)         "debug
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug/segments";
 #endif 
+#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR)        "debug/palette_vector";
+#endif 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
 #endif 
@@ -376,7 +379,7 @@ class mAnimatorLight :
     uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_appending = true);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
-    void LoadPalette(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer = nullptr, uint16_t palette_buflen = 0);
+    void LoadPalette(uint8_t palette_id, uint8_t segment_index = 0, uint8_t* palette_buffer = nullptr, uint16_t palette_buflen = 0);
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Segments(uint8_t json_level = 0, bool json_appending = true);
@@ -404,6 +407,9 @@ class mAnimatorLight :
     #endif
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
     uint8_t ConstructJSON_Debug_Segments(uint8_t json_level = 0, bool json_appending = true);
+    #endif
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+    uint8_t ConstructJSON_Debug_Palette_Vector(uint8_t json_level = 0, bool json_appending = true);
     #endif
     #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
@@ -451,6 +457,9 @@ class mAnimatorLight :
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
       struct handler<mAnimatorLight> mqtthandler_debug_segments;
+      #endif
+      #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+      struct handler<mAnimatorLight> mqtthandler_debug_palette_vector;
       #endif
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
@@ -672,6 +681,7 @@ class mAnimatorLight :
 
     #define SEGMENT          segments[getCurrSegmentId()]
     #define SEGMENT_I(X)     segments[X]
+    #define pSEGMENT_I(X)    pCONT_lAni->segments[X]
     #define SEGLEN           _virtualSegmentLength
 
     #define SPEED_FORMULA_L  5U + (50U*(255U - SEGMENT._speed))/SEGLEN
@@ -1761,6 +1771,7 @@ class mAnimatorLight :
   void CommandSet_SegColour_RgbcctColour_Manual(uint8_t* values, uint8_t value_count, uint8_t colour_index = 0, uint8_t segment_index = 0);
 
 
+  uint8_t GetNumberOfColoursInPalette(uint16_t palette_id);
 
   /***************
    * END
@@ -1794,10 +1805,10 @@ class mAnimatorLight :
 
 
 
-  #define DEBUG_LINE_HERE    Serial.printf("DEBUG HERE: ");\
-                        Serial.print(__FILE__);\
-                        Serial.println(__LINE__);\
-                        Serial.flush();
+  // #define DEBUG_LINE_HERE    Serial.printf("DEBUG HERE: ");\
+  //                       Serial.print(__FILE__);\
+  //                       Serial.println(__LINE__);\
+  //                       Serial.flush();
 
 
 void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index = 0);
@@ -2193,7 +2204,7 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
       palette_container = new mPaletteContainer(); 
       #endif // ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
 
-      DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE;
 
       // if(RGBCCTCOLOURS_SIZE != 5) //minimum as default
       // {
@@ -2461,6 +2472,7 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
 
 
 const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
+int16_t GetPaletteIDbyName(char* buffer);
 
 
 RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
@@ -2623,7 +2635,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline void setTransition(uint16_t t) { _transitionDur = t; }
     inline void appendSegment(const Segment_New &seg = Segment_New()) {
 
-      DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE;
        segments.push_back(seg); 
        
        }

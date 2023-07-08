@@ -253,7 +253,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool 
 
   // GPS data
   #ifdef USE_MODULE_DRIVERS_GPS
-  JBI->Level_Start("G");
+  JBI->Object_Start("G");
     JBI->Add("la", pCONT_gps->gps_result_stored.latitudeL()); 
     JBI->Add("lg", pCONT_gps->gps_result_stored.longitudeL()); 
     JBI->Add("at", pCONT_gps->gps_result_stored.altitude_cm()); //above mean sea level, in cm 
@@ -273,7 +273,7 @@ uint8_t mGPS_SD_Logger::ConstructJSON_SDCardSuperFrame(uint8_t json_level, bool 
 
     JBI->Add("tms",  tod_millis);
     JBI->Add_FV("t",  "\"%02d:%02d:%02d-%03d\"", pCONT_gps->gps_result_stored.dateTime.hours, pCONT_gps->gps_result_stored.dateTime.minutes, pCONT_gps->gps_result_stored.dateTime.seconds, pCONT_gps->gps_result_stored.dateTime_ms());
-  JBI->Level_End();
+  JBI->Object_End();
   #endif // USE_MODULE_DRIVERS_GPS
   
   return JsonBuilderI->End();

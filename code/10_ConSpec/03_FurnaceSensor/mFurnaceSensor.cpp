@@ -279,7 +279,7 @@ uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level, bool json_append
 
   JBI->Start();
 
-  JBI->Level_Start("ManualData");
+  JBI->Object_Start("ManualData");
     // Lockout
     JBI->Add("AIO", analogRead(35));
     // JBI->Add("DIO", digitalRead(12));//D6));
@@ -296,7 +296,7 @@ uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level, bool json_append
     JBI->Add("garage_temp", pCONT_bme->sensor[0].temperature);
     #endif 
 
-    JBI->Level_End();
+    JBI->Object_End();
 
     // if(adc_values.adc1 != 0)
     // {

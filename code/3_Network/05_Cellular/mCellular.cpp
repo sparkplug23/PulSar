@@ -574,12 +574,12 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
     JBI->Add("uptime", pCONT_time->uptime_seconds_nonreset);
     JBI->Add("rtcseconds", pCONT_time->RtcTime.second);
-    JBI->Level_Start("GPRS");
+    JBI->Object_Start("GPRS");
         JBI->Add("ConSec", gprs.connected_seconds);
         JBI->Add("rss_dbm", gprs.signal_quality_rssi_dbm);
-    JBI->Level_End();
+    JBI->Object_End();
     #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    JBI->Level_Start("GPS");
+    JBI->Object_Start("GPS");
       JBI->Add("second", gps.second);
       JBI->Add("Speed", gps.speed);
       JBI->Add("altitude", gps.altitude);
@@ -619,14 +619,14 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
       );
 
       JBI->Add("url", buffer);
-    JBI->Level_End();
+    JBI->Object_End();
     #endif // USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
-    JBI->Level_Start("Battery");
+    JBI->Object_Start("Battery");
       JBI->Add("Volts_mv", modem_status.battery.volts_mv);
       JBI->Add("Percentage", modem_status.battery.percentage);
       JBI->Add("ChargeState", modem_status.battery.charge_state);
       JBI->Add("Valid", modem_status.battery.isvalid);
-    JBI->Level_End();
+    JBI->Object_End();
   
   return JBI->End();
 

@@ -513,7 +513,7 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
-    // JBI->Level_Start(D_JSON_RFRECEIVED);
+    // JBI->Object_Start(D_JSON_RFRECEIVED);
   
       // JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
 
@@ -527,7 +527,7 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
       // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
-    // JBI->Level_End();
+    // JBI->Object_End();
   
   
 

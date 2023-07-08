@@ -359,20 +359,20 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
     #if defined(USE_MODULE_SENSORS_LSM303D) || defined(USE_MODULE_SENSORS_L3G)
     // Force update of sensor here
 
-    JBI->Level_Start("IA"); // 9 axis gyro
+    JBI->Object_Start("IA"); // 9 axis gyro
 
       #ifdef USE_MODULE_SENSORS_LSM303D
       pCONT_LSM303D->sensor[0].lsm303d->read();
-      JBI->Level_Start("M");
+      JBI->Object_Start("M");
         JBI->Add("x", pCONT_LSM303D->sensor[0].lsm303d->m.x);
         JBI->Add("y", pCONT_LSM303D->sensor[0].lsm303d->m.y);
         JBI->Add("z", pCONT_LSM303D->sensor[0].lsm303d->m.z);
-      JBI->Level_End();
-      JBI->Level_Start("A");
+      JBI->Object_End();
+      JBI->Object_Start("A");
         JBI->Add("x", pCONT_LSM303D->sensor[0].lsm303d->a.x);
         JBI->Add("y", pCONT_LSM303D->sensor[0].lsm303d->a.y);
         JBI->Add("z", pCONT_LSM303D->sensor[0].lsm303d->a.z);
-      JBI->Level_End();
+      JBI->Object_End();
       
       float heading;
       float roll;
@@ -383,38 +383,38 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
         &heading, &roll, &pitch
       );
 
-      JBI->Level_Start("O");
+      JBI->Object_Start("O");
         JBI->Add("H", heading);
         JBI->Add("R", roll);
         JBI->Add("P", pitch);
-      JBI->Level_End();
+      JBI->Object_End();
 
       #endif
       #ifdef USE_MODULE_SENSORS_L3G
       pCONT_L3G->gyro->read();
-      JBI->Level_Start("G");
+      JBI->Object_Start("G");
         JBI->Add("x", pCONT_L3G->gyro->g.x);
         JBI->Add("y", pCONT_L3G->gyro->g.y);
         JBI->Add("z", pCONT_L3G->gyro->g.z);
-      JBI->Level_End();
+      JBI->Object_End();
       #endif
     
     
-    JBI->Level_End();
+    JBI->Object_End();
     
-    JBI->Level_Start("IL"); // 6 axis -- leg
+    JBI->Object_Start("IL"); // 6 axis -- leg
       #ifdef USE_MODULE_SENSORS_LSM303D
       pCONT_LSM303D->sensor[1].lsm303d->read();
-      JBI->Level_Start("M");
+      JBI->Object_Start("M");
         JBI->Add("x", pCONT_LSM303D->sensor[1].lsm303d->m.x);
         JBI->Add("y", pCONT_LSM303D->sensor[1].lsm303d->m.y);
         JBI->Add("z", pCONT_LSM303D->sensor[1].lsm303d->m.z);
-      JBI->Level_End();
-      JBI->Level_Start("A");
+      JBI->Object_End();
+      JBI->Object_Start("A");
         JBI->Add("x", pCONT_LSM303D->sensor[1].lsm303d->a.x);
         JBI->Add("y", pCONT_LSM303D->sensor[1].lsm303d->a.y);
         JBI->Add("z", pCONT_LSM303D->sensor[1].lsm303d->a.z);
-      JBI->Level_End();
+      JBI->Object_End();
       
       pCONT_LSM303D->CalculateOrientation(
         pCONT_LSM303D->sensor[1].lsm303d->a.x, pCONT_LSM303D->sensor[1].lsm303d->a.y, pCONT_LSM303D->sensor[1].lsm303d->a.z, 
@@ -422,26 +422,26 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
         &heading, &roll, &pitch
       );
 
-      JBI->Level_Start("O");
+      JBI->Object_Start("O");
         JBI->Add("H", heading);
         JBI->Add("R", roll);
         JBI->Add("P", pitch);
-      JBI->Level_End();
+      JBI->Object_End();
 
       #endif    
     
-    JBI->Level_End();
+    JBI->Object_End();
 
 
     #endif // USE_MODULE_SENSORS_LSM303D
 
 
-    JBI->Level_Start("ADC");
+    JBI->Object_Start("ADC");
       adc_values.adc2 = adc1_get_raw(ADC1_CHANNEL_4);
       adc_values.adc5 = adc1_get_raw(ADC1_CHANNEL_7);
       JBI->Add("2", adc_values.adc2);
       JBI->Add("5", adc_values.adc5);
-    JBI->Level_End();
+    JBI->Object_End();
 
   return JsonBuilderI->End();
     

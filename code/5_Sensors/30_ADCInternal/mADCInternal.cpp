@@ -586,10 +586,10 @@ void mADCInternal::MQTTHandler_Sender(uint8_t id)
 //     uint8_t percentage = mapvalue(analogRead(A0), 1024,320, 0,100);
 
 //     JsonBuilderI->Add("percentage", percentage);
-//     JsonBuilderI->Level_Start("limits");
+//     JsonBuilderI->Object_Start("limits");
 //       JsonBuilderI->Add("min", 1024);    
 //       JsonBuilderI->Add("max", 320);
-//     JsonBuilderI->Level_End();
+//     JsonBuilderI->Object_End();
 
 //   return JsonBuilderI->End();
 

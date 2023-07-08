@@ -163,8 +163,12 @@
 
 #define DEF_PGM_CTR(X) \
   const char X[] PROGMEM =
+#define DEF_CPGM_CTR(X) \
+  char X[] PROGMEM =
 #define DEF_PGM_UINT8(X) \
   const uint8_t X[] PROGMEM =
+#define DEF_CPGM_UINT8(X) \
+  uint8_t X[] PROGMEM =
 
 
 // #define SET_BUFFER_AS_GLOBAL_OR_LOCAL(X,Y) \

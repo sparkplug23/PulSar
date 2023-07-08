@@ -1007,17 +1007,17 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
 
     char name[10]={0};
 
-      JBI->Level_Start("Settings");
+      JBI->Object_Start("Settings");
         JBI->Add("Default",settings.loaded_default_for_moduled);
-      JBI->Level_End();
+      JBI->Object_End();
 
     for(uint8_t id=0;id<GetConfiguredCount();id++){
 
         sprintf(name, "Rule%d", id);
 
-      // JBI->Level_Start("Settings");
+      // JBI->Object_Start("Settings");
       
-      // JBI->Level_End();
+      // JBI->Object_End();
 
       JsonBuilderI->Level_Start_P(name);//DLI->GetDeviceNameWithEnumNumber(D_MODULE_SENSORS_DHT_ID,sensor_id,buffer,sizeof(buffer)));   
 
@@ -1035,7 +1035,7 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
             // if(rules[id].trigger.p_json_commands!=nullptr){
             //     JBI->Add("json", rules[id].trigger.p_json_commands);
             // }
-        JsonBuilderI->Level_End(); 
+        JsonBuilderI->Object_End(); 
 
         JsonBuilderI->Level_Start_P("Destination");
             JsonBuilderI->Add("module_id", rules[id].command.module_id);
@@ -1075,10 +1075,10 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
                 JBI->Add("json_es", buffer_escaped); 
 
             }
-        JsonBuilderI->Level_End(); 
+        JsonBuilderI->Object_End(); 
 
 
-      JsonBuilderI->Level_End(); 
+      JsonBuilderI->Object_End(); 
     }
 
     // JBI->Add("data", jsonbuffer.data); 
@@ -1100,7 +1100,7 @@ uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method, bool json_appendin
   char buffer[100];
   JBI->Start();
 
-    JBI->Level_Start("EventTriggered");
+    JBI->Object_Start("EventTriggered");
 
       JBI->Add("DeviceID", event_triggered.device_id);
       JBI->Add("FunctionID", event_triggered.function_id);    
@@ -1111,7 +1111,7 @@ uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method, bool json_appendin
 
       
 
-    JBI->Level_End();
+    JBI->Object_End();
 
 
 

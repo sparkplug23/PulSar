@@ -445,6 +445,7 @@ inline uint8_t lsrX4( uint8_t dividend)
 
 CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+    
     //      hi4 = index >> 4;
     uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;

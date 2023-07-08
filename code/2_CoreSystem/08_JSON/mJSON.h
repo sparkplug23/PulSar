@@ -84,10 +84,10 @@ class JsonBuilder{
     void Start();
     bool End();
 
-    void Level_Start(const char* key);
+    void Object_Start(const char* key);
     void Level_Start_P(const char* keyP, ...);
-    void Level_Start_F(const char* keyP, ...);
-    void Level_End();
+    void Object_Start_F(const char* keyP, ...);
+    void Object_End();
 
     void Start_NoMemClear();
 
@@ -105,7 +105,7 @@ class JsonBuilder{
 
     void AppendBuffer(const char* formatP, ...);
     void AddKey(const char* key);
-    void Level_Start(); //no key name 
+    void Object_Start(); //no key name 
 
     bool BufferValid(){
       if((writer.buffer == nullptr)||(writer.buffer_size == 0))

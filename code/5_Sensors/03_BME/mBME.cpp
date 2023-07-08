@@ -587,12 +587,12 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
          #endif // ENABLE_DEVFEATURE_BME680
         if(json_level >=  JSON_LEVEL_DETAILED)
         {          
-          JBI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+          JBI->Object_Start(D_JSON_ISCHANGEDMETHOD);
             JBI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
             JBI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-bmp_sensors[sensor_id].ischangedtLast)/1000));
-          JBI->Level_End();  
+          JBI->Object_End();  
         }
-      JBI->Level_End();
+      JBI->Object_End();
     }
   }
   

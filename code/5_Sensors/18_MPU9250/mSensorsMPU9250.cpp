@@ -352,14 +352,14 @@ uint8_t mSensorsMPU9250::ConstructJSON_Sensor(uint8_t json_level){
 
   char buffer[50];
 
-  JBI->Level_Start("Mag");
-  JBI->Level_Start("Average");
+  JBI->Object_Start("Mag");
+  JBI->Object_Start("Average");
 
   JBI->Add("x", mag.average.x->Mean());
   JBI->Add("y", mag.average.y->Mean());
   JBI->Add("z", mag.average.z->Mean());
 
-    JBI->Level_End();
+    JBI->Object_End();
 
 JBI->Add("reset", mag.average.x->tResetPeriod);
 
@@ -374,7 +374,7 @@ JBI->Add("reset", mag.average.x->tResetPeriod);
 
   JBI->Array_End();
 
-    JBI->Level_End();
+    JBI->Object_End();
 
 //   for(uint8_t sensor_id = 0;sensor_id<MAX_SENSORS;sensor_id++){
 //     if(sensor[sensor_id].ischanged_over_threshold || (json_level>JSON_LEVEL_IFCHANGED)){
@@ -383,11 +383,11 @@ JBI->Add("reset", mag.average.x->tResetPeriod);
 //         JsonBuilderI->Add(D_JSON_HUMIDITY, sensor[sensor_id].humidity);
 //         JsonBuilderI->Add(D_JSON_PRESSURE, sensor[sensor_id].pressure);
 //         JsonBuilderI->Add(D_JSON_ALTITUDE, sensor[sensor_id].altitude);
-//         JsonBuilderI->Level_Start(D_JSON_ISCHANGEDMETHOD);
+//         JsonBuilderI->Object_Start(D_JSON_ISCHANGEDMETHOD);
 //           JsonBuilderI->Add(D_JSON_TYPE, D_JSON_SIGNIFICANTLY);
 //           JsonBuilderI->Add(D_JSON_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].ischangedtLast)/1000));
-//         JsonBuilderI->Level_End();  
-//       JsonBuilderI->Level_End();
+//         JsonBuilderI->Object_End();  
+//       JsonBuilderI->Object_End();
 //     }
 //   }
 

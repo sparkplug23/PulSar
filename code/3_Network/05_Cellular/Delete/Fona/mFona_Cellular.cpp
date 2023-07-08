@@ -1239,7 +1239,7 @@ uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_append
 
   JBI->Start();
 
-    // JBI->Level_Start(D_JSON_RFRECEIVED);
+    // JBI->Object_Start(D_JSON_RFRECEIVED);
   
     //   JBI->Add("Pin1", pCONT_pins->GetPin(GPIO_LED1_ID));
     //   // JBI->Add(D_JSON_RF_BITS, rx_pkt.bit_length);
@@ -1249,12 +1249,12 @@ uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_append
     //   // JBI->Add(D_JSON_TIME, mTime::ConvertU32TimetoCtr(&rx_pkt.received_utc_time, buffer, sizeof(buffer)));
       
     
-    // JBI->Level_End();
+    // JBI->Object_End();
 
     JBI->Add("rssi", connection.rssi_dBm);
 
 
-    JBI->Level_Start("GPIO_State");
+    JBI->Object_Start("GPIO_State");
       JBI->Add("Key", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_KEY__ID)));
       JBI->Add("PS", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_POWER_STATUS__ID)));
       JBI->Add("NS", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_NETWORK_STATUS__ID)));
@@ -1262,7 +1262,7 @@ uint8_t mFona_Cellular::ConstructJSON_State(uint8_t json_level, bool json_append
       // JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_UART_TX__ID)));
       // JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_UART_RX__ID)));
       JBI->Add("RI", digitalRead(pCONT_pins->GetPin(GPIO_FUNCTION__FONA_RING_INDICATOR__ID)));
-    JBI->Level_End();
+    JBI->Object_End();
   
   
 
