@@ -17,11 +17,6 @@ int8_t mAnimatorLight::Tasker_Web(uint8_t function)
     break;
     case FUNC_WEB_ADD_HANDLER:
     
-
-      pCONT_web->server->on("/light", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "mAnimatorLight");
-      });
-
       MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
 
     break;

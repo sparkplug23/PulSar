@@ -511,11 +511,11 @@ const char PM_WEB_CONTENT_TYPE_TEXT_CSS[] PROGMEM = "text/css";
 
 
 
-// #define D_WEB_HANDLE_CONSOLE "/console" // change to animator_settings
-// #define D_WEB_HANDLE_CONSOLE_PAGE "/PAGEconsole" // change to animator_settings
-// DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
-// #define D_BUTTON_NAME_CONSOLE_CTR "Console"
-// DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
+#define D_WEB_HANDLE_CONSOLE "/console" // change to animator_settings
+#define D_WEB_HANDLE_CONSOLE_PAGE "/PAGEconsole" // change to animator_settings
+DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
+#define D_BUTTON_NAME_CONSOLE_CTR "Console"
+DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 
 
 
@@ -1354,19 +1354,19 @@ public mTaskerInterface{
     // freemem_usage_t freemem_usage_json_shared;
     // #endif // DEBUG_WEBSERVER_MEMORY
     // bool reset_web_log_flag = false;                  // Reset web console log
-    // uint8_t fConsole_active = false;
+    uint8_t fConsole_active = false;
     // uint8_t fConsole_history = false;
 
     // // FUNCTIONS
     // void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) override;
-    // bool HttpCheckPriviledgedAccess();
+    bool HttpCheckPriviledgedAccess();
     // static bool WifiIsInManagerMode();
     // bool WebAuthenticate(void);
     // void StopWebserver(void);
     // void StartWebserver(int type, IPAddress ipweb);
     // void WifiManagerBegin(bool reset_only);
     // void PollDnsWebserver(void);
-    // void WebPage_Root_AddHandlers();
+    void WebPage_Root_AddHandlers();
     // void WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...);
     // bool RespondWebSend_UnableToAllocateBuffer(AsyncWebServerRequest *request);
     void WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType, char* content_ptr);
@@ -1381,7 +1381,9 @@ public mTaskerInterface{
     // void Web_Root_UpdateURLs(AsyncWebServerRequest *request);
     // void Web_Base_Page_Draw(AsyncWebServerRequest *request);
     // void WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request);    
-    // void HandlePage_Console(AsyncWebServerRequest *request);
+    #ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+    void HandlePage_Console(AsyncWebServerRequest *request);
+    #endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
     // void Web_Console_Draw(AsyncWebServerRequest *request);
     // void Console_JSON_Data(AsyncWebServerRequest *request);
     // bool RespondWebSendFreeMemoryTooLow(AsyncWebServerRequest *request, uint16_t memory_needed = 0);
@@ -1398,14 +1400,14 @@ public mTaskerInterface{
     // void WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles);
     // void WebAppend_Root_Draw_Table_dList_P(uint8_t row_count, char const* value_handle, const char* dList_titles);
     // void WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles);
-    // void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
+    void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
     // void WebAppend_Root_Draw_PageTitleFields();
     // void WebAppend_Root_Draw_PageTable();
     // void WebAppend_Root_Draw_ModuleTable();
     // void WebAppend_Root_Draw_PageButtons();
     // void WebAppend_Root_Draw_ModuleButtons();
     // void HandleConsole(AsyncWebServerRequest *request);
-    // void HandleConsoleRefresh(AsyncWebServerRequest *request);
+    void HandleConsoleRefresh(AsyncWebServerRequest *request);
     // void HandleInformation(AsyncWebServerRequest *request);
     // void WebAppend_Start_Head_P(const char* title, bool auth);
     // void WebAppend_Start_Head_P(const char* title);

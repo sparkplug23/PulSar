@@ -15,6 +15,7 @@ var pcMode = false, pcModeA = false, lastw = 0, wW;
 var tr = 7;
 var d = document;
 var palettesData;
+var palettesStyle;
 var fxdata = [];
 var pJson = {}, eJson = {}, lJson = {};
 var plJson = {}; // array of playlists
@@ -943,11 +944,17 @@ function redrawPalPrev()
 	}
 }
 
+function scale (number, inMin, inMax, outMin, outMax) {
+    return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
 function genPalPrevCss(id)
 {
 	if (!palettesData) return;
 
 	var paletteData = palettesData[id];
+
+	var paletteStyle = palettesStyle[id];
 
 	if (!paletteData) return 'display: none';
 
@@ -958,6 +965,12 @@ function genPalPrevCss(id)
 			paletteData[1][0] = 255;
 		}
 	}
+
+	var style_this = paletteStyle;
+
+	console.log(style_this)
+
+	// var banding = true
 
 	var gradient = [];
 	for (let j = 0; j < paletteData.length; j++) {
@@ -983,11 +996,40 @@ function genPalPrevCss(id)
 		if (index === false) {
 			index = Math.round(j / paletteData.length * 100);
 		}
+	
+		// If banding is desired, then duplicate RGB for the next index to define the end point
+		if(style_this.bg === 'B')
+		{	
+			var xl = index;
+			var xu = index;
+			if(j<paletteData.length-1)
+			{
+				xu = Math.round(paletteData[j+1][0]/255*100); // Original scale, get next index
+			}
 
-		gradient.push(`rgb(${r},${g},${b}) ${index}%`);
+			var range_parts = Math.round(255/paletteData.length);
+
+			xl = scale(xl, 0,255, 0,255-range_parts);
+			xu = scale(xu, 0,255, 0,255-range_parts);
+
+			// if last, then set the xu to be the end point
+			if(j == paletteData.length-1)
+			{
+				xu = 100
+			}
+			
+			gradient.push(`rgb(${r},${g},${b}) ${xl}%`);
+			gradient.push(`rgb(${r},${g},${b}) ${xu}%`);
+
+			console.log("id="+id+",j="+j+",xl="+xl+",xu="+xu);
+		}else{
+			gradient.push(`rgb(${r},${g},${b}) ${index}%`); //original
+		}
 	}
 
-	return `background: linear-gradient(to right,${gradient.join()});`;
+	var result = `background: linear-gradient(to right,${gradient.join()});`;
+
+	return result;
 }
 
 function generateListItemHtml(listName, id, name, clickAction, extraHtml = '', effectPar = '')
@@ -1415,6 +1457,8 @@ function readState(s,command=false)
 	gId('sliderC1').value  = i.c1 ? i.c1 : 0;
 	gId('sliderC2').value  = i.c2 ? i.c2 : 0;
 	gId('sliderC3').value  = i.c3 ? i.c3 : 0;
+	gId('sliderTransitionTime').value = i.tt;
+	gId('sliderTransitionRate').value = i.tr;
 	gId('checkO1').checked = !(!i.o1);
 	gId('checkO2').checked = !(!i.o2);
 	gId('checkO3').checked = !(!i.o3);
@@ -2276,6 +2320,19 @@ function setIntensity()
 	requestJson(obj);
 }
 
+
+function setTransitionTime()
+{
+	var obj = {"seg": {"tt": parseInt(gId('sliderTransitionTime').value)}};
+	requestJson(obj);
+}
+
+function setTransitionRate()
+{
+	var obj = {"seg": {"tr": parseInt(gId('sliderTransitionRate').value)}};
+	requestJson(obj);
+}
+
 function setCustom(i=1)
 {
 	if (i<1 || i>3) return;
@@ -2633,6 +2690,7 @@ function loadPalettesData(callback = null)
 			var d = JSON.parse(lsPalData);
 			if (d && d.vid == d.vid) {
 				palettesData = d.p;
+				palettesStyle = d.s;
 				if (callback) callback();
 				return;
 			}
@@ -2640,9 +2698,11 @@ function loadPalettesData(callback = null)
 	}
 
 	palettesData = {};
+	palettesStyle = {};
 	getPalettesData(0, ()=>{
 		localStorage.setItem(lsKey, JSON.stringify({
 			p: palettesData,
+			s: palettesStyle,
 			vid: lastinfo.vid
 		}));
 		redrawPalPrev();
@@ -2664,6 +2724,7 @@ function getPalettesData(page, callback)
 	})
 	.then(json => {
 		palettesData = Object.assign({}, palettesData, json.p);
+		palettesStyle = Object.assign({}, palettesStyle, json.s);
 		if (page < json.m) setTimeout(()=>{ getPalettesData(page + 1, callback); }, 50);
 		else callback();
 	})

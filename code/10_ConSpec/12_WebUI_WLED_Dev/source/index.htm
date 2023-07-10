@@ -297,6 +297,24 @@
 				<output class="sliderbubble"></output>
 				<span class="tooltiptext" id="sliderLabel4">Custom 3</span>
 			</div>
+			<div id="slider5" class="slider">
+				<i class="icons slider-icon" onclick="tglFreeze()">&#xe325;</i>
+				<div class="sliderwrap il">
+					<input id="sliderTransitionTime" class="noslide" onchange="setTransitionTime()" oninput="updateTrail(this)" max="10000" min="0" type="range" value="1000" />
+					<div class="sliderdisplay"></div>
+				</div>
+				<output class="sliderbubble"></output>
+				<span id="sliderLabel0" class="tooltiptext">Transition Time</span>
+			</div>
+			<div id="slider6" class="slider">
+				<i class="icons slider-icon" onclick="tglFreeze()">&#xe325;</i>
+				<div class="sliderwrap il">
+					<input id="sliderTransitionRate" class="noslide" onchange="setTransitionRate()" oninput="updateTrail(this)" max="10000" min="0" type="range" value="1000" />
+					<div class="sliderdisplay"></div>
+				</div>
+				<output class="sliderbubble"></output>
+				<span id="sliderLabel0" class="tooltiptext">Transition Rate</span>
+			</div>
 			<div id="fxopt" class="option fade">
 				<label id="opt0" class="check ochkl hide"><i class="icons">&#xe2b3;</i><span class="tooltiptext" id="optLabel0">Check 1</span>
 					<input id="checkO1" type="checkbox" onchange="setOption(1, this.checked)">

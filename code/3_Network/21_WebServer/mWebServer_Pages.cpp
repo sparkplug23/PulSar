@@ -1,9 +1,9 @@
-// // File contains the formation of pages, while "mWebServer" contains all parsing and commands
-// // Mostly for refactoring
+// File contains the formation of pages, while "mWebServer" contains all parsing and commands
+// Mostly for refactoring
 
-// #include "mWebServer.h"
+#include "mWebServer.h"
 
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER21
 
 // /*************************************************************************************************************************************************************************************
 //   ************************************************************************************************************************************************************************************
@@ -371,44 +371,44 @@
 // }
 
 
-// /*************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//    * Console Page
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-// */
+/*************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+   * Console Page
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+*/
 
-// void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
+void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
 
-//   fConsole_active = true;
+  fConsole_active = true;
 
-//   if (!HttpCheckPriviledgedAccess()) { return; }
+  if (!HttpCheckPriviledgedAccess()) { return; }
   
-//   if (request->hasParam("c2")) {      // Console refresh requested
-//     HandleConsoleRefresh(request);
-//     return;
-//   }
+  if (request->hasParam("c2")) {      // Console refresh requested
+    HandleConsoleRefresh(request);
+    return;
+  }
 
-//   // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
-//   // return;
+  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+  // return;
 
-//   AsyncWebServerResponse *response = request->beginResponse_P(200, CONTENT_TYPE_TEXT_HTML_ID, PAGE_ROOT, PAGE_ROOT_L);
+  AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_ROOT, PAGE_ROOT_L);
 
-//   response->addHeader("Content-Encoding","gzip");
+  response->addHeader("Content-Encoding","gzip");
   
-//   request->send(response);
+  request->send(response);
 
-// }
+}
 
 
 // void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
@@ -484,67 +484,67 @@
 
 // } //end function
 
-// void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-// {
-//   bool cflg = true;
-//   uint8_t counter = 0;                // Initial start, should never be 0 again
+void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+{
+  bool cflg = true;
+  uint8_t counter = 0;                // Initial start, should never be 0 again
 
-//   // String svalue = request->arg("c1");
-//   // if (svalue.length() && (svalue.length() < INPUT_BUFFER_SIZE)) {
-//   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "%s"), svalue.c_str());
-//   //   ExecuteWebCommand((char*)svalue.c_str(), SRC_WEBCONSOLE);
-//   // }
+  // String svalue = request->arg("c1");
+  // if (svalue.length() && (svalue.length() < INPUT_BUFFER_SIZE)) {
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_COMMAND "%s"), svalue.c_str());
+  //   ExecuteWebCommand((char*)svalue.c_str(), SRC_WEBCONSOLE);
+  // }
 
-//   char stmp[8];
-//   WebGetArg(request,"c2", stmp, sizeof(stmp));
-//   if (strlen(stmp)) { counter = atoi(stmp); }
+  char stmp[8];
+  WebGetArg(request,"c2", stmp, sizeof(stmp));
+  if (strlen(stmp)) { counter = atoi(stmp); }
 
-//   BufferWriterI->Start();
+  BufferWriterI->Start();
 
-//   BufferWriterI->Append_P(
-//     PSTR(
-//       "%d" //web_log_index
-//       "}1"
-//       "%d" //reset_web_log_flag
-//       "}1")
-//     , pCONT_set->web_log_index, reset_web_log_flag);
+  BufferWriterI->Append_P(
+    PSTR(
+      "%d" //web_log_index
+      "}1"
+      "%d" //reset_web_log_flag
+      "}1")
+    , pCONT_set->web_log_index, reset_web_log_flag);
 
-//   if (!reset_web_log_flag) {
-//     counter = 0;                  //reset counter from webpage 
-//     reset_web_log_flag = true;
-//   }
-//   if (counter != pCONT_set->web_log_index) {   //if webpage counter does not match internal counter
-//     if (!counter) {    //and counter is not FIRST position
-//       counter = pCONT_set->web_log_index;  //use internal counter
-//       cflg = false;     //no NEW line
-//     }
+  if (!reset_web_log_flag) {
+    counter = 0;                  //reset counter from webpage 
+    reset_web_log_flag = true;
+  }
+  if (counter != pCONT_set->web_log_index) {   //if webpage counter does not match internal counter
+    if (!counter) {    //and counter is not FIRST position
+      counter = pCONT_set->web_log_index;  //use internal counter
+      cflg = false;     //no NEW line
+    }
 
-//     // get the webindex, and get all internal indexes until internal catches up with web
-//     do {
-//       char* tmp;
-//       size_t len;
-//       pCONT_log->GetLog(counter, &tmp, &len);
-//       if (len) { //if there is new log data
-//       // and is not larger than buffer
-//         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
-//         char stemp[len +1]; //leak!
-//         strlcpy(stemp, tmp, len);
-//         // add new line if not first, then text
-//         BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
-//         cflg = true;
-//       }
-//       counter++; //internal counter
-//       if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
-//       if(counter>100) break;
-//     } while (counter != pCONT_set->web_log_index);
+    // get the webindex, and get all internal indexes until internal catches up with web
+    do {
+      char* tmp;
+      size_t len;
+      pCONT_log->GetLog(counter, &tmp, &len);
+      if (len) { //if there is new log data
+      // and is not larger than buffer
+        if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
+        char stemp[len +1]; //leak!
+        strlcpy(stemp, tmp, len);
+        // add new line if not first, then text
+        BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
+        cflg = true;
+      }
+      counter++; //internal counter
+      if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
+      if(counter>100) break;
+    } while (counter != pCONT_set->web_log_index);
 
-//   }
+  }
 
-//   BufferWriterI->Append_P(PSTR("}1"));
+  BufferWriterI->Append_P(PSTR("}1"));
   
-//   request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
+  request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
  
-// }
+}
 
 // void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
 
@@ -2343,4 +2343,4 @@
 // // }
 
 
-// #endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER
+#endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER21

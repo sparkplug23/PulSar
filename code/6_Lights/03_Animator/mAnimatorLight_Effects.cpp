@@ -324,15 +324,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
      **/
     if(i > 0) 
     {
-      DEBUG_LINE_HERE;
-   
-      colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);
-      DEBUG_LINE_HERE;
+      colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);      
       colour_sec = RgbColor(0);
-      // char buffer[100];
-      // LoadPalette(flicker_palette_id, SEGIDX, buffer, sizeof(buffer));
-      // colour_sec = mPaletteI->GetColourFromPreloadedPaletteBuffer(flicker_palette_id, buffer, pixel_palette_counter);
-
       colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
       if(pixel_palette_counter++ >= pixels_in_palette-1)
@@ -342,7 +335,6 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
 
       SEGMENT.SetPixelColor(SEGMENT.pixel_range.start + i, colour_out);
 
-      DEBUG_LINE_HERE;
       SEGMENT.data[d  ] = s; 
       SEGMENT.data[d+1] = s_target; 
       SEGMENT.data[d+2] = fadeStep;
@@ -358,18 +350,11 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
                  p <= SEGMENT.pixel_range.stop;
                  p++
       ){
-   
-      DEBUG_LINE_HERE;
+
         colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);
         colour_sec = RgbColor(0);
-        // char buffer[100];
-        // LoadPalette(flicker_palette_id, SEGIDX, buffer, sizeof(buffer));
-        // colour_pri = mPaletteI->GetColourFromPreloadedPaletteBuffer(flicker_palette_id, buffer, pixel_palette_counter);
-
-      DEBUG_LINE_HERE;
         colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
-      DEBUG_LINE_HERE;
         if(pixel_palette_counter++ >= pixels_in_palette-1)
         {
           pixel_palette_counter = 0;
@@ -386,7 +371,6 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
     }
   }
 
-      DEBUG_LINE_HERE;
   SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
 
 }

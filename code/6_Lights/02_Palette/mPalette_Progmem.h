@@ -789,11 +789,11 @@ DEF_PGM_CTR  (PM_PALETTE_GRADIENT_01_NAME_CTR)        D_PALETTE_GRADIENT_01_NAME
 DEF_PGM_UINT8(PM_PALETTE_GRADIENT_01_COLOUR_MAP__DATA)
 {
   0,   COLOUR_MAP_RED__ID,
-  20,  COLOUR_MAP_ORANGE__ID,
-  35,  COLOUR_MAP_GREEN__ID,
-  50,  COLOUR_MAP_CYAN__ID,
-  65,  COLOUR_MAP_BLUE__ID,
-  80,  COLOUR_MAP_PINK__ID,
+  51,  COLOUR_MAP_ORANGE__ID,
+  90,  COLOUR_MAP_GREEN__ID,
+  127,  COLOUR_MAP_CYAN__ID,
+  165,  COLOUR_MAP_BLUE__ID,
+  204,  COLOUR_MAP_PINK__ID,
   255, COLOUR_MAP_HOTPINK__ID
 };
 
@@ -1936,14 +1936,7 @@ DEF_PGM_UINT8(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA)
     DEF_PGM_CTR  (PM_PALETTE_PASTEL_01_NAME_CTR)        D_PALETTE_PASTEL_01_NAME_CTR;
     #define        D_PALETTE_PASTEL_01_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)     
     DEF_PGM_UINT8(PM_PALETTE_PASTEL_01_COLOUR_MAP__DATA)
-    {
-      // D_RGB_CYAN_PASTEL_80SAT       
-      // COLOUR_MAP_PINK_SATURATION80__ID, 
-      // COLOUR_MAP_LIGHTORANGE_SATURATION80__ID,
-      // COLOUR_MAP_PINK_SATURATION30__ID,
-      // COLOUR_MAP_GREEN_SATURATION40__ID,
-      // COLOUR_MAP_WHITE_SATURATION70__ID
-      
+    {      
       D_RGB_PINK_ALT_2
       D_RGB_GREEN_FULL
       D_RGB_BLUE_FULL  
@@ -1954,24 +1947,16 @@ DEF_PGM_UINT8(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA)
 
 
     #ifndef D_PALETTE_PASTEL_02_NAME_CTR
-    #define D_PALETTE_PASTEL_02_NAME_CTR        "Pastel 02|Pastel MicroLEDs"     
+    #define D_PALETTE_PASTEL_02_NAME_CTR        "Pastel 02|Pastel MicroLEDs|Garden Chairs"     
     #endif
     DEF_PGM_CTR  (PM_PALETTE_PASTEL_02_NAME_CTR)        D_PALETTE_PASTEL_02_NAME_CTR;
     #define        D_PALETTE_PASTEL_02_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
     DEF_PGM_UINT8(PM_PALETTE_PASTEL_02_COLOUR_MAP__DATA)
     {
-      // D_RGB_PINK_ALT_2
-      // D_RGB_GREEN_FULL
-      // D_RGB_BLUE_FULL  
-      D_RGB_WHITE_COOL_FULL
-      // D_RGB_WHITE_WARM_1
-
-
-      255, 100, 224, //pink white
-      243, 74, 204, // more pink
-      247, 58, 203,
-      // 0, 0, 255
-
+      255,86,8,  //249,216,198, // Crown Colour Code Z4730V Peach
+      255,51,112, // Pink Crown V9502B
+      84, 255, 61, // Green Crown F3602H
+      48,255,255 // Blue chair
     };
 
 
@@ -2007,16 +1992,12 @@ DEF_PGM_UINT8(PM_PALETTE_GRADIENT_SUNLEVEL_GROUP01_01_COLOUR_MAP__DATA)
 DEF_PGM_CTR  (PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_NAME_CTR)        D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_NAME_CTR;
 #define        D_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_ENCODING        (PALETTE_ENCODING_TYPE_RGBCCT_WITHINDEX_GRADIENT)     
 DEF_PGM_UINT8(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_02_COLOUR_MAP__DATA)
-{ //Index,R,G,B,WW,CW
-  0,     0,   0,   0,  0, 0,
-  50,    20, 14, 82,  0, 0,
-  //120, 30, 24, 150, 0, 0,
+{ //Gradient,R,G,B,WW,CW
+  0,   0,   0,  0,  0, 0,
+  50,  20, 14, 82,  0, 0,
   127, 30, 24, 255, 0, 0, //CENTRE
-  //135, 30, 24, 150, 0, 0,
-  200,   20, 14, 82, 0, 0,
-  255,   0,   0,   0,  0, 0,   
-
-
+  200, 20, 14, 82,  0, 0,
+  255,  0,  0,  0,  0, 0,   
 };
 
 /** GRADIENT_SUNLEVEL_GROUP01
@@ -3293,7 +3274,7 @@ const byte Atlantica_gp[] PROGMEM = {
   
   const byte C9_2_gp[] PROGMEM = {
     0,   6, 126,   2, //green
-   45,   6, 126,   2,
+   45,   6, 126,   2,            // double use of gradient index will give "edge" between linear gradient blend
    45,   4,  30, 114, //blue
    90,   4,  30, 114,
    90, 255,   5,   0, //red
@@ -3580,16 +3561,22 @@ const byte* const gGradientPalettes[] PROGMEM = {
   GMT_drywet_gp,                //30-17 Drywet
   ib_jul01_gp,                  //31-18 Jul
   es_vintage_57_gp,             //32-19 Grintage
+
+  // 20-29
   ib15_gp,                      //33-20 Rewhi
   Tertiary_01_gp,               //34-21 Tertiary
   lava_gp,                      //35-22 Fire
   fierce_ice_gp,                //36-23 Icefire
   Colorfull_gp,                 //37-24 Cyane
+
   Pink_Purple_gp,               //38-25 Light Pink
   es_autumn_19_gp,              //39-26 Autumn
   BlacK_Blue_Magenta_White_gp,  //40-27 Magenta
   BlacK_Magenta_Red_gp,         //41-28 Magred
   BlacK_Red_Magenta_Yellow_gp,  //42-29 Yelmag
+  
+
+  // 30-39
   Blue_Cyan_Yellow_gp,          //43-30 Yelblu
   Orange_Teal_gp,               //44-31 Orange & Teal
   Tiamat_gp,                    //45-32 Tiamat
@@ -3640,7 +3627,7 @@ DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR)
 {
   "Sunset|Rivendell|Ocean Breeze|Red & Blue|Yellowout|Analogous|Pink Splash|Sunset Yellow|Sunset 2|Beech|"
   "Vintage|Departure|Landscape|Beach|Sherbet|Hult|Hult 64|Drywet|Jul|"
-  "Grintage|Rewhi|Lava Fire|Icefire|Cyane|Light Pink|Autumn 16|Magenta|Magred|Yelmag|"
+  "Grintage|Rewhi|Tertiary|Lava Fire|Icefire|Cyane|Light Pink|Autumn 16|Magenta|Magred|Yelmag|"
   "Yelblu|Orange & Teal|Tiamat|April Night|Orangery|C9|Sakura|Aurora|Atlantica|C9 2|"
   "C9 New|Temperature|Aurora 2|Retro Clown|Candy|Toxy Reaf|Fairy Reaf|Semi Blue|Pink Candy|Red Reaf|"
   "Aqua Flash|Yelblu Hot|Lite Light|Red Flash|Blink Red|Red Shift|Red Tide|Candy2"

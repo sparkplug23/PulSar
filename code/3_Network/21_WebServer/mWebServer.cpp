@@ -24,18 +24,22 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 
 // }
 
-// // Helper function to avoid code duplication (saves 4k Flash)
-// void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max)
-// {
+#ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+
+// Helper function to avoid code duplication (saves 4k Flash)
+void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max)
+{
   
-//   // #ifndef DISABLE_SERIAL_LOGGING
-//   // P_PHASE_OUT();
-//   // #endif
+  // #ifndef DISABLE_SERIAL_LOGGING
+  // P_PHASE_OUT();
+  // #endif
 
-//   String s = request->arg(arg);
-//   strlcpy(out, s.c_str(), max);
+  String s = request->arg(arg);
+  strlcpy(out, s.c_str(), max);
 
-// }
+}
+
+#endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
 
 // bool mWebServer::WifiIsInManagerMode(){
 //   return (HTTP_MANAGER == webserver_state || HTTP_MANAGER_RESET_ONLY == webserver_state);
@@ -89,12 +93,12 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 //   ALOG_INF(PSTR(D_LOG_DEBUG "StartWebserver"));
   
 //   if(!webserver_state){
-//     if(!pWebServer){    
+//     if(!server){    
 
 //       #ifdef ESP8266
-//         pWebServer = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
+//         server = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
 //       #else
-//         pWebServer = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
+//         server = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
 //       #endif
             
 //       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); // ALLOW CROSS SITE JAVASCRIPT ACCESS (CORS) BY DEFAULT
@@ -108,7 +112,7 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 //     #ifdef ENABLE_LOG_LEVEL_INFO
 //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP "StartWebserver starting..."));
 //     #endif// ENABLE_LOG_LEVEL_INFO
-//     pWebServer->begin();
+//     server->begin();
 //   }
 //   if(webserver_state != type){
 //     #ifdef ENABLE_LOG_LEVEL_INFO
@@ -206,29 +210,29 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 
 
 
-// void mWebServer::WebPage_Root_AddHandlers(){
+void mWebServer::WebPage_Root_AddHandlers(){
 
 //   /**
 //    * Shared resources
 //    * */
-//   pCONT_web->pWebServer->on("/base_page_fill.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+//   pCONT_web->server->on("/base_page_fill.json", HTTP_GET, [this](AsyncWebServerRequest *request){
 //     Web_Base_Page_Draw(request);
 //   });   
-//   pWebServer->on(WEB_HANLDE_JSON_WEB_TOP_BAR, HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//   server->on(WEB_HANLDE_JSON_WEB_TOP_BAR, HTTP_GET, [this](AsyncWebServerRequest *request){ 
 //     WebSend_JSON_WebServer_TopBar(request);    
 //   });  
-//   pWebServer->on(WEB_HANLDE_JSON_WEB_STATUS_POPOUT_DATA, HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//   server->on(WEB_HANLDE_JSON_WEB_STATUS_POPOUT_DATA, HTTP_GET, [this](AsyncWebServerRequest *request){ 
 //     WebSend_JSON_WebServer_StatusPopoutData(request);    
 //   });
-//   pCONT_web->pWebServer->on(WEB_HANDLE_JSON_ROOT_STATUS_ANY, HTTP_GET, [this](AsyncWebServerRequest *request){
+//   pCONT_web->server->on(WEB_HANDLE_JSON_ROOT_STATUS_ANY, HTTP_GET, [this](AsyncWebServerRequest *request){
 //     WebSend_JSON_RootStatus_Table(request);
 //   });
 
-//   pCONT_web->pWebServer->on("/console_test.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+//   pCONT_web->server->on("/console_test.json", HTTP_GET, [this](AsyncWebServerRequest *request){
 //     Console_JSON_Data(request);
 //   });  
       
-//   pCONT_web->pWebServer->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+//   pCONT_web->server->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
 //     if(!index)
 //       Serial.printf("BodyStart: %u\n", total);
 //     Serial.printf("%s", (const char*)data);
@@ -237,7 +241,7 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 //   });
 
   
-//   pCONT_web->pWebServer->on("/json_command.json", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+//   pCONT_web->server->on("/json_command.json", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
 //     Serial.println("onRequestBody " "/json_command.json" );
 //     if ((request->url() == "/json_command.json") && (request->method() == HTTP_POST))
 //     {
@@ -258,50 +262,52 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 //   /**
 //    * Root Page
 //    * */
-//   // pWebServer->redirect("/", "/main/page");
-//   // pCONT_web->pWebServer->rewrite("/", WEB_HANDLE_ROOT);
-//   pCONT_web->pWebServer->on(WEB_HANDLE_ROOT "/", [this](AsyncWebServerRequest *request){
+//   // server->redirect("/", "/main/page");
+//   // pCONT_web->server->rewrite("/", WEB_HANDLE_ROOT);
+//   pCONT_web->server->on(WEB_HANDLE_ROOT "/", [this](AsyncWebServerRequest *request){
 //     HandlePage_Root(request);
 //   });
-//   pCONT_web->pWebServer->on(WEB_HANDLE_ROOT "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+//   pCONT_web->server->on(WEB_HANDLE_ROOT "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
 //     Web_Root_Draw(request);
 //   });
-//   pCONT_web->pWebServer->on(WEB_HANDLE_ROOT "/module_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+//   pCONT_web->server->on(WEB_HANDLE_ROOT "/module_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
 //     Web_Root_Draw_Modules(request);
 //   });
-//   pCONT_web->pWebServer->on(WEB_HANDLE_ROOT "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//   pCONT_web->server->on(WEB_HANDLE_ROOT "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
 //     Web_Root_UpdateURLs(request);
 //   }); 
 
-//   /**
-//    * Console Page
-//    * */
-//   pCONT_web->pWebServer->on(D_WEB_HANDLE_CONSOLE_PAGE, [this](AsyncWebServerRequest *request){
-//     HandlePage_Console(request);
-//   });
-//   pCONT_web->pWebServer->on(D_WEB_HANDLE_CONSOLE "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     Web_Console_Draw(request);
-//   });
-//   pCONT_web->pWebServer->on(D_WEB_HANDLE_CONSOLE "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
-//     // Web_Root_UpdateURLs(request);
-//   }); 
-//   pCONT_web->pWebServer->on(D_WEB_HANDLE_CONSOLE "/update_data.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     // Web_Root_Draw_Modules(request); //get console log
-//   });
+#ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+  /**
+   * Console Page
+   * */
+  pCONT_web->server->on(D_WEB_HANDLE_CONSOLE_PAGE, [this](AsyncWebServerRequest *request){
+    HandlePage_Console(request);
+  });
+#endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+  // pCONT_web->server->on(D_WEB_HANDLE_CONSOLE "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+  //   Web_Console_Draw(request);
+  // });
+  // pCONT_web->server->on(D_WEB_HANDLE_CONSOLE "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
+  //   // Web_Root_UpdateURLs(request);
+  // }); 
+  // pCONT_web->server->on(D_WEB_HANDLE_CONSOLE "/update_data.json", HTTP_GET, [this](AsyncWebServerRequest *request){
+  //   // Web_Root_Draw_Modules(request); //get console log
+  // });
 
 //   /**
 //    * Information Page
 //    * */
-//   // pWebServer->on(PM_WEBURL_PAGE_INFO, [this](AsyncWebServerRequest *request){
+//   // server->on(PM_WEBURL_PAGE_INFO, [this](AsyncWebServerRequest *request){
 //   //   HandleInformation(request); 
 //   // });
-//   // pWebServer->on(PM_WEBURL_PAGE_INFO_LOAD_URLS, HTTP_GET, [this](AsyncWebServerRequest *request){  
+//   // server->on(PM_WEBURL_PAGE_INFO_LOAD_URLS, HTTP_GET, [this](AsyncWebServerRequest *request){  
 //   //   Web_All_LoadTime_Minimum_URLs(request);
 //   // });  
-//   // pWebServer->on(PM_WEBURL_PAGE_INFO_DRAW_TABLE, [this](AsyncWebServerRequest *request){
+//   // server->on(PM_WEBURL_PAGE_INFO_DRAW_TABLE, [this](AsyncWebServerRequest *request){
 //   //   HandleInformation_TableDraw(request); 
 //   // });
-//   // pWebServer->on(PM_WEBURL_PAGE_INFO_LOAD_SCRIPT, HTTP_GET, [this](AsyncWebServerRequest *request){ 
+//   // server->on(PM_WEBURL_PAGE_INFO_LOAD_SCRIPT, HTTP_GET, [this](AsyncWebServerRequest *request){ 
 //   //   //Web_Info_LoadScript(request);
 //   //   HandleNotFound(request);
 //   // });
@@ -309,17 +315,17 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 //   /**
 //    * Upgrades
 //    * */  
-//   // pWebServer->on("/up", [this](AsyncWebServerRequest *request){HandleUpgradeFirmware(request); });
-//   // pWebServer->on("/u1", [this](AsyncWebServerRequest *request){HandleUpgradeFirmwareStart(request); });  // OTA
-//   // // pWebServer->on("/u2", HTTP_POST,
+//   // server->on("/up", [this](AsyncWebServerRequest *request){HandleUpgradeFirmware(request); });
+//   // server->on("/u1", [this](AsyncWebServerRequest *request){HandleUpgradeFirmwareStart(request); });  // OTA
+//   // // server->on("/u2", HTTP_POST,
 //   // //     [this](AsyncWebServerRequest *request){HandleUploadDone(request); },
 //   // //     [this](AsyncWebServerRequest *request){HandleUploadLoop(request); });
-//   // pWebServer->on("/u2", HTTP_OPTIONS, [this](AsyncWebServerRequest *request){HandlePreflightRequest(request); });
+//   // server->on("/u2", HTTP_OPTIONS, [this](AsyncWebServerRequest *request){HandlePreflightRequest(request); });
 
 //   /**
 //    * System Settings
 //    * */  
-//   // pWebServer->on("/ss", [this](AsyncWebServerRequest *request){
+//   // server->on("/ss", [this](AsyncWebServerRequest *request){
 //   //   HandleSystemSettings(request); 
 //   // });
 
@@ -327,27 +333,27 @@ const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETW
 //   /**
 //    * Resources Settings
 //    * */ 
-//   // pWebServer->on("/favicon.ico", HTTP_GET, [this](AsyncWebServerRequest *request){
+//   // server->on("/favicon.ico", HTTP_GET, [this](AsyncWebServerRequest *request){
 //   //   // HandleFavicon(request);
 //   // });
           
-// //       pWebServer->on("/cm", [this](AsyncWebServerRequest *request){HandleHttpCommand(request); });
+// //       server->on("/cm", [this](AsyncWebServerRequest *request){HandleHttpCommand(request); });
   
 // // #ifndef FIRMWARE_MINIMAL
-// //       pWebServer->on("/cn", [this](AsyncWebServerRequest *request){HandleConfiguration(request); });
-// //       pWebServer->on("/md", [this](AsyncWebServerRequest *request){HandleModuleConfiguration(request); });
-// //       pWebServer->on("/wi", [this](AsyncWebServerRequest *request){HandleWifiConfiguration(request); });
-// //       pWebServer->on("/lg", [this](AsyncWebServerRequest *request){HandleLoggingConfiguration(request); });
-// //       pWebServer->on("/tp", [this](AsyncWebServerRequest *request){HandleTemplateConfiguration(request); });
-// //       pWebServer->on("/co", [this](AsyncWebServerRequest *request){HandleOtherConfiguration(request); });
-// //       pWebServer->on("/dl", [this](AsyncWebServerRequest *request){HandleBackupConfiguration(request); });
-// //       pWebServer->on("/rs", [this](AsyncWebServerRequest *request){HandleRestoreConfiguration(request); });
-//       // pWebServer->on("/rt", [this](AsyncWebServerRequest *request){HandleResetConfiguration(request); });
-//       pWebServer->on("/reset", [this](AsyncWebServerRequest *request){HandleReset(request); });
+// //       server->on("/cn", [this](AsyncWebServerRequest *request){HandleConfiguration(request); });
+// //       server->on("/md", [this](AsyncWebServerRequest *request){HandleModuleConfiguration(request); });
+// //       server->on("/wi", [this](AsyncWebServerRequest *request){HandleWifiConfiguration(request); });
+// //       server->on("/lg", [this](AsyncWebServerRequest *request){HandleLoggingConfiguration(request); });
+// //       server->on("/tp", [this](AsyncWebServerRequest *request){HandleTemplateConfiguration(request); });
+// //       server->on("/co", [this](AsyncWebServerRequest *request){HandleOtherConfiguration(request); });
+// //       server->on("/dl", [this](AsyncWebServerRequest *request){HandleBackupConfiguration(request); });
+// //       server->on("/rs", [this](AsyncWebServerRequest *request){HandleRestoreConfiguration(request); });
+//       // server->on("/rt", [this](AsyncWebServerRequest *request){HandleResetConfiguration(request); });
+//       server->on("/reset", [this](AsyncWebServerRequest *request){HandleReset(request); });
 // //#endif
-//   pWebServer->onNotFound([this](AsyncWebServerRequest *request){HandleNotFound(request); });
+//   server->onNotFound([this](AsyncWebServerRequest *request){HandleNotFound(request); });
   
-// }
+}
 
 
 // bool mWebServer::CheckWebSendFreeMemoryTooLow(uint16_t memory_needed){
@@ -465,7 +471,7 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
 // void mWebServer::StopWebserver(void)
 // {
 //   //if(webserver_state) {
-//     pWebServer->reset(); // asyncedit
+//     server->reset(); // asyncedit
 //     webserver_state = HTTP_OFF;
 //     #ifdef ENABLE_LOG_LEVEL_INFO
 //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
@@ -518,28 +524,28 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
 // bool mWebServer::WebAuthenticate(void)
 // {
 //   // if (pCONT_set->Settings.web_password[0] != 0 && HTTP_MANAGER_RESET_ONLY != webserver_state) {
-//   //   // return pWebServer->authenticate(WEB_USERNAME, pCONT_set->Settings.web_password);
+//   //   // return server->authenticate(WEB_USERNAME, pCONT_set->Settings.web_password);
 //   // } else {
 //     return true;
 //   // }
 // }
 
-// //bool mWebServer::HttpCheckPriviledgedAccess(bool autorequestauth = true)
-// bool mWebServer::HttpCheckPriviledgedAccess()
-// {
+//bool mWebServer::HttpCheckPriviledgedAccess(bool autorequestauth = true)
+bool mWebServer::HttpCheckPriviledgedAccess()
+{
 
-// //     bool autorequestauth = true;
+//     bool autorequestauth = true;
 
-// //   if (HTTP_USER == webserver_state) {
-// //     HandleRoot();
-// //     return false;
-// //   }
-// //   if (autorequestauth && !WebAuthenticate()) {
-// //     pWebServer->requestAuthentication();
-// //     return false;
-// //   }
-//   return true; // admin by default
-// }
+//   if (HTTP_USER == webserver_state) {
+//     HandleRoot();
+//     return false;
+//   }
+//   if (autorequestauth && !WebAuthenticate()) {
+//     server->requestAuthentication();
+//     return false;
+//   }
+  return true; // admin by default
+}
 
 
 
@@ -1301,9 +1307,9 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
   //   case FUNC_EVERY_SECOND:
 
   //   break;
-  //   case FUNC_WEB_ADD_HANDLER:
-  //     WebPage_Root_AddHandlers();
-  //   break;
+    case FUNC_WEB_ADD_HANDLER:
+      WebPage_Root_AddHandlers();
+    break;
   //   case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
   //       JsonBuilderI->Add("/module_draw.json",-1); 
   //       // JsonBuilderI->Add("/web_top_bar.json",1000); 

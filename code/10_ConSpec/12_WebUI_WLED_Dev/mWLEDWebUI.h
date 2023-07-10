@@ -84,33 +84,3 @@ class mWLEDWebUI :
 #endif //DEVICE_RADIATORFAN
 
 #endif
-
-
-
-/**
- * This is a basic HVAC, that could technically be performed by rules only
- * 
- * This is basically a usermod_radiatordfan
- * 
- * 
- * */
-
-// Rename to something generic
-
-// Description: Temperature controlled relays
-// Use example: Temp probe that measures radiator temperature and controls fan to assist in heat disspersion
-
-// This is the equivalent of a simple rule, temp drops below threshold, relay off, temp goes above, relay on
-
-// "mTemperature"
-
-// can this be described as hvac? temp drops, relay on, though, its continuous and no shcedules (too complex for its need)
-
-// mTemperatureControlledRelays()
-
-
-
-// What this could be merged into: sensor controlled, threshold high and low (hysteresis), output (any driver)
-// Actions/Rule
-
-// Relay mode to use temp sensor to control state

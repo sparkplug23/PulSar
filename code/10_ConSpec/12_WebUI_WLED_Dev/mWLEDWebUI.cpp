@@ -144,8 +144,6 @@ typedef enum mapping1D2D {
 #define SETTINGS_STACK_BUF_SIZE 3608  // warning: quite a large value for stack
 #endif
 
-
-
 #ifdef WLED_USE_ETHERNET
   #ifdef WLED_ETH_DEFAULT                                          // default ethernet board type if specified
     WLED_GLOBAL int ethernetType _INIT(WLED_ETH_DEFAULT);          // ethernet board type
@@ -2411,6 +2409,15 @@ bool requestJSONBufferLock(uint8_t module)
   return true;
 }
 
+void releaseJSONBufferLock()
+{
+  DEBUG_PRINT(F("JSON buffer released. ("));
+  DEBUG_PRINT(jsonBufferLock);
+  DEBUG_PRINTLN(")");
+  // fileDoc = nullptr;
+  jsonBufferLock = 0;
+}
+
 
 void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte id, bool forPreset, bool segmentBounds)
 {
@@ -2448,7 +2455,6 @@ void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte i
     segcol[2] = seg.rgbcctcolors[i].B;
     segcol[3] = seg.rgbcctcolors[i].W1;
     char tmpcol[22];
-    // sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
     sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
     strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);
   }
@@ -2459,6 +2465,12 @@ void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte i
   root["fx"]  = seg.effect_id;
   root["sx"]  = seg.speed();
   root["ix"]  = seg.intensity();
+
+  // root["tt"]  = constrain(map(seg.transition.time_ms, 0,10000, 0,255),0,255);
+  // root["tr"]  = constrain(map(seg.transition.rate_ms, 0,10000, 0,255),0,255);
+  root["tt"]  = seg.transition.time_ms;//, 0,10000, 0,255),0,255);
+  root["tr"]  = seg.transition.rate_ms;//, 0,10000, 0,255),0,255);
+
   root["pal"] = seg.palette.id;
   root["c1"]  = seg.custom1;
   root["c2"]  = seg.custom2;
@@ -2493,8 +2505,6 @@ void serializeState(JsonObject root, bool forPreset, bool includeBri, bool segme
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;
     root[F("pl")] = currentPlaylist;
-
-//     usermods.addToJsonState(root);
 
     JsonObject nl = root.createNestedObject("nl");
     nl["on"] = nightlightActive;
@@ -2544,23 +2554,23 @@ void serializeInfo(JsonObject root)
 {
   root[F("ver")] = "versionString";
   root[F("vid")] = PROJECT_VERSION;
-  //root[F("cn")] = WLED_CODENAME;
+  root[F("cn")] = "WLED_CODENAME";
 
   JsonObject leds = root.createNestedObject("leds");
   leds[F("count")] = 123;//pCONT_lAni->getLengthTotal();
   leds[F("pwr")] = 123;//pCONT_lAni->currentMilliamps;
-  // leds["fps"] = pCONT_lAni->getFps();
-  // leds[F("maxpwr")] = (pCONT_lAni->currentMilliamps)? pCONT_lAni->ablMilliampsMax : 0;
-  // leds[F("maxseg")] = pCONT_lAni->getMaxSegments();
-  //leds[F("actseg")] = pCONT_lAni->getActiveSegmentsNum();
-  //leds[F("seglock")] = false; //might be used in the future to prevent modifications to segment config
+  leds["fps"] = pCONT_lAni->getFps();
+  leds[F("maxpwr")] = (pCONT_lAni->currentMilliamps)? pCONT_lAni->ablMilliampsMax : 0;
+  leds[F("maxseg")] = pCONT_lAni->getMaxSegments();
+  leds[F("actseg")] = pCONT_lAni->getActiveSegmentsNum();
+  leds[F("seglock")] = false; //might be used in the future to prevent modifications to segment config
 
   #ifndef WLED_DISABLE_2D
-  // if (pCONT_lAni->isMatrix) {
-  //   JsonObject matrix = leds.createNestedObject("matrix");
-  //   matrix["w"] = 1;//mAnimatorLight::Segment_New::maxWidth;
-  //   matrix["h"] = 2;//mAnimatorLight::Segment_New::maxHeight;
-  // }
+  if (pCONT_lAni->isMatrix) {
+    JsonObject matrix = leds.createNestedObject("matrix");
+    matrix["w"] = 1;//mAnimatorLight::Segment_New::maxWidth;
+    matrix["h"] = 2;//mAnimatorLight::Segment_New::maxHeight;
+  }
   #endif
 
   uint8_t totalLC = 0;
@@ -2608,12 +2618,12 @@ void serializeInfo(JsonObject root)
     case REALTIME_MODE_DDP:      root["lm"] = F("DDP"); break;
   }
 
-  // if (realtimeIP[0] == 0)
-  // {
-  //   root[F("lip")] = "";
-  // } else {
-  //   root[F("lip")] = realtimeIP.toString();
-  // }
+  if (realtimeIP[0] == 0)
+  {
+    root[F("lip")] = "";
+  } else {
+    root[F("lip")] = realtimeIP.toString();
+  }
 
   #ifdef WLED_ENABLE_WEBSOCKETS
   root[F("ws")] = ws.count();
@@ -2683,8 +2693,6 @@ void serializeInfo(JsonObject root)
   #endif
   // root[F("uptime")] = millis()/1000 + rolloverMillis*4294967;
 
-  // usermods.addToJsonInfo(root);
-
   uint16_t os = 0;
   #ifdef WLED_DEBUG
   os  = 0x80;
@@ -2728,47 +2736,6 @@ void serializeInfo(JsonObject root)
   root["ip"] = s;
 }
 
-// void setPaletteColors(JsonArray json, CRGBPalette16 palette)
-// {
-//     for (int i = 0; i < 16; i++) {
-//       JsonArray colors =  json.createNestedArray();
-//       CRGB color = palette[i];
-//       colors.add(i<<4);
-//       colors.add(color.red);
-//       colors.add(color.green);
-//       colors.add(color.blue);
-//     }
-// }
-
-// void setPaletteColors(JsonArray json, byte* tcp)
-// {
-//     TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
-//     TRGBGradientPaletteEntryUnion u;
-
-//     // Count entries
-//     uint16_t count = 0;
-//     do {
-//         u = *(ent + count);
-//         count++;
-//     } while ( u.index != 255);
-
-//     u = *ent;
-//     int indexstart = 0;
-//     while( indexstart < 255) {
-//       indexstart = u.index;
-
-//       JsonArray colors =  json.createNestedArray();
-//       colors.add(u.index);
-//       colors.add(u.r);
-//       colors.add(u.g);
-//       colors.add(u.b);
-
-//       ent++;
-//       u = *ent;
-//     }
-// }
-
-#ifdef ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
 
 void setPaletteColors(JsonArray json, CRGBPalette16 palette)
 {
@@ -2804,64 +2771,220 @@ void serializePalettes(JsonObject root, int page)
 
   root[F("m")] = maxPage; // inform caller how many pages there are
   JsonObject palettes  = root.createNestedObject("p");
+  JsonObject palettes_style  = root.createNestedObject("s");
+
+  uint8_t encoded_gradient = 0;
 
 /**
  * @brief 
  * Start by sending the current palette loaded
  */
 
-  for (int i = start; i < end; i++) 
+  for (int palette_id = start; palette_id < end; palette_id++) 
   {
+        
+    bool banded_gradient = false;
 
-    ALOG_INF(PSTR("i=%d|p%d|m%d"),i,page,maxPage);
-    
-    uint16_t palette_id = i;// < palettesCount ? i : 0;
-
-    // DEBUG_LINE_HERE;
+    ALOG_INF(PSTR("i=%d|p%d|m%d"),palette_id,page,maxPage);
 
     pCONT_lAni->LoadPalette(palette_id); // Assume segment 1 exists, and use it to load all palettes. Effect should reset to active palette in main loop. Or here, have it then flip back. Though this may cause flickering midanimation. Animation may also need paused on esp32.
-
-    // DEBUG_LINE_HERE;
     uint16_t colours_in_palette = pCONT_lAni->GetNumberOfColoursInPalette(palette_id);
-    // if(colours_in_palette < 16)
-    // {
+   
+    ALOG_INF(PSTR("colours_in_palette=%d"),colours_in_palette);
 
-    // DEBUG_LINE_HERE;
-        JsonArray curPalette_obj = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
+    JsonArray curPalette_obj = palettes.createNestedArray(String(palette_id));
+    JsonObject curPalette_s_obj = palettes_style.createNestedObject(String(palette_id));
 
-    // DEBUG_LINE_HERE;
-        for (int j = 0; j < colours_in_palette; j++) {
+    // palettes.createNestedObject("")
+    // JsonObject obj2 = curPalette_obj.createNestedObject();
+    //   obj2["TEST"] = 1;//.add("test",1);
 
-    // DEBUG_LINE_HERE;
-          RgbcctColor color = 
-          // pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()].GetColourFromPalette(j);  
+    /**
+     * @brief To reduce memory usage, the static gradients that are stored with less than 16 colours, shall be read directly
+     * 
+     */
+    if(
+      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+    ){ 
 
-          
-        mPaletteI->GetColourFromPreloadedPaletteBuffer(
-          palette_id,
-          pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
-          j,
-          nullptr,
-          false,
-          true
-        );
+      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
 
+      byte tcp[72];
+      memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[adjusted_id])), 72);
 
+      TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
+      TRGBGradientPaletteEntryUnion u;
 
+      // Count entries
+      uint16_t count = 0;
+      do {
+          u = *(ent + count);
+          count++;
+      } while ( u.index != 255);
 
+      ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
+
+      u = *ent;
+      int indexstart = 0;
+      while( indexstart < 255) {
+        indexstart = u.index;
+
+        JsonArray colors =  curPalette_obj.createNestedArray();
+        colors.add(u.index);
+        colors.add(u.r);
+        colors.add(u.g);
+        colors.add(u.b);
+
+        ent++;
+        u = *ent;
+      }
+      
+      banded_gradient = false;
+
+    }
+    else
+    {
+
+      
+      for (int j = 0; j < colours_in_palette; j++) {
+
+        encoded_gradient = 0;
         
-          JsonArray colors =  curPalette_obj.createNestedArray();
-          // CRGB color = palette[i];
-          // colors.add(i<<4); // all colour sent should probably scale into the 255 range
+        RgbcctColor color =    RgbcctColor(0);
+        
+        color = mPaletteI->GetColourFromPreloadedPaletteBuffer(
+            palette_id, pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
+            j, &encoded_gradient,
+            false, true,
+            0, true
+          );
 
+        JsonArray colors =  curPalette_obj.createNestedArray();
+
+        Serial.println(encoded_gradient);
+
+        /**
+         * @brief 
+         * First colour needs to be applied twice, or at least have the index increased
+         * 
+         */
+
+        /**
+         * @brief 
+         * Gradient Exists: encoded > 0, then take it directly. If it exists but is 0, then the else will still work to catch it
+         * Gradient Empty:  encoded == 0, scale colour_count into range
+         */
+        if(encoded_gradient)
+        {
+          
+          // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+          // uint8_t range_width = 255/(colours_in_palette+1);
+          // colors.add(map(encoded_gradient, 0,255, range_width,255)); // Rescale encoded value into new scale
+          // #else
+          colors.add(encoded_gradient); // when palette has gradient index value, it should be used instead of this
+          // #endif
+                    
+
+        }
+        else
+        {
+          // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+          // uint8_t range_width = 255/(colours_in_palette+1);
+          // colors.add(map(j, 0,colours_in_palette, range_width,255)); // when palette has gradient index value, it should be used instead of this
+          // #else
+          // colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
+          // #endif
+
+          #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+          // uint8_t range_width = 255/(colours_in_palette+1);
+          colors.add(map(j, 0,colours_in_palette-1, 0,255)); // when palette has gradient index value, it should be used instead of this
+          #else
           colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
+          #endif
 
-          colors.add(color.red);
-          colors.add(color.green);
-          colors.add(color.blue);
+          banded_gradient = true;
+                    
+
         }
 
-    // }
+        colors.add(color.red);
+        colors.add(color.green);
+        colors.add(color.blue);
+
+      }
+
+            
+        // ALOG_INF(PSTR("palette_id %d"), palette_id);
+      /**************************************************************
+       * 
+       * PALETTELIST_STATIC__IDS
+       * PALETTELIST_VARIABLE_HSBID__IDS
+       * PALETTELIST_VARIABLE_GENERIC__IDS
+       * 
+      ***************************************************************/
+      if(
+        ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
+      )
+      {  
+          
+        banded_gradient = true;
+
+        mPalette::PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+
+        if(ptr->encoding.index_scaled_to_segment)
+        {
+          banded_gradient = false;
+        };
+
+      }
+
+      /**************************************************************
+       * 
+       * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+       * 
+      ***************************************************************/
+      if(
+        (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+      ){  
+        banded_gradient = false;
+      }
+
+      /**************************************************************
+       * 
+       * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+       * 
+      ***************************************************************/
+      if(
+        (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+      ){  
+        banded_gradient = false;
+      }
+
+      /**************************************************************
+       * 
+       * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+       * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+       * 
+      ***************************************************************/
+      if(
+        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
+      ){  
+        banded_gradient = false;
+      }
+
+      if(banded_gradient)
+      {
+        curPalette_s_obj["bg"] = "B";
+      }else{
+        curPalette_s_obj["bg"] = "L";
+      }
+          
+    }
+
 
   }
 
@@ -2873,9 +2996,6 @@ void serializePalettes(JsonObject root, int page)
 //   for (int i = start; i < end; i++) {
 //     JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
 //     switch (i) {
-//       case 0: //default palette
-//         setPaletteColors(curPalette, PartyColors_p);
-//         break;
 //       case 1: //random
 //           curPalette.add("r");
 //           curPalette.add("r");
@@ -2914,167 +3034,11 @@ void serializePalettes(JsonObject root, int page)
 //         curPalette.add("c3");
 //         curPalette.add("c1");
 //         break;
-//       case 6: //Party colors
-//         setPaletteColors(curPalette, PartyColors_p);
-//         break;
-//       case 7: //Cloud colors
-//         setPaletteColors(curPalette, CloudColors_p);
-//         break;
-//       case 8: //Lava colors
-//         setPaletteColors(curPalette, LavaColors_p);
-//         break;
-//       case 9: //Ocean colors
-//         setPaletteColors(curPalette, OceanColors_p);
-//         break;
-//       case 10: //Forest colors
-//         setPaletteColors(curPalette, ForestColors_p);
-//         break;
-//       case 11: //Rainbow colors
-//         setPaletteColors(curPalette, RainbowColors_p);
-//         break;
-//       case 12: //Rainbow stripe colors
-//         setPaletteColors(curPalette, RainbowStripeColors_p);
-//         break;
-//       default:
-//         {
-//         if (i>=palettesCount) {
-//           setPaletteColors(curPalette, pCONT_lAni->customPalettes[i - palettesCount]);
-//         } else {
-//           memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
-//           setPaletteColors(curPalette, tcp);
-//         }
-//         }
-//         break;
-//     }
 //   }
 
 
 
 }
-
-
-#else // ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
-
-
-void setPaletteColors(JsonArray json, CRGBPalette16 palette)
-{
-    for (int i = 0; i < 16; i++) {
-      JsonArray colors =  json.createNestedArray();
-      CRGB color = palette[i];
-      colors.add(i<<4);
-      colors.add(color.red);
-      colors.add(color.green);
-      colors.add(color.blue);
-    }
-}
-
-
-void serializePalettes(JsonObject root, int page)
-{
-  byte tcp[72];
-  #ifdef ESP8266
-  int itemPerPage = 5;
-  #else
-  int itemPerPage = 8;
-  #endif
-
-  int palettesCount = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID;//pCONT_lAni->getPaletteCount();
-  int customPalettes = pCONT_lAni->customPalettes.size();
-
-  int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
-  if (page > maxPage) page = maxPage;
-
-  int start = itemPerPage * page;
-  int end = start + itemPerPage;
-  if (end > palettesCount + customPalettes) end = palettesCount + customPalettes;
-
-  root[F("m")] = maxPage; // inform caller how many pages there are
-  JsonObject palettes  = root.createNestedObject("p");
-
-
-
-
-  for (int i = start; i < end; i++) {
-    JsonArray curPalette = palettes.createNestedArray(String(i>=palettesCount ? 255 - i + palettesCount : i));
-    switch (i) {
-      case 0: //default palette
-        setPaletteColors(curPalette, PartyColors_p);
-        break;
-      case 1: //random
-          curPalette.add("r");
-          curPalette.add("r");
-          curPalette.add("r");
-          curPalette.add("r");
-        break;
-      case 2: //primary color only
-        curPalette.add("c1");
-        break;
-      case 3: //primary + secondary
-        curPalette.add("c1");
-        curPalette.add("c1");
-        curPalette.add("c2");
-        curPalette.add("c2");
-        break;
-      case 4: //primary + secondary + tertiary
-        curPalette.add("c3");
-        curPalette.add("c2");
-        curPalette.add("c1");
-        break;
-      case 5: //primary + secondary (+tert if not off), more distinct
-        curPalette.add("c1");
-        curPalette.add("c1");
-        curPalette.add("c1");
-        curPalette.add("c1");
-        curPalette.add("c1");
-        curPalette.add("c2");
-        curPalette.add("c2");
-        curPalette.add("c2");
-        curPalette.add("c2");
-        curPalette.add("c2");
-        curPalette.add("c3");
-        curPalette.add("c3");
-        curPalette.add("c3");
-        curPalette.add("c3");
-        curPalette.add("c3");
-        curPalette.add("c1");
-        break;
-      case 6: //Party colors
-        setPaletteColors(curPalette, PartyColors_p);
-        break;
-      case 7: //Cloud colors
-        setPaletteColors(curPalette, CloudColors_p);
-        break;
-      case 8: //Lava colors
-        setPaletteColors(curPalette, LavaColors_p);
-        break;
-      case 9: //Ocean colors
-        setPaletteColors(curPalette, OceanColors_p);
-        break;
-      case 10: //Forest colors
-        setPaletteColors(curPalette, ForestColors_p);
-        break;
-      case 11: //Rainbow colors
-        setPaletteColors(curPalette, RainbowColors_p);
-        break;
-      case 12: //Rainbow stripe colors
-        setPaletteColors(curPalette, RainbowStripeColors_p);
-        break;
-      default:
-        {
-        if (i>=palettesCount) {
-          setPaletteColors(curPalette, pCONT_lAni->customPalettes[i - palettesCount]);
-        } else {
-          memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[i - 13])), 72);
-          setPaletteColors(curPalette, tcp);
-        }
-        }
-        break;
-    }
-  }
-}
-
-
-#endif // ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
 
 
 void serializeNetworks(JsonObject root)
@@ -3106,6 +3070,7 @@ void serializeNetworks(JsonObject root)
   }
 }
 
+
 void serializeNodes(JsonObject root)
 {
   JsonArray nodes = root.createNestedArray("nodes");
@@ -3124,6 +3089,7 @@ void serializeNodes(JsonObject root)
   // }
 }
 
+
 // deserializes mode data string into JsonArray
 void serializeModeData(JsonArray fxdata)
 {
@@ -3137,6 +3103,7 @@ void serializeModeData(JsonArray fxdata)
     }
   }
 }
+
 
 // deserializes mode names string into JsonArray
 // also removes effect data extensions (@...) from deserialised names
@@ -3152,20 +3119,13 @@ void serializeModeNames(JsonArray arr) {
   }
 }
 
+
 // deserializes mode names string into JsonArray
 // also removes effect data extensions (@...) from deserialised names
 void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only = true);
-void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) {
+void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) 
+{
   char lineBuffer[128];
-  // for (size_t i = 0; i < pCONT_lAni->getModeCount(); i++) {
-  //   strncpy_P(lineBuffer, pCONT_lAni->getModeData(i), 127);
-  //   if (lineBuffer[0] != 0) {
-  //     char* dataPtr = strchr(lineBuffer,'@');
-  //     if (dataPtr) *dataPtr = 0; // terminate mode data after name
-  //     arr.add(lineBuffer);
-  //   }
-  // }
-
   for(uint16_t i = 0; i < pCONT_lAni->getEffectsFunctionCount(); i++)
   {
     pCONT_lAni->GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer));
@@ -3176,8 +3136,6 @@ void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) {
     }
     arr.add(lineBuffer);
   }
-
-
 }
 
 
@@ -3248,16 +3206,10 @@ void serveJson(AsyncWebServerRequest* request)
   #endif
   else if (url.indexOf("pal") > 0) {
 
-
-// const char JSON_palette_2[] PROGMEM = R"=====([
-// "Default Michael","* Random Cycle"
-// ])=====";
-
     JBI->Start();
       JBI->Array_Start();
-        // JBI->Add("1");
-        // JBI->Add("2");
-char lineBuffer[100] = {0};
+
+      char lineBuffer[100] = {0};
       bool flag_get_first_name_only = true;
         
         // for(uint16_t i = 0; i < 10; i++)//< mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID; i++)
@@ -3273,8 +3225,6 @@ char lineBuffer[100] = {0};
           ALOG_INF(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
           JBI->Add(lineBuffer);
         }
-
-
 
       JBI->Array_End();
     JBI->End();
@@ -3303,10 +3253,10 @@ char lineBuffer[100] = {0};
     return;
   }
 
-  // if (!requestJSONBufferLock(17)) {
-  //   request->send(503, "application/json", F("{\"error\":3}"));
-  //   return;
-  // }
+  if (!requestJSONBufferLock(17)) {
+    request->send(503, "application/json", F("{\"error\":3}"));
+    return;
+  }
   AsyncJsonResponse *response = new AsyncJsonResponse(&doc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
   JsonVariant lDoc = response->getRoot();
@@ -3317,8 +3267,6 @@ char lineBuffer[100] = {0};
       serializeState(lDoc); break;
     case JSON_PATH_INFO:
       serializeInfo(lDoc); break;
-    // case JSON_PATH_NODES:
-    //   serializeNodes(lDoc); break;
     case JSON_PATH_PALETTES:
       serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
       break;
@@ -3360,9 +3308,6 @@ char lineBuffer[100] = {0};
       //     pal.add(lineBuffer);
       //   }
 
-
-
-
       }
       lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
   }
@@ -3373,7 +3318,7 @@ char lineBuffer[100] = {0};
   DEBUG_PRINT(F("JSON content length: ")); DEBUG_PRINTLN(len);
 
   request->send(response);
-  // releaseJSONBufferLock();
+  releaseJSONBufferLock();
 }
 
 
@@ -3421,19 +3366,12 @@ void serveSettings(AsyncWebServerRequest* request, bool post)
     else if (url.indexOf("lock") > 0) subPage = SUBPAGE_LOCK;
   }
   else if (url.indexOf("/update") >= 0) subPage = SUBPAGE_UPDATE; // update page, for PIN check
-  //else if (url.indexOf("/edit")   >= 0) subPage = 10;
   else subPage = SUBPAGE_WELCOME;
 
   if (!correctPIN && strlen(settingsPIN) > 0 && (subPage > 0 && subPage < 11)) {
     originalSubPage = subPage;
     subPage = SUBPAGE_PINREQ; // require PIN
   }
-
-  // // if OTA locked or too frequent PIN entry requests fail hard
-  // if ((subPage == SUBPAGE_WIFI && wifiLock && otaLock) || (post && !correctPIN && millis()-lastEditTime < PIN_RETRY_COOLDOWN))
-  // {
-  //   serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_ota), 254); return;
-  // }
 
   if (post) { //settings/set POST request, saving
     // if (subPage != SUBPAGE_WIFI || !(wifiLock && otaLock)) handleSettingsSet(request, subPage);
@@ -3573,6 +3511,7 @@ bool getVal(JsonVariant elem, byte* val, byte vmin, byte vmax) {
   return false; //key does not exist
 }
 
+
 //get RGB values from color temperature in K (https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
 void colorKtoRGB(uint16_t kelvin, byte* rgb) //white spectrum to rgb, calc
 {
@@ -3598,6 +3537,7 @@ void colorKtoRGB(uint16_t kelvin, byte* rgb) //white spectrum to rgb, calc
   rgb[3] = 0;
 }
 
+
 //contrary to the colorFromDecOrHexString() function, this uses the more standard RRGGBB / RRGGBBWW order
 bool colorFromHexString(byte* rgb, const char* in) {
   if (in == nullptr) return false;
@@ -3621,13 +3561,11 @@ bool colorFromHexString(byte* rgb, const char* in) {
 
 
 bool deserializeSegment(JsonObject elem, byte it, byte presetId = 0);
-bool deserializeState(JsonObject root, byte callMode = CALL_MODE_DIRECT_CHANGE, byte presetId = 0);
-/*
- * JSON API (De)serialization
- */
-
 bool deserializeSegment(JsonObject elem, byte it, byte presetId)
 {
+
+  ALOG_INF(PSTR("================deserializeSegment"));
+
   byte id = elem["id"] | it;
   if (id >= pCONT_lAni->getMaxSegments()) return false;
 
@@ -3635,6 +3573,9 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   // if using vectors use this code to append segment
   if (id >= pCONT_lAni->getSegmentsNum()) {
+
+    ALOG_HGL(PSTR("DESTROYING SEGMENT, BAD %d %d"), id, pCONT_lAni->getSegmentsNum());
+
     if (stop <= 0) return false; // ignore empty/inactive segments
     pCONT_lAni->appendSegment(mAnimatorLight::Segment_New(0, pCONT_lAni->getLengthTotal()));
     id = pCONT_lAni->getSegmentsNum()-1; // segments are added at the end of list
@@ -3761,13 +3702,8 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
             if (kelvin <  0) continue;
             if (kelvin == 0)
             {
-
-    ALOG_INF(PSTR("seg.setColor(i, 0); %d"), i);
-
+              ALOG_INF(PSTR("seg.setColor(i, 0); %d"), i);
               seg.setColor(i, 0);
-
-
-
             }
             if (kelvin >  0) colorKtoRGB(kelvin, brgbw);
             colValid = true;
@@ -3785,8 +3721,7 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
 
         if (!colValid) continue;
 
-    ALOG_INF(PSTR("seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));"));
-
+        ALOG_INF(PSTR("seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));"));
     
         seg.setColor(i, RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]));
         if (seg.animation_mode_id == 0) pCONT_lAni->trigger(); //instant refresh
@@ -3828,10 +3763,7 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   byte fx = seg.animation_mode_id;
   if (getVal(elem["fx"], &fx, 0, pCONT_lAni->getModeCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
-  
     ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, pCONT_lAni->getModeCount()) %d"), fx);
-
-
     // if (!presetId && currentPlaylist>=0) unloadPlaylist();
     // if (fx != seg.animation_mode_id) 
     seg.setMode(fx, elem[F("fxdef")]);
@@ -3840,6 +3772,24 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
   //getVal also supports inc/decrementing and random
   getVal(elem["sx"], &seg._speed);
   getVal(elem["ix"], &seg._intensity);
+
+  // uint8_t transition_slider_time = 0;
+  // getVal(elem["tt"], &transition_slider_time);
+  // Map scale into internal rate
+  if (elem["tt"].is<int>()) {
+    seg.transition.time_ms = elem["tt"];//map(transition_slider_time, 0,255, 0,10000);
+    ALOG_INF(PSTR("seg.transition.time_ms = %d"), seg.transition.time_ms);
+  }
+
+  // uint8_t transition_slider_rate = 0;
+  // getVal(elem["tr"], &transition_slider_rate);
+  // Map scale into internal rate
+  if (elem["tr"].is<int>()) {
+    seg.transition.rate_ms = elem["tr"];//map(transition_slider_rate, 0,255, 0,10000);
+    ALOG_INF(PSTR("seg.transition.rate_ms = %d"), seg.transition.rate_ms);
+  }
+
+  // getVal(elem["tr"], &seg.transition.rate_ms);
 
   uint8_t pal = seg.palette.id;
   if (seg.getLightCapabilities() & 1) {  // ignore palette for White and On/Off segments
@@ -3919,8 +3869,12 @@ bool deserializeSegment(JsonObject elem, byte it, byte presetId)
 
 // deserializes WLED state (fileDoc points to doc object if called from web server)
 // presetId is non-0 if called from handlePreset()
+bool deserializeState(JsonObject root, byte callMode = CALL_MODE_DIRECT_CHANGE, byte presetId = 0);
 bool deserializeState(JsonObject root, byte callMode, byte presetId)
 {
+  ALOG_INF(PSTR("================deserializeState"));
+
+
   bool stateResponse = root[F("v")] | false;
 
                                         
@@ -4125,39 +4079,6 @@ bool captivePortal(AsyncWebServerRequest *request)
   return false;
 }
 
-//This function provides a json with info on the number of LEDs connected
-// it is needed by artemis to know how many LEDs to display on the surface
-void handleConfig(AsyncWebServerRequest *request)
-{
-DEBUG_LINE_HERE;
-  String config = (String)"{\
-  \"channels\": [\
-    {\
-      \"channel\": 1,\
-      \"leds\": 123\
-    },\
-    {\
-      \"channel\": 2,\
-      \"leds\": " + "0" + "\
-    },\
-    {\
-      \"channel\": 3,\
-      \"leds\": " + "0" + "\
-    },\
-    {\
-      \"channel\": 4,\
-      \"leds\": " + "0" + "\
-    }\
-  ]\
-}";
-
-Serial.println(config);
-DEBUG_LINE_HERE;
-
-  request->send(200, "application/json", config);
-DEBUG_LINE_HERE;
-}
-
 
 void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
@@ -4238,12 +4159,12 @@ void initServer()
 
     Serial.println((char*)request->_tempObject);
 
-    // if (!requestJSONBufferLock(14)) return;
+    if (!requestJSONBufferLock(14)) return;
 
     DeserializationError error = deserializeJson(doc, (uint8_t*)(request->_tempObject));
     JsonObject root = doc.as<JsonObject>();
     if (error || root.isNull()) {
-      // releaseJSONBufferLock();
+      releaseJSONBufferLock();
       request->send(400, "application/json", F("{\"error\":9}")); // ERR_JSON
       return;
     }
@@ -4259,18 +4180,18 @@ void initServer()
         DEBUG_PRINTLN();
       #endif
       */
-    ALOG_INF(PSTR("deserializeState"));
+      ALOG_INF(PSTR("deserializeState"));
       verboseResponse = deserializeState(root);
     } else {
       if (!correctPIN && strlen(settingsPIN)>0) {
         request->send(403, "application/json", F("{\"error\":1}")); // ERR_DENIED
-        // releaseJSONBufferLock();
+        releaseJSONBufferLock();
         return;
       }
     ALOG_INF(PSTR("deserializeConfig"));
       verboseResponse = deserializeConfig(root); //use verboseResponse to determine whether cfg change should be saved immediately
     }
-    // releaseJSONBufferLock();
+    releaseJSONBufferLock();
 
     if (verboseResponse) {
       if (!isConfig) {
@@ -4399,7 +4320,7 @@ void initServer()
   });
   #else
   pCONT_web->server->on("/dmxmap", HTTP_GET, [](AsyncWebServerRequest *request){
-    // serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
+    serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
   });
   #endif
 
@@ -4480,23 +4401,6 @@ void initServer()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int8_t mWLEDWebUI::Tasker(uint8_t function, JsonParserObject obj)
 {
 
@@ -4514,14 +4418,9 @@ int8_t mWLEDWebUI::Tasker(uint8_t function, JsonParserObject obj)
   switch(function){
     case FUNC_WIFI_CONNECTED:
 
-initServer();
+      initServer();
 
-
-DEBUG_LINE_HERE;
-
-    pCONT_web->server->begin();
-
-DEBUG_LINE_HERE;
+      pCONT_web->server->begin();
 
     break;
     /************

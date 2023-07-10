@@ -39,7 +39,14 @@ class mPaletteContainer
     ~mPaletteContainer(){};
 
 	std::vector<uint8_t> pData;
-	CRGBPalette16 crgb16_palette;
+
+	struct CRGB16Palette16_PALETTE
+	{
+		CRGBPalette16 data;
+		std::vector<uint8_t> encoded_index;
+	};
+
+	CRGB16Palette16_PALETTE CRGB16Palette16_Palette;
 
 	void LoadPaletteI();
 

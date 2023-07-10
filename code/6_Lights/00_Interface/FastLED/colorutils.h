@@ -1494,7 +1494,7 @@ public:
         CRGB rgbstart( u.r, u.g, u.b);
 
         int indexstart = 0;
-        while( indexstart < 255) {
+        while( indexstart < 255) { // This is used so it can know when the read 72 bytes would be the start of another palette, and hence dont read in this palette
             ent++;
             u = *ent;
             int indexend  = u.index;

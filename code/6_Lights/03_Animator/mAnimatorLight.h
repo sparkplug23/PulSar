@@ -81,7 +81,6 @@
 #include "math.h"
 #include "fastmath.h"
 
-
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
@@ -89,14 +88,11 @@
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
 #endif // USE_SK6812_METHOD_DEFAULT
 
-
 #include "6_Lights/02_Palette/mPaletteContainer.h"
 class mPaletteContainer;
 
-
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/00_Interface/FastLED/FastLED.h"
-
 
 /**
  * @brief For integrated effects on each frame, disable animation callback
@@ -179,7 +175,6 @@ class mAnimatorLight :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
-    // Splitting into into subsections for easier reading
     void Init__Palettes();
 
     void Settings_Load();
@@ -277,15 +272,10 @@ class mAnimatorLight :
     bool    pwm_multi_channels = false;        // SetOption68, treat each PWM channel as an independant dimmer
     bool    fade_initialized = false;      // dont't fade at startup
    
-
     #ifdef USE_MODULE_CORE_RULES
     void RulesEvent_Set_Power();
     #endif // rules
-  
-
-    // void setChannels(uint8_t r, uint8_t g, uint8_t b, uint8_t wc = 0, uint8_t ww = 0);
-    // void setChannelsRaw(uint8_t r, uint8_t g, uint8_t b, uint8_t wc, uint8_t ww);
-   
+     
     void EverySecond_AutoOff();
     void BootMessage();
 
@@ -2620,8 +2610,6 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     
     uint8_t _segment_index_primary;
     uint8_t _mainSegment;
-
-
 
     void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
     void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp

@@ -1006,7 +1006,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 192, random8(128, 255)),
@@ -1021,7 +1021,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
@@ -1038,7 +1038,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
@@ -1056,7 +1056,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
@@ -1074,7 +1074,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
         {
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), random8(0, 255), 255),
                           CHSV(random8(), random8(0, 255), 255),
                           CHSV(random8(), random8(0, 255), 255),
@@ -1090,7 +1090,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
       { //primary color only
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0])); //is this stable to do? maybe since its not a pointer but instead an instance of a class
-        SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim); 
+        SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim); 
         // length = 1;
       }
       break;
@@ -1098,7 +1098,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
       { //primary + secondary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-        SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim,prim,sec,sec); 
+        SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,sec,sec); 
         // length = 4;
       }
       break;
@@ -1107,7 +1107,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
         CRGB ter  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-        SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(ter,sec,prim); 
+        SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(ter,sec,prim); 
         // length = 3; // 3 unique colours
       }
       break;    
@@ -1118,9 +1118,9 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
         if (RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]))
         {
           CRGB ter = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
         } else {
-          SEGMENT_I(segment_index).palette_container->crgb16_palette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
+          SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
         }
         // length = 16;
       }
@@ -5509,7 +5509,7 @@ uint32_t mAnimatorLight::getPixelColor(uint16_t i)
 {
   // if (i >= _length) return 0;
   // if (i < customMappingSize) i = customMappingTable[i];
-  // return busses.getPixelColor(i);
+  return RgbcctColor::GetU32Colour(pCONT_iLight->bus_manager->getPixelColor(i));
 }
 
 
@@ -6043,12 +6043,6 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
   // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
-      // DEBUG_LINE_HERE;
-
-/**
- * @brief Notice how I can automatically pass the one buffer, or my own to load additional palettes
- * 
- */
   return mPaletteI->GetColourFromPreloadedPaletteBuffer(
     palette.id,
     (uint8_t*)palette_container->pData.data(),//desired_index_from_palette,  

@@ -1846,11 +1846,21 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
   uint16_t palette_id,
   uint8_t* palette_buffer,
   uint16_t _pixel_position,//desired_index_from_palette,  
+  
+  //encoded value needs to be U32 since they can be 3 bytes wide
   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  
+  
   uint8_t mcol, // will be phased out
+
+
+  // Should be controlled by user option 
   bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+  
+  
+  // unless needed by WLED effects, phase out and apply inside effect
   uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
   // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
@@ -1967,25 +1977,24 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     ){
       
       // ALOG_INF(PSTR("enabled %d,%d,%d,%d,%d"), ptr->encoding.red_enabled, ptr->encoding.green_enabled, ptr->encoding.blue_enabled, ptr->encoding.white_cold_enabled, ptr->encoding.white_warm_enabled);
-      // ALOG_INF(PSTR("palette_elements %d"), palette_elements[0]);
-   
+      // ALOG_INF(PSTR("palette_elements %d"), palette_elements[0]);   
       // ALOG_INF(PSTR("p = %d, r = %d, v = %d|%d, w=%d"), pixel_position, index_relative, palette_elements[index_relative], palette_elements[index_relative+1],colour_width);
 
       // Get Start of Colour Information by adjusting for indexing
       index_relative = pixel_position*GetEncodedColourWidth(ptr->encoding); // get expected pixel position
-        // ALOG_INF(PSTR("index_relative=%d"),index_relative);
+        
+      // ALOG_INF(PSTR("index_relativeA=%d"),index_relative);
+
       if(ptr->encoding.index_scaled_to_segment)
       {
-    //     ALOG_INF(PSTR("index_relative=%d"),index_relative);
-        // If desired, return the index value
-        // if(encoded_value != nullptr){ 
+        // ALOG_INF(PSTR("index_relativeB=%d"),index_relative);
         if(encoded_value != nullptr){
           *encoded_value = palette_buffer[index_relative];
         }
-          // }
         // Set the index to move beyond the indexing information
         index_relative++;
       }
+        // ALOG_INF(PSTR("encoded_valueC=%d"), *encoded_value);
       
       // Get colour
       colour = RgbcctColor(
@@ -2070,7 +2079,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
       // DEBUG_LINE_HERE;
     // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
-    // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
+    ALOG_INF(PSTR("WS2812FX %d"), palette_id);
 
     // Assumes other function has already set and loaded it? into "currentPalette", which is part of "loading" palette
 
@@ -2103,6 +2112,11 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     //   uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255); //change to "scale8" for speed
     //   pixel_position_adjust = remainder_scaled255;
 
+    if(flag_convert_pixel_index_to_get_exact_crgb_colour)
+    {
+      pixel_position_adjust = map(pixel_position_adjust, 0,15, 0,255); //gradient type when exact value is needed needs scaled into full range
+    }
+
       
       
     //   // Serial.printf("pixel = %d|%d \t %d||%d\n\r", pixel_position, pixel_position_adjust , remainder, remainder_scaled255);
@@ -2112,11 +2126,11 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     // {
       
       // if (SEGMENT.palette.id == 0 && mcol < 3) return SEGCOLOR_U32(mcol); //WS2812FX default
-      if(palette_id == 0 && _pixel_position < 3)
-      {        
-        ALOG_ERR(PSTR("PHASED OUT! Not sure it is still needed?"));
-        // return pCONT_lAni->SEGMENT_I(pCONT_lAni->getCurrSegmentId()).rgbcctcolors[_pixel_position]; 
-      }
+      // if(palette_id == 0 && _pixel_position < 3)
+      // {        
+      //   ALOG_ERR(PSTR("PHASED OUT! Not sure it is still needed?"));
+      //   // return pCONT_lAni->SEGMENT_I(pCONT_lAni->getCurrSegmentId()).rgbcctcolors[_pixel_position]; 
+      // }
       // 
       // DEBUG_LINE_HERE;
       if (flag_map_scaling) pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
@@ -2154,9 +2168,9 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
     // DEBUG_LINE_HERE;
-    // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
+    ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
     // FastLED Get ColorFromPalette that is CRGBPalette16
-    fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->crgb16_palette, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
+    fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
     // DEBUG_LINE_HERE;
     // uint32_t fastled_col32 = 0;
@@ -2166,10 +2180,29 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
 
+
+
+
+
+    if(_pixel_position < pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size())
+    {
+
+      uint8_t enc = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[_pixel_position];
+        ALOG_ERR(PSTR("enc[%d] = %d|%d,%d,%d"),_pixel_position,enc,colour.R,colour.G,colour.B);
+
+      
+    }
+
     
         // ALOG_ERR(PSTR("colour[%d] = %d,%d,%d"),pixel_position_adjust,colour.R,colour.G,colour.B);
 
   } // END of CRGBPalette's
+  else
+  {
+
+ALOG_INF(PSTR("Missing %d"), palette_id);
+
+  }
 
   return colour;
 }
@@ -2182,30 +2215,77 @@ void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id, uint8_t seg_
 
   /******************************************************
    * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * No gradient information in palette bytes, CRGB16 will scale equally
    ******************************************************/
   switch (palette_id)
   {
     default:
-    case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    pSEGMENT_I(seg_i).palette_container->crgb16_palette = PartyColors_p;   break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   pSEGMENT_I(seg_i).palette_container->crgb16_palette = CloudColors_p;   break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    pSEGMENT_I(seg_i).palette_container->crgb16_palette = LavaColors_p;    break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    pSEGMENT_I(seg_i).palette_container->crgb16_palette = OceanColors_p;   break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   pSEGMENT_I(seg_i).palette_container->crgb16_palette = ForestColors_p;  break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  pSEGMENT_I(seg_i).palette_container->crgb16_palette = RainbowColors_p; break;
-    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: pSEGMENT_I(seg_i).palette_container->crgb16_palette = RainbowStripeColors_p; break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = PartyColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = CloudColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = LavaColors_p;    break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = OceanColors_p;   break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
+    case PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
   }
+
+  pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+  for(uint8_t i=0;i<16;i++)
+  {
+    pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
+  }
+
 
   /******************************************************
    * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
    ******************************************************/
-  if(IsWithinRange(palette_id, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__ATLANTICA__ID))
+  if(IsWithinRange(palette_id, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
   {
     uint16_t gradient_id = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
     byte tcp[72]; //support gradient palettes with up to 18 entries
     memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
-    pSEGMENT_I(seg_i).palette_container->crgb16_palette.loadDynamicGradientPalette(tcp);
 
-    ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, pSEGMENT_I(seg_i).palette_container->crgb16_palette[0].r, pSEGMENT_I(seg_i).palette_container->crgb16_palette[0].g, pSEGMENT_I(seg_i).palette_container->crgb16_palette[0].b );
+    /**
+     * @brief Loading uses the CRGBPalette to get the colours
+     **/
+    pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
+
+    /**
+     * @brief To get the gradients data exactly, manually parse them 
+     * 
+     */    
+    pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+
+
+    TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
+    TRGBGradientPaletteEntryUnion u;
+
+    // Count entries
+    uint16_t count = 0;
+    do {
+        u = *(ent + count);
+        count++;
+    } while ( u.index != 255);
+
+    u = *ent;
+    int indexstart = 0;
+    while( indexstart < 255) {
+      indexstart = u.index;
+
+      // JsonArray colors =  json.createNestedArray();
+      // colors.add(u.index);
+      // colors.add(u.r);
+      // colors.add(u.g);
+      // colors.add(u.b);
+
+      pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
+
+      ent++;
+      u = *ent;
+    }
+
+
+    ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[0].r, pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[0].g, pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[0].b );
   }
   
 }
