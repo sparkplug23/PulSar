@@ -856,18 +856,18 @@ function populateEffects()
 	var effects = eJson;
 	var html = "";
 
-	effects.shift(); // temporary remove solid
+	// effects.shift(); // temporary remove solid
 	for (let i = 0; i < effects.length; i++) {
 		effects[i] = {
 			id: effects[i][0],
 			name:effects[i][1]
 		};
 	}
-	effects.sort((a,b) => (a.name).localeCompare(b.name));
-	effects.unshift({
-		"id": 0,
-		"name": "Solid"
-	});
+	// effects.sort((a,b) => (a.name).localeCompare(b.name));
+	// effects.unshift({
+	// 	"id": 0,
+	// 	"name": "Solid"
+	// });
 
 	for (let ef of effects) {
 		// add slider and color control to setFX (used by requestjson)

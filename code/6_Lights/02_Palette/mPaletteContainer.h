@@ -10,33 +10,17 @@
 
 #include <vector>
 
-// uint16_t mPaletteContainer::_usedSegmentData = 0;
-
-// #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-
 class mPaletteContainer
 {
 	public:
-// private:
-    /* data */
-    // uint8_t* data = nullptr;
-    // uint16_t _dataLen = 0;
 	
-	uint8_t loaded_palette_id = 0; // Loaded
-
-// public:
-    mPaletteContainer(uint16_t buffer_size = 0)
-	{
-
-		// allocateData(buffer_size);
-		// Serial.println(buffer_size);
-
-		// Init_LoadedPaletted();
-		LoadPaletteI();
-	};
     mPaletteContainer(){};
 
-    ~mPaletteContainer(){};
+    ~mPaletteContainer(){
+		deallocateData();
+	};
+
+	uint8_t loaded_palette_id = 0;
 
 	std::vector<uint8_t> pData;
 
@@ -45,31 +29,15 @@ class mPaletteContainer
 		CRGBPalette16 data;
 		std::vector<uint8_t> encoded_index;
 	};
-
 	CRGB16Palette16_PALETTE CRGB16Palette16_Palette;
 
-	void LoadPaletteI();
-
-
-    bool allocateData(uint16_t len)
-    {
-		pData.clear();
-		pData.push_back(0);
-		pData.push_back(1);
-		pData.push_back(2);
-
-		return true;
-    };
     void deallocateData()
     {
 		// Clear vector by replacing it with an empty vector. The destructor for vector will properly remove the previous instance
 		pData = std::vector<uint8_t>();
+		CRGB16Palette16_Palette.encoded_index = std::vector<uint8_t>(); 
     };
 
-
-
 };
-
-// #endif // ENABLE_DEVFEATURE_PALETTECONTAINER
 
 #endif // _M_PALETTE_CONTAINER_H

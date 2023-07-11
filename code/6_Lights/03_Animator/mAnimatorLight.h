@@ -369,7 +369,7 @@ class mAnimatorLight :
     uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_appending = true);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
-    void LoadPalette(uint8_t palette_id, uint8_t segment_index = 0, uint8_t* palette_buffer = nullptr, uint16_t palette_buflen = 0);
+    void LoadPalette(uint8_t palette_id, uint8_t segment_index = 0, mPaletteContainer* palette_container = nullptr);
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Segments(uint8_t json_level = 0, bool json_appending = true);
@@ -705,172 +705,60 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__ID,
     #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Desc: pixels are rotated
-     * Para: direction of motion, speed, instant or blend change
-     * 
-     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,
     #endif
-    /**
-     * Desc: pixels are rotated
-     * Para: direction of motion, speed, instant or blend change
-     * 
-     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__ROTATING_PALETTE__ID,
     #endif
-    /**
-     * Desc: pixels are rotated
-     * Para: direction of motion, speed, instant or blend change
-     * 
-     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,
     #endif
-    /**
-     * Desc: pixels are rotated
-     * Para: direction of motion, speed, instant or blend change
-     * 
-     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,
     #endif
-    /**
-     * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
-     *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
-     * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
-     * TODO: Add size of step as percentage ie to show 50% of 4 colours would be 2 of 4, 75% of 4 is 3
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
     #endif
-    /**
-     * Desc: Spread palette across segment
-     * If gradient value exists, then use it to spread colour across segment
-     * If no index in palette, then spread palette equal distant across palette
-     * */
-    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    // EFFECTS_FUNCTION__STATIC_PALETTE_GRADIENT__ID,
-    // #endif
-    /**
-     * Desc: Animation, that fades from selected palette to white,
-     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
-     * Para: 
-     * TODO: 
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID,
     #endif
-    /**
-     * Desc: Animation, that fades from selected palette to white,
-     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
-     * Para: 
-     * TODO: 
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID,
     #endif
-    /**
-     * Desc: Animation, that fades from selected palette to anothor palette,
-     *       The intensity of fade (closer to palette B) will depend on intensity value
-     *       ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
-     * 
-     *       New method to set options
-     *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
-     *        option16 for 65000 value range
-     * Para: 
-     * TODO: 
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
     #endif
-    /**
-     * Desc: Draws palette_primary in order, then randomly takes from a second palette (saved by aux0)
-     *       This will allow white palettes to work, or else applying coloured twinkles over a white palette too
-     * 
-     * Para: 
-     * TODO: 
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
     #endif
-    /**
-     * Desc: Picks colours from palette and randomly adds them as full brightness
-     *       With each call of the animation (as new colours are added), all pixels will
-     *       decay in brightness (easiest by half each time until 0).
-     *       Note: The decay must happen first, so the new draws are still at full brightness
-     *       This will require saving the total output in the buffer.
-     * 
-     * Para: 
-     * TODO: 
-     * 
-     * Note: allocate_buffer is used as transition data
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
     #endif
-    /**
-     * Desc: Any set palette, will be set to span (with linearblend) the width of the segment
-     *
-     * 
-     * */
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,
     #endif
-
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
     EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
     EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
     EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
     EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,    
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
-  
-  
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     *** Specialised: WLED Animations converted  ***************************************************************************************************************************************************************************
     **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-    
+    ******************************************************************************************************************************************************************************/  
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     // Static
     EFFECTS_FUNCTION__WLED_STATIC__ID,
     EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
     EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__WLED_SPOTS__ID,
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #endif
     EFFECTS_FUNCTION__WLED_PERCENT__ID,
     // One colour changes
     EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,
@@ -879,8 +767,6 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID, // 1 direction only
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID, //start to end to start again
-
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID,
     EFFECTS_FUNCTION__WLED_ANDROID__ID,
     EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID,
@@ -927,7 +813,6 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_FADE__ID,
     EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,
     EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID,
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
     // Fireworks
     EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
@@ -935,7 +820,7 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
     EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,
     EFFECTS_FUNCTION__WLED_RAIN__ID,
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     // Sparkle/Twinkle
     EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID,
     EFFECTS_FUNCTION__WLED_POPCORN__ID,
@@ -953,9 +838,7 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID,
     EFFECTS_FUNCTION__WLED_COLORFUL__ID,
     EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
-        
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE            
     // Blink/Strobe
     EFFECTS_FUNCTION__WLED_BLINK__ID,
     EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,
@@ -993,11 +876,10 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_DRIP__ID,     
     // Added 2022
     EFFECTS_FUNCTION__WLED_BLENDS__ID,            // mode_blends
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__WLED_TV_SIMULATOR__ID,      // mode_tv_simulator
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE    
-    EFFECTS_FUNCTION__WLED_LENGTH__ID, // to show end of declared animation, this will have no actual effect     
+    #endif    
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-
 
     /**
      * Development effects
@@ -1408,6 +1290,7 @@ class mAnimatorLight :
   void SubTask_Segment_Animation__Flicker_Base(bool use_multi = false, uint16_t flicker_palette = 0);
   void SubTask_Segment_Animation__Candle_Single();
   void SubTask_Segment_Animation__Candle_Multiple();
+  void SubTask_Segment_Animation__Shimmering_Palette_Saturation();
   void SubTask_Segment_Animation__Shimmering_Palette();
   void SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
   #endif
@@ -1437,7 +1320,10 @@ class mAnimatorLight :
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
-  #endif  
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Decaying_Palette();
+  #endif
   // Static
   void SubTask_Segment_Animation__Static();
   void SubTask_Segment_Animation__Static_Pattern();
@@ -2392,7 +2278,6 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
 
 
 
-
     // 2D matrix
     uint16_t virtualWidth(void)  const;
     uint16_t virtualHeight(void) const;
@@ -2460,6 +2345,21 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
 } segment_new;
 //static int segSize = sizeof(Segment_New);
 
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromUnloadedPalette(
+      uint16_t palette_id,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      uint8_t mcol = 0, // will be phased out
+      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
+      uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      // uint8_t* discrete_colours_in_palette = nullptr
+    );
 
 const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
 int16_t GetPaletteIDbyName(char* buffer);

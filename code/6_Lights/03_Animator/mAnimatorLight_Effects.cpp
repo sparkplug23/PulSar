@@ -1,6 +1,6 @@
 /**
  * @file mAnimatorLight_Segments_Effects.cpp
- * @author Michael Doone (you@domain.com)
+ * @author Michael Doone (michaeldoonehub@gmail.com)
  * @brief 
  * @version 0.1
  * @date 2023-01-02
@@ -208,16 +208,31 @@ void mAnimatorLight::SubTask_Segment_Animation__Candle_Multiple()
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
+void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette_Saturation()
+{
+  SubTask_Segment_Animation__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__White__ID);
+}
+/**
+ * @description:   : Flickers by multiple levels towards black
+ **/
 void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette() // Same as Candle_Multiple
 {
   SubTask_Segment_Animation__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 /**
  * @description:   : Flicker between primary and secondary palette
+ * 
+     * Desc: Animation, that fades from selected palette to anothor palette,
+     *       The intensity of fade (closer to palette B) will depend on intensity value
+     *       ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
+     * 
+     *       New method to set options
+     *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
+     *        option16 for 65000 value range
  * */
 void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
 {
-  SubTask_Segment_Animation__Flicker_Base(true, SEGMENT.aux2);
+  SubTask_Segment_Animation__Flicker_Base(true, SEGMENT.user_params.val0);
 }
 /**
  * @description:   : Base function for flickering
@@ -319,13 +334,16 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
       if (fadeStep == 0) fadeStep = 1;
     }
 
+    // flicker_palette_id = mPalette::PALETTELIST_HTML_COLOUR__White__ID;
+
     /**
      * Apply colour to output: different per pixel
      **/
     if(i > 0) 
     {
       colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);      
-      colour_sec = RgbColor(0);
+      colour_sec = GetColourFromUnloadedPalette(flicker_palette_id);
+      
       colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
       if(pixel_palette_counter++ >= pixels_in_palette-1)
@@ -351,8 +369,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uin
                  p++
       ){
 
-        colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);
-        colour_sec = RgbColor(0);
+        colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter); 
+        colour_sec = GetColourFromUnloadedPalette(flicker_palette_id);
+
         colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
         if(pixel_palette_counter++ >= pixels_in_palette-1)
@@ -523,8 +542,8 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
       uint16_t start_pixel = 0;
       uint16_t stop_pixel  = SEGLEN;
       
-      mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(SEGMENT.palette.id);
-
+      mPalette::PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
+      
       if(ptr->encoding.index_scaled_to_segment)
       {
         start_pixel_position = map(start_pixel_position, 0,255, start_pixel,stop_pixel);
@@ -569,7 +588,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
   );
 
 }
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -660,6 +679,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette_New()
 
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+
+    /**
+     * Desc: pixels are rotated
+     * Para: direction of motion, speed, instant or blend change
+     * 
+     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
+     * */
+
 void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 {
 
@@ -733,6 +760,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
 
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+
+    /**
+     * Desc: pixels are rotated
+     * Para: direction of motion, speed, instant or blend change
+     * 
+     * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
+     * */
+
 void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
 {
 
@@ -777,6 +812,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
  *  
  * Future Change: Make it so more than two can be shown, ie if 5 colours exist, then have "Intensity" (as percentage) select how many colours to remain visible
  * 
+     * Desc: Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
+     *       Stepping through them with a count, ie pixel 0/1 then 1/2 then 2/3, first pixel overwrite
+     * Para: Amount of pixels to show from palette as it steps through (eg 2, 3 etc)
+     * TODO: Add size of step as percentage ie to show 50% of 4 colours would be 2 of 4, 75% of 4 is 3
+     * 
+     * Note: allocate_buffer is used as transition data
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
@@ -874,6 +915,20 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
  * @param  "Time"      :: If unset (ie set to 0), then the speed will assume the DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD as 10 seconds
  *         "Speed"     :: If the time is set to zero, then the Speed will scale from sweep of saturation time between DEFAULT_MINIMUM_ANIMATION_SPEED_PERIOD (1 second) and DEFAULT_MAXIMUM_ANIMATION_SPEED_PERIOD (10 second)
  *          
+     * Desc: Spread palette across segment
+     * If gradient value exists, then use it to spread colour across segment
+     * If no index in palette, then spread palette equal distant across palette
+     * */
+    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    // EFFECTS_FUNCTION__STATIC_PALETTE_GRADIENT__ID,
+    // #endif
+    /**
+     * Desc: Animation, that fades from selected palette to white,
+     *       The intensity of fade (closer to white, ie loss of saturation) will depend on intensity value
+     * Para: 
+     * TODO: 
+     * 
+     * Note: allocate_buffer is used as transition data
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
@@ -977,7 +1032,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
                                         0,SEGMENT.length()
                                       );
 
-  uint16_t pixels_in_map = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+  uint16_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette.id);
 
   uint16_t pixel_index = 0;
   RgbcctColor colour = RgbcctColor(0);
@@ -1053,6 +1108,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
  * This effect later needs intensity to define the brightness difference between the base palette and the secondary "flash" palette
  * The speed must also be made to work like it does for WLED, instead of setting a manual ratems
  * 
+     * Desc: Draws palette_primary in order, then randomly takes from a second palette (saved by aux0)
+     *       This will allow white palettes to work, or else applying coloured twinkles over a white palette too
+     * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -1145,6 +1203,116 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name : NOTDONE Blend Palette Between Another Palette
+ * @note : 
+     * Desc: Picks colours from palette and randomly adds them as full brightness
+     *       With each call of the animation (as new colours are added), all pixels will
+     *       decay in brightness (easiest by half each time until 0).
+     *       Note: The decay must happen first, so the new draws are still at full brightness
+     *       This will require saving the total output in the buffer.
+     * 
+     * Para: 
+     * 
+     * ^^ This is the one I aciddenly made on and recorded on video. 
+     * 
+     * I simply want random leds to turn on, then everything evenally fades together until off.
+     * The amount of on/darkness will depend on intensity
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Decaying_Palette()
+{
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
+
+// effect not written yet, copied from another
+
+  if (!SEGMENT.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
+    return;
+  }
+  
+  /**
+   * @brief Step 1: Draw palette 1
+   * 
+   */
+  RgbcctColor colour = RgbcctColor(0);
+  for(uint16_t pixel = 0; 
+                pixel < SEGMENT.virtualLength(); 
+                pixel++
+  ){
+
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
+    
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+    
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    #endif
+
+  }
+
+  /**
+   * @brief Step 2: Draw over randomly with palette 2
+   * Intensity will pick how many to randomly pick
+   * 
+   * For xmas2022, forced as white
+   */
+  colour = RgbcctColor(255,255,255);
+  uint16_t random_pixel = 0;
+  
+  uint16_t pixels_to_update = mapvalue(
+                                      SEGMENT.intensity(), 
+                                      0,255, 
+                                      0,SEGMENT.length()
+                                    );
+
+  for(uint16_t pixel = 0; 
+                pixel < pixels_to_update; 
+                pixel++
+  ){
+
+    // colour = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
+    
+    // if(SEGMENT.flags.brightness_applied_during_colour_generation){
+    //   colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+    // }
+
+    random_pixel = random(0, SEGMENT.length()); // Indexing must be relative to buffer
+
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type, colour);
+
+    #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    #endif
+
+  }
+
+
+
+  /**
+   * @brief Update outputs
+   * 
+   */
+
+  // Get starting positions already on show
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  // Call the animator to blend from previous to new
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+    }
+  );
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -1301,7 +1469,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   /**
 //    * Get total pixels in palette
 //    * */
-//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(SEGMENT.palette.id);
+//   mPalette::PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
@@ -1828,7 +1996,7 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
 // RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness)
 // {
   
-//   mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
+//   mPalette::PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
 
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(ptr);
 
@@ -1860,15 +2028,15 @@ void mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
   //   animation_colours[startPos].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
   //   animation_colours[startPos + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
   //   if ( LED_DIGITS / 3 > 1 ) {
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 1].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
   //     }
   //   if ( dots == 2 ) {
   //     animation_colours[startPos + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
   //     animation_colours[startPos + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);
   //     if ( LED_DIGITS / 3 > 1 ) {
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
-  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(mPaletteI->currentPalette, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 3].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
+  //       animation_colours[startPos + LED_PER_DIGITS_STRIP + LED_BETWEEN_DIGITS_STRIPS + 4].DesiredColour = ColorFromPalette(pCONT_iLight->animation.palette.id, color);//colour;// = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, color, brightness, LINEARBLEND);
   //     }
   //   }
   // }
@@ -1965,7 +2133,7 @@ void mAnimatorLight::LCDDisplay_colorOverlay() {                                
   //   }
     
   //                                                                                             // ...and if it is lit...
-  //     // leds[i] = ColorFromPalette(mPaletteI->currentPalette, startColor + (colorOffset * i), brightness, LINEARBLEND);  // ...assign increasing color from current palette
+  //     // leds[i] = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, startColor + (colorOffset * i), brightness, LINEARBLEND);  // ...assign increasing color from current palette
   // }
 }
 
@@ -5836,7 +6004,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Colour_Sweep_Random()
 //   // AddLog(LOG_LEVEL_TEST, PSTR("paletteIndex=%d"),paletteIndex);
 //   if (!wrap) paletteIndex = scale8(paletteIndex, 240); //cut off blend at palette "end"
 //   CRGB fastled_col;
-//   fastled_col = ColorFromPalette( mPaletteI->currentPalette, paletteIndex, pbri, (paletteBlend == 3)? NOBLEND:LINEARBLEND);
+//   fastled_col = ColorFromPalette( SEGMENT.palette_container->CRGB16Palette16_Palette.data, paletteIndex, pbri, (paletteBlend == 3)? NOBLEND:LINEARBLEND);
 //   return  fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
 
 // }
@@ -8212,7 +8380,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Juggle()
   for ( byte i = 0; i < 8; i++) {
     uint16_t index = 0 + beatsin88((128 + SEGMENT.speed())*(i + 7), 0, SEGLEN -1);
     fastled_col = RgbcctColor::GetU32Colour(SEGMENT.GetPixelColor(index));
-    fastled_col |= (SEGMENT.palette.id==0)?CHSV(dothue, 220, 255):ColorFromPalette(mPaletteI->currentPalette, dothue, 255);
+    fastled_col |= (SEGMENT.palette.id==0)?CHSV(dothue, 220, 255):ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, dothue, 255);
     SEGMENT.SetPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
     dothue += 32;
   }
@@ -8339,7 +8507,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourWaves()
     uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
     bri8 += (255 - brightdepth);
 
-    CRGB newcolor = ColorFromPalette(mPaletteI->currentPalette, hue8, bri8);
+    CRGB newcolor = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, hue8, bri8);
     fastled_col = RgbcctColor::GetU32Colour(SEGMENT.GetPixelColor(i));
 
     nblend(fastled_col, newcolor, 128);
@@ -8374,7 +8542,7 @@ void mAnimatorLight::SubTask_Segment_Animation__BPM()
   uint32_t stp = (millis() / 20) & 0xFF;
   uint8_t beat = beatsin8(SEGMENT.speed(), 64, 255);
   for (uint16_t i = 0; i < SEGLEN; i++) {
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, stp + (i * 2), beat - stp + (i * 10));
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, stp + (i * 2), beat - stp + (i * 10));
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -8444,7 +8612,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Colour()
       {
         int i = random16(SEGLEN);
         if(RgbcctColor::GetU32Colour(SEGMENT.GetPixelColor(i)) == 0) {
-          fastled_col = ColorFromPalette(mPaletteI->currentPalette, random8(), 64, NOBLEND);
+          fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, random8(), 64, NOBLEND);
           uint16_t index = i >> 3;
           uint8_t  bitNum = i & 0x07;
           bitWrite(SEGMENT.data[index], bitNum, true);
@@ -8484,7 +8652,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Lake()
   {
     int index = cos8((i*15)+ wave1)/2 + cubicwave8((i*23)+ wave2)/2;           
     uint8_t lum = (index > wave3) ? index - wave3 : 0;
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, map(index,0,255,0,240), lum, LINEARBLEND);
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, map(index,0,255,0,240), lum, LINEARBLEND);
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -8662,7 +8830,7 @@ CRGB mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uin
   uint8_t hue = slowcycle8 - salt;
   CRGB c;
   if (bright > 0) {
-    c = ColorFromPalette(mPaletteI->currentPalette, hue, bright, NOBLEND);
+    c = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, hue, bright, NOBLEND);
     if(COOL_LIKE_INCANDESCENT == 1) {
       // This code takes a pixel, and if its in the 'fading down'
       // part of the cycle, it adjusts the color a little bit like the
@@ -9004,7 +9172,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Plasma()
     uint8_t colorIndex = cubicwave8((i*(1+ 3*(SEGMENT.speed() >> 5)))+(thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
                              + cos8((i*(1+ 2*(SEGMENT.speed() >> 5)))+(thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
     uint8_t thisBright = qsub8(colorIndex, beatsin8(6,0, (255 - SEGMENT.intensity())|0x01 ));
-    CRGB color = ColorFromPalette(mPaletteI->currentPalette, colorIndex, thisBright, LINEARBLEND);
+    CRGB color = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, colorIndex, thisBright, LINEARBLEND);
     SEGMENT.SetPixelColor(i, color.red, color.green, color.blue);
   }
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
@@ -9127,9 +9295,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Pacifica()
       0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
 
   if (SEGMENT.palette.id) {
-    pacifica_palette_1 = mPaletteI->currentPalette;
-    pacifica_palette_2 = mPaletteI->currentPalette;
-    pacifica_palette_3 = mPaletteI->currentPalette;
+    pacifica_palette_1 = SEGMENT.palette_container->CRGB16Palette16_Palette.data;
+    pacifica_palette_2 = SEGMENT.palette_container->CRGB16Palette16_Palette.data;
+    pacifica_palette_3 = SEGMENT.palette_container->CRGB16Palette16_Palette.data;
   }
 
   // Increment the four "color index start" counters, one for each wave layer.
@@ -9730,7 +9898,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fire_2012()
 
   // Step 4.  Map from heat cells to LED colors
   for (uint16_t j = 0; j < SEGLEN; j++) {
-    CRGB color = ColorFromPalette(mPaletteI->currentPalette, MIN(heat[j],240), 255, LINEARBLEND);
+    CRGB color = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, MIN(heat[j],240), 255, LINEARBLEND);
     SEGMENT.SetPixelColor(j, color.red, color.green, color.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -9844,7 +10012,7 @@ void mAnimatorLight::SubTask_Segment_Animation__FillNoise8()
   CRGB fastled_col;
   for (uint16_t i = 0; i < SEGLEN; i++) {
     uint8_t index = inoise8(i * SEGLEN, SEGMENT.step + i * SEGLEN);
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, index, 255, LINEARBLEND);
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, index, 255, LINEARBLEND);
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.step += beatsin8(SEGMENT.speed(), 1, 6); //10,1,4
@@ -9881,7 +10049,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_1()
 
     uint8_t index = sin8(noise * 3);                         // map LED color based on noise data
 
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, index, 255, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, index, 255, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
 
@@ -9914,7 +10082,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_2()
 
     uint8_t index = sin8(noise * 3);                          // map led color based on noise data
 
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
 
@@ -9950,7 +10118,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_3()
 
     uint8_t index = sin8(noise * 3);                          // map led color based on noise data
 
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, index, noise, LINEARBLEND);   // With that value, look up the 8 bit colour palette value and assign it to the current LED.
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
 
@@ -9973,7 +10141,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_4()
   uint32_t stp = (millis() * SEGMENT.speed()) >> 7;
   for (uint16_t i = 0; i < SEGLEN; i++) {
     int16_t index = inoise16(uint32_t(i) << 12, stp);
-    fastled_col = ColorFromPalette(mPaletteI->currentPalette, index);
+    fastled_col = ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, index);
     SEGMENT.SetPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
   }
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -10014,7 +10182,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise_Pal()
   //EVERY_N_MILLIS(10) { //(don't have to time this, effect function is only called every 24ms)
   nblendPaletteTowardPalette(palettes[0], palettes[1], 48);               // Blend towards the target palette over 48 iterations.
 
-  if (SEGMENT.palette.id > 0) palettes[0] = mPaletteI->currentPalette;
+  if (SEGMENT.palette.id > 0) palettes[0] = SEGMENT.palette_container->CRGB16Palette16_Palette.data;
 
   for(int i = 0; i < SEGLEN; i++) {
     uint8_t index = inoise8(i*scale, SEGMENT.aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
@@ -10653,7 +10821,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_01()
 {
 
 
- mPaletteI->currentPalette = Test_p;
+ SEGMENT.palette_container->CRGB16Palette16_Palette.data = Test_p;
  pCONT_lAni->_virtualSegmentLength = 50;
  pCONT_lAni->paletteBlend = 3;
  
@@ -10748,7 +10916,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_Function_Tester_02()
   ALOG_INF( PSTR("SubTask_Flasher_Animate_Function_Tester_02") );
 
 
-  // mPaletteI->currentPalette = Test_p;
+  // SEGMENT.palette_container->CRGB16Palette16_Palette.data = Test_p;
   // pCONT_lAni->_virtualSegmentLength = 50;
   // pCONT_lAni->paletteBlend = 3;
 

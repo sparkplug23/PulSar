@@ -947,12 +947,24 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
  * should load even be here? surely into palette container
  * 
  */
-void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer, uint16_t palette_buflen)
+void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteContainer* _palette_container)
 {
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
 
   // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
+
+    // DEBUG_LINE_HERE;
+  /**
+   * @brief If none was passed, then assume its the default for that segment and load its container
+   * 
+   */
+  if(_palette_container == nullptr)
+  {
+    // DEBUG_LINE_HERE;
+    _palette_container = SEGMENT_I(segment_index).palette_container;
+  }
+    // DEBUG_LINE_HERE;
 
   /**
    * @brief My palettes
@@ -965,17 +977,39 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
 
     // mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);  
 
+  // DEBUG_LINE_HERE;
     mPalette::PALETTE *ptr = &mPaletteI->palettelist[palette_id];
 
+  // DEBUG_LINE_HERE;
+
+  if(_palette_container==nullptr)
+  {
+  DEBUG_LINE_HERE;
+
+  }else{
+    
+  // DEBUG_LINE_HERE;
+  }
 
     #ifdef ESP32
-    SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
+    // DEBUG_LINE_HERE;
+    _palette_container->pData = std::vector<uint8_t>();
+    // DEBUG_LINE_HERE;
+    _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
+    // DEBUG_LINE_HERE;
+
+    // for(int i=0;i<_palette_container->pData.size();i++)
+    // {
+    //   Serial.printf("%d,\n\r", _palette_container->pData[i]);
+    // }
+
     #else // ESP8266 requires safe reading out of progmem first
     uint8_t buffer[ptr->data_length];
     memcpy_P(buffer, ptr->data, sizeof(uint8_t)*ptr->data_length);
     SEGMENT_I(segment_index).palette_container->pData.assign(buffer, buffer + ptr->data_length);
     #endif  
  
+  // DEBUG_LINE_HERE;
   }
   else
   if(
@@ -1098,7 +1132,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
       { //primary + secondary
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-        SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,sec,sec); 
+        _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,sec,sec); 
         // length = 4;
       }
       break;
@@ -1134,8 +1168,97 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, uint
     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
   ){   
-    mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id, segment_index); // ie WLED22 "loadPalette"
+
+    /**
+     * @brief Moving out of mPalette since it includes references to PaletteContainer. May need moving back.
+     * 
+     */
+    // mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id, segment_index); // ie WLED22 "loadPalette"
+
+
+
+    
+  ALOG_INF(PSTR("LoadPalette_CRGBPalette16_Static %d"), palette_id);
+
+  /******************************************************
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * No gradient information in palette bytes, CRGB16 will scale equally
+   ******************************************************/
+  switch (palette_id)
+  {
+    default:
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = PartyColors_p;   break;
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   _palette_container->CRGB16Palette16_Palette.data = CloudColors_p;   break;
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    _palette_container->CRGB16Palette16_Palette.data = LavaColors_p;    break;
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = OceanColors_p;   break;
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   _palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  _palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
+    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
   }
+
+  _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+  for(uint8_t i=0;i<16;i++)
+  {
+    _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
+  }
+
+
+  /******************************************************
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   ******************************************************/
+  if(IsWithinRange(palette_id, mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  {
+    uint16_t gradient_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    byte tcp[72]; //support gradient palettes with up to 18 entries
+    memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
+
+    /**
+     * @brief Loading uses the CRGBPalette to get the colours
+     **/
+    _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
+
+    /**
+     * @brief To get the gradients data exactly, manually parse them 
+     * 
+     */    
+    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+
+
+    TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
+    TRGBGradientPaletteEntryUnion u;
+
+    // Count entries
+    uint16_t count = 0;
+    do {
+        u = *(ent + count);
+        count++;
+    } while ( u.index != 255);
+
+    u = *ent;
+    int indexstart = 0;
+    while( indexstart < 255) {
+      indexstart = u.index;
+
+      // JsonArray colors =  json.createNestedArray();
+      // colors.add(u.index);
+      // colors.add(u.r);
+      // colors.add(u.g);
+      // colors.add(u.b);
+
+      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
+
+      ent++;
+      u = *ent;
+    }
+
+
+    // ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, _palette_container->CRGB16Palette16_Palette.data[0].r, _palette_container->CRGB16Palette16_Palette.data[0].g, _palette_container->CRGB16Palette16_Palette.data[0].b );
+  }
+
+
+
+  }
+  // DEBUG_LINE_HERE;
 
 }
 
@@ -1642,7 +1765,7 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
      * 
      */
     segments[0].rgbcctcolors[0].debug_print(">A>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-      SEGMENT_I(seg_index).palette_container = new mPaletteContainer(0); // Needs internalised
+      SEGMENT_I(seg_index).palette_container = new mPaletteContainer(); // Needs internalised
       DEBUG_LINE_HERE;
       
     segments[0].rgbcctcolors[0].debug_print(">B>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
@@ -1761,7 +1884,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
         seg.tSaved_AnimateRunTime = millis(); // Not reset inside TimeReached when fForceUpdate is triggered
       }
 
-      DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE;
       
       #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
       // if(!seg.transitional)  // Needs better integration before it can be used
@@ -1771,7 +1894,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
       #endif // ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
 
       
-      DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE;
       // This maybe cant be global and needs placed inside each effect?
       // Not valid for long term, needs to be changed
       Set_Segment_ColourType(_segment_index_primary, pCONT_set->Settings.light_settings.type);
@@ -1787,7 +1910,7 @@ void mAnimatorLight::SubTask_Segments_Animation()
 
       ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
 
-      DEBUG_LINE_HERE;
+      // DEBUG_LINE_HERE;
       switch(seg.effect_id)
       {
         default:
@@ -1813,6 +1936,9 @@ void mAnimatorLight::SubTask_Segments_Animation()
           break;     
           case EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID:
             SubTask_Segment_Animation__Candle_Multiple();
+          break; 
+          case EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID:
+            SubTask_Segment_Animation__Shimmering_Palette_Saturation();
           break;     
           case EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID:
             SubTask_Segment_Animation__Shimmering_Palette();
@@ -1821,7 +1947,6 @@ void mAnimatorLight::SubTask_Segments_Animation()
             SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
           break;   
         #endif
-
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:
           SubTask_Segment_Animate_Function__Static_Gradient_Palette();
@@ -1831,19 +1956,27 @@ void mAnimatorLight::SubTask_Segments_Animation()
         case EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID:
           SubTask_Segment_Animation__Rotating_Palette_New();
         break;
+        #endif 
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:
           SubTask_Segment_Animation__Rotating_Palette(); // phase out
         break;
+        #endif 
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID:
           SubTask_Segment_Animation__Rotating_Previous_Animation(); // phase out
         break;
+        #endif 
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID:
           SubTask_Segment_Animation__Rotating_Previous_Animation(); // phase out
         break;
+        #endif 
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:
           SubTask_Segment_Animation__Stepping_Palette();
         break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+        #endif 
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
         case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:
           SubTask_Segment_Animation__Blend_Palette_To_White();
@@ -1857,6 +1990,11 @@ void mAnimatorLight::SubTask_Segments_Animation()
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
         case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
           SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
+        break;
+        #endif
+        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+        case EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID:
+          SubTask_Segment_Animation__Twinkle_Decaying_Palette();
         break;
         #endif
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING    
@@ -3674,7 +3812,6 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_STROBE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_STROBE__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_MULTI_STROBE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID; }
@@ -6043,6 +6180,13 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
   // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
+  // need to add here to load if loaded palette.id does not match desired. This will remove need to loadPalette
+  // if(palette.id != palette_container->loaded_palette_id)
+  // {
+  //   DEBUG_LINE_HERE;
+  //   pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+  // }
+
   return mPaletteI->GetColourFromPreloadedPaletteBuffer(
     palette.id,
     (uint8_t*)palette_container->pData.data(),//desired_index_from_palette,  
@@ -6058,6 +6202,56 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
 
 }
 
+/**
+ * @brief New method that gets any colour without preloading, and hence will be slower but allows getters to use this for multiple uses e.g. webui population
+ * 
+ */
+RgbcctColor 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mAnimatorLight::GetColourFromUnloadedPalette(
+  uint16_t palette_id,
+  uint16_t _pixel_position,//desired_index_from_palette,  
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  uint8_t mcol, // will be phased out
+  bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+  uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+  // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+){
+
+  // DEBUG_LINE_HERE;
+
+  /**
+   * @brief To get around loading, a temporary loading item will be created
+   **/
+  mPaletteContainer palette_container_temp = mPaletteContainer();
+
+  // DEBUG_LINE_HERE;
+  pCONT_lAni->LoadPalette(palette_id, 0, &palette_container_temp);
+  // DEBUG_LINE_HERE;
+
+  // return RgbcctColor(255,0,0);
+
+  RgbcctColor colour =  mPaletteI->GetColourFromPreloadedPaletteBuffer(
+    palette_id,
+    (uint8_t*)&palette_container_temp.pData[0],
+    _pixel_position,
+    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+    flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    mcol, // will be phased out
+    flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+    brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+    // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+  );
+
+  // DEBUG_LINE_HERE;
+  return colour;
+
+}
 
 
 

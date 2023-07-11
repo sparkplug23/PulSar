@@ -2,21 +2,6 @@
 #include "6_Lights/02_Palette/mPaletteContainer.h"
 
 
-void mPaletteContainer::LoadPaletteI()
-{
-
-
-
-
-//  Serial.println("mPaletteContainer::LoadPaletteI()");
- 
-
-
-
-}
-
-
-
 // /**
 //  * @brief Internally load palette into container
 //  * 
