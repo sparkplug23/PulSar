@@ -1690,7 +1690,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   uint16_t start = pCONT_iLight->settings.light_size_count/2;
 //   uint16_t end = pCONT_iLight->settings.light_size_count; 
 //   RgbTypeColor colour_gradient = HsbColor(
-//                                           pCONT_iLight->HueN2F(120),
+//                                           pCONT_iLight->HUE_N2F(120),
 //                                           pCONT_iLight->SatN2F(100),
 //                                           pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100))  
 //                                           );
@@ -4352,7 +4352,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //     )
 //   {
 //     HsbColor hsb = HsbColor(RgbColor(0));
-//     hsb.H = pCONT_iLight->HueN2F(mapvalue(sun_elevation,10,-5,35,0)); // yellow to red
+//     hsb.H = pCONT_iLight->HUE_N2F(mapvalue(sun_elevation,10,-5,35,0)); // yellow to red
 //     hsb.S = 1;
 
 //     /**
@@ -4390,7 +4390,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //     // hsb.H = map(sun_elevation,-50,10,255,0)
 
 //     HsbColor hsb = HsbColor(RgbColor(0));
-//     hsb.H =  pCONT_iLight->HueN2F(mapvalue(sun_elevation,-5,-10,180,240)); // yellow to red
+//     hsb.H =  pCONT_iLight->HUE_N2F(mapvalue(sun_elevation,-5,-10,180,240)); // yellow to red
 //     hsb.S = 1;
 
 //     /**
@@ -4424,7 +4424,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //     )
 //   {
 //     HsbColor hsb = HsbColor(RgbColor(0));
-//     hsb.H = pCONT_iLight->HueN2F(240); // yellow to red
+//     hsb.H = pCONT_iLight->HUE_N2F(240); // yellow to red
 //     hsb.S = 1;
 
 //     /**
@@ -5414,7 +5414,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   //       // for (uint16_t ii = 0; ii < random_amount; ii++){
 //   //       //   SEGMENT.SetPixelColor(
 //   //       //     random(0,pCONT_iLight->settings.light_size_count), 
-//   //       //     HsbColor(pCONT_iLight->HueN2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
+//   //       //     HsbColor(pCONT_iLight->HUE_N2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
 //   //       //   );
 //   //       // }
 //   //     break;
@@ -5581,7 +5581,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //         for (uint16_t ii = 0; ii < random_amount; ii++){
 //           SEGMENT.SetPixelColor(
 //             random(0,pCONT_iLight->settings.light_size_count), 
-//             HsbColor(pCONT_iLight->HueN2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
+//             HsbColor(pCONT_iLight->HUE_N2F(30),pCONT_iLight->SatN2F(90),pCONT_iLight->BrtN2F(random(0,brightness_as_percentage)))
 //           );
 //         }
 //       break;
@@ -11213,27 +11213,27 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 // // Limit ambilight to addressible type, else I will just use "scene"
 // void mAnimatorLight::init_Ambilight(){
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HUE_N2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
 
 
 
 //   #ifdef   DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
   
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(pCONT_iLight->HueN2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(340),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(120),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = RgbcctColor(255,175,0,255,0);//HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = RgbcctColor(0,0,0,100,0);//HsbColor(pCONT_iLight->HUE_N2F(0),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(340),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(120),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 42;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 44; // 2 extra pixels on centre inlay
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 23;
@@ -11245,18 +11245,18 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 //   #endif // DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE
 
 //   #ifdef DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HueN2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HueN2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
-//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HueN2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour = HsbColor(pCONT_iLight->HUE_N2F(8),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].left.colour   = HsbColor(pCONT_iLight->HUE_N2F(240),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
+//   ambilightsettings.screens[SCREEN_CENTRE].right.colour  = HsbColor(pCONT_iLight->HUE_N2F(330),pCONT_iLight->SatN2F(100),pCONT_iLight->BrtN2F(100));
 //   ambilightsettings.screens[SCREEN_CENTRE].top.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].bottom.size = 33;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].right.size = 19;
 //   ambilightsettings.screens[SCREEN_CENTRE].left.blend_between_sides_gradient_percentage = 50;
 
-//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
-//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HueN2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
+//   ambilightsettings.screens[SCREEN_CENTRE].top.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(0));
+//   ambilightsettings.screens[SCREEN_CENTRE].bottom.colour    = HsbColor(pCONT_iLight->HUE_N2F(20),pCONT_iLight->SatN2F(95),pCONT_iLight->BrtN2F(50));
 
 
 
@@ -11535,7 +11535,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 // // //   if(!obj[F("top")][F(D_JSON_HUE)].isNull()){ 
 // // //     uint16_t hue = obj[F("top")][F(D_JSON_HUE)];
 // // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HueN2F(hue);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].top.colour.H = pCONT_iLight->HUE_N2F(hue);
 // // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].top.colour.H);
 // // //     data_buffer.isserviced++;
@@ -11562,7 +11562,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 // // //   if(!obj[F("bottom")][F(D_JSON_HUE)].isNull()){ 
 // // //     uint16_t hue = obj[F("bottom")][F(D_JSON_HUE)];
 // // //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_NVALUE),D_JSON_HUE,hue);
-// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HueN2F(hue);
+// // //     ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H = pCONT_iLight->HUE_N2F(hue);
 // // //     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO D_PARSING_MATCHED D_JSON_COMMAND_FVALUE),D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     // Response_mP(S_JSON_COMMAND_FVALUE,D_JSON_HUE,ambilightsettings.screens[SCREEN_CENTRE].bottom.colour.H);
 // // //     data_buffer.isserviced++;

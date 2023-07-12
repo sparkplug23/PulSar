@@ -170,7 +170,7 @@ class mAnimatorLight :
     uint16_t GetClassSize(){ return sizeof(mAnimatorLight);};
     #endif
 
-    void Pre= void);
+    void Pre_Init(void);
     void Init(void);        
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
@@ -408,7 +408,7 @@ class mAnimatorLight :
     #endif
     
     #ifdef USE_MODULE_NETWORK_MQTT
-      void MQTTHandler= );
+      void MQTTHandler_Init();
       void MQTTHandler_Set_RefreshAll();
       void MQTTHandler_Set_DefaultPeriodRate();  
       void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
@@ -724,7 +724,7 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID,
+    EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,

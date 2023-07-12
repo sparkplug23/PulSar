@@ -7,6 +7,7 @@
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 
+#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 #include <freertos/FreeRTOS.h>
@@ -54,23 +55,22 @@ public:
 #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
+#define HUE_N2F(h) h/360.0f
+#define SAT_N2F(s) s/100.0f
+#define BRT_N2F(v) v/100.0f
+
+#define HUE_F2N(h) round(h*360.0f)
+#define SAT_F2N(s) round(s*100.0f)
+#define BRT_F2N(v) round(v*100.0f)
 
 
-  #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+#include "6_Lights/00_Interface/mBusManager.h"
+#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
-  #include "6_Lights/00_Interface/mBusManager.h"
-  #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-
-// New sections of code that should be enabled by default
-// #define ENABLE_CRGBPALETTES_IN_PROGMEM
-// #define ENABLE_FEATURE_INCLUDE_WLED_PALETTES
-#define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-
-
-  #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR   "HsbID %02d"
-  // #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Solid Rgbcct %02d"
-  #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Rgbcct %02d"
-  #define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_GENERIC__NAME_CTR "Generic %02d"
+#define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_HSBID__NAME_CTR   "HsbID %02d"
+#define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR  "Rgbcct %02d"
+#define D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_GENERIC__NAME_CTR "Generic %02d"
 
 #define ENABLE_ANIMATION_MODE__EFFECTS
 
@@ -81,47 +81,13 @@ public:
 
 #include "JsonParser.h"
 
-#ifdef ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
-#include "6_Lights/02_Palette/mColourUtils.h"
-#endif // ENABLE_DEVFEATURE_PALETTE_LOADED_AS_NEW_CLASS
-
 #include "6_Lights/02_Palette/mPaletteContainer.h"
 #include "6_Lights/02_Palette/mPalette.h"
-
-//Required as defualt for now
-#define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-#define D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR "RGBCCT_PWM"
-#define D_PIXEL_HARDWARE_TYPE_WS28XX_CTR "WS28XX"
-#define D_PIXEL_HARDWARE_TYPE_SK6812_CTR "SK6812"
-
-
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR)       D_PIXEL_HARDWARE_TYPE_RGBCCT_PWM_CTR;
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_WS28XX_CTR)       D_PIXEL_HARDWARE_TYPE_WS28XX_CTR;
-DEFINE_PGM_CTR(PM_PIXEL_HARDWARE_TYPE_SK6812_CTR)       D_PIXEL_HARDWARE_TYPE_SK6812_CTR;
-
-
-// #define CLEAR_PALETTELIST_WITH_PTR(x) memset(x,0,sizeof(PALETTELIST::PALETTE));
-
-// These should be removed in favour of busses method!
-enum LightTypes_IDS{
-  LT_BASIC, //relay?
-  // PWM types gives the amount of channels, but not the type of led, thats handled by rgbcw order
-  LT_PWM1,    LT_PWM2, LT_PWM3,   LT_PWM4,  LT_PWM5,  LT_PWM6, LT_PWM7,
-  LT_NU8,   LT_SERIAL1, LT_SERIAL2,   
-  LT_LIGHT_INTERFACE_END,
-  // Anything after this will not be handled in lightinterface
-  LT_ADDRESSABLE_WS281X,  // this needs split out, into WS2812, SK6812
-  LT_ADDRESSABLE_SK6812,
-  LT_RGBW,  LT_RGBWC, // This are not needed, as they are either ADD or PWM
-};
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/02_Time/mTime.h"
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
-
-#define LST_MAX 5
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR) "state";  
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR) "debug/module";
@@ -237,19 +203,18 @@ class mInterfaceLight :
 {
   public:
     mInterfaceLight(){};
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void Init(void);
     void Pre_Init(void);
-
+    void EveryLoop();
     
     static const char* PM_MODULE_LIGHTS_INTERFACE_CTR;
     static const char* PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_INTERFACE_CTR; }
     PGM_P GetModuleFriendlyName(){  return PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID; }
-
     #ifdef USE_DEBUG_CLASS_SIZE
-    uint16_t GetClassSize(){
-      return sizeof(mInterfaceLight);
-    };
+    uint16_t GetClassSize(){      return sizeof(mInterfaceLight);    };
     #endif
 
     struct SETTINGS
@@ -264,62 +229,17 @@ class mInterfaceLight :
 
     void LightCalcPWMRange();
     void parseJSONObject__BusConfig(JsonParserObject obj); 
-
-    void EveryLoop();
-    
-    uint32_t RgbColorto32bit(RgbColor rgb);
-    
         
-    #ifdef ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
-        void StartFadeToNewColour(RgbcctColor targetColor, uint16_t _time_to_newcolour,  RgbcctColor fromcolor = RgbcctColor(0) );
-    #endif // ENABLE_PIXEL_GENERAL_PHASEDOUT_CODE_TO_BE_REMOVED_IF_NOT_NEEDED
-
-
     void Template_Load();
 
     void parse_JSONCommand(JsonParserObject obj);
 
-    // void ShowInterface();
-
-  
-  
-
-
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * Commands
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
-
-
-
     #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
     NeoPixelShowTask* neopixel_runner = nullptr;
+    Init_NeoPixelBus_PinnedTask(void)
     #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-
-
-
-
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void Init(void);
-    
-    void changeChannels(uint8_t *channels);
-    uint16_t change8to10(uint8_t v);
-    uint8_t change10to8(uint16_t v);
-
-   uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
+        
+    uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
     uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
 
     BusManager* bus_manager = nullptr;
@@ -327,11 +247,9 @@ class mInterfaceLight :
     void BusManager_Create_DefaultSingleNeoPixel();
     void BusManager_Create_DefaultSinglePWM_5CH();
 
-    // int8_t Get
-
-
-
     #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+    uint16_t change8to10(uint8_t v);
+    uint8_t change10to8(uint16_t v);
     uint16_t ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr);
     uint16_t ledGammaReverse_internal(uint16_t vg, const struct gamma_table_t *gt_ptr);
     uint16_t ledGamma10_10(uint16_t v);
@@ -344,19 +262,6 @@ class mInterfaceLight :
     uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
     #endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
-    void InternalSet_ActiveSolidPalette_ColourTemp(uint16_t ct) ;
-
-    float    HueN2F(uint16_t hue);
-    float    SatN2F(uint8_t sat);
-    float    BrtN2F(uint8_t brt);
-    uint16_t HueF2N(float hue);
-    uint8_t  SatF2N(float sat);
-    uint8_t  BrtF2N(float brt);
-    
-
-    // Please note that you can still set CT to 153..500, but any value below _ct_min_range or above _ct_max_range not change the CT
-    // uint16_t _ct_min_range = 153;   // the minimum CT rendered range
-    // uint16_t _ct_max_range = 500;   // the maximum CT rendered range
     uint8_t  _briRGB_Global = 255;  // 0..255 // Used for ws28xx
     uint8_t  _briCT_Global = 255;
 
@@ -384,28 +289,18 @@ class mInterfaceLight :
     void CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index = 0);
     void CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index = 0);
 
-
-    RgbcctColor GetRandomColour(RgbcctColor colour1, RgbcctColor colour2);
-    HsbColor GetHSBColour();
-
-    RgbcctColor Color32bit2RgbColour(uint32_t colour32bit);
-
-    void UpdateSetOutputs();  
-    
     RgbColor GetColourValueUsingMaps_FullBrightness(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     RgbColor GetColourValueUsingMaps_AdjustedBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     
     /******************************************************************************************************************
      * ConstructJson
     *******************************************************************************************************************/
-
   
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
     uint8_t ConstructJSON_Debug_Module_Config(uint8_t json_level = 0, bool json_appending = true);
     #endif
-
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
     uint8_t ConstructJSON_Debug__BusConfig(uint8_t json_level, bool json_appending);
     #endif
@@ -428,15 +323,19 @@ class mInterfaceLight :
     std::vector<struct handler<mInterfaceLight>*> mqtthandler_list;
 
     #endif
-    
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
 
-/**
- * @brief MQTTHandler_AddWebURL_PayloadRequests
- * */
-void MQTTHandler_AddWebURL_PayloadRequests();
+    /******************************************************************************************************************
+     * WEBSERVER
+    *******************************************************************************************************************/
 
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
+
+      /**
+       * @brief MQTTHandler_AddWebURL_PayloadRequests
+       * */
+      void MQTTHandler_AddWebURL_PayloadRequests();
+
+    #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 
 

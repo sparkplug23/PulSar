@@ -187,9 +187,9 @@ void mAnimatorLight::EveryLoop()
       break;
       #endif
       case ANIMATION_MODE__DISABLED: default: return; // Leave function
-    }
+    } // END switch
 
-  }
+  } // END realtimeMode
 
 
   if(!realtimeMode)
@@ -1992,7 +1992,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
         break;
         #endif 
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:
+        case EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID:
           SubTask_Segment_Animation__Blend_Palette_To_White();
         break;
         #endif
@@ -3555,7 +3555,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SEQUENTIAL__NAME_CTR)){    return EFFECTS_FUNCTION__STEPPING_PALETTE__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__NAME_CTR)){    return EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__NAME_CTR)){    return EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID; }
@@ -4013,7 +4013,7 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SEQUENTIAL__NAME_CTR); break;
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__NAME_CTR); break;
+    case EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID:                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__NAME_CTR); break;
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:             snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR); break;

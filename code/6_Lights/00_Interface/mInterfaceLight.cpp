@@ -5,21 +5,17 @@
 const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
 const char* mInterfaceLight::PM_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR = D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR;
 
+
 void mInterfaceLight::Pre_Init(void)
 {
 
-  DEBUG_LINE_HERE;
   bus_manager = new BusManager();
-  DEBUG_LINE_HERE;
-  ALOG_INF(PSTR("This needs a better location to be defined"));
 
 }
 
 
 void mInterfaceLight::Template_Load()
 {
-
-  ALOG_DBM(PSTR("mInterfaceLight::Template_Load()"));
 
   #ifdef USE_LIGHTING_TEMPLATE
   // load from progmem into local
@@ -31,64 +27,55 @@ void mInterfaceLight::Template_Load()
 
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
 
-  DEBUG_LINE_HERE;
-
-  // DEBUG_DELAY(5000);
-
   #endif // USE_LIGHTING_TEMPLATE
 
 }
 
 
-void mInterfaceLight::Init(void) //LightInit(void)
+void mInterfaceLight::Init(void)
 {
-
-  
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
-    // constexpr
-    // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
-    uint8_t kTaskRunnerCore = 1;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
-
-    ALOG_INF(PSTR("kTaskRunnerCore=%d"),kTaskRunnerCore);
-
-
-
-    neopixel_runner->begin(
-        [this]() {
-          // stripbus->Show();
-
-          /**
-           * @brief Actual bit of the code that gets called each time
-           * 
-           */
-
-          if(!neopixel_runner->flag_block_show)
-          {
-
-
-            if(bus_manager)
-            {
-              bus_manager->show();
-            }
-            // Serial.println("NeoPixelShowTask::Show Y");
-
-            // delay(10);
-          }else
-          {
-
-            Serial.println("NeoPixelShowTask::Show --------------");
-          }
-          // I could also try a temporary way of adding a flag to the "runner", so its set when show is called and cleared after. or rahter, the reverse, have it only call show if the animation is now updating
-            
-        },
-        kTaskRunnerCore
-    );
-    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-
-
+  #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+  Init_NeoPixelBus_PinnedTask(void)
+  #endif  
 
 }
+
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+void mInterfaceLight::Init_NeoPixelBus_PinnedTask(void)
+{
+
+  neopixel_runner = new NeoPixelShowTask();///* neopixel_runner = nullptr;
+  // constexpr
+  // uint8_t kTaskRunnerCore = ARDUINO_RUNNING_CORE;//xPortGetCoreID(); // 0, 1 to select core
+  uint8_t kTaskRunnerCore = 1;//xPortGetCoreID(); // 0, 1 to select core // > 1 to disable separate task
+
+  ALOG_INF(PSTR("kTaskRunnerCore=%d"),kTaskRunnerCore);
+
+  neopixel_runner->begin(
+      [this]() {
+        /**
+         * @brief Actual bit of the code that gets called each time
+         */
+        if(!neopixel_runner->flag_block_show)
+        {
+          if(bus_manager)
+          {
+            bus_manager->show();
+          }
+          // Serial.println("NeoPixelShowTask::Show Y");
+          // delay(10);
+        }else
+        {
+          Serial.println("NeoPixelShowTask::Show --------------");
+        }
+        // I could also try a temporary way of adding a flag to the "runner", so its set when show is called and cleared after. or rahter, the reverse, have it only call show if the animation is now updating
+      },
+      kTaskRunnerCore
+  );
+
+}
+#endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
 void mInterfaceLight::ShowInterface()
@@ -170,8 +157,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-
-
 #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 namespace
@@ -188,6 +173,7 @@ namespace
     }
   }
 } // namespace
+
 
 void NeoPixelShowTask::begin(CommitHandler handler, uint8_t core_id)
 {
@@ -207,16 +193,12 @@ void NeoPixelShowTask::begin(CommitHandler handler, uint8_t core_id)
   }
 }
 
+
 void NeoPixelShowTask::execute()
 {
   // Trigger the pinned function to run at configured priority and wait for maximum time for it to finish
   xTaskNotifyGive(_commit_task);
   while (xSemaphoreTake(_commit_params.semaphore, portMAX_DELAY) != pdTRUE);
-
-
-
-
-
 }
 
 
@@ -227,68 +209,14 @@ bool NeoPixelShowTask::IsBusy()
 
 }
 
-
-
 #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-
-
-
 
 
 void mInterfaceLight::EveryLoop()
 {
-
-  ALOG_DBM(PSTR("mInterfaceLight::EveryLoop()"));
         
 } // END everyloop
 
-
-float mInterfaceLight::HueN2F(uint16_t hue){
-  return hue/360.0f;
-}
-float mInterfaceLight::SatN2F(uint8_t sat){
-  return sat/100.0f;
-}
-float mInterfaceLight::BrtN2F(uint8_t brt){
-  return brt/100.0f;
-}
-
-uint16_t mInterfaceLight::HueF2N(float hue){
-  return round(hue*360.0f);
-}
-uint8_t mInterfaceLight::SatF2N(float sat){
-  return round(sat*100.0f);
-}
-uint8_t mInterfaceLight::BrtF2N(float brt){
-  return round(brt*100.0f);
-}
-
-
-// Generate random colour between two hsb colours
-// Needs to be totally random or hue random only, same brightness
-RgbcctColor mInterfaceLight::GetRandomColour(RgbcctColor colour1, RgbcctColor colour2){
-  // int random_hue = random(HueF2N(colour1.H),HueF2N(colour2.H));
-  // int random_sat = random(SatF2N(colour1.S),SatF2N(colour2.S));
-  // int random_brt = random(BrtF2N(colour1.B),BrtF2N(colour2.B));
-  return RgbcctColor(0);//HueN2F(random_hue),SatN2F(random_sat),BrtN2F(random_brt));
-}
-
-
-
-
-
-RgbcctColor mInterfaceLight::Color32bit2RgbColour(uint32_t colour32bit){
-  RgbcctColor rgb;
-    rgb.R = colour32bit >> 24; //RGB
-    rgb.G = colour32bit >> 16; //RGB
-    rgb.B = colour32bit >> 8 & 0xFF; //RGB
-    // rgb.W = colour32bit & 0xFF; //RGB
-  return rgb;
-}
-
-uint32_t mInterfaceLight::RgbColorto32bit(RgbColor rgb){
-  return (rgb.R << 16) | (rgb.G << 8) | rgb.B;
-}
 
 /********************************************************************************************************************
 *******************************************************************************************************************
@@ -347,7 +275,7 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_AdjustedBrightness(float value
       brt = 100;
     }
 
-    RgbColor colour = HsbColor(HueN2F(hue),1.0f,BrtN2F(brt));
+    RgbColor colour = HsbColor(HUE_N2F(hue),1.0f,BRT_N2F(brt));
 
     // colour = RgbColor((int)value, 2, 3);
 
@@ -400,7 +328,7 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_FullBrightness(float value,
       brt = 100;
     }
 
-    RgbColor colour = HsbColor(HueN2F(hue),1.0f,1.0f);
+    RgbColor colour = HsbColor(HUE_N2F(hue),1.0f,1.0f);
 
     // colour = RgbColor((int)value, 2, 3);
 
@@ -411,6 +339,8 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_FullBrightness(float value,
 }
 
 
+
+#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
 
 /*********************************************************************************************\
  * Change scales from 8 bits to 10 bits and vice versa
@@ -427,28 +357,24 @@ uint8_t mInterfaceLight::change10to8(uint16_t v) {
 /*********************************************************************************************\
  * Gamma correction
 \*********************************************************************************************/
-#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+// compute actual PWM min/max values from DimmerRange
+// must be called when DimmerRange is changed or LedTable
+void mInterfaceLight::LightCalcPWMRange(void) {
+  uint16_t _pwm_min=0, _pwm_max=1023;
 
+  _pwm_min = change8to10(0);//DimmerToBri(pCONT_set->Settings.dimmer_hw_min));   // default 0
+  _pwm_max = change8to10(255);//DimmerToBri(pCONT_set->Settings.dimmer_hw_max));   // default 100
+  // if (pCONT_set->Settings.light_correction) {
+    _pwm_min = ledGamma10_10(_pwm_min);       // apply gamma correction
+    _pwm_max = ledGamma10_10(_pwm_max);       // 0..1023
+  // }
+  _pwm_min = _pwm_min > 0 ? mapvalue(_pwm_min, 1, 1023, 1, pCONT_set->Settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
+  _pwm_max = mapvalue(_pwm_max, 1, 1023,  1, pCONT_set->Settings.pwm_range);  // _pwm_max cannot be zero
 
-  // compute actual PWM min/max values from DimmerRange
-  // must be called when DimmerRange is changed or LedTable
-  void mInterfaceLight::LightCalcPWMRange(void) {
-    uint16_t _pwm_min=0, _pwm_max=1023;
-
-    _pwm_min = change8to10(0);//DimmerToBri(pCONT_set->Settings.dimmer_hw_min));   // default 0
-    _pwm_max = change8to10(255);//DimmerToBri(pCONT_set->Settings.dimmer_hw_max));   // default 100
-    // if (pCONT_set->Settings.light_correction) {
-      _pwm_min = ledGamma10_10(_pwm_min);       // apply gamma correction
-      _pwm_max = ledGamma10_10(_pwm_max);       // 0..1023
-    // }
-    _pwm_min = _pwm_min > 0 ? mapvalue(_pwm_min, 1, 1023, 1, pCONT_set->Settings.pwm_range) : 0;  // adapt range but keep zero and non-zero values
-    _pwm_max = mapvalue(_pwm_max, 1, 1023, 1, pCONT_set->Settings.pwm_range);  // _pwm_max cannot be zero
-
-     pCONT_iLight->pwm_min = _pwm_min;
-     pCONT_iLight->pwm_max = _pwm_max;
-    // AddLog_P2(LOG_LEVEL_TEST, PSTR("LightCalcPWMRange %d %d - %d %d"), settings.dimmer_hw_min, settings.dimmer_hw_max, pwm_min, pwm_max);
-  }
-
+    pCONT_iLight->pwm_min = _pwm_min;
+    pCONT_iLight->pwm_max = _pwm_max;
+  // AddLog_P2(LOG_LEVEL_TEST, PSTR("LightCalcPWMRange %d %d - %d %d"), settings.dimmer_hw_min, settings.dimmer_hw_max, pwm_min, pwm_max);
+}
 // Calculate the gamma corrected value for LEDS
 uint16_t mInterfaceLight::ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr) {
   uint16_t from_src = 0;
@@ -494,13 +420,11 @@ uint8_t mInterfaceLight::ledGamma(uint8_t v) {
   return change10to8(ledGamma10(v));
 }
 
-
-
 // Just apply basic Gamma to each channel
 void mInterfaceLight::calcGammaMultiChannels(uint16_t cur_col_10[5]) {
   // Apply gamma correction for 8 and 10 bits resolutions, if needed
   if (pCONT_set->Settings.light_settings.light_correction) {
-    for (uint32_t i = 0; i < LST_MAX; i++) {
+    for (uint32_t i = 0; i < 5; i++) {
       cur_col_10[i] = ledGamma10_10(cur_col_10[i]);
     }
   }
@@ -559,7 +483,6 @@ void mInterfaceLight::calcGammaBulbs(uint16_t cur_col_10[5]) {
 //     }
 //   }
 }
-
 
 bool mInterfaceLight::isChannelGammaCorrected(uint32_t channel) {
   if (!pCONT_set->Settings.light_settings.light_correction) { return false; }   // Gamma correction not activated
@@ -1056,14 +979,6 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
   char buffer[30];
   
   JsonBuilderI->Start();  
-
-    JBI->Add("ColourPaletteID", pCONT_lAni->SEGMENT_I(0).palette.id);
-
-    // JBI->Add("Type", pCONT_set->Settings.light_settings.type);
-
-    JsonBuilderI->Add_P(PM_JSON_TIME, (uint16_t)round(pCONT_lAni->SEGMENT_I(0).transition.time_ms/1000));
-    JsonBuilderI->Add_P(PM_JSON_TIME_MS, pCONT_lAni->SEGMENT_I(0).transition.time_ms);
-
 
     #ifdef ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
     mqtthandler__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
