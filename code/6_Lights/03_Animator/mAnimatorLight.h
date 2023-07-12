@@ -170,7 +170,7 @@ class mAnimatorLight :
     uint16_t GetClassSize(){ return sizeof(mAnimatorLight);};
     #endif
 
-    void Pre_Init(void);
+    void Pre= void);
     void Init(void);        
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
@@ -408,7 +408,7 @@ class mAnimatorLight :
     #endif
     
     #ifdef USE_MODULE_NETWORK_MQTT
-      void MQTTHandler_Init();
+      void MQTTHandler= );
       void MQTTHandler_Set_RefreshAll();
       void MQTTHandler_Set_DefaultPeriodRate();  
       void MQTTHandler_Sender(uint8_t mqtt_handler_id = MQTT_HANDLER_ALL_ID);
@@ -703,7 +703,10 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,
     EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
-    EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__ID,
+    EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,
@@ -722,9 +725,6 @@ class mAnimatorLight :
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID,
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
@@ -1177,7 +1177,7 @@ class mAnimatorLight :
 
   uint16_t getEffectsFunctionCount(){ return EFFECTS_FUNCTION__LENGTH__ID; }
 
-  void SubTask_Segments_Animation();
+  void SubTask_Segments_Effects();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
   
   //realtime modes
@@ -1194,6 +1194,17 @@ class mAnimatorLight :
   #define REALTIME_OVERRIDE_NONE    0
   #define REALTIME_OVERRIDE_ONCE    1
   #define REALTIME_OVERRIDE_ALWAYS  2
+  
+  // realtime
+  byte realtimeMode = REALTIME_MODE_INACTIVE;
+  byte realtimeOverride = REALTIME_OVERRIDE_NONE;
+  // IPAddress realtimeIP = ((0, 0, 0, 0));
+  unsigned long realtimeTimeout = 0;
+  uint8_t tpmPacketCount = 0;
+  uint16_t tpmPayloadFrameSize = 0;
+  bool useMainSegmentOnly = false;
+
+
 
   #define NUM_COLORS2       3 /* number of colors per segment */
 
@@ -1273,7 +1284,6 @@ class mAnimatorLight :
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
   void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
 
-
   /**
    * My animations (and their animators where applicable)
    * */
@@ -1322,7 +1332,7 @@ class mAnimatorLight :
   void SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Decaying_Palette();
+  void SubTask_Segment_Animation__Twinkle_Decaying_Palette();
   #endif
   // Static
   void SubTask_Segment_Animation__Static();
@@ -1919,10 +1929,13 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
      * Internal multi-use variables
      */
     // INTERNAL_MULTIUSE_PARAMETERS
-    uint16_t aux0 = 0;  // custom var
-    uint16_t aux1 = 0;  // custom var
-    uint16_t aux2 = 0;
-    uint16_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
+    struct INTERNAL_MULTIUSE_PARAMETERS
+    {
+      uint16_t aux0 = 0;  // custom var
+      uint16_t aux1 = 0;  // custom var
+      uint16_t aux2 = 0;
+      uint16_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
+    }params_internal;
 
     Decounter<uint16_t> auto_timeoff = Decounter<uint16_t>();
 
@@ -1936,7 +1949,7 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
       uint16_t val1 = 0;
       uint16_t val2 = 0;
       uint16_t val3 = 0;
-    }user_params;
+    }params_user;
 
 
     byte* data;     // effect data pointer
@@ -2061,8 +2074,8 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
       next_time(0),
       step(0),
       call(0),
-      aux0(0),
-      aux1(0),
+      // aux0(0),
+      // aux1(0),
       data(nullptr),
       leds(nullptr),
       _capabilities(0),
@@ -2072,6 +2085,11 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
       pixel_range.start = sStart;
       pixel_range.stop = sStop;
       refreshLightCapabilities();
+
+      params_internal.aux0 = 0;
+      params_internal.aux1 = 0;
+      params_internal.aux2 = 0;
+      params_internal.aux3 = 0;
       
       // // Init
       // palette_container = new mPaletteContainer(0);//nullptr;

@@ -275,20 +275,20 @@ DEBUG_LINE_HERE;
         if(arrlen > 4){ break; }
         switch(arrlen)
         {
-          case 0: SEGMENT_I(segment_index).user_params.val0 = v.getInt(); break;
-          case 1: SEGMENT_I(segment_index).user_params.val1 = v.getInt(); break;
-          case 2: SEGMENT_I(segment_index).user_params.val2 = v.getInt(); break;
-          case 3: SEGMENT_I(segment_index).user_params.val3 = v.getInt(); break;
+          case 0: SEGMENT_I(segment_index).params_user.val0 = v.getInt(); break;
+          case 1: SEGMENT_I(segment_index).params_user.val1 = v.getInt(); break;
+          case 2: SEGMENT_I(segment_index).params_user.val2 = v.getInt(); break;
+          case 3: SEGMENT_I(segment_index).params_user.val3 = v.getInt(); break;
         }
         arrlen++;      
       }
 
       AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_PIXEL "Effects.Params Segment[%d] = %d,%d,%d,%d"),
         segment_index,
-        SEGMENT_I(segment_index).user_params.val0,
-        SEGMENT_I(segment_index).user_params.val1,
-        SEGMENT_I(segment_index).user_params.val2,
-        SEGMENT_I(segment_index).user_params.val3
+        SEGMENT_I(segment_index).params_user.val0,
+        SEGMENT_I(segment_index).params_user.val1,
+        SEGMENT_I(segment_index).params_user.val2,
+        SEGMENT_I(segment_index).params_user.val3
       );
       
       data_buffer.isserviced++;
@@ -1056,7 +1056,7 @@ DEBUG_LINE_HERE;
 
 
       // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
-      SEGMENT_I(segment_index).aux0 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_internal.aux0 = jtok.getInt();  
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
       #endif // ENABLE_LOG_LEVEL_DEBUG
@@ -1066,7 +1066,7 @@ DEBUG_LINE_HERE;
 
 
       // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
-      SEGMENT_I(segment_index).aux1 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_internal.aux1 = jtok.getInt();  
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
       #endif // ENABLE_LOG_LEVEL_DEBUG
@@ -1075,14 +1075,14 @@ DEBUG_LINE_HERE;
     if(jtok = jObj_debug[PM_JSON_EFFECTS].getObject()["Option2"])
     { 
       // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
-      SEGMENT_I(segment_index).aux2 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_internal.aux2 = jtok.getInt();  
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
       #endif // ENABLE_LOG_LEVEL_DEBUG
     }
     if(jtok = jObj_debug[PM_JSON_EFFECTS].getObject()["Option3"])
     {     // ALOG_INF( PSTR("Grouping %d %d"), jtok.getInt(), segment_index );
-      SEGMENT_I(segment_index).aux3 = jtok.getInt();  
+      SEGMENT_I(segment_index).params_internal.aux3 = jtok.getInt();  
       #ifdef ENABLE_LOG_LEVEL_DEBUG
       // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
       #endif // ENABLE_LOG_LEVEL_DEBUG
@@ -1097,10 +1097,10 @@ DEBUG_LINE_HERE;
           if(arrlen > 4){ break; }
           switch(arrlen)
           {
-            case 0: SEGMENT_I(segment_index).aux0 = v.getInt(); break;
-            case 1: SEGMENT_I(segment_index).aux1 = v.getInt(); break;
-            case 2: SEGMENT_I(segment_index).aux2 = v.getInt(); break;
-            case 3: SEGMENT_I(segment_index).aux3 = v.getInt(); break;
+            case 0: SEGMENT_I(segment_index).params_internal.aux0 = v.getInt(); break;
+            case 1: SEGMENT_I(segment_index).params_internal.aux1 = v.getInt(); break;
+            case 2: SEGMENT_I(segment_index).params_internal.aux2 = v.getInt(); break;
+            case 3: SEGMENT_I(segment_index).params_internal.aux3 = v.getInt(); break;
           }
           arrlen++;
           // array[arrlen++] = v.getInt();
@@ -1116,10 +1116,10 @@ DEBUG_LINE_HERE;
           AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_PIXEL "AuxOptions Segment[%d] flag%d = %d,%d,%d,%d"),
             segment_index,
             SEGMENT_I(segment_index).reset,
-            SEGMENT_I(segment_index).aux0,
-            SEGMENT_I(segment_index).aux1,
-            SEGMENT_I(segment_index).aux2,
-            SEGMENT_I(segment_index).aux3
+            SEGMENT_I(segment_index).params_internal.aux0,
+            SEGMENT_I(segment_index).params_internal.aux1,
+            SEGMENT_I(segment_index).params_internal.aux2,
+            SEGMENT_I(segment_index).params_internal.aux3
           );
       //   if(SEGMENT_I(segment_index).pixel_range.stop > STRIP_SIZE_MAX+1)
       //   {
@@ -1399,10 +1399,10 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
 
     CommandSet_Flasher_FunctionID(data[0], segment_index);
 
-    SEGMENT_I(segment_index).user_params.val0 = data[1];
-    SEGMENT_I(segment_index).user_params.val1 = data[2];
-    SEGMENT_I(segment_index).user_params.val2 = data[3];
-    SEGMENT_I(segment_index).user_params.val3 = data[4];
+    SEGMENT_I(segment_index).params_user.val0 = data[1];
+    SEGMENT_I(segment_index).params_user.val1 = data[2];
+    SEGMENT_I(segment_index).params_user.val2 = data[3];
+    SEGMENT_I(segment_index).params_user.val3 = data[4];
   }
   
   if(jtok1 = obj["Colour"])

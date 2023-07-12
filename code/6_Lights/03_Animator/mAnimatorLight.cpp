@@ -136,248 +136,262 @@ void mAnimatorLight::EveryLoop()
     // serializeConfig(); // in WLED This saved everything to json memory
   }
 
-  #ifdef USE_MODULE_LIGHTS_ANIMATOR  
-  switch(SEGMENT_I(0).animation_mode_id)    // needs to know the id 
+  /**
+   * @brief If RealTime modes first
+   * - when realtime is used, effects are not to keep performance up and since the realtime aspect (network) needs priority, it is not going to be
+   *   sustainable to also have internal animations running 
+   * 
+   */
+  if(realtimeMode)
   {
-    #ifdef ENABLE_ANIMATION_MODE__EFFECTS
-    case ANIMATION_MODE__EFFECTS:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MQTT_SETPIXEL
-    case ANIMATION_MODE__MQTT_SETPIXEL:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_REALTIME_UDP
-    case ANIMATION_MODE__REALTIME_UDP:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MODE__REALTIME_HYPERION
-    case ANIMATION_MODE__REALTIME_HYPERION:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MODE__REALTIME_E131
-    case ANIMATION_MODE__REALTIME_E131:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MODE__REALTIME_ADALIGHT
-    case ANIMATION_MODE__REALTIME_ADALIGHT:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MODE__REALTIME_ARTNET
-    case ANIMATION_MODE__REALTIME_ARTNET:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MODE__REALTIME_TPM2NET
-    case ANIMATION_MODE__REALTIME_TPM2NET:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    #ifdef ENABLE_ANIMATION_MODE__REALTIME_DDP
-    case ANIMATION_MODE__REALTIME_DDP:
-      SubTask_Segments_Animation();
-    break;
-    #endif
-    case ANIMATION_MODE__DISABLED: default: return; // Leave function
-  }
-  #endif
-  
-
-  uint8_t flag_animations_needing_updated = 0;
-    
-  for (uint16_t seg_i = 0; seg_i < segments.size(); seg_i++)
-  {
-
-    _segment_index_primary = seg_i; // Important! Otherwise _segment_index_primary can be incremented out of scope when a later callback is called
-
-    if(SEGMENT_I(seg_i).isActive())
+    switch(SEGMENT_I(0).animation_mode_id)    // needs to know the id 
     {
-      if (SEGMENT_I(seg_i).animator->IsAnimating())
-      {
-        /**
-         * @brief A Backoff time is needed per animation so the DMA is not overloaded
-        **/
-        if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, ANIMATION_UPDATOR_TIME_MINIMUM))
-        {
-          SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
-          flag_animations_needing_updated++; // channels needing updated
-        } //end TimeReached
-  
-        SEGMENT.flags.animator_first_run = RESET_FLAG;     // CHANGE to function: reset here for all my methods
+      #ifdef ENABLE_ANIMATION_MQTT_SETPIXEL
+      case ANIMATION_MODE__MQTT_SETPIXEL:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_REALTIME_UDP
+      case ANIMATION_MODE__REALTIME_UDP:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_MODE__REALTIME_HYPERION
+      case ANIMATION_MODE__REALTIME_HYPERION:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_MODE__REALTIME_E131
+      case ANIMATION_MODE__REALTIME_E131:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_MODE__REALTIME_ADALIGHT
+      case ANIMATION_MODE__REALTIME_ADALIGHT:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_MODE__REALTIME_ARTNET
+      case ANIMATION_MODE__REALTIME_ARTNET:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_MODE__REALTIME_TPM2NET
+      case ANIMATION_MODE__REALTIME_TPM2NET:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      #ifdef ENABLE_ANIMATION_MODE__REALTIME_DDP
+      case ANIMATION_MODE__REALTIME_DDP:
+        SubTask_Segments_Effects();
+      break;
+      #endif
+      case ANIMATION_MODE__DISABLED: default: return; // Leave function
+    }
 
-        /**
-         * @brief If it completes, reset
-         *
-         * Need proper checks here to only reset if it was running before
-         */
-        if(!SEGMENT_I(seg_i).animator->IsAnimationActive(0))
+  }
+
+
+  if(!realtimeMode)
+  {
+
+    #ifdef ENABLE_ANIMATION_MODE__EFFECTS
+    SubTask_Segments_Effects();
+    #endif
+  
+
+    uint8_t flag_animations_needing_updated = 0;
+      
+    for (uint16_t seg_i = 0; seg_i < segments.size(); seg_i++)
+    {
+
+      _segment_index_primary = seg_i; // Important! Otherwise _segment_index_primary can be incremented out of scope when a later callback is called
+
+      if(SEGMENT_I(seg_i).isActive())
+      {
+        if (SEGMENT_I(seg_i).animator->IsAnimating())
         {
-          SEGMENT_I(seg_i).transitional = false; // Since this is already inside "IsAnimating" then it should only be set if it was animating but is now stopping
+          /**
+           * @brief A Backoff time is needed per animation so the DMA is not overloaded
+          **/
+          if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, ANIMATION_UPDATOR_TIME_MINIMUM))
+          {
+            SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
+            flag_animations_needing_updated++; // channels needing updated
+          } //end TimeReached
+    
+          SEGMENT.flags.animator_first_run = RESET_FLAG;     // CHANGE to function: reset here for all my methods
+
+          /**
+           * @brief If it completes, reset
+           *
+           * Need proper checks here to only reset if it was running before
+           */
+          if(!SEGMENT_I(seg_i).animator->IsAnimationActive(0))
+          {
+            SEGMENT_I(seg_i).transitional = false; // Since this is already inside "IsAnimating" then it should only be set if it was animating but is now stopping
+          }
+
         }
 
-      }
+      }//isactive
 
-    }//isactive
+    } //loop segments
 
-  } //loop segments
-
-  /**
-   * @brief If any change has happened, update!?
-   * IsDirty checks to only update if needed
-   */
-  if(flag_animations_needing_updated)
-  {
-    #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
-    ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
-    #endif
-
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-
-
-      // some buses send asynchronously and this method will return before
-      // all of the data has been sent.
-      // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
-      // if(pCONT_iLight->bus_manager)
-      // {
-      //   pCONT_iLight->bus_manager->show();
-      // }
-      
-      pCONT_iLight->neopixel_runner->execute();   
-
-    #else
-
-      // some buses send asynchronously and this method will return before
-      // all of the data has been sent.
-      // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
-      if(pCONT_iLight->bus_manager)
-      {
-        pCONT_iLight->bus_manager->show();
-      }
-
-    #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-
-
-
-    
-//     #ifndef ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-//     /**
-//      * THESE ALL NEED PUT INTO SEGMENTS
-//      * THESE ARE COMMANDS IF ANY IS ANIMATING
-//      * checking if animation state has changed from before (maybe check via animation state?)
-//      * */
-//     if(!SEGMENT_I(0).flags.fRunning)
-//     {   
-//       #ifdef ENABLE_LOG_LEVEL_DEBUG
-//       ALOG_DBM( PSTR(D_LOG_NEO "Animation Started"));
-//       #endif
-//     }
-//     SEGMENT_I(0).flags.fRunning = true; 
-//     fPixelsUpdated = true;
-//     pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
-//     //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
-//   }
-//   else // none need animating
-//   {
-    
-//       #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-//       // Serial.print("E");
-//       #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
-
-
-//     if(SEGMENT_I(0).flags.fRunning)
-//     { // Was running
-//       #ifdef ENABLE_LOG_LEVEL_DEBUG
-//       ALOG_DBM( PSTR(D_LOG_NEO "Animation Finished")); 
-//       #endif
-
-
-//       fAnyLEDsOnOffCount = 0;
-
-// /*****
-//  *  DISABLING THE ABILITY TO KNOW WHEN IT IS ON OR OFF, NEEDS ADDED BACK IN AGAIN WITH CHECKING ALL SEGMENTS        
-//  ***
-  
-//   */
-//       for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){ 
-//         if(SEGMENT.GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
-//       }          
-
-//     }
-//     SEGMENT_I(0).flags.fRunning = false;
-//     pCONT_set->Settings.enable_sleep = true;
-//     if(blocking_force_animate_to_complete){ //if it was running
-//       #ifdef ENABLE_LOG_LEVEL_DEBUG
-//       ALOG_DBM( PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
-//       #endif
-//       blocking_force_animate_to_complete = false;
-//     }
-// #endif // ENABLE_DEVFEATURE_FORCED_REMOVE_091122
-  } // flag_animations_needing_updated
-  else
-  {
     /**
-     * @brief If no animations are running, with backoff, lets check the current output (though, this may be bad since I want to limit BEFORE hitting max)
-     **/
-    // stripbus->SetPixelSettings(NeoRgbCurrentSettings(1,2,3))
-    // ALOG_INF(PSTR("power %d",stripbus->CalcTotalMilliAmpere());
+     * @brief If any change has happened, update!?
+     * IsDirty checks to only update if needed
+     */
+    if(flag_animations_needing_updated)
+    {
+      #ifdef ENABLE_DEVFEATURE_DEBUG_SERIAL__ANIMATION_OUTPUT
+      ALOG_INF(PSTR("flag_animations_needing_updated=%d"),flag_animations_needing_updated);
+      #endif
 
 
-    // float power_level = 0;
-    // for(uint16_t i=0;i<STRIP_SIZE_MAX;i++){
-    //   stripbus->SEGMENT.GetPixelColor
-    // }
-
-  }
+      #ifdef ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
-// } //enabeled
+        // some buses send asynchronously and this method will return before
+        // all of the data has been sent.
+        // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+        // if(pCONT_iLight->bus_manager)
+        // {
+        //   pCONT_iLight->bus_manager->show();
+        // }
+        
+        pCONT_iLight->neopixel_runner->execute();   
+
+      #else
+
+        // some buses send asynchronously and this method will return before
+        // all of the data has been sent.
+        // See https://github.com/Makuna/NeoPixelBus/wiki/ESP32-NeoMethods#neoesp32rmt-methods
+        if(pCONT_iLight->bus_manager)
+        {
+          pCONT_iLight->bus_manager->show();
+        }
+
+      #endif // ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
 
 
+
+      
+  //     #ifndef ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+  //     /**
+  //      * THESE ALL NEED PUT INTO SEGMENTS
+  //      * THESE ARE COMMANDS IF ANY IS ANIMATING
+  //      * checking if animation state has changed from before (maybe check via animation state?)
+  //      * */
+  //     if(!SEGMENT_I(0).flags.fRunning)
+  //     {   
+  //       #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //       ALOG_DBM( PSTR(D_LOG_NEO "Animation Started"));
+  //       #endif
+  //     }
+  //     SEGMENT_I(0).flags.fRunning = true; 
+  //     fPixelsUpdated = true;
+  //     pCONT_set->Settings.enable_sleep = false;    //Make this a function, pause sleep during animations
+  //     //AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_NEO "~a"));
+  //   }
+  //   else // none need animating
+  //   {
+      
+  //       #ifdef ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+  //       // Serial.print("E");
+  //       #endif // ENABLE_DEVFEATURE_DEBUG_FREEZING_SK6812
+
+
+  //     if(SEGMENT_I(0).flags.fRunning)
+  //     { // Was running
+  //       #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //       ALOG_DBM( PSTR(D_LOG_NEO "Animation Finished")); 
+  //       #endif
+
+
+  //       fAnyLEDsOnOffCount = 0;
+
+  // /*****
+  //  *  DISABLING THE ABILITY TO KNOW WHEN IT IS ON OR OFF, NEEDS ADDED BACK IN AGAIN WITH CHECKING ALL SEGMENTS        
+  //  ***
+    
+  //   */
+  //       for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){ 
+  //         if(SEGMENT.GetPixelColor(i)!=0){ fAnyLEDsOnOffCount++; }
+  //       }          
+
+  //     }
+  //     SEGMENT_I(0).flags.fRunning = false;
+  //     pCONT_set->Settings.enable_sleep = true;
+  //     if(blocking_force_animate_to_complete){ //if it was running
+  //       #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //       ALOG_DBM( PSTR(D_LOG_NEO "Animation blocking_force_animate_to_complete"));
+  //       #endif
+  //       blocking_force_animate_to_complete = false;
+  //     }
+  // #endif // ENABLE_DEVFEATURE_FORCED_REMOVE_091122
+    } // flag_animations_needing_updated
+    else
+    {
+      /**
+       * @brief If no animations are running, with backoff, lets check the current output (though, this may be bad since I want to limit BEFORE hitting max)
+       **/
+      // stripbus->SetPixelSettings(NeoRgbCurrentSettings(1,2,3))
+      // ALOG_INF(PSTR("power %d",stripbus->CalcTotalMilliAmpere());
+
+
+      // float power_level = 0;
+      // for(uint16_t i=0;i<STRIP_SIZE_MAX;i++){
+      //   stripbus->SEGMENT.GetPixelColor
+      // }
+
+    }
+
+
+  // } //enabeled
+
+
+
+    /**
+     *  control relay power
+     * */
+    // //(pCONT_iLight->light_power_state)
+    //   if(pCONT_iLight->light_power_state!=pCONT_iLight->light_power_Saved){
+    //     pCONT_iLight->light_power_Saved = pCONT_iLight->light_power_state;
+    //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pCONT_iLight->light_power_Saved"));
+    //     //pCONT->mry->CommandSet_Relay_Power(0,pCONT_iLight->light_power_state);
+    //   }
+
+    //   //ALOG_DBM( PSTR(D_LOG_NEO "file%sline%d"),__FILE__,__LINE__);
+    //   DEBUG_LINE;
 
   /**
-   *  control relay power
+   * Check any lights are on
    * */
-  // //(pCONT_iLight->light_power_state)
-  //   if(pCONT_iLight->light_power_state!=pCONT_iLight->light_power_Saved){
-  //     pCONT_iLight->light_power_Saved = pCONT_iLight->light_power_state;
-  //     // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pCONT_iLight->light_power_Saved"));
-  //     //pCONT->mry->CommandSet_Relay_Power(0,pCONT_iLight->light_power_state);
-  //   }
+    // if(mTime::TimeReached(&tSavedCheckAnyLEDsOnOff,1000)){
+    //   fAnyLEDsOnOffCount = 0;
+    //   for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){
+    //     #ifdef ENABLE_LOG_LEVEL_DEBUG
+    //     ALOG_DBM( PSTR(D_LOG_NEO "fAnyLEDsOnOffCount %d"),fAnyLEDsOnOffCount);
+    //     #endif
+    //     if(SEGMENT.GetPixelColor(i)!=0){
+    //       fAnyLEDsOnOffCount++;
+    //     }
+    //   }
+    //   if(fAnyLEDsOnOffCount>0){
+    //     #ifdef ENABLE_LOG_LEVEL_DEBUG
+    //     ALOG_DBM( PSTR(D_LOG_NEO "fAnyLEDsOnOffCount %d"),fAnyLEDsOnOffCount);
+    //     #endif
+    //   }
+    //   // #ifdef USE_MODULE_DRIVERS_RELAY
+    //   //   //pCONT->mry->CommandSet_Relay_Power(0,fAnyLEDsOnOffCount>0?1:0);
+    //   // #endif
+    // }
+    // DEBUG_LINE;
+  // 
 
-  //   //ALOG_DBM( PSTR(D_LOG_NEO "file%sline%d"),__FILE__,__LINE__);
-  //   DEBUG_LINE;
 
-/**
- * Check any lights are on
- * */
-  // if(mTime::TimeReached(&tSavedCheckAnyLEDsOnOff,1000)){
-  //   fAnyLEDsOnOffCount = 0;
-  //   for(int i=0;i<pCONT_iLight->settings.light_size_count;i++){
-  //     #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //     ALOG_DBM( PSTR(D_LOG_NEO "fAnyLEDsOnOffCount %d"),fAnyLEDsOnOffCount);
-  //     #endif
-  //     if(SEGMENT.GetPixelColor(i)!=0){
-  //       fAnyLEDsOnOffCount++;
-  //     }
-  //   }
-  //   if(fAnyLEDsOnOffCount>0){
-  //     #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //     ALOG_DBM( PSTR(D_LOG_NEO "fAnyLEDsOnOffCount %d"),fAnyLEDsOnOffCount);
-  //     #endif
-  //   }
-  //   // #ifdef USE_MODULE_DRIVERS_RELAY
-  //   //   //pCONT->mry->CommandSet_Relay_Power(0,fAnyLEDsOnOffCount>0?1:0);
-  //   // #endif
-  // }
-  // DEBUG_LINE;
-// 
+  } // End of !realtimeMode and Effect methods
 
 }
 
@@ -1038,14 +1052,14 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       {        
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+        if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
         {
           SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 192, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255)));
-          SEGMENT_I(segment_index).aux3 = millis();
+          SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
       break;
@@ -1053,7 +1067,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       {        
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+        if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
         {
           SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
                           CHSV(random8(), random8(204, 255), 255),
@@ -1062,7 +1076,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(204, 255), 255)
                           );
                           
-          SEGMENT_I(segment_index).aux3 = millis();
+          SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
       break;
@@ -1070,7 +1084,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       {        
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+        if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
         {
           SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), random8(153, 255), 255),
@@ -1079,7 +1093,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(153, 255), 255)
                           );
                           
-          SEGMENT_I(segment_index).aux3 = millis();
+          SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
       break;
@@ -1088,7 +1102,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       {        
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+        if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
         {
           SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), random8(153, 217), 255),
@@ -1097,7 +1111,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(153, 217), 255)
                           );
                           
-          SEGMENT_I(segment_index).aux3 = millis();
+          SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
       break;
@@ -1106,7 +1120,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       {        
         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+        if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
         {
           SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
                           CHSV(random8(), random8(0, 255), 255),
@@ -1115,7 +1129,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(0, 255), 255)
                           );
                           
-          SEGMENT_I(segment_index).aux3 = millis();
+          SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
       break;
@@ -1336,14 +1350,14 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //       {        
 //         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
 //         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
 //         {
 //           mPaletteI->currentPalette = CRGBPalette16(
 //                           CHSV(random8(), 255, random8(128, 255)),
 //                           CHSV(random8(), 255, random8(128, 255)),
 //                           CHSV(random8(), 192, random8(128, 255)),
 //                           CHSV(random8(), 255, random8(128, 255)));
-//           SEGMENT_I(segment_index).aux3 = millis();
+//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
 //         }
 //       }
 //       break;
@@ -1351,7 +1365,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //       {        
 //         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
 //         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
 //         {
 //           mPaletteI->currentPalette = CRGBPalette16(
 //                           CHSV(random8(), random8(204, 255), 255),
@@ -1360,7 +1374,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //                           CHSV(random8(), random8(204, 255), 255)
 //                           );
                           
-//           SEGMENT_I(segment_index).aux3 = millis();
+//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
 //         }
 //       }
 //       break;
@@ -1368,7 +1382,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //       {        
 //         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
 //         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
 //         {
 //           mPaletteI->currentPalette = CRGBPalette16(
 //                           CHSV(random8(), random8(153, 255), 255),
@@ -1377,7 +1391,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //                           CHSV(random8(), random8(153, 255), 255)
 //                           );
                           
-//           SEGMENT_I(segment_index).aux3 = millis();
+//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
 //         }
 //       }
 //       break;
@@ -1386,7 +1400,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //       {        
 //         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
 //         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
 //         {
 //           mPaletteI->currentPalette = CRGBPalette16(
 //                           CHSV(random8(), random8(153, 217), 255),
@@ -1395,7 +1409,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //                           CHSV(random8(), random8(153, 217), 255)
 //                           );
                           
-//           SEGMENT_I(segment_index).aux3 = millis();
+//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
 //         }
 //       }
 //       break;
@@ -1404,7 +1418,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //       {        
 //         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
 //         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).aux3 > new_colour_rate_ms)        
+//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
 //         {
 //           mPaletteI->currentPalette = CRGBPalette16(
 //                           CHSV(random8(), random8(0, 255), 255),
@@ -1413,7 +1427,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 //                           CHSV(random8(), random8(0, 255), 255)
 //                           );
                           
-//           SEGMENT_I(segment_index).aux3 = millis();
+//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
 //         }
 //       }
 //       break;
@@ -1831,7 +1845,7 @@ void mAnimatorLight::Init_Segments_RgbcctControllers()
 }
 
 
-void mAnimatorLight::SubTask_Segments_Animation()
+void mAnimatorLight::SubTask_Segments_Effects()
 {
 
   #ifdef ENABLE_DEVFEATURE_LIGHT__REQUIRE_MINIMUM_BACKOFF_ON_ANIMATION_TO_MAYBE_FIX_BUS_FLICKER
@@ -1937,15 +1951,15 @@ void mAnimatorLight::SubTask_Segments_Animation()
           case EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID:
             SubTask_Segment_Animation__Candle_Multiple();
           break; 
-          case EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID:
-            SubTask_Segment_Animation__Shimmering_Palette_Saturation();
-          break;     
           case EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID:
             SubTask_Segment_Animation__Shimmering_Palette();
           break;   
-          case EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__ID:
+          case EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID:
             SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
           break;   
+          case EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID:
+            SubTask_Segment_Animation__Shimmering_Palette_Saturation();
+          break;     
         #endif
         #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
         case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:
@@ -3441,7 +3455,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
     SEGMENT_I(segment_index).markForReset();
     SEGMENT_I(segment_index).effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
   }
-  SEGMENT_I(segment_index).aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
+  SEGMENT_I(segment_index).params_internal.aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
   SEGMENT_I(segment_index).flags.animator_first_run= true; // first run, so do extra things
 
   
@@ -3451,7 +3465,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   //   segments[segment_index].markForReset();
   //   segments[segment_index].effect_id = value;      //make function "changeFlasherFunction" so then the region is automatically updated internally
   // }
-  // segments[segment_index].aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
+  // segments[segment_index].params_internal.aux0 = EFFECTS_REGION_COLOUR_SELECT_ID;
   // segments[segment_index].flags.animator_first_run= true; // first run, so do extra things
 
   ALOG_DBM(PSTR("segments[segment_index].effect_id=%d"),segments[segment_index].effect_id);
@@ -3523,7 +3537,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR)){    return EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID; }
@@ -3544,7 +3558,7 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__NAME_CTR)){    return EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__NAME_CTR)){    return EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID; }
+  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID; }
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID; }
@@ -3978,7 +3992,10 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     case EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);  break;
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__ID:                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);  break;
+    case EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID:                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);  break;
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    case EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID:        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR); break;
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     case EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR);  break;
@@ -3997,9 +4014,6 @@ const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     case EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__ID:                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__BLEND_PALETTE_SATURATION_TO_WHITE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__ID:        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__CANDLE_FLICKER_PALETTE_SATURATION_TO_WHITE__NAME_CTR); break;
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:             snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR); break;
@@ -4611,7 +4625,7 @@ void mAnimatorLight::Segment_New::resetIfRequired() {
      * @brief Potential issue with WLED effects, but removing aux options from reset since they may be used as config options
      * 
      */
-    aux0 = 0; aux1 = 0;  aux2 = 0;  aux3 = 0; 
+    params_internal.aux0 = 0; params_internal.aux1 = 0;  params_internal.aux2 = 0;  params_internal.aux3 = 0; 
     
     
     reset = false; // setOption(SEG_OPTION_RESET, false);
