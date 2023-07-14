@@ -1677,13 +1677,6 @@ uint8_t mPalette::GetDefaultColourPaletteUserIDsCount(uint8_t id){
 }
 
 
-// void mPalette::SetPaletteListPtrFromID(uint8_t id){
-//   //AddLog(LOG_LEVEL_TEST,PSTR("SetPaletteListPtrFromID(%d)"),id);
-//   palettelist.ptr = GetPalettePointerByID(id);
-// }
-
-
-
 int8_t mPalette::GetColourMapIDbyName(const char* c){
   if(*c=='\0') return -1;
   // if(strstr(c,D_COLOUR_MAP_RED_CTR))          return COLOUR_MAP_RED__ID;
@@ -1714,63 +1707,6 @@ const char* mPalette::GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buf
   
 }
 
-// /**
-//  * @brief Used for webui, gets the base colours and length of palette (no wraps)
-//  * 
-//  * @param palette_id 
-//  * @param _pixel_position 
-//  * @param encoded_value 
-//  * @return RgbcctColor 
-//  */
-// RgbcctColor mPalette::GetColourElementsFromUnloadedPalette(
-//   uint16_t palette_id,
-//   uint16_t _pixel_position,//desired_index_from_palette,  
-//   uint8_t* encoded_value  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-// ){ 
-  
-//   uint8_t* palette_elements = pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
-
-
-
-
-// std::vector<uint8_t> pData;
-
-
-
-//   /**
-//    * @brief If requested palette_id does not match preloaded, make sure to reload first
-//    **/
-//   if(palette_id != pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->loaded_palette_id)
-//   {
-//     pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->loaded_palette_id = palette_id;
-//     ALOG_INF(PSTR("GetColourFromPreloadedPalette Reload"));
-//   }
-
-//   return mPaletteI->GetColourFromPreloadedPaletteBuffer( //"buffer" name to be removed when properly integrated
-//     palette_id,
-//     palette_elements,
-//     _pixel_position,//desired_index_from_palette,  
-//     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-//     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-//     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-//     mcol, // will be phased out
-//     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-//     brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-//     // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
-//   );
-
-// }
-
-
-
-
-
-
-
-
-
-
-
 
 // Legacy method to phase out!
 RgbcctColor 
@@ -1783,10 +1719,9 @@ mPalette::GetColourFromPreloadedPalette(
   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-  uint8_t mcol, // will be phased out
+  uint8_t  mcol, // will be phased out
   bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
   uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-  // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){ 
   
   uint8_t* palette_elements = pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
@@ -1810,7 +1745,6 @@ mPalette::GetColourFromPreloadedPalette(
     mcol, // will be phased out
     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
     brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-    // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
   );
 
 }
@@ -1889,24 +1823,18 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     // ALOG_INF(PSTR("MINE %d"), palette_id);
 
-    // PALETTELIST::PALETTE *ptr = GetPalettePointerByID(palette_id);
-
     if(palette_id>mPaletteI->palettelist.size())
     {
       ALOG_ERR(PSTR("PALETTE EXCEEDS VECTOR SIZE")); delay(2000);
       return colour;
     }
 
-
     PALETTE *ptr = &mPaletteI->palettelist[palette_id];
-
 
     // this will not work, since each segment will need its preloaded. 
     // Need a drastic rethink on this, perhaps another subpalette class that stores the "runtime palette"
     //probably best to worry about speed optimising until after WLED palettes are merged fully
-
     // AddLog(LOG_LEVEL_TEST, PSTR("ptr->data_length=%d"),ptr->data_length );
-
     // uint8_t* palette_elements = pCONT_lAni->segments[pCONT_lAni->_segment_index_primary].palette_container->pData.data(); // If function gets internalised to strip, it wont need to define which data set
 
     if(palette_buffer==nullptr)
@@ -2029,19 +1957,9 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     uint16_t adjusted_id = palette_id - PALETTELIST_HTML_COLOUR__AliceBlue__ID;
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
-    // for (
-      // uint8_t indexName = 0; 
-    //   indexName < HtmlColorNames::Count(); indexName++)
-    // {
-      const HtmlColorPair* colorPair = HtmlColorNames::Pair(adjusted_id);
-      PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
-      RgbcctColor colour = (HtmlColor)colorPair->Color;
-      // ALOG_INF(PSTR("[%d] \"%S\" {%d} = %d,%d,%d"), adjusted_id, searchName, colorPair->Color, colour.R, colour.G, colour.B);
-    // }
-
-
-    // RgbcctColor colour = RgbcctColor::GetRgbcctFromU32Colour(0);//HtmlColor::)
-
+    const HtmlColorPair* colorPair = HtmlColorNames::Pair(adjusted_id);
+    PGM_P searchName = reinterpret_cast<PGM_P>(pgm_read_ptr(&(colorPair->Name)));
+    RgbcctColor colour = (HtmlColor)colorPair->Color;
    
     return colour;
   }
@@ -2142,66 +2060,34 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     // DEBUG_LINE_HERE;
     // }
-    
-    
+        
     // CRGBPalette16 curPal;
     // if (transitional && _t) curPal = _t->_palT;
     // else                    loadPalette(curPal, palette);
     
-    // Should only need to be loaded once, but added here to make the decoding easier
-    // UpdatePalette_FastLED_TargetPalette();  // Cant be here, since it updates with EACH pixel, not just once
-
-
-
-  // uint32_t colour0 = RgbcctColor::GetU32Colour(pCONT_lAni->segments[0].rgbcctcolors[0]);
-  // uint32_t colour1 = RgbcctColor::GetU32Colour(pCONT_lAni->segments[0].rgbcctcolors[1]);
-  // uint32_t colour2 = RgbcctColor::GetU32Colour(pCONT_lAni->segments[0].rgbcctcolors[2]);
-  //     CRGB prim = pCONT_lAni->col_to_crgb(colour0);
-  //     CRGB sec  = pCONT_lAni->col_to_crgb(colour1);
-  //     CRGB tri  = pCONT_lAni->col_to_crgb(colour2);
-
-
-
-  //     currentPalette = CRGBPalette16(prim,sec,tri); 
-
-
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
-    // DEBUG_LINE_HERE;
     ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
     // FastLED Get ColorFromPalette that is CRGBPalette16
     fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
-    // DEBUG_LINE_HERE;
-    // uint32_t fastled_col32 = 0;
-    // fastled_col32 = fastled_col.r*65536 +  fastled_col.g*256 +  fastled_col.b;
-    
-    // if(discrete_colours_in_palette != nullptr){ *discrete_colours_in_palette = colours_in_palette; }
-
     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
-
-
-
 
 
     if(_pixel_position < pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size())
     {
 
       uint8_t enc = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[_pixel_position];
-        ALOG_ERR(PSTR("enc[%d] = %d|%d,%d,%d"),_pixel_position,enc,colour.R,colour.G,colour.B);
-
+      ALOG_ERR(PSTR("enc[%d] = %d|%d,%d,%d"),_pixel_position,enc,colour.R,colour.G,colour.B);
       
     }
 
-    
-        // ALOG_ERR(PSTR("colour[%d] = %d,%d,%d"),pixel_position_adjust,colour.R,colour.G,colour.B);
+    // ALOG_ERR(PSTR("colour[%d] = %d,%d,%d"),pixel_position_adjust,colour.R,colour.G,colour.B);
 
   } // END of CRGBPalette's
   else
   {
-
-ALOG_INF(PSTR("Missing %d"), palette_id);
-
+    ALOG_INF(PSTR("Missing %d"), palette_id);
   }
 
   return colour;
@@ -2252,10 +2138,8 @@ void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id, uint8_t seg_
 
     /**
      * @brief To get the gradients data exactly, manually parse them 
-     * 
-     */    
+     **/    
     pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-
 
     TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
     TRGBGradientPaletteEntryUnion u;
@@ -2272,18 +2156,11 @@ void mPalette::LoadPalette_CRGBPalette16_Static(uint8_t palette_id, uint8_t seg_
     while( indexstart < 255) {
       indexstart = u.index;
 
-      // JsonArray colors =  json.createNestedArray();
-      // colors.add(u.index);
-      // colors.add(u.r);
-      // colors.add(u.g);
-      // colors.add(u.b);
-
       pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
 
       ent++;
       u = *ent;
     }
-
 
     ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[0].r, pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[0].g, pSEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[0].b );
   }

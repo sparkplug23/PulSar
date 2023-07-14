@@ -1,11 +1,9 @@
 #ifndef _M_PALETTE_H
-#define _M_PALETTE_H 0.1
+#define _M_PALETTE_H
 
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
-
-// #define CLEAR_PALETTELIST_WITH_PTR(x) memset(x,0,sizeof(PALETTELIST::PALETTE));
 
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
@@ -37,8 +35,6 @@ class mPalette
     static mPalette* instance;
 
     void Init_Palettes();
-
-    bool flag_started = false;
 
     void init_PresetColourPalettes(); 
 
@@ -81,8 +77,7 @@ class mPalette
     };
 
     // One special buffer, block of memory allows any format of pallete (eg)
-    // This will also require encoding of type of palette into the buffer somehow
-    // shared, with overlapping memory
+    // This will also require encoding of type of palette into the buffer somehow shared, with overlapping memory
     // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
     enum PALETTELIST_VARIABLE_GENERIC__IDS{
       PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID, // New scene colour, static
@@ -179,7 +174,12 @@ class mPalette
       PALETTELIST_STATIC_SKY_GLOW_01__ID,
       /**
        * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
-       * Effect will go through these to form a rising/falling sun
+       *       like grad 1, order of using these will produce sunrising/falling
+       *       linear gradient sunlevel below (dark with no sun point above horizon)
+       *       linear gradient sunlevel low (dark red center, orange sides)
+       *       linear gradient sunlevel med (light red/orange center, orange, then yellow sides, pale blue on farest edges)
+       *       linear gradient sunlevel high (orange sun center, yellow slightly, largely light blue)
+       *       linear gradient sunlevel highest/midday (orange sun center, white edges... pale blue rest)
        * */
       //add below horizon gradients (5 below), for black/blue
       PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01__ID,
@@ -189,21 +189,6 @@ class mPalette
       PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_05__ID,
       PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_06__ID,
       PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07__ID,
-      /**
-       * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
-       * */
-      //Single sun azimuth rgbcct colour, allows AZ code to select colour as "As the sky looks"
-
-      // Another palette which does the same, but applies CCT by AZ position 
-      // Do as effect
-
-      //like grad 1, order of using these will produce sunrising/falling
-      //linear gradient sunlevel below (dark with no sun point above horizon)
-      //linear gradient sunlevel low (dark red center, orange sides)
-      //linear gradient sunlevel med (light red/orange center, orange, then yellow sides, pale blue on farest edges)
-      //linear gradient sunlevel high (orange sun center, yellow slightly, largely light blue)
-      //linear gradient sunlevel highest/midday (orange sun center, white edges... pale blue rest)
-
 
       PALETTELIST_STATIC_OCEAN_01__ID,
       PALETTELIST_STATIC_CUSTOM_USER_01__ID,
@@ -234,20 +219,18 @@ class mPalette
       /**
        * Rgbcct colour pairs: For ambilight top/bottom arrangement
        * */
-      PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,
-      
+      PALETTELIST_STATIC_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,      
 
       // Count of total handlers and starting point for other modules
       PALETTELIST_STATIC_LENGTH__ID 
     };
 
-    /**
-     * @brief 
+    /****************************************************************************************************************************************
+     *****************************************************************************************************************************************
+      @brief 
      * @NOTE: Only palettes below this are fixed in memory (WLED types)
-     */
-
-
-
+     ****************************************************************************************************************************************
+     *****************************************************************************************************************************************/
     
     /**
      * @brief Only the static/progmem stuff below will be taken from inside palette.cpp
@@ -493,9 +476,7 @@ class mPalette
     #define PALETTELIST_TOTAL_LENGTH PALETTELIST_HTML_COLOUR__LENGTH__ID
     #define PALETTELIST_COLOUR_AMOUNT_MAX 20//15 new max
 
-
     uint16_t GetPaletteListLength(){ PALETTELIST_HTML_COLOUR__LENGTH__ID; }
-
 
     typedef union {
       uint16_t data; // allows full manipulating
@@ -544,11 +525,6 @@ class mPalette
 
     HSBID_PALETTE hsbid_pals[10];
 
-
-    RgbcctColor GetActiveFirstColourFromCurrentPalette();    
-    RgbwColor Color32bit2RgbColour(uint32_t colour32bit);
-
-    // void UpdateSetOutputs();
     const char* GetColourMapNamebyID(uint8_t id, char* buffer, uint8_t buflen);
     int8_t      GetColourMapIDbyName(const char* c);
 
@@ -558,26 +534,9 @@ class mPalette
     HsbColor GetHsbColour(uint8_t id);
           
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
-    uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0);
-    // uint16_t GetNumberOfColoursInPalette(PALETTELIST::PALETTE *ptr = nullptr, uint8_t pixel_width_contrained_limit = 0);
-
-    #ifdef ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
-    void LoadPalette(uint16_t palette_id);
-    #endif // ENABLE_DEVFEATURE_PALETTES_PRELOAD_STATIC_PALETTE_VARIABLES_WHEN_SETTING_CURRENT_PALLETTE
-
-
-    /**
-     * @brief Needs to be moved so FastLED palettes can differ in each segment
-     **/
-    // CRGBPalette16 currentPalette;    
+    uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0); 
 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
-
-    // RgbcctColor GetColourElementsFromUnloadedPalette(
-    //   uint16_t palette_id,
-    //   uint16_t _pixel_position,//desired_index_from_palette,  
-    //   uint8_t* encoded_value = nullptr  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    // );
 
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
@@ -589,10 +548,9 @@ class mPalette
       uint8_t* encoded_index = nullptr,
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t mcol = 0, // will be phased out
+      uint8_t  mcol = 0, // will be phased out
       bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
       uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      // uint8_t* discrete_colours_in_palette = nullptr
     );
 
     RgbcctColor 
@@ -606,28 +564,13 @@ class mPalette
       uint8_t* encoded_index = nullptr,
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t mcol = 0, // will be phased out
+      uint8_t  mcol = 0, // will be phased out
       bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      // uint8_t* discrete_colours_in_palette = nullptr
+      uint8_t  brightness_scale = 255 // 255 No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
     );
 
-
-
     void LoadPalette_CRGBPalette16_Static(uint8_t palette_id, uint8_t seg_i = 0);
-    // PALETTELIST::PALETTE* GetPalettePointerByID(uint8_t id);
-          
-    // void init_PresetColourPalettes_HSBID_UserFill(uint8_t id);
-    // void init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id);
-    // void init_PresetColourPalettes_User_Generic_Fill(uint8_t id);
-   
-    // bool CheckPaletteIsEditable(PALETTELIST::PALETTE *ptr);
-    // bool CheckPaletteByIDIsEditable(uint8_t id);
-
-    void SetPaletteListPtrFromID(uint8_t id);
-
-    // friend class mPaletteContainer;
-
+    
 };
 
 #define mPaletteI mPalette::GetInstance() // lets investigate making mPalette NOT a singleton, though, to be included inside palette controller, it might need to be so it only has once instance

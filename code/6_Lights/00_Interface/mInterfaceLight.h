@@ -81,7 +81,7 @@ public:
 
 #include "JsonParser.h"
 
-#include "6_Lights/02_Palette/mPaletteContainer.h"
+#include "6_Lights/02_Palette/mPaletteLoaded.h"
 #include "6_Lights/02_Palette/mPalette.h"
 
 #include "1_TaskerManager/mTaskerManager.h"

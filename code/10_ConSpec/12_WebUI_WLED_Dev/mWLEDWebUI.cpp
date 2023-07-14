@@ -3129,6 +3129,7 @@ void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only)
   for(uint16_t i = 0; i < pCONT_lAni->getEffectsFunctionCount(); i++)
   {
     pCONT_lAni->GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer));
+
     if(flag_get_first_name_only)
     {    
       char* dataPtr = strchr(lineBuffer,'|');

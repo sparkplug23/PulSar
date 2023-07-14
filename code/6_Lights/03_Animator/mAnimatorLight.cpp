@@ -141,6 +141,7 @@ void mAnimatorLight::EveryLoop()
    * - when realtime is used, effects are not to keep performance up and since the realtime aspect (network) needs priority, it is not going to be
    *   sustainable to also have internal animations running 
    * 
+   * realtimeModes will always be loaded into the first segment, with other segments paused when realtimeMode is active
    */
   if(realtimeMode)
   {
@@ -456,7 +457,7 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   _isOffRefreshRequired = false;
   _hasWhiteChannel = false;
   _triggered = false;
-  _modeCount = EFFECTS_FUNCTION__LENGTH__ID;
+  _effectsCount = EFFECTS_FUNCTION__LENGTH__ID;
   _callback = nullptr;
   customMappingTable = nullptr;
   customMappingSize = 0;
@@ -464,9 +465,9 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   _segment_index_primary = 0;
   _mainSegment = 0;
 
-  _mode.reserve(_modeCount);     // allocate memory to prevent initial fragmentation (does not increase size())
-  _modeData.reserve(_modeCount); // allocate memory to prevent initial fragmentation (does not increase size())
-  if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _modeCount = 1; // memory allocation failed only show Solid
+  _effects.reserve(_effectsCount);     // allocate memory to prevent initial fragmentation (does not increase size())
+  _effectsData.reserve(_effectsCount); // allocate memory to prevent initial fragmentation (does not increase size())
+  if (_effects.capacity() <= 1 || _effectsData.capacity() <= 1) _effectsCount = 1; // memory allocation failed only show Solid
   else setupEffectData();
 
 }
@@ -628,6 +629,8 @@ void mAnimatorLight::Init(void)
 
   }
 
+  Init_Effects();
+
   ALOG_INF(PSTR("Decouple buses, nothing about busses should happen before this point")); 
 
   DEBUG_LINE_HERE;
@@ -642,7 +645,7 @@ void mAnimatorLight::Init(void)
 
   // #ifndef ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
   // ALOG_INF(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced. Must happen AFTER segment is created"));
-  // SEGMENT_I(0).palette_container = new mPaletteContainer(100);
+  // SEGMENT_I(0).palette_container = new mPaletteLoaded(100);
   // #endif// ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
 
 
@@ -961,7 +964,7 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
  * should load even be here? surely into palette container
  * 
  */
-void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteContainer* _palette_container)
+void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteLoaded* _palette_container)
 {
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
@@ -1278,213 +1281,6 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 
 
 
-/**
- * @brief Function to load palette_id into the segment
- *   (lets just use largest possible byte value without making it dynamic for now)
- * 
- * For now, calling this function will take all data from the palette (rgb data) and 
- * move it into the array
- * 
- * Later, GetColourFromPreloadedPalette will retreive data from ram array, NEVER progmem
- * 
- * loadPalette 
- *  ** create buffer into heap, save pointer
- * 
- * unloadPalette
- *  ** delete buffer data from heap, reset to nullptr
- * 
- * should load even be here? surely into palette container
- * 
- */
-// void mAnimatorLight::LoadPalette_Into_PaletteContainer(uint8_t palette_id, uint8_t segment_index, uint8_t* palette_buffer, uint16_t palette_buflen)
-// {
-
-//   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
-
-//   ALOG_DBM(PSTR("LoadPalette %d %d %d"), palette_id, segment_index, strip->_segment_index_primary);
-
-//   /**
-//    * @brief My palettes
-//    **/
-//   if(
-//     ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)) ||
-//     ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
-//     ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
-//   ){   
-
-//     mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);  
-
-//     #ifdef ESP32
-//     SEGMENT_I(segment_index).palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
-//     #else // ESP8266 requires safe reading out of progmem first
-//     uint8_t buffer[ptr->data_length];
-//     memcpy_P(buffer, ptr->data, sizeof(uint8_t)*ptr->data_length);
-//     SEGMENT_I(segment_index).palette_container->pData.assign(buffer, buffer + ptr->data_length);
-//     #endif  
- 
-//   }
-//   else
-//   if(
-//     (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
-//   ){  
-//     // Does not need loaded, contained in segment
-//   }
-//   else
-//   if(
-//     (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
-//   ){  
-//     // Does not need loaded, contained in segment
-//   }
-//   else
-//   if(
-//     (palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID)
-//   ){  
-
-//     /**
-//      * @brief These pri/sec/ter should really be merged into my palettes as another encoded type, thus, removing colors[x] from palette.cpp
-//      * 
-//      */
-//     switch(palette_id)
-//     {
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID: // Original WLED random
-//       {        
-//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
-//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
-//         {
-//           mPaletteI->currentPalette = CRGBPalette16(
-//                           CHSV(random8(), 255, random8(128, 255)),
-//                           CHSV(random8(), 255, random8(128, 255)),
-//                           CHSV(random8(), 192, random8(128, 255)),
-//                           CHSV(random8(), 255, random8(128, 255)));
-//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
-//         }
-//       }
-//       break;
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
-//       {        
-//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
-//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
-//         {
-//           mPaletteI->currentPalette = CRGBPalette16(
-//                           CHSV(random8(), random8(204, 255), 255),
-//                           CHSV(random8(), random8(204, 255), 255),
-//                           CHSV(random8(), random8(204, 255), 255),
-//                           CHSV(random8(), random8(204, 255), 255)
-//                           );
-                          
-//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
-//         }
-//       }
-//       break;
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
-//       {        
-//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
-//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
-//         {
-//           mPaletteI->currentPalette = CRGBPalette16(
-//                           CHSV(random8(), random8(153, 255), 255),
-//                           CHSV(random8(), random8(153, 255), 255),
-//                           CHSV(random8(), random8(153, 255), 255),
-//                           CHSV(random8(), random8(153, 255), 255)
-//                           );
-                          
-//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
-//         }
-//       }
-//       break;
-
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
-//       {        
-//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
-//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
-//         {
-//           mPaletteI->currentPalette = CRGBPalette16(
-//                           CHSV(random8(), random8(153, 217), 255),
-//                           CHSV(random8(), random8(153, 217), 255),
-//                           CHSV(random8(), random8(153, 217), 255),
-//                           CHSV(random8(), random8(153, 217), 255)
-//                           );
-                          
-//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
-//         }
-//       }
-//       break;
-
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
-//       {        
-//         uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-SEGMENT_I(segment_index).intensity()))*100);
-//         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-//         if (millis() - SEGMENT_I(segment_index).params_internal.aux3 > new_colour_rate_ms)        
-//         {
-//           mPaletteI->currentPalette = CRGBPalette16(
-//                           CHSV(random8(), random8(0, 255), 255),
-//                           CHSV(random8(), random8(0, 255), 255),
-//                           CHSV(random8(), random8(0, 255), 255),
-//                           CHSV(random8(), random8(0, 255), 255)
-//                           );
-                          
-//           SEGMENT_I(segment_index).params_internal.aux3 = millis();
-//         }
-//       }
-//       break;
-
-    
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
-//       { //primary color only
-//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0])); //is this stable to do? maybe since its not a pointer but instead an instance of a class
-//         mPaletteI->currentPalette = CRGBPalette16(prim); 
-//         // length = 1;
-//       }
-//       break;
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID:
-//       { //primary + secondary
-//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
-//         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-//         mPaletteI->currentPalette = CRGBPalette16(prim,prim,sec,sec); 
-//         // length = 4;
-//       }
-//       break;
-//       case mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID:
-//       { //primary + secondary + tertiary
-//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
-//         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-//         CRGB ter  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-//         mPaletteI->currentPalette = CRGBPalette16(ter,sec,prim); 
-//         // length = 3; // 3 unique colours
-//       }
-//       break;    
-//       case  mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID:
-//       { //primary + secondary (+tert if not off), more distinct
-//         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
-//         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
-//         if (RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]))
-//         {
-//           CRGB ter = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
-//           mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
-//         } else {
-//           mPaletteI->currentPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
-//         }
-//         // length = 16;
-//       }
-//       break;
-
-//     } //end switch
-    
-//   }
-//   else
-//   if(
-//     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-//     ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-//   ){   
-//     mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id); // ie WLED22 "loadPalette"
-//   }
-
-// }
-
 
 /**
  * @brief Gets palette names directly or from palette class when needed
@@ -1733,7 +1529,6 @@ void mAnimatorLight::Init_Segments()
   ALOG_WRN(PSTR("Force fix the stop pixel size"));
   #endif // USE_MODULE_LIGHTS_PWM
   
-  // Init_Segments_RgbcctControllers();
   
 }
 
@@ -1779,7 +1574,7 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
      * 
      */
     segments[0].rgbcctcolors[0].debug_print(">A>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-      SEGMENT_I(seg_index).palette_container = new mPaletteContainer(); // Needs internalised
+      SEGMENT_I(seg_index).palette_container = new mPaletteLoaded(); // Needs internalised
       DEBUG_LINE_HERE;
       
     segments[0].rgbcctcolors[0].debug_print(">B>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
@@ -1835,12 +1630,610 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
 }
 
 
-void mAnimatorLight::Init_Segments_RgbcctControllers()
+void mAnimatorLight::Init_Effects()
 {
-  
-  CommandSet_SegColour_RgbcctColour_Hue_360(123, 0, 0);
-  CommandSet_SegColour_RgbcctColour_Sat_255(255, 0, 0);
-  CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(153, 0, 0);
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                            PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                                 PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                             PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR);  
+  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                           PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,            &mAnimatorLight::EffectAnim__Shimmering_Palette,                        PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Palette_To_Another_Palette,     PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);
+  #endif  
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,             PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,       &mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette,     PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,          &mAnimatorLight::EffectAnim__Rotating_Palette_New,                      PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Rotating_Palette,                          PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,   &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,               PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,  &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,        PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Stepping_Palette,                          PM_EFFECTS_FUNCTION__STEP_THROUGH_PALETTE__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID, &mAnimatorLight::EffectAnim__Blend_Palette_To_White,                  PM_EFFECTS_FUNCTION__BLEND_PALETTE);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
+    EffectAnim__Blend_Palette_Between_Another_Palette();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
+    EffectAnim__Twinkle_Palette_Onto_Palette();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID:
+    EffectAnim__Twinkle_Decaying_Palette();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING   
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR); 
+  case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
+    SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
+  break; 
+  #endif        
+  /**
+   * Static
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_STATIC__ID:
+    EffectAnim__Static();
+  break;
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:
+    EffectAnim__Static_Pattern();
+  break;
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:
+    EffectAnim__Tri_Static_Pattern();
+  break;
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_PERCENT__ID:
+    EffectAnim__Percent();
+  break;
+  #endif
+  /**
+   * One Colour
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:
+    EffectAnim__Random_Colour();
+  break;
+  #endif
+  /**
+   * Wipe/Sweep/Runners 
+   **/
+  case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:
+    EffectAnim__Colour_Wipe();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:
+    EffectAnim__Colour_Wipe_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:
+    EffectAnim__Colour_Sweep();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
+    EffectAnim__Colour_Sweep_Random();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  /**
+   * Fireworks
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
+    EffectAnim__Fireworks();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
+    EffectAnim__Exploding_Fireworks();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
+    EffectAnim__Fireworks_Starburst();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
+    EffectAnim__Fireworks_Starburst_Glows();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAIN__ID:
+    EffectAnim__Rain();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
+    EffectAnim__Exploding_Fireworks_NoLaunch();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  case EFFECTS_FUNCTION__WLED_SPOTS__ID:
+    EffectAnim__Spots();
+  break;
+  case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
+    EffectAnim__TriColour();
+  break;
+  case EFFECTS_FUNCTION__WLED_ANDROID__ID:
+    EffectAnim__Android();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:
+    EffectAnim__Running_Red_Blue();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:
+    EffectAnim__Running_Colour();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:
+    EffectAnim__Running_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_GRADIENT__ID:
+    EffectAnim__Gradient();
+  break;
+  case EFFECTS_FUNCTION__WLED_LOADING__ID:
+    EffectAnim__Loading();
+  break;
+  case EFFECTS_FUNCTION__WLED_POLICE__ID:
+    EffectAnim__Police();
+  break;
+  case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:
+    EffectAnim__Polce_All();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:
+    EffectAnim__Two_Dots();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:
+    EffectAnim__Two_Areas();
+  break;
+  case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:
+    EffectAnim__Multi_Comet();
+  break;
+  case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:
+    EffectAnim__Oscillate();
+  break;
+  case EFFECTS_FUNCTION__WLED_BPM__ID:
+    EffectAnim__BPM();
+  break;
+  case EFFECTS_FUNCTION__WLED_JUGGLE__ID:
+    EffectAnim__Juggle();
+  break;
+  case EFFECTS_FUNCTION__WLED_PALETTE__ID:
+    EffectAnim__Palette();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:
+    EffectAnim__ColourWaves();
+  break;
+  case EFFECTS_FUNCTION__WLED_LAKE__ID:
+    EffectAnim__Lake();
+  break;
+  case EFFECTS_FUNCTION__WLED_GLITTER__ID:
+    EffectAnim__Glitter();
+  break;
+  case EFFECTS_FUNCTION__WLED_METEOR__ID:
+    EffectAnim__Meteor();
+  break;
+  case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:
+    EffectAnim__Metoer_Smooth();
+  break;
+  case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:
+    EffectAnim__Pride_2015();
+  break;
+  case EFFECTS_FUNCTION__WLED_PACIFICA__ID:
+    EffectAnim__Pacifica();
+  break;
+  case EFFECTS_FUNCTION__WLED_SUNRISE__ID:
+    EffectAnim__Sunrise();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:
+    EffectAnim__Sinewave();
+  break;
+  case EFFECTS_FUNCTION__WLED_FLOW__ID:
+    EffectAnim__Flow();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:
+    EffectAnim__Running_Lights();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:
+    EffectAnim__Rainbow_Cycle();
+  break;
+  case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:
+    EffectAnim__Merry_Christmas();
+  break;
+  case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:
+    EffectAnim__Halloween();
+  break;
+  /**
+   * Chase
+   **/
+  case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:
+    EffectAnim__Chase_Colour();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:
+    EffectAnim__Chase_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:
+    EffectAnim__Chase_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:
+    EffectAnim__Chase_Flash();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:
+    EffectAnim__Chase_Flash_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:
+    EffectAnim__Chase_Rainbow_White();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:
+    EffectAnim__Chase_Theater();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:
+    EffectAnim__Chase_Theatre_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:
+    EffectAnim__Chase_TriColour();
+  break;
+  case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:
+    EffectAnim__Circus_Combustus();
+  break;
+  /**
+   *  Breathe/Fade/Pulse
+   **/    
+  case EFFECTS_FUNCTION__WLED_BREATH__ID:
+    EffectAnim__Breath();
+  break;
+  case EFFECTS_FUNCTION__WLED_FADE__ID:
+    EffectAnim__Fade();
+  break;
+  case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:
+    EffectAnim__Fade_TriColour();
+  break;
+  case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:
+    EffectAnim__Fade_Spots();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+  /**
+   * Sparkle/Twinkle
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:
+    EffectAnim__Solid_Glitter();
+  break;
+  case EFFECTS_FUNCTION__WLED_POPCORN__ID:
+    EffectAnim__Popcorn();
+  break;
+  case EFFECTS_FUNCTION__WLED_PLASMA__ID:
+    EffectAnim__Plasma();
+  break;
+  case EFFECTS_FUNCTION__WLED_SPARKLE__ID:
+    EffectAnim__Sparkle();
+  break;
+  case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:
+    EffectAnim__Sparkle_Flash();
+  break;
+  case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:
+    EffectAnim__Sparkle_Hyper();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLE__ID:
+    EffectAnim__Twinkle();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:
+    EffectAnim__Twinkle_Colour();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:
+    EffectAnim__Twinkle_Fox();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:
+    EffectAnim__Twinkle_Cat();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:
+    EffectAnim__Twinkle_Up();
+  break;
+  case EFFECTS_FUNCTION__WLED_SAW__ID:
+    EffectAnim__Saw();
+  break;
+  case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:
+    EffectAnim__Dissolve();
+  break;
+  case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:
+    EffectAnim__Dissolve_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLORFUL__ID:
+    EffectAnim__ColourFul();
+  break;
+  case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
+    EffectAnim__Traffic_Light();
+  break;
+  /**
+   * Blink/Strobe
+   **/
+  case EFFECTS_FUNCTION__WLED_BLINK__ID:
+    EffectAnim__Blink();
+  break;
+  case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:
+    EffectAnim__Blink_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_STROBE__ID:
+    EffectAnim__Strobe();
+  break;
+  case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:
+    EffectAnim__Strobe_Multi();
+  break;
+  case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:
+    EffectAnim__Strobe_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAINBOW__ID:
+    EffectAnim__Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:
+    EffectAnim__Lightning();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:
+    EffectAnim__Fire_2012();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAILWAY__ID:
+    EffectAnim__Railway();
+  break;
+  case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:
+    EffectAnim__Heartbeat();
+  break;
+  /**
+   * Noise
+   **/
+  case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:
+    EffectAnim__FillNoise8();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:
+    EffectAnim__Noise16_1();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:
+    EffectAnim__Noise16_2();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:
+    EffectAnim__Noise16_3();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:
+    EffectAnim__Noise16_4();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:
+    EffectAnim__Noise_Pal();
+  break;
+  case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:
+    EffectAnim__PhasedNoise();
+  break;
+  case EFFECTS_FUNCTION__WLED_PHASED__ID:
+    EffectAnim__Phased();
+  break;
+  /**
+   * Scan
+   **/
+  case EFFECTS_FUNCTION__WLED_SCAN__ID:
+    EffectAnim__Scan();
+  break;
+  case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:
+    EffectAnim__Scan_Dual();
+  break;
+  case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:
+    EffectAnim__Larson_Scanner();
+  break;
+  case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:
+    EffectAnim__Larson_Scanner_Dual();
+  break;
+  case EFFECTS_FUNCTION__WLED_ICU__ID:
+    EffectAnim__ICU();
+  break;
+  case EFFECTS_FUNCTION__WLED_RIPPLE__ID:
+    EffectAnim__Ripple();
+  break;
+  case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:
+    EffectAnim__Ripple_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_COMET__ID:
+    EffectAnim__Comet();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:
+    EffectAnim__Chunchun();
+  break;
+  case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:
+    EffectAnim__Bouncing_Balls();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINELON__ID:
+    EffectAnim__Sinelon();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:
+    EffectAnim__Sinelon_Dual();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:
+    EffectAnim__Sinelon_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_DRIP__ID:
+    EffectAnim__Drip();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
+    EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
+    EffectAnim__SunPositions_Elevation_Palette_Progress_Step();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
+  case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
+    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
+    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
+    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+  break;   
+  #endif 
+  // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
+  //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+  //  break;
+  /**
+   * Development effects without full code 
+   **/          
+  //  case EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID:
+  //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+  //  break;
+  //  case EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID:
+  //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+  //  break;
+  //  case EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID:
+  //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
+  //  break;
+  //  case EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID:
+  //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+  //  break;
+  //  case EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID:
+  //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+  //  break;
+  //  case EFFECTS_FUNCTION__FADE_GRADIENT__ID:
+  //    SubTask_Flasher_Animate_Function_Fade_Gradient();
+  //  break;
+  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON:
+  //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
+  //  break;
+  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID:
+  //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+  //  break;
+  // EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
+  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF__ID:
+  //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+  //  break;
+  //  case EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+  //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+  //  break;
+  //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+  //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+  //  break;        
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
+    SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
+  break;
+  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
+    SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
+  break;
+  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
+    SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+  break;
+  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:
+    SubTask_Flasher_Animate_LCD_Display_Show_String_01();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
+  case EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID:
+    SubTask_Segment_Animate_Function__Notification_Static();
+  break;
+  case EFFECTS_FUNCTION__NOTIFICATION_FADE__ID:
+    SubTask_Segment_Animate_Function__Notification_Fade();
+  break;
+  case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
+    SubTask_Segment_Animate_Function__Notification_Blinking();
+  break;
+  case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
+    SubTask_Segment_Animate_Function__Notification_Pulsing();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  case EFFECTS_FUNCTION__TESTER_01__ID:
+    SubTask_Flasher_Animate_Function_Tester_01();
+  break; 
+  case EFFECTS_FUNCTION__TESTER_02__ID:
+    SubTask_Flasher_Animate_Function_Tester_02();
+  break; 
+  // testing to replacement
+  case EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID:
+    EffectAnim__Static_Palette_New();
+  break;
+  case EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID:
+    EffectAnim__Slow_Glow_New();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                  &mAnimatorLight::EffectAnim__Christmas_Musical__01,                              PM_EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01__NAME_CTR);
+  #endif 
+
+}
+
+
+void 
+mAnimatorLight::addThingy(RequiredFunction func)
+{
+    //Don't take the address of the address:
+    vectoroffunctions.push_back(func);
+    // vectoroffunctions.push_back(&mAnimatorLight::EffectAnim__Solid_Colour);
+}
+
+void
+mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *name)
+{
+
+  // if (id == 255) { // find empty slot
+  //   for (size_t i=1; i<_mode.size(); i++) if (_modeData[i] == _data_RESERVED) { id = i; break; }
+  // }
+
+
+  if (id < _effects.size()) {
+    // if (_modeData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
+    _effects[id]     = function;
+    _effectsData[id] = name;
+  } else {
+    _effects.push_back(function);
+    _effectsData.push_back(name);
+    if (_effectsCount < _effects.size()) _effectsCount++;
+  }
+
+
   
 }
 
@@ -1924,597 +2317,10 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
 
-      // DEBUG_LINE_HERE;
-      switch(seg.effect_id)
+      if(seg.effect_id < _effects.size())
       {
-        default:
-          ALOG_ERR(PSTR("Unknown Effect %d"), seg.effect_id);
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__SOLID_COLOUR__ID:
-            SubTask_Segment_Animate_Function__Solid_Colour();
-          break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__STATIC_PALETTE__ID:
-            SubTask_Segment_Animate_Function__Static_Palette();
-          break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__SLOW_GLOW__ID:
-            SubTask_Segment_Animate_Function__Slow_Glow();
-          break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-          case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:
-            SubTask_Segment_Animation__Candle_Single();
-          break;     
-          case EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID:
-            SubTask_Segment_Animation__Candle_Multiple();
-          break; 
-          case EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID:
-            SubTask_Segment_Animation__Shimmering_Palette();
-          break;   
-          case EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID:
-            SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
-          break;   
-          case EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID:
-            SubTask_Segment_Animation__Shimmering_Palette_Saturation();
-          break;     
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:
-          SubTask_Segment_Animate_Function__Static_Gradient_Palette();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID:
-          SubTask_Segment_Animation__Rotating_Palette_New();
-        break;
-        #endif 
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:
-          SubTask_Segment_Animation__Rotating_Palette(); // phase out
-        break;
-        #endif 
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID:
-          SubTask_Segment_Animation__Rotating_Previous_Animation(); // phase out
-        break;
-        #endif 
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID:
-          SubTask_Segment_Animation__Rotating_Previous_Animation(); // phase out
-        break;
-        #endif 
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-        case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:
-          SubTask_Segment_Animation__Stepping_Palette();
-        break;
-        #endif 
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID:
-          SubTask_Segment_Animation__Blend_Palette_To_White();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
-          SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
-          SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID:
-          SubTask_Segment_Animation__Twinkle_Decaying_Palette();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING    
-        case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
-          SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
-        break; 
-        #endif        
-        /**
-         * Static
-         **/
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__WLED_STATIC__ID:
-          SubTask_Segment_Animation__Static();
-        break;
-        case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:
-          SubTask_Segment_Animation__Static_Pattern();
-        break;
-        case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:
-          SubTask_Segment_Animation__Tri_Static_Pattern();
-        break;
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-        case EFFECTS_FUNCTION__WLED_PERCENT__ID:
-          SubTask_Segment_Animation__Percent();
-        break;
-        #endif
-        /**
-         * One Colour
-         **/
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-        case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:
-          SubTask_Segment_Animation__Random_Colour();
-        break;
-        #endif
-        /**
-         * Wipe/Sweep/Runners 
-         **/
-        case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:
-          SubTask_Segment_Animation__Colour_Wipe();
-        break;
-        case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:
-          SubTask_Segment_Animation__Colour_Wipe_Random();
-        break;
-        case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:
-          SubTask_Segment_Animation__Colour_Sweep();
-        break;
-        case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
-          SubTask_Segment_Animation__Colour_Sweep_Random();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-        /**
-         * Fireworks
-         **/
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-        case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
-          SubTask_Segment_Animation__Fireworks();
-        break;
-        case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
-          SubTask_Segment_Animation__Exploding_Fireworks();
-        break;
-        case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
-          SubTask_Segment_Animation__Fireworks_Starburst();
-        break;
-        case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
-          SubTask_Segment_Animation__Fireworks_Starburst_Glows();
-        break;
-        case EFFECTS_FUNCTION__WLED_RAIN__ID:
-          SubTask_Segment_Animation__Rain();
-        break;
-        case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
-          SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-        case EFFECTS_FUNCTION__WLED_SPOTS__ID:
-          SubTask_Segment_Animation__Spots();
-        break;
-        case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
-          SubTask_Segment_Animation__TriColour();
-        break;
-        case EFFECTS_FUNCTION__WLED_ANDROID__ID:
-          SubTask_Segment_Animation__Android();
-        break;
-        case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:
-          SubTask_Segment_Animation__Running_Red_Blue();
-        break;
-        case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:
-          SubTask_Segment_Animation__Running_Colour();
-        break;
-        case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:
-          SubTask_Segment_Animation__Running_Random();
-        break;
-        case EFFECTS_FUNCTION__WLED_GRADIENT__ID:
-          SubTask_Segment_Animation__Gradient();
-        break;
-        case EFFECTS_FUNCTION__WLED_LOADING__ID:
-          SubTask_Segment_Animation__Loading();
-        break;
-        case EFFECTS_FUNCTION__WLED_POLICE__ID:
-          SubTask_Segment_Animation__Police();
-        break;
-        case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:
-          SubTask_Segment_Animation__Polce_All();
-        break;
-        case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:
-          SubTask_Segment_Animation__Two_Dots();
-        break;
-        case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:
-          SubTask_Segment_Animation__Two_Areas();
-        break;
-        case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:
-          SubTask_Segment_Animation__Multi_Comet();
-        break;
-        case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:
-          SubTask_Segment_Animation__Oscillate();
-        break;
-        case EFFECTS_FUNCTION__WLED_BPM__ID:
-          SubTask_Segment_Animation__BPM();
-        break;
-        case EFFECTS_FUNCTION__WLED_JUGGLE__ID:
-          SubTask_Segment_Animation__Juggle();
-        break;
-        case EFFECTS_FUNCTION__WLED_PALETTE__ID:
-          SubTask_Segment_Animation__Palette();
-        break;
-        case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:
-          SubTask_Segment_Animation__ColourWaves();
-        break;
-        case EFFECTS_FUNCTION__WLED_LAKE__ID:
-          SubTask_Segment_Animation__Lake();
-        break;
-        case EFFECTS_FUNCTION__WLED_GLITTER__ID:
-          SubTask_Segment_Animation__Glitter();
-        break;
-        case EFFECTS_FUNCTION__WLED_METEOR__ID:
-          SubTask_Segment_Animation__Meteor();
-        break;
-        case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:
-          SubTask_Segment_Animation__Metoer_Smooth();
-        break;
-        case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:
-          SubTask_Segment_Animation__Pride_2015();
-        break;
-        case EFFECTS_FUNCTION__WLED_PACIFICA__ID:
-          SubTask_Segment_Animation__Pacifica();
-        break;
-        case EFFECTS_FUNCTION__WLED_SUNRISE__ID:
-          SubTask_Segment_Animation__Sunrise();
-        break;
-        case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:
-          SubTask_Segment_Animation__Sinewave();
-        break;
-        case EFFECTS_FUNCTION__WLED_FLOW__ID:
-          SubTask_Segment_Animation__Flow();
-        break;
-        case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:
-          SubTask_Segment_Animation__Running_Lights();
-        break;
-        case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:
-          SubTask_Segment_Animation__Rainbow_Cycle();
-        break;
-        case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:
-          SubTask_Segment_Animation__Merry_Christmas();
-        break;
-        case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:
-          SubTask_Segment_Animation__Halloween();
-        break;
-        /**
-         * Chase
-         **/
-        case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:
-          SubTask_Segment_Animation__Chase_Colour();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:
-          SubTask_Segment_Animation__Chase_Random();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:
-          SubTask_Segment_Animation__Chase_Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:
-          SubTask_Segment_Animation__Chase_Flash();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:
-          SubTask_Segment_Animation__Chase_Flash_Random();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:
-          SubTask_Segment_Animation__Chase_Rainbow_White();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:
-          SubTask_Segment_Animation__Chase_Theater();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:
-          SubTask_Segment_Animation__Chase_Theatre_Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:
-          SubTask_Segment_Animation__Chase_TriColour();
-        break;
-        case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:
-          SubTask_Segment_Animation__Circus_Combustus();
-        break;
-        /**
-         *  Breathe/Fade/Pulse
-         **/    
-        case EFFECTS_FUNCTION__WLED_BREATH__ID:
-          SubTask_Segment_Animation__Breath();
-        break;
-        case EFFECTS_FUNCTION__WLED_FADE__ID:
-          SubTask_Segment_Animation__Fade();
-        break;
-        case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:
-          SubTask_Segment_Animation__Fade_TriColour();
-        break;
-        case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:
-          SubTask_Segment_Animation__Fade_Spots();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-
-        /**
-         * Sparkle/Twinkle
-         **/
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-        case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:
-          SubTask_Segment_Animation__Solid_Glitter();
-        break;
-        case EFFECTS_FUNCTION__WLED_POPCORN__ID:
-          SubTask_Segment_Animation__Popcorn();
-        break;
-        case EFFECTS_FUNCTION__WLED_PLASMA__ID:
-          SubTask_Segment_Animation__Plasma();
-        break;
-        case EFFECTS_FUNCTION__WLED_SPARKLE__ID:
-          SubTask_Segment_Animation__Sparkle();
-        break;
-        case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:
-          SubTask_Segment_Animation__Sparkle_Flash();
-        break;
-        case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:
-          SubTask_Segment_Animation__Sparkle_Hyper();
-        break;
-        case EFFECTS_FUNCTION__WLED_TWINKLE__ID:
-          SubTask_Segment_Animation__Twinkle();
-        break;
-        case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:
-          SubTask_Segment_Animation__Twinkle_Colour();
-        break;
-        case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:
-          SubTask_Segment_Animation__Twinkle_Fox();
-        break;
-        case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:
-          SubTask_Segment_Animation__Twinkle_Cat();
-        break;
-        case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:
-          SubTask_Segment_Animation__Twinkle_Up();
-        break;
-        case EFFECTS_FUNCTION__WLED_SAW__ID:
-          SubTask_Segment_Animation__Saw();
-        break;
-        case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:
-          SubTask_Segment_Animation__Dissolve();
-        break;
-        case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:
-          SubTask_Segment_Animation__Dissolve_Random();
-        break;
-        case EFFECTS_FUNCTION__WLED_COLORFUL__ID:
-          SubTask_Segment_Animation__ColourFul();
-        break;
-        case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
-          SubTask_Segment_Animation__Traffic_Light();
-        break;
-        /**
-         * Blink/Strobe
-         **/
-        case EFFECTS_FUNCTION__WLED_BLINK__ID:
-          SubTask_Segment_Animation__Blink();
-        break;
-        case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:
-          SubTask_Segment_Animation__Blink_Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_STROBE__ID:
-          SubTask_Segment_Animation__Strobe();
-        break;
-        case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:
-          SubTask_Segment_Animation__Strobe_Multi();
-        break;
-        case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:
-          SubTask_Segment_Animation__Strobe_Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_RAINBOW__ID:
-          SubTask_Segment_Animation__Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:
-          SubTask_Segment_Animation__Lightning();
-        break;
-        case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:
-          SubTask_Segment_Animation__Fire_2012();
-        break;
-        case EFFECTS_FUNCTION__WLED_RAILWAY__ID:
-          SubTask_Segment_Animation__Railway();
-        break;
-        case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:
-          SubTask_Segment_Animation__Heartbeat();
-        break;
-        /**
-         * Noise
-         **/
-        case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:
-          SubTask_Segment_Animation__FillNoise8();
-        break;
-        case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:
-          SubTask_Segment_Animation__Noise16_1();
-        break;
-        case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:
-          SubTask_Segment_Animation__Noise16_2();
-        break;
-        case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:
-          SubTask_Segment_Animation__Noise16_3();
-        break;
-        case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:
-          SubTask_Segment_Animation__Noise16_4();
-        break;
-        case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:
-          SubTask_Segment_Animation__Noise_Pal();
-        break;
-        case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:
-          SubTask_Segment_Animation__PhasedNoise();
-        break;
-        case EFFECTS_FUNCTION__WLED_PHASED__ID:
-          SubTask_Segment_Animation__Phased();
-        break;
-        /**
-         * Scan
-         **/
-        case EFFECTS_FUNCTION__WLED_SCAN__ID:
-          SubTask_Segment_Animation__Scan();
-        break;
-        case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:
-          SubTask_Segment_Animation__Scan_Dual();
-        break;
-        case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:
-          SubTask_Segment_Animation__Larson_Scanner();
-        break;
-        case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:
-          SubTask_Segment_Animation__Larson_Scanner_Dual();
-        break;
-        case EFFECTS_FUNCTION__WLED_ICU__ID:
-          SubTask_Segment_Animation__ICU();
-        break;
-        case EFFECTS_FUNCTION__WLED_RIPPLE__ID:
-          SubTask_Segment_Animation__Ripple();
-        break;
-        case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:
-          SubTask_Segment_Animation__Ripple_Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_COMET__ID:
-          SubTask_Segment_Animation__Comet();
-        break;
-        case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:
-          SubTask_Segment_Animation__Chunchun();
-        break;
-        case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:
-          SubTask_Segment_Animation__Bouncing_Balls();
-        break;
-        case EFFECTS_FUNCTION__WLED_SINELON__ID:
-          SubTask_Segment_Animation__Sinelon();
-        break;
-        case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:
-          SubTask_Segment_Animation__Sinelon_Dual();
-        break;
-        case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:
-          SubTask_Segment_Animation__Sinelon_Rainbow();
-        break;
-        case EFFECTS_FUNCTION__WLED_DRIP__ID:
-          SubTask_Segment_Animation__Drip();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-        case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
-          SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-        case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
-          SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
-        case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
-          SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-        case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
-          SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-        break;
-        #endif
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-        case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
-          SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-        break;   
-        #endif 
-        // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
-        //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-        //  break;
-        //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
-        //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-        //  break;
-        /**
-         * Development effects without full code 
-         **/          
-        //  case EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID:
-        //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
-        //  break;
-        //  case EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID:
-        //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
-        //  break;
-        //  case EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID:
-        //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
-        //  break;
-        //  case EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID:
-        //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-        //  break;
-        //  case EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID:
-        //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-        //  break;
-        //  case EFFECTS_FUNCTION__FADE_GRADIENT__ID:
-        //    SubTask_Flasher_Animate_Function_Fade_Gradient();
-        //  break;
-        //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON:
-        //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
-        //  break;
-        //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID:
-        //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
-        //  break;
-        // EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
-        //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF__ID:
-        //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
-        //  break;
-        //  case EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
-        //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
-        //  break;
-        //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
-        //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
-        //  break;        
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-        case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
-          SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
-        break;
-        case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
-          SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
-        break;
-        case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
-          SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-        break;
-        case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:
-          SubTask_Flasher_Animate_LCD_Display_Show_String_01();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
-        case EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID:
-          SubTask_Segment_Animate_Function__Notification_Static();
-        break;
-        case EFFECTS_FUNCTION__NOTIFICATION_FADE__ID:
-          SubTask_Segment_Animate_Function__Notification_Fade();
-        break;
-        case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
-          SubTask_Segment_Animate_Function__Notification_Blinking();
-        break;
-        case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
-          SubTask_Segment_Animate_Function__Notification_Pulsing();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-        #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-        case EFFECTS_FUNCTION__TESTER_01__ID:
-          SubTask_Flasher_Animate_Function_Tester_01();
-        break; 
-        case EFFECTS_FUNCTION__TESTER_02__ID:
-          SubTask_Flasher_Animate_Function_Tester_02();
-        break; 
-        // testing to replacement
-        case EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID:
-          SubTask_Segment_Animate_Function__Static_Palette_New();
-        break;
-        case EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID:
-          SubTask_Segment_Animate_Function__Slow_Glow_New();
-        break;
-        #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-      } //end SWITCH
+        (this->*_effects[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
+      }
 
       /**
        * @brief Only calls Animator if effects are not directly handled
@@ -3482,483 +3288,22 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 {
+      
+  // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "GetFlasherFunctionIDbyName %s"),f);
+
+
   if(f==0) return -2;
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR)){    return EFFECTS_FUNCTION__SOLID_COLOUR__ID; }
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR)){    return EFFECTS_FUNCTION__SLOW_GLOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR)){    return EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__ROTATING_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR)){    return EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__NAME_CTR)){    return EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SEQUENTIAL__NAME_CTR)){    return EFFECTS_FUNCTION__STEPPING_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__NAME_CTR)){    return EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR)){    return EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR)){    return EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__NOTIFICATION_STATIC__NAME_CTR)){    return EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__NOTIFICATION_BLINKING__NAME_CTR)){    return EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__NOTIFICATION_FADE__NAME_CTR)){    return EFFECTS_FUNCTION__NOTIFICATION_FADE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__NOTIFICATION_PULSING__NAME_CTR)){    return EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_STATIC__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SPOTS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PERCENT__ID; }
-  #endif
-  // One colour changes
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RANDOM_COLOR__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID; }
-  #endif
-  // Wipe/Sweep/Runners  
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_ANDROID__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_ANDROID__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RUNNING_COLOR__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_GRADIENT__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_GRADIENT__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_LOADING__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_LOADING__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_POLICE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_POLICE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_POLICE_ALL__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_POLICE_ALL__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TWO_DOTS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TWO_DOTS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TWO_AREAS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TWO_AREAS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_MULTI_COMET__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_MULTI_COMET__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_OSCILLATE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_OSCILLATE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BPM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BPM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_JUGGLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_JUGGLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLORWAVES__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLORWAVES__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_LAKE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_LAKE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_GLITTER__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_GLITTER__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_METEOR__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_METEOR__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PRIDE_2015__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PRIDE_2015__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PACIFICA__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PACIFICA__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SUNRISE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SUNRISE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SINEWAVE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SINEWAVE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_FLOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FLOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_HALLOWEEN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_HALLOWEEN__ID; }
-  #endif
-  // Chase
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHASE_COLOR__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHASE_RANDOM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHASE_FLASH__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TRICOLOR_CHASE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID; }
-  #endif
-  // Breathe/Fade/Pulse
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BREATH__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BREATH__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_FADE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FADE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TRICOLOR_FADE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SPOTS_FADE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID; }
-  #endif
-  // Fireworks
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_FIREWORKS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FIREWORKS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_EXPLODING_FIREWORKS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_EXPLODING_FIREWORKS_NO_LAUNCH__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_STARBURST__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_STARBURST_GLOWS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RAIN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RAIN__ID; }
-  #endif
-  // Sparkle/Twinkle
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_GLITTER__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_POPCORN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_POPCORN__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PLASMA__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PLASMA__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SPARKLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SPARKLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TWINKLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TWINKLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLORTWINKLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TWINKLEFOX__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TWINKLECAT__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TWINKLECAT__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TWINKLEUP__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TWINKLEUP__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SAW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SAW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_DISSOLVE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_DISSOLVE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COLORFUL__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COLORFUL__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID; }
-  #endif
-  // Blink/Strobe
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BLINK__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BLINK__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_MULTI_STROBE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_LIGHTNING__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_LIGHTNING__ID; }
-  #endif  
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_FIRE_2012__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FIRE_2012__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RAILWAY__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RAILWAY__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_HEARTBEAT__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_HEARTBEAT__ID; }
-  #endif
-  // Noise
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_FILLNOISE8__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_FILLNOISE8__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_NOISE16_1__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_NOISE16_1__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_NOISE16_2__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_NOISE16_2__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_NOISE16_3__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_NOISE16_3__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_NOISE16_4__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_NOISE16_4__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_NOISEPAL__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_NOISEPAL__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PHASEDNOISE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_PHASED__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_PHASED__ID; }
-  #endif
-  // Scan
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SCAN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SCAN__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_DUAL_SCAN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_LARSON_SCANNER__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_ICU__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_ICU__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RIPPLE__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RIPPLE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_COMET__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_COMET__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_CHUNCHUN__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_CHUNCHUN__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SINELON__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SINELON__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SINELON_DUAL__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_DRIP__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_DRIP__ID; }
-  #endif
-  // Added 2022
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_BLENDS__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_BLENDS__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__WLED_TV_SIMULATOR__NAME_CTR)){    return EFFECTS_FUNCTION__WLED_TV_SIMULATOR__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR)){    return EFFECTS_FUNCTION__FIREPLACE_1D_01__ID; }
-  #endif
-  // Sun
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID:     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR)){    return EFFECTS_FUNCTION__STATIC_PALETTE__ID; }
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  if(mSupport::CheckCommand_P(f, PM_EFFECTS_FUNCTION__TESTER__NAME_CTR)){    return EFFECTS_FUNCTION__TESTER_01__ID; }
-  #endif
-  // EFFECTS_FUNCTION__TESTER_02__ID,
-  // EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID,
-  // EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID,
 
-
+  for(uint16_t id=0;id<_effects.size();id++)
+  {
+    if(mSupport::CheckCommand_P(f, _effectsData[id]))
+    {   
+      ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"),f,id);
+      return id; 
+    }
+  }
 
   return -1;
 
@@ -3967,450 +3312,14 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen,
 {
   return GetFlasherFunctionNamebyID(SEGMENT_I(segment_index).effect_id, buffer, buflen);
 }
+
+// Include both methods, one to write into a buffer and another simply return the progmem address
 const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen)
 {
-  switch(id){
-    default:  
-      snprintf(buffer, buflen, "Function ################################################# NoName %d", id);  
-    break;
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__SOLID_COLOUR__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__STATIC_PALETTE__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__SLOW_GLOW__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    case EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID:                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID:        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    case EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    case EFFECTS_FUNCTION__ROTATING_PALETTE__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID:                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    case EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID:               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__STEPPING_PALETTE__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__SEQUENTIAL__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID:                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:             snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID:                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID:                           snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    case EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__NOTIFICATION_STATIC__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:                             snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__NOTIFICATION_BLINKING__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    case EFFECTS_FUNCTION__NOTIFICATION_FADE__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__NOTIFICATION_FADE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__NOTIFICATION_PULSING__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_STATIC__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:                           snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SPOTS__ID:                                        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PERCENT__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR); break;
-    #endif
-    // One colour changes
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RANDOM_COLOR__NAME_CTR); break;
-    #endif
-    // Wipe/Sweep/Runners  
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:                            snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:                           snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_ANDROID__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_ANDROID__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:                             snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RUNNING_COLOR__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_GRADIENT__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_GRADIENT__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_LOADING__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_LOADING__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_POLICE__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_POLICE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_POLICE_ALL__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TWO_DOTS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TWO_AREAS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_MULTI_COMET__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_OSCILLATE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_BPM__ID:                                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_BPM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_JUGGLE__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_JUGGLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PALETTE__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_PALETTE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLORWAVES__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_LAKE__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_LAKE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_GLITTER__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_GLITTER__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_METEOR__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_METEOR__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_PRIDE_2015__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PACIFICA__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_PACIFICA__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SUNRISE__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SUNRISE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SINEWAVE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FLOW__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_FLOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_HALLOWEEN__NAME_CTR); break;
-    #endif
-    // Chase
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHASE_COLOR__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHASE_RANDOM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHASE_FLASH__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:                           snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:                        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TRICOLOR_CHASE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:                             snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__NAME_CTR); break;
-    #endif
-    // Breathe/Fade/Pulse
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_BREATH__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_BREATH__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FADE__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_FADE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TRICOLOR_FADE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SPOTS_FADE__NAME_CTR); break;
-    #endif
-    // Fireworks
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_FIREWORKS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_EXPLODING_FIREWORKS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_EXPLODING_FIREWORKS_NO_LAUNCH__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_STARBURST__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_STARBURST_GLOWS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RAIN__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RAIN__NAME_CTR); break;
-    #endif
-    // Sparkle/Twinkle
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_GLITTER__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_POPCORN__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_POPCORN__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PLASMA__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_PLASMA__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SPARKLE__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SPARKLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TWINKLE__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TWINKLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLORTWINKLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TWINKLEFOX__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TWINKLECAT__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TWINKLEUP__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SAW__ID:                                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SAW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_DISSOLVE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COLORFUL__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COLORFUL__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__NAME_CTR); break;
-    #endif
-    // Blink/Strobe
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_BLINK__ID:                                        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_BLINK__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_STROBE__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_STROBE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_MULTI_STROBE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RAINBOW__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_LIGHTNING__NAME_CTR); break;
-    #endif  
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_FIRE_2012__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RAILWAY__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RAILWAY__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_HEARTBEAT__NAME_CTR); break;
-    #endif
-    // Noise
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_FILLNOISE8__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_NOISE16_1__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_NOISE16_2__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_NOISE16_3__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_NOISE16_4__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_NOISEPAL__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:                                  snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_PHASEDNOISE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_PHASED__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_PHASED__NAME_CTR); break;
-    #endif
-    // Scan
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SCAN__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SCAN__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:                                    snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_DUAL_SCAN__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_LARSON_SCANNER__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_ICU__ID:                                          snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_ICU__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RIPPLE__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RIPPLE__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:                               snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_COMET__ID:                                        snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_COMET__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:                                     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_CHUNCHUN__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SINELON__ID:                                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SINELON__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SINELON_DUAL__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:                              snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_DRIP__ID:                                         snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_DRIP__NAME_CTR); break;
-    #endif
-    // Added 2022
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_BLENDS__ID:                                       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_BLENDS__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__WLED_TV_SIMULATOR__ID:                                 snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__WLED_TV_SIMULATOR__NAME_CTR); break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    case EFFECTS_FUNCTION__FIREPLACE_1D_01__ID:                                   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    // Sun
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:       snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID:     snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:                                snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:                      snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__FIREPLACE_1D_01__NAME_CTR);  break;
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-    case EFFECTS_FUNCTION__TESTER_01__ID:   snprintf_P(buffer, buflen, PM_EFFECTS_FUNCTION__TESTER__NAME_CTR);  break;
-    #endif
-    // EFFECTS_FUNCTION__TESTER_02__ID,
-    // EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID,
-    // EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID,
-  
-  
-  }
+
+  snprintf_P(buffer, buflen, _effectsData[id]);  
   return buffer;
+
 }
 
 
@@ -5458,30 +4367,57 @@ uint16_t mode_static(void) {
 // use id==255 to find unallocatd gaps (with "Reserved" data string)
 // if vector size() is smaller than id (single) data is appended at the end (regardless of id)
 void mAnimatorLight::addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name) {
-  if (id == 255) { // find empty slot
-    for (size_t i=1; i<_mode.size(); i++) if (_modeData[i] == _data_RESERVED) { id = i; break; }
-  }
-  if (id < _mode.size()) {
-    if (_modeData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
-    _mode[id]     = mode_fn;
-    _modeData[id] = mode_name;
-  } else {
-    _mode.push_back(mode_fn);
-    _modeData.push_back(mode_name);
-    if (_modeCount < _mode.size()) _modeCount++;
-  }
+  // if (id == 255) { // find empty slot
+  //   for (size_t i=1; i<_effects.size(); i++) if (_effectsData[i] == _data_RESERVED) { id = i; break; }
+  // }
+  // if (id < _effects.size()) {
+  //   if (_effectsData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
+  //   _effects[id]     = mode_fn;
+  //   _effectsData[id] = mode_name;
+  // } else {
+  //   _effects.push_back(mode_fn);
+  //   _effectsData.push_back(mode_name);
+  //   if (_effectsCount < _effects.size()) _effectsCount++;
+  // }
 }
 
+
+
+// add (or replace reserved) effect mode and data into vector
+// use id==255 to find unallocatd gaps (with "Reserved" data string)
+// if vector size() is smaller than id (single) data is appended at the end (regardless of id)
+// void mAnimatorLight::addEffect2( mode_ptr mode_fn ) {
+//   // if (id == 255) { // find empty slot
+//   //   for (size_t i=1; i<_mode.size(); i++) if (_modeData[i] == _data_RESERVED) { id = i; break; }
+//   // }
+//   // if (id < _mode.size()) {
+//   //   if (_modeData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
+//   //   _mode[id]     = mode_fn;
+//   //   _modeData[id] = mode_name;
+//   // } else {
+//   //   _mode.push_back(mode_fn);
+//   //   _modeData.push_back(mode_name);
+//   //   if (_effectsCount < _mode.size()) _effectsCount++;
+//   // }
+
+
+
+// }
+
+
+
+
+
 void mAnimatorLight::setupEffectData() {
-  // Solid must be first! (assuming vector is empty upon call to setup)
-  _mode.push_back(&mode_static);
-  _modeData.push_back(_data_FX_MODE_STATIC);
-  // fill reserved word in case there will be any gaps in the array
-  for (size_t i=1; i<_modeCount; i++) {
-    _mode.push_back(&mode_static);
-    _modeData.push_back(_data_RESERVED);
-  }
-  //all effects set here
+  // // Solid must be first! (assuming vector is empty upon call to setup)
+  // _mode.push_back(&mode_static);
+  // _modeData.push_back(_data_FX_MODE_STATIC);
+  // // fill reserved word in case there will be any gaps in the array
+  // for (size_t i=1; i<_effectsCount; i++) {
+  //   _mode.push_back(&mode_static);
+  //   _modeData.push_back(_data_RESERVED);
+  // }
+  // //all effects set here
 
 }
 
@@ -6137,8 +5073,8 @@ void mAnimatorLight::printSize()
   size_t size = 0;
   for (const mAnimatorLight::Segment_New &seg : segments) size += seg.getSize();
   DEBUG_PRINTF("Segments: %d -> %uB\n", segments.size(), size);
-  DEBUG_PRINTF("Modes: %d*%d=%uB\n", sizeof(mode_ptr), _mode.size(), (_mode.capacity()*sizeof(mode_ptr)));
-  DEBUG_PRINTF("Data: %d*%d=%uB\n", sizeof(const char *), _modeData.size(), (_modeData.capacity()*sizeof(const char *)));
+  DEBUG_PRINTF("Modes: %d*%d=%uB\n", sizeof(mode_ptr), _effects.size(), (_effects.capacity()*sizeof(mode_ptr)));
+  DEBUG_PRINTF("Data: %d*%d=%uB\n", sizeof(const char *), _effectsData.size(), (_effectsData.capacity()*sizeof(const char *)));
   DEBUG_PRINTF("Map: %d*%d=%uB\n", sizeof(uint16_t), (int)customMappingSize, customMappingSize*sizeof(uint16_t));
   if (useLedsArray) DEBUG_PRINTF("Buffer: %d*%d=%uB\n", sizeof(CRGB), (int)_length, _length*sizeof(CRGB));
 }
@@ -6241,7 +5177,7 @@ mAnimatorLight::GetColourFromUnloadedPalette(
   /**
    * @brief To get around loading, a temporary loading item will be created
    **/
-  mPaletteContainer palette_container_temp = mPaletteContainer();
+  mPaletteLoaded palette_container_temp = mPaletteLoaded();
 
   // DEBUG_LINE_HERE;
   pCONT_lAni->LoadPalette(palette_id, 0, &palette_container_temp);
@@ -7218,6 +6154,58 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests2()
 
   
 #endif// USE_MODULE_NETWORK_MQTT
+
+
+
+//gamma 2.8 lookup table used for color correction
+uint8_t mAnimatorLight::NeoGammaWLEDMethod::gammaT[256] = {
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
+// re-calculates & fills gamma table
+void mAnimatorLight::NeoGammaWLEDMethod::calcGammaTable(float gamma)
+{
+  for (size_t i = 0; i < 256; i++) {
+    gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
+  }
+}
+
+uint8_t mAnimatorLight::NeoGammaWLEDMethod::Correct(uint8_t value)
+{
+  // if (!gammaCorrectCol) return value;
+  // return gammaT[value];
+}
+
+// used for color gamma correction
+uint32_t mAnimatorLight::NeoGammaWLEDMethod::Correct32(uint32_t color)
+{
+  // if (!gammaCorrectCol) return color;
+  // uint8_t w = W(color);
+  // uint8_t r = R(color);
+  // uint8_t g = G(color);
+  // uint8_t b = B(color);
+  // w = gammaT[w];
+  // r = gammaT[r];
+  // g = gammaT[g];
+  // b = gammaT[b];
+  // return RGBW32(r, g, b, w);
+}
+
+
 
 
 

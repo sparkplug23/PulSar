@@ -301,6 +301,16 @@ struct RgbcctColor
         uint8_t blue  = (uint8_t)(c);
         return RgbcctColor(red,green,blue,white);
     }
+    
+    uint32_t getU32()
+    {
+        uint32_t c_out =
+            ((uint32_t)W1 << 24) |
+            ((uint32_t)R        << 16) |
+            ((uint32_t)G      <<  8) |
+            ((uint32_t)B            ) ;
+        return c_out;
+    }
 
 
 // public: // not sure if this is needed?

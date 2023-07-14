@@ -68,7 +68,7 @@ class mWLEDWebUI :
       struct handler<mWLEDWebUI> mqtthandler_state_ifchanged;
       struct handler<mWLEDWebUI> mqtthandler_state_teleperiod;
 
-      // No specialised payload therefore use system default instead of enum
+      // No specialised payload therefore use system default instead of enum         FROM CHERNO, use enum class somehwere to force better coding
       const uint8_t MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
       
       struct handler<mWLEDWebUI>* mqtthandler_list[3] = {

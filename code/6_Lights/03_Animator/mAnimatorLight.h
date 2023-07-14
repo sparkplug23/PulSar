@@ -9,6 +9,7 @@
 
 #include "6_Lights/00_Interface/mBusManager.h"
 
+#include "6_Lights/Toki.h"
 
 //color mangling macros
 #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
@@ -58,7 +59,7 @@
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 #include "6_Lights/02_Palette/mPalette.h"
-#include "6_Lights/02_Palette/mPaletteContainer.h"
+#include "6_Lights/02_Palette/mPaletteLoaded.h"
 
 #include "6_Lights/00_Interface/mInterfaceLight.h"
 
@@ -88,8 +89,8 @@
   #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
 #endif // USE_SK6812_METHOD_DEFAULT
 
-#include "6_Lights/02_Palette/mPaletteContainer.h"
-class mPaletteContainer;
+#include "6_Lights/02_Palette/mPaletteLoaded.h"
+class mPaletteLoaded;
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/00_Interface/FastLED/FastLED.h"
@@ -369,7 +370,7 @@ class mAnimatorLight :
     uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_appending = true);
     #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
-    void LoadPalette(uint8_t palette_id, uint8_t segment_index = 0, mPaletteContainer* palette_container = nullptr);
+    void LoadPalette(uint8_t palette_id, uint8_t segment_index = 0, mPaletteLoaded* palette_container = nullptr);
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Segments(uint8_t json_level = 0, bool json_appending = true);
@@ -705,8 +706,11 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID,
+    #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,
@@ -735,15 +739,39 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,
-    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
     EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
     EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
     EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
     EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,    
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+    /**
+     * Palette is drawn "inorder" and animations are drawn with X outputs (4 or 5 like normal lights) to create the effect like real lights
+     *
+      1 - Combination (ommited, can be performed using mixer)
+      2 - In Waves
+      3 - Sequentials
+      4 - Slo-Glo
+      5 - Chasing / Flash
+      6 - Slow Fade
+      7 - Twinkle / Flash
+      8 - Steady on (already added)
+     * */
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER_IN_WAVES_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SEQUENTIAL_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLO_GLO_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__CHASING_AND_FLASHING_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLOW_FADE_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__TWINKLE_AND_FLASH_ID
+    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+        
+        
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
+    #endif
+
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -935,17 +963,6 @@ class mAnimatorLight :
     //  * So, pixel red (50%) changing to pixel blue, would go red to blue (bright 100%) then fade down brightness 50%
     //  * Optional, could also be non-equal triangle ie have value for peak of traingle, so 20% would mean 0.2 seconds flash to new colour then slowly decay (0.8 seconds) to new brightness
     //  * */
-    // // EFECT
-
-    // /**
-    //  * Fire animations
-    //  * rename from fireplace to another name, simply fire
-    //  * */
-
-    // this will likely just use candle effect, maybe forced colour palette?/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-     EFFECTS_FUNCTION__FIREPLACE_1D_01__ID, // Custom to using matrix for fireplace light effect
-    #endif 
 
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -1091,28 +1108,6 @@ class mAnimatorLight :
 
      * */
 
-    /**
-     * Palette is drawn "inorder" and animations are drawn with X outputs (4 or 5 like normal lights) to create the effect like real lights
-     *
-      1 - Combination (ommited, can be performed using mixer)
-      2 - In Waves
-      3 - Sequentials
-      4 - Slo-Glo
-      5 - Chasing / Flash
-      6 - Slow Fade
-      7 - Twinkle / Flash
-      8 - Steady on (already added)
-     * */
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER_IN_WAVES_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SEQUENTIAL_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLO_GLO_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__CHASING_AND_FLASHING_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLOW_FADE_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__TWINKLE_AND_FLASH_ID
-    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-
 
     // need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
     // This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
@@ -1198,13 +1193,11 @@ class mAnimatorLight :
   // realtime
   byte realtimeMode = REALTIME_MODE_INACTIVE;
   byte realtimeOverride = REALTIME_OVERRIDE_NONE;
-  // IPAddress realtimeIP = ((0, 0, 0, 0));
+  IPAddress realtimeIP = IPAddress(0,0,0,0);// = (({0, 0, 0, 0}));
   unsigned long realtimeTimeout = 0;
   uint8_t tpmPacketCount = 0;
   uint16_t tpmPayloadFrameSize = 0;
   bool useMainSegmentOnly = false;
-
-
 
   #define NUM_COLORS2       3 /* number of colors per segment */
 
@@ -1267,7 +1260,6 @@ class mAnimatorLight :
   };      
 
 
-  void Init_Segments_RgbcctControllers();
   mAnimatorLight& SetSegment_AnimFunctionCallback(uint8_t segment_index, ANIM_FUNCTION_SIGNATURE);
   void StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index = 0);
   void Segments_SetPixelColor_To_Static_Pallete(uint16_t palette_id);
@@ -1288,204 +1280,206 @@ class mAnimatorLight :
    * My animations (and their animators where applicable)
    * */
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  void SubTask_Segment_Animate_Function__Solid_Colour(); 
+  void EffectAnim__Solid_Colour(); 
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  void SubTask_Segment_Animate_Function__Static_Palette();
+  void EffectAnim__Static_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  void SubTask_Segment_Animate_Function__Slow_Glow();
+  void EffectAnim__Slow_Glow();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  void SubTask_Segment_Animation__Flicker_Base(bool use_multi = false, uint16_t flicker_palette = 0);
-  void SubTask_Segment_Animation__Candle_Single();
-  void SubTask_Segment_Animation__Candle_Multiple();
-  void SubTask_Segment_Animation__Shimmering_Palette_Saturation();
-  void SubTask_Segment_Animation__Shimmering_Palette();
-  void SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette();
+  void EffectAnim__Flicker_Base(bool use_multi = false, uint16_t flicker_palette = 0);
+  void EffectAnim__Candle_Single();
+  void EffectAnim__Candle_Multiple();
+  void EffectAnim__Shimmering_Palette();
+  void EffectAnim__Shimmering_Palette_To_Another_Palette();
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  void EffectAnim__Shimmering_Palette_Saturation();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void SubTask_Segment_Animation__Stepping_Palette();
+  void EffectAnim__Stepping_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void SubTask_Segment_Animation__Rotating_Palette_New();
+  void EffectAnim__Rotating_Palette_New();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void SubTask_Segment_Animation__Rotating_Palette();
+  void EffectAnim__Rotating_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void SubTask_Segment_Animation__Rotating_Previous_Animation();
+  void EffectAnim__Rotating_Previous_Animation();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void SubTask_Segment_Animation__Blend_Palette_To_White();
+  void EffectAnim__Blend_Palette_To_White();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  void SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette();
+  void EffectAnim__Blend_Palette_Between_Another_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  void SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette();
+  void EffectAnim__Twinkle_Palette_Onto_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  void SubTask_Segment_Animation__Twinkle_Decaying_Palette();
+  void EffectAnim__Twinkle_Decaying_Palette();
   #endif
   // Static
-  void SubTask_Segment_Animation__Static();
-  void SubTask_Segment_Animation__Static_Pattern();
-  void SubTask_Segment_Animation__Tri_Static_Pattern();
-  void SubTask_Segment_Animation__Base_Spots(uint16_t threshold);
-  void SubTask_Segment_Animation__Spots();
+  void EffectAnim__Static();
+  void EffectAnim__Static_Pattern();
+  void EffectAnim__Tri_Static_Pattern();
+  void EffectAnim__Base_Spots(uint16_t threshold);
+  void EffectAnim__Spots();
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  void SubTask_Segment_Animation__Percent();
+  void EffectAnim__Percent();
   #endif
   // One colour changes
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  void SubTask_Segment_Animation__Random_Colour();
+  void EffectAnim__Random_Colour();
   #endif
   // Wipe/Sweep/Runners 
-  void BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, bool useRandomColors);
-  void SubTask_Segment_Animation__Colour_Wipe();
-  void SubTask_Segment_Animation__Colour_Wipe_Random();
-  void SubTask_Segment_Animation__Colour_Sweep();
-  void SubTask_Segment_Animation__Colour_Sweep_Random();
-  void SubTask_Segment_Animation__TriColour();
-  void SubTask_Segment_Animation__Android();
-  void SubTask_Segment_Animation__Base_Running(bool saw);
-  void SubTask_Segment_Animation__Base_Running(uint32_t color1, uint32_t color2);
-  void SubTask_Segment_Animation__Running_Red_Blue();
+  void BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomColors);
+  void EffectAnim__Colour_Wipe();
+  void EffectAnim__Colour_Wipe_Random();
+  void EffectAnim__Colour_Sweep();
+  void EffectAnim__Colour_Sweep_Random();
+  void EffectAnim__TriColour();
+  void EffectAnim__Android();
+  void EffectAnim__Base_Running(bool saw);
+  void EffectAnim__Base_Running(uint32_t color1, uint32_t color2);
+  void EffectAnim__Running_Red_Blue();
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  void SubTask_Segment_Animation__Running_Colour();
-  void SubTask_Segment_Animation__Running_Random();
-  void SubTask_Segment_Animation__Base_Gradient(bool loading);
-  void SubTask_Segment_Animation__Gradient();
-  void SubTask_Segment_Animation__Loading();
-  void SubTask_Segment_Animation__Base_Police(uint32_t color1, uint32_t color2, bool all);
-  void SubTask_Segment_Animation__Police();
-  void SubTask_Segment_Animation__Polce_All();
-  void SubTask_Segment_Animation__Two_Dots();
-  void SubTask_Segment_Animation__Two_Areas();
-  void SubTask_Segment_Animation__Multi_Comet();
-  void SubTask_Segment_Animation__Oscillate();
-  void SubTask_Segment_Animation__BPM();
-  void SubTask_Segment_Animation__Juggle();
-  void SubTask_Segment_Animation__Palette();
-  void SubTask_Segment_Animation__ColourWaves();
-  void SubTask_Segment_Animation__Lake();
-  void SubTask_Segment_Animation__Glitter();
-  void SubTask_Segment_Animation__Meteor();
-  void SubTask_Segment_Animation__Metoer_Smooth();    
-  void SubTask_Segment_Animation__Pride_2015();    
+  void EffectAnim__Running_Colour();
+  void EffectAnim__Running_Random();
+  void EffectAnim__Base_Gradient(bool loading);
+  void EffectAnim__Gradient();
+  void EffectAnim__Loading();
+  void EffectAnim__Base_Police(uint32_t color1, uint32_t color2, bool all);
+  void EffectAnim__Police();
+  void EffectAnim__Polce_All();
+  void EffectAnim__Two_Dots();
+  void EffectAnim__Two_Areas();
+  void EffectAnim__Multi_Comet();
+  void EffectAnim__Oscillate();
+  void EffectAnim__BPM();
+  void EffectAnim__Juggle();
+  void EffectAnim__Palette();
+  void EffectAnim__ColourWaves();
+  void EffectAnim__Lake();
+  void EffectAnim__Glitter();
+  void EffectAnim__Meteor();
+  void EffectAnim__Metoer_Smooth();    
+  void EffectAnim__Pride_2015();    
   CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);   
-  void SubTask_Segment_Animation__Pacifica();    
-  void SubTask_Segment_Animation__Sunrise();    
-  void SubTask_Segment_Animation__Sinewave();    
-  void SubTask_Segment_Animation__Flow();    
-  void SubTask_Segment_Animation__Base_Phased(uint8_t moder);
-  void SubTask_Segment_Animation__PhasedNoise();    
-  void SubTask_Segment_Animation__Phased();    
-  void SubTask_Segment_Animation__Running_Lights();    
-  void SubTask_Segment_Animation__Rainbow_Cycle();    
-  void SubTask_Segment_Animation__Merry_Christmas();    
-  void SubTask_Segment_Animation__Halloween();    
+  void EffectAnim__Pacifica();    
+  void EffectAnim__Sunrise();    
+  void EffectAnim__Sinewave();    
+  void EffectAnim__Flow();    
+  void EffectAnim__Base_Phased(uint8_t moder);
+  void EffectAnim__PhasedNoise();    
+  void EffectAnim__Phased();    
+  void EffectAnim__Running_Lights();    
+  void EffectAnim__Rainbow_Cycle();    
+  void EffectAnim__Merry_Christmas();    
+  void EffectAnim__Halloween();    
   // Chase    
-  void SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
-  void SubTask_Segment_Animation__Chase_Colour();
-  void SubTask_Segment_Animation__Chase_Random();
-  void SubTask_Segment_Animation__Chase_Rainbow();
-  void SubTask_Segment_Animation__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
-  void SubTask_Segment_Animation__Chase_Flash();
-  void SubTask_Segment_Animation__Chase_Flash_Random();
-  void SubTask_Segment_Animation__Chase_Rainbow_White();
-  void SubTask_Segment_Animation__Chase_Theater();
-  void SubTask_Segment_Animation__Chase_Theatre_Rainbow();
-  void SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
-  void SubTask_Segment_Animation__Chase_TriColour();
-  void SubTask_Segment_Animation__Circus_Combustus();
+  void EffectAnim__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
+  void EffectAnim__Chase_Colour();
+  void EffectAnim__Chase_Random();
+  void EffectAnim__Chase_Rainbow();
+  void EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette);
+  void EffectAnim__Chase_Flash();
+  void EffectAnim__Chase_Flash_Random();
+  void EffectAnim__Chase_Rainbow_White();
+  void EffectAnim__Chase_Theater();
+  void EffectAnim__Chase_Theatre_Rainbow();
+  void EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
+  void EffectAnim__Chase_TriColour();
+  void EffectAnim__Circus_Combustus();
   // Breathe/Fade/Pulse
-  void SubTask_Segment_Animation__Breath();
-  void SubTask_Segment_Animation__Fade();
-  void SubTask_Segment_Animation__Fade_TriColour();
-  void SubTask_Segment_Animation__Fade_Spots();
+  void EffectAnim__Breath();
+  void EffectAnim__Fade();
+  void EffectAnim__Fade_TriColour();
+  void EffectAnim__Fade_Spots();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   // Fireworks
-  void SubTask_Segment_Animation__Fireworks();
-  void SubTask_Segment_Animation__Exploding_Fireworks();
-  void SubTask_Segment_Animation__Fireworks_Starburst();
-  void SubTask_Segment_Animation__Fireworks_Starburst_Glows();
-  void SubTask_Segment_Animation__Rain();
-  void SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch();
+  void EffectAnim__Fireworks();
+  void EffectAnim__Exploding_Fireworks();
+  void EffectAnim__Fireworks_Starburst();
+  void EffectAnim__Fireworks_Starburst_Glows();
+  void EffectAnim__Rain();
+  void EffectAnim__Exploding_Fireworks_NoLaunch();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   // Sparkle/Twinkle
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  void SubTask_Segment_Animation__Solid_Glitter();
-  void SubTask_Segment_Animation__Popcorn();
-  void SubTask_Segment_Animation__Plasma();
-  void SubTask_Segment_Animation__Sparkle();
-  void SubTask_Segment_Animation__Sparkle_Flash();
-  void SubTask_Segment_Animation__Sparkle_Hyper();
-  void SubTask_Segment_Animation__Twinkle();
-  CRGB SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
-  void SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat);
-  void SubTask_Segment_Animation__Twinkle_Colour();
-  void SubTask_Segment_Animation__Twinkle_Fox();
-  void SubTask_Segment_Animation__Twinkle_Cat();
-  void SubTask_Segment_Animation__Twinkle_Up();
-  void SubTask_Segment_Animation__Saw();
-  void SubTask_Segment_Animation__Base_Dissolve(uint32_t color);
-  void SubTask_Segment_Animation__Dissolve();
-  void SubTask_Segment_Animation__Dissolve_Random();
-  void SubTask_Segment_Animation__ColourFul();
-  void SubTask_Segment_Animation__Traffic_Light();
+  void EffectAnim__Solid_Glitter();
+  void EffectAnim__Popcorn();
+  void EffectAnim__Plasma();
+  void EffectAnim__Sparkle();
+  void EffectAnim__Sparkle_Flash();
+  void EffectAnim__Sparkle_Hyper();
+  void EffectAnim__Twinkle();
+  CRGB EffectAnim__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat);
+  void EffectAnim__Base_Twinkle_Fox(bool cat);
+  void EffectAnim__Twinkle_Colour();
+  void EffectAnim__Twinkle_Fox();
+  void EffectAnim__Twinkle_Cat();
+  void EffectAnim__Twinkle_Up();
+  void EffectAnim__Saw();
+  void EffectAnim__Base_Dissolve(uint32_t color);
+  void EffectAnim__Dissolve();
+  void EffectAnim__Dissolve_Random();
+  void EffectAnim__ColourFul();
+  void EffectAnim__Traffic_Light();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   // Blink/Strobe
-  void SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
-  void SubTask_Segment_Animation__Blink();
-  void SubTask_Segment_Animation__Blink_Rainbow();
-  void SubTask_Segment_Animation__Strobe();
-  void SubTask_Segment_Animation__Strobe_Multi();
-  void SubTask_Segment_Animation__Strobe_Rainbow();
-  void SubTask_Segment_Animation__Rainbow();
-  void SubTask_Segment_Animation__Lightning();
-  void SubTask_Segment_Animation__Fire_2012();
-  void SubTask_Segment_Animation__Railway();
-  void SubTask_Segment_Animation__Heartbeat();
+  void EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette);
+  void EffectAnim__Blink();
+  void EffectAnim__Blink_Rainbow();
+  void EffectAnim__Strobe();
+  void EffectAnim__Strobe_Multi();
+  void EffectAnim__Strobe_Rainbow();
+  void EffectAnim__Rainbow();
+  void EffectAnim__Lightning();
+  void EffectAnim__Fire_2012();
+  void EffectAnim__Railway();
+  void EffectAnim__Heartbeat();
   //Noise
-  void SubTask_Segment_Animation__FillNoise8();
-  void SubTask_Segment_Animation__Noise16_1();
-  void SubTask_Segment_Animation__Noise16_2();
-  void SubTask_Segment_Animation__Noise16_3();
-  void SubTask_Segment_Animation__Noise16_4();
-  void SubTask_Segment_Animation__Noise_Pal();
+  void EffectAnim__FillNoise8();
+  void EffectAnim__Noise16_1();
+  void EffectAnim__Noise16_2();
+  void EffectAnim__Noise16_3();
+  void EffectAnim__Noise16_4();
+  void EffectAnim__Noise_Pal();
   // Scan
-  void SubTask_Segment_Animation__Base_Scan(bool dual);
-  void SubTask_Segment_Animation__Scan();
-  void SubTask_Segment_Animation__Scan_Dual();
-  void SubTask_Segment_Animation__Base_Larson_Scanner(bool dual);
-  void SubTask_Segment_Animation__Larson_Scanner();
-  void SubTask_Segment_Animation__Larson_Scanner_Dual();
-  void SubTask_Segment_Animation__ICU();
-  void SubTask_Segment_Animation__Base_Ripple(bool rainbow);
-  void SubTask_Segment_Animation__Ripple();
-  void SubTask_Segment_Animation__Ripple_Rainbow(); 
-  void SubTask_Segment_Animation__Comet();
-  void SubTask_Segment_Animation__Chunchun();
-  void SubTask_Segment_Animation__Bouncing_Balls();
-  void SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rainbow=false);
-  void SubTask_Segment_Animation__Sinelon();
-  void SubTask_Segment_Animation__Sinelon_Dual();
-  void SubTask_Segment_Animation__Sinelon_Rainbow();
-  void SubTask_Segment_Animation__Drip();
+  void EffectAnim__Base_Scan(bool dual);
+  void EffectAnim__Scan();
+  void EffectAnim__Scan_Dual();
+  void EffectAnim__Base_Larson_Scanner(bool dual);
+  void EffectAnim__Larson_Scanner();
+  void EffectAnim__Larson_Scanner_Dual();
+  void EffectAnim__ICU();
+  void EffectAnim__Base_Ripple(bool rainbow);
+  void EffectAnim__Ripple();
+  void EffectAnim__Ripple_Rainbow(); 
+  void EffectAnim__Comet();
+  void EffectAnim__Chunchun();
+  void EffectAnim__Bouncing_Balls();
+  void EffectAnim__Base_Sinelon(bool dual, bool rainbow=false);
+  void EffectAnim__Sinelon();
+  void EffectAnim__Sinelon_Dual();
+  void EffectAnim__Sinelon_Rainbow();
+  void EffectAnim__Drip();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step();       
-  void SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend();   
+  void EffectAnim__SunPositions_Elevation_Palette_Progress_Step();       
+  void EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend();   
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
   void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
@@ -1493,14 +1487,17 @@ class mAnimatorLight :
   void SubTask_Flasher_Animate_Function_Tester_01();
   void SubTask_Flasher_Animate_Function_Tester_02();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  void SubTask_Segment_Animate_Function__Static_Palette_New();
-  void SubTask_Segment_Animate_Function__Slow_Glow_New();
+  void EffectAnim__Static_Palette_New();
+  void EffectAnim__Slow_Glow_New();
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
   void SubTask_Segment_Animate_Function__BoxEdge_TwoColour_Gradient();
   void SubTask_Segment_Animate_Function__BoxEdge_FourColour_Gradient();
   void SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid();
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  void EffectAnim__Christmas_Musical__01();
+  #endif 
 
 
 
@@ -1702,6 +1699,8 @@ void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_in
 
 void SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i = 0);
 
+
+
 /**
 * Segment, 72 bytes
 **/
@@ -1893,10 +1892,8 @@ typedef struct Segment_New {
     uint8_t opacity = 255; // PHASE OUT ie opacity is the segment "brightness"
     // uint8_t seg_brightness = 255; // this will be merged with overall brightness to allow per segment brightness value
 
-
-void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1);
+    void setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1);
     
-
     uint8_t effect_id = 0;
     /**
      * @brief Allow a second effect to be loaded at the same time, this will enable a single effect to show just once, and then the id_next will be loaded into the primary position
@@ -1904,6 +1901,16 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
      * 
      */
     uint8_t effect_id_next = 0;  
+
+
+
+
+
+
+
+
+
+
 
     #ifdef ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     uint8_t  cct;                 //0==1900K, 255==10091K
@@ -1921,8 +1928,10 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
 
     // runtime data
     unsigned long next_time;  // millis() of next update
+    uint32_t tSaved_EffectStartReferenceTime = 0;
     uint32_t step;  // custom "step" var
     uint32_t call;  // call counter
+
 
     /**
      * @brief AUX options going forward must only be internal effect save states, and NOT user defined options (these should be "effect_option")
@@ -2021,8 +2030,8 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
 
       bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
       
-      mPaletteContainer* palette_container = nullptr;
-      // mPaletteContainer* palette_container = new mPaletteContainer(0);
+      mPaletteLoaded* palette_container = nullptr;
+      // mPaletteLoaded* palette_container = new mPaletteLoaded(0);
 
       uint32_t tSaved_LastUpdated = millis();
       uint32_t tTick_maximum_call_ms = 10;
@@ -2092,10 +2101,10 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
       params_internal.aux3 = 0;
       
       // // Init
-      // palette_container = new mPaletteContainer(0);//nullptr;
+      // palette_container = new mPaletteLoaded(0);//nullptr;
 
       #ifdef ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-      palette_container = new mPaletteContainer(); 
+      palette_container = new mPaletteLoaded(); 
       #endif // ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
 
       // DEBUG_LINE_HERE;
@@ -2124,8 +2133,8 @@ void    setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t o
       Serial.println(F("-- Copy segment constructor --"));
       
 
-      // Serial.println(F("-- Copy segment constructor -- palette_container = new mPaletteContainer(0);"));
-      // palette_container = new mPaletteContainer(0);
+      // Serial.println(F("-- Copy segment constructor -- palette_container = new mPaletteLoaded(0);"));
+      // palette_container = new mPaletteLoaded(0);
 
       memcpy(this, &orig, sizeof(Segment_New));
       name = nullptr;
@@ -2393,13 +2402,15 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 // // main "strip" class
 // class WS2812FX {  // 96 bytes
 
-  typedef uint16_t (*mode_ptr)(void); // pointer to mode function
+  typedef void (*mode_ptr)(void); // pointer to mode function
+
+
   typedef void (*show_callback)(void); // pre show callback
   typedef struct ModeData {
     uint8_t     _id;   // mode (effect) id
     mode_ptr    _fcn;  // mode (effect) function
     const char *_data; // mode (effect) name and its UI control data
-    ModeData(uint8_t id, uint16_t (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
+    ModeData(uint8_t id, void (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
   } mode_data_t;
 
 //   static WS2812FX* instance;
@@ -2438,7 +2449,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 //       _isOffRefreshRequired(false),
 //       _hasWhiteChannel(false),
 //       _triggered(false),
-//       _modeCount(EFFECTS_FUNCTION__LENGTH__ID),
+//       _effectsCount(EFFECTS_FUNCTION__LENGTH__ID),
 //       _callback(nullptr),
 //       customMappingTable(nullptr),
 //       customMappingSize(0),
@@ -2447,9 +2458,9 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 //       _mainSegment(0)
 //     {
 //       WS2812FX::instance = this;
-//       _mode.reserve(_modeCount);     // allocate memory to prevent initial fragmentation (does not increase size())
-//       _modeData.reserve(_modeCount); // allocate memory to prevent initial fragmentation (does not increase size())
-//       if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _modeCount = 1; // memory allocation failed only show Solid
+//       _mode.reserve(_effectsCount);     // allocate memory to prevent initial fragmentation (does not increase size())
+//       _modeData.reserve(_effectsCount); // allocate memory to prevent initial fragmentation (does not increase size())
+//       if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _effectsCount = 1; // memory allocation failed only show Solid
 //       else setupEffectData();
 //     }
 
@@ -2515,9 +2526,27 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       bool _triggered            : 1;
     };
 
-    uint8_t                  _modeCount;
-    std::vector<mode_ptr>    _mode;     // SRAM footprint: 4 bytes per element
-    std::vector<const char*> _modeData; // mode (effect) name and its slider control data array
+
+
+
+    // typedef uint16_t (*mode_ptr)(void); // pointer to mode function
+    // typedef void (*show_callback)(void); // pre show callback
+
+    // typedef struct ModeData {
+    //   uint8_t     _id;   // mode (effect) id
+    //   mode_ptr    _fcn;  // mode (effect) function
+    //   const char *_data; // mode (effect) name and its UI control data
+    //   ModeData(uint8_t id, uint16_t (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
+    // } mode_data_t;
+
+    // std::vector<mode_ptr>    _mode;     // SRAM footprint: 4 bytes per element
+    // std::vector<const char*> _modeData; // mode (effect) name and its slider control data array
+    
+    // void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
+    void Init_Effects();
+
+
+
 
     show_callback _callback;
 
@@ -2531,6 +2560,26 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
     void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
     void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
+    // void addEffect2(
+      
+    //   void (mAnimatorLight::*)()
+
+
+    // ); // add effect to the list; defined in FX.cpp
+
+    typedef void (mAnimatorLight::*RequiredFunction)();
+        
+    void addThingy(RequiredFunction func);
+
+    void addEffect3(uint8_t id, RequiredFunction function, const char *name); // add effect to the list; defined in FX.cpp
+
+    std::vector<RequiredFunction> vectoroffunctions;
+
+    uint8_t                  _effectsCount;
+    std::vector<RequiredFunction>    _effects;     // SRAM footprint: 4 bytes per element
+    std::vector<const char*> _effectsData; // mode (effect) name and its slider control data array
+
+
     void setupEffectData(void); // add default effects to the list; defined in FX.cpp
 
     // outsmart the compiler :) by correctly overloading
@@ -2575,7 +2624,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline uint8_t getMainSegmentId(void) { return _mainSegment; }
     inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
     inline uint8_t getTargetFps() { return _targetFps; }
-    inline uint8_t getModeCount() { return _modeCount; }
+    inline uint8_t getModeCount() { return _effectsCount; }
 
     uint16_t
       ablMilliampsMax,
@@ -2598,10 +2647,10 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline uint32_t segColor(uint8_t i) { return _colors_t[i]; }
 
     const char *
-      getModeData(uint8_t id = 0) { return (id && id<_modeCount) ? _modeData[id] : PSTR("Solid"); }
+      getModeData(uint8_t id = 0) { return (id && id<_effectsCount) ? _effectsData[id] : PSTR("Solid"); }
 
     const char **
-      getModeDataSrc(void) { return &(_modeData[0]); } // vectors use arrays for underlying data
+      getModeDataSrc(void) { return &(_effectsData[0]); } // vectors use arrays for underlying data
 
     Segment_New&        getSegment(uint8_t id);
     inline Segment_New& getFirstSelectedSeg(void) { return segments[getFirstSelectedSegId()]; }
@@ -2653,7 +2702,201 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
     void
       estimateCurrentAndLimitBri(void);
-  
+
+
+    #ifdef ENABLE_DEVFEATURE_LIGHT__HYPERION
+    uint16_t udpRgbPort = 19446; // Hyperion port
+
+#define WLED_GLOBAL
+#define _INIT(x) = x
+# define _INIT_N(x)
+
+
+//if true, a segment per bus will be created on boot and LED settings save
+//if false, only one segment spanning the total LEDs is created,
+//but not on LED settings save if there is more than one segment currently
+WLED_GLOBAL bool autoSegments    _INIT(false);
+WLED_GLOBAL bool correctWB       _INIT(false); // CCT color correction of RGB color
+WLED_GLOBAL bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
+WLED_GLOBAL bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
+WLED_GLOBAL bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
+WLED_GLOBAL float gammaCorrectVal _INIT(2.8f); // gamma correction value
+
+WLED_GLOBAL byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
+WLED_GLOBAL byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
+WLED_GLOBAL byte briS     _INIT(128);                     // default brightness
+
+WLED_GLOBAL byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
+WLED_GLOBAL byte nightlightDelayMins _INIT(60);
+WLED_GLOBAL byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
+WLED_GLOBAL bool fadeTransition      _INIT(true);   // enable crossfading color transition
+WLED_GLOBAL uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
+
+WLED_GLOBAL Toki toki _INIT(Toki());
+
+
+// nightlight
+WLED_GLOBAL bool nightlightActive _INIT(false);
+WLED_GLOBAL bool nightlightActiveOld _INIT(false);
+WLED_GLOBAL uint32_t nightlightDelayMs _INIT(10);
+WLED_GLOBAL byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
+WLED_GLOBAL unsigned long nightlightStartTime;
+WLED_GLOBAL byte briNlT _INIT(0);                     // current nightlight brightness
+WLED_GLOBAL byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
+
+// udp interface objects
+WLED_GLOBAL WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
+WLED_GLOBAL WiFiUDP ntpUdp;
+// WLED_GLOBAL ESPAsyncE131 e131 _INIT_N(((handleE131Packet)));
+// WLED_GLOBAL ESPAsyncE131 ddp  _INIT_N(((handleE131Packet)));
+WLED_GLOBAL bool e131NewData _INIT(false);
+
+WLED_GLOBAL uint16_t udpPort    _INIT(21324); // WLED notifier default port
+WLED_GLOBAL uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
+
+WLED_GLOBAL bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
+WLED_GLOBAL bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
+WLED_GLOBAL bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
+WLED_GLOBAL bool notifyMacro  _INIT(false);                       // send notification for macro
+WLED_GLOBAL bool notifyHue    _INIT(true);                        // send notification if Hue light changes
+
+//Notifier callMode
+#define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
+#define CALL_MODE_DIRECT_CHANGE  1
+#define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
+#define CALL_MODE_NOTIFICATION   3
+#define CALL_MODE_NIGHTLIGHT     4
+#define CALL_MODE_NO_NOTIFY      5
+#define CALL_MODE_FX_CHANGED     6     //no longer used
+#define CALL_MODE_HUE            7
+#define CALL_MODE_PRESET_CYCLE   8
+#define CALL_MODE_BLYNK          9     //no longer used
+#define CALL_MODE_ALEXA         10
+#define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
+#define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
+
+// notifications
+WLED_GLOBAL bool notifyDirectDefault _INIT(notifyDirect);
+WLED_GLOBAL bool receiveNotifications _INIT(true);
+WLED_GLOBAL unsigned long notificationSentTime _INIT(0);
+WLED_GLOBAL byte notificationSentCallMode _INIT(CALL_MODE_INIT);
+WLED_GLOBAL uint8_t notificationCount _INIT(0);
+
+
+WLED_GLOBAL uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
+WLED_GLOBAL int arlsOffset _INIT(0);                              // realtime LED offset
+WLED_GLOBAL bool receiveDirect _INIT(true);                       // receive UDP realtime
+WLED_GLOBAL bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
+WLED_GLOBAL bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
+
+
+// LED CONFIG
+WLED_GLOBAL bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
+WLED_GLOBAL byte bootPreset   _INIT(0);                   // save preset to load after power-up
+
+WLED_GLOBAL byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
+
+
+WLED_GLOBAL uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
+WLED_GLOBAL uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
+WLED_GLOBAL bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
+WLED_GLOBAL bool receiveNotificationColor      _INIT(true);       // apply color
+WLED_GLOBAL bool receiveNotificationEffects    _INIT(true);       // apply effects setup
+WLED_GLOBAL bool receiveSegmentOptions         _INIT(false);      // apply segment options
+WLED_GLOBAL bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
+// WLED_GLOBAL bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
+// WLED_GLOBAL bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
+// WLED_GLOBAL bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
+// WLED_GLOBAL bool notifyMacro  _INIT(false);                       // send notification for macro
+// WLED_GLOBAL bool notifyHue    _INIT(true);                        // send notification if Hue light changes
+WLED_GLOBAL uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
+
+// network
+WLED_GLOBAL bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
+
+
+// brightness
+WLED_GLOBAL unsigned long lastOnTime _INIT(0);
+WLED_GLOBAL bool offMode             _INIT(!turnOnAtBoot);
+WLED_GLOBAL byte bri                 _INIT(briS);          // global brightness (set)
+WLED_GLOBAL byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
+WLED_GLOBAL byte briT                _INIT(0);             // global brightness during transition
+WLED_GLOBAL byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
+WLED_GLOBAL byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
+
+
+
+
+// transitions
+WLED_GLOBAL bool          transitionActive        _INIT(false);
+WLED_GLOBAL uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
+WLED_GLOBAL uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
+WLED_GLOBAL unsigned long transitionStartTime;
+WLED_GLOBAL float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
+WLED_GLOBAL bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
+WLED_GLOBAL uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
+
+    
+// User Interface CONFIG
+#ifndef SERVERNAME
+WLED_GLOBAL char serverDescription[33] _INIT("WLED");  // Name of module - use default
+#else
+WLED_GLOBAL char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
+#endif
+WLED_GLOBAL bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
+WLED_GLOBAL bool simplifiedUI          _INIT(false);   // enable simplified UI
+WLED_GLOBAL byte cacheInvalidate       _INIT(0);   
+
+WLED_GLOBAL bool stateChanged _INIT(false);
+
+  //colors.cpp
+  // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
+  class NeoGammaWLEDMethod {
+    public:
+      static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
+      static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
+      static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
+      static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
+    private:
+      static uint8_t gammaT[];
+  };
+  #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
+  #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
+
+
+#include <map>
+#include <IPAddress.h>
+
+#define NODE_TYPE_ID_UNDEFINED        0
+#define NODE_TYPE_ID_ESP8266         82
+#define NODE_TYPE_ID_ESP32           32
+#define NODE_TYPE_ID_ESP32S2         33
+#define NODE_TYPE_ID_ESP32S3         34
+#define NODE_TYPE_ID_ESP32C3         35
+
+/*********************************************************************************************\
+* NodeStruct
+\*********************************************************************************************/
+struct NodeStruct
+{
+  String    nodeName;
+  IPAddress ip;
+  uint8_t   age;
+  uint8_t   nodeType;
+  uint32_t  build;
+
+  NodeStruct() : age(0), nodeType(0), build(0)
+  {
+    for (uint8_t i = 0; i < 4; ++i) { ip[i] = 0; }
+  }
+};
+typedef std::map<uint8_t, NodeStruct> NodesMap;
+
+
+
+
+
+    #endif
 
 
 

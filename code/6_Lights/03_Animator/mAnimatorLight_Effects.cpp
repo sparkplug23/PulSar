@@ -24,8 +24,9 @@
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Colour()
+void mAnimatorLight::EffectAnim__Solid_Colour()
 {
+  ALOG_INF( PSTR("EffectAnim__Solid_Colour"));
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type)*2) ){ return; }
 
@@ -66,7 +67,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Solid_Colour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
+void mAnimatorLight::EffectAnim__Static_Palette()
 {
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength() )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
@@ -99,7 +100,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
+void mAnimatorLight::EffectAnim__Slow_Glow()
 {
 
   if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength() )){ return; }
@@ -194,30 +195,32 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Slow_Glow()
 /**
  * @description:   : Flickers pixels by the same amount towards black
  **/
-void mAnimatorLight::SubTask_Segment_Animation__Candle_Single()
+void mAnimatorLight::EffectAnim__Candle_Single()
 {
-  SubTask_Segment_Animation__Flicker_Base(false, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
-void mAnimatorLight::SubTask_Segment_Animation__Candle_Multiple()
+void mAnimatorLight::EffectAnim__Candle_Multiple()
 {
-  SubTask_Segment_Animation__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
-void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette_Saturation()
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
 {
-  SubTask_Segment_Animation__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__White__ID);
+  EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__White__ID);
 }
+#endif
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
-void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette() // Same as Candle_Multiple
+void mAnimatorLight::EffectAnim__Shimmering_Palette() // Same as Candle_Multiple
 {
-  SubTask_Segment_Animation__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 /**
  * @description:   : Flicker between primary and secondary palette
@@ -230,14 +233,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette() // Same as 
      *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
      *        option16 for 65000 value range
  * */
-void mAnimatorLight::SubTask_Segment_Animation__Shimmering_Palette_To_Another_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
+void mAnimatorLight::EffectAnim__Shimmering_Palette_To_Another_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
 {
-  SubTask_Segment_Animation__Flicker_Base(true, SEGMENT.params_user.val0);
+  EffectAnim__Flicker_Base(true, SEGMENT.params_user.val0);
 }
 /**
  * @description:   : Base function for flickering
  * */
-void mAnimatorLight::SubTask_Segment_Animation__Flicker_Base(bool use_multi, uint16_t flicker_palette_id )
+void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_palette_id )
 {
 
   uint8_t pixels_in_palette = GetNumberOfColoursInPalette(SEGMENT.palette.id);
@@ -526,7 +529,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette_New()
+void mAnimatorLight::EffectAnim__Rotating_Palette_New()
 {
 
   uint16_t* region_p             = &SEGMENT.params_internal.aux0;
@@ -607,7 +610,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette_New()
      * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
      * */
 
-void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
+void mAnimatorLight::EffectAnim__Rotating_Palette()
 {
 
   uint16_t* region_p             = &SEGMENT.params_internal.aux0;
@@ -688,10 +691,10 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Palette()
      * draw static palette, then use neopixel to rotate with animator, no need for dynamic animationpair
      * */
 
-void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
+void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 {
 
-  // ALOG_INF(PSTR("SubTask_Segment_Animation__Rotating_Previous_Animation"));
+  // ALOG_INF(PSTR("EffectAnim__Rotating_Previous_Animation"));
 
   uint16_t* movement_direction_p = &SEGMENT.params_internal.aux0;  
 
@@ -741,7 +744,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rotating_Previous_Animation()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
+void mAnimatorLight::EffectAnim__Stepping_Palette()
 {
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
@@ -852,7 +855,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Stepping_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
+void mAnimatorLight::EffectAnim__Blend_Palette_To_White()
 {
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length();
@@ -930,7 +933,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_To_White()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Palette()
+void mAnimatorLight::EffectAnim__Blend_Palette_Between_Another_Palette()
 {
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
@@ -1034,7 +1037,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Blend_Palette_Between_Another_Pa
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
+void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 {
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 
@@ -1144,7 +1147,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Palette_Onto_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Decaying_Palette()
+void mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
 {
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 
@@ -1236,7 +1239,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Decaying_Palette()
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend
+ * @name : EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend
  * @note : Randomly changes colours of pixels, and blends to the new one
  *  
  * Best to develop this with 12 pixel ring, esp32
@@ -1252,7 +1255,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Decaying_Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS 
-void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_Step()
+void mAnimatorLight::EffectAnim__SunPositions_Elevation_Palette_Progress_Step()
 {
 
 // for sun thing
@@ -1294,14 +1297,14 @@ void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_P
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend
+ * @name : EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend
  * @note : Randomly changes colours of pixels, and blends to the new one
  *  
  * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-void mAnimatorLight::SubTask_Segment_Animation__SunPositions_Elevation_Palette_Progress_LinearBlend()
+void mAnimatorLight::EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend()
 {
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
@@ -5739,7 +5742,7 @@ typedef struct Spark {
  * @param speed    : None
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
+void mAnimatorLight::EffectAnim__Tri_Static_Pattern()
 {
 
   uint8_t segSize = (SEGMENT.intensity() >> 5) +1;
@@ -5790,7 +5793,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Tri_Static_Pattern()
 *******************************************************************************************************************************************************************************************************************
 ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, bool useRandomColors)
+void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomColors)
 {
 
 //speed of 128, cycletime = 19800
@@ -5866,36 +5869,36 @@ void mAnimatorLight::BaseSubTask_Segment_Animation__Base_Colour_Wipe(bool rev, b
 /*
  * Lights all LEDs one after another.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Colour_Wipe()
+void mAnimatorLight::EffectAnim__Colour_Wipe()
 {
-  BaseSubTask_Segment_Animation__Base_Colour_Wipe(false, false);
+  BaseEffectAnim__Base_Colour_Wipe(false, false);
 }
 
 /*
  * Turns all LEDs after each other to a random color.
  * Then starts over with another color.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Colour_Wipe_Random()
+void mAnimatorLight::EffectAnim__Colour_Wipe_Random()
 {
-  BaseSubTask_Segment_Animation__Base_Colour_Wipe(false, true);
+  BaseEffectAnim__Base_Colour_Wipe(false, true);
 }
 
 
 /*
  * Lights all LEDs one after another. Turns off opposite
  */
-void mAnimatorLight::SubTask_Segment_Animation__Colour_Sweep()
+void mAnimatorLight::EffectAnim__Colour_Sweep()
 {
-  BaseSubTask_Segment_Animation__Base_Colour_Wipe(true, false);
+  BaseEffectAnim__Base_Colour_Wipe(true, false);
 }
 
 
 /*
  * Random color introduced alternating from start and end of strip->
  */
-void mAnimatorLight::SubTask_Segment_Animation__Colour_Sweep_Random()
+void mAnimatorLight::EffectAnim__Colour_Sweep_Random()
 {
-  BaseSubTask_Segment_Animation__Base_Colour_Wipe(true, true);
+  BaseEffectAnim__Base_Colour_Wipe(true, true);
 }
 
 
@@ -5989,7 +5992,7 @@ uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
+void mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
 {
   
 // void mAnimatorLight::chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette) {
@@ -6068,9 +6071,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase(uint32_t color1, uint
 //   return chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), true);
 // }
 
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Colour()
+void mAnimatorLight::EffectAnim__Chase_Colour()
 {
-  SubTask_Segment_Animation__Base_Chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), true);
+  EffectAnim__Base_Chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), true);
 }
 
 
@@ -6082,9 +6085,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Colour()
 //   return chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), false);
 // }
 
-// void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
+// void mAnimatorLight::EffectAnim__Chase_Random()
 // {
-//   SubTask_Segment_Animation__Base_Chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), false);
+//   EffectAnim__Base_Chase(SEGCOLOR_U32(1), (SEGCOLOR_U32(2)) ? SEGCOLOR_U32(2) : SEGCOLOR_U32(0), SEGCOLOR_U32(0), false);
 // }
 
 /*
@@ -6093,13 +6096,13 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Colour()
 // void mAnimatorLight::mode_chase_rainbow(void) {
 //   return chase();
 // }
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow()
+void mAnimatorLight::EffectAnim__Chase_Rainbow()
 {
   uint8_t color_sep = 256 / SEGLEN;
   uint8_t color_index = SEGMENT.call & 0xFF;
   uint32_t color = color_wheel(((SEGMENT.step * color_sep) + color_index) & 0xFF);
 
-  SubTask_Segment_Animation__Base_Chase(color, SEGCOLOR_U32(0), SEGCOLOR_U32(1), false);
+  EffectAnim__Base_Chase(color, SEGCOLOR_U32(0), SEGCOLOR_U32(1), false);
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
@@ -6126,7 +6129,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash()
+void mAnimatorLight::EffectAnim__Chase_Flash()
 // Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette)
 {
   uint8_t flash_step = SEGMENT.call % ((FLASH_COUNT * 2) + 1);
@@ -6170,7 +6173,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
+void mAnimatorLight::EffectAnim__Chase_Flash_Random()
 {
   uint8_t flash_step = SEGMENT.call % ((FLASH_COUNT * 2) + 1);
 
@@ -6220,7 +6223,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Flash_Random()
 
 //   return chase(SEGCOLOR_U32(0), color2, color3, false);
 // }
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow_White()
+void mAnimatorLight::EffectAnim__Chase_Rainbow_White()
 {
 
   uint16_t n = SEGMENT.step;
@@ -6228,7 +6231,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Rainbow_White()
   uint32_t color2 = color_wheel(((n * 256 / SEGLEN) + (SEGMENT.call & 0xFF)) & 0xFF);
   uint32_t color3 = color_wheel(((m * 256 / SEGLEN) + (SEGMENT.call & 0xFF)) & 0xFF);
 
-  SubTask_Segment_Animation__Base_Chase(SEGCOLOR_U32(0), color2, color3, false);
+  EffectAnim__Base_Chase(SEGCOLOR_U32(0), color2, color3, false);
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
@@ -6246,7 +6249,7 @@ void mAnimatorLight::theater_chase(uint32_t color1, uint32_t color2, bool do_pal
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette)
+void mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t color2, bool do_palette)
 {
 
 
@@ -6281,8 +6284,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_Theater(uint32_t colo
  * Theatre-style crawling lights.
  * Inspired by the Adafruit examples.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Theater(void) {
-  return SubTask_Segment_Animation__Base_Chase_Theater(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
+void mAnimatorLight::EffectAnim__Chase_Theater(void) {
+  return EffectAnim__Base_Chase_Theater(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
 }
 
 
@@ -6290,8 +6293,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Theater(void) {
  * Theatre-style crawling lights with rainbow effect.
  * Inspired by the Adafruit examples.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Theatre_Rainbow(void) {
-  return SubTask_Segment_Animation__Base_Chase_Theater(color_wheel(SEGMENT.step), SEGCOLOR_U32(1), false);
+void mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow(void) {
+  return EffectAnim__Base_Chase_Theater(color_wheel(SEGMENT.step), SEGCOLOR_U32(1), false);
 }
 
 
@@ -6309,7 +6312,7 @@ void mAnimatorLight::tricolor_chase(uint32_t color1, uint32_t color2) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t color1, uint32_t color2)
+void mAnimatorLight::EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t color2)
 {
   
   uint32_t cycleTime = 50 + (255 - SEGMENT.speed())*2;
@@ -6339,9 +6342,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Chase_TriColour(uint32_t co
 /*
  * Tricolor chase mode
  */
-void mAnimatorLight::SubTask_Segment_Animation__Chase_TriColour(void) {
+void mAnimatorLight::EffectAnim__Chase_TriColour(void) {
 
-  return SubTask_Segment_Animation__Base_Chase_TriColour(SEGCOLOR_U32(2), SEGCOLOR_U32(0));
+  return EffectAnim__Base_Chase_TriColour(SEGCOLOR_U32(2), SEGCOLOR_U32(0));
 }
 
 
@@ -6359,7 +6362,7 @@ void mAnimatorLight::mode_random_chase(void)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
+void mAnimatorLight::EffectAnim__Chase_Random()
 {
 
   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed()));
@@ -6386,8 +6389,8 @@ void mAnimatorLight::SubTask_Segment_Animation__Chase_Random()
 /*
  * Alternating white/red/black pixels running. PLACEHOLDER
  */
-void mAnimatorLight::SubTask_Segment_Animation__Circus_Combustus(void) {
-  return SubTask_Segment_Animation__Base_Chase_TriColour(RED, WHITE);
+void mAnimatorLight::EffectAnim__Circus_Combustus(void) {
+  return EffectAnim__Base_Chase_TriColour(RED, WHITE);
 }
 
 
@@ -6413,7 +6416,7 @@ void mAnimatorLight::mode_breath(void) {
  ********************************************************************************************************************************************************************************************************************/
 
 
-void mAnimatorLight::SubTask_Segment_Animation__Breath()
+void mAnimatorLight::EffectAnim__Breath()
 {
   uint16_t var = 0;
   uint16_t counter = (millis() * ((SEGMENT.speed() >> 3) +10));
@@ -6442,7 +6445,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Breath()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Fade()
+void mAnimatorLight::EffectAnim__Fade()
 {
   uint16_t counter = (millis() * ((SEGMENT.speed() >> 3) +10));
   uint8_t lum = triwave16(counter) >> 8;
@@ -6470,7 +6473,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade()
  * @param aux2 Iter to wrap palette
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Fireworks()
+void mAnimatorLight::EffectAnim__Fireworks()
 {
   
   fade_out(0, SET_BRIGHTNESS);
@@ -6539,7 +6542,7 @@ typedef struct particle {
   float    fragment[STARBURST_MAX_FRAG];
 } star;
 
-void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst()
+void mAnimatorLight::EffectAnim__Fireworks_Starburst()
 {
 
   uint8_t numStars = 1 + (SEGLEN >> 3);
@@ -6658,7 +6661,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst()
  * @brief To introduce much slower fade out, have it burst and fade out very slowly
  * 
  */
-void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst_Glows()
+void mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows()
 {
  
   uint8_t numStars = 1 + (SEGLEN >> 3);
@@ -6785,7 +6788,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fireworks_Starburst_Glows()
  * @param aux2 Iter to wrap palette
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks()
+void mAnimatorLight::EffectAnim__Exploding_Fireworks()
 {
 
   //allocate segment data
@@ -6917,7 +6920,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch()
+void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
 {
 
   //allocate segment data
@@ -7061,7 +7064,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Exploding_Fireworks_NoLaunch()
  @param aux2 Iter to wrap palette
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Rain()
+void mAnimatorLight::EffectAnim__Rain()
 {
   
   SEGMENT.step += FRAMETIME_MS;
@@ -7082,7 +7085,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rain()
     if (SEGMENT.params_internal.aux1 == SEGLEN) SEGMENT.params_internal.aux1 = 0;
   }
   
-  SubTask_Segment_Animation__Fireworks();
+  EffectAnim__Fireworks();
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();  
 
 }
@@ -7110,7 +7113,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rain()
  *
  *******************************************************************************************************************************************************************************************************************
  ******************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Sparkle() // Firework_Rain
+void mAnimatorLight::EffectAnim__Sparkle() // Firework_Rain
 {
   
   for(uint16_t i = 0; i < SEGLEN; i++) 
@@ -7143,7 +7146,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle() // Firework_Rain
  * Inspired by www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Flash() // Firework_Rain
+void mAnimatorLight::EffectAnim__Sparkle_Flash() // Firework_Rain
 {
   
   for(uint16_t i = 0; i < SEGLEN; i++) {
@@ -7171,7 +7174,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Flash() // Firework_Rain
    Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Sparkle_Hyper() // Firework_Rain
+void mAnimatorLight::EffectAnim__Sparkle_Hyper() // Firework_Rain
 {
 
   for(uint16_t i = 0; i < SEGLEN; i++) {
@@ -7215,7 +7218,7 @@ void mAnimatorLight::mode_twinkleup(void) {                 // A very short twin
  ********************************************************************************************************************************************************************************************************************/
 
 //Twinkling LEDs running. Inspired by https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/Rain.h
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Up() // Firework_Rain
+void mAnimatorLight::EffectAnim__Twinkle_Up() // Firework_Rain
 {
   
 random16_set_seed(535);                                 // The randomizer needs to be re-set each time through the loop in order for the same 'random' numbers to be the same each time through.
@@ -7248,7 +7251,7 @@ random16_set_seed(535);                                 // The randomizer needs 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Random_Colour()
+void mAnimatorLight::EffectAnim__Random_Colour()
 {
 /*
  * Lights all LEDs in one random color up. Then switches them
@@ -7297,7 +7300,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Random_Colour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Rainbow_Cycle()
+void mAnimatorLight::EffectAnim__Rainbow_Cycle()
 {
 
 /*
@@ -7327,7 +7330,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rainbow_Cycle()
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Base_Running(bool saw)
+void mAnimatorLight::EffectAnim__Base_Running(bool saw)
 {
   uint8_t x_scale = SEGMENT.intensity() >> 2;
   uint32_t counter = (millis() * SEGMENT.speed()) >> 9;
@@ -7359,9 +7362,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(bool saw)
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Running_Lights()
+void mAnimatorLight::EffectAnim__Running_Lights()
 {
-  SubTask_Segment_Animation__Base_Running(false);
+  EffectAnim__Base_Running(false);
 }
 
 
@@ -7372,9 +7375,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Running_Lights()
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Saw()
+void mAnimatorLight::EffectAnim__Saw()
 {
-  SubTask_Segment_Animation__Base_Running(true);
+  EffectAnim__Base_Running(true);
 }
 
 
@@ -7386,7 +7389,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Saw()
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle()
+void mAnimatorLight::EffectAnim__Twinkle()
 {
   fill(SEGCOLOR_U32(1));
 
@@ -7427,7 +7430,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle()
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Base_Dissolve(uint32_t color)
+void mAnimatorLight::EffectAnim__Base_Dissolve(uint32_t color)
 {
 
 //tmp added
@@ -7477,9 +7480,9 @@ uint8_t _brightness = pCONT_iLight->getBriRGB_Global();
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Dissolve()
+void mAnimatorLight::EffectAnim__Dissolve()
 {
-  SubTask_Segment_Animation__Base_Dissolve(SEGCOLOR_U32(0));
+  EffectAnim__Base_Dissolve(SEGCOLOR_U32(0));
 }
 
 
@@ -7490,9 +7493,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Dissolve()
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Dissolve_Random()
+void mAnimatorLight::EffectAnim__Dissolve_Random()
 {
-  SubTask_Segment_Animation__Base_Dissolve(color_wheel(random8()));
+  EffectAnim__Base_Dissolve(color_wheel(random8()));
 }
 
 
@@ -7512,7 +7515,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Dissolve_Random()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Android()
+void mAnimatorLight::EffectAnim__Android()
 {
   
   for(uint16_t i = 0; i < SEGLEN; i++) {
@@ -7577,7 +7580,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Android()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__ColourFul()
+void mAnimatorLight::EffectAnim__ColourFul()
 {
 
   uint32_t cols[]{0x00FF0000,0x00EEBB00,0x0000EE00,0x000077CC,0x00FF0000,0x00EEBB00,0x0000EE00};
@@ -7642,7 +7645,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourFul()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Traffic_Light()
+void mAnimatorLight::EffectAnim__Traffic_Light()
 {
   for(uint16_t i=0; i < SEGLEN; i++)
     SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
@@ -7689,7 +7692,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Traffic_Light()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Running(uint32_t color1, uint32_t color2)
+void mAnimatorLight::EffectAnim__Base_Running(uint32_t color1, uint32_t color2)
 {
   uint8_t pxw = 1 + (SEGMENT.intensity() >> 5);
   uint32_t cycleTime = 35 + (255 - SEGMENT.speed());
@@ -7723,30 +7726,30 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Running(uint32_t color1, ui
 /*
  * Alternating red/blue pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Running_Red_Blue(void) {
-  return SubTask_Segment_Animation__Base_Running(RED, BLUE);
+void mAnimatorLight::EffectAnim__Running_Red_Blue(void) {
+  return EffectAnim__Base_Running(RED, BLUE);
 }
 
 /*
  * Alternating color/sec pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Running_Colour(void) {
-  return SubTask_Segment_Animation__Base_Running(SEGCOLOR_U32(0), SEGCOLOR_U32(1));
+void mAnimatorLight::EffectAnim__Running_Colour(void) {
+  return EffectAnim__Base_Running(SEGCOLOR_U32(0), SEGCOLOR_U32(1));
 }
 
 /*
  * Alternating red/green pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Merry_Christmas(void) {
-  return SubTask_Segment_Animation__Base_Running(RED, GREEN);
+void mAnimatorLight::EffectAnim__Merry_Christmas(void) {
+  return EffectAnim__Base_Running(RED, GREEN);
 }
 
 
 /*
  * Alternating orange/purple pixels running.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Halloween(void) {
-  return SubTask_Segment_Animation__Base_Running(PURPLE, ORANGE);
+void mAnimatorLight::EffectAnim__Halloween(void) {
+  return EffectAnim__Base_Running(PURPLE, ORANGE);
 }
 
 
@@ -7764,7 +7767,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Halloween(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Running_Random()
+void mAnimatorLight::EffectAnim__Running_Random()
 {
 
   uint32_t cycleTime = 25 + (3 * (uint32_t)(255 - SEGMENT.speed()));
@@ -7811,7 +7814,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Running_Random()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Gradient(bool loading)
+void mAnimatorLight::EffectAnim__Base_Gradient(bool loading)
 {
 
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) + 1);
@@ -7844,16 +7847,16 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Gradient(bool loading)
 /*
  * Gradient run
  */
-void mAnimatorLight::SubTask_Segment_Animation__Gradient(void) {
-  return SubTask_Segment_Animation__Base_Gradient(false);
+void mAnimatorLight::EffectAnim__Gradient(void) {
+  return EffectAnim__Base_Gradient(false);
 }
 
 
 /*
  * Gradient run with hard transition
  */
-void mAnimatorLight::SubTask_Segment_Animation__Loading(void) {
-  return SubTask_Segment_Animation__Base_Gradient(true);
+void mAnimatorLight::EffectAnim__Loading(void) {
+  return EffectAnim__Base_Gradient(true);
 }
 
 
@@ -7870,7 +7873,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Loading(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Police(uint32_t color1, uint32_t color2, bool all)
+void mAnimatorLight::EffectAnim__Base_Police(uint32_t color1, uint32_t color2, bool all)
 {
 
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) +1);
@@ -7916,42 +7919,42 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Police(uint32_t color1, uin
 
 
 //American Police Light with all LEDs Red and Blue 
-void mAnimatorLight::SubTask_Segment_Animation__Polce_All()
+void mAnimatorLight::EffectAnim__Polce_All()
 {
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
-  return SubTask_Segment_Animation__Base_Police(RED, BLUE, true);
+  return EffectAnim__Base_Police(RED, BLUE, true);
 }
 
 
 //Police Lights Red and Blue 
-void mAnimatorLight::SubTask_Segment_Animation__Police()
+void mAnimatorLight::EffectAnim__Police()
 {
   fill(SEGCOLOR_U32(1));
 
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
-  return SubTask_Segment_Animation__Base_Police(RED, BLUE, false);
+  return EffectAnim__Base_Police(RED, BLUE, false);
 }
 
 
 //Police All with custom colors
-void mAnimatorLight::SubTask_Segment_Animation__Two_Areas()
+void mAnimatorLight::EffectAnim__Two_Areas()
 {
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
-  return SubTask_Segment_Animation__Base_Police(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
+  return EffectAnim__Base_Police(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
 }
 
 
 //Police Lights with custom colors 
-void mAnimatorLight::SubTask_Segment_Animation__Two_Dots()
+void mAnimatorLight::EffectAnim__Two_Dots()
 {
   fill(SEGCOLOR_U32(2));
   uint32_t color2 = (SEGCOLOR_U32(1) == SEGCOLOR_U32(2)) ? SEGCOLOR_U32(0) : SEGCOLOR_U32(1);
 
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
-  return SubTask_Segment_Animation__Base_Police(SEGCOLOR_U32(0), color2, false);
+  return EffectAnim__Base_Police(SEGCOLOR_U32(0), color2, false);
 }
 
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -7973,7 +7976,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Two_Dots()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__TriColour()
+void mAnimatorLight::EffectAnim__TriColour()
 {
   uint32_t cycleTime = 1000 + (255 - SEGMENT.speed())*200;
   uint32_t perc = millis() % cycleTime;
@@ -8029,7 +8032,7 @@ void mAnimatorLight::SubTask_Segment_Animation__TriColour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Fade_TriColour()
+void mAnimatorLight::EffectAnim__Fade_TriColour()
 {
   uint16_t counter = millis() * ((SEGMENT.speed() >> 3) +1);
   uint32_t prog = (counter * 768) >> 16;
@@ -8085,7 +8088,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fade_TriColour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Multi_Comet()
+void mAnimatorLight::EffectAnim__Multi_Comet()
 {
 
   uint32_t cycleTime = 10 + (uint32_t)(255 - SEGMENT.speed());
@@ -8148,7 +8151,7 @@ typedef struct Oscillator {
   int8_t  speed;
 } oscillator;
 
-void mAnimatorLight::SubTask_Segment_Animation__Oscillate()
+void mAnimatorLight::EffectAnim__Oscillate()
 {
 
   uint8_t numOscillators = 3;
@@ -8236,7 +8239,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Oscillate()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Pride_2015()
+void mAnimatorLight::EffectAnim__Pride_2015()
 {
   uint16_t duration = 10 + SEGMENT.speed();
   uint16_t sPseudotime = SEGMENT.step;
@@ -8292,7 +8295,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Pride_2015()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Juggle()
+void mAnimatorLight::EffectAnim__Juggle()
 {
   fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
   CRGB fastled_col;
@@ -8322,7 +8325,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Juggle()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Palette()
+void mAnimatorLight::EffectAnim__Palette()
 {
   uint16_t counter = 0;
   if (SEGMENT.speed() != 0) 
@@ -8391,7 +8394,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Palette()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__ColourWaves()
+void mAnimatorLight::EffectAnim__ColourWaves()
 {
   uint16_t duration = 10 + SEGMENT.speed();
   uint16_t sPseudotime = SEGMENT.step;
@@ -8455,7 +8458,7 @@ void mAnimatorLight::SubTask_Segment_Animation__ColourWaves()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__BPM()
+void mAnimatorLight::EffectAnim__BPM()
 {
 
   CRGB fastled_col;
@@ -8486,7 +8489,7 @@ void mAnimatorLight::SubTask_Segment_Animation__BPM()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Colour()
+void mAnimatorLight::EffectAnim__Twinkle_Colour()
 {
   uint16_t dataSize = (SEGLEN+7) >> 3; //1 bit per LED
   if (!SEGMENT.allocateData(dataSize)){    
@@ -8560,7 +8563,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Colour()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Lake()
+void mAnimatorLight::EffectAnim__Lake()
 {
   uint8_t sp = SEGMENT.speed()/10;
   int wave1 = beatsin8(sp +2, -64,64);
@@ -8595,7 +8598,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Lake()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Meteor()
+void mAnimatorLight::EffectAnim__Meteor()
 {
   if (!SEGMENT.allocateData(SEGLEN)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
@@ -8650,7 +8653,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Meteor()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
+void mAnimatorLight::EffectAnim__Metoer_Smooth()
 {
   if (!SEGMENT.allocateData(SEGLEN)){return;}// return mode_static(); //allocation failed
 
@@ -8713,7 +8716,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Metoer_Smooth()
 #define COOL_LIKE_INCANDESCENT 1
 
 
-CRGB mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
+CRGB mAnimatorLight::EffectAnim__Base_Twinkle_Fox_One_Twinkle(uint32_t ms, uint8_t salt, bool cat)
 {
   // Overall twinkle speed() (changed)
   uint16_t ticks = ms / SEGMENT.params_internal.aux0;
@@ -8788,7 +8791,7 @@ CRGB mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(uin
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat)
+void mAnimatorLight::EffectAnim__Base_Twinkle_Fox(bool cat)
 {
   // "PRNG16" is the pseudorandom number generator
   // It MUST be reset to the same starting value each time
@@ -8827,7 +8830,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat)
     // We now have the adjusted 'clock' for this pixel, now we call
     // the function that computes what color the pixel should be based
     // on the "brightness = f( time )" idea.
-    CRGB c = SubTask_Segment_Animation__Base_Twinkle_Fox_One_Twinkle(myclock30, myunique8, cat);
+    CRGB c = EffectAnim__Base_Twinkle_Fox_One_Twinkle(myclock30, myunique8, cat);
 
     uint8_t cbright = c.getAverageLight();
     int16_t deltabright = cbright - backgroundBrightness;
@@ -8851,14 +8854,14 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Twinkle_Fox(bool cat)
   
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Fox()
+void mAnimatorLight::EffectAnim__Twinkle_Fox()
 {
-  return SubTask_Segment_Animation__Base_Twinkle_Fox(false);
+  return EffectAnim__Base_Twinkle_Fox(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Cat()
+void mAnimatorLight::EffectAnim__Twinkle_Cat()
 {
-  return SubTask_Segment_Animation__Base_Twinkle_Fox(true);
+  return EffectAnim__Base_Twinkle_Fox(true);
 }
 
 
@@ -8875,7 +8878,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Twinkle_Cat()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
+void mAnimatorLight::EffectAnim__Base_Spots(uint16_t threshold)
 {
 
   fill(SEGCOLOR_U32(1));
@@ -8907,9 +8910,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Spots(uint16_t threshold)
 
 
 // //intensity() slider sets number of "lights", speed() sets LEDs per light
-void mAnimatorLight::SubTask_Segment_Animation__Spots()
+void mAnimatorLight::EffectAnim__Spots()
 {
-  SubTask_Segment_Animation__Base_Spots((255 - SEGMENT.speed()) << 8);
+  EffectAnim__Base_Spots((255 - SEGMENT.speed()) << 8);
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
@@ -8917,13 +8920,13 @@ void mAnimatorLight::SubTask_Segment_Animation__Spots()
 
 // //intensity() slider sets number of "lights", LEDs per light fade in and out
 
-void mAnimatorLight::SubTask_Segment_Animation__Fade_Spots()
+void mAnimatorLight::EffectAnim__Fade_Spots()
 {
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) +8);
   uint16_t t = triwave16(counter);
   uint16_t tr = (t >> 1) + (t >> 2);
 //   return spots_base(tr);
-  SubTask_Segment_Animation__Base_Spots(tr);
+  EffectAnim__Base_Spots(tr);
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
@@ -8971,7 +8974,7 @@ uint16_t mAnimatorLight::mode_palette()
   
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Glitter()
+void mAnimatorLight::EffectAnim__Glitter()
 {
 
   mode_palette();
@@ -9001,7 +9004,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Popcorn()
+void mAnimatorLight::EffectAnim__Popcorn()
 {
 
   //allocate segment data
@@ -9082,7 +9085,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Popcorn()
    @param useRandomColors 
 *******************************************************************************************************************************************************************************************************************
 ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Plasma()
+void mAnimatorLight::EffectAnim__Plasma()
 {
 
   uint8_t thisPhase = beatsin8(6,-64,64);                       // Setting phase change for a couple of waves.
@@ -9117,7 +9120,7 @@ void mAnimatorLight::mode_percent(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-void mAnimatorLight::SubTask_Segment_Animation__Percent()
+void mAnimatorLight::EffectAnim__Percent()
 {
 	uint8_t percent = MAX(0, MIN(200, SEGMENT.intensity()));
 	uint16_t active_leds = (percent < 100) ? SEGLEN * percent / 100.0
@@ -9202,7 +9205,7 @@ void mAnimatorLight::mode_bouncing_balls(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Pacifica()
+void mAnimatorLight::EffectAnim__Pacifica()
 {
   CRGBPalette16 pacifica_palette_1 = 
     { 0x000507, 0x000409, 0x00030B, 0x00030D, 0x000210, 0x000212, 0x000114, 0x000117, 
@@ -9307,7 +9310,7 @@ void mAnimatorLight::mode_solid_glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Solid_Glitter()
+void mAnimatorLight::EffectAnim__Solid_Glitter()
 {
 
   fill(SEGCOLOR_U32(0));
@@ -9335,7 +9338,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Solid_Glitter()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Sunrise()
+void mAnimatorLight::EffectAnim__Sunrise()
 {
   
   //speed() 0 - static sun
@@ -9403,7 +9406,7 @@ void mAnimatorLight::mode_sinewave(void) {             // Adjustable sinewave. B
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Sinewave()
+void mAnimatorLight::EffectAnim__Sinewave()
 {
   
   //#define qsuba(x, b)  ((x>b)?x-b:0)               // Analog Unsigned subtraction macro. if result <0, then => 0
@@ -9442,7 +9445,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sinewave()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Flow()
+void mAnimatorLight::EffectAnim__Flow()
 {
   
   uint16_t counter = 0;
@@ -9498,7 +9501,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Flow()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::SubTask_Segment_Animation__Static()
+void mAnimatorLight::EffectAnim__Static()
 {
   
   fill(SEGCOLOR_U32(0), SET_BRIGHTNESS);
@@ -9517,7 +9520,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Static()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
+void mAnimatorLight::EffectAnim__Static_Pattern()
 {
   
   uint16_t lit = 1 + SEGMENT.speed();
@@ -9557,7 +9560,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Static_Pattern()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-void mAnimatorLight::SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
+void mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
 {
 /*
  * Blink/strobe function
@@ -9607,9 +9610,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Blink(uint32_t color1, uint
  *  Normal blinking. 50% on/off time.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Blink()
+void mAnimatorLight::EffectAnim__Blink()
 {
-  SubTask_Segment_Animation__Base_Blink(SEGCOLOR_U32(0), SEGCOLOR_U32(1), false, true);  
+  EffectAnim__Base_Blink(SEGCOLOR_U32(0), SEGCOLOR_U32(1), false, true);  
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -9619,9 +9622,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Blink()
  * Classic Blink effect. Cycling through the rainbow.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Blink_Rainbow()
+void mAnimatorLight::EffectAnim__Blink_Rainbow()
 {
-  SubTask_Segment_Animation__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), false, false);  
+  EffectAnim__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), false, false);  
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -9631,9 +9634,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Blink_Rainbow()
  * Classic Strobe effect.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Strobe()
+void mAnimatorLight::EffectAnim__Strobe()
 {
-  SubTask_Segment_Animation__Base_Blink(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true, true);
+  EffectAnim__Base_Blink(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true, true);
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
@@ -9645,7 +9648,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Strobe()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-void mAnimatorLight::SubTask_Segment_Animation__Strobe_Multi()
+void mAnimatorLight::EffectAnim__Strobe_Multi()
 {
   for(uint16_t i = 0; i < SEGLEN; i++) {
     SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1));
@@ -9677,9 +9680,9 @@ void mAnimatorLight::SubTask_Segment_Animation__Strobe_Multi()
  * Classic Strobe effect. Cycling through the rainbow.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Strobe_Rainbow()
+void mAnimatorLight::EffectAnim__Strobe_Rainbow()
 {
-  SubTask_Segment_Animation__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), true, false);
+  EffectAnim__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), true, false);
 }
 
 /********************************************************************************************************************************************************************************************************************
@@ -9689,7 +9692,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Strobe_Rainbow()
  * Cycles all LEDs at once through a rainbow.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Rainbow()
+void mAnimatorLight::EffectAnim__Rainbow()
 {
 
   uint16_t counter = (millis() * ((SEGMENT.speed() >> 2) +2)) & 0xFFFF;
@@ -9712,7 +9715,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Rainbow()
  * @note : Converted from WLED Effects
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Lightning()
+void mAnimatorLight::EffectAnim__Lightning()
 {
  uint16_t ledstart = random16(SEGLEN);               // Determine starting location of flash
   uint16_t ledlen = 1 + random16(SEGLEN -ledstart);   // Determine length of flash (not to go beyond NUM_LEDS-1)
@@ -9787,7 +9790,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Lightning()
 // in step 3 above) (Effect Intensity = Sparking).
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Fire_2012()
+void mAnimatorLight::EffectAnim__Fire_2012()
 {
 
   uint32_t it = millis() >> 5; //div 32
@@ -9834,7 +9837,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Fire_2012()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Railway()
+void mAnimatorLight::EffectAnim__Railway()
 {
 
   uint16_t dur = 40 + (255 - SEGMENT.speed()) * 10;
@@ -9882,7 +9885,7 @@ void mAnimatorLight::mode_heartbeat(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Heartbeat()
+void mAnimatorLight::EffectAnim__Heartbeat()
 {
   uint8_t bpm = 40 + (SEGMENT.speed() >> 4);
   uint32_t msPerBeat = (60000 / bpm);
@@ -9926,7 +9929,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Heartbeat()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__FillNoise8()
+void mAnimatorLight::EffectAnim__FillNoise8()
 {
   if (SEGMENT.call == 0) SEGMENT.step = random16(12345);
   CRGB fastled_col;
@@ -9948,7 +9951,7 @@ void mAnimatorLight::SubTask_Segment_Animation__FillNoise8()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Noise16_1()
+void mAnimatorLight::EffectAnim__Noise16_1()
 {
 
   uint16_t scale = 320;                                      // the "zoom factor" for the noise
@@ -9985,7 +9988,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_1()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Noise16_2()
+void mAnimatorLight::EffectAnim__Noise16_2()
 {
   uint16_t scale = 1000;                                       // the "zoom factor" for the noise
   CRGB fastled_col;
@@ -10019,7 +10022,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_2()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Noise16_3()
+void mAnimatorLight::EffectAnim__Noise16_3()
 {
   uint16_t scale = 800;                                       // the "zoom factor" for the noise
   CRGB fastled_col;
@@ -10055,7 +10058,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_3()
  * @note : https://github.com/aykevl/ledstrip-spark/blob/master/ledstrip->ino
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Noise16_4()
+void mAnimatorLight::EffectAnim__Noise16_4()
 {
   CRGB fastled_col;
   uint32_t stp = (millis() * SEGMENT.speed()) >> 7;
@@ -10078,7 +10081,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise16_4()
  *         Slow noise palette by Andrew Tuline.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Noise_Pal()
+void mAnimatorLight::EffectAnim__Noise_Pal()
 {
   uint16_t scale = 15 + (SEGMENT.intensity() >> 2); //default was 30
   //#define scale 30
@@ -10125,7 +10128,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Noise_Pal()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Phased(uint8_t moder)
+void mAnimatorLight::EffectAnim__Base_Phased(uint8_t moder)
 {
   uint8_t allfreq = 16;                                          // Base frequency.
   //float* phasePtr = reinterpret_cast<float*>(SEGMENT.step);       // Phase change value gets calculated.
@@ -10153,13 +10156,13 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Phased(uint8_t moder)
 }
 
 
-void mAnimatorLight::SubTask_Segment_Animation__PhasedNoise(void) {
-  return SubTask_Segment_Animation__Base_Phased(1);
+void mAnimatorLight::EffectAnim__PhasedNoise(void) {
+  return EffectAnim__Base_Phased(1);
 }
 
 
-void mAnimatorLight::SubTask_Segment_Animation__Phased(void) {
-  return SubTask_Segment_Animation__Base_Phased(0);
+void mAnimatorLight::EffectAnim__Phased(void) {
+  return EffectAnim__Base_Phased(0);
 }
 
 
@@ -10178,7 +10181,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Phased(void) {
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Base_Scan(bool dual)
+void mAnimatorLight::EffectAnim__Base_Scan(bool dual)
 {
 
   uint32_t cycleTime = 750 + (255 - SEGMENT.speed())*150;
@@ -10213,18 +10216,18 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Scan(bool dual)
 /*
  * Runs a single pixel back and forth.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Scan()
+void mAnimatorLight::EffectAnim__Scan()
 {
-  SubTask_Segment_Animation__Base_Scan(false);
+  EffectAnim__Base_Scan(false);
 }
 
 
 /*
  * Runs two pixel back and forth in opposite directions.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Scan_Dual()
+void mAnimatorLight::EffectAnim__Scan_Dual()
 {
-  SubTask_Segment_Animation__Base_Scan(true);
+  EffectAnim__Base_Scan(true);
 }
 
 
@@ -10234,7 +10237,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Scan_Dual()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Base_Larson_Scanner(bool dual)
+void mAnimatorLight::EffectAnim__Base_Larson_Scanner(bool dual)
 {
   
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) +8);
@@ -10274,17 +10277,17 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Larson_Scanner(bool dual)
 /*
  * K.I.T.T.
  */
-void mAnimatorLight::SubTask_Segment_Animation__Larson_Scanner()
+void mAnimatorLight::EffectAnim__Larson_Scanner()
 {
-  SubTask_Segment_Animation__Base_Larson_Scanner(false);
+  EffectAnim__Base_Larson_Scanner(false);
 }
 
 /*
  * Creates two Larson scanners moving in opposite directions
  * Custom mode by Keith Lord: https://github.com/kitesurfer1404/WS2812FX/blob/master/src/custom/DualLarson.h
  */
-void mAnimatorLight::SubTask_Segment_Animation__Larson_Scanner_Dual(void){
-  return SubTask_Segment_Animation__Base_Larson_Scanner(true);
+void mAnimatorLight::EffectAnim__Larson_Scanner_Dual(void){
+  return EffectAnim__Base_Larson_Scanner(true);
 }
 
 
@@ -10295,7 +10298,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Larson_Scanner_Dual(void){
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__ICU()
+void mAnimatorLight::EffectAnim__ICU()
 {
   uint16_t dest = SEGMENT.step & 0xFFFF;
   uint8_t space = (SEGMENT.intensity() >> 3) +2;
@@ -10354,7 +10357,7 @@ typedef struct Ripple {
   uint16_t pos;
 } ripple;
 
-void mAnimatorLight::SubTask_Segment_Animation__Base_Ripple(bool rainbow)
+void mAnimatorLight::EffectAnim__Base_Ripple(bool rainbow)
 {
 
   uint16_t maxRipples = 1 + (SEGLEN >> 2);
@@ -10429,12 +10432,12 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Ripple(bool rainbow)
   
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Ripple(void) {
-  return SubTask_Segment_Animation__Base_Ripple(false);
+void mAnimatorLight::EffectAnim__Ripple(void) {
+  return EffectAnim__Base_Ripple(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Ripple_Rainbow(void) {
-  return SubTask_Segment_Animation__Base_Ripple(true);
+void mAnimatorLight::EffectAnim__Ripple_Rainbow(void) {
+  return EffectAnim__Base_Ripple(true);
 }
 
 
@@ -10446,7 +10449,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Ripple_Rainbow(void) {
  *
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Comet()
+void mAnimatorLight::EffectAnim__Comet()
 {
 
   uint16_t counter = millis() * ((SEGMENT.speed() >>2) +1);
@@ -10481,7 +10484,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Comet()
  *         Little pixel birds flying in a circle. By Aircoookie
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Chunchun()
+void mAnimatorLight::EffectAnim__Chunchun()
 {
   fill(SEGCOLOR_U32(1));
   uint16_t counter = millis()*(6 + (SEGMENT.speed() >> 4));
@@ -10517,7 +10520,7 @@ typedef struct Ball {
  * @note : Bouncing Balls Effect
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Bouncing_Balls()
+void mAnimatorLight::EffectAnim__Bouncing_Balls()
 {
   //allocate segment data
   uint16_t maxNumBalls = 16; 
@@ -10583,7 +10586,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Bouncing_Balls()
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rainbow)
+void mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
 {
 
   fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
@@ -10619,16 +10622,16 @@ void mAnimatorLight::SubTask_Segment_Animation__Base_Sinelon(bool dual, bool rai
   
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Sinelon(void) {
-  return SubTask_Segment_Animation__Base_Sinelon(false);
+void mAnimatorLight::EffectAnim__Sinelon(void) {
+  return EffectAnim__Base_Sinelon(false);
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Sinelon_Dual(void) {
-  return SubTask_Segment_Animation__Base_Sinelon(true);
+void mAnimatorLight::EffectAnim__Sinelon_Dual(void) {
+  return EffectAnim__Base_Sinelon(true);
 }
 
-void mAnimatorLight::SubTask_Segment_Animation__Sinelon_Rainbow(void) {
-  return SubTask_Segment_Animation__Base_Sinelon(true, true);
+void mAnimatorLight::EffectAnim__Sinelon_Rainbow(void) {
+  return EffectAnim__Base_Sinelon(true, true);
 }
 
 
@@ -10645,7 +10648,7 @@ void mAnimatorLight::SubTask_Segment_Animation__Sinelon_Rainbow(void) {
 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::SubTask_Segment_Animation__Drip()
+void mAnimatorLight::EffectAnim__Drip()
 {
   //allocate segment data
   uint16_t numDrops = 4; 
@@ -11921,6 +11924,828 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
+
+// const uint32_t MUSIC_TIMING[] = {
+
+// 0,
+// 7,
+// 240,
+// 248,
+// 488,
+// 500,
+// 739,
+// 747,
+// 1239,
+// 1247,
+// 1738,
+// 1746,
+// 2478,
+// 2486,
+// 2726,
+// 2738,
+// 3218,
+// 3225,
+// 3717,
+// 3725,
+// 4217,
+// 4224,
+// 4716,
+// 4724,
+// 5216,
+// 5223,
+// 5715,
+// 5723,
+// 6455,
+// 6463,
+// 6704,
+// 6714,
+// 7202,
+// 7214,
+// 7694,
+// 7702,
+// 8694,
+// 8701,
+// 9273,
+// 9281,
+// 9853,
+// 9861,
+// 10433,
+// 10441,
+// 11013,
+// 11020,
+// 11592,
+// 11600,
+// 12172,
+// 12180,
+// 12471,
+// 12479,
+// 12752,
+// 12759,
+// 13331,
+// 13339,
+// 13911,
+// 13918,
+// 14490,
+// 14498,
+// 15070,
+// 15077,
+// 15649,
+// 15657,
+// 16229,
+// 16236,
+// 16816,
+// 16828,
+// 17108,
+// 17116,
+// 17396,
+// 17408,
+// 17976,
+// 17987,
+// 18556,
+// 18567,
+// 19136,
+// 19146,
+// 19726,
+// 19733,
+// 20006,
+// 20013,
+// 20305,
+// 20313,
+// 20586,
+// 20593,
+// 20885,
+// 20893,
+// 21465,
+// 21472,
+// 22044,
+// 22052,
+// 22324,
+// 22332,
+// 22624,
+// 22632,
+// 22904,
+// 22912,
+// 23203,
+// 23211,
+// 23783,
+// 23791,
+// 24363,
+// 24371,
+// 24643,
+// 24650,
+// 24942,
+// 24950,
+// 25223,
+// 25230,
+// 25522,
+// 25530,
+// 26102,
+// 26110,
+// 26390,
+// 26401,
+// 26682,
+// 26689,
+// 27261,
+// 27269,
+// 27841,
+// 27849,
+// 28420,
+// 28428,
+// 29000,
+// 29008,
+// 29579,
+// 29588,
+// 30159,
+// 30167,
+// 30739,
+// 30747,
+// 31319,
+// 31326,
+// 31898,
+// 31906,
+// 32478,
+// 32485,
+// 33636,
+// 33645,
+// 34304,
+// 34316,
+// 34635,
+// 34644,
+// 34975,
+// 34983,
+// 35464,
+// 35475,
+// 35635,
+// 35642,
+// 35954,
+// 35963,
+// 36295,
+// 36302,
+// 36634,
+// 36641,
+// 36954,
+// 36962,
+// 37293,
+// 37301,
+// 37614,
+// 37621,
+// 37953,
+// 37961,
+// 38282,
+// 38293,
+// 38952,
+// 38960,
+// 39272,
+// 39280,
+// 39612,
+// 39620,
+// 39940,
+// 39952,
+// 40271,
+// 40279,
+// 40611,
+// 40618,
+// 40931,
+// 40939,
+// 41271,
+// 41278,
+// 41590,
+// 41598,
+// 41930,
+// 41938,
+// 42270,
+// 42277,
+// 43589,
+// 43597,
+// 44168,
+// 44176,
+// 44456,
+// 44468,
+// 44748,
+// 44756,
+// 45036,
+// 45048,
+// 45907,
+// 45915,
+// 46196,
+// 46207,
+// 46486,
+// 46494,
+// 46786,
+// 46793,
+// 47365,
+// 47373,
+// 47646,
+// 47653,
+// 47945,
+// 47953,
+// 48225,
+// 48232,
+// 48524,
+// 48532,
+// 49384,
+// 49392,
+// 49683,
+// 49691,
+// 49964,
+// 49971,
+// 50263,
+// 50271,
+// 50843,
+// 50850,
+// 51422,
+// 51430,
+// 51862,
+// 51869,
+// 52002,
+// 52010,
+// 52581,
+// 52589,
+// 53161,
+// 53169,
+// 53601,
+// 53608,
+// 53740,
+// 53748,
+// 54320,
+// 54328,
+// 54609,
+// 54620,
+// 54900,
+// 54907,
+// 55189,
+// 55199,
+// 55479,
+// 55487,
+// 56059,
+// 56067,
+// 56639,
+// 56646,
+// 57218,
+// 57226,
+// 57798,
+// 57805,
+// 58457,
+// 58465,
+// 58797,
+// 58805,
+// 59125,
+// 59136,
+// 59796,
+// 59803,
+// 60116,
+// 60124,
+// 60456,
+// 60463,
+// 60783,
+// 60795,
+// 61115,
+// 61123,
+// 61774,
+// 61783,
+// 62434,
+// 62442,
+// 62774,
+// 62782,
+// 63103,
+// 63114,
+// 63433,
+// 63441,
+// 63773,
+// 63780,
+// 64093,
+// 64101,
+// 64433,
+// 64440,
+// 64761,
+// 64772,
+// 65092,
+// 65100,
+// 65751,
+// 65759,
+// 66419,
+// 66431,
+// 66750,
+// 66758,
+// 67090,
+// 67097,
+// 67410,
+// 67418,
+// 67750,
+// 67757,
+// 68069,
+// 68077,
+// 68410,
+// 68417,
+// 68738,
+// 68749,
+// 69069,
+// 69077,
+// 69728,
+// 69737,
+// 70396,
+// 70408,
+// 71068,
+// 71075,
+// 71727,
+// 71735,
+// 72387,
+// 72395,
+// 73047,
+// 73054,
+// 74374,
+// 74385,
+// 74866,
+// 74873,
+// 75625,
+// 75632,
+// 75865,
+// 75872,
+// 76364,
+// 76372,
+// 76864,
+// 76872,
+// 77364,
+// 77372,
+// 77864,
+// 77871,
+// 78352,
+// 78363,
+// 78603,
+// 78611,
+// 78843,
+// 78851,
+// 79103,
+// 79110,
+// 79343,
+// 79351,
+// 79603,
+// 79610,
+// 79842,
+// 79850,
+// 80342,
+// 80350,
+// 80582,
+// 80590,
+// 80842,
+// 80849,
+// 81341,
+// 81349,
+// 81841,
+// 81848,
+// 82329,
+// 82341,
+// 82821,
+// 82828,
+// 83580,
+// 83588,
+// 83820,
+// 83828,
+// 84320,
+// 84328,
+// 84560,
+// 84567,
+// 84819,
+// 84827,
+// 85559,
+// 85567,
+// 85819,
+// 85826,
+// 86307,
+// 86318,
+// 86558,
+// 86566,
+// 86798,
+// 86806,
+// 87058,
+// 87066,
+// 87298,
+// 87306,
+// 87797,
+// 87806,
+// 88047,
+// 88058,
+// 88297,
+// 88305,
+// 88797,
+// 88805,
+// 89296,
+// 89304,
+// 89796,
+// 89804,
+// 90285,
+// 90296,
+// 90776,
+// 90784,
+// 91275,
+// 91284,
+// 91535,
+// 91543,
+// 92025,
+// 92035,
+// 92275,
+// 92283,
+// 92774,
+// 92783,
+// 93274,
+// 93282,
+// 93774,
+// 93782,
+// 94262,
+// 94274,
+// 94753,
+// 94761,
+// 95253,
+// 95261,
+// 95513,
+// 95521,
+// 95753,
+// 95760,
+// 96002,
+// 96012,
+// 96253,
+// 96260,
+// 96752,
+// 96760,
+// 97252,
+// 97259,
+// 97751,
+// 97759,
+// 98240,
+// 98251,
+// 98731,
+// 98739,
+// 99231,
+// 99238,
+// 99490,
+// 99498,
+// 99990,
+// 99997,
+// 100069
+
+// };
+
+
+
+const uint32_t MUSIC_TIMING[] = {
+0,
+7.972,
+499.402,
+507.345,
+1239.155,
+1246.915,
+1486.988,
+1498.504,
+1978.485,
+1986.135,
+2477.608,
+2485.89,
+2977.531,
+2985.234,
+3476.742,
+3485.012,
+3976.526,
+3984.354,
+4216.1,
+4224.27,
+4476.055,
+4483.668,
+4715.713,
+4723.855,
+4975.646,
+4983.101,
+5215.28,
+5223.448,
+5475.251,
+5482.568,
+5963.141,
+5974.626,
+6214.72,
+6222.387,
+6454.313,
+6462.491,
+6954.357,
+6962.023,
+7453.624,
+7461.892,
+7953.691,
+7961.352,
+8452.793,
+8461.126,
+9192.867,
+9200.642,
+9452.332,
+9460.077,
+9940.75,
+9952.133,
+10191.923,
+10200.067,
+10432.143,
+10439.687,
+11191.14,
+11199.189,
+11431.529,
+11439.092,
+11930.861,
+11939.134,
+12178.845,
+12190.851,
+12430.409,
+12438.662,
+12670.817,
+12678.358,
+12930.18,
+12938.213,
+13430.08,
+13437.6,
+13669.854,
+13678.009,
+13919.112,
+13929.893,
+14409.374,
+14417.651,
+14909.454,
+14917.125,
+15408.764,
+15417.023,
+15908.825,
+15916.49,
+16408.118,
+16416.381,
+16907.866,
+16915.69,
+17147.64,
+17155.794,
+17647.684,
+17655.34,
+17907.063,
+17914.782,
+18395.001,
+18406.844,
+18886.432,
+18894.685,
+19386.443,
+19394.129,
+19885.738,
+19893.997,
+20385.762,
+20393.437,
+20884.842,
+20893.168,
+21125.234,
+21132.779,
+21384.583,
+21392.539,
+21624.889,
+21632.418,
+21884.245,
+21892.017,
+22372.704,
+22384.026,
+22863.555,
+22871.818,
+23363.529,
+23371.224,
+23862.805,
+23871.069,
+24362.828,
+24370.49,
+24861.942,
+24870.356,
+25102.289,
+25109.86,
+25601.557,
+25609.85,
+25861.549,
+25869.021,
+26350.888,
+26360.99,
+26848.94,
+26860.828,
+27340.425,
+27348.692,
+27840.485,
+27848.167,
+28339.784,
+28348.051,
+28839.847,
+28847.528,
+29079.292,
+29087.475,
+29339.325,
+29346.962,
+29578.959,
+29587.14,
+29838.977,
+29846.462,
+30338.364,
+30346.149,
+30826.407,
+30838.185,
+31817.477,
+31825.872,
+32817.334,
+32825.151,
+33316.531,
+33324.865,
+33816.602,
+33824.242,
+34316.244,
+34324.005,
+34556.58,
+34564.162,
+34804.449,
+34816.025,
+35296.2,
+35303.891,
+35795.556,
+35803.833,
+36295.647,
+36303.341,
+36794.925,
+36803.228,
+37055.158,
+37059.831,
+
+
+};
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name           : Slow Glow 
+ * @description:   : Randomly changes colours of pixels, and blends to the new one
+ * 
+ * @param intensity: 0-255 is how many should pixels should randomly change (0-255 scaled to 0-pixel_count)
+ * @param speed    : None
+ * @param rate     : Period of time (ms) between updates
+ * @param time     : Blend time
+ * 
+ * 
+ * Method 1: Inside the music function, when aux0 is reseting, then "playTrack" should be started where another driver for the music should be called.
+ *           Wait until finished, or with timeout, and then use the start time as the animation sync start and play the effect until the end.
+ * 
+ * Method 2: Could be started same as above. I may want to call any other effect and simple apply the music as a trigger. Or introduce animation trigger methods where
+ *            - using speed/intensity
+ *            - using sound reactive, which uses a microphone to then call each animation
+ *            - using prerecorded tracks, ie christmas music controller
+ * 
+ *            Method 2 would allow animations to be applied to any current and future animation, and simply be triggering calls for the animation to update. 
+ * 
+ *            Playlists in this case could actually be used to literally link sound/animations together.
+ * 
+ * 
+ * 
+ * 
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Christmas_Musical__01()
+{
+
+  uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
+
+  if (!SEGMENT.allocateData(dataSize)){    
+    ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
+    SEGMENT.effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+    return;
+  }
+
+
+
+  if(SEGMENT.params_internal.aux0 == 0)
+  {
+
+  }
+  if(SEGMENT.params_internal.aux0 == ARRAY_SIZE(MUSIC_TIMING))
+  {
+    SEGMENT.params_internal.aux0 = 0;
+    SEGMENT.tSaved_EffectStartReferenceTime = millis();
+    
+  }
+
+  SEGMENT.params_internal.aux0++;
+
+
+  uint32_t time_from_reference = millis() - SEGMENT.tSaved_EffectStartReferenceTime;
+
+
+  // ALOG_INF(PSTR("EffectAnim__Christmas_Musical__01 aux0 = %d %d/%d"), SEGMENT.params_internal.aux0, 
+  //   SEGMENT.tSaved_EffectStartReferenceTime,
+  //   time_from_reference
+
+  
+  
+  // );
+
+
+
+  uint32_t next_time = 0;
+  if(SEGMENT.params_internal.aux0 < ARRAY_SIZE(MUSIC_TIMING))
+  {
+    next_time = MUSIC_TIMING[SEGMENT.params_internal.aux0+1] - MUSIC_TIMING[SEGMENT.params_internal.aux0];
+
+      
+    // ALOG_INF(PSTR("EffectAnim__Christmas_Musical__01 aux0 = %d|%d next=%d"), 
+    // MUSIC_TIMING[SEGMENT.params_internal.aux0+1], MUSIC_TIMING[SEGMENT.params_internal.aux0],
+    // next_time
+    // );
+
+
+
+
+
+  }
+
+  
+  // for (uint16_t i = 0; i < c; i++) //fill from start until c
+    // SEGMENT.SetPixelColor(0, RgbcctColor( SEGMENT.params_internal.aux0,0,0  ));
+  // }
+
+  SEGMENT.transition.rate_ms = next_time;
+  SEGMENT.transition.time_ms = 0;
+  // SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  
+
+
+
+  // ALOG_INF(PSTR("EffectAnim__Christmas_Musical__01 aux0 = %d %d/%d"), SEGMENT.params_internal.aux0, 
+  //   SEGMENT.tSaved_EffectStartReferenceTime,
+  //   time_from_reference
+  // );
+
+
+  uint16_t* region_p          = &SEGMENT.params_internal.aux0;
+  uint16_t* indexes_active_p  = &SEGMENT.params_internal.aux1; // shared_flasher_parameters_segments.indexes.active
+  uint16_t* indexes_counter_p = &SEGMENT.params_internal.aux2; // shared_flasher_parameters_segments.indexes.counter
+
+  desired_pixel=0;
+    
+  uint8_t pixel_position = 0;
+  uint8_t pixels_in_map = GetNumberOfColoursInPalette(SEGMENT.palette.id);
+
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "pixels_in_map= %d"),pixels_in_map);
+  
+  desired_pixel = *indexes_active_p;
+  uint8_t pixels_map_upper_limit = *indexes_active_p+1;
+  uint8_t pixels_map_lower_limit = *indexes_active_p;
+
+  uint8_t index_1, index_2;
+  uint8_t counter = 0;
+      
+  //if last pixel, then include it and the first, else include it and the next
+  if(*indexes_active_p == pixels_in_map-1){ //wrap wround
+    index_1 = 0;
+    index_2 = *indexes_active_p;
+    counter = 0;
+  }else{
+    index_1 = *indexes_active_p;
+    index_2 = *indexes_active_p+1;
+    counter = 1;
+
+  }
+
+  *indexes_counter_p ^= 1;
+
+  // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEO "counter = %d/%d/%d"), counter,index_1,index_2);
+
+  RgbcctColor colour;
+
+  for(uint16_t index=SEGMENT.pixel_range.start;
+                index<=SEGMENT.pixel_range.stop;
+                index++
+  ){
+
+    if(counter^=1){
+      desired_pixel = *indexes_counter_p ? index_2 : index_1;
+    }else{
+      desired_pixel = *indexes_counter_p ? index_1 : index_2;
+    }
+    
+    colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_pixel, &pixel_position);
+    
+    colour = ApplyBrightnesstoRgbcctColour(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.data, SEGMENT.DataLength(), index, SEGMENT.colour_type, colour);
+        
+  } 
+
+//messy
+  if(++*indexes_active_p>pixels_in_map-1){
+    *indexes_active_p=0;
+  }
+  
+  
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  
+  SetSegment_AnimFunctionCallback(  SEGIDX, 
+    [this](const AnimationParam& param){ 
+      this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); 
+    }
+  );
+
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
 

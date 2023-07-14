@@ -1,5 +1,5 @@
-#ifndef _M_PALETTE_CONTAINER_H
-#define _M_PALETTE_CONTAINER_H
+#ifndef _M_PALETTE_LOADED_H
+#define _M_PALETTE_LOADED_H
 
 #include "stdint.h"
 
@@ -10,13 +10,13 @@
 
 #include <vector>
 
-class mPaletteContainer
+class mPaletteLoaded
 {
 	public:
 	
-    mPaletteContainer(){};
+    mPaletteLoaded(){};
 
-    ~mPaletteContainer(){
+    ~mPaletteLoaded(){
 		deallocateData();
 	};
 
