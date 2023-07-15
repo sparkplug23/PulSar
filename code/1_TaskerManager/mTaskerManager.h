@@ -214,7 +214,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 
 #define D_TARGET_TASKER_NONE 0
 
-enum MODULE_IDS{
+enum TASKER_ID{
   // Core
   #ifdef USE_MODULE_CORE_HARDWAREPINS
     EM_MODULE_CORE_HARDWAREPINS_ID,
@@ -1078,7 +1078,11 @@ class mTaskerManager{
 
   public:
   
-    mTaskerInterface* pModule[EM_MODULE_LENGTH_ID] = {nullptr}; // Set to nullptr so init can be checked
+    // mTaskerInterface* pModule[EM_MODULE_LENGTH_ID] = {nullptr}; // Set to nullptr so init can be checked
+
+    std::vector<mTaskerInterface*> pModule;
+
+    // vectorise this!
 
   private:
     /* Prevent others from being created */
@@ -1096,6 +1100,8 @@ class mTaskerManager{
       }
       return instance;
     };
+
+    void addTasker(TASKER_ID id, mTaskerInterface* mod);
 
     int16_t GetModuleIndexbyFriendlyName(const char* c);
     int16_t GetModuleUniqueIDbyFriendlyName(const char* c);
@@ -1118,6 +1124,7 @@ class mTaskerManager{
 
     PGM_P GetModuleName(uint8_t id);
     PGM_P GetModuleFriendlyName(uint16_t module_id);
+
     uint16_t GetClassCount();
 
     

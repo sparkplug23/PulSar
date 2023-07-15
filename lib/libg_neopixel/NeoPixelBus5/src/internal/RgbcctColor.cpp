@@ -113,6 +113,54 @@ void RgbcctColor::Darken(uint8_t delta)
     }
 }
 
+void RgbcctColor::Fade(uint8_t fade)
+{
+    if (R > fade)
+    {
+        R /= fade;
+    }
+    else
+    {
+        R = 0;
+    }
+
+    if (G > fade)
+    {
+        G /= fade;
+    }
+    else
+    {
+        G = 0;
+    }
+
+    if (B > fade)
+    {
+        B /= fade;
+    }
+    else
+    {
+        B = 0;
+    }
+
+    if (WC > fade)
+    {
+        WC /= fade;
+    }
+    else
+    {
+        WC = 0;
+    }
+
+    if (WW > fade)
+    {
+        WW /= fade;
+    }
+    else
+    {
+        WW = 0;
+    }
+}
+
 void RgbcctColor::Lighten(uint8_t delta)
 {
     if (IsColorLess())

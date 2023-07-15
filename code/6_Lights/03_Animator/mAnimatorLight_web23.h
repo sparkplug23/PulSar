@@ -6,29 +6,6 @@
 
 
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
-
-
-
-
-
-
-
-
-
-#endif // USE_MODULE_NETWORK_WEBSERVER23
-
-
-
-
-
-
-
-
-
-
-
-
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 

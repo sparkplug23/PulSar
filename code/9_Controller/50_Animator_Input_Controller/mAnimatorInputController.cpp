@@ -16,6 +16,15 @@
 // #include "mSonoffIFan.h"
 
 
+//   #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
+//   user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
+//   user_input.selected.brightness_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[1];
+//   user_input.selected.effects_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[2];
+//   user_input.selected.intensity_id = pCONT_set->Settings.animation_settings.xmas_controller_params[3];
+//   PhysicalController_Convert_IDs_to_Internal_Parameters();
+//   #endif
+
+
 // #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
 
 // const char* mSonoffIFan::PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE_CONTROLLER_CEILINGFAN_CTR;

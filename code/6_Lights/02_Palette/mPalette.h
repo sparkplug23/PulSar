@@ -53,8 +53,18 @@ class mPalette
      ************************************************************************************************************************************
      ***************************************************************************************************************************************/
    
+    enum PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS{
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID = 0, // New scene colour, static
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID,
+      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
+    };
+
+    
     enum PALETTELIST_VARIABLE_HSBID__IDS{ // 10 TOTAL variable and can be deleted by the user, saved in memory
-      PALETTELIST_VARIABLE_HSBID_01__ID = 0,
+      PALETTELIST_VARIABLE_HSBID_01__ID = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID,
       PALETTELIST_VARIABLE_HSBID_02__ID,
       PALETTELIST_VARIABLE_HSBID_03__ID,
       PALETTELIST_VARIABLE_HSBID_04__ID,
@@ -67,20 +77,14 @@ class mPalette
       PALETTELIST_VARIABLE_HSBID_LENGTH__ID  // Count of total handlers and starting point for other modules
     };
     
-    enum PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS{
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_02__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_03__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_04__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_05__ID,
-      PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
-    };
+
+
 
     // One special buffer, block of memory allows any format of pallete (eg)
     // This will also require encoding of type of palette into the buffer somehow shared, with overlapping memory
     // first X amounts of the original buffer will be used for encoding type, but data pointer will remain the same
     enum PALETTELIST_VARIABLE_GENERIC__IDS{
-      PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID, // New scene colour, static
+      PALETTELIST_VARIABLE_GENERIC_01__ID = PALETTELIST_VARIABLE_HSBID_LENGTH__ID, // New scene colour, static
       // PALETTELIST_VARIABLE_GENERIC_02__ID, // New scene colour, static
       PALETTELIST_VARIABLE_GENERIC_LENGTH__ID    
     };

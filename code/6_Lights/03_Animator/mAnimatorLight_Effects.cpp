@@ -12,6 +12,591 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+
+void mAnimatorLight::LoadEffects()
+{
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                            PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                                 PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                             PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR);  
+  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                           PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,            &mAnimatorLight::EffectAnim__Shimmering_Palette,                        PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,     PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);
+  #endif  
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,             PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,       &mAnimatorLight::EffectAnim__Static_Gradient_Palette,     PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,          &mAnimatorLight::EffectAnim__Rotating_Palette_New,                      PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Rotating_Palette,                          PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,   &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,               PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,  &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,        PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Stepping_Palette,                          PM_EFFECTS_FUNCTION__STEP_THROUGH_PALETTE__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__ID,              &mAnimatorLight::EffectAnim__Popping_Decay_Palette,                PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__ID,              &mAnimatorLight::EffectAnim__Popping_Decay_Random,                  PM_EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__NAME_CTR);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID, &mAnimatorLight::EffectAnim__Blend_Palette_To_White,                  PM_EFFECTS_FUNCTION__BLEND_PALETTE);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
+    EffectAnim__Blend_Palette_Between_Another_Palette();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
+    EffectAnim__Twinkle_Palette_Onto_Palette();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID:
+    EffectAnim__Twinkle_Decaying_Palette();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING   
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR); 
+  case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
+    SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
+  break; 
+  #endif        
+  /**
+   * Static
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_STATIC__ID:
+    EffectAnim__Static();
+  break;
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:
+    EffectAnim__Static_Pattern();
+  break;
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:
+    EffectAnim__Tri_Static_Pattern();
+  break;
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_PERCENT__ID:
+    EffectAnim__Percent();
+  break;
+  #endif
+  /**
+   * One Colour
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:
+    EffectAnim__Random_Colour();
+  break;
+  #endif
+  /**
+   * Wipe/Sweep/Runners 
+   **/
+  case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:
+    EffectAnim__Colour_Wipe();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:
+    EffectAnim__Colour_Wipe_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:
+    EffectAnim__Colour_Sweep();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
+    EffectAnim__Colour_Sweep_Random();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  /**
+   * Fireworks
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
+    EffectAnim__Fireworks();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
+    EffectAnim__Exploding_Fireworks();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
+    EffectAnim__Fireworks_Starburst();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
+    EffectAnim__Fireworks_Starburst_Glows();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAIN__ID:
+    EffectAnim__Rain();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
+    EffectAnim__Exploding_Fireworks_NoLaunch();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  case EFFECTS_FUNCTION__WLED_SPOTS__ID:
+    EffectAnim__Spots();
+  break;
+  case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
+    EffectAnim__TriColour();
+  break;
+  case EFFECTS_FUNCTION__WLED_ANDROID__ID:
+    EffectAnim__Android();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:
+    EffectAnim__Running_Red_Blue();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:
+    EffectAnim__Running_Colour();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:
+    EffectAnim__Running_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_GRADIENT__ID:
+    EffectAnim__Gradient();
+  break;
+  case EFFECTS_FUNCTION__WLED_LOADING__ID:
+    EffectAnim__Loading();
+  break;
+  case EFFECTS_FUNCTION__WLED_POLICE__ID:
+    EffectAnim__Police();
+  break;
+  case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:
+    EffectAnim__Polce_All();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:
+    EffectAnim__Two_Dots();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:
+    EffectAnim__Two_Areas();
+  break;
+  case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:
+    EffectAnim__Multi_Comet();
+  break;
+  case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:
+    EffectAnim__Oscillate();
+  break;
+  case EFFECTS_FUNCTION__WLED_BPM__ID:
+    EffectAnim__BPM();
+  break;
+  case EFFECTS_FUNCTION__WLED_JUGGLE__ID:
+    EffectAnim__Juggle();
+  break;
+  case EFFECTS_FUNCTION__WLED_PALETTE__ID:
+    EffectAnim__Palette();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:
+    EffectAnim__ColourWaves();
+  break;
+  case EFFECTS_FUNCTION__WLED_LAKE__ID:
+    EffectAnim__Lake();
+  break;
+  case EFFECTS_FUNCTION__WLED_GLITTER__ID:
+    EffectAnim__Glitter();
+  break;
+  case EFFECTS_FUNCTION__WLED_METEOR__ID:
+    EffectAnim__Meteor();
+  break;
+  case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:
+    EffectAnim__Metoer_Smooth();
+  break;
+  case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:
+    EffectAnim__Pride_2015();
+  break;
+  case EFFECTS_FUNCTION__WLED_PACIFICA__ID:
+    EffectAnim__Pacifica();
+  break;
+  case EFFECTS_FUNCTION__WLED_SUNRISE__ID:
+    EffectAnim__Sunrise();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:
+    EffectAnim__Sinewave();
+  break;
+  case EFFECTS_FUNCTION__WLED_FLOW__ID:
+    EffectAnim__Flow();
+  break;
+  case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:
+    EffectAnim__Running_Lights();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:
+    EffectAnim__Rainbow_Cycle();
+  break;
+  case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:
+    EffectAnim__Merry_Christmas();
+  break;
+  case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:
+    EffectAnim__Halloween();
+  break;
+  /**
+   * Chase
+   **/
+  case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:
+    EffectAnim__Chase_Colour();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:
+    EffectAnim__Chase_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:
+    EffectAnim__Chase_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:
+    EffectAnim__Chase_Flash();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:
+    EffectAnim__Chase_Flash_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:
+    EffectAnim__Chase_Rainbow_White();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:
+    EffectAnim__Chase_Theater();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:
+    EffectAnim__Chase_Theatre_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:
+    EffectAnim__Chase_TriColour();
+  break;
+  case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:
+    EffectAnim__Circus_Combustus();
+  break;
+  /**
+   *  Breathe/Fade/Pulse
+   **/    
+  case EFFECTS_FUNCTION__WLED_BREATH__ID:
+    EffectAnim__Breath();
+  break;
+  case EFFECTS_FUNCTION__WLED_FADE__ID:
+    EffectAnim__Fade();
+  break;
+  case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:
+    EffectAnim__Fade_TriColour();
+  break;
+  case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:
+    EffectAnim__Fade_Spots();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+  /**
+   * Sparkle/Twinkle
+   **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:
+    EffectAnim__Solid_Glitter();
+  break;
+  case EFFECTS_FUNCTION__WLED_POPCORN__ID:
+    EffectAnim__Popcorn();
+  break;
+  case EFFECTS_FUNCTION__WLED_PLASMA__ID:
+    EffectAnim__Plasma();
+  break;
+  case EFFECTS_FUNCTION__WLED_SPARKLE__ID:
+    EffectAnim__Sparkle();
+  break;
+  case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:
+    EffectAnim__Sparkle_Flash();
+  break;
+  case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:
+    EffectAnim__Sparkle_Hyper();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLE__ID:
+    EffectAnim__Twinkle();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:
+    EffectAnim__Twinkle_Colour();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:
+    EffectAnim__Twinkle_Fox();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:
+    EffectAnim__Twinkle_Cat();
+  break;
+  case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:
+    EffectAnim__Twinkle_Up();
+  break;
+  case EFFECTS_FUNCTION__WLED_SAW__ID:
+    EffectAnim__Saw();
+  break;
+  case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:
+    EffectAnim__Dissolve();
+  break;
+  case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:
+    EffectAnim__Dissolve_Random();
+  break;
+  case EFFECTS_FUNCTION__WLED_COLORFUL__ID:
+    EffectAnim__ColourFul();
+  break;
+  case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
+    EffectAnim__Traffic_Light();
+  break;
+  /**
+   * Blink/Strobe
+   **/
+  case EFFECTS_FUNCTION__WLED_BLINK__ID:
+    EffectAnim__Blink();
+  break;
+  case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:
+    EffectAnim__Blink_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_STROBE__ID:
+    EffectAnim__Strobe();
+  break;
+  case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:
+    EffectAnim__Strobe_Multi();
+  break;
+  case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:
+    EffectAnim__Strobe_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAINBOW__ID:
+    EffectAnim__Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:
+    EffectAnim__Lightning();
+  break;
+  case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:
+    EffectAnim__Fire_2012();
+  break;
+  case EFFECTS_FUNCTION__WLED_RAILWAY__ID:
+    EffectAnim__Railway();
+  break;
+  case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:
+    EffectAnim__Heartbeat();
+  break;
+  /**
+   * Noise
+   **/
+  case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:
+    EffectAnim__FillNoise8();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:
+    EffectAnim__Noise16_1();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:
+    EffectAnim__Noise16_2();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:
+    EffectAnim__Noise16_3();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:
+    EffectAnim__Noise16_4();
+  break;
+  case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:
+    EffectAnim__Noise_Pal();
+  break;
+  case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:
+    EffectAnim__PhasedNoise();
+  break;
+  case EFFECTS_FUNCTION__WLED_PHASED__ID:
+    EffectAnim__Phased();
+  break;
+  /**
+   * Scan
+   **/
+  case EFFECTS_FUNCTION__WLED_SCAN__ID:
+    EffectAnim__Scan();
+  break;
+  case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:
+    EffectAnim__Scan_Dual();
+  break;
+  case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:
+    EffectAnim__Larson_Scanner();
+  break;
+  case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:
+    EffectAnim__Larson_Scanner_Dual();
+  break;
+  case EFFECTS_FUNCTION__WLED_ICU__ID:
+    EffectAnim__ICU();
+  break;
+  case EFFECTS_FUNCTION__WLED_RIPPLE__ID:
+    EffectAnim__Ripple();
+  break;
+  case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:
+    EffectAnim__Ripple_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_COMET__ID:
+    EffectAnim__Comet();
+  break;
+  case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:
+    EffectAnim__Chunchun();
+  break;
+  case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:
+    EffectAnim__Bouncing_Balls();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINELON__ID:
+    EffectAnim__Sinelon();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:
+    EffectAnim__Sinelon_Dual();
+  break;
+  case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:
+    EffectAnim__Sinelon_Rainbow();
+  break;
+  case EFFECTS_FUNCTION__WLED_DRIP__ID:
+    EffectAnim__Drip();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
+    EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
+    EffectAnim__SunPositions_Elevation_Palette_Progress_Step();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
+  case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
+    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
+    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
+  break;
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
+  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
+    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+  break;   
+  #endif 
+  // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
+  //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
+  //  break;
+  //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
+  //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
+  //  break;
+  /**
+   * Development effects without full code 
+   **/          
+  //  case EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID:
+  //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
+  //  break;
+  //  case EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID:
+  //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
+  //  break;
+  //  case EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID:
+  //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
+  //  break;
+  //  case EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID:
+  //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
+  //  break;
+  //  case EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID:
+  //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
+  //  break;
+  //  case EFFECTS_FUNCTION__FADE_GRADIENT__ID:
+  //    SubTask_Flasher_Animate_Function_Fade_Gradient();
+  //  break;
+  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON:
+  //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
+  //  break;
+  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID:
+  //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
+  //  break;
+  // EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
+  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF__ID:
+  //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
+  //  break;
+  //  case EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
+  //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
+  //  break;
+  //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
+  //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
+  //  break;        
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
+    SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
+  break;
+  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
+    SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
+  break;
+  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
+    SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
+  break;
+  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:
+    SubTask_Flasher_Animate_LCD_Display_Show_String_01();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
+  case EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID:
+    SubTask_Segment_Animate_Function__Notification_Static();
+  break;
+  case EFFECTS_FUNCTION__NOTIFICATION_FADE__ID:
+    SubTask_Segment_Animate_Function__Notification_Fade();
+  break;
+  case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
+    SubTask_Segment_Animate_Function__Notification_Blinking();
+  break;
+  case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
+    SubTask_Segment_Animate_Function__Notification_Pulsing();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  case EFFECTS_FUNCTION__TESTER_01__ID:
+    SubTask_Flasher_Animate_Function_Tester_01();
+  break; 
+  case EFFECTS_FUNCTION__TESTER_02__ID:
+    SubTask_Flasher_Animate_Function_Tester_02();
+  break; 
+  // testing to replacement
+  case EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID:
+    EffectAnim__Static_Palette_New();
+  break;
+  case EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID:
+    EffectAnim__Slow_Glow_New();
+  break;
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  addEffect3(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                  &mAnimatorLight::EffectAnim__Christmas_Musical__01,                              PM_EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01__NAME_CTR);
+  #endif 
+
+}
+
+
+
+
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name           : Solid Colour
@@ -174,6 +759,258 @@ void mAnimatorLight::EffectAnim__Slow_Glow()
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
+ * @name           : Based on accidently effect
+ * @description:   : Colours are added (with various methods) then fade off
+ * @note           : 
+ * 
+ * Ideas:
+ * - param to enable "instant" or popping in, or to have the introduction of new colours actually fade on before decaying away (hence, the fade direction may be needed? may be too complex)
+ * - fade off method, to have all fade together (using intensity), intensity should be for how many to pop-in, speed for how quickly they fade away
+ * - params could be used to signifying all fade together, or later, randomly pick fade rates. Though, fade together is probably visually nicer. Option would be good
+ * 
+ * 
+ * @param intensity: Depth of variation from max/min brightness
+ * @param speed    : How often it occurs
+ * @param rate     : None
+ * @param time     : None
+ * @param aux0     : brightness saved
+ * @param aux1     : target brightness
+ * @param aux2     : (U) Second target palette
+ * @param aux3     : Reserved for random palette refresh rate
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+/**
+ * @description:   : Randomly redraw palette in the correct order, with fade always being calculated (though on next count so at least one step away)
+ **/
+void mAnimatorLight::EffectAnim__Popping_Decay_Palette()
+{
+  EffectAnim__Popping_Decay_Base(true);
+}
+/**
+ * @description:   : Randomly redraw random indexs, not ordered
+ **/
+void mAnimatorLight::EffectAnim__Popping_Decay_Random()
+{
+  EffectAnim__Popping_Decay_Base(false);
+}
+/**
+ * @description:   : Base function for flickering
+ * */
+void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
+{
+
+  ALOG_INF(PSTR("s=%d\t a0=%d\t a1=%d\t a2=%d"),    SEGMENT.step, SEGMENT.params_internal.aux0, SEGMENT.params_internal.aux1, SEGMENT.params_internal.aux2);
+
+  uint8_t pixels_in_palette = GetNumberOfColoursInPalette(SEGMENT.palette.id);
+
+  RgbcctColor colour_pri;
+  RgbcctColor colour_sec;
+  RgbcctColor colour_out;
+
+  // if (draw_palette_inorder)
+  // {
+  //   uint16_t dataSize = (SEGLEN-1) *3;
+  //   if(!SEGMENT.allocateData(dataSize) ){ return; }
+  // }
+
+  
+  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength() )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
+    
+  RgbcctColor colour = RgbcctColor(0);
+
+
+
+  //max. flicker range controlled by intensity()
+  uint8_t valrange = SEGMENT.intensity();
+  uint8_t rndval = valrange >> 1;
+
+  #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+  ALOG_DBG(PSTR("step=%d"),    SEGMENT.step);
+  ALOG_DBG(PSTR("valrange=%d"),valrange);
+  ALOG_DBG(PSTR("rndval=%d"),  rndval);
+  #endif
+
+  uint8_t pixel_palette_counter = 0;
+
+  //step (how much to move closer to target per frame) coarsely set by speed()
+  uint8_t speedFactor = 4;
+
+    uint16_t i = 0;
+
+    #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+    ALOG_DBG(PSTR("i=%d|%d"),i,numCandles);
+    #endif
+
+    uint16_t d = 0; //data location
+
+    uint8_t s        = SEGMENT.params_internal.aux0, 
+            s_target = SEGMENT.params_internal.aux1, 
+            fadeStep = SEGMENT.step;
+
+    // if (i > 0) {
+    //   d = (i-1) *3;
+    //   s = SEGMENT.data[d]; 
+    //   s_target = SEGMENT.data[d+1]; 
+    //   fadeStep = SEGMENT.data[d+2];
+    // }
+
+    // if (fadeStep == 0) { //init vals
+    //   s = 128; s_target = 130 + random8(4); fadeStep = 1;
+    // }
+
+    // bool newTarget = false;
+    // if (s_target > s) { //fade up
+
+    //   #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+    //   ALOG_DBG(PSTR("fade up s_target > s %d=%d"), s_target, s);
+    //   #endif
+
+    //   s = qadd8(s, fadeStep);
+    //   if (s >= s_target) newTarget = true;
+    // } else {
+    //   s = qsub8(s, fadeStep);
+    //   if (s <= s_target) newTarget = true;
+          
+    //   #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+    //   ALOG_DBG(PSTR("fade down=%d"),s);
+    //   #endif
+
+    // }
+
+    // if (newTarget) {
+    //   s_target = random8(rndval) + random8(rndval);
+    //   if (s_target < (rndval >> 1)) s_target = (rndval >> 1) + random8(rndval);
+    //   uint8_t offset = (255 - valrange) >> 1;
+    //   s_target += offset;
+
+    //   uint8_t dif = (s_target > s) ? s_target - s : s - s_target;
+    
+    //   fadeStep = dif >> speedFactor;
+    //   if (fadeStep == 0) fadeStep = 1;
+    // }
+
+    /**
+     * @brief aux2
+     * 
+     */
+
+    bool redraw_all_pixels = false;
+    bool do_fade = false;
+
+    uint16_t* drawmode = &SEGMENT.params_internal.aux2;
+
+
+
+    /*
+    @ redraw when aux2 is zero
+    */
+    if(*drawmode == 0)
+    {
+      redraw_all_pixels = true;
+      do_fade = false;
+    }else
+    if(*drawmode>10) // Reset
+    {
+      *drawmode = 0;
+      do_fade = false;
+    }else{
+      do_fade = true;
+    }
+
+    *drawmode = *drawmode + 1;
+
+    /**
+     * @brief ReDraw all (either as option, or first run of animation)
+     * 
+     */
+    if(redraw_all_pixels)
+    {
+
+      ALOG_INF(PSTR("redraw_all_pixels"));
+
+      pixel_palette_counter = 0;      
+      for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
+      {
+        if(draw_palette_inorder)
+        {
+          // Cycle through palette index pal_i
+          if(pixel_palette_counter++ >= pixels_in_palette-1){ pixel_palette_counter = 0; }
+        }
+        else
+        {
+          pixel_palette_counter = random(0, pixels_in_palette-1); // Randon colour from palette
+        }
+
+        colour = SEGMENT.GetColourFromPalette(pixel_palette_counter);      
+        colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+        SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
+      }
+
+    }
+
+    /**
+     * @brief Decay test
+     * 
+     */
+    if(do_fade)
+    {
+      
+      ALOG_INF(PSTR("do_fade"));
+
+      for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
+      {
+        colour_out = SEGMENT.GetPixelColor(pixel);
+        colour_out.Fade(2);// = ApplyBrightnesstoRgbcctColour(colour_out, pCONT_iLight->getBriRGB_Global());       
+        SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour_out);
+      }
+    }
+
+
+
+
+      /////////////////////
+    // for(uint16_t p = SEGMENT.pixel_range.start;
+    //             p <= SEGMENT.pixel_range.stop;
+    //             p++
+    // ){
+
+    //   colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);  // redraw palette
+    //   colour_sec = GetColourFromUnloadedPalette(0);
+
+    //   colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
+
+    //   if(pixel_palette_counter++ >= pixels_in_palette-1)
+    //   {
+    //     pixel_palette_counter = 0;
+    //   }
+
+    //   SEGMENT.SetPixelColor(p, colour_out);
+
+    // }
+
+    SEGMENT.params_internal.aux0 = s; 
+    SEGMENT.params_internal.aux1 = s_target; 
+    SEGMENT.step = fadeStep;
+
+  
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
+
+
+
+  // SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+
+
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
  * @name           : Candle Flicker Base Function
  * @description:   : Randomly changes colours of pixels, and blends to the new one
  *                   Values close to 100 (speed) produce 5Hz flicker, which looks very candle-y
@@ -233,7 +1070,7 @@ void mAnimatorLight::EffectAnim__Shimmering_Palette() // Same as Candle_Multiple
      *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
      *        option16 for 65000 value range
  * */
-void mAnimatorLight::EffectAnim__Shimmering_Palette_To_Another_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
+void mAnimatorLight::EffectAnim__Shimmering_Two_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
 {
   EffectAnim__Flicker_Base(true, SEGMENT.params_user.val0);
 }
@@ -398,7 +1235,6 @@ void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_p
 }
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
-
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Static Gradient Palette
@@ -415,7 +1251,7 @@ void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_p
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-void mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette()
+void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
 {
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 

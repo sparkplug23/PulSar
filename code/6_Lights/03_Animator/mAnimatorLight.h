@@ -144,6 +144,16 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
  **/
 #include "6_Lights/03_Animator/mAnimatorLight_ProgMem_Defines.h"
 
+#ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+
+#define ARDUINOJSON_DECODE_UNICODE 0
+#include "3_Network/21_WebServer/AsyncJson-v6.h"
+#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+
+#include "6_Lights/03_Animator/WebUI_01/mWebUI_Headers.h" // Not inside the class
+#endif
+
+
 
 #include <functional>
 // #define ANIM_FUNCTION_SIGNATURE_TWO_COLOURS         std::function<void(const AnimationParam& param, RgbcctColor c1, RgbcctColor c2)>  anim_function_callback
@@ -364,11 +374,6 @@ class mAnimatorLight :
 
     timereached_t tSavedCalculatePowerUsage;
     #endif // ENABLE_PIXEL_OUTPUT_POWER_ESTIMATION
-
-    #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-    void SubTask_Manual_SetPixel();
-    uint8_t ConstructJSON_Manual_SetPixel(uint8_t json_level = 0, bool json_appending = true);
-    #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 
     void LoadPalette(uint8_t palette_id, uint8_t segment_index = 0, mPaletteLoaded* palette_container = nullptr);
 
@@ -767,6 +772,10 @@ class mAnimatorLight :
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
     // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
         
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__ID,
+    EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__ID,
+    #endif
         
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
@@ -1175,29 +1184,30 @@ class mAnimatorLight :
   void SubTask_Segments_Effects();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
   
-  //realtime modes
-  #define REALTIME_MODE_INACTIVE    0
-  #define REALTIME_MODE_GENERIC     1
-  #define REALTIME_MODE_UDP         2
-  #define REALTIME_MODE_HYPERION    3
-  #define REALTIME_MODE_E131        4
-  #define REALTIME_MODE_ADALIGHT    5
-  #define REALTIME_MODE_ARTNET      6
-  #define REALTIME_MODE_TPM2NET     7
+  // //realtime modes
+  // #define REALTIME_MODE_INACTIVE    0
+  // #define REALTIME_MODE_GENERIC     1
+  // #define REALTIME_MODE_UDP         2
+  // #define REALTIME_MODE_HYPERION    3
+  // #define REALTIME_MODE_E131        4
+  // #define REALTIME_MODE_ADALIGHT    5
+  // #define REALTIME_MODE_ARTNET      6
+  // #define REALTIME_MODE_TPM2NET     7
 
-  //realtime override modes
-  #define REALTIME_OVERRIDE_NONE    0
-  #define REALTIME_OVERRIDE_ONCE    1
-  #define REALTIME_OVERRIDE_ALWAYS  2
+  // //realtime override modes
+  // #define REALTIME_OVERRIDE_NONE    0
+  // #define REALTIME_OVERRIDE_ONCE    1
+  // #define REALTIME_OVERRIDE_ALWAYS  2
+// WLED_GLOBAL byte realtimeMode _INIT(REALTIME_MODE_INACTIVE);
   
-  // realtime
+  // // realtime
   byte realtimeMode = REALTIME_MODE_INACTIVE;
-  byte realtimeOverride = REALTIME_OVERRIDE_NONE;
-  IPAddress realtimeIP = IPAddress(0,0,0,0);// = (({0, 0, 0, 0}));
-  unsigned long realtimeTimeout = 0;
-  uint8_t tpmPacketCount = 0;
-  uint16_t tpmPayloadFrameSize = 0;
-  bool useMainSegmentOnly = false;
+  // byte realtimeOverride = REALTIME_OVERRIDE_NONE;
+  // IPAddress realtimeIP = IPAddress(0,0,0,0);// = (({0, 0, 0, 0}));
+  // unsigned long realtimeTimeout = 0;
+  // uint8_t tpmPacketCount = 0;
+  // uint16_t tpmPayloadFrameSize = 0;
+  // bool useMainSegmentOnly = false;
 
   #define NUM_COLORS2       3 /* number of colors per segment */
 
@@ -1293,17 +1303,22 @@ class mAnimatorLight :
   void EffectAnim__Candle_Single();
   void EffectAnim__Candle_Multiple();
   void EffectAnim__Shimmering_Palette();
-  void EffectAnim__Shimmering_Palette_To_Another_Palette();
+  void EffectAnim__Shimmering_Two_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Shimmering_Palette_Saturation();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void SubTask_Segment_Animate_Function__Static_Gradient_Palette();
+  void EffectAnim__Static_Gradient_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Stepping_Palette();
   #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  void EffectAnim__Popping_Decay_Palette();
+  void EffectAnim__Popping_Decay_Random();
+  void EffectAnim__Popping_Decay_Base(bool draw_palette_inorder);
+  #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Rotating_Palette_New();
   #endif
@@ -1665,7 +1680,6 @@ class mAnimatorLight :
 
   void setValuesFromMainSeg();
   void resetTimebase();
-  void toggleOnOff();
   void setAllLeds();
   void setLedsStandard(bool justColors = false);
   bool colorChanged();
@@ -1895,8 +1909,10 @@ typedef struct Segment_New {
     void setUp(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1);
     
     uint8_t effect_id = 0;
-    /**
-     * @brief Allow a second effect to be loaded at the same time, this will enable a single effect to show just once, and then the id_next will be loaded into the primary position
+    /***
+     * @brief 
+     * 
+     *
      * e.g. For rotating effect, preload the initial animation and then rotate it
      * 
      */
@@ -2059,8 +2075,6 @@ typedef struct Segment_New {
   // public:
 
     Segment_New(uint16_t sStart=0, uint16_t sStop=30) :
-      // start(sStart),
-      // stop(sStop),
       offset(0),
       _speed(DEFAULT_SPEED),
       _intensity(DEFAULT_INTENSITY),
@@ -2069,7 +2083,6 @@ typedef struct Segment_New {
       grouping(1),
       spacing(0),
       opacity(255),
-      // colors{DEFAULT_COLOR,BLACK,BLACK},
       cct(127),
       custom1(DEFAULT_C1),
       custom2(DEFAULT_C2),
@@ -2083,8 +2096,6 @@ typedef struct Segment_New {
       next_time(0),
       step(0),
       call(0),
-      // aux0(0),
-      // aux1(0),
       data(nullptr),
       leds(nullptr),
       _capabilities(0),
@@ -2129,12 +2140,7 @@ typedef struct Segment_New {
 
     Segment_New(const Segment_New &orig) // copy constructor
      {
-      // DEBUG_LINE_HERE;
       Serial.println(F("-- Copy segment constructor --"));
-      
-
-      // Serial.println(F("-- Copy segment constructor -- palette_container = new mPaletteLoaded(0);"));
-      // palette_container = new mPaletteLoaded(0);
 
       memcpy(this, &orig, sizeof(Segment_New));
       name = nullptr;
@@ -2147,15 +2153,12 @@ typedef struct Segment_New {
       if (orig._t)   { _t = new Transition(orig._t->_dur, orig._t->_briT, orig._t->_cctT, orig._t->_colorT); }
       if (orig.leds && !Segment_New::_globalLeds) { leds = (CRGB*)malloc(sizeof(CRGB)*length()); if (leds) memcpy(leds, orig.leds, sizeof(CRGB)*length()); }
     
-      // DEBUG_LINE_HERE;
-  
     };
-
 
 
     Segment_New(Segment_New &&orig) noexcept // move constructor
     {
-      // DEBUG_LINE_HERE;
+
       Serial.println(F("-- Move segment constructor --"));
       memcpy(this, &orig, sizeof(mAnimatorLight::Segment_New));
       orig.name = nullptr;
@@ -2163,13 +2166,13 @@ typedef struct Segment_New {
       orig._dataLen = 0;
       orig._t   = nullptr;
       orig.leds = nullptr;
-      // DEBUG_LINE_HERE;
+      
     }
 
 
-    ~Segment_New() {
+    ~Segment_New() 
+    {
 
-      // DEBUG_LINE_HERE;
       #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
       Serial.print(F("Destroying segment:"));
       if (name) Serial.printf(" %s (%p)", name, name);
@@ -2180,10 +2183,10 @@ typedef struct Segment_New {
       if (!Segment_New::_globalLeds && leds) free(leds);
       if (name) delete[] name;
       if (_t) delete _t;
-      // DEBUG_LINE_HERE;
       deallocateData();
-      // DEBUG_LINE_HERE;
+
     }
+
 
     Segment_New& operator= (const Segment_New &orig); // copy assignment
     Segment_New& operator= (Segment_New &&orig) noexcept; // move assignment
@@ -2233,20 +2236,9 @@ typedef struct Segment_New {
       */
     inline void markForReset(void) 
     {
-      // Serial.println(DEBUG_INSERT_PAGE_BREAK "mAnimatorLight::Segment_New::markForReset()"); delay(5000);      
       reset = true; 
-    }  // setOption(SEG_OPTION_RESET, true)
+    }
     void setUpLeds(void);   // set up leds[] array for loseless getPixelColor()
-
-    // transition functions
-    void     startTransition(uint16_t dur); // transition has to start before actual segment values change
-    void     handleTransition(void);
-    uint16_t progress(void); //transition progression between 0-65535
-    uint8_t  currentBri(uint8_t briNew, bool useCct = false);
-    uint8_t  currentMode(uint8_t modeNew);
-    uint32_t currentColor(uint8_t slot, uint32_t colorNew);
-    CRGBPalette16 &loadPalette(CRGBPalette16 &tgt, uint8_t pal);
-    CRGBPalette16 &currentPalette(CRGBPalette16 &tgt, uint8_t paletteID);
 
     // 1D strip
     uint16_t virtualLength(void) const;
@@ -2264,8 +2256,7 @@ typedef struct Segment_New {
     void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool brightness_needs_applied = false);  
     void SetPixelColor(uint16_t indexPixel, uint32_t color, bool brightness_needs_applied = false);//, uint16_t segment_length = 0);
     void SetPixelColor_All(RgbcctColor colour);
-    
-    
+  
 
     // 1D support functions (some implement 2D as well)
     void blur(uint8_t);
@@ -2281,13 +2272,11 @@ typedef struct Segment_New {
 
 
     uint8_t get_random_wheel_index(uint8_t pos);
-    uint32_t color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255);
     uint32_t color_wheel(uint8_t pos);
 
     /**
      * @brief Adding Palette Get functions inside segment so it can automatically load buffers and set current palette_id
-     * 
-     */
+     **/
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
@@ -2299,11 +2288,8 @@ typedef struct Segment_New {
       bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
       uint8_t mcol = 0, // will be phased out
       bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      // uint8_t* discrete_colours_in_palette = nullptr
+      uint8_t  brightness_scale = 255 // 255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
     );
-
-
 
     // 2D matrix
     uint16_t virtualWidth(void)  const;
@@ -2370,7 +2356,6 @@ typedef struct Segment_New {
     void wu_pixel(uint32_t x, uint32_t y, CRGB c) {}
   #endif
 } segment_new;
-//static int segSize = sizeof(Segment_New);
 
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
@@ -2394,14 +2379,6 @@ int16_t GetPaletteIDbyName(char* buffer);
 
 RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
-/**
- * @brief Temporary use the WS2812FX class, but work towards removing it as the mAnimatorLight class is already the class
- * 
- */
-
-// // main "strip" class
-// class WS2812FX {  // 96 bytes
-
   typedef void (*mode_ptr)(void); // pointer to mode function
 
 
@@ -2412,69 +2389,6 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     const char *_data; // mode (effect) name and its UI control data
     ModeData(uint8_t id, void (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
   } mode_data_t;
-
-//   static WS2812FX* instance;
-//   public:
-
-//     WS2812FX() :
-//       paletteFade(0),
-//       paletteBlend(0),
-//       milliampsPerLed(55),
-//       cctBlending(0),
-//       ablMilliampsMax(0),//ABL_MILLIAMPS_DEFAULT),
-//       currentMilliamps(0),
-//       now(millis()),
-//       timebase(0),
-//       isMatrix(false),
-//       #ifndef WLED_DISABLE_2D
-//       hPanels(1),
-//       vPanels(1),
-//       panelH(8),
-//       panelW(8),
-//       matrix{0,0,0,0},
-//       panel{{0,0,0,0}},
-//       #endif
-//       // semi-private (just obscured) used in effect functions through macros
-//       _currentPalette(CRGBPalette16(HTMLColorCode::Black)),
-//       _colors_t{0,0,0},
-//       _virtualSegmentLength(0),
-//       // true private variables
-//       _length(DEFAULT_LED_COUNT),
-//       _brightness(DEFAULT_BRIGHTNESS),
-//       _transitionDur(750),
-//       _targetFps(WLED_FPS),
-//       _frametime(FRAMETIME_FIXED),
-//       _cumulativeFps(2),
-//       _isServicing(false),
-//       _isOffRefreshRequired(false),
-//       _hasWhiteChannel(false),
-//       _triggered(false),
-//       _effectsCount(EFFECTS_FUNCTION__LENGTH__ID),
-//       _callback(nullptr),
-//       customMappingTable(nullptr),
-//       customMappingSize(0),
-//       _lastShow(0),
-//       _segment_index_primary(0),
-//       _mainSegment(0)
-//     {
-//       WS2812FX::instance = this;
-//       _mode.reserve(_effectsCount);     // allocate memory to prevent initial fragmentation (does not increase size())
-//       _modeData.reserve(_effectsCount); // allocate memory to prevent initial fragmentation (does not increase size())
-//       if (_mode.capacity() <= 1 || _modeData.capacity() <= 1) _effectsCount = 1; // memory allocation failed only show Solid
-//       else setupEffectData();
-//     }
-
-//     ~WS2812FX() {
-//       if (customMappingTable) delete[] customMappingTable;
-//       _mode.clear();
-//       _modeData.clear();
-//       segments.clear();
-//       customPalettes.clear();
-//       if (useLedsArray && Segment_New::_globalLeds) free(Segment_New::_globalLeds);
-//     }
-
-//     static WS2812FX* getInstance(void) { return instance; }
-
 
     void
 #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
@@ -2526,27 +2440,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       bool _triggered            : 1;
     };
 
-
-
-
-    // typedef uint16_t (*mode_ptr)(void); // pointer to mode function
-    // typedef void (*show_callback)(void); // pre show callback
-
-    // typedef struct ModeData {
-    //   uint8_t     _id;   // mode (effect) id
-    //   mode_ptr    _fcn;  // mode (effect) function
-    //   const char *_data; // mode (effect) name and its UI control data
-    //   ModeData(uint8_t id, uint16_t (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
-    // } mode_data_t;
-
-    // std::vector<mode_ptr>    _mode;     // SRAM footprint: 4 bytes per element
-    // std::vector<const char*> _modeData; // mode (effect) name and its slider control data array
-    
-    // void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
-    void Init_Effects();
-
-
-
+    void LoadEffects();
 
     show_callback _callback;
 
@@ -2559,25 +2453,16 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     uint8_t _mainSegment;
 
     void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
-    void addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name); // add effect to the list; defined in FX.cpp
-    // void addEffect2(
-      
-    //   void (mAnimatorLight::*)()
 
-
-    // ); // add effect to the list; defined in FX.cpp
-
-    typedef void (mAnimatorLight::*RequiredFunction)();
-        
-    void addThingy(RequiredFunction func);
-
+    typedef void (mAnimatorLight::*RequiredFunction)();        
     void addEffect3(uint8_t id, RequiredFunction function, const char *name); // add effect to the list; defined in FX.cpp
 
-    std::vector<RequiredFunction> vectoroffunctions;
-
-    uint8_t                  _effectsCount;
-    std::vector<RequiredFunction>    _effects;     // SRAM footprint: 4 bytes per element
-    std::vector<const char*> _effectsData; // mode (effect) name and its slider control data array
+    struct EFFECTS
+    {
+      uint8_t                         count = 0;
+      std::vector<RequiredFunction>   function;     // SRAM footprint: 4 bytes per element
+      std::vector<const char*>        data; // mode (effect) name and its slider control data array
+    }effects;
 
 
     void setupEffectData(void); // add default effects to the list; defined in FX.cpp
@@ -2624,7 +2509,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline uint8_t getMainSegmentId(void) { return _mainSegment; }
     inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
     inline uint8_t getTargetFps() { return _targetFps; }
-    inline uint8_t getModeCount() { return _effectsCount; }
+    inline uint8_t getModeCount() { return effects.count; }
 
     uint16_t
       ablMilliampsMax,
@@ -2647,10 +2532,10 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline uint32_t segColor(uint8_t i) { return _colors_t[i]; }
 
     const char *
-      getModeData(uint8_t id = 0) { return (id && id<_effectsCount) ? _effectsData[id] : PSTR("Solid"); }
+      getModeData(uint8_t id = 0) { return (id && id<effects.count) ? effects.data[id] : PSTR("Solid"); }
 
     const char **
-      getModeDataSrc(void) { return &(_effectsData[0]); } // vectors use arrays for underlying data
+      getModeDataSrc(void) { return &(effects.data[0]); } // vectors use arrays for underlying data
 
     Segment_New&        getSegment(uint8_t id);
     inline Segment_New& getFirstSelectedSeg(void) { return segments[getFirstSelectedSegId()]; }
@@ -2695,174 +2580,214 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
   // end 2D support
 
-    void loadCustomPalettes(void); // loads custom palettes from JSON
-    CRGBPalette16 _currentPalette; // palette used for current effect (includes transition)
+    void loadCustomPalettes(void);
     std::vector<CRGBPalette16> customPalettes; // TODO: move custom palettes out of WS2812FX class
 
-
-    void
-      estimateCurrentAndLimitBri(void);
-
+    void estimateCurrentAndLimitBri(void);
 
     #ifdef ENABLE_DEVFEATURE_LIGHT__HYPERION
-    uint16_t udpRgbPort = 19446; // Hyperion port
+    // uint16_t udpRgbPort = 19446; // Hyperion port
 
 #define WLED_GLOBAL
 #define _INIT(x) = x
 # define _INIT_N(x)
 
 
-//if true, a segment per bus will be created on boot and LED settings save
-//if false, only one segment spanning the total LEDs is created,
-//but not on LED settings save if there is more than one segment currently
-WLED_GLOBAL bool autoSegments    _INIT(false);
-WLED_GLOBAL bool correctWB       _INIT(false); // CCT color correction of RGB color
-WLED_GLOBAL bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
-WLED_GLOBAL bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
-WLED_GLOBAL bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
-WLED_GLOBAL float gammaCorrectVal _INIT(2.8f); // gamma correction value
+// //if true, a segment per bus will be created on boot and LED settings save
+// //if false, only one segment spanning the total LEDs is created,
+// //but not on LED settings save if there is more than one segment currently
+// WLED_GLOBAL bool autoSegments    _INIT(false);
+// WLED_GLOBAL bool correctWB       _INIT(false); // CCT color correction of RGB color
+// WLED_GLOBAL bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
+// WLED_GLOBAL bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
+// WLED_GLOBAL bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
+// WLED_GLOBAL float gammaCorrectVal _INIT(2.8f); // gamma correction value
 
-WLED_GLOBAL byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
-WLED_GLOBAL byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
-WLED_GLOBAL byte briS     _INIT(128);                     // default brightness
+// WLED_GLOBAL byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
+// WLED_GLOBAL byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
+// WLED_GLOBAL byte briS     _INIT(128);                     // default brightness
 
-WLED_GLOBAL byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
-WLED_GLOBAL byte nightlightDelayMins _INIT(60);
-WLED_GLOBAL byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
-WLED_GLOBAL bool fadeTransition      _INIT(true);   // enable crossfading color transition
-WLED_GLOBAL uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
+// WLED_GLOBAL byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
+// WLED_GLOBAL byte nightlightDelayMins _INIT(60);
+// WLED_GLOBAL byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
+// WLED_GLOBAL bool fadeTransition      _INIT(true);   // enable crossfading color transition
+// WLED_GLOBAL uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
 
 WLED_GLOBAL Toki toki _INIT(Toki());
 
 
-// nightlight
-WLED_GLOBAL bool nightlightActive _INIT(false);
-WLED_GLOBAL bool nightlightActiveOld _INIT(false);
-WLED_GLOBAL uint32_t nightlightDelayMs _INIT(10);
-WLED_GLOBAL byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
-WLED_GLOBAL unsigned long nightlightStartTime;
-WLED_GLOBAL byte briNlT _INIT(0);                     // current nightlight brightness
-WLED_GLOBAL byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
+// // nightlight
+// WLED_GLOBAL bool nightlightActive _INIT(false);
+// WLED_GLOBAL bool nightlightActiveOld _INIT(false);
+// WLED_GLOBAL uint32_t nightlightDelayMs _INIT(10);
+// WLED_GLOBAL byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
+// WLED_GLOBAL unsigned long nightlightStartTime;
+// WLED_GLOBAL byte briNlT _INIT(0);                     // current nightlight brightness
+// WLED_GLOBAL byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
 
-// udp interface objects
+// // udp interface objects
 WLED_GLOBAL WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
-WLED_GLOBAL WiFiUDP ntpUdp;
-// WLED_GLOBAL ESPAsyncE131 e131 _INIT_N(((handleE131Packet)));
-// WLED_GLOBAL ESPAsyncE131 ddp  _INIT_N(((handleE131Packet)));
+// WLED_GLOBAL WiFiUDP ntpUdp;
+// // WLED_GLOBAL ESPAsyncE131 e131 _INIT_N(((handleE131Packet)));
+// // WLED_GLOBAL ESPAsyncE131 ddp  _INIT_N(((handleE131Packet)));
 WLED_GLOBAL bool e131NewData _INIT(false);
 
-WLED_GLOBAL uint16_t udpPort    _INIT(21324); // WLED notifier default port
-WLED_GLOBAL uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
+// WLED_GLOBAL uint16_t udpPort    _INIT(21324); // WLED notifier default port
+// WLED_GLOBAL uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
 
-WLED_GLOBAL bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
-WLED_GLOBAL bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
-WLED_GLOBAL bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
-WLED_GLOBAL bool notifyMacro  _INIT(false);                       // send notification for macro
-WLED_GLOBAL bool notifyHue    _INIT(true);                        // send notification if Hue light changes
-
-//Notifier callMode
-#define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
-#define CALL_MODE_DIRECT_CHANGE  1
-#define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
-#define CALL_MODE_NOTIFICATION   3
-#define CALL_MODE_NIGHTLIGHT     4
-#define CALL_MODE_NO_NOTIFY      5
-#define CALL_MODE_FX_CHANGED     6     //no longer used
-#define CALL_MODE_HUE            7
-#define CALL_MODE_PRESET_CYCLE   8
-#define CALL_MODE_BLYNK          9     //no longer used
-#define CALL_MODE_ALEXA         10
-#define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
-#define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
-
-// notifications
-WLED_GLOBAL bool notifyDirectDefault _INIT(notifyDirect);
-WLED_GLOBAL bool receiveNotifications _INIT(true);
-WLED_GLOBAL unsigned long notificationSentTime _INIT(0);
-WLED_GLOBAL byte notificationSentCallMode _INIT(CALL_MODE_INIT);
-WLED_GLOBAL uint8_t notificationCount _INIT(0);
-
-
-WLED_GLOBAL uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
-WLED_GLOBAL int arlsOffset _INIT(0);                              // realtime LED offset
-WLED_GLOBAL bool receiveDirect _INIT(true);                       // receive UDP realtime
-WLED_GLOBAL bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
-WLED_GLOBAL bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
-
-
-// LED CONFIG
-WLED_GLOBAL bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
-WLED_GLOBAL byte bootPreset   _INIT(0);                   // save preset to load after power-up
-
-WLED_GLOBAL byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
-
-
-WLED_GLOBAL uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
-WLED_GLOBAL uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
-WLED_GLOBAL bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
-WLED_GLOBAL bool receiveNotificationColor      _INIT(true);       // apply color
-WLED_GLOBAL bool receiveNotificationEffects    _INIT(true);       // apply effects setup
-WLED_GLOBAL bool receiveSegmentOptions         _INIT(false);      // apply segment options
-WLED_GLOBAL bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
 // WLED_GLOBAL bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
 // WLED_GLOBAL bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
 // WLED_GLOBAL bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
 // WLED_GLOBAL bool notifyMacro  _INIT(false);                       // send notification for macro
 // WLED_GLOBAL bool notifyHue    _INIT(true);                        // send notification if Hue light changes
-WLED_GLOBAL uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
 
-// network
-WLED_GLOBAL bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
+// //Notifier callMode
+// #define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
+// #define CALL_MODE_DIRECT_CHANGE  1
+// #define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
+// #define CALL_MODE_NOTIFICATION   3
+// #define CALL_MODE_NIGHTLIGHT     4
+// #define CALL_MODE_NO_NOTIFY      5
+// #define CALL_MODE_FX_CHANGED     6     //no longer used
+// #define CALL_MODE_HUE            7
+// #define CALL_MODE_PRESET_CYCLE   8
+// #define CALL_MODE_BLYNK          9     //no longer used
+// #define CALL_MODE_ALEXA         10
+// #define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
+// #define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
+
+// // notifications
+// WLED_GLOBAL bool notifyDirectDefault _INIT(notifyDirect);
+// WLED_GLOBAL bool receiveNotifications _INIT(true);
+// WLED_GLOBAL unsigned long notificationSentTime _INIT(0);
+// WLED_GLOBAL byte notificationSentCallMode _INIT(CALL_MODE_INIT);
+// WLED_GLOBAL uint8_t notificationCount _INIT(0);
 
 
-// brightness
-WLED_GLOBAL unsigned long lastOnTime _INIT(0);
-WLED_GLOBAL bool offMode             _INIT(!turnOnAtBoot);
-WLED_GLOBAL byte bri                 _INIT(briS);          // global brightness (set)
-WLED_GLOBAL byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
-WLED_GLOBAL byte briT                _INIT(0);             // global brightness during transition
-WLED_GLOBAL byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
-WLED_GLOBAL byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
+// WLED_GLOBAL uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
+// WLED_GLOBAL int arlsOffset _INIT(0);                              // realtime LED offset
+// WLED_GLOBAL bool receiveDirect _INIT(true);                       // receive UDP realtime
+// WLED_GLOBAL bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
+// WLED_GLOBAL bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
+
+
+// // LED CONFIG
+// WLED_GLOBAL bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
+// WLED_GLOBAL byte bootPreset   _INIT(0);                   // save preset to load after power-up
+
+// WLED_GLOBAL byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
+
+
+// WLED_GLOBAL uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
+// WLED_GLOBAL uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
+// WLED_GLOBAL bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
+// WLED_GLOBAL bool receiveNotificationColor      _INIT(true);       // apply color
+// WLED_GLOBAL bool receiveNotificationEffects    _INIT(true);       // apply effects setup
+// WLED_GLOBAL bool receiveSegmentOptions         _INIT(false);      // apply segment options
+// WLED_GLOBAL bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
+// // WLED_GLOBAL bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
+// // WLED_GLOBAL bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
+// // WLED_GLOBAL bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
+// // WLED_GLOBAL bool notifyMacro  _INIT(false);                       // send notification for macro
+// // WLED_GLOBAL bool notifyHue    _INIT(true);                        // send notification if Hue light changes
+// WLED_GLOBAL uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
+
+// // network
+// WLED_GLOBAL bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
+
+
+// // brightness
+// WLED_GLOBAL unsigned long lastOnTime _INIT(0);
+// WLED_GLOBAL bool offMode             _INIT(!turnOnAtBoot);
+// WLED_GLOBAL byte bri                 _INIT(briS);          // global brightness (set)
+// WLED_GLOBAL byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
+// WLED_GLOBAL byte briT                _INIT(0);             // global brightness during transition
+// WLED_GLOBAL byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
+// WLED_GLOBAL byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
 
 
 
 
-// transitions
-WLED_GLOBAL bool          transitionActive        _INIT(false);
-WLED_GLOBAL uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
-WLED_GLOBAL uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
-WLED_GLOBAL unsigned long transitionStartTime;
-WLED_GLOBAL float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
-WLED_GLOBAL bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
-WLED_GLOBAL uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
+// // transitions
+// WLED_GLOBAL bool          transitionActive        _INIT(false);
+// WLED_GLOBAL uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
+// WLED_GLOBAL uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
+// WLED_GLOBAL unsigned long transitionStartTime;
+// WLED_GLOBAL float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
+// WLED_GLOBAL bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
+// WLED_GLOBAL uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
 
     
-// User Interface CONFIG
-#ifndef SERVERNAME
-WLED_GLOBAL char serverDescription[33] _INIT("WLED");  // Name of module - use default
-#else
-WLED_GLOBAL char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
-#endif
-WLED_GLOBAL bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
-WLED_GLOBAL bool simplifiedUI          _INIT(false);   // enable simplified UI
-WLED_GLOBAL byte cacheInvalidate       _INIT(0);   
+// // User Interface CONFIG
+// #ifndef SERVERNAME
+// WLED_GLOBAL char serverDescription[33] _INIT("WLED");  // Name of module - use default
+// #else
+// WLED_GLOBAL char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
+// #endif
+// WLED_GLOBAL bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
+// WLED_GLOBAL bool simplifiedUI          _INIT(false);   // enable simplified UI
+// WLED_GLOBAL byte cacheInvalidate       _INIT(0);   
 
-WLED_GLOBAL bool stateChanged _INIT(false);
+///////////////////////////////////////////////////////////////////////////////////////
 
-  //colors.cpp
-  // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
-  class NeoGammaWLEDMethod {
-    public:
-      static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
-      static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
-      static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
-      static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
-    private:
-      static uint8_t gammaT[];
-  };
-  #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
-  #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
+// presets
+WLED_GLOBAL byte currentPreset _INIT(0);
 
+WLED_GLOBAL byte errorFlag _INIT(0);
+
+
+// WLED_GLOBAL bool stateChanged _INIT(false);
+
+  // //colors.cpp
+  // // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
+  // class NeoGammaWLEDMethod {
+  //   public:
+  //     static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
+  //     static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
+  //     static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
+  //     static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
+  //   private:
+  //     const uint8_t gammaT[256] = {
+  //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+  //         1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+  //         2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+  //         5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+  //       10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+  //       17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+  //       25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+  //       37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+  //       51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+  //       69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+  //       90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+  //       115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+  //       144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+  //       177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+  //       215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
+
+  // };
+  // #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
+  // #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
+
+// //gamma 2.8 lookup table used for color correction
+// uint8_t NeoGammaWLEDMethod::gammaT[256] = {
+//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+//     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+//     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+//     5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+//    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+//    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+//    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+//    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+//    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+//    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+//    90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+//   115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+//   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+//   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+//   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
 
 #include <map>
 #include <IPAddress.h>
@@ -2899,7 +2824,13 @@ typedef std::map<uint8_t, NodeStruct> NodesMap;
     #endif
 
 
-
+    /**
+     * @brief Include style01 for webui based on WLED 
+     * 
+     */
+    #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+    #include "6_Lights/03_Animator/WebUI_01/WebUI.h"
+    #endif
 
 
 };

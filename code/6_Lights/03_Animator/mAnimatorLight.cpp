@@ -48,6 +48,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
       Test_Config();
       #endif
+
+      #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+      initServer();
+      pCONT_web->server->begin();
+      #endif // ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+
     break;
     /************
      * TRIGGERS SECTION * 
@@ -62,6 +68,8 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
+
+
     /************
      * MQTT SECTION * 
     *******************/   
@@ -442,11 +450,7 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   matrix{0,0,0,0},
   panel{{0,0,0,0}},
   #endif
-  // semi-private (just obscured) used in effect functions through macros
-  _currentPalette = CRGBPalette16(HTMLColorCode::Black);
-  // _colors_t = {0,0,0};
   _virtualSegmentLength = 0;
-  // true private variables
   _length = DEFAULT_LED_COUNT;
   _brightness = DEFAULT_BRIGHTNESS;
   _transitionDur = 750;
@@ -457,7 +461,7 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   _isOffRefreshRequired = false;
   _hasWhiteChannel = false;
   _triggered = false;
-  _effectsCount = EFFECTS_FUNCTION__LENGTH__ID;
+  effects.count = EFFECTS_FUNCTION__LENGTH__ID;
   _callback = nullptr;
   customMappingTable = nullptr;
   customMappingSize = 0;
@@ -465,10 +469,10 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   _segment_index_primary = 0;
   _mainSegment = 0;
 
-  _effects.reserve(_effectsCount);     // allocate memory to prevent initial fragmentation (does not increase size())
-  _effectsData.reserve(_effectsCount); // allocate memory to prevent initial fragmentation (does not increase size())
-  if (_effects.capacity() <= 1 || _effectsData.capacity() <= 1) _effectsCount = 1; // memory allocation failed only show Solid
-  else setupEffectData();
+  effects.function.reserve(effects.count);     // allocate memory to prevent initial fragmentation (does not increase size())
+  effects.data.reserve(effects.count); // allocate memory to prevent initial fragmentation (does not increase size())
+  // if (effects.function.capacity() <= 1 || effects.data.capacity() <= 1) effects.count = 1; // memory allocation failed only show Solid
+  // else setupEffectData();
 
 }
 
@@ -525,12 +529,6 @@ void mAnimatorLight::Init(void)
   settings.light_size_count = STRIP_SIZE_MAX; 
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
 
-
-
-
-
-
-
   /**
    * @brief Search for Digital pins
    * I could search for how many pins within each type and configure defaults for them. eg.
@@ -551,45 +549,12 @@ void mAnimatorLight::Init(void)
   ALOG_DBM(PSTR("Init_SegmentWS2812FxStrip")); 
   Init_SegmentWS2812FxStrip();
 
-
-
   /**
    * @brief Called the first time to ensure the minimal default version is started
    * Busses must be reconfigured with lighting_template. This process of calling should be optimising later with better integration
    **/
   ALOG_INF(PSTR("Preloading a default single neopixel bus until LIGHTING_TEMPLATE is loaded: This can be changed as flag so this is called in the main loop at runtime"));
 
-  // #ifdef ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-  // #ifdef USE_LIGHTING_TEMPLATE
-  // // load from progmem into local
-  // D_DATA_BUFFER_CLEAR();
-  // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
-  // data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-
-  // ALOG_INF( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
-  
-  // JsonParser parser(data_buffer.payload.ctr);    
-  // JsonParserObject obj = parser.getRootObject();   
-  // JsonParserToken jtok = 0; 
-
-  //  /**
-  //  * @brief Bus needs to be configured first, and probably built immediately from within here so plattes etc next are added properly, otherwise EVERY_LOOP would have to happen
-  //  * 
-  //  */
-  // if(jtok = obj["BusConfig"])
-  // { 
-  //   if(jtok.isArray())
-  //   {      
-  //     ALOG_INF(PSTR("BusConfig TEMPORARY: PRELOADING BUSCONFIG BEFORE INIT A MINIMAL DEFAULT, TO BE CHANGED **************  \t%d"), jtok.getType());
-  //     JsonParserArray arrobj = jtok;      
-  //     for(auto value : arrobj)
-  //     {
-  //       pCONT_iLight->parseJSONObject__BusConfig(value.getObject());
-  //     }
-  //   }
-  // }
-  // #endif // USE_LIGHTING_TEMPLATE
-  // #endif // ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
 
   #ifndef ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
   finalizeInit();
@@ -623,92 +588,38 @@ void mAnimatorLight::Init(void)
   if(!flag_any_pin_set)
   {
     ALOG_ERR(PSTR("NO PIN FOUND: STOPPING ANIMATOR - overriding for h801, may cause issues"));
-    // delay(5000);
-    // return;
-
-
   }
 
-  Init_Effects();
+  LoadEffects();
 
-  ALOG_INF(PSTR("Decouple buses, nothing about busses should happen before this point")); 
-
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
   Init_Segments();
-  DEBUG_LINE_HERE;
-  DEBUG_LINE_HERE;
-
-  
 
   ALOG_INF(PSTR("Segments Initiated and save to use")); 
 
-  // #ifndef ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-  // ALOG_INF(PSTR("minimum to get this working, but should still be made internal/auto the segment being produced. Must happen AFTER segment is created"));
-  // SEGMENT_I(0).palette_container = new mPaletteLoaded(100);
-  // #endif// ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-
-
-
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  blocking_force_animate_to_complete = true; //animate to completion on boot (for short animations)
-  init_Ambilight();
-  #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
   init_mixer_defaults();
   #endif
-  #ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-  user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
-  user_input.selected.brightness_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[1];
-  user_input.selected.effects_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[2];
-  user_input.selected.intensity_id = pCONT_set->Settings.animation_settings.xmas_controller_params[3];
-  PhysicalController_Convert_IDs_to_Internal_Parameters();
-  #endif
-  DEBUG_LINE_HERE;
 
   settings.flags.EnableModule = true;
 
-} //end "init"
+} // END "init"
+
 
 /**
  * @brief Now, do I use "Save" going forward as simple byte packed struct, or, saving them as json encoded in memory (much larger, but more dynamic)
- * 
- */
+ **/
 void mAnimatorLight::Settings_Load()
 {
     
   // setBriRGB_Global(pCONT_set->Settings.light_settings.light_brightness_as_percentage);
 
-#ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-  user_input.selected.palette_id = pCONT_set->Settings.animation_settings.xmas_controller_params[0];
-  user_input.selected.brightness_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[1];
-  user_input.selected.effects_id =  pCONT_set->Settings.animation_settings.xmas_controller_params[2];
-  user_input.selected.intensity_id = pCONT_set->Settings.animation_settings.xmas_controller_params[3];
-  AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("LOADED user_input.selected.palette_id %d"),user_input.selected.palette_id);
-#endif // USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-
-
 }
+
 
 void mAnimatorLight::Settings_Save()
 {
   
-#ifdef USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-
-  pCONT_set->Settings.animation_settings.xmas_controller_params[0] = user_input.selected.palette_id;
-  pCONT_set->Settings.animation_settings.xmas_controller_params[1] = user_input.selected.brightness_id;
-  pCONT_set->Settings.animation_settings.xmas_controller_params[2] = user_input.selected.effects_id;
-  pCONT_set->Settings.animation_settings.xmas_controller_params[3] = user_input.selected.intensity_id;
-
-  // PhysicalController_Convert_IDs_to_Internal_Parameters();
-
-  pCONT_set->Settings.animation_settings.xmas_controller_params[5] = 6;
-
-#endif // USE_MODULE_LIGHTS_USER_INPUT_BASIC_BUTTONS
-
-
 }
-
 
 
 void mAnimatorLight::Settings_Default(){
@@ -728,49 +639,6 @@ void mAnimatorLight::Settings_Default(){
     //pCONT_iLight->Template_Load();
 
   }
-
-  #ifdef ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-  /**
-   * @brief To be included in 2023
-   * 
-   * Alternate of grouping from WLED, I also want a "dynamic_group" that uses an array to set the group width.
-   * 
-   * ie is group is set, and group_map is provided, then widths from group_map will be set for each group [1,2,3] will become [1, 2,2, 3,3,3] for a total of 14 pixels set
-   * 
-   */
-  memset(&editable_mapped_array_data_array,0,sizeof(editable_mapped_array_data_array));
-  
-  uint16_t single_row_count_array[] = {
-    31,35,39,42,43,//31,44,39,42,43,
-    43,43,42,42,42,
-    41,39,38,36,33,
-    30,29,28,25,25,
-    23,22,22,20,18,
-    19,17,18,16,14,
-    14,13,10,10,11,
-    11,8,4,4,5,6,6,
-    5,5,5,5,5,
-    0,3
-  }; // 0 is filled last
-  uint8_t single_row_count_array_size = 49;//sizeof(single_row_count_array)/single_row_count_array[0];
-
-  // Serial.println(single_row_count_array_size);
-  // delay(5000);
-  
-  uint16_t count = 0;
-  for(int i=0;i<single_row_count_array_size;i++){
-    count += single_row_count_array[i];
-  }
-  single_row_count_array[single_row_count_array_size-2] = 1050-count; // use 2nd last one as filler
-  
-
-  memcpy(editable_mapped_array_data_array, single_row_count_array, sizeof(single_row_count_array));
-
-
-  pixel_group.mapped_array_data.length = ArrayCountUntilNull(editable_mapped_array_data_array, (uint8_t)D_MAPPED_ARRAY_DATA_MAXIMUM_LENGTH); //values before 0
-;
-  #endif // ENABLE_PIXEL_FUNCTION_PIXELGROUPING
-
 
 }
 
@@ -824,10 +692,6 @@ void mAnimatorLight::EverySecond_AutoOff()
     #endif
   }
 
-
-  
-
-
   /**
    * @brief Segment(s) AutoOff DeCounter
    * 
@@ -874,6 +738,7 @@ void mAnimatorLight::EverySecond_AutoOff()
 
 #endif // ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
 
+
 RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness){
 
   RgbcctColor colour_adjusted_with_brightness; // No init for speed// = RgbcctColor();//0);
@@ -885,6 +750,7 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range
   return colour_adjusted_with_brightness;
 
 }
+
 
 RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT){
 
@@ -904,12 +770,13 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range
 
 }
 
+
 // Assumed should be integrated into RgbcctController
 RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor full_range_colour, uint8_t brightness){
   
   uint8_t new_brightness_255 = 0;
 
-    new_brightness_255 = brightness;
+  new_brightness_255 = brightness;
 
   // AddLog(LOG_LEVEL_TEST, PSTR("ledGamma=new_brightness_255=%d - >%d"), 
   //   new_brightness_255, pCONT_iLight->ledGamma(new_brightness_255)
@@ -925,15 +792,6 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoDesiredColourWithGamma(RgbcctColor 
   return ApplyBrightnesstoRgbcctColour(full_range_colour, new_brightness_255);
 
 }
-
-
-
-
-
-
-
-
-
 
 
 #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
@@ -1194,83 +1052,83 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 
 
 
-    
-  ALOG_INF(PSTR("LoadPalette_CRGBPalette16_Static %d"), palette_id);
+      
+    ALOG_INF(PSTR("LoadPalette_CRGBPalette16_Static %d"), palette_id);
 
-  /******************************************************
-   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
-   * No gradient information in palette bytes, CRGB16 will scale equally
-   ******************************************************/
-  switch (palette_id)
-  {
-    default:
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = PartyColors_p;   break;
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   _palette_container->CRGB16Palette16_Palette.data = CloudColors_p;   break;
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    _palette_container->CRGB16Palette16_Palette.data = LavaColors_p;    break;
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = OceanColors_p;   break;
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   _palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  _palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
-    case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
-  }
+    /******************************************************
+     * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+     * No gradient information in palette bytes, CRGB16 will scale equally
+     ******************************************************/
+    switch (palette_id)
+    {
+      default:
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = PartyColors_p;   break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:   _palette_container->CRGB16Palette16_Palette.data = CloudColors_p;   break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:    _palette_container->CRGB16Palette16_Palette.data = LavaColors_p;    break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = OceanColors_p;   break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:   _palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:  _palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
+      case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
+    }
 
-  _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-  for(uint8_t i=0;i<16;i++)
-  {
-    _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
-  }
-
-
-  /******************************************************
-   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
-   ******************************************************/
-  if(IsWithinRange(palette_id, mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  {
-    uint16_t gradient_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    byte tcp[72]; //support gradient palettes with up to 18 entries
-    memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
-
-    /**
-     * @brief Loading uses the CRGBPalette to get the colours
-     **/
-    _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
-
-    /**
-     * @brief To get the gradients data exactly, manually parse them 
-     * 
-     */    
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-
-
-    TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
-    TRGBGradientPaletteEntryUnion u;
-
-    // Count entries
-    uint16_t count = 0;
-    do {
-        u = *(ent + count);
-        count++;
-    } while ( u.index != 255);
-
-    u = *ent;
-    int indexstart = 0;
-    while( indexstart < 255) {
-      indexstart = u.index;
-
-      // JsonArray colors =  json.createNestedArray();
-      // colors.add(u.index);
-      // colors.add(u.r);
-      // colors.add(u.g);
-      // colors.add(u.b);
-
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
-
-      ent++;
-      u = *ent;
+    for(uint8_t i=0;i<16;i++)
+    {
+      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
     }
 
 
-    // ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, _palette_container->CRGB16Palette16_Palette.data[0].r, _palette_container->CRGB16Palette16_Palette.data[0].g, _palette_container->CRGB16Palette16_Palette.data[0].b );
-  }
+    /******************************************************
+     * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+     ******************************************************/
+    if(IsWithinRange(palette_id, mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID, mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+    {
+      uint16_t gradient_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+      byte tcp[72]; //support gradient palettes with up to 18 entries
+      memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
+
+      /**
+       * @brief Loading uses the CRGBPalette to get the colours
+       **/
+      _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
+
+      /**
+       * @brief To get the gradients data exactly, manually parse them 
+       * 
+       */    
+      _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
+
+
+      TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
+      TRGBGradientPaletteEntryUnion u;
+
+      // Count entries
+      uint16_t count = 0;
+      do {
+          u = *(ent + count);
+          count++;
+      } while ( u.index != 255);
+
+      u = *ent;
+      int indexstart = 0;
+      while( indexstart < 255) {
+        indexstart = u.index;
+
+        // JsonArray colors =  json.createNestedArray();
+        // colors.add(u.index);
+        // colors.add(u.r);
+        // colors.add(u.g);
+        // colors.add(u.b);
+
+        _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
+
+        ent++;
+        u = *ent;
+      }
+
+
+      // ALOG_INF(PSTR("palette_container%d (seg%d) %d %d %d"), gradient_id, seg_i, _palette_container->CRGB16Palette16_Palette.data[0].r, _palette_container->CRGB16Palette16_Palette.data[0].g, _palette_container->CRGB16Palette16_Palette.data[0].b );
+    }
 
 
 
@@ -1397,8 +1255,6 @@ int16_t mAnimatorLight::GetPaletteIDbyName(char* buffer)
 }
 
 
-
-
 //get RGB values from color temperature in K (https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
 void mAnimatorLight::colorKtoRGB(uint16_t kelvin, byte* rgb) //white spectrum to rgb, calc
 {
@@ -1424,6 +1280,7 @@ void mAnimatorLight::colorKtoRGB(uint16_t kelvin, byte* rgb) //white spectrum to
   rgb[3] = 0;
 }
 
+
 // adjust RGB values based on color temperature in K (range [2800-10200]) (https://en.wikipedia.org/wiki/Color_balance)
 uint32_t mAnimatorLight::colorBalanceFromKelvin(uint16_t kelvin, uint32_t rgb)
 {
@@ -1437,6 +1294,7 @@ uint32_t mAnimatorLight::colorBalanceFromKelvin(uint16_t kelvin, uint32_t rgb)
   rgbw[3] =                                W(rgb);
   return RGBW32(rgbw[0],rgbw[1],rgbw[2],rgbw[3]);
 }
+
 
 //approximates a Kelvin color temperature from an RGB color.
 //this does no check for the "whiteness" of the color,
@@ -1630,589 +1488,6 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
 }
 
 
-void mAnimatorLight::Init_Effects()
-{
-
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                            PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                                 PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                             PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR);  
-  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                           PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,            &mAnimatorLight::EffectAnim__Shimmering_Palette,                        PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Palette_To_Another_Palette,     PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);
-  #endif  
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,             PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,       &mAnimatorLight::SubTask_Segment_Animate_Function__Static_Gradient_Palette,     PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,          &mAnimatorLight::EffectAnim__Rotating_Palette_New,                      PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR);
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Rotating_Palette,                          PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR);
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,   &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,               PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR);
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,  &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,        PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__NAME_CTR);
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Stepping_Palette,                          PM_EFFECTS_FUNCTION__STEP_THROUGH_PALETTE__NAME_CTR);
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID, &mAnimatorLight::EffectAnim__Blend_Palette_To_White,                  PM_EFFECTS_FUNCTION__BLEND_PALETTE);
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID:
-    EffectAnim__Blend_Palette_Between_Another_Palette();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID:
-    EffectAnim__Twinkle_Palette_Onto_Palette();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID:
-    EffectAnim__Twinkle_Decaying_Palette();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING   
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR); 
-  case EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID:
-    SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment();
-  break; 
-  #endif        
-  /**
-   * Static
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__WLED_STATIC__ID:
-    EffectAnim__Static();
-  break;
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID:
-    EffectAnim__Static_Pattern();
-  break;
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID:
-    EffectAnim__Tri_Static_Pattern();
-  break;
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__WLED_PERCENT__ID:
-    EffectAnim__Percent();
-  break;
-  #endif
-  /**
-   * One Colour
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                              PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
-  case EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID:
-    EffectAnim__Random_Colour();
-  break;
-  #endif
-  /**
-   * Wipe/Sweep/Runners 
-   **/
-  case EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID:
-    EffectAnim__Colour_Wipe();
-  break;
-  case EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID:
-    EffectAnim__Colour_Wipe_Random();
-  break;
-  case EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID:
-    EffectAnim__Colour_Sweep();
-  break;
-  case EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID:
-    EffectAnim__Colour_Sweep_Random();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  /**
-   * Fireworks
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  case EFFECTS_FUNCTION__WLED_FIREWORKS__ID:
-    EffectAnim__Fireworks();
-  break;
-  case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID:
-    EffectAnim__Exploding_Fireworks();
-  break;
-  case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID:
-    EffectAnim__Fireworks_Starburst();
-  break;
-  case EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID:
-    EffectAnim__Fireworks_Starburst_Glows();
-  break;
-  case EFFECTS_FUNCTION__WLED_RAIN__ID:
-    EffectAnim__Rain();
-  break;
-  case EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID:
-    EffectAnim__Exploding_Fireworks_NoLaunch();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  case EFFECTS_FUNCTION__WLED_SPOTS__ID:
-    EffectAnim__Spots();
-  break;
-  case EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID:
-    EffectAnim__TriColour();
-  break;
-  case EFFECTS_FUNCTION__WLED_ANDROID__ID:
-    EffectAnim__Android();
-  break;
-  case EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID:
-    EffectAnim__Running_Red_Blue();
-  break;
-  case EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID:
-    EffectAnim__Running_Colour();
-  break;
-  case EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID:
-    EffectAnim__Running_Random();
-  break;
-  case EFFECTS_FUNCTION__WLED_GRADIENT__ID:
-    EffectAnim__Gradient();
-  break;
-  case EFFECTS_FUNCTION__WLED_LOADING__ID:
-    EffectAnim__Loading();
-  break;
-  case EFFECTS_FUNCTION__WLED_POLICE__ID:
-    EffectAnim__Police();
-  break;
-  case EFFECTS_FUNCTION__WLED_POLICE_ALL__ID:
-    EffectAnim__Polce_All();
-  break;
-  case EFFECTS_FUNCTION__WLED_TWO_DOTS__ID:
-    EffectAnim__Two_Dots();
-  break;
-  case EFFECTS_FUNCTION__WLED_TWO_AREAS__ID:
-    EffectAnim__Two_Areas();
-  break;
-  case EFFECTS_FUNCTION__WLED_MULTI_COMET__ID:
-    EffectAnim__Multi_Comet();
-  break;
-  case EFFECTS_FUNCTION__WLED_OSCILLATE__ID:
-    EffectAnim__Oscillate();
-  break;
-  case EFFECTS_FUNCTION__WLED_BPM__ID:
-    EffectAnim__BPM();
-  break;
-  case EFFECTS_FUNCTION__WLED_JUGGLE__ID:
-    EffectAnim__Juggle();
-  break;
-  case EFFECTS_FUNCTION__WLED_PALETTE__ID:
-    EffectAnim__Palette();
-  break;
-  case EFFECTS_FUNCTION__WLED_COLORWAVES__ID:
-    EffectAnim__ColourWaves();
-  break;
-  case EFFECTS_FUNCTION__WLED_LAKE__ID:
-    EffectAnim__Lake();
-  break;
-  case EFFECTS_FUNCTION__WLED_GLITTER__ID:
-    EffectAnim__Glitter();
-  break;
-  case EFFECTS_FUNCTION__WLED_METEOR__ID:
-    EffectAnim__Meteor();
-  break;
-  case EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID:
-    EffectAnim__Metoer_Smooth();
-  break;
-  case EFFECTS_FUNCTION__WLED_PRIDE_2015__ID:
-    EffectAnim__Pride_2015();
-  break;
-  case EFFECTS_FUNCTION__WLED_PACIFICA__ID:
-    EffectAnim__Pacifica();
-  break;
-  case EFFECTS_FUNCTION__WLED_SUNRISE__ID:
-    EffectAnim__Sunrise();
-  break;
-  case EFFECTS_FUNCTION__WLED_SINEWAVE__ID:
-    EffectAnim__Sinewave();
-  break;
-  case EFFECTS_FUNCTION__WLED_FLOW__ID:
-    EffectAnim__Flow();
-  break;
-  case EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID:
-    EffectAnim__Running_Lights();
-  break;
-  case EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID:
-    EffectAnim__Rainbow_Cycle();
-  break;
-  case EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID:
-    EffectAnim__Merry_Christmas();
-  break;
-  case EFFECTS_FUNCTION__WLED_HALLOWEEN__ID:
-    EffectAnim__Halloween();
-  break;
-  /**
-   * Chase
-   **/
-  case EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID:
-    EffectAnim__Chase_Colour();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID:
-    EffectAnim__Chase_Random();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID:
-    EffectAnim__Chase_Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID:
-    EffectAnim__Chase_Flash();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID:
-    EffectAnim__Chase_Flash_Random();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID:
-    EffectAnim__Chase_Rainbow_White();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID:
-    EffectAnim__Chase_Theater();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID:
-    EffectAnim__Chase_Theatre_Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID:
-    EffectAnim__Chase_TriColour();
-  break;
-  case EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID:
-    EffectAnim__Circus_Combustus();
-  break;
-  /**
-   *  Breathe/Fade/Pulse
-   **/    
-  case EFFECTS_FUNCTION__WLED_BREATH__ID:
-    EffectAnim__Breath();
-  break;
-  case EFFECTS_FUNCTION__WLED_FADE__ID:
-    EffectAnim__Fade();
-  break;
-  case EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID:
-    EffectAnim__Fade_TriColour();
-  break;
-  case EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID:
-    EffectAnim__Fade_Spots();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-
-  /**
-   * Sparkle/Twinkle
-   **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  case EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID:
-    EffectAnim__Solid_Glitter();
-  break;
-  case EFFECTS_FUNCTION__WLED_POPCORN__ID:
-    EffectAnim__Popcorn();
-  break;
-  case EFFECTS_FUNCTION__WLED_PLASMA__ID:
-    EffectAnim__Plasma();
-  break;
-  case EFFECTS_FUNCTION__WLED_SPARKLE__ID:
-    EffectAnim__Sparkle();
-  break;
-  case EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID:
-    EffectAnim__Sparkle_Flash();
-  break;
-  case EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID:
-    EffectAnim__Sparkle_Hyper();
-  break;
-  case EFFECTS_FUNCTION__WLED_TWINKLE__ID:
-    EffectAnim__Twinkle();
-  break;
-  case EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID:
-    EffectAnim__Twinkle_Colour();
-  break;
-  case EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID:
-    EffectAnim__Twinkle_Fox();
-  break;
-  case EFFECTS_FUNCTION__WLED_TWINKLECAT__ID:
-    EffectAnim__Twinkle_Cat();
-  break;
-  case EFFECTS_FUNCTION__WLED_TWINKLEUP__ID:
-    EffectAnim__Twinkle_Up();
-  break;
-  case EFFECTS_FUNCTION__WLED_SAW__ID:
-    EffectAnim__Saw();
-  break;
-  case EFFECTS_FUNCTION__WLED_DISSOLVE__ID:
-    EffectAnim__Dissolve();
-  break;
-  case EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID:
-    EffectAnim__Dissolve_Random();
-  break;
-  case EFFECTS_FUNCTION__WLED_COLORFUL__ID:
-    EffectAnim__ColourFul();
-  break;
-  case EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID:
-    EffectAnim__Traffic_Light();
-  break;
-  /**
-   * Blink/Strobe
-   **/
-  case EFFECTS_FUNCTION__WLED_BLINK__ID:
-    EffectAnim__Blink();
-  break;
-  case EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID:
-    EffectAnim__Blink_Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_STROBE__ID:
-    EffectAnim__Strobe();
-  break;
-  case EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID:
-    EffectAnim__Strobe_Multi();
-  break;
-  case EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID:
-    EffectAnim__Strobe_Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_RAINBOW__ID:
-    EffectAnim__Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_LIGHTNING__ID:
-    EffectAnim__Lightning();
-  break;
-  case EFFECTS_FUNCTION__WLED_FIRE_2012__ID:
-    EffectAnim__Fire_2012();
-  break;
-  case EFFECTS_FUNCTION__WLED_RAILWAY__ID:
-    EffectAnim__Railway();
-  break;
-  case EFFECTS_FUNCTION__WLED_HEARTBEAT__ID:
-    EffectAnim__Heartbeat();
-  break;
-  /**
-   * Noise
-   **/
-  case EFFECTS_FUNCTION__WLED_FILLNOISE8__ID:
-    EffectAnim__FillNoise8();
-  break;
-  case EFFECTS_FUNCTION__WLED_NOISE16_1__ID:
-    EffectAnim__Noise16_1();
-  break;
-  case EFFECTS_FUNCTION__WLED_NOISE16_2__ID:
-    EffectAnim__Noise16_2();
-  break;
-  case EFFECTS_FUNCTION__WLED_NOISE16_3__ID:
-    EffectAnim__Noise16_3();
-  break;
-  case EFFECTS_FUNCTION__WLED_NOISE16_4__ID:
-    EffectAnim__Noise16_4();
-  break;
-  case EFFECTS_FUNCTION__WLED_NOISEPAL__ID:
-    EffectAnim__Noise_Pal();
-  break;
-  case EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID:
-    EffectAnim__PhasedNoise();
-  break;
-  case EFFECTS_FUNCTION__WLED_PHASED__ID:
-    EffectAnim__Phased();
-  break;
-  /**
-   * Scan
-   **/
-  case EFFECTS_FUNCTION__WLED_SCAN__ID:
-    EffectAnim__Scan();
-  break;
-  case EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID:
-    EffectAnim__Scan_Dual();
-  break;
-  case EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID:
-    EffectAnim__Larson_Scanner();
-  break;
-  case EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID:
-    EffectAnim__Larson_Scanner_Dual();
-  break;
-  case EFFECTS_FUNCTION__WLED_ICU__ID:
-    EffectAnim__ICU();
-  break;
-  case EFFECTS_FUNCTION__WLED_RIPPLE__ID:
-    EffectAnim__Ripple();
-  break;
-  case EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID:
-    EffectAnim__Ripple_Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_COMET__ID:
-    EffectAnim__Comet();
-  break;
-  case EFFECTS_FUNCTION__WLED_CHUNCHUN__ID:
-    EffectAnim__Chunchun();
-  break;
-  case EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID:
-    EffectAnim__Bouncing_Balls();
-  break;
-  case EFFECTS_FUNCTION__WLED_SINELON__ID:
-    EffectAnim__Sinelon();
-  break;
-  case EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID:
-    EffectAnim__Sinelon_Dual();
-  break;
-  case EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID:
-    EffectAnim__Sinelon_Rainbow();
-  break;
-  case EFFECTS_FUNCTION__WLED_DRIP__ID:
-    EffectAnim__Drip();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID: //blend between colours
-    EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  case EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID:   //pick nearest
-    EffectAnim__SunPositions_Elevation_Palette_Progress_Step();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS          
-  case SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID: // Solar elevation gives progress along palette ( using max/min elevation on that day, as start and end of palette)
-    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID:
-    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-  break;
-  #endif
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS    
-  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID:
-    SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
-  break;   
-  #endif 
-  // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01:
-  //    SubTask_Flasher_Animate_Function_SunPositions_SunRise_Alarm_01();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Gradient_Sun_Elevation_And_Azimuth_01();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_01();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_03();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_04();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_05();
-  //  break;
-  //  case EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID:
-  //    SubTask_Flasher_Animate_Function_SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_With_Augmented_01();
-  //  break;
-  /**
-   * Development effects without full code 
-   **/          
-  //  case EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID:
-  //    SubTask_Flasher_Animate_Function_Slow_Glow_On_Brightness();
-  //  break;
-  //  case EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID:
-  //    SubTask_Flasher_Animate_Function_Twinkle_SingleColour_Random();
-  //  break;
-  //  case EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID:
-  //    SubTask_Flasher_Animate_Function_Twinkle_PaletteColour_Random();
-  //  break;
-  //  case EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID:
-  //    SubTask_Flasher_Animate_Function_Slow_Fade_Brightness_All();
-  //  break;
-  //  case EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID:
-  //    SubTask_Flasher_Animate_Function_Slow_Fade_Saturation_All();
-  //  break;
-  //  case EFFECTS_FUNCTION__FADE_GRADIENT__ID:
-  //    SubTask_Flasher_Animate_Function_Fade_Gradient();
-  //  break;
-  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON:
-  //    SubTask_Flasher_Animate_Function_Pulse_Random_On();
-  //  break;
-  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID:
-  //    SubTask_Flasher_Animate_Function_Pulse_Random_On_2();
-  //  break;
-  // EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
-  //  case EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF__ID:
-  //    SubTask_Flasher_Animate_Function_Pulse_Random_On_Fade_Off();
-  //  break;
-  //  case EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY:
-  //    SubTask_Flasher_Animate_Function_Popping_Palette_Brightness_From_Lower_To_Upper_Boundary();
-  //  break;
-  //  case EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK:
-  //    SubTask_Flasher_Animate_Function_Twinkle_Palette_Brightness_From_Lower_To_Upper_And_Back();
-  //  break;        
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID:            
-    SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
-  break;
-  case EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID:
-    SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
-  break;
-  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID:
-    SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-  break;
-  case EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID:
-    SubTask_Flasher_Animate_LCD_Display_Show_String_01();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK     
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
-  case EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID:
-    SubTask_Segment_Animate_Function__Notification_Static();
-  break;
-  case EFFECTS_FUNCTION__NOTIFICATION_FADE__ID:
-    SubTask_Segment_Animate_Function__Notification_Fade();
-  break;
-  case EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID:
-    SubTask_Segment_Animate_Function__Notification_Blinking();
-  break;
-  case EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID:
-    SubTask_Segment_Animate_Function__Notification_Pulsing();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  case EFFECTS_FUNCTION__TESTER_01__ID:
-    SubTask_Flasher_Animate_Function_Tester_01();
-  break; 
-  case EFFECTS_FUNCTION__TESTER_02__ID:
-    SubTask_Flasher_Animate_Function_Tester_02();
-  break; 
-  // testing to replacement
-  case EFFECTS_FUNCTION__STATIC_PALETTE_NEW__ID:
-    EffectAnim__Static_Palette_New();
-  break;
-  case EFFECTS_FUNCTION__SLOW_GLOW_NEW__ID:
-    EffectAnim__Slow_Glow_New();
-  break;
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                  &mAnimatorLight::EffectAnim__Christmas_Musical__01,                              PM_EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01__NAME_CTR);
-  #endif 
-
-}
-
-
-void 
-mAnimatorLight::addThingy(RequiredFunction func)
-{
-    //Don't take the address of the address:
-    vectoroffunctions.push_back(func);
-    // vectoroffunctions.push_back(&mAnimatorLight::EffectAnim__Solid_Colour);
-}
 
 void
 mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *name)
@@ -2223,14 +1498,14 @@ mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *n
   // }
 
 
-  if (id < _effects.size()) {
+  if (id < effects.function.size()) {
     // if (_modeData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
-    _effects[id]     = function;
-    _effectsData[id] = name;
+    effects.function[id]     = function;
+    effects.data[id] = name;
   } else {
-    _effects.push_back(function);
-    _effectsData.push_back(name);
-    if (_effectsCount < _effects.size()) _effectsCount++;
+    effects.function.push_back(function);
+    effects.data.push_back(name);
+    if (effects.count < effects.function.size()) effects.count++;
   }
 
 
@@ -2317,9 +1592,9 @@ void mAnimatorLight::SubTask_Segments_Effects()
 
       ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
 
-      if(seg.effect_id < _effects.size())
+      if(seg.effect_id < effects.function.size())
       {
-        (this->*_effects[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
+        (this->*effects.function[seg.effect_id])(); // Call Effect Function (passes and returns nothing)
       }
 
       /**
@@ -3296,9 +2571,9 @@ int8_t mAnimatorLight::GetFlasherFunctionIDbyName(const char* f)
 
   if(f==0) return -2;
 
-  for(uint16_t id=0;id<_effects.size();id++)
+  for(uint16_t id=0;id<effects.function.size();id++)
   {
-    if(mSupport::CheckCommand_P(f, _effectsData[id]))
+    if(mSupport::CheckCommand_P(f, effects.data[id]))
     {   
       ALOG_INF(PSTR("GetFlasherFunctionIDbyName %s %d"),f,id);
       return id; 
@@ -3317,7 +2592,7 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen,
 const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen)
 {
 
-  snprintf_P(buffer, buflen, _effectsData[id]);  
+  snprintf_P(buffer, buflen, effects.data[id]);  
   return buffer;
 
 }
@@ -3560,164 +2835,6 @@ void mAnimatorLight::Segment_New::setUpLeds() {
   }
 }
 
-CRGBPalette16 &mAnimatorLight::Segment_New::loadPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
-  static unsigned long _lastPaletteChange = 0; // perhaps it should be per segment
-  static CRGBPalette16 randomPalette = CRGBPalette16(DEFAULT_COLOR);
-
-  ALOG_INF(PSTR("&mAnimatorLight::Segment_New::loadPalette"));
-
-  // byte tcp[72];
-  // if (pal < 245 && pal > GRADIENT_PALETTE_COUNT+13) pal = 0;
-  // if (pal > 245 && (strip.customPalettes.size() == 0 || 255U-pal > strip.customPalettes.size()-1)) pal = 0;
-  // //default palette. Differs depending on effect
-  // if (pal == 0) switch (mode) {
-  //   case FX_MODE_FIRE_2012  : pal = 35; break; // heat palette
-  //   case FX_MODE_COLORWAVES : pal = 26; break; // landscape 33
-  //   case FX_MODE_FILLNOISE8 : pal =  9; break; // ocean colors
-  //   case FX_MODE_NOISE16_1  : pal = 20; break; // Drywet
-  //   case FX_MODE_NOISE16_2  : pal = 43; break; // Blue cyan yellow
-  //   case FX_MODE_NOISE16_3  : pal = 35; break; // heat palette
-  //   case FX_MODE_NOISE16_4  : pal = 26; break; // landscape 33
-  //   case FX_MODE_GLITTER    : pal = 11; break; // rainbow colors
-  //   case FX_MODE_SUNRISE    : pal = 35; break; // heat palette
-  //   case FX_MODE_FLOW       : pal =  6; break; // party
-  // }
-  // switch (pal) {
-  //   case 0: //default palette. Exceptions for specific effects above
-  //     targetPalette = PartyColors_p; break;
-  //   case 1: //periodically replace palette with a random one. Doesn't work with multiple FastLED segments
-  //     if (millis() - _lastPaletteChange > 5000 /*+ ((uint32_t)(255-intensity))*100*/) {
-  //       randomPalette = CRGBPalette16(
-  //                       CHSV(random8(), random8(160, 255), random8(128, 255)),
-  //                       CHSV(random8(), random8(160, 255), random8(128, 255)),
-  //                       CHSV(random8(), random8(160, 255), random8(128, 255)),
-  //                       CHSV(random8(), random8(160, 255), random8(128, 255)));
-  //       _lastPaletteChange = millis();
-  //     }
-  //     targetPalette = randomPalette; break;
-  //   case 2: {//primary color only
-  //     CRGB prim = gamma32(colors[0]);
-  //     targetPalette = CRGBPalette16(prim); break;}
-  //   case 3: {//primary + secondary
-  //     CRGB prim = gamma32(colors[0]);
-  //     CRGB sec  = gamma32(colors[1]);
-  //     targetPalette = CRGBPalette16(prim,prim,sec,sec); break;}
-  //   case 4: {//primary + secondary + tertiary
-  //     CRGB prim = gamma32(colors[0]);
-  //     CRGB sec  = gamma32(colors[1]);
-  //     CRGB ter  = gamma32(colors[2]);
-  //     targetPalette = CRGBPalette16(ter,sec,prim); break;}
-  //   case 5: {//primary + secondary (+tert if not off), more distinct
-  //     CRGB prim = gamma32(colors[0]);
-  //     CRGB sec  = gamma32(colors[1]);
-  //     if (colors[2]) {
-  //       CRGB ter = gamma32(colors[2]);
-  //       targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,ter,ter,ter,ter,ter,prim);
-  //     } else {
-  //       targetPalette = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
-  //     }
-  //     break;}
-  //   case 6: //Party colors
-      targetPalette = PartyColors_p;// break;
-  //   case 7: //Cloud colors
-  //     targetPalette = CloudColors_p; break;
-  //   case 8: //Lava colors
-  //     targetPalette = LavaColors_p; break;
-  //   case 9: //Ocean colors
-  //     targetPalette = OceanColors_p; break;
-  //   case 10: //Forest colors
-  //     targetPalette = ForestColors_p; break;
-  //   case 11: //Rainbow colors
-  //     targetPalette = RainbowColors_p; break;
-  //   case 12: //Rainbow stripe colors
-  //     targetPalette = RainbowStripeColors_p; break;
-  //   default: //progmem palettes
-  //     if (pal>245) {
-  //       targetPalette = strip.customPalettes[255-pal]; // we checked bounds above
-  //     } else {
-  //       memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[pal-13])), 72);
-  //       targetPalette.loadDynamicGradientPalette(tcp);
-  //     }
-  //     break;
-  // }
-  return targetPalette;
-}
-
-void mAnimatorLight::Segment_New::startTransition(uint16_t dur) {
-  if (transitional || _t) return; // already in transition no need to store anything
-
-  // starting a transition has to occur before change so we get current values 1st
-  uint8_t _briT = currentBri(on ? opacity : 0);
-  uint8_t _cctT = currentBri(cct, true);
-  CRGBPalette16 _palT; loadPalette(_palT, palette.id);
-  uint8_t _modeP = effect_id;
-  uint32_t _colorT[NUM_COLORS];
-  
-  for (size_t i=0; i<NUM_COLORS; i++) _colorT[i] = currentColor(i, RgbcctColor::GetU32Colour(rgbcctcolors[i]));
-
-  if (!_t) _t = new Transition(dur); // no previous transition running
-  if (!_t) return; // failed to allocate data
-  _t->_briT  = _briT;
-  _t->_cctT  = _cctT;
-  _t->_palT  = _palT;
-  _t->_modeP = _modeP;
-  for (size_t i=0; i<NUM_COLORS; i++) _t->_colorT[i] = _colorT[i];
-  transitional = true; // setOption(SEG_OPTION_TRANSITIONAL, true);
-}
-
-// transition progression between 0-65535
-uint16_t mAnimatorLight::Segment_New::progress() {
-  if (!transitional || !_t) return 0xFFFFU;
-  uint32_t timeNow = millis();
-  if (timeNow - _t->_start > _t->_dur || _t->_dur == 0) return 0xFFFFU;
-  return (timeNow - _t->_start) * 0xFFFFU / _t->_dur;
-}
-
-uint8_t mAnimatorLight::Segment_New::currentBri(uint8_t briNew, bool useCct) {
-  if (transitional && _t) {
-    uint32_t prog = progress() + 1;
-    if (useCct) return ((briNew * prog) + _t->_cctT * (0x10000 - prog)) >> 16;
-    else        return ((briNew * prog) + _t->_briT * (0x10000 - prog)) >> 16;
-  } else {
-    return briNew;
-  }
-}
-
-uint8_t mAnimatorLight::Segment_New::currentMode(uint8_t newMode) {
-  return (progress()>32767U) ? newMode : _t->_modeP; // change effect in the middle of transition
-}
-
-uint32_t mAnimatorLight::Segment_New::currentColor(uint8_t slot, uint32_t colorNew) {
- // return transitional && _t ? ColourBlend(_t->_colorT[slot], colorNew, progress(), true) : colorNew;
-}
-
-CRGBPalette16 &mAnimatorLight::Segment_New::currentPalette(CRGBPalette16 &targetPalette, uint8_t pal) {
-  loadPalette(targetPalette, pal);
-  if (transitional && _t && progress() < 0xFFFFU) {
-    // blend palettes
-    // there are about 255 blend passes of 48 "blends" to completely blend two palettes (in _dur time)
-    // minimum blend time is 100ms maximum is 65535ms
-    uint32_t timeMS = millis() - _t->_start;
-    uint16_t noOfBlends = (255U * timeMS / _t->_dur) - _t->_prevPaletteBlends;
-    for (int i=0; i<noOfBlends; i++, _t->_prevPaletteBlends++) nblendPaletteTowardPalette(_t->_palT, targetPalette, 48);
-    targetPalette = _t->_palT; // copy transitioning/temporary palette
-  }
-  return targetPalette;
-}
-
-void mAnimatorLight::Segment_New::handleTransition() {
-  // if (!transitional) return;
-  // unsigned long maxWait = millis() + 20;
-  // if (mode == EFFECTS_FUNCTION__LENGTH__ID && next_time > maxWait) next_time = maxWait;
-  // if (progress() == 0xFFFFU) {
-  //   if (_t) {
-  //     if (_t->_modeP != mode) markForReset();
-  //     delete _t;
-  //     _t = nullptr;
-  //   }
-  //   transitional = false; // finish transitioning segment
-  // }
-}
 
 void mAnimatorLight::Segment_New::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8_t spc, uint16_t ofs, uint16_t i1Y, uint16_t i2Y) {
   //return if neither bounds nor grouping have changed
@@ -3839,7 +2956,11 @@ void mAnimatorLight::Segment_New::setMode(uint8_t fx, bool loadDefaults) {
 }
 
 
-
+void mAnimatorLight::Segment_New::setPalette(uint8_t pal) 
+{
+  palette.id = pal;  
+  ALOG_INF(PSTR("setPalette(%d)"), palette.id);
+}
 
 
 uint8_t mAnimatorLight::Segment_New::getBrightnessRGB_WithGlobalApplied()
@@ -3884,23 +3005,6 @@ uint8_t mAnimatorLight::Segment_New::getBrightnessCCT_WithGlobalApplied()
   #endif
 
   return _brightness_cct;
-}
-
-
-
-
-void mAnimatorLight::Segment_New::setPalette(uint8_t pal) {
-  // if (pal < 245 && pal > GRADIENT_PALETTE_COUNT+13) pal = 0; // built in palettes
-  // if (pal > 245 && (strip.customPalettes.size() == 0 || 255U-pal > strip.customPalettes.size()-1)) pal = 0; // custom palettes
-  // if (pal != palette) {
-  //   if (strip.paletteFade) startTransition(strip.getTransition());
-  //   palette = pal;
-  palette.id = pal;
-  
-  ALOG_INF(PSTR("setPalette(%d)"), palette.id);
-  
-  //   stateChanged = true; // send UDP/WS broadcast
-  // }
 }
 
 // 2D matrix
@@ -4292,7 +3396,7 @@ void mAnimatorLight::Segment_New::blur(uint8_t blur_amount)
  * Inspired by the Adafruit examples.
  */
 uint32_t mAnimatorLight::Segment_New::color_wheel(uint8_t pos) { // TODO
-  if (palette.id) return color_from_palette(pos, false, true, 0);
+  // if (palette.id) return color_from_palette(pos, false, true, 0);
   pos = 255 - pos;
   if(pos < 85) {
     return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
@@ -4319,110 +3423,6 @@ uint8_t mAnimatorLight::Segment_New::get_random_wheel_index(uint8_t pos) {
   }
   return r;
 }
-
-/*
- * Gets a single color from the currently selected palette.
- * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
- * @param mapping if true, LED position in segment is considered for color
- * @param wrap FastLED palettes will usally wrap back to the start smoothly. Set false to get a hard edge
- * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
- * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
- * @returns Single color from palette
- */
-uint32_t mAnimatorLight::Segment_New::color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri)
-{
-  // // default palette or no RGB support on segment
-  // if ((palette == 0 && mcol < NUM_COLORS) || !_isRGB) {
-  //   uint32_t color = currentColor(mcol, colors[mcol]);
-  //   color = gamma32(color);
-  //   if (pbri == 255) return color;
-  //   return RGBW32(scale8_video(R(color),pbri), scale8_video(G(color),pbri), scale8_video(B(color),pbri), scale8_video(W(color),pbri));
-  // }
-
-  // uint8_t paletteIndex = i;
-  // if (mapping && virtualLength() > 1) paletteIndex = (i*255)/(virtualLength() -1);
-  // if (!wrap) paletteIndex = scale8(paletteIndex, 240); //cut off blend at palette "end"
-  // CRGB fastled_col;
-  // CRGBPalette16 curPal;
-  // if (transitional && _t) curPal = _t->_palT;
-  // else                    loadPalette(curPal, palette);
-  // fastled_col = ColorFromPalette(curPal, paletteIndex, pbri, (strip.paletteBlend == 3)? NOBLEND:LINEARBLEND); // NOTE: paletteBlend should be global
-
-  // return RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// mAnimatorLight::WS2812FX class implementation
-///////////////////////////////////////////////////////////////////////////////
-
-static const char _data_RESERVED[] PROGMEM = "RSVD";
-static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
-uint16_t mode_static(void) {
-  // SEGMENT.fill(SEGCOLOR_U32(0));
-  return 350;
-}
-
-// add (or replace reserved) effect mode and data into vector
-// use id==255 to find unallocatd gaps (with "Reserved" data string)
-// if vector size() is smaller than id (single) data is appended at the end (regardless of id)
-void mAnimatorLight::addEffect(uint8_t id, mode_ptr mode_fn, const char *mode_name) {
-  // if (id == 255) { // find empty slot
-  //   for (size_t i=1; i<_effects.size(); i++) if (_effectsData[i] == _data_RESERVED) { id = i; break; }
-  // }
-  // if (id < _effects.size()) {
-  //   if (_effectsData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
-  //   _effects[id]     = mode_fn;
-  //   _effectsData[id] = mode_name;
-  // } else {
-  //   _effects.push_back(mode_fn);
-  //   _effectsData.push_back(mode_name);
-  //   if (_effectsCount < _effects.size()) _effectsCount++;
-  // }
-}
-
-
-
-// add (or replace reserved) effect mode and data into vector
-// use id==255 to find unallocatd gaps (with "Reserved" data string)
-// if vector size() is smaller than id (single) data is appended at the end (regardless of id)
-// void mAnimatorLight::addEffect2( mode_ptr mode_fn ) {
-//   // if (id == 255) { // find empty slot
-//   //   for (size_t i=1; i<_mode.size(); i++) if (_modeData[i] == _data_RESERVED) { id = i; break; }
-//   // }
-//   // if (id < _mode.size()) {
-//   //   if (_modeData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
-//   //   _mode[id]     = mode_fn;
-//   //   _modeData[id] = mode_name;
-//   // } else {
-//   //   _mode.push_back(mode_fn);
-//   //   _modeData.push_back(mode_name);
-//   //   if (_effectsCount < _mode.size()) _effectsCount++;
-//   // }
-
-
-
-// }
-
-
-
-
-
-void mAnimatorLight::setupEffectData() {
-  // // Solid must be first! (assuming vector is empty upon call to setup)
-  // _mode.push_back(&mode_static);
-  // _modeData.push_back(_data_FX_MODE_STATIC);
-  // // fill reserved word in case there will be any gaps in the array
-  // for (size_t i=1; i<_effectsCount; i++) {
-  //   _mode.push_back(&mode_static);
-  //   _modeData.push_back(_data_RESERVED);
-  // }
-  // //all effects set here
-
-}
-
-
-
 
 
 //do not call this method from system context (network callback)
@@ -4526,63 +3526,6 @@ void mAnimatorLight::finalizeInit(void)
   ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), pCONT_iLight->bus_manager->getNumBusses());
 
 }
-
-// void mAnimatorLight::service() {
-//   // uint32_t nowUp = millis(); // Be aware, millis() rolls over every 49 days
-//   // now = nowUp + timebase;
-//   // if (nowUp - _lastShow < MIN_SHOW_DELAY) return;
-//   // bool doShow = false;
-
-//   _isServicing = true;
-//   _segment_index_primary = 0;
-//   for (segment_new &seg : segments) {
-
-//     // reset the segment runtime data if needed
-//     DEBUG_LINE_HERE;
-//     seg.resetIfRequired();
-
-//     if (!seg.isActive()) continue;
-
-//   //   // last condition ensures all solid segments are updated at the same time
-//   //   if(nowUp > seg.next_time || _triggered || (doShow && seg.mode == EFFECTS_FUNCTION__LENGTH__ID))
-//   //   {
-//   //     if (seg.grouping == 0) seg.grouping = 1; //sanity check
-//   //     doShow = true;
-//   //     uint16_t delay = FRAMETIME;
-
-//   //     if (!seg.freeze) { //only run effect function if not frozen
-//   //       _virtualSegmentLength = seg.virtualLength();
-//   //       _colors_t[0] = seg.currentColor(0, seg.colors[0]);
-//   //       _colors_t[1] = seg.currentColor(1, seg.colors[1]);
-//   //       _colors_t[2] = seg.currentColor(2, seg.colors[2]);
-//   //       seg.currentPalette(_currentPalette, seg.palette);
-
-//   //       if (!cctFromRgb || correctWB) busses.setSegmentCCT(seg.currentBri(seg.cct, true), correctWB);
-//   //       for (uint8_t c = 0; c < NUM_COLORS; c++) _colors_t[c] = gamma32(_colors_t[c]);
-
-//   //       // effect blending (execute previous effect)
-//   //       // actual code may be a bit more involved as effects have runtime data including allocated memory
-//   //       //if (seg.transitional && seg._modeP) (*_mode[seg._modeP])(progress());
-//   //       delay = (*_mode[seg.currentMode(seg.mode)])();
-//   //       if (seg.mode != FX_MODE_HALLOWEEN_EYES) seg.call++;
-//   //       if (seg.transitional && delay > FRAMETIME) delay = FRAMETIME; // foce faster updates during transition
-
-//   //       seg.handleTransition();
-//   //     }
-
-//   //     seg.next_time = nowUp + delay;
-//   //   }
-//     _segment_index_primary++;
-//   }
-//   // _virtualSegmentLength = 0;
-//   // busses.setSegmentCCT(-1);
-//   // if(doShow) {
-//   //   yield();
-//   //   show();
-//   // }
-//   // _triggered = false;
-//   // _isServicing = false;
-// }
 
 // IS contained within segment so busses etc are known (ie the right pin will be used)
 void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
@@ -4731,7 +3674,7 @@ void mAnimatorLight::setMode(uint8_t segid, uint8_t m) {
   if (m >= getModeCount()) m = getModeCount() - 1;
 
   if (segments[segid].animation_mode_id != m) {
-    segments[segid].startTransition(_transitionDur); // set effect transitions
+    // segments[segid].startTransition(_transitionDur); // set effect transitions
     //segments[segid].markForReset();
     segments[segid].animation_mode_id = m;
   }
@@ -5073,8 +4016,8 @@ void mAnimatorLight::printSize()
   size_t size = 0;
   for (const mAnimatorLight::Segment_New &seg : segments) size += seg.getSize();
   DEBUG_PRINTF("Segments: %d -> %uB\n", segments.size(), size);
-  DEBUG_PRINTF("Modes: %d*%d=%uB\n", sizeof(mode_ptr), _effects.size(), (_effects.capacity()*sizeof(mode_ptr)));
-  DEBUG_PRINTF("Data: %d*%d=%uB\n", sizeof(const char *), _effectsData.size(), (_effectsData.capacity()*sizeof(const char *)));
+  DEBUG_PRINTF("Modes: %d*%d=%uB\n", sizeof(mode_ptr), effects.function.size(), (effects.function.capacity()*sizeof(mode_ptr)));
+  DEBUG_PRINTF("Data: %d*%d=%uB\n", sizeof(const char *), effects.data.size(), (effects.data.capacity()*sizeof(const char *)));
   DEBUG_PRINTF("Map: %d*%d=%uB\n", sizeof(uint16_t), (int)customMappingSize, customMappingSize*sizeof(uint16_t));
   if (useLedsArray) DEBUG_PRINTF("Buffer: %d*%d=%uB\n", sizeof(CRGB), (int)_length, _length*sizeof(CRGB));
 }
@@ -6157,55 +5100,946 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests2()
 
 
 
-//gamma 2.8 lookup table used for color correction
-uint8_t mAnimatorLight::NeoGammaWLEDMethod::gammaT[256] = {
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+// //gamma 2.8 lookup table used for color correction
+// uint8_t mAnimatorLight::NeoGammaWLEDMethod::gammaT[256] = {
+//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+//     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+//     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+//     5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+//    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+//    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+//    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+//    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+//    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+//    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+//    90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+//   115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+//   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+//   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+//   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
 
-// re-calculates & fills gamma table
-void mAnimatorLight::NeoGammaWLEDMethod::calcGammaTable(float gamma)
+// // re-calculates & fills gamma table
+// void mAnimatorLight::NeoGammaWLEDMethod::calcGammaTable(float gamma)
+// {
+//   for (size_t i = 0; i < 256; i++) {
+//     gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
+//   }
+// }
+
+// uint8_t mAnimatorLight::NeoGammaWLEDMethod::Correct(uint8_t value)
+// {
+//   // if (!gammaCorrectCol) return value;
+//   // return gammaT[value];
+// }
+
+// // used for color gamma correction
+// uint32_t mAnimatorLight::NeoGammaWLEDMethod::Correct32(uint32_t color)
+// {
+//   // if (!gammaCorrectCol) return color;
+//   // uint8_t w = W(color);
+//   // uint8_t r = R(color);
+//   // uint8_t g = G(color);
+//   // uint8_t b = B(color);
+//   // w = gammaT[w];
+//   // r = gammaT[r];
+//   // g = gammaT[g];
+//   // b = gammaT[b];
+//   // return RGBW32(r, g, b, w);
+// }
+
+
+
+/*
+ * UDP sync notifier / Realtime / Hyperion / TPM2.NET
+ */
+
+#define UDP_SEG_SIZE 36
+#define SEG_OFFSET (41+(MAX_NUM_SEGMENTS*UDP_SEG_SIZE))
+#define WLEDPACKETSIZE (41+(MAX_NUM_SEGMENTS*UDP_SEG_SIZE)+0)
+#define UDP_IN_MAXSIZE 1472
+#define PRESUMED_NETWORK_DELAY 3 //how many ms could it take on avg to reach the receiver? This will be added to transmitted times
+
+#define Network WiFi
+
+
+void realtimeLock2(uint32_t timeoutMs, byte md);
+
+#define WLED_GLOBAL
+#define _INIT(x) = x
+
+
+//Notifier callMode
+#define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
+#define CALL_MODE_DIRECT_CHANGE  1
+#define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
+#define CALL_MODE_NOTIFICATION   3
+#define CALL_MODE_NIGHTLIGHT     4
+#define CALL_MODE_NO_NOTIFY      5
+#define CALL_MODE_FX_CHANGED     6     //no longer used
+#define CALL_MODE_HUE            7
+#define CALL_MODE_PRESET_CYCLE   8
+#define CALL_MODE_BLYNK          9     //no longer used
+#define CALL_MODE_ALEXA         10
+#define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
+#define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
+
+void setRealtimePixel(uint16_t i, byte r, byte g, byte b, byte w = 0);
+
+#ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+
+//scales the brightness with the briMultiplier factor
+byte scaledBri2(byte in)
 {
-  for (size_t i = 0; i < 256; i++) {
-    gammaT[i] = (int)(powf((float)i / 255.0f, gamma) * 255.0f + 0.5f);
+  uint16_t val = ((uint16_t)in*pCONT_lAni->briMultiplier)/100;
+  if (val > 255) val = 255;
+  return (byte)val;
+}
+
+
+
+
+
+void notify(byte callMode, bool followUp)
+{
+  if (!pCONT_lAni->udpConnected) return;
+  if (!pCONT_lAni->syncGroups) return;
+  switch (callMode)
+  {
+    case CALL_MODE_INIT:          return;
+    case CALL_MODE_DIRECT_CHANGE: if (!pCONT_lAni->notifyDirect) return; break;
+    case CALL_MODE_BUTTON:        if (!pCONT_lAni->notifyButton) return; break;
+    case CALL_MODE_BUTTON_PRESET: if (!pCONT_lAni->notifyButton) return; break;
+    case CALL_MODE_NIGHTLIGHT:    if (!pCONT_lAni->notifyDirect) return; break;
+    case CALL_MODE_HUE:           if (!pCONT_lAni->notifyHue)    return; break;
+    case CALL_MODE_PRESET_CYCLE:  if (!pCONT_lAni->notifyDirect) return; break;
+    case CALL_MODE_ALEXA:         if (!pCONT_lAni->notifyAlexa)  return; break;
+    default: return;
+  }
+  byte udpOut[WLEDPACKETSIZE];
+  mAnimatorLight::Segment_New& mainseg = pCONT_lAni->getMainSegment();
+  udpOut[0] = 0; //0: wled notifier protocol 1: WARLS protocol
+  udpOut[1] = callMode;
+  udpOut[2] = pCONT_iLight->getBri_Global();
+  uint32_t col = mainseg.rgbcctcolors[0].getU32();
+  udpOut[3] = R(col);
+  udpOut[4] = G(col);
+  udpOut[5] = B(col);
+  udpOut[6] = pCONT_lAni->nightlightActive;
+  udpOut[7] = pCONT_lAni->nightlightDelayMins;
+  udpOut[8] = mainseg.effect_id;
+  udpOut[9] = mainseg.speed();
+  udpOut[10] = W(col);
+  //compatibilityVersionByte:
+  //0: old 1: supports white 2: supports secondary color
+  //3: supports FX intensity, 24 byte packet 4: supports transitionDelay 5: sup palette
+  //6: supports timebase syncing, 29 byte packet 7: supports tertiary color 8: supports sys time sync, 36 byte packet
+  //9: supports sync groups, 37 byte packet 10: supports CCT, 39 byte packet 11: per segment options, variable packet length (40+MAX_NUM_SEGMENTS*3)
+  //12: enhanced effct sliders, 2D & mapping options
+  udpOut[11] = 12;
+  col = mainseg.rgbcctcolors[1].getU32();
+  udpOut[12] = R(col);
+  udpOut[13] = G(col);
+  udpOut[14] = B(col);
+  udpOut[15] = W(col);
+  udpOut[16] = mainseg.intensity();
+  udpOut[17] = (pCONT_lAni->transitionDelay >> 0) & 0xFF;
+  udpOut[18] = (pCONT_lAni->transitionDelay >> 8) & 0xFF;
+  udpOut[19] = mainseg.palette.id;
+  col = mainseg.rgbcctcolors[2].getU32();
+  udpOut[20] = R(col);
+  udpOut[21] = G(col);
+  udpOut[22] = B(col);
+  udpOut[23] = W(col);
+
+  udpOut[24] = followUp;
+  uint32_t t = millis() + pCONT_lAni->timebase;
+  udpOut[25] = (t >> 24) & 0xFF;
+  udpOut[26] = (t >> 16) & 0xFF;
+  udpOut[27] = (t >>  8) & 0xFF;
+  udpOut[28] = (t >>  0) & 0xFF;
+
+  //sync system time
+  udpOut[29] = pCONT_lAni->toki.getTimeSource();
+  Toki::Time tm = pCONT_lAni->toki.getTime();
+  uint32_t unix = tm.sec;
+  udpOut[30] = (unix >> 24) & 0xFF;
+  udpOut[31] = (unix >> 16) & 0xFF;
+  udpOut[32] = (unix >>  8) & 0xFF;
+  udpOut[33] = (unix >>  0) & 0xFF;
+  uint16_t ms = tm.ms;
+  udpOut[34] = (ms >> 8) & 0xFF;
+  udpOut[35] = (ms >> 0) & 0xFF;
+
+  //sync groups
+  udpOut[36] = pCONT_lAni->syncGroups;
+
+  //Might be changed to Kelvin in the future, receiver code should handle that case
+  //0: byte 38 contains 0-255 value, 255: no valid CCT, 1-254: Kelvin value MSB
+  udpOut[37] = pCONT_lAni->hasCCTBus() ? 0 : 255; //check this is 0 for the next value to be significant
+  udpOut[38] = mainseg.cct;
+
+  udpOut[39] = pCONT_lAni->getActiveSegmentsNum();
+  udpOut[40] = UDP_SEG_SIZE; //size of each loop iteration (one segment)
+  size_t s = 0, nsegs = pCONT_lAni->getSegmentsNum();
+  for (size_t i = 0; i < nsegs; i++) {
+    mAnimatorLight::Segment_New &selseg = pCONT_lAni->getSegment(i);
+    if (!selseg.isActive()) continue;
+    uint16_t ofs = 41 + s*UDP_SEG_SIZE; //start of segment offset byte
+    udpOut[0 +ofs] = s;
+    udpOut[1 +ofs] = selseg.pixel_range.start >> 8;
+    udpOut[2 +ofs] = selseg.pixel_range.start & 0xFF;
+    udpOut[3 +ofs] = selseg.pixel_range.stop >> 8;
+    udpOut[4 +ofs] = selseg.pixel_range.stop & 0xFF;
+    udpOut[5 +ofs] = selseg.grouping;
+    udpOut[6 +ofs] = selseg.spacing;
+    udpOut[7 +ofs] = selseg.offset >> 8;
+    udpOut[8 +ofs] = selseg.offset & 0xFF;
+    udpOut[9 +ofs] = selseg.options & 0x8F; //only take into account selected, mirrored, on, reversed, reverse_y (for 2D); ignore freeze, reset, transitional
+    udpOut[10+ofs] = selseg.opacity;
+    udpOut[11+ofs] = selseg.effect_id;
+    udpOut[12+ofs] = selseg.speed();
+    udpOut[13+ofs] = selseg.intensity();
+    udpOut[14+ofs] = selseg.palette.id;
+    udpOut[15+ofs] = R(selseg.rgbcctcolors[0].getU32());
+    udpOut[16+ofs] = G(selseg.rgbcctcolors[0].getU32());
+    udpOut[17+ofs] = B(selseg.rgbcctcolors[0].getU32());
+    udpOut[18+ofs] = W(selseg.rgbcctcolors[0].getU32());
+    udpOut[19+ofs] = R(selseg.rgbcctcolors[1].getU32());
+    udpOut[20+ofs] = G(selseg.rgbcctcolors[1].getU32());
+    udpOut[21+ofs] = B(selseg.rgbcctcolors[1].getU32());
+    udpOut[22+ofs] = W(selseg.rgbcctcolors[1].getU32());
+    udpOut[23+ofs] = R(selseg.rgbcctcolors[2].getU32());
+    udpOut[24+ofs] = G(selseg.rgbcctcolors[2].getU32());
+    udpOut[25+ofs] = B(selseg.rgbcctcolors[2].getU32());
+    udpOut[26+ofs] = W(selseg.rgbcctcolors[2].getU32());
+    udpOut[27+ofs] = selseg.cct;
+    udpOut[28+ofs] = (selseg.options>>8) & 0xFF; //mirror_y, transpose, 2D mapping & sound
+    udpOut[29+ofs] = selseg.custom1;
+    udpOut[30+ofs] = selseg.custom2;
+    udpOut[31+ofs] = selseg.custom3 | (selseg.check1<<5) | (selseg.check2<<6) | (selseg.check3<<7);
+    udpOut[32+ofs] = selseg.startY >> 8;
+    udpOut[33+ofs] = selseg.startY & 0xFF;
+    udpOut[34+ofs] = selseg.stopY >> 8;
+    udpOut[35+ofs] = selseg.stopY & 0xFF;
+    ++s;
+  }
+
+  //uint16_t offs = SEG_OFFSET;
+  //next value to be added has index: udpOut[offs + 0]
+
+  IPAddress broadcastIp;
+  broadcastIp = ~uint32_t(Network.subnetMask()) | uint32_t(Network.gatewayIP());
+
+  pCONT_lAni->notifierUdp.beginPacket(broadcastIp, pCONT_lAni->udpPort);
+  pCONT_lAni->notifierUdp.write(udpOut, WLEDPACKETSIZE);
+  pCONT_lAni->notifierUdp.endPacket();
+  pCONT_lAni->notificationSentCallMode = callMode;
+  pCONT_lAni->notificationSentTime = millis();
+  pCONT_lAni->notificationCount = followUp ? pCONT_lAni->notificationCount + 1 : 0;
+}
+
+void realtimeLock2(uint32_t timeoutMs, byte md)
+{
+  if (!pCONT_lAni->realtimeMode && !pCONT_lAni->realtimeOverride) {
+    uint16_t stop, start;
+    if (pCONT_lAni->useMainSegmentOnly) {
+      mAnimatorLight::Segment_New& mainseg = pCONT_lAni->getMainSegment();
+      start = mainseg.pixel_range.start;
+      stop  = mainseg.pixel_range.stop;
+      mainseg.freeze = true;
+    } else {
+      start = 0;
+      stop  = pCONT_lAni->getLengthTotal();
+    }
+    // clear strip/segment
+    for (size_t i = start; i < stop; i++) pCONT_lAni->setPixelColor(i,BLACK);
+    // if WLED was off and using main segment only, freeze non-main segments so they stay off
+    if (pCONT_lAni->useMainSegmentOnly && pCONT_iLight->getBri_Global() == 0) {
+      for (size_t s=0; s < pCONT_lAni->getSegmentsNum(); s++) {
+        pCONT_lAni->getSegment(s).freeze = true;
+      }
+    }
+  }
+  // if strip is off (bri==0) and not already in RTM
+  if (pCONT_lAni->briT == 0 && !pCONT_lAni->realtimeMode && !pCONT_lAni->realtimeOverride) {
+    pCONT_lAni->setBrightness(scaledBri2(pCONT_lAni->briLast), true);
+  }
+
+  if (pCONT_lAni->realtimeTimeout != UINT32_MAX) {
+    pCONT_lAni->realtimeTimeout = (timeoutMs == 255001 || timeoutMs == 65000) ? UINT32_MAX : millis() + timeoutMs;
+  }
+  pCONT_lAni->realtimeMode = md;
+
+  if (pCONT_lAni->realtimeOverride) return;
+  if (pCONT_lAni->arlsForceMaxBri) pCONT_lAni->setBrightness(scaledBri2(255), true);
+  if (pCONT_lAni->briT > 0 && md == REALTIME_MODE_GENERIC) pCONT_lAni->show();
+}
+
+void exitRealtime2() {
+  if (!pCONT_lAni->realtimeMode) return;
+  if (pCONT_lAni->realtimeOverride == REALTIME_OVERRIDE_ONCE) pCONT_lAni->realtimeOverride = REALTIME_OVERRIDE_NONE;
+  pCONT_lAni->setBrightness(scaledBri2(pCONT_iLight->getBri_Global()), true);
+  pCONT_lAni->realtimeTimeout = 0; // cancel realtime mode immediately
+  pCONT_lAni->realtimeMode = REALTIME_MODE_INACTIVE; // inform UI immediately
+  pCONT_lAni->realtimeIP[0] = 0;
+  if (pCONT_lAni->useMainSegmentOnly) { // unfreeze live segment again
+    pCONT_lAni->getMainSegment().freeze = false;
+  }
+  // updateInterfaces(CALL_MODE_WS_SEND);
+}
+
+
+#define TMP2NET_OUT_PORT 65442
+
+void sendTPM2Ack() {
+  pCONT_lAni->notifierUdp.beginPacket(pCONT_lAni->notifierUdp.remoteIP(), TMP2NET_OUT_PORT);
+  uint8_t response_ack = 0xac;
+  pCONT_lAni->notifierUdp.write(&response_ack, 1);
+  pCONT_lAni->notifierUdp.endPacket();
+}
+
+
+void handleNotifications()
+{
+  IPAddress localIP;
+
+  //send second notification if enabled
+  if(pCONT_lAni->udpConnected && (pCONT_lAni->notificationCount < pCONT_lAni->udpNumRetries) && ((millis()-pCONT_lAni->notificationSentTime) > 250)){
+    notify(pCONT_lAni->notificationSentCallMode,true);
+  }
+
+  if (pCONT_lAni->e131NewData && millis() - pCONT_lAni->getLastShow() > 15)
+  {
+    pCONT_lAni->e131NewData = false;
+    pCONT_lAni->show();
+  }
+
+  //unlock strip when realtime UDP times out
+  if (pCONT_lAni->realtimeMode && millis() > pCONT_lAni->realtimeTimeout) exitRealtime2();
+
+  //receive UDP notifications
+  if (!pCONT_lAni->udpConnected) return;
+
+  bool isSupp = false;
+  size_t packetSize = pCONT_lAni->notifierUdp.parsePacket();
+  if (!packetSize && pCONT_lAni->udp2Connected) {
+    packetSize = pCONT_lAni->notifier2Udp.parsePacket();
+    isSupp = true;
+  }
+
+  //hyperion / raw RGB
+  if (!packetSize && pCONT_lAni->udpRgbConnected) {
+    packetSize = pCONT_lAni->rgbUdp.parsePacket();
+    if (packetSize) {
+      if (!pCONT_lAni->receiveDirect) return;
+      if (packetSize > UDP_IN_MAXSIZE || packetSize < 3) return;
+      pCONT_lAni->realtimeIP = pCONT_lAni->rgbUdp.remoteIP();
+      DEBUG_PRINTLN( pCONT_lAni->rgbUdp.remoteIP());
+      uint8_t lbuf[packetSize];
+      pCONT_lAni->rgbUdp.read(lbuf, packetSize);
+      realtimeLock2(pCONT_lAni->realtimeTimeoutMs, REALTIME_MODE_HYPERION);
+      if (pCONT_lAni->realtimeOverride && !(pCONT_lAni->realtimeMode && pCONT_lAni->useMainSegmentOnly)) return;
+      uint16_t id = 0;
+      uint16_t totalLen = pCONT_lAni->getLengthTotal();
+      for (size_t i = 0; i < packetSize -2; i += 3)
+      {
+        setRealtimePixel(id, lbuf[i], lbuf[i+1], lbuf[i+2], 0);
+        id++; if (id >= totalLen) break;
+      }
+      if (!(pCONT_lAni->realtimeMode && pCONT_lAni->useMainSegmentOnly)) pCONT_lAni->show();
+      return;
+    }
+  }
+
+  if (!(pCONT_lAni->receiveNotifications || pCONT_lAni->receiveDirect)) return;
+
+  localIP = Network.localIP();
+  //notifier and UDP realtime
+  if (!packetSize || packetSize > UDP_IN_MAXSIZE) return;
+  if (!isSupp && pCONT_lAni->notifierUdp.remoteIP() == localIP) return; //don't process broadcasts we send ourselves
+
+  uint8_t udpIn[packetSize +1];
+  uint16_t len;
+  if (isSupp) len = pCONT_lAni->notifier2Udp.read(udpIn, packetSize);
+  else        len =  pCONT_lAni->notifierUdp.read(udpIn, packetSize);
+
+  // // WLED nodes info notifications
+  // if (isSupp && udpIn[0] == 255 && udpIn[1] == 1 && len >= 40) {
+  //   if (!pCONT_lAni->nodeListEnabled || pCONT_lAni->notifier2Udp.remoteIP() == localIP) return;
+
+  //   uint8_t unit = udpIn[39];
+  //   NodesMap::iterator it = Nodes.find(unit);
+  //   if (it == Nodes.end() && Nodes.size() < WLED_MAX_NODES) { // Create a new element when not present
+  //     Nodes[unit].age = 0;
+  //     it = Nodes.find(unit);
+  //   }
+
+  //   if (it != Nodes.end()) {
+  //     for (size_t x = 0; x < 4; x++) {
+  //       it->second.ip[x] = udpIn[x + 2];
+  //     }
+  //     it->second.age = 0; // reset 'age counter'
+  //     char tmpNodeName[33] = { 0 };
+  //     memcpy(&tmpNodeName[0], reinterpret_cast<byte *>(&udpIn[6]), 32);
+  //     tmpNodeName[32]     = 0;
+  //     it->second.nodeName = tmpNodeName;
+  //     it->second.nodeName.trim();
+  //     it->second.nodeType = udpIn[38];
+  //     uint32_t build = 0;
+  //     if (len >= 44)
+  //       for (size_t i=0; i<sizeof(uint32_t); i++)
+  //         build |= udpIn[40+i]<<(8*i);
+  //     it->second.build = build;
+  //   }
+  //   return;
+  // }
+
+  //wled notifier, ignore if realtime packets active
+  if (udpIn[0] == 0 && !pCONT_lAni->realtimeMode && pCONT_lAni->receiveNotifications)
+  {
+    //ignore notification if received within a second after sending a notification ourselves
+    if (millis() - pCONT_lAni->notificationSentTime < 1000) return;
+    if (udpIn[1] > 199) return; //do not receive custom versions
+
+    //compatibilityVersionByte:
+    byte version = udpIn[11];
+
+    // if we are not part of any sync group ignore message
+    if (version < 9 || version > 199) {
+      // legacy senders are treated as if sending in sync group 1 only
+      if (!(pCONT_lAni->receiveGroups & 0x01)) return;
+    } else if (!(pCONT_lAni->receiveGroups & udpIn[36])) return;
+
+    bool someSel = (pCONT_lAni->receiveNotificationBrightness || pCONT_lAni->receiveNotificationColor || pCONT_lAni->receiveNotificationEffects);
+
+    //apply colors from notification to main segment, only if not syncing full segments
+    if ((pCONT_lAni->receiveNotificationColor || !someSel) && (version < 11 || !pCONT_lAni->receiveSegmentOptions)) {
+      // primary color, only apply white if intented (version > 0)
+      pCONT_lAni->setColor(0, RGBW32(udpIn[3], udpIn[4], udpIn[5], (version > 0) ? udpIn[10] : 0));
+      if (version > 1) {
+        pCONT_lAni->setColor(1, RGBW32(udpIn[12], udpIn[13], udpIn[14], udpIn[15])); // secondary color
+      }
+      if (version > 6) {
+        pCONT_lAni->setColor(2, RGBW32(udpIn[20], udpIn[21], udpIn[22], udpIn[23])); // tertiary color
+        if (version > 9 && version < 200 && udpIn[37] < 255) { // valid CCT/Kelvin value
+          uint16_t cct = udpIn[38];
+          if (udpIn[37] > 0) { //Kelvin
+            cct |= (udpIn[37] << 8);
+          }
+          pCONT_lAni->setCCT(cct);
+        }
+      }
+    }
+
+    bool timebaseUpdated = false;
+    //apply effects from notification
+    bool applyEffects = (pCONT_lAni->receiveNotificationEffects || !someSel);
+    if (version < 200)
+    {
+      // if (applyEffects && currentPlaylist >= 0) unloadPlaylist();
+      if (version > 10 && (pCONT_lAni->receiveSegmentOptions || pCONT_lAni->receiveSegmentBounds)) {
+        uint8_t numSrcSegs = udpIn[39];
+        for (size_t i = 0; i < numSrcSegs; i++) {
+          uint16_t ofs = 41 + i*udpIn[40]; //start of segment offset byte
+          uint8_t id = udpIn[0 +ofs];
+          if (id > pCONT_lAni->getSegmentsNum()) break;
+
+          mAnimatorLight::Segment_New& selseg = pCONT_lAni->getSegment(id);
+          if (!selseg.isActive() || !selseg.isSelected()) continue; //do not apply to non selected segments
+
+          uint16_t startY = 0, start  = (udpIn[1+ofs] << 8 | udpIn[2+ofs]);
+          uint16_t stopY  = 1, stop   = (udpIn[3+ofs] << 8 | udpIn[4+ofs]);
+          uint16_t offset = (udpIn[7+ofs] << 8 | udpIn[8+ofs]);
+          if (!pCONT_lAni->receiveSegmentOptions) {
+            selseg.setUp(start, stop, selseg.grouping, selseg.spacing, offset, startY, stopY);
+            continue;
+          }
+          //for (size_t j = 1; j<4; j++) selseg.setOption(j, (udpIn[9 +ofs] >> j) & 0x01); //only take into account mirrored, on, reversed; ignore selected
+          selseg.options = (selseg.options & 0x0071U) | (udpIn[9 +ofs] & 0x0E); // ignore selected, freeze, reset & transitional
+          selseg.setOpacity(udpIn[10+ofs]);
+          if (applyEffects) {
+            pCONT_lAni->setMode(id,  udpIn[11+ofs]);
+            selseg.set_speed(      udpIn[12+ofs]);
+            selseg.set_intensity(  udpIn[13+ofs]);
+            selseg.palette.id   = udpIn[14+ofs];
+          }
+          if (pCONT_lAni->receiveNotificationColor || !someSel) {
+            selseg.setColor(0, RGBW32(udpIn[15+ofs],udpIn[16+ofs],udpIn[17+ofs],udpIn[18+ofs]));
+            selseg.setColor(1, RGBW32(udpIn[19+ofs],udpIn[20+ofs],udpIn[21+ofs],udpIn[22+ofs]));
+            selseg.setColor(2, RGBW32(udpIn[23+ofs],udpIn[24+ofs],udpIn[25+ofs],udpIn[26+ofs]));
+            selseg.setCCT(udpIn[27+ofs]);
+          }
+          if (version > 11) {
+            // when applying synced options ignore selected as it may be used as indicator of which segments to sync
+            // freeze, reset & transitional should never be synced
+            selseg.options = (selseg.options & 0x0071U) | (udpIn[28+ofs]<<8) | (udpIn[9 +ofs] & 0x8E); // ignore selected, freeze, reset & transitional
+            if (applyEffects) {
+              selseg.custom1 = udpIn[29+ofs];
+              selseg.custom2 = udpIn[30+ofs];
+              selseg.custom3 = udpIn[31+ofs] & 0x1F;
+              selseg.check1  = (udpIn[31+ofs]>>5) & 0x1;
+              selseg.check1  = (udpIn[31+ofs]>>6) & 0x1;
+              selseg.check1  = (udpIn[31+ofs]>>7) & 0x1;
+            }
+            startY = (udpIn[32+ofs] << 8 | udpIn[33+ofs]);
+            stopY  = (udpIn[34+ofs] << 8 | udpIn[35+ofs]);
+          }
+          if (pCONT_lAni->receiveSegmentBounds) {
+            selseg.setUp(start, stop, udpIn[5+ofs], udpIn[6+ofs], offset, startY, stopY);
+          } else {
+            selseg.setUp(selseg.pixel_range.start, selseg.pixel_range.stop, udpIn[5+ofs], udpIn[6+ofs], selseg.offset, selseg.startY, selseg.stopY);
+          }
+        }
+        pCONT_lAni->stateChanged = true;
+      }
+
+      // simple effect sync, applies to all selected segments
+      if (applyEffects && (version < 11 || !pCONT_lAni->receiveSegmentOptions)) {
+        for (size_t i = 0; i < pCONT_lAni->getSegmentsNum(); i++) {
+          mAnimatorLight::Segment_New& seg = pCONT_lAni->getSegment(i);
+          if (!seg.isActive() || !seg.isSelected()) continue;
+          seg.setMode(udpIn[8]);
+          seg.set_speed( udpIn[9]);
+          if (version > 2) seg.set_intensity( udpIn[16]);
+          if (version > 4) seg.setPalette(udpIn[19]);
+        }
+        pCONT_lAni->stateChanged = true;
+      }
+
+      if (applyEffects && version > 5) {
+        uint32_t t = (udpIn[25] << 24) | (udpIn[26] << 16) | (udpIn[27] << 8) | (udpIn[28]);
+        t += PRESUMED_NETWORK_DELAY; //adjust trivially for network delay
+        t -= millis();
+        pCONT_lAni->timebase = t;
+        timebaseUpdated = true;
+      }
+    }
+
+    //adjust system time, but only if sender is more accurate than self
+    if (version > 7 && version < 200)
+    {
+      Toki::Time tm;
+      tm.sec = (udpIn[30] << 24) | (udpIn[31] << 16) | (udpIn[32] << 8) | (udpIn[33]);
+      tm.ms = (udpIn[34] << 8) | (udpIn[35]);
+      if (udpIn[29] > pCONT_lAni->toki.getTimeSource()) { //if sender's time source is more accurate
+        pCONT_lAni->toki.adjust(tm, PRESUMED_NETWORK_DELAY); //adjust trivially for network delay
+        uint8_t ts = TOKI_TS_UDP;
+        if (udpIn[29] > 99) ts = TOKI_TS_UDP_NTP;
+        else if (udpIn[29] >= TOKI_TS_SEC) ts = TOKI_TS_UDP_SEC;
+        pCONT_lAni->toki.setTime(tm, ts);
+      } else if (timebaseUpdated && pCONT_lAni->toki.getTimeSource() > 99) { //if we both have good times, get a more accurate timebase
+        Toki::Time myTime = pCONT_lAni->toki.getTime();
+        uint32_t diff = pCONT_lAni->toki.msDifference(tm, myTime);
+        pCONT_lAni->timebase -= PRESUMED_NETWORK_DELAY; //no need to presume, use difference between NTP times at send and receive points
+        if (pCONT_lAni->toki.isLater(tm, myTime)) {
+          pCONT_lAni->timebase += diff;
+        } else {
+          pCONT_lAni->timebase -= diff;
+        }
+      }
+    }
+
+    if (version > 3)
+    {
+      pCONT_lAni->transitionDelayTemp = ((udpIn[17] << 0) & 0xFF) + ((udpIn[18] << 8) & 0xFF00);
+    }
+
+    pCONT_lAni->nightlightActive = udpIn[6];
+    if (pCONT_lAni->nightlightActive) pCONT_lAni->nightlightDelayMins = udpIn[7];
+
+    if (pCONT_lAni->receiveNotificationBrightness || !someSel) pCONT_iLight->setBriRGB_Global( udpIn[2] );
+    // stateUpdated(CALL_MODE_NOTIFICATION);
+    return;
+  }
+
+  if (!pCONT_lAni->receiveDirect) return;
+
+  //TPM2.NET
+  if (udpIn[0] == 0x9c)
+  {
+    //WARNING: this code assumes that the final TMP2.NET payload is evenly distributed if using multiple packets (ie. frame size is constant)
+    //if the number of LEDs in your installation doesn't allow that, please include padding bytes at the end of the last packet
+    byte tpmType = udpIn[1];
+    if (tpmType == 0xaa) { //TPM2.NET polling, expect answer
+      sendTPM2Ack(); return;
+    }
+    if (tpmType != 0xda) return; //return if notTPM2.NET data
+
+    pCONT_lAni->realtimeIP = (isSupp) ? pCONT_lAni->notifier2Udp.remoteIP() : pCONT_lAni->notifierUdp.remoteIP();
+    realtimeLock2(pCONT_lAni->realtimeTimeoutMs, REALTIME_MODE_TPM2NET);
+    if (pCONT_lAni->realtimeOverride && !(pCONT_lAni->realtimeMode && pCONT_lAni->useMainSegmentOnly)) return;
+
+    pCONT_lAni->tpmPacketCount++; //increment the packet count
+    if (pCONT_lAni->tpmPacketCount == 1) pCONT_lAni->tpmPayloadFrameSize = (udpIn[2] << 8) + udpIn[3]; //save frame size for the whole payload if this is the first packet
+    byte packetNum = udpIn[4]; //starts with 1!
+    byte numPackets = udpIn[5];
+
+    uint16_t id = (pCONT_lAni->tpmPayloadFrameSize/3)*(packetNum-1); //start LED
+    uint16_t totalLen = pCONT_lAni->getLengthTotal();
+    for (size_t i = 6; i < pCONT_lAni->tpmPayloadFrameSize + 4U; i += 3)
+    {
+      if (id < totalLen)
+      {
+        setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], 0);
+        id++;
+      }
+      else break;
+    }
+    if (pCONT_lAni->tpmPacketCount == numPackets) //reset packet count and show if all packets were received
+    {
+      pCONT_lAni->tpmPacketCount = 0;
+      pCONT_lAni->show();
+    }
+    return;
+  }
+
+  //UDP realtime: 1 warls 2 drgb 3 drgbw
+  if (udpIn[0] > 0 && udpIn[0] < 5)
+  {
+    pCONT_lAni->realtimeIP = (isSupp) ? pCONT_lAni->notifier2Udp.remoteIP() : pCONT_lAni->notifierUdp.remoteIP();
+    DEBUG_PRINTLN(pCONT_lAni->realtimeIP);
+    if (packetSize < 2) return;
+
+    if (udpIn[1] == 0)
+    {
+      pCONT_lAni->realtimeTimeout = 0;
+      return;
+    } else {
+      realtimeLock2(udpIn[1]*1000 +1, REALTIME_MODE_UDP);
+    }
+    if (pCONT_lAni->realtimeOverride && !(pCONT_lAni->realtimeMode && pCONT_lAni->useMainSegmentOnly)) return;
+
+    uint16_t totalLen = pCONT_lAni->getLengthTotal();
+    if (udpIn[0] == 1) //warls
+    {
+      for (size_t i = 2; i < packetSize -3; i += 4)
+      {
+        setRealtimePixel(udpIn[i], udpIn[i+1], udpIn[i+2], udpIn[i+3], 0);
+      }
+    } else if (udpIn[0] == 2) //drgb
+    {
+      uint16_t id = 0;
+      for (size_t i = 2; i < packetSize -2; i += 3)
+      {
+        setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], 0);
+
+        id++; if (id >= totalLen) break;
+      }
+    } else if (udpIn[0] == 3) //drgbw
+    {
+      uint16_t id = 0;
+      for (size_t i = 2; i < packetSize -3; i += 4)
+      {
+        setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], udpIn[i+3]);
+
+        id++; if (id >= totalLen) break;
+      }
+    } else if (udpIn[0] == 4) //dnrgb
+    {
+      uint16_t id = ((udpIn[3] << 0) & 0xFF) + ((udpIn[2] << 8) & 0xFF00);
+      for (size_t i = 4; i < packetSize -2; i += 3)
+      {
+        if (id >= totalLen) break;
+        setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], 0);
+        id++;
+      }
+    } else if (udpIn[0] == 5) //dnrgbw
+    {
+      uint16_t id = ((udpIn[3] << 0) & 0xFF) + ((udpIn[2] << 8) & 0xFF00);
+      for (size_t i = 4; i < packetSize -2; i += 4)
+      {
+        if (id >= totalLen) break;
+        setRealtimePixel(id, udpIn[i], udpIn[i+1], udpIn[i+2], udpIn[i+3]);
+        id++;
+      }
+    }
+    pCONT_lAni->show();
+    return;
+  }
+
+  // API over UDP
+  udpIn[packetSize] = '\0';
+
+  // if (requestJSONBufferLock(18)) {
+  //   if (udpIn[0] >= 'A' && udpIn[0] <= 'Z') { //HTTP API
+  //     String apireq = "win"; apireq += '&'; // reduce flash string usage
+  //     apireq += (char*)udpIn;
+  //     handleSet(nullptr, apireq);
+  //   } else if (udpIn[0] == '{') { //JSON API
+  //     DeserializationError error = deserializeJson(doc, udpIn);
+  //     JsonObject root = doc.as<JsonObject>();
+  //     if (!error && !root.isNull()) deserializeState(root);
+  //   }
+  //   releaseJSONBufferLock();
+  // }
+}
+
+
+void setRealtimePixel(uint16_t i, byte r, byte g, byte b, byte w)
+{
+  uint16_t pix = i + pCONT_lAni->arlsOffset;
+  if (pix < pCONT_lAni->getLengthTotal()) {
+    if (!pCONT_lAni->arlsDisableGammaCorrection && pCONT_lAni->gammaCorrectCol) {
+      // r = pCONT_lAni->gamma8(r);
+      // g = pCONT_lAni->gamma8(g);
+      // b = pCONT_lAni->gamma8(b);
+      // w = pCONT_lAni->gamma8(w);
+    }
+    if (pCONT_lAni->useMainSegmentOnly) {
+      mAnimatorLight::Segment_New &seg = pCONT_lAni->getMainSegment();
+      if (pix<seg.length()) seg.setPixelColor(pix, r, g, b, w);
+    } else {
+      pCONT_lAni->setPixelColor(pix, r, g, b, w);
+    }
   }
 }
 
-uint8_t mAnimatorLight::NeoGammaWLEDMethod::Correct(uint8_t value)
+/*********************************************************************************************\
+   Refresh aging for remote units, drop if too old...
+\*********************************************************************************************/
+void refreshNodeList()
 {
-  // if (!gammaCorrectCol) return value;
-  // return gammaT[value];
+  // for (NodesMap::iterator it = Nodes.begin(); it != Nodes.end();) {
+  //   bool mustRemove = true;
+
+  //   if (it->second.ip[0] != 0) {
+  //     if (it->second.age < 10) {
+  //       it->second.age++;
+  //       mustRemove = false;
+  //       ++it;
+  //     }
+  //   }
+
+  //   if (mustRemove) {
+  //     it = Nodes.erase(it);
+  //   }
+  // }
 }
 
-// used for color gamma correction
-uint32_t mAnimatorLight::NeoGammaWLEDMethod::Correct32(uint32_t color)
+/*********************************************************************************************\
+   Broadcast system info to other nodes. (to update node lists)
+\*********************************************************************************************/
+void sendSysInfoUDP()
 {
-  // if (!gammaCorrectCol) return color;
-  // uint8_t w = W(color);
-  // uint8_t r = R(color);
-  // uint8_t g = G(color);
-  // uint8_t b = B(color);
-  // w = gammaT[w];
-  // r = gammaT[r];
-  // g = gammaT[g];
-  // b = gammaT[b];
-  // return RGBW32(r, g, b, w);
+  if (!pCONT_lAni->udp2Connected) return;
+
+  IPAddress ip = Network.localIP();
+  if (!ip || ip == IPAddress(255,255,255,255)) ip = IPAddress(4,3,2,1);
+
+  // TODO: make a nice struct of it and clean up
+  //  0: 1 byte 'binary token 255'
+  //  1: 1 byte id '1'
+  //  2: 4 byte ip
+  //  6: 32 char name
+  // 38: 1 byte node type id
+  // 39: 1 byte node id
+  // 40: 4 byte version ID
+  // 44 bytes total
+
+  // send my info to the world...
+  uint8_t data[44] = {0};
+  data[0] = 255;
+  data[1] = 1;
+
+  for (size_t x = 0; x < 4; x++) {
+    data[x + 2] = ip[x];
+  }
+  memcpy((byte *)data + 6, pCONT_lAni->serverDescription, 32);
+  #ifdef ESP8266
+  data[38] = NODE_TYPE_ID_ESP8266;
+  #elif defined(CONFIG_IDF_TARGET_ESP32C3)
+  data[38] = NODE_TYPE_ID_ESP32C3;
+  #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+  data[38] = NODE_TYPE_ID_ESP32S3;
+  #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+  data[38] = NODE_TYPE_ID_ESP32S2;
+  #elif defined(ARDUINO_ARCH_ESP32)
+  data[38] = 32;//NODE_TYPE_ID_ESP32;
+  #else
+  data[38] = NODE_TYPE_ID_UNDEFINED;
+  #endif
+  data[39] = ip[3]; // unit ID == last IP number
+
+  uint32_t build = PROJECT_VERSION;
+  for (size_t i=0; i<sizeof(uint32_t); i++)
+    data[40+i] = (build>>(8*i)) & 0xFF;
+
+  IPAddress broadcastIP(255, 255, 255, 255);
+  pCONT_lAni->notifier2Udp.beginPacket(broadcastIP, pCONT_lAni->udpPort2);
+  pCONT_lAni->notifier2Udp.write(data, sizeof(data));
+  pCONT_lAni->notifier2Udp.endPacket();
 }
 
 
+/*********************************************************************************************\
+ * Art-Net, DDP, E131 output - work in progress
+\*********************************************************************************************/
+
+#define DDP_HEADER_LEN 10
+#define DDP_SYNCPACKET_LEN 10
+
+#define DDP_FLAGS1_VER 0xc0  // version mask
+#define DDP_FLAGS1_VER1 0x40 // version=1
+#define DDP_FLAGS1_PUSH 0x01
+#define DDP_FLAGS1_QUERY 0x02
+#define DDP_FLAGS1_REPLY 0x04
+#define DDP_FLAGS1_STORAGE 0x08
+#define DDP_FLAGS1_TIME 0x10
+
+#define DDP_ID_DISPLAY 1
+#define DDP_ID_CONFIG 250
+#define DDP_ID_STATUS 251
+
+// 1440 channels per packet
+#define DDP_CHANNELS_PER_PACKET 1440 // 480 leds
+
+//
+// Send real time UDP updates to the specified client
+//
+// type   - protocol type (0=DDP, 1=E1.31, 2=ArtNet)
+// client - the IP address to send to
+// length - the number of pixels
+// buffer - a buffer of at least length*4 bytes long
+// isRGBW - true if the buffer contains 4 components per pixel
+
+static       size_t sequenceNumber = 0; // this needs to be shared across all outputs
+static const size_t ART_NET_HEADER_SIZE = 12;
+static const byte   ART_NET_HEADER[] PROGMEM = {0x41,0x72,0x74,0x2d,0x4e,0x65,0x74,0x00,0x00,0x50,0x00,0x0e};
+
+uint8_t realtimeBroadcast(uint8_t type, IPAddress client, uint16_t length, uint8_t *buffer, uint8_t bri, bool isRGBW)  {
+  // if (!(apActive || interfacesInited) || !client[0] || !length) return 1;  // network not initialised or dummy/unset IP address  031522 ajn added check for ap
+
+  WiFiUDP ddpUdp;
+
+  switch (type) {
+    case 0: // DDP
+    {
+      // // calculate the number of UDP packets we need to send
+      // size_t channelCount = length * (isRGBW? 4:3); // 1 channel for every R,G,B value
+      // size_t packetCount = ((channelCount-1) / DDP_CHANNELS_PER_PACKET) +1;
+
+      // // there are 3 channels per RGB pixel
+      // uint32_t channel = 0; // TODO: allow specifying the start channel
+      // // the current position in the buffer
+      // size_t bufferOffset = 0;
+
+      // for (size_t currentPacket = 0; currentPacket < packetCount; currentPacket++) {
+      //   if (sequenceNumber > 15) sequenceNumber = 0;
+
+      //   if (!ddpUdp.beginPacket(client, DDP_DEFAULT_PORT)) {  // port defined in ESPAsyncE131.h
+      //     DEBUG_PRINTLN(F("WiFiUDP.beginPacket returned an error"));
+      //     return 1; // problem
+      //   }
+
+      //   // the amount of data is AFTER the header in the current packet
+      //   size_t packetSize = DDP_CHANNELS_PER_PACKET;
+
+      //   uint8_t flags = DDP_FLAGS1_VER1;
+      //   if (currentPacket == (packetCount - 1U)) {
+      //     // last packet, set the push flag
+      //     // TODO: determine if we want to send an empty push packet to each destination after sending the pixel data
+      //     flags = DDP_FLAGS1_VER1 | DDP_FLAGS1_PUSH;
+      //     if (channelCount % DDP_CHANNELS_PER_PACKET) {
+      //       packetSize = channelCount % DDP_CHANNELS_PER_PACKET;
+      //     }
+      //   }
+
+      //   // write the header
+      //   /*0*/ddpUdp.write(flags);
+      //   /*1*/ddpUdp.write(sequenceNumber++ & 0x0F); // sequence may be unnecessary unless we are sending twice (as requested in Sync settings)
+      //   /*2*/ddpUdp.write(isRGBW ?  DDP_TYPE_RGBW32 : DDP_TYPE_RGB24);
+      //   /*3*/ddpUdp.write(DDP_ID_DISPLAY);
+      //   // data offset in bytes, 32-bit number, MSB first
+      //   /*4*/ddpUdp.write(0xFF & (channel >> 24));
+      //   /*5*/ddpUdp.write(0xFF & (channel >> 16));
+      //   /*6*/ddpUdp.write(0xFF & (channel >>  8));
+      //   /*7*/ddpUdp.write(0xFF & (channel      ));
+      //   // data length in bytes, 16-bit number, MSB first
+      //   /*8*/ddpUdp.write(0xFF & (packetSize >> 8));
+      //   /*9*/ddpUdp.write(0xFF & (packetSize     ));
+
+      //   // write the colors, the write write(const uint8_t *buffer, size_t size)
+      //   // function is just a loop internally too
+      //   for (size_t i = 0; i < packetSize; i += (isRGBW?4:3)) {
+      //     ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // R
+      //     ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // G
+      //     ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // B
+      //     if (isRGBW) ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // W
+      //   }
+
+      //   if (!ddpUdp.endPacket()) {
+      //     DEBUG_PRINTLN(F("WiFiUDP.endPacket returned an error"));
+      //     return 1; // problem
+      //   }
+
+      //   channel += packetSize;
+      // }
+    } break;
+
+    case 1: //E1.31
+    {
+    } break;
+
+    case 2: //ArtNet
+    {
+      // // calculate the number of UDP packets we need to send
+      // const size_t channelCount = length * (isRGBW?4:3); // 1 channel for every R,G,B,(W?) value
+      // const size_t ARTNET_CHANNELS_PER_PACKET = isRGBW?512:510; // 512/4=128 RGBW LEDs, 510/3=170 RGB LEDs
+      // const size_t packetCount = ((channelCount-1)/ARTNET_CHANNELS_PER_PACKET)+1;
+
+      // uint32_t channel = 0; 
+      // size_t bufferOffset = 0;
+
+      // sequenceNumber++;
+
+      // for (size_t currentPacket = 0; currentPacket < packetCount; currentPacket++) {
+
+      //   if (sequenceNumber > 255) sequenceNumber = 0;
+
+      //   if (!ddpUdp.beginPacket(client, ARTNET_DEFAULT_PORT)) {
+      //     DEBUG_PRINTLN(F("Art-Net WiFiUDP.beginPacket returned an error"));
+      //     return 1; // borked
+      //   }
+
+      //   size_t packetSize = ARTNET_CHANNELS_PER_PACKET;
+
+      //   if (currentPacket == (packetCount - 1U)) {
+      //     // last packet
+      //     if (channelCount % ARTNET_CHANNELS_PER_PACKET) {
+      //       packetSize = channelCount % ARTNET_CHANNELS_PER_PACKET;
+      //     }
+      //   }
+
+      //   byte header_buffer[ART_NET_HEADER_SIZE];
+      //   memcpy_P(header_buffer, ART_NET_HEADER, ART_NET_HEADER_SIZE);
+      //   ddpUdp.write(header_buffer, ART_NET_HEADER_SIZE); // This doesn't change. Hard coded ID, OpCode, and protocol version.
+      //   ddpUdp.write(sequenceNumber & 0xFF); // sequence number. 1..255
+      //   ddpUdp.write(0x00); // physical - more an FYI, not really used for anything. 0..3
+      //   ddpUdp.write((currentPacket) & 0xFF); // Universe LSB. 1 full packet == 1 full universe, so just use current packet number.
+      //   ddpUdp.write(0x00); // Universe MSB, unused.
+      //   ddpUdp.write(0xFF & (packetSize >> 8)); // 16-bit length of channel data, MSB
+      //   ddpUdp.write(0xFF & (packetSize     )); // 16-bit length of channel data, LSB
+
+      //   for (size_t i = 0; i < packetSize; i += (isRGBW?4:3)) {
+      //     ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // R
+      //     ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // G
+      //     ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // B
+      //     if (isRGBW) ddpUdp.write(scale8(buffer[bufferOffset++], bri)); // W
+      //   }
+
+      //   if (!ddpUdp.endPacket()) {
+      //     DEBUG_PRINTLN(F("Art-Net WiFiUDP.endPacket returned an error"));
+      //     return 1; // borked
+      //   }
+      //   channel += packetSize;
+      // }
+    } break;
+  }
+  return 0;
+}
+
+#endif // ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
 
 
 

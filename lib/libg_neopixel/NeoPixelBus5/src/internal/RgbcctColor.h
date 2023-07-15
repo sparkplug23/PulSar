@@ -233,6 +233,13 @@ struct RgbcctColor
     // ------------------------------------------------------------------------
     void Darken(uint8_t delta);
 
+    /**
+     * @brief Instead of changing by a delta value, the colour component is divided by the fade amount
+     * 
+     * @param fade 
+     */
+    void Fade(uint8_t fade);
+
     // ------------------------------------------------------------------------
     // Lighten will adjust the color by the given delta toward white
     // NOTE: This is a simple linear change

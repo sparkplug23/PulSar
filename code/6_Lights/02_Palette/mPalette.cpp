@@ -39,6 +39,33 @@ void mPalette::init_PresetColourPalettes()
     return;
   }
   
+
+  /**
+   *  Static 
+   * 
+   * init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id)
+   * 
+   * */
+
+  for(
+    uint8_t id=0; 
+            id<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID); 
+            id++
+  ){
+
+    ALOG_ERR(PSTR("THESE ARE NOT HERE ANYMORE, keeping to permit compile"));
+
+    pal.id = id+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    pal.friendly_name_ctr = nullptr;
+    pal.data = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[id*5]; // Point to memory location
+    pal.data_length = 5; // each is 5 bytes wide, 1 pixel = 5 bytes total    
+    pal.encoding.data       = PALETTE_ENCODING_INCLUDES_RGBCCT_NO_INDEX;
+
+    palettelist.push_back(pal); ALOG_INF( PSTR("palettelist %d|%d"), __LINE__, palettelist.size() );
+
+  }
+
+
   /**
    *  Static 
    * 
@@ -72,32 +99,6 @@ void mPalette::init_PresetColourPalettes()
     palettelist.push_back(pal); ALOG_INF( PSTR("palettelist %d|%d"), __LINE__, palettelist.size() );
 
   }
-
-  /**
-   *  Static 
-   * 
-   * init_PresetColourPalettes_User_RGBCCT_Fill(uint8_t id)
-   * 
-   * */
-
-  for(
-    uint8_t id=0; 
-            id<(PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID); 
-            id++
-  ){
-
-    ALOG_ERR(PSTR("THESE ARE NOT HERE ANYMORE, keeping to permit compile"));
-
-    pal.id = id+PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
-    pal.friendly_name_ctr = nullptr;
-    pal.data = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[id*5]; // Point to memory location
-    pal.data_length = 5; // each is 5 bytes wide, 1 pixel = 5 bytes total    
-    pal.encoding.data       = PALETTE_ENCODING_INCLUDES_RGBCCT_NO_INDEX;
-
-    palettelist.push_back(pal); ALOG_INF( PSTR("palettelist %d|%d"), __LINE__, palettelist.size() );
-
-  }
-
 
 // void mPalette::init_PresetColourPalettes_User_Generic_Fill(uint8_t id)
 // {

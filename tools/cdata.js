@@ -22,8 +22,8 @@ const CleanCSS = require("clean-css");
 const MinifyHTML = require("html-minifier-terser").minify; // npm install html-minifier-terser
 const packageJson = require("../package.json");
 
-let source_path      = "code/10_ConSpec/12_WebUI_WLED_Dev/source"
-let destination_path = "code/10_ConSpec/12_WebUI_WLED_Dev/webpages/"
+let source_path      = "code/6_Lights/03_Animator/WebUI_01/source"
+let destination_path = "code/6_Lights/03_Animator/WebUI_01/webpages/"
 
 /**
  *
