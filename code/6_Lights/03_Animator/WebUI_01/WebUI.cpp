@@ -1956,7 +1956,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment_
   // this will reduce RAM footprint from ~300 bytes to 84 bytes per segment
   char colstr[70]; colstr[0] = '['; colstr[1] = '\0';  //max len 68 (5 chan, all 255)
   const char *format = hasWhiteChannel() ? PSTR("[%u,%u,%u,%u]") : PSTR("[%u,%u,%u]");
-  for (size_t i = 0; i < 3; i++)
+  for (size_t i = 0; i < 5; i++)
   {
     byte segcol[4]; byte* c = segcol;
     segcol[0] = seg.rgbcctcolors[i].R;
@@ -1965,7 +1965,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment_
     segcol[3] = seg.rgbcctcolors[i].W1;
     char tmpcol[22];
     sprintf_P(tmpcol, format, (unsigned)c[0], (unsigned)c[1], (unsigned)c[2], (unsigned)c[3]);
-    strcat(colstr, i<2 ? strcat(tmpcol, ",") : tmpcol);
+    strcat(colstr, i<4 ? strcat(tmpcol, ",") : tmpcol);
   }
   strcat(colstr, "]");
   ALOG_INF(PSTR("colstr OUT = %s"), colstr);
@@ -2602,14 +2602,43 @@ void mAnimatorLight::serializeNodes(JsonObject root)
 // deserializes mode data string into JsonArray
 void mAnimatorLight::serializeModeData(JsonArray fxdata)
 {
+
+  
+    // #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
+
+    // uint8_t effect_name_len = strlen(lineBuffer);
+    // if(effects.data_config[i] != nullptr)
+    // {
+    //   snprintf_P(lineBuffer+effect_name_len, sizeof(lineBuffer)-effect_name_len, "@%s", effects.data_config[i]);
+    // }
+
+    // #endif 
+
+
+
   char lineBuffer[128];
   for (size_t i = 0; i < getModeCount(); i++) {
-    strncpy_P(lineBuffer, getModeData(i), 127);
-    if (lineBuffer[0] != 0) {
-      char* dataPtr = strchr(lineBuffer,'@');
-      if (dataPtr) fxdata.add(dataPtr+1);
-      else         fxdata.add("");
+
+    
+    // if (lineBuffer[0] != 0) {
+    //   char* dataPtr = strchr(lineBuffer,'@');
+    //   if (dataPtr) fxdata.add(dataPtr+1);
+    //   else         fxdata.add("");
+    // }
+
+
+
+    if(effects.data_config[i] != nullptr)
+    {
+    // strncpy_P(lineBuffer, effects.data_config[i], 127);
+      fxdata.add(effects.data_config[i]);
+      // snprintf_P(lineBuffer+effect_name_len, sizeof(lineBuffer)-effect_name_len, "@%s", effects.data_config[i]);
+    }else{
+      fxdata.add("");
     }
+
+
+
   }
 }
 
@@ -2634,14 +2663,14 @@ void mAnimatorLight::serializeModeNames(JsonArray arr) {
 void mAnimatorLight::serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) 
 {
 
-  // ALOG_INF(PSTR("serializeModeNames2 %d"), getEffectsFunctionCount());
+  // ALOG_INF(PSTR("serializeModeNames2 %d"), getEffectsAmount());
 
-  char lineBuffer[128];
-  for(uint16_t i = 0; i < getEffectsFunctionCount(); i++)
+  char lineBuffer[128] = {0};
+  for(uint16_t i = 0; i < getEffectsAmount(); i++)
   {
     GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer));
 
-  // ALOG_INF(PSTR("serializeModeNames2 %d"), getEffectsFunctionCount());
+  // ALOG_INF(PSTR("serializeModeNames2 %d"), getEffectsAmount());
     if(flag_get_first_name_only)
     {    
       char* dataPtr = strchr(lineBuffer,'|');
@@ -2650,7 +2679,8 @@ void mAnimatorLight::serializeModeNames2(JsonArray arr, bool flag_get_first_name
 
 
 
-  // ALOG_INF(PSTR("serializeModeNames2 %d %s"), getEffectsFunctionCount(), lineBuffer);
+
+  // ALOG_INF(PSTR("serializeModeNames2 %d %s"), getEffectsAmount(), lineBuffer);
 
     arr.add(lineBuffer);
   }
@@ -3176,7 +3206,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
     if (seg.getLightCapabilities() & 3) {
       // segment has RGB or White
-      for (size_t i = 0; i < 3; i++)
+      for (size_t i = 0; i < 5; i++)
       {
         int rgbw[] = {0,0,0,0};
         bool colValid = false;

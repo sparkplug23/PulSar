@@ -3126,7 +3126,7 @@ void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only = true);
 void serializeModeNames2(JsonArray arr, bool flag_get_first_name_only) 
 {
   char lineBuffer[128];
-  for(uint16_t i = 0; i < pCONT_lAni->getEffectsFunctionCount(); i++)
+  for(uint16_t i = 0; i < pCONT_lAni->getEffectsAmount(); i++)
   {
     pCONT_lAni->GetFlasherFunctionNamebyID(i, lineBuffer, sizeof(lineBuffer));
 

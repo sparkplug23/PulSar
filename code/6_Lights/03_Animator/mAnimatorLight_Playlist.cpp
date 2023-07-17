@@ -1,3 +1,14 @@
+/**
+ * @brief 
+ * 
+ * 
+ * playlists then takes presets and moves between them based on times etc
+ * 
+ * 
+ */
+
+
+
 // #include "mAnimatorLight.h"
 
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR

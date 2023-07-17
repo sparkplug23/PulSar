@@ -1,3 +1,18 @@
+/**
+ * @file mAnimatorLight_Auto_Presets.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2023-07-16
+ * 
+ * 
+ * Presets are effects, colours, params, timings selected by a user to show a certain output. It should be able to switch to and reproduce regardless of previous effect.
+ * 
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include "mAnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR

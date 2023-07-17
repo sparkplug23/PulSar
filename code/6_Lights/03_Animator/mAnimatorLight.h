@@ -789,24 +789,46 @@ class mAnimatorLight :
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/  
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    // Static
+    /**
+     * Static
+     **/
     EFFECTS_FUNCTION__WLED_STATIC__ID,
     EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
     EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,
+    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__WLED_SPOTS__ID,
     #endif
     EFFECTS_FUNCTION__WLED_PERCENT__ID,
-    // One colour changes
+    /**
+     * One Colour
+     **/
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,
-    // Wipe/Sweep/Runners     
+    #endif
+    /**
+     * Wipe/Sweep/Runners 
+     **/
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,
     EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID, // 1 direction only
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID, //start to end to start again
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     * Fireworks
+     **/
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,
+    EFFECTS_FUNCTION__WLED_RAIN__ID,
+    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID,
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID,
     EFFECTS_FUNCTION__WLED_ANDROID__ID,
-    EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__ID,
     EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID,
     EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID,
     EFFECTS_FUNCTION__WLED_GRADIENT__ID,
@@ -832,9 +854,10 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_FLOW__ID,
     EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID,
     EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID,
-    EFFECTS_FUNCTION__WLED_MERRY_CHRISTMAS__ID,
-    EFFECTS_FUNCTION__WLED_HALLOWEEN__ID,
-    // Chase
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     * Chase
+     **/
     EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID,
     EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID,
     EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID, 
@@ -844,21 +867,19 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID,
     EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID,
     EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID,
-    EFFECTS_FUNCTION__WLED_CIRCUS_COMBUSTUS__ID,
-    // Breathe/Fade/Pulse
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     *  Breathe/Fade/Pulse
+     **/    
     EFFECTS_FUNCTION__WLED_BREATH__ID,
     EFFECTS_FUNCTION__WLED_FADE__ID,
     EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,
     EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID,
-    // Fireworks
-    EFFECTS_FUNCTION__WLED_FIREWORKS__ID,
-    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,
-    EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID,
-    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,
-    EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,
-    EFFECTS_FUNCTION__WLED_RAIN__ID,
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     * Sparkle/Twinkle
+     **/
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    // Sparkle/Twinkle
     EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID,
     EFFECTS_FUNCTION__WLED_POPCORN__ID,
     EFFECTS_FUNCTION__WLED_PLASMA__ID,
@@ -876,7 +897,10 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_COLORFUL__ID,
     EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE            
-    // Blink/Strobe
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     * Blink/Strobe
+     **/
     EFFECTS_FUNCTION__WLED_BLINK__ID,
     EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,
     EFFECTS_FUNCTION__WLED_STROBE__ID,
@@ -887,7 +911,11 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_FIRE_2012__ID,
     EFFECTS_FUNCTION__WLED_RAILWAY__ID,
     EFFECTS_FUNCTION__WLED_HEARTBEAT__ID, 
-    // Noise
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     * Noise
+     **/
     EFFECTS_FUNCTION__WLED_FILLNOISE8__ID,
     EFFECTS_FUNCTION__WLED_NOISE16_1__ID,
     EFFECTS_FUNCTION__WLED_NOISE16_2__ID,
@@ -896,7 +924,11 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_NOISEPAL__ID,
     EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID,
     EFFECTS_FUNCTION__WLED_PHASED__ID,
-    // Scan
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    /**
+     * Scan
+     **/
     EFFECTS_FUNCTION__WLED_SCAN__ID,
     EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID,
     EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID,
@@ -910,13 +942,8 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_SINELON__ID,
     EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID,
     EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID,
-    EFFECTS_FUNCTION__WLED_DRIP__ID,     
-    // Added 2022
-    EFFECTS_FUNCTION__WLED_BLENDS__ID,            // mode_blends
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    EFFECTS_FUNCTION__WLED_TV_SIMULATOR__ID,      // mode_tv_simulator
-    #endif    
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    EFFECTS_FUNCTION__WLED_DRIP__ID,   
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE  
 
     /**
      * Development effects
@@ -1179,7 +1206,7 @@ class mAnimatorLight :
   #define DEFAULT_EFFECTS_FUNCTION    0
   #endif
 
-  uint16_t getEffectsFunctionCount(){ return EFFECTS_FUNCTION__LENGTH__ID; }
+  uint16_t getEffectsAmount(){ return effects.data.size(); }
 
   void SubTask_Segments_Effects();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
@@ -1332,7 +1359,7 @@ class mAnimatorLight :
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void EffectAnim__Blend_Palette_To_White();
+  void EffectAnim__Palette_Colour_Fade_Saturation();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void EffectAnim__Blend_Palette_Between_Another_Palette();
@@ -1366,7 +1393,6 @@ class mAnimatorLight :
   void EffectAnim__Android();
   void EffectAnim__Base_Running(bool saw);
   void EffectAnim__Base_Running(uint32_t color1, uint32_t color2);
-  void EffectAnim__Running_Red_Blue();
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   void EffectAnim__Running_Colour();
   void EffectAnim__Running_Random();
@@ -1399,8 +1425,6 @@ class mAnimatorLight :
   void EffectAnim__Phased();    
   void EffectAnim__Running_Lights();    
   void EffectAnim__Rainbow_Cycle();    
-  void EffectAnim__Merry_Christmas();    
-  void EffectAnim__Halloween();    
   // Chase    
   void EffectAnim__Base_Chase(uint32_t color1, uint32_t color2, uint32_t color3, bool do_palette);
   void EffectAnim__Chase_Colour();
@@ -1414,7 +1438,6 @@ class mAnimatorLight :
   void EffectAnim__Chase_Theatre_Rainbow();
   void EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t color2);
   void EffectAnim__Chase_TriColour();
-  void EffectAnim__Circus_Combustus();
   // Breathe/Fade/Pulse
   void EffectAnim__Breath();
   void EffectAnim__Fade();
@@ -1761,9 +1784,8 @@ typedef struct Segment_New {
      * @NOTE: Replaces WLED 3 colour options
      **/
     #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-    // std::vector<RgbcctColor> rgbcctcolors = {RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0)};// = RgbcctColor();
     #define RGBCCTCOLOURS_SIZE 5
-    RgbcctColor rgbcctcolors[5] = {RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0), RgbcctColor(0)};// = RgbcctColor();
+    RgbcctColor rgbcctcolors[5] = {RgbcctColor(255,0,0,0,0), RgbcctColor(0,255,0,0,0), RgbcctColor(0,0,255,0,0), RgbcctColor(255,0,255,0,0), RgbcctColor(255,255,0,0,0)};// = RgbcctColor();
     #else
     std::vector<RgbcctColor> rgbcctcolors; // memory leak as size/memcpy is used with new segments. This needs to be predefined, so maybe move back to array?
     #endif
@@ -2455,13 +2477,14 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
 
     typedef void (mAnimatorLight::*RequiredFunction)();        
-    void addEffect3(uint8_t id, RequiredFunction function, const char *name); // add effect to the list; defined in FX.cpp
+    void addEffect3(uint8_t id, RequiredFunction function, const char *name, const char* effect_config = nullptr); // add effect to the list; defined in FX.cpp
 
     struct EFFECTS
     {
       uint8_t                         count = 0;
       std::vector<RequiredFunction>   function;     // SRAM footprint: 4 bytes per element
       std::vector<const char*>        data; // mode (effect) name and its slider control data array
+      std::vector<const char*>        data_config; // For at least now, using WLED options until webpage is functional.
     }effects;
 
 

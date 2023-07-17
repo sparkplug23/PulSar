@@ -7,7 +7,7 @@ var nlMode = false;
 var segLmax = 0; // size (in pixels) of largest selected segment
 var selectedFx = 0;
 var selectedPal = 0;
-var csel = 0; // selected color slot (0-2)
+var csel = 0; // selected color slot (0-4)
 var currentPreset = -1;
 var lastUpdate = 0;
 var segCount = 0, ledCount = 0, lowestUnused = 0, maxSeg = 0, lSeg = 0;
@@ -1498,13 +1498,13 @@ function readState(s,command=false)
 // If an effect name is followed by an @, slider and color control is effective.
 // If not effective then:
 //      - For AC effects (id<128) 2 sliders and 3 colors and the palette will be shown
-//      - For SR effects (id>128) 5 sliders and 3 colors and the palette will be shown
+//      - For SR effects (id>128) 7 sliders and 3 colors and the palette will be shown
 // If effective (@)
 //      - a ; seperates slider controls (left) from color controls (middle) and palette control (right)
 //      - if left, middle or right is empty no controls are shown
-//      - a , seperates slider controls (max 5) or color controls (max 3). Palette has only one value
+//      - a , seperates slider controls (max 7) or color controls (max 3). Palette has only one value
 //      - a ! means that the default is used.
-//             - For sliders: Effect speeds, Effect intensity, Custom 1, Custom 2, Custom 3
+//             - For sliders: Effect speeds, Effect intensity, Custom 1, Custom 2, Custom 3, TimeMS, RateMS
 //             - For colors: Fx color, Background color, Custom
 //             - For palette: prompt for color palette OR palette ID if numeric (will hide palette selection)
 //
@@ -1524,7 +1524,7 @@ function setEffectParameters(idx)
 	var paOnOff = (effectPars.length<3  || effectPars[2]=='')?[]:effectPars[2].split(",");
 
 	// set html slider items on/off
-	let nSliders = 5;
+	let nSliders = 7; //5+my two timers
 	for (let i=0; i<nSliders; i++) {
 		var slider = gId("slider" + i);
 		var label = gId("sliderLabel" + i);
@@ -1539,12 +1539,12 @@ function setEffectParameters(idx)
 			slider.classList.add('hide');
 		}
 	}
-	if (slOnOff.length>5) { // up to 3 checkboxes
+	if (slOnOff.length>nSliders) { // up to 3 checkboxes
 		gId('fxopt').classList.remove('fade');
 		for (let i = 0; i<3; i++) {
-			if (5+i<slOnOff.length && slOnOff[5+i]!=='') {
+			if (nSliders+i<slOnOff.length && slOnOff[nSliders+i]!=='') {
 				gId('opt'+i).classList.remove('hide');
-				gId('optLabel'+i).innerHTML = slOnOff[5+i]=="!" ? 'Option' : slOnOff[5+i].substr(0,16);
+				gId('optLabel'+i).innerHTML = slOnOff[nSliders+i]=="!" ? 'Option' : slOnOff[nSliders+i].substr(0,16);
 			} else
 				gId('opt'+i).classList.add('hide');
 		}
@@ -2622,7 +2622,7 @@ function setColor(sr)
 	cdd.b = b = hasRGB ? col.b : w;
 	cdd.w = w;
 	setCSL(cd[csel]);
-	var obj = {"seg": {"col": [[],[],[]]}};
+	var obj = {"seg": {"col": [[],[],[],[],[]]}};
 	obj.seg.col[csel] = [r, g, b, w];
 	requestJson(obj);
 }

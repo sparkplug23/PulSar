@@ -422,11 +422,9 @@ void mAnimatorLight::BootMessage()
 ********************************************************************************************************************
 ********************************************************************************************************************/
 
-// Nothing is needed in "Pre_Init"
 void mAnimatorLight::Pre_Init(void)
 {
   
-
 }
 
 
@@ -461,7 +459,7 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   _isOffRefreshRequired = false;
   _hasWhiteChannel = false;
   _triggered = false;
-  effects.count = EFFECTS_FUNCTION__LENGTH__ID;
+  effects.count = getEffectsAmount();
   _callback = nullptr;
   customMappingTable = nullptr;
   customMappingSize = 0;
@@ -479,14 +477,6 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
 
 void mAnimatorLight::Init__Palettes()
 {
-
-  DEBUG_LINE_HERE;
-  ALOG_DBM(PSTR("mPaletteI->init_PresetColourPalettes(); to be made internal to class"));
-  #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-  mPaletteI->init_PresetColourPalettes();
-  #endif
-
-  DEBUG_LINE_HERE;
   
   char buffer[30];
   // Default user names for palette
@@ -1164,10 +1154,10 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
    * 
   ***************************************************************/
   if(
-    ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID) && 
+    ((palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && 
     (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
   ){  
-    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;
+    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
     DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
   }
   // DEBUG_LINE_HERE;
@@ -1490,7 +1480,7 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
 
 
 void
-mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *name)
+mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *name, const char* effect_config)
 {
 
   // if (id == 255) { // find empty slot
@@ -1502,9 +1492,11 @@ mAnimatorLight:: addEffect3(uint8_t id, RequiredFunction function, const char *n
     // if (_modeData[id] != _data_RESERVED) return; // do not overwrite alerady added effect
     effects.function[id]     = function;
     effects.data[id] = name;
+    effects.data_config[id] = name;
   } else {
     effects.function.push_back(function);
     effects.data.push_back(name);
+    effects.data_config.push_back(effect_config);
     if (effects.count < effects.function.size()) effects.count++;
   }
 
@@ -2591,8 +2583,11 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen,
 // Include both methods, one to write into a buffer and another simply return the progmem address
 const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen)
 {
-
-  snprintf_P(buffer, buflen, effects.data[id]);  
+  if(id<getEffectsAmount()){
+    snprintf_P(buffer, buflen, effects.data[id]);  
+  }else{
+    snprintf(buffer, buflen, "id_err %d", id);  
+  }
   return buffer;
 
 }

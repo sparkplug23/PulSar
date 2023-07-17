@@ -358,6 +358,33 @@ void mPalette::init_PresetColourPalettes()
       D_PALETTE_PASTEL_02_ENCODING
     }
   );
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PASTEL_03__ID, 
+      (char*)PM_PALETTE_PASTEL_03_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PASTEL_03_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PASTEL_03_COLOUR_MAP__DATA),
+      D_PALETTE_PASTEL_03_ENCODING
+    }
+  );
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PASTEL_04__ID, 
+      (char*)PM_PALETTE_PASTEL_04_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PASTEL_04_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PASTEL_04_COLOUR_MAP__DATA),
+      D_PALETTE_PASTEL_04_ENCODING
+    }
+  );
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_PASTEL_05__ID, 
+      (char*)PM_PALETTE_PASTEL_05_NAME_CTR,
+      (uint8_t*)PM_PALETTE_PASTEL_05_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_PASTEL_05_COLOUR_MAP__DATA),
+      D_PALETTE_PASTEL_05_ENCODING
+    }
+  );
 
   palettelist.push_back(
     {
@@ -1998,7 +2025,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
       // DEBUG_LINE_HERE;
     // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
-    ALOG_INF(PSTR("WS2812FX %d"), palette_id);
+    // ALOG_INF(PSTR("WS2812FX %d"), palette_id);
 
     // Assumes other function has already set and loaded it? into "currentPalette", which is part of "loading" palette
 
@@ -2068,7 +2095,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
-    ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
+    // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
     // FastLED Get ColorFromPalette that is CRGBPalette16
     fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
@@ -2079,7 +2106,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
     {
 
       uint8_t enc = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[_pixel_position];
-      ALOG_ERR(PSTR("enc[%d] = %d|%d,%d,%d"),_pixel_position,enc,colour.R,colour.G,colour.B);
+      // ALOG_ERR(PSTR("enc[%d] = %d|%d,%d,%d"),_pixel_position,enc,colour.R,colour.G,colour.B);
       
     }
 
