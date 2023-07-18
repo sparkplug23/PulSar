@@ -612,16 +612,6 @@ DEF_PGM_CTR  (PM_PALETTE_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY
 
 
 
-#ifndef D_PALETTE_WINTER_NAME_CTR
-#define D_PALETTE_WINTER_NAME_CTR        "Winter"   
-#endif    
-DEF_PGM_CTR  (PM_PALETTE_WINTER_NAME_CTR)        D_PALETTE_WINTER_NAME_CTR;
-#define D_PALETTE_WINTER_ENCODING                (PALETTE_ENCODING_TYPE_HSBID)    
-DEF_PGM_UINT8(PM_PALETTE_WINTER_COLOUR_MAP__DATA)
-{
-  COLOUR_MAP_CYAN__ID, COLOUR_MAP_WHITE__ID, COLOUR_MAP_CYAN__ID, COLOUR_MAP_BLUE_SATURATION60__ID,
-  COLOUR_MAP_WHITE__ID
-};
 
 #ifndef D_PALETTE_OCEAN_01_NAME_CTR
 #define D_PALETTE_OCEAN_01_NAME_CTR        "Ocean 01"   
@@ -1860,34 +1850,98 @@ DEF_PGM_UINT8(PM_PALETTE_SINGLE_FIRE_01_COLOUR_MAP__DATA)
 
 
     #ifndef D_PALETTE_PASTEL_04_NAME_CTR
-    #define D_PALETTE_PASTEL_04_NAME_CTR        "Pastel 04"     
+    #define D_PALETTE_PASTEL_04_NAME_CTR        "IceCream Floats+ P04"     
     #endif
     DEF_PGM_CTR  (PM_PALETTE_PASTEL_04_NAME_CTR)        D_PALETTE_PASTEL_04_NAME_CTR;
     #define        D_PALETTE_PASTEL_04_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
     DEF_PGM_UINT8(PM_PALETTE_PASTEL_04_COLOUR_MAP__DATA)
     {      
-      D_RGB_PINK_ALT_2
-      D_RGB_GREEN_FULL
-      D_RGB_BLUE_FULL  
-      D_RGB_WHITE_COOL_FULL
-      D_RGB_WHITE_WARM_1
+      // USe pastels like this orange, that are "creamy" (orange ice mixed style)
+      255, 67, 10, // peach   
+      255,51,112, // Pink Crown V9502B
+      252,167,10,  //Yellow
+      84, 255, 61, // Green Crown F3602H
+      255, 18, 10, // Red
+      48,255,255, // Blue chair
     };
 
 
 
-    #ifndef D_PALETTE_PASTEL_05_NAME_CTR
-    #define D_PALETTE_PASTEL_05_NAME_CTR        "Pastel 05"     
-    #endif
-    DEF_PGM_CTR  (PM_PALETTE_PASTEL_05_NAME_CTR)        D_PALETTE_PASTEL_05_NAME_CTR;
-    #define        D_PALETTE_PASTEL_05_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
-    DEF_PGM_UINT8(PM_PALETTE_PASTEL_05_COLOUR_MAP__DATA)
-    {      
-      D_RGB_PINK_ALT_2
-      D_RGB_GREEN_FULL
-      D_RGB_BLUE_FULL  
-      D_RGB_WHITE_COOL_FULL
-      D_RGB_WHITE_WARM_1
-    };
+#ifndef D_PALETTE_PASTEL_05_NAME_CTR
+#define D_PALETTE_PASTEL_05_NAME_CTR        "Pastel P05"     
+#endif
+DEF_PGM_CTR  (PM_PALETTE_PASTEL_05_NAME_CTR)        D_PALETTE_PASTEL_05_NAME_CTR;
+#define        D_PALETTE_PASTEL_05_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_PASTEL_05_COLOUR_MAP__DATA)
+{      
+  D_RGB_PINK_ALT_2
+  D_RGB_GREEN_FULL
+  D_RGB_BLUE_FULL  
+  D_RGB_WHITE_COOL_FULL
+  D_RGB_WHITE_WARM_1
+};
+
+
+#ifndef D_PALETTE_WINTER_01_NAME_CTR
+#define D_PALETTE_WINTER_01_NAME_CTR        "Winter Blue W01"  // Only blues https://www.google.com/url?sa=i&url=https%3A%2F%2Fcreativemarket.com%2Fblog%2Fwinter-color-palettes&psig=AOvVaw1GiJufj17c7To3tgxRCaZS&ust=1689756901327000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCPDnv5Hxl4ADFQAAAAAdAAAAABAc
+#endif
+DEF_PGM_CTR  (PM_PALETTE_WINTER_01_NAME_CTR)        D_PALETTE_WINTER_01_NAME_CTR;
+#define        D_PALETTE_WINTER_01_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_WINTER_01_COLOUR_MAP__DATA)
+{      
+  // USe pastels like this orange, that are "creamy" (orange ice mixed style)
+  0x05, 0x44, 0xa1, //    
+  0x05, 0x2c, 0x7e, // 
+  0x04, 0x84, 0xe4, // 
+  0x27, 0x4d, 0x83, // 
+};
+
+#ifndef D_PALETTE_WINTER_02_NAME_CTR
+#define D_PALETTE_WINTER_02_NAME_CTR        "Winter Dark W02"  // Should contain whites (e.g. a snow covered mountain scene with pale blue sky, the kind that has a hazy white to it near horizon)
+#endif
+DEF_PGM_CTR  (PM_PALETTE_WINTER_02_NAME_CTR)        D_PALETTE_WINTER_02_NAME_CTR;
+#define        D_PALETTE_WINTER_02_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_WINTER_02_COLOUR_MAP__DATA)
+{      
+  0x1f, 0x29, 0x33, // Ebony Clay
+  0x13, 0x1e, 0x32, // Blue
+};
+
+#ifndef D_PALETTE_WINTER_03_NAME_CTR
+#define D_PALETTE_WINTER_03_NAME_CTR        "Winter Snow W03"  // Should contain whites (e.g. a snow covered mountain scene with pale blue sky, the kind that has a hazy white to it near horizon)
+#endif //https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2Fcolor-palette-ideas-from-693-winter-images--764767580450031607%2F&psig=AOvVaw1ul7ntaVEtUpLQY-9MvR6S&ust=1689757340640000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCKDI7OLyl4ADFQAAAAAdAAAAABAJ
+DEF_PGM_CTR  (PM_PALETTE_WINTER_03_NAME_CTR)        D_PALETTE_WINTER_03_NAME_CTR;
+#define        D_PALETTE_WINTER_03_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_WINTER_03_COLOUR_MAP__DATA)
+{      
+  // USe pastels like this orange, that are "creamy" (orange ice mixed style)
+  0x67, 0xb3, 0xe4, //    
+  0xc4, 0xd4, 0xdd, // 
+  0x64, 0xb2, 0xdb, // 
+  0x94, 0xac, 0xbd, // 
+  0x54, 0xb4, 0xe4, // 
+};
+
+
+#ifndef D_PALETTE_WINTER_04_NAME_CTR
+#define D_PALETTE_WINTER_04_NAME_CTR        "Winter SunGlow W04"  // Snow mountain at sunset (alpineglow)
+#endif 
+DEF_PGM_CTR  (PM_PALETTE_WINTER_04_NAME_CTR)        D_PALETTE_WINTER_04_NAME_CTR;
+#define        D_PALETTE_WINTER_04_ENCODING        (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+DEF_PGM_UINT8(PM_PALETTE_WINTER_04_COLOUR_MAP__DATA)
+{      
+  // USe pastels like this orange, that are "creamy" (orange ice mixed style)
+  0x67, 0xb3, 0xe4, //    
+  0xc4, 0xd4, 0xdd, // 
+  0x0c, 0x64, 0xcc,
+  255, 67, 10, // peach   
+  252,167,10,  //Yellow
+  0xfb, 0xdf, 0x98,
+  0x94, 0x5c, 0x54,
+  0x64, 0xb2, 0xdb, //
+  0x94, 0xac, 0xbd, // 
+  0x54, 0xb4, 0xe4, // 
+};
 
 
 /** GRADIENT_SUNLEVEL_GROUP01

@@ -20,9 +20,9 @@
 
 
 
-#define D_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR                  "Static"
-#define D_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR          "Solid Pattern"
-#define D_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR      "Solid Pattern Tri"
+#define D_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR                  "Static Single Colour"
+#define D_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR          "Static Pattern Lit"
+#define D_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR      "Static Pattern Tri"
 #define D_EFFECTS_FUNCTION__WLED_BLINK__NAME_CTR                   "Blink"
 #define D_EFFECTS_FUNCTION__WLED_BREATH__NAME_CTR                  "Breathe"
 #define D_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR              "Wipe"
@@ -159,10 +159,10 @@
 #define D_EFFECTS_FUNCTION__NOTIFICATION_STATIC_ON__NAME_CTR "Notification On"
 
 
-#define D_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR "Blend Palette Between Palettes"
-#define D_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR "Twinkle Palette Sec on primary"
-#define D_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR "Twinkle decaying palette"
-#define D_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR "Static Gradient Palette"
+#define D_EFFECTS_FUNCTION__BLEND_TWO_PALETTES__NAME_CTR                            "Blend Two Palettes"
+#define D_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR    "Twinkle Palette Two on One"
+#define D_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR                      "Twinkle Decaying Palette"
+#define D_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR                       "Static Gradient Palette"
 
 
 

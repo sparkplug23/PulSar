@@ -1362,7 +1362,7 @@ class mAnimatorLight :
   void EffectAnim__Palette_Colour_Fade_Saturation();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  void EffectAnim__Blend_Palette_Between_Another_Palette();
+  void EffectAnim__Blend_Two_Palettes();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void EffectAnim__Twinkle_Palette_Onto_Palette();
@@ -1371,7 +1371,7 @@ class mAnimatorLight :
   void EffectAnim__Twinkle_Decaying_Palette();
   #endif
   // Static
-  void EffectAnim__Static();
+  void EffectAnim__Static_Solid();
   void EffectAnim__Static_Pattern();
   void EffectAnim__Tri_Static_Pattern();
   void EffectAnim__Base_Spots(uint16_t threshold);
@@ -2546,7 +2546,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     inline uint16_t getTransition(void) { return _transitionDur; }
 
     uint32_t
-      now,
+      _now,
       timebase,
       currentColor(uint32_t colorNew, uint8_t tNr),
       getPixelColor(uint16_t);

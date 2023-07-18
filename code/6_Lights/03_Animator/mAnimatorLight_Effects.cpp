@@ -12,10 +12,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-
-
-
-
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name           : Solid Colour
@@ -25,6 +21,7 @@
  * @param speed    : None
  * @param rate     : None
  * @param time     : Blend time on first/only update
+ * Time/Rate should be set elsewhere to use default amounts, and only when requested transition into this differently (eg playlist effects that use it for special visual blending)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -56,6 +53,7 @@ void mAnimatorLight::EffectAnim__Solid_Colour()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(param); } );
 
 }
+static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -89,6 +87,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
+static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -173,9 +172,8 @@ void mAnimatorLight::EffectAnim__Slow_Glow()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 static const char PM_EFFECT_CONFIG__SLOW_GLOW[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -208,6 +206,7 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Palette()
 {
   EffectAnim__Popping_Decay_Base(true);
 }
+static const char PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Randomly redraw random indexs, not ordered
  **/
@@ -215,6 +214,7 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Random()
 {
   EffectAnim__Popping_Decay_Base(false);
 }
+static const char PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Base function for flickering
  * */
@@ -523,6 +523,7 @@ void mAnimatorLight::EffectAnim__Candle_Single()
 {
   EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
+static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
@@ -530,6 +531,7 @@ void mAnimatorLight::EffectAnim__Candle_Multiple()
 {
   EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
+static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
@@ -538,6 +540,7 @@ void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
 {
   EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__White__ID);
 }
+static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif
 /**
  * @description:   : Flickers by multiple levels towards black
@@ -546,6 +549,7 @@ void mAnimatorLight::EffectAnim__Shimmering_Palette() // Same as Candle_Multiple
 {
   EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
+static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Flicker between primary and secondary palette
  * 
@@ -561,6 +565,7 @@ void mAnimatorLight::EffectAnim__Shimmering_Two_Palette() // Also add another he
 {
   EffectAnim__Flicker_Base(true, SEGMENT.params_user.val0);
 }
+static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Base function for flickering
  * */
@@ -834,6 +839,7 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
   );
 
 }
+static const char PM_EFFECT_CONFIG__STATIC_GRADIENT_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
@@ -921,6 +927,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette_New()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
+static const char PM_EFFECT_CONFIG__ROTATING_PALETTE_NEW[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
@@ -1002,6 +1009,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
 
 }
+static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif
 
 
@@ -1048,6 +1056,7 @@ void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR(); // Change this to be function that sets transition up
 
 }
+static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
@@ -1148,6 +1157,7 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
   );
 
 }
+static const char PM_EFFECT_CONFIG__STEPPING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
@@ -1256,7 +1266,7 @@ void mAnimatorLight::EffectAnim__Palette_Colour_Fade_Saturation()
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::EffectAnim__Blend_Palette_Between_Another_Palette()
+void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 {
 
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.length(); //allocate space for 10 test pixels
@@ -1333,8 +1343,8 @@ void mAnimatorLight::EffectAnim__Blend_Palette_Between_Another_Palette()
     }
   );
 
-
 }
+static const char PM_EFFECT_CONFIG__BLEND_TWO_PALETTES[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
@@ -1446,6 +1456,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
   );
 
 }
+static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
@@ -1558,6 +1569,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
   );
 
 }
+static const char PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 /********************************************************************************************************************************************************************************************************************
@@ -6197,6 +6209,7 @@ void mAnimatorLight::EffectAnim__Colour_Wipe()
 {
   BaseEffectAnim__Base_Colour_Wipe(false, false);
 }
+static const char PM_EFFECT_CONFIG__COLOR_WIPE[] PROGMEM = "!,!;!,!;!";
 
 /*
  * Turns all LEDs after each other to a random color.
@@ -6206,6 +6219,7 @@ void mAnimatorLight::EffectAnim__Colour_Wipe_Random()
 {
   BaseEffectAnim__Base_Colour_Wipe(false, true);
 }
+static const char PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM[] PROGMEM = "!;;!";
 
 
 /*
@@ -6215,6 +6229,7 @@ void mAnimatorLight::EffectAnim__Colour_Sweep()
 {
   BaseEffectAnim__Base_Colour_Wipe(true, false);
 }
+static const char PM_EFFECT_CONFIG__COLOR_SWEEP[] PROGMEM = "!,!;!,!;!";
 
 
 /*
@@ -6224,6 +6239,7 @@ void mAnimatorLight::EffectAnim__Colour_Sweep_Random()
 {
   BaseEffectAnim__Base_Colour_Wipe(true, true);
 }
+static const char PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM[] PROGMEM = "!;;!";
 
 
 
@@ -7560,18 +7576,12 @@ static const char PM_EFFECT_CONFIG__TWINKLEUP[] PROGMEM = "!,Intensity;!,!;!;;m1
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Name
- * @note : Converted from WLED Effects
- * 
-
+ * @note : Converted from WLED Effect 
+ * Lights all LEDs in one random color up. Then switches them to the next random color.
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Random_Colour()
 {
-/*
- * Lights all LEDs in one random color up. Then switches them
- * to the next random color.
- */
-// void mAnimatorLight::mode_random_color(void) {
   uint32_t cycleTime = 200 + (255 - SEGMENT.speed())*50;
   uint32_t it = millis() / cycleTime;
   uint32_t rem = millis() % cycleTime;
@@ -7599,8 +7609,8 @@ void mAnimatorLight::EffectAnim__Random_Colour()
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
-
 }
+static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM = "!,Fade time;;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -8605,21 +8615,31 @@ static const char PM_EFFECT_CONFIG__PRIDE_2015[] PROGMEM = "!;;";
 
 void mAnimatorLight::EffectAnim__Juggle()
 {
-  fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
+
+  // ALOG_INF(PSTR("EffectAnim__Juggle %d %dms"), SEGMENT.call, SEGMENT.transition.rate_ms);
+
+  if (SEGMENT.call == 0) {
+    SEGMENT.setUpLeds();  // lossless getPixelColor()
+    SEGMENT.fill(BLACK);
+  }
+
+  SEGMENT.fadeToBlackBy(192 - (3*SEGMENT.intensity()/4));
+
   CRGB fastled_col;
   byte dothue = 0;
-  for ( byte i = 0; i < 8; i++) {
-    uint16_t index = 0 + beatsin88((128 + SEGMENT.speed())*(i + 7), 0, SEGLEN -1);
-    fastled_col = RgbcctColor::GetU32Colour(SEGMENT.GetPixelColor(index));
+  for (int i = 0; i < 8; i++) {
+    uint16_t index = 0 + beatsin88((16 + SEGMENT.speed())*(i + 7), 0, SEGLEN -1);
+    fastled_col = CRGB(SEGMENT.getPixelColor(index));
     fastled_col |= (SEGMENT.palette.id==0)?CHSV(dothue, 220, 255):ColorFromPalette(SEGMENT.palette_container->CRGB16Palette16_Palette.data, dothue, 255);
-    SEGMENT.SetPixelColor(index, fastled_col.red, fastled_col.green, fastled_col.blue);
+    SEGMENT.setPixelColor(index, fastled_col);
     dothue += 32;
   }
+
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
 }
-static const char PM_EFFECT_CONFIG__JUGGLES[] PROGMEM = "!,# of balls;!,!;!;1v;m12=0,si=0"; // Pixels, Beatsin
+static const char PM_EFFECT_CONFIG__JUGGLES[] PROGMEM = "!,Trail;;!;;sx=64,ix=128"; // Pixels, Beatsin
 
 
 
@@ -9466,6 +9486,7 @@ void mAnimatorLight::EffectAnim__Percent()
   
 
 }
+static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM = ",% of fill,,,,One color;!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -9796,20 +9817,18 @@ static const char PM_EFFECT_CONFIG__FLOW[] PROGMEM = "!,Zones;;!;;m12=1"; //vert
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : Static using WLED colours
- * @description: Running lights effect with smooth sine transition base.
- * @note : Converted from WLED Effects
- * @note : This is a duplicate of my own function, and may be removed when colour palettes are universal
+ * @name : 
+ * @description: 
+ * @note : Converted from WLED Effects (updated to use the first colour of any palette)
+ * @note : Static Fill, uses single colours to fill palette
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-void mAnimatorLight::EffectAnim__Static()
-{
-  
-  fill(SEGCOLOR_U32(0), SET_BRIGHTNESS);
-  SEGMENT.transition.rate_ms = (SEGMENT.getOption(SEG_OPTION_TRANSITIONAL)) ? FRAMETIME_MS : 500;
+void mAnimatorLight::EffectAnim__Static_Solid()
+{  
+  fill(RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, /** Always use first **/ 0, nullptr, false, false, 255)), SET_BRIGHTNESS);
+  SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
-
 }
 static const char PM_EFFECT_CONFIG__STATIC[] PROGMEM = "";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -9851,56 +9870,46 @@ static const char PM_EFFECT_CONFIG__STATIC_PATTERN[] PROGMEM = "Fg size,Bg size;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
 
-/****************************************************************************************************************************
- **************************************************************************************************************************** 
- * Blink
- ****************************************************************************************************************************
- ****************************************************************************************************************************/
-
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @name : Name
+ * @name : Blink/strobe function
  * @note : Converted from WLED Effects
+ * 
+ * Alternate between color1 and color2
+ * if(strobe == true) then create a strobe effect
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 void mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette)
 {
-/*
- * Blink/strobe function
- * Alternate between color1 and color2
- * if(strobe == true) then create a strobe effect
- * NOTE: Maybe re-rework without timer
- */
-// void mAnimatorLight::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
-  uint16_t stateTime = SEGMENT.params_internal.aux1;
+
   uint32_t cycleTime = (255 - SEGMENT.speed())*20;
-  uint32_t onTime = 0;
-  uint32_t offTime = cycleTime;
+  uint32_t onTime = FRAMETIME;
+  if (!strobe) onTime += ((cycleTime * SEGMENT.intensity()) >> 8);
+  cycleTime += FRAMETIME*2;
+  uint32_t it = _now / cycleTime;
+  uint32_t rem = _now % cycleTime;
 
-  if (!strobe) {
-    onTime = (cycleTime * SEGMENT.intensity()) >> 8;
-    offTime = cycleTime - onTime;
-  }
-  
-  stateTime = ((SEGMENT.params_internal.aux0 & 1) == 0) ? onTime : offTime;
-  stateTime += 20;
-    
-  if (millis() - SEGMENT.step > stateTime)
-  {
-    SEGMENT.params_internal.aux0++;
-    SEGMENT.params_internal.aux1 = stateTime;
-    SEGMENT.step = millis();
+  bool on = false;
+  if (it != SEGMENT.step //new iteration, force on state for one frame, even if set time is too brief
+      || rem <= onTime) {
+    on = true;
   }
 
-  uint32_t color = ((SEGMENT.params_internal.aux0 & 1) == 0) ? color1 : color2;
+  SEGMENT.step = it; //save previous iteration
+
+  uint32_t color = on ? color1 : color2;
   if (color == color1 && do_palette)
   {
-    for(uint16_t i = 0; i < SEGLEN; i++) {
+    for (int i = 0; i < SEGLEN; i++) {
       SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0));
     }
-  } else fill(color);
-
+  }
+  else
+  {
+    SEGMENT.fill(color); // alternates between colours passed in unless do_pal is set
+  }
+  
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   
@@ -9920,6 +9929,7 @@ void mAnimatorLight::EffectAnim__Blink()
 }
 static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM = "!,Duty cycle;!,!;!;01";
 
+
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Name
@@ -9932,6 +9942,7 @@ void mAnimatorLight::EffectAnim__Blink_Rainbow()
   EffectAnim__Base_Blink(color_wheel(SEGMENT.call & 0xFF), SEGCOLOR_U32(1), false, false);  
 }
 static const char PM_EFFECT_CONFIG__BLINK_RAINBOW[] PROGMEM = "Frequency,Blink duration;!,!;!;01";
+
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -13071,6 +13082,7 @@ void mAnimatorLight::EffectAnim__Christmas_Musical__01()
 
 
 }
+static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -13081,61 +13093,58 @@ void mAnimatorLight::LoadEffects()
 {
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                    PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__SOLID_COLOUR__ID,                  &mAnimatorLight::EffectAnim__Solid_Colour,                    PM_EFFECTS_FUNCTION__SOLID_COLOUR__NAME_CTR,                                   PM_EFFECT_CONFIG__SOLID_COLOUR);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                  PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                  PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR,                                 PM_EFFECT_CONFIG__STATIC_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR,                            PM_EFFECT_CONFIG__SLOW_GLOW);
+  addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR,                                      PM_EFFECT_CONFIG__SLOW_GLOW);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR);  
-  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,            &mAnimatorLight::EffectAnim__Shimmering_Palette,              PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_TO_ANOTHER__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR,                             PM_EFFECT_CONFIG__CANDLE_SINGLE);  
+  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR,                           PM_EFFECT_CONFIG__CANDLE_MULTIPLE);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,            &mAnimatorLight::EffectAnim__Shimmering_Palette,              PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR,                             PM_EFFECT_CONFIG__SHIMMERING_PALETTE);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECTS_FUNCTION__SHIMMERING_TWO_PALETTES__NAME_CTR,                        PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES);
   #endif  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,   PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID, &mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation,   PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__NAME_CTR,                  PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,       &mAnimatorLight::EffectAnim__Static_Gradient_Palette,         PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__ID,       &mAnimatorLight::EffectAnim__Static_Gradient_Palette,         PM_EFFECTS_FUNCTION__STATIC_GRADIENT_PALETTE__NAME_CTR,                        PM_EFFECT_CONFIG__STATIC_GRADIENT_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,          &mAnimatorLight::EffectAnim__Rotating_Palette_New,            PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__ID,          &mAnimatorLight::EffectAnim__Rotating_Palette_New,            PM_EFFECTS_FUNCTION__ROTATING_PALETTE_NEW__NAME_CTR,                           PM_EFFECT_CONFIG__ROTATING_PALETTE_NEW);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Rotating_Palette,                PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Rotating_Palette,                PM_EFFECTS_FUNCTION__ROTATING_PALETTE__NAME_CTR,                               PM_EFFECT_CONFIG__ROTATING_PALETTE);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,   &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,     PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__ID,   &mAnimatorLight::EffectAnim__Rotating_Previous_Animation,     PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION__NAME_CTR,                    PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__ID,  &mAnimatorLight::EffectAnim__Rotating_Previous_Animation, PM_EFFECTS_FUNCTION__ROTATING_PREVIOUS_ANIMATION_BLENDED__NAME_CTR);
-  #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,              &mAnimatorLight::EffectAnim__Stepping_Palette,                 PM_EFFECTS_FUNCTION__STEP_THROUGH_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,                           &mAnimatorLight::EffectAnim__Stepping_Palette,                      PM_EFFECTS_FUNCTION__STEPPING_PALETTE__NAME_CTR,                                  PM_EFFECT_CONFIG__STEPPING_PALETTE);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID,         &mAnimatorLight::EffectAnim__Palette_Colour_Fade_Saturation,            PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID,             &mAnimatorLight::EffectAnim__Palette_Colour_Fade_Saturation,        PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR,                             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,      &mAnimatorLight::EffectAnim__Blend_Palette_Between_Another_Palette, PM_EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,      &mAnimatorLight::EffectAnim__Blend_Two_Palettes,                    PM_EFFECTS_FUNCTION__BLEND_TWO_PALETTES__NAME_CTR,                                PM_EFFECT_CONFIG__BLEND_TWO_PALETTES);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID, &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,          PM_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID, &mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette,          PM_EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__NAME_CTR,        PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,                   &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,              PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,                   &mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette,              PM_EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__NAME_CTR,                          PM_EFFECT_CONFIG__TWINKLE_DECAYING_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__ID,         &mAnimatorLight::EffectAnim__Popping_Decay_Palette,            PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__ID,                      &mAnimatorLight::EffectAnim__Popping_Decay_Palette,                 PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR,                             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__ID,          &mAnimatorLight::EffectAnim__Popping_Decay_Random,             PM_EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__ID,                       &mAnimatorLight::EffectAnim__Popping_Decay_Random,                  PM_EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__NAME_CTR,                              PM_EFFECT_CONFIG__POPPING_DECAY_RANDOM);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  addEffect3(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                  &mAnimatorLight::EffectAnim__Christmas_Musical__01,                              PM_EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,                       &mAnimatorLight::EffectAnim__Christmas_Musical__01,                 PM_EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01__NAME_CTR,                             PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING   
   addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID,            &mAnimatorLight::SubTask_Flasher_Animate_Function__Static_Palette_Spanning_Segment, PM_EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__NAME_CTR); 
@@ -13144,28 +13153,28 @@ void mAnimatorLight::LoadEffects()
    * Static
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__WLED_STATIC__ID,               &mAnimatorLight::EffectAnim__Static,                                PM_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR,PM_EFFECT_CONFIG__STATIC);
-  addEffect3(EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR, PM_EFFECT_CONFIG__STATIC_PATTERN);
-  addEffect3(EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR, PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
+  addEffect3(EFFECTS_FUNCTION__WLED_STATIC__ID,               &mAnimatorLight::EffectAnim__Static_Solid,                          PM_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR,                      PM_EFFECT_CONFIG__STATIC);
+  addEffect3(EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR,              PM_EFFECT_CONFIG__STATIC_PATTERN);
+  addEffect3(EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR,          PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
   #endif
-  addEffect3(EFFECTS_FUNCTION__WLED_SPOTS__ID,                 &mAnimatorLight::EffectAnim__Spots,              PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR, PM_EFFECT_CONFIG__SPOTS);
+  addEffect3(EFFECTS_FUNCTION__WLED_SPOTS__ID,                 &mAnimatorLight::EffectAnim__Spots,                                PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__WLED_PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR,                     PM_EFFECT_CONFIG__PERCENT);
   #endif
   /**
    * One Colour
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,         &mAnimatorLight::EffectAnim__Random_Colour,                         PM_EFFECTS_FUNCTION__WLED_RANDOM_COLOR__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,         &mAnimatorLight::EffectAnim__Random_Colour,                         PM_EFFECTS_FUNCTION__WLED_RANDOM_COLOR__NAME_CTR,                PM_EFFECT_CONFIG__RANDOM_COLOR);
   #endif
   /**
    * Wipe/Sweep/Runners 
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,           &mAnimatorLight::EffectAnim__Colour_Wipe,                           PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID,    &mAnimatorLight::EffectAnim__Colour_Wipe_Random,                    PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,          &mAnimatorLight::EffectAnim__Colour_Sweep,                          PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID,   &mAnimatorLight::EffectAnim__Colour_Sweep_Random,                   PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR);
+  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,           &mAnimatorLight::EffectAnim__Colour_Wipe,                           PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR,                  PM_EFFECT_CONFIG__COLOR_WIPE);
+  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID,    &mAnimatorLight::EffectAnim__Colour_Wipe_Random,                    PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__NAME_CTR,           PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,          &mAnimatorLight::EffectAnim__Colour_Sweep,                          PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR,                 PM_EFFECT_CONFIG__COLOR_SWEEP);
+  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID,   &mAnimatorLight::EffectAnim__Colour_Sweep_Random,                   PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Fireworks

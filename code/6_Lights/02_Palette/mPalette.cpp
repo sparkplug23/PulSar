@@ -388,11 +388,41 @@ void mPalette::init_PresetColourPalettes()
 
   palettelist.push_back(
     {
-      PALETTELIST_STATIC_WINTER__ID, 
-      (char*)PM_PALETTE_WINTER_NAME_CTR,
-      (uint8_t*)PM_PALETTE_WINTER_COLOUR_MAP__DATA, 
-      sizeof(PM_PALETTE_WINTER_COLOUR_MAP__DATA),
-      D_PALETTE_WINTER_ENCODING
+      PALETTELIST_STATIC_WINTER_01__ID, 
+      (char*)PM_PALETTE_WINTER_01_NAME_CTR,
+      (uint8_t*)PM_PALETTE_WINTER_01_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_WINTER_01_COLOUR_MAP__DATA),
+      D_PALETTE_WINTER_01_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_WINTER_02__ID, 
+      (char*)PM_PALETTE_WINTER_02_NAME_CTR,
+      (uint8_t*)PM_PALETTE_WINTER_02_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_WINTER_02_COLOUR_MAP__DATA),
+      D_PALETTE_WINTER_02_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_WINTER_03__ID, 
+      (char*)PM_PALETTE_WINTER_03_NAME_CTR,
+      (uint8_t*)PM_PALETTE_WINTER_03_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_WINTER_03_COLOUR_MAP__DATA),
+      D_PALETTE_WINTER_03_ENCODING
+    }
+  );
+
+  palettelist.push_back(
+    {
+      PALETTELIST_STATIC_WINTER_04__ID, 
+      (char*)PM_PALETTE_WINTER_04_NAME_CTR,
+      (uint8_t*)PM_PALETTE_WINTER_04_COLOUR_MAP__DATA, 
+      sizeof(PM_PALETTE_WINTER_04_COLOUR_MAP__DATA),
+      D_PALETTE_WINTER_04_ENCODING
     }
   );
 

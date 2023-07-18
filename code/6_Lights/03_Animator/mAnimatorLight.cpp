@@ -437,7 +437,7 @@ void mAnimatorLight::Init_SegmentWS2812FxStrip() //rename later
   cctBlending = 0;
   ablMilliampsMax = 0;//ABL_MILLIAMPS_DEFAULT),
   currentMilliamps = 0;
-  now = millis();
+  _now = millis();
   timebase = 0;
   isMatrix = false;
   #ifndef WLED_DISABLE_2D
@@ -1039,11 +1039,8 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
      * 
      */
     // mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id, segment_index); // ie WLED22 "loadPalette"
-
-
-
-      
-    ALOG_INF(PSTR("LoadPalette_CRGBPalette16_Static %d"), palette_id);
+    
+    // ALOG_INF(PSTR("LoadPalette_CRGBPalette16_Static %d"), palette_id);
 
     /******************************************************
      * PALETTELIST_STATIC_CRGBPALETTE16__IDS
@@ -1581,6 +1578,7 @@ void mAnimatorLight::SubTask_Segments_Effects()
       #endif
 
       _virtualSegmentLength = seg.virtualLength();
+      _now = millis(); // internal millis used for animation to make calculations work correctly (instead of calling millis lots)
 
       ALOG_DBM( PSTR("_segments[%d].effect_id=%d \t%d"),_segment_index_primary, seg.effect_id, millis()); 
 
@@ -3061,6 +3059,10 @@ void IRAM_ATTR mAnimatorLight::Segment_New::setPixelColor(int i, uint32_t col)
 //   int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
 //   i &= 0xFFFF;
 
+// Serial.println("ERROR UNSUPPORTED mAnimatorLight::Segment_New::setPixelColor");
+
+SetPixelColor(i,col);
+
 //   if (i >= virtualLength() || i<0) return;  // if pixel would fall out of segment just exit
 
 // #ifndef WLED_DISABLE_2D
@@ -3150,6 +3152,9 @@ void IRAM_ATTR mAnimatorLight::Segment_New::setPixelColor(int i, uint32_t col)
 // anti-aliased normalized version of setPixelColor()
 void mAnimatorLight::Segment_New::setPixelColor(float i, uint32_t col, bool aa)
 {
+
+  SetPixelColor(i, col);
+
   // int vStrip = int(i/10.0f); // hack to allow running on virtual strips (2D segment columns/rows)
   // i -= int(i);
 
@@ -3181,6 +3186,9 @@ void mAnimatorLight::Segment_New::setPixelColor(float i, uint32_t col, bool aa)
 
 uint32_t mAnimatorLight::Segment_New::getPixelColor(int i)
 {
+
+  return GetPixelColor(i).getU32();
+
 //   int vStrip = i>>16;
 //   i &= 0xFFFF;
 
@@ -3275,12 +3283,12 @@ void mAnimatorLight::Segment_New::refreshLightCapabilities() {
  * Fills segment with color
  */
 void mAnimatorLight::Segment_New::fill(uint32_t c) {
-  // const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
-  // const uint16_t rows = virtualHeight(); // will be 1 for 1D
-  // for(uint16_t y = 0; y < rows; y++) for (uint16_t x = 0; x < cols; x++) {
-  //   if (is2D()) setPixelColorXY(x, y, c);
-  //   else        setPixelColor(x, c);
-  // }
+  const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
+  const uint16_t rows = virtualHeight(); // will be 1 for 1D
+  for(uint16_t y = 0; y < rows; y++) for (uint16_t x = 0; x < cols; x++) {
+    if (is2D()) setPixelColorXY(x, y, c);
+    else        setPixelColor(x, c);
+  }
 }
 
 // Blends the specified color with the existing pixel color.
@@ -3339,13 +3347,13 @@ void mAnimatorLight::Segment_New::fade_out(uint8_t rate) {
 
 // fades all pixels to black using nscale8()
 void mAnimatorLight::Segment_New::fadeToBlackBy(uint8_t fadeBy) {
-  // const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
-  // const uint16_t rows = virtualHeight(); // will be 1 for 1D
+  const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
+  const uint16_t rows = virtualHeight(); // will be 1 for 1D
 
-  // for (uint16_t y = 0; y < rows; y++) for (uint16_t x = 0; x < cols; x++) {
-  //   if (is2D()) setPixelColorXY(x, y, CRGB(getPixelColorXY(x,y)).nscale8(255-fadeBy));
-  //   else        setPixelColor(x, CRGB(getPixelColor(x)).nscale8(255-fadeBy));
-  // }
+  for (uint16_t y = 0; y < rows; y++) for (uint16_t x = 0; x < cols; x++) {
+    if (is2D()) setPixelColorXY(x, y, CRGB(getPixelColorXY(x,y)).nscale8(255-fadeBy));
+    else        setPixelColor(x, CRGB(getPixelColor(x)).nscale8(255-fadeBy));
+  }
 }
 
 /*
@@ -3527,7 +3535,7 @@ void IRAM_ATTR mAnimatorLight::setPixelColor(int i, uint32_t col)
 {
   if (i >= _length) return;
   if (i < customMappingSize) i = customMappingTable[i];
-  // busses.setPixelColor(i, col);
+  pCONT_iLight->bus_manager->setPixelColor(i, col);
 }
 
 uint32_t mAnimatorLight::getPixelColor(uint16_t i)
