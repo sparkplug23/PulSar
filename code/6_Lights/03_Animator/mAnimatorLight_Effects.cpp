@@ -494,6 +494,38 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
 
 
 
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name           : Spanned Static Palette
+ * @description:   : Shows pixels from palette, in order. Gradients can either be displayed over total length of segment, or repeated by X pixels
+ * 
+ * @param intensity: None
+ * @param speed    : None
+ * @param rate     : None
+ * @param time     : Blend time on first/only update
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
+{
+
+  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength() )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
+    
+  RgbcctColor colour = RgbcctColor(0);
+  for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
+  {
+    colour = SEGMENT.GetColourFromPalette(pixel, NO_ENCODED_VALUE, PALETTE_SCALED_ON, PALETTE_WRAP_ON);      
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
+  }
+
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
+
+}
+static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6841,7 +6873,7 @@ void mAnimatorLight::EffectAnim__Fireworks()
       uint8_t pixels_in_palette = GetNumberOfColoursInPalette();
       SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1)), true);
       #else // wled way for now
-      SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, random8(), nullptr, false, false, 0), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, random8(), nullptr, false, false), SET_BRIGHTNESS);
       #endif // ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES
       SEGMENT.params_internal.aux1 = SEGMENT.params_internal.aux0;
       SEGMENT.params_internal.aux0 = index;
@@ -13125,6 +13157,9 @@ void mAnimatorLight::LoadEffects()
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,                           &mAnimatorLight::EffectAnim__Stepping_Palette,                      PM_EFFECTS_FUNCTION__STEPPING_PALETTE__NAME_CTR,                                  PM_EFFECT_CONFIG__STEPPING_PALETTE);
   #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,                PM_EFFECTS_FUNCTION__SPANNED_PALETTE__NAME_CTR,                                 PM_EFFECT_CONFIG__SPANNED_PALETTE);
+  #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID,             &mAnimatorLight::EffectAnim__Palette_Colour_Fade_Saturation,        PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR,                             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE);
   #endif 

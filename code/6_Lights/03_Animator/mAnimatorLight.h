@@ -56,6 +56,13 @@
 
 #define MAX_PIXELBUS_DIGITAL_PINS 20
 
+// DEfines to make it visually easy to read
+#define PALETTE_WRAP_ON   true
+#define PALETTE_WRAP_OFF  false
+#define PALETTE_SCALED_ON true
+#define PALETTE_SCALED_OFF false
+#define NO_ENCODED_VALUE nullptr
+
 
 #include "6_Lights/02_Palette/mPalette_Progmem.h"
 #include "6_Lights/02_Palette/mPalette.h"
@@ -744,6 +751,9 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
     #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__SPANNED_PALETTE__ID,
+    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
     EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
     EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
@@ -1178,8 +1188,6 @@ class mAnimatorLight :
     /**
      * Palette developing
      * */
-    // Step 1 of palette merging: Making it so any palette can span the entire segment, static, no effect.
-    EFFECTS_FUNCTION__STATIC_PALETTE_SPANNING_SEGMENT__ID,
     /**
      * Designing and quick test of animations before creating its own animaiton profile
      * */
@@ -1345,6 +1353,9 @@ class mAnimatorLight :
   void EffectAnim__Popping_Decay_Palette();
   void EffectAnim__Popping_Decay_Random();
   void EffectAnim__Popping_Decay_Base(bool draw_palette_inorder);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  void EffectAnim__Spanned_Static_Palette();
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Rotating_Palette_New();
@@ -2308,7 +2319,6 @@ typedef struct Segment_New {
       uint8_t* encoded_index = nullptr,
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t mcol = 0, // will be phased out
       bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
       uint8_t  brightness_scale = 255 // 255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
     );

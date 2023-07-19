@@ -4070,10 +4070,8 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
   uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
   bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
   bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-  uint8_t mcol, // will be phased out
   bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
   uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-  // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
 ){
 
   // need to add here to load if loaded palette.id does not match desired. This will remove need to loadPalette
@@ -4090,10 +4088,8 @@ mAnimatorLight::Segment_New::GetColourFromPalette(
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    mcol, // will be phased out
     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
     brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-    // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
   );
 
 }
@@ -4138,13 +4134,11 @@ mAnimatorLight::GetColourFromUnloadedPalette(
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    mcol, // will be phased out
     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
     brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
     // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
   );
 
-  // DEBUG_LINE_HERE;
   return colour;
 
 }

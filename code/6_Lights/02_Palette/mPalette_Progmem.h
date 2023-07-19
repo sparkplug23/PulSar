@@ -1944,6 +1944,9 @@ DEF_PGM_UINT8(PM_PALETTE_WINTER_04_COLOUR_MAP__DATA)
 };
 
 
+
+// The group of these should be changed into only a couple and the brightness itself will be  "rise"
+
 /** GRADIENT_SUNLEVEL_GROUP01
  * Warmer sunrise, blue with yellows midway
  * DARKEST, basically night
