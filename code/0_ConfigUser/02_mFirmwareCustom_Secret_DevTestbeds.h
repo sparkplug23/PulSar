@@ -6707,7 +6707,7 @@
  * Primary testbed for all new lighting code on nodemcu
  */
 #ifdef DEVICE_TESTBED__LIGHTING_MULTIPIN__ESP32_AS_NEOPIXEL_DUAL_I2S_BUS_WEBUI
-  #define DEVICENAME_CTR          "testgroup_multipin_esp32_neodual"
+  // #define DEVICENAME_CTR          "testgroup_multipin_esp32_neodual"
   #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
@@ -6898,9 +6898,54 @@
 
 
   #define USE_LIGHTING_TEMPLATE
-  #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
 
   #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+  #define STRIP_SIZE_MAX 30
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":30
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        30
+      ],
+      "ColourPalette":0,
+      "SegColour0": {
+        "Hue": 330,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function": 0,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+
+  
+  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
   #define STRIP_SIZE_MAX 100
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -6941,13 +6986,52 @@
     "BrightnessCCT": 0
   }
   )=====";
-  #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
-/*
+  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+  
+  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
+  #define STRIP_SIZE_MAX 59
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":59
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        59
+      ],
+      "ColourPalette":0,
+      "SegColour0": {
+        "Hue": 330,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function": 0,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
 
 
-
-
-*/
 #endif // DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 
 

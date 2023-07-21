@@ -2249,7 +2249,7 @@ RgbcctColor mPalette::SubGet_Encoded_PaletteList_Colour(
  * @param seg_i 
  * @return RgbcctColor 
  */
-RgbcctColor mPalette::SubGet_Encoded_PaletteList_Colour_Gradient(
+RgbcctColor mPalette::SubGet_Encoded_PaletteList_Colour_WithoutScaling(
 
 
 
@@ -2283,58 +2283,470 @@ RgbcctColor mPalette::SubGet_Encoded_PaletteList_Colour_Gradient(
     uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_id);  
     uint8_t colour_width  = GetEncodedColourWidth(ptr->encoding); 
 
+
+    // Serial.println(pixels_in_map);
+    uint8_t remainder = 0;
+    if(pixels_in_map != 0)
+    {
+      // This to stop errors, but assumption is it will be less than pixels in palette
+      remainder = _pixel_position%pixels_in_map;  // /ERROR, REUSING NAME!!!
+    }
+    // uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255);
+
+    // Reminder gives me each pixel, no gradient
+    uint16_t pixel_position = remainder;   // THIS IS BEING PASSED IN AND REUSED??
+
+    
+    //something like this does need adding, but the previous and next pixels will be needed for the blend so perhaps make another if
+    // if (flag_map_scaling) pixel_position = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  
+
+    // / Perhaps I want to make it, if it should wrap then load up to the first 16 pixels into the CRGBPalette16 gradient and then exact per the same method as below.
+
+
+
+    uint16_t index_relative = 0; // get expected pixel position
+
+    #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    Serial.println(ptr->encoding.data, BIN);
+    Serial.println(ptr->encoding.encoded_as_hsb_ids);
+    Serial.println(ptr->encoding.index_scaled_to_segment);
+    #endif // ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    
+    /**
+      Encoded as HSBID, must handle all index methods
+    **/
+    if(
+      (ptr->encoding.encoded_as_hsb_ids)
+    ){
+
+      // Serial.println("MAPIDS_TYPE_HSBCOLOURMAP_NOINDEX__ID"); 
+
+      // Get Start of Colour Information by adjusting for indexing
+      index_relative = pixel_position*GetEncodedColourWidth(ptr->encoding); // get expected pixel position
+      if(ptr->encoding.index_scaled_to_segment)
+      {
+        // If desired, return the index value
+        if(encoded_value != nullptr){
+          *encoded_value = palette_buffer[index_relative];
+        }
+        // Serial.println(*encoded_value);
+        // Set the index to move beyond the indexing information
+        index_relative++;
+      };
+
+      colour = RgbcctColor(
+        GetHsbColour(palette_buffer[index_relative])
+      );
+
+      // if(pixel_position==0)
+      // Serial.printf("%d|%d c %d %d %d\n\r", palette_id, pCONT_lAni->_segment_index_primary, colour.R, colour.G, colour.B);
+      
+    }
+
+    /**
+      Encoded as Colour (RGBCCT or parts), must handle all index methods
+    **/
+    else if( // MAPIDS_TYPE_RGBCOLOUR_WITHINDEX_GRADIENT__ID              //switch to bit masking
+      (ptr->encoding.red_enabled)||
+      (ptr->encoding.green_enabled)||
+      (ptr->encoding.blue_enabled)||
+      (ptr->encoding.white_cold_enabled)||
+      (ptr->encoding.white_warm_enabled)
+    ){
+      
+      // ALOG_INF(PSTR("enabled %d,%d,%d,%d,%d"), ptr->encoding.red_enabled, ptr->encoding.green_enabled, ptr->encoding.blue_enabled, ptr->encoding.white_cold_enabled, ptr->encoding.white_warm_enabled);
+      // ALOG_INF(PSTR("palette_elements %d"), palette_elements[0]);   
+      // ALOG_INF(PSTR("p = %d, r = %d, v = %d|%d, w=%d"), pixel_position, index_relative, palette_elements[index_relative], palette_elements[index_relative+1],colour_width);
+
+      // Get Start of Colour Information by adjusting for indexing
+      index_relative = pixel_position*GetEncodedColourWidth(ptr->encoding); // get expected pixel position
+        
+      // ALOG_INF(PSTR("index_relativeA=%d"),index_relative);
+
+      if(ptr->encoding.index_scaled_to_segment)
+      {
+        // ALOG_INF(PSTR("index_relativeB=%d"),index_relative);
+        if(encoded_value != nullptr){
+          *encoded_value = palette_buffer[index_relative];
+        }
+        // Set the index to move beyond the indexing information
+        index_relative++;
+      }
+        // ALOG_INF(PSTR("encoded_valueC=%d"), *encoded_value);
+      
+      // Get colour
+      colour = RgbcctColor(
+        ptr->encoding.red_enabled         ? palette_buffer[index_relative  ] : 0,
+        ptr->encoding.green_enabled       ? palette_buffer[index_relative+1] : 0,
+        ptr->encoding.blue_enabled        ? palette_buffer[index_relative+2] : 0,
+        ptr->encoding.white_cold_enabled  ? palette_buffer[index_relative+3] : 0,
+        ptr->encoding.white_warm_enabled  ? palette_buffer[index_relative+4] : 0
+      );
+
+    }
+
+
+  return colour;
+
+}
+
+
+
+/**
+ * @brief private function
+ * 
+ * By having this as a subfunction, it should enable iterative multiple calls function the main GetColour
+ * 
+ * @param palette_id 
+ * @param seg_i 
+ * @return RgbcctColor 
+ */
+RgbcctColor mPalette::SubGet_Encoded_PaletteList_Colour_Gradient(
+
+
+
+  uint16_t palette_id,
+  uint8_t* palette_buffer,
+  uint16_t _pixel_position,  
+  //encoded value needs to be U32 since they can be 3 bytes wide
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
+  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    // Should be controlled by user option 
+  bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
+  // unless needed by WLED effects, phase out and apply inside effect
+  uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+  // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+
+
+)
+{
+
+  // if(_pixel_position > 10)
+  //   return RgbcctColor(1,0,0);
+
+/**
+ * @brief No matter what, the first step is conversion of the pixel_position into 0-255 to make things easier
+ * 
+ */
+
+  RgbcctColor colour = RgbcctColor(0);
+
+    if(palette_id>mPaletteI->palettelist.size())
+    {
+      ALOG_ERR(PSTR("PALETTE EXCEEDS VECTOR SIZE")); delay(2000);
+      return colour;
+    }
+
+    PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+
+
+      // uint8_t palette_length = GetNumberOfColoursInPalette(palette_id);
     /**
      * @brief If mine have gradients, then use that, or else create equidistant one
      * 
      */
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
 
-const byte ib_jul01_gp[] PROGMEM = {
-    0, 0,  0,  255,
-   10,   1, 255, 18,
-  132,  57,131, 28,
-  255, 255,  1,  1};
+// const byte ib_jul01_gp[] PROGMEM = {
+//     0, 0,  0,  255,
+//    10,   1, 255, 18,
+//   132,  57,131, 28,
+//   255, 255,  1,  1};
 
-  char grad_buffer[100] = {0};
+//   char grad_buffer[100] = {0};
 
-    byte tcp[200]; //support gradient palettes with up to 18 entries
-
-
-    // memcpy_P(tcp, ptr->data, ptr->data_length);
-
-    memcpy_P(tcp, PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA, sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA) );
+//     byte tcp[200]; //support gradient palettes with up to 18 entries
 
 
-    // memcpy_P(tcp, ib_jul01_gp, 72);
-      // memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[0])), 72);
+//     // memcpy_P(tcp, ptr->data, ptr->data_length);
 
-DEBUG_LINE_HERE;
-    /**
-     * @brief Loading uses the CRGBPalette to get the colours
-     **/
-    CRGBPalette32 pal16;
-    pal16.loadDynamicGradientPalette(tcp);
+//     memcpy_P(tcp, PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA, sizeof(PM_PALETTE_STATIC_GRADIENT_SUNLEVEL_GROUP01_05_COLOUR_MAP__DATA) );
 
-DEBUG_LINE_HERE;
-    CRGB fastled_col;
+
+//     // memcpy_P(tcp, ib_jul01_gp, 72);
+//       // memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[0])), 72);
+
+// DEBUG_LINE_HERE;
+//     /**
+//      * @brief Loading uses the CRGBPalette to get the colours
+//      **/
+//     CRGBPalette32 pal16;
+//     pal16.loadDynamicGradientPalette(tcp);
+
+// DEBUG_LINE_HERE;
+//     CRGB fastled_col;
+
+// pixel value coming in now is 0-100
+
+    uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_id);  
+    uint8_t colour_width  = GetEncodedColourWidth(ptr->encoding); 
+
+    // uint8_t remainder = 0;
+    // if(pixels_in_map != 0)
+    // {
+    //   remainder = _pixel_position%pixels_in_map;  // /ERROR, REUSING NAME!!!
+    // }
+    // // uint8_t remainder_scaled255 = map(remainder, 0,pixels_in_segment-1, 0,255);
+    //   ALOG_INF(PSTR("id %d index_scaled_to_segment"), palette_id);
+
+    // // Reminder gives me each pixel, no gradient
+    // uint16_t pixel_position = remainder;   // THIS IS BEING PASSED IN AND REUSED??
+
+    
+    //something like this does need adding, but the previous and next pixels will be needed for the blend so perhaps make another if
+    // if (flag_map_scaling) pixel_position = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  
+
+
     uint8_t pixel_position_adjust = _pixel_position;
-    if(flag_convert_pixel_index_to_get_exact_crgb_colour)
-    {
-      pixel_position_adjust = map(pixel_position_adjust, 0,15, 0,255); //gradient type when exact value is needed needs scaled into full range
-    }
+//     if(flag_convert_pixel_index_to_get_exact_crgb_colour)
+//     {
+      // pixel_position_adjust = map(pixel_position_adjust, 0,pixels_in_map, 0,255); //gradient type when exact value is needed needs scaled into full range
+//     }
     if (flag_map_scaling) pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
-    if (!flag_wrap) pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
+    // if (!flag_wrap){
+    //   // uint8_t pixel_end_boundary = map(pixels_in_map-1, 0,pixels_in_map-1, 0,255); // depends on the number of pixels
+    //   pixel_position_adjust = scale8(pixel_position_adjust, 240); //cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
+    // }
+      // ALOG_INF(PSTR("_pixel_position %d/%d/%d"), _pixel_position, pCONT_lAni->_virtualSegmentLength, pixel_position_adjust);
 
-DEBUG_LINE_HERE;
-    fastled_col = ColorFromPalette( pal16, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
+// DEBUG_LINE_HERE;
+//     fastled_col = ColorFromPalette( pal16, pixel_position_adjust, brightness_scale, NOBLEND);// (pCONT_lAni->paletteBlend == 3)? NOBLEND:LINEARBLEND);
   
-DEBUG_LINE_HERE;
-    colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
+// DEBUG_LINE_HERE;
+//     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b) ;// RgbcctColor::GetRgbcctFromU32Colour(fastled_col32);
 
-DEBUG_LINE_HERE;
+// DEBUG_LINE_HERE;
+
+    uint8_t lower_limit = 10;
+    uint8_t upper_limit = 245;
+
+
+    bool palette_contains_gradient_indexes = false;
+
+    std::vector<uint8_t> gradient_palettes;
+    uint8_t encoded_value2 = 0;
+
+    /**
+     * @brief Only "index_scaled_to_segment" index is a gradient
+     * 
+     */
+    if(ptr->encoding.index_scaled_to_segment)
+    {
+      // ALOG_INF(PSTR("id %d index_scaled_to_segment"), palette_id);
+
+      for(uint8_t pix_i=0; pix_i<pixels_in_map; pix_i++)
+      {
+        SubGet_Encoded_PaletteList_Colour(palette_id, palette_buffer, pix_i, &encoded_value2);
+        gradient_palettes.push_back(encoded_value2);
+      }
+
+      // Serial.println("Aencoded_value2");
+      // for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,",gradient_palettes[v]); }
+
+    }else{
+
+      for(uint8_t pix_i=0; pix_i<pixels_in_map; pix_i++)
+      {
+        gradient_palettes.push_back(map(pix_i, 0,pixels_in_map-1, lower_limit,upper_limit));
+      }
+
+      // Serial.print("B!!!!!!!!!!!!!!!!!!!!!!!encoded_value2===");
+      // for(uint8_t v=0;v<gradient_palettes.size();v++){ Serial.printf("%d,%s",gradient_palettes[v], v<gradient_palettes.size()-1?"":"\n\r"); }
+
+    }
+
+    
+      // ALOG_INF(PSTR("###################################_pixel_position pixel_position_adjust %d %d"), _pixel_position), pixel_position_adjust;
 
 
 
+
+    // ALOG_INF(PSTR("pixel_position_adjust %d"), pixel_position_adjust);
+
+    // Search for lower boundary
+    uint8_t desired_pixel_scaled = pixel_position_adjust;
+    uint8_t lower_boundary_i = 0;
+    uint8_t upper_boundary_i = 0;
+    uint8_t lower_boundary_v = 0;
+    uint8_t upper_boundary_v = 0;
+    bool lower_boundary_found = 0;
+
+    float progress = 0;
+
+    /**
+     * @brief 
+     * Uses current scaled gradient value, and searches the palettes scaled boundaries to get the region of palette to scale between
+     * >>Example<<
+     * Palette of 5 colours, index 0,  1,   2,   3,   4
+     * Scaled to 255       , grad  0, 64, 128, 191, 255
+     * Desired scaled value (200)                  ^        191-255 should be scaled into 0.0f to 1.0f, and the colour between these as LinearBlend(colour_lower, colour_upper, ratio)    
+     * 
+     * Since the for loop checks the current and next index in the same loop, it will check all but the final/end boundary
+     * Therefore, this will always be the end/255 value, and should be checked first. Only if not the final, should the loop be used to search for the boundary.
+     * Based on fastled, there may be a divisor was to achieve this?? Note that above I am creating the range, then searching with it. Surely I simply need to assume the index and then create its equiavlent mapped scaled value just once?
+     * Leave as optimise problem.
+     * 
+     * If pixels of 5 is the palette
+     * and 150 (as 250 range) is asked for as gradient.
+     * map(150, 0,255, 0,5-1) would give lower boundary?     
+     * 
+     */
+    if(desired_pixel_scaled < lower_limit)   
+    {
+      // Stick with first colour
+      lower_boundary_i = 0;
+      upper_boundary_i = 1;
+          lower_boundary_v = gradient_palettes[lower_boundary_i];
+          upper_boundary_v = gradient_palettes[upper_boundary_i];
+      progress = 0;
+    }else
+    if(desired_pixel_scaled > upper_limit)
+    {
+      // Stick with last colour
+      lower_boundary_i = gradient_palettes.size()-1;
+      upper_boundary_i = gradient_palettes.size(); //ignored
+          lower_boundary_v = gradient_palettes[lower_boundary_i];
+          upper_boundary_v = gradient_palettes[upper_boundary_i];
+      progress = 0;
+    }
+    else // Search
+    {
+      lower_boundary_i = 0; //default for errors
+      upper_boundary_i = 1;
+      for(uint8_t v=0;v<gradient_palettes.size()-1;v++) // Using the indexes expect the final one
+      {      
+        // ALOG_INF(PSTR("v>>>>>>>> [%d]  %d<%d<%d"), v, gradient_palettes[v], pixel_position_adjust, gradient_palettes[v+1]);
+        if(
+          (pixel_position_adjust >= gradient_palettes[v])&&    // Greater than lower/current boundary
+          (pixel_position_adjust < gradient_palettes[v+1])     // Smaller than upper/next boundary
+        ){
+          lower_boundary_i = v;
+          upper_boundary_i = v+1;
+          lower_boundary_v = gradient_palettes[lower_boundary_i];
+          upper_boundary_v = gradient_palettes[upper_boundary_i];
+          progress = mSupport::mapfloat(desired_pixel_scaled, lower_boundary_v,upper_boundary_v, 0.0f, 1.0f);
+          // ALOG_INF(PSTR("WITHIN ======================BREAK %d   ||| %d larger %d? (%d|%d)"), v, desired_pixel_scaled, gradient_palettes[v], lower_boundary_i, upper_boundary_i);
+          break; // found lower boundary index
+        }
+        // else{
+        //   ALOG_INF(PSTR("OUTSIDE %d is still lower than %d for index %d"), gradient_palettes[v], desired_pixel_scaled, v);
+        // }
+      }
+
+      // uint8_t lower_guard = 50;
+      // uint8_t upper_guard = 50;
+      // uint8_t remaining_grad = 255 - lower_guard - upper_guard;
+
+
+      // bool boundary_found = false;
+
+      // // Search all
+      // uint8_t index = 0;
+      // while(boundary_found)
+      // {
+      //   // Search each region
+      //   for(uint8_t v=0;v<gradient_palettes.size()-1;v++) // Using the indexes expect the final one
+      //   {      
+      //     // ALOG_INF(PSTR("v>>>>>>>> [%d]  %d<%d<%d"), v, gradient_palettes[v], pixel_position_adjust, gradient_palettes[v+1]);
+
+      //     if(pixel_position_adjust <= lower_guard)
+      //     {
+      //       lower_boundary_i = v;
+      //       upper_boundary_i = v+1;
+      //     }else
+      //     if(pixel_position_adjust <= lower_guard)
+      //     {
+
+      //     }
+
+
+
+      //     if(
+      //       (pixel_position_adjust >= gradient_palettes[v])&&    // Greater than lower/current boundary
+      //       (pixel_position_adjust < gradient_palettes[v+1])     // Smaller than upper/next boundary
+      //     ){
+
+
+
+
+      //       lower_boundary_i = v;
+      //       upper_boundary_i = v+1;
+      //       // ALOG_INF(PSTR("WITHIN ======================BREAK %d   ||| %d larger %d? (%d|%d)"), v, desired_pixel_scaled, gradient_palettes[v], lower_boundary_i, upper_boundary_i);
+      //       break; // found lower boundary index
+      //     }
+      //     // else{
+      //     //   ALOG_INF(PSTR("OUTSIDE %d is still lower than %d for index %d"), gradient_palettes[v], desired_pixel_scaled, v);
+      //     // }
+
+      //     v++;
+      //   }
+
+      // }
+
+
+
+    }
+
+
+    ALOG_INF(PSTR("v>>>>>>>> [%d|%d]  %d|%d p%d"), _pixel_position, desired_pixel_scaled, lower_boundary_v, upper_boundary_v, (int)(progress*100));
+
+
+    // uint8_t desired_pixel_scaled2   = pixel_position_adjust; // This assume 150
+    // float   mapped_pixel_as_palette = mSupport::mapfloat(desired_pixel_scaled2, 0,255, 0.0f,(float)pixels_in_map-1);
+    // uint8_t mapped_lower_boundary_i = (uint8_t)floor(mapped_pixel_as_palette);
+    // uint8_t mapped_upper_boundary_i = mapped_lower_boundary_i+1;
+    // lower_boundary_i = mapped_lower_boundary_i;
+    // upper_boundary_i = mapped_upper_boundary_i;
+    // // progress = desired_pixel_scaled2/255.0f;//mSupport::mapfloat(desired_pixel_scaled2, 0,255, 0.0f, 1.0f);
+    // // ALOG_INF(PSTR("desired_pixel_scaled2 %d %d %d %d"), desired_pixel_scaled2, mapped_lower_boundary_i, mapped_upper_boundary_i, (int)(progress*100));
+    
+
+    // uint8_t grad_width = 255/(pixels_in_map-1); // this assume equal width, which will not always be true. Doing it the harder way above lets me replace those grad points using the saved ones, so better?
+    // float pixel_index_f = (float)pixel_position_adjust / grad_width;
+    // progress = pixel_index_f - floor(pixel_index_f);
+    // mapped_lower_boundary_i = floor(pixel_index_f);
+    // mapped_upper_boundary_i = mapped_lower_boundary_i + 1;
+    // ALOG_INF(PSTR("desired_pixel_scaled2 %d %d %d %d"), desired_pixel_scaled2, mapped_lower_boundary_i, mapped_upper_boundary_i, (int)(progress*100));
+    
+
+    // ALOG_INF(PSTR("WITHIN ======================BREAK %d   ||| %d larger %d? (%d|%d)"), v, desired_pixel_scaled, gradient_palettes[v], lower_boundary_i, upper_boundary_i, int(progress*100));
+
+    RgbcctColor lower_colour = SubGet_Encoded_PaletteList_Colour_WithoutScaling(
+        palette_id,
+        palette_buffer,
+        lower_boundary_i,  
+        nullptr,
+        false,
+        false
+      );
+    
+    RgbcctColor upper_colour = SubGet_Encoded_PaletteList_Colour_WithoutScaling(
+        palette_id,
+        palette_buffer,
+        upper_boundary_i,  
+        nullptr,
+        false,
+        false
+      );
+
+      // lower_colour.debug_print("lower_colour");
+      // upper_colour.debug_print("upper_colour");
+
+      RgbcctColor out = RgbcctColor::LinearBlend(lower_colour, upper_colour, progress);
+    
+      // out.debug_print("  out_colour");
+
+      return out;
+    
+    // ALOG_INF(PSTR("desired_pixel_scaled %d<%d<%d index (L%d/U%d, len%d)"), 
+    //                                   lower_boundary_v,
+    //                                   pixel_position_adjust,
+    //                                   upper_boundary_v,
+    //                                   lower_boundary_i,
+    //                                   upper_boundary_i,
+    //                                   pixels_in_map
+    // );
 
 
 

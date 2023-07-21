@@ -2487,7 +2487,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
       if(banded_gradient)
       {
-        curPalette_s_obj["bg"] = "B";
+        curPalette_s_obj["bg"] = "L";//"B";
       }else{
         curPalette_s_obj["bg"] = "L";
       }

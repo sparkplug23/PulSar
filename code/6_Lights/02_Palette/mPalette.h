@@ -502,10 +502,10 @@ class mPalette
          **/
         uint16_t encoded_value_byte_width : 3; // 3 bits wide, or 0b000 gives 9 value options
 
-        uint16_t index_exact : 1;
-        uint16_t index_scaled_to_segment : 1;
+        uint16_t index_exact : 1;                       // Specialised, maybe also could be removed as not useful. The effect itself should treat this index as special
+        uint16_t index_scaled_to_segment : 1;           // To rename, again, "index_scaled_to_segment" worded as effect style, whereas it should simply be "index_gradient"
         uint16_t index_is_trigger_value_exact : 1;
-        uint16_t index_is_trigger_value_scaled100 : 1;
+        uint16_t index_is_trigger_value_scaled100 : 1;  //probably remove this, why bother having 100% when 0-255 is the same
 
         uint16_t encoded_as_hsb_ids : 1; //move this to other encoded types
         uint16_t encoded_as_crgb_palette_16 : 1;
@@ -579,6 +579,21 @@ class mPalette
 
 
     RgbcctColor SubGet_Encoded_PaletteList_Colour(
+      uint16_t palette_id = 0,
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
+      uint8_t  brightness_scale = 255 // 255 No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+
+
+
+
+    );
+
+    RgbcctColor SubGet_Encoded_PaletteList_Colour_WithoutScaling(
       uint16_t palette_id = 0,
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
