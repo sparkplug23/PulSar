@@ -502,7 +502,7 @@ void mAnimatorLight::HandlePage_PaletteEditor(AsyncWebServerRequest *request)
 //   if (pCONT_web->pWebServer->hasParam("m")) {
 //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"m\")"));
 //     pCONT_web->WSContentBegin(200, CT_PLAIN);
-//     for (uint8_t row_id = 0; row_id < PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//     for (uint8_t row_id = 0; row_id < PALETTELIST_FIXED_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //       BufferWriterI->Append_P(
 //         HTTP_MODULE_TEMPLATE_REPLACE3, 
 //         row_id, 
@@ -1146,7 +1146,7 @@ void mAnimatorLight::HandleParameters_RGBLightSettings(AsyncWebServerRequest *re
 //   if (pCONT_web->pWebServer->hasParam("pa")) {
 //     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEO "pWebServer->hasParam(\"pa\")"));
 //     pCONT_web->WSContentBegin(200, CT_PLAIN);
-//     for (uint8_t row_id = 0; row_id <= PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+//     for (uint8_t row_id = 0; row_id <= PALETTELIST_FIXED_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
 //       BufferWriterI->Append_P(
 //         HTTP_MODULE_TEMPLATE_REPLACE3, 
 //         row_id, 
@@ -1882,7 +1882,7 @@ void mAnimatorLight::WebAppend_PaletteEditor_FillOptions_Controls(){
     JsonBuilderI->Object_Start();
       JsonBuilderI->AddKey("eihr"); // function
         JsonBuilderI->AppendBuffer("\"");      
-        for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+        for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_FIXED_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR,
             row_id, 
             pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer))
@@ -2158,7 +2158,7 @@ void mAnimatorLight::WebAppend_RGBLightSettings_FillOptions_Controls(){
     JsonBuilderI->Object_Start();
       JsonBuilderI->AddKey("eihr");           // function
         JsonBuilderI->AppendBuffer("\"");    
-        for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_STATIC_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
+        for (uint8_t row_id = 0; row_id < pCONT_iLight->PALETTELIST_FIXED_LENGTH_ID; row_id++) {  // "}2'%d'>%s (%d)}3" - "}2'255'>UserTemplate (0)}3" - "}2'0'>Sonoff Basic (1)}3"
           JsonBuilderI->AppendBuffer(PM_HTTP_OPTION_SELECT_TEMPLATE_REPLACE_CTR_CTR,
             pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer, sizeof(buffer)),
             pCONT_iLight->GetPaletteFriendlyNameByID(row_id, buffer2, sizeof(buffer2))

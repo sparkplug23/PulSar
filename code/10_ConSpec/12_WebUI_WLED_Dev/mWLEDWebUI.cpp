@@ -2759,7 +2759,7 @@ void serializePalettes(JsonObject root, int page)
   int itemPerPage = 8;
   #endif
 
-  int palettesCount = mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID;//pCONT_lAni->getPaletteCount();
+  int palettesCount = mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID;//pCONT_lAni->getPaletteCount();
   int customPalettes = pCONT_lAni->customPalettes.size();
 
   int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
@@ -2804,10 +2804,10 @@ void serializePalettes(JsonObject root, int page)
      * 
      */
     if(
-      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+      (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID)
     ){ 
 
-      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;
 
       byte tcp[72];
       memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[adjusted_id])), 72);
@@ -2917,15 +2917,15 @@ void serializePalettes(JsonObject root, int page)
         // ALOG_INF(PSTR("palette_id %d"), palette_id);
       /**************************************************************
        * 
-       * PALETTELIST_STATIC__IDS
+       * PALETTELIST_FIXED__IDS
        * PALETTELIST_VARIABLE_HSBID__IDS
        * PALETTELIST_VARIABLE_GENERIC__IDS
        * 
       ***************************************************************/
       if(
-        ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_FIXED_LENGTH__ID)) ||
         ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
+        ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->))
       )
       {  
           
@@ -2942,7 +2942,7 @@ void serializePalettes(JsonObject root, int page)
 
       /**************************************************************
        * 
-       * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+       * PALETTELIST_FIXED_HTML_COLOUR_CODES__IDS
        * 
       ***************************************************************/
       if(
@@ -2953,24 +2953,24 @@ void serializePalettes(JsonObject root, int page)
 
       /**************************************************************
        * 
-       * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+       * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
        * 
       ***************************************************************/
       if(
-        (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+        (palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
       ){  
         banded_gradient = false;
       }
 
       /**************************************************************
        * 
-       * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+       * PALETTELIST_FIXED_CRGBPALETTE16__IDS
        * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
        * 
       ***************************************************************/
       if(
-        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
         ((palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
       ){  
         banded_gradient = false;
@@ -3214,7 +3214,7 @@ void serveJson(AsyncWebServerRequest* request)
       bool flag_get_first_name_only = true;
         
         // for(uint16_t i = 0; i < 10; i++)//< mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID; i++)
-        for(uint16_t i = 0; i < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID; i++)
+        for(uint16_t i = 0; i < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID; i++)
         {
 
           pCONT_lAni->GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));

@@ -1683,14 +1683,14 @@ void mAnimatorLight::CommandSet_PaletteID(uint8_t value, uint8_t segment_index)
 
   char buffer[50];
 
-  SEGMENT_I(segment_index).palette.id = value < mPalette::PALETTELIST_TOTAL_LENGTH ? value : 0;
+  SEGMENT_I(segment_index).palette.id = value < mPaletteI->GetPaletteListLength() ? value : 0;
   
   _segment_index_primary = segment_index;
   LoadPalette(segments[segment_index].palette.id, segment_index);
 
   // //If "id" is in the range of rgbcct, make sure to automatically make internal_rgbctt track it
-  // if((value>=mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)
-  // &&(value<mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
+  // if((value>=mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)
+  // &&(value<mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
   // {
   //   CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(value, segment_index);
   // }
@@ -1930,25 +1930,25 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
   // Get starting position of buffer
   uint8_t* palette_buffer = nullptr;
 
-  if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
-    palette_id_adjusted_to_array_index = palette_id;
-    // palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
-    palette_buffer = & mPaletteI->hsbid_pals[palette_id_adjusted_to_array_index].encoded_data[0];  //pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
-    // Clear the entire new colour to the "unset" values
-    memset(palette_buffer,COLOUR_MAP_NONE__ID,20); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
+  // if(palette_id<mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID){
+  //   palette_id_adjusted_to_array_index = palette_id;
+  //   // palette_buffer = &pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
+  //   palette_buffer = & mPaletteI->hsbid_pals[palette_id_adjusted_to_array_index].encoded_data[0];  //pCONT_set->Settings.animation_settings.palette_hsbid_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE_HSBID_01__ID)*palette_id_adjusted_to_array_index];
+  //   // Clear the entire new colour to the "unset" values
+  //   memset(palette_buffer,COLOUR_MAP_NONE__ID,20); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
     
-    // Add to select correct buffer depending on palette type
-    memcpy(palette_buffer,buffer,buflen);
+  //   // Add to select correct buffer depending on palette type
+  //   memcpy(palette_buffer,buffer,buflen);
 
-    // rgbcct_controller.UpdateFromExternalBuffer();
-    pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
+  //   // rgbcct_controller.UpdateFromExternalBuffer();
+  //   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
 
-  }else
-  if((palette_id>=mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
+  // }else
+  if((palette_id>=mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
  
 
-    palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_HSBID_LENGTH__ID;    
-    palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
+    palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;    
+    palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
     memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
 
     // Add to select correct buffer depending on palette type
@@ -1957,31 +1957,32 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
     // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->UpdateFromExternalBuffer();
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
 
-  }else
-  if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)){
-    
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
-    #endif // ENABLE_LOG_LEVEL_INFO
-
-    palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID;    
-    palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;
-
-    // AddLog(LOG_LEVEL_TEST, PSTR("Buffer len %d"),buflen);
-    
-    // pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)*palette_id_adjusted_to_array_index];
-    
-    // Clear old buffer space
-    memset(palette_buffer, 0, palette_encoded_users_colour_map_LENGTH); //200 now   
-    // Write new palette data into buffer space
-    memcpy(palette_buffer,buffer,buflen);
-    // Parse buffer data to correctly set data parameters
-    ALOG_ERR(PSTR(" FORCED REMOVED DURING PALETTE CHANGE mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);"));
-
-    // 
-
-
   }
+  // else
+  // if((palette_id>=mPaletteI->PALETTELIST_VARIABLE_GENERIC_01__ID)&&(palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID)){
+    
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog(LOG_LEVEL_TEST, PSTR("Palette: Generic \"%d\"\n\r"),palette_id);
+  //   #endif // ENABLE_LOG_LEVEL_INFO
+
+  //   palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID;    
+  //   palette_buffer = pCONT_set->Settings.animation_settings.palette_encoded_users_colour_map;
+
+  //   // AddLog(LOG_LEVEL_TEST, PSTR("Buffer len %d"),buflen);
+    
+  //   // pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH_ID-mPaletteI->PALETTELIST_VARIABLE_GENERIC_01_ID)*palette_id_adjusted_to_array_index];
+    
+  //   // Clear old buffer space
+  //   memset(palette_buffer, 0, palette_encoded_users_colour_map_LENGTH); //200 now   
+  //   // Write new palette data into buffer space
+  //   memcpy(palette_buffer,buffer,buflen);
+  //   // Parse buffer data to correctly set data parameters
+  //   ALOG_ERR(PSTR(" FORCED REMOVED DURING PALETTE CHANGE mPaletteI->init_PresetColourPalettes_User_Generic_Fill(0);"));
+
+  //   // 
+
+
+  // }
 
 
   // Update new length stored in palettelist

@@ -6713,6 +6713,8 @@
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
     #define MQTT_PORT     1883
 
+    #define ENABLE_DEVFEATURE_REMOVING_HSBID
+
 
 // Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
 // Gain complete understanding/implemenation as is, only then start changes. 

@@ -553,7 +553,7 @@ static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;
  **/
 void mAnimatorLight::EffectAnim__Candle_Single()
 {
-  EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(false, 0);//mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
@@ -561,7 +561,7 @@ static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,
  **/
 void mAnimatorLight::EffectAnim__Candle_Multiple()
 {
-  EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(true,  0);//mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
@@ -570,7 +570,7 @@ static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = ",,,,,Time,Rate;
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
 {
-  EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__White__ID);
+  EffectAnim__Flicker_Base(true,  0);//mPalette::PALETTELIST_HTML_COLOUR__White__ID);
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif
@@ -579,7 +579,7 @@ static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = ",
  **/
 void mAnimatorLight::EffectAnim__Shimmering_Palette() // Same as Candle_Multiple
 {
-  EffectAnim__Flicker_Base(true, mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(true,  0);//mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
@@ -825,7 +825,7 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
       uint16_t start_pixel = 0;
       uint16_t stop_pixel  = SEGLEN;
       
-      mPalette::PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
+      mPalette::STATIC_PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
       
       if(ptr->encoding.index_scaled_to_segment)
       {
@@ -1723,7 +1723,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //  #ifndef DISABLE_ANIMATION_COLOURS_FOR_RGBCCT_OLD_METHOD
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_FIXED_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //   uint8_t segment_index = SEGIDX;
 //   uint16_t start_pixel = SEGMENT.pixel_range.start;
@@ -3522,11 +3522,11 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   //   case EFFECTS_REGION_COLOUR_SELECT_ID:{ //set colours
 
 
-//       // if(effect_config2->active_palette_id++>mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID){
-//       //   effect_config2->active_palette_id = mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID;
+//       // if(effect_config2->active_palette_id++>mPaletteI->PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_07_ID){
+//       //   effect_config2->active_palette_id = mPaletteI->PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_01_ID;
 //       // }
-//       if(pCONT_iLight->animation.palette.id++>=mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_07_ID){
-//         pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_GRADIENT_SUNLEVEL_GROUP01_01_ID;
+//       if(pCONT_iLight->animation.palette.id++>=mPaletteI->PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_07_ID){
+//         pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_01_ID;
 //       }
 
 
@@ -3976,7 +3976,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 //   // delay(5000);
 
-//   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_FIXED_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //   // Set palette pointer
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
@@ -5024,7 +5024,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
  
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_FIXED_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //  // AddLog(LOG_LEVEL_TEST, PSTR("SubTask_Flasher_Animate_Function__Solid_Static_Single_Colour"));
 //   // Set palette pointer
@@ -5056,7 +5056,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   /**
 //    * Get total pixels in palette
 //    * */
-//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID);
+//   mPalette::PALETTELIST::PALETTE *palette_p = mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_FIXED_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID);
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
@@ -5414,7 +5414,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 // //   int16_t adjusted_index = 0;
 // //   for(int desired_index=0;desired_index<pixels_max;desired_index++)
 // //   {
-// //     RgbcctColor c = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID), desired_index, &indexing);
+// //     RgbcctColor c = mPaletteI->GetColourFromPalette(mPaletteI->GetPalettePointerByID(mPaletteI->PALETTELIST_FIXED_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID), desired_index, &indexing);
 // //     adjusted_index = indexing - 90;
 // //     AddLog(LOG_LEVEL_INFO, PSTR("rgbcct[%d]=\t%d\t%d\t%d,%d,%d,%d,%d"),desired_index,indexing,adjusted_index,c.R,c.G,c.B,c.WW,c.WC);
 // //   }
@@ -5476,7 +5476,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
  
 //   // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "SubTask_Flasher_Animate_Function_SunPositions_Solid_Colour_Based_On_Sun_Elevation_02"));
 
-//   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_STATIC_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
+//   // pCONT_iLight->animation.palette.id = mPaletteI->PALETTELIST_FIXED_SOLID_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01_ID;
 
 //   // Set palette pointer
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);

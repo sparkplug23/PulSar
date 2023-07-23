@@ -2268,8 +2268,10 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
   int itemPerPage = 8;
   #endif
 
-  int palettesCount = mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID;//getPaletteCount();
+  int palettesCount = mPaletteI->GetPaletteListLength();
   int customPalettes = pCONT_lAni->customPalettes.size();
+
+  // ALOG_HGL(PSTR("palettesCount=%d"), palettesCount); 
 
   int maxPage = (palettesCount + customPalettes -1) / itemPerPage;
   if (page > maxPage) page = maxPage;
@@ -2313,10 +2315,10 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
      * 
      */
     if(
-      (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+      (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID)
     ){ 
 
-      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+      uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;
 
       byte tcp[72];
       memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[adjusted_id])), 72);
@@ -2360,17 +2362,19 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         encoded_gradient = 0;
         
         RgbcctColor color =    RgbcctColor(0);
+      
         
         color = mPaletteI->GetColourFromPreloadedPaletteBuffer(
             palette_id, segments[getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
             j, &encoded_gradient,
-            false, true,
-            0, true
+            false, false, true
           );
 
         JsonArray colors =  curPalette_obj.createNestedArray();
 
-        Serial.println(encoded_gradient);
+        WDT_Reset();
+
+        // Serial.println(encoded_gradient);
 
         /**
          * @brief 
@@ -2426,21 +2430,22 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         // ALOG_INF(PSTR("palette_id %d"), palette_id);
       /**************************************************************
        * 
-       * PALETTELIST_STATIC__IDS
+       * PALETTELIST_FIXED__IDS
        * PALETTELIST_VARIABLE_HSBID__IDS
        * PALETTELIST_VARIABLE_GENERIC__IDS
        * 
       ***************************************************************/
       if(
-        ((palette_id >= mPalette::PALETTELIST_STATIC_PARTY_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_VARIABLE_GENERIC_01__ID)  && (palette_id < mPalette::PALETTELIST_VARIABLE_GENERIC_LENGTH__ID))
+        ((palette_id >= mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_FIXED_LENGTH__ID))
+         ||
+        // ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength()))
       )
       {  
           
         banded_gradient = true;
 
-        mPalette::PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+        mPalette::STATIC_PALETTE *ptr = &mPaletteI->palettelist[palette_id];
 
         if(ptr->encoding.index_scaled_to_segment)
         {
@@ -2449,38 +2454,40 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
       }
 
+      // /**************************************************************
+      //  * 
+      //  * PALETTELIST_FIXED_HTML_COLOUR_CODES__IDS
+      //  * 
+      // ***************************************************************/
+      // if(
+      //   (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+      // ){  
+      //   banded_gradient = false;
+      // }
+
       /**************************************************************
        * 
-       * PALETTELIST_STATIC_HTML_COLOUR_CODES__IDS
+       * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
        * 
       ***************************************************************/
       if(
-        (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
+        (palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
       ){  
         banded_gradient = false;
       }
 
       /**************************************************************
        * 
-       * PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR__IDS
-       * 
-      ***************************************************************/
-      if(
-        (palette_id >= mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_VARIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
-      ){  
-        banded_gradient = false;
-      }
-
-      /**************************************************************
-       * 
-       * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+       * PALETTELIST_FIXED_CRGBPALETTE16__IDS
        * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
        * 
       ***************************************************************/
       if(
-        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID))
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+        
+        ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID))
       ){  
         banded_gradient = false;
       }
@@ -2760,7 +2767,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       bool flag_get_first_name_only = true;
         
         // for(uint16_t i = 0; i < 10; i++)//< mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__LENGTH__ID; i++)
-        for(uint16_t i = 0; i < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID; i++)
+        for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
         {
 
           GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));

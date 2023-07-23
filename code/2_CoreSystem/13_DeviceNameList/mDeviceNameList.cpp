@@ -186,7 +186,11 @@ const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_
 }
 
 
-const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found){
+const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found)
+{
+
+  ALOG_INF( PSTR("GetDeviceNameWithEnumNumber(%d,%d)"),unique_module_id, device_id);
+
 
 // DEBUG_LINE_HERE;
 
@@ -252,7 +256,7 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
       snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleFriendlyName_WithUniqueID(unique_module_id), random(1000));//device_id);
 
       #ifdef ENABLE_LOG_LEVEL_INFO
-      ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
+      ALOG_INF( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
       #endif // ENABLE_LOG_LEVEL_INFO
     }
     return buffer;
