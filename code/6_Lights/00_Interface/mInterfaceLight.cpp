@@ -102,10 +102,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case FUNC_POINTER_INIT:
 
-      #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-      mPaletteI->init_PresetColourPalettes();
-      #endif // ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-
     break;
     case FUNC_PRE_INIT:
       Pre_Init();

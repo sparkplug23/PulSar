@@ -825,7 +825,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
 
-  ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
+  // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
 
     // DEBUG_LINE_HERE;
   /**
@@ -1972,6 +1972,12 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID)
   ){  
     palette_colour_count = 16;    
+  }
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__LENGTH__ID)
+  ){  
+    palette_colour_count = 1;    
   }
   else
   if(

@@ -36,8 +36,6 @@ class mPalette
 
     void Init_Palettes();
 
-    void init_PresetColourPalettes(); 
-
     /**************
      * COLOUR Designs by name
      * PALETTE are different colours by pixel
@@ -160,12 +158,35 @@ class mPalette
       PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID    
     };
 
+    /**
+     * @brief Instead of HTML Colours, define some popular colours for easy switching without using Custom Colour ##. Eg, Black for effects.
+     * 
+     */
+    enum PALETTELIST_STATIC_SINGLE_COLOURS__IDS{    // Not stored in memory, but changes when called, maybe grow with segment size, but not stored there? save as encoded?
+      PALETTELIST_FIXED_SINGLE_COLOUR__RED__ID = PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__ORANGE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__LIGHTORANGE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__YELLOW__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__LIMEGREEN__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__GREEN__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__CYAN__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__BLUE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__BLUEPURPLE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__PURPLE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__PINK__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__HOTPINK__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__WARMWHITE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__COLDWHITE__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID,
+      PALETTELIST_FIXED_SINGLE_COLOUR__LENGTH__ID    
+    };
+
 
 ///// START of stored in vector
 
     enum PALETTELIST_FIXED__IDS
     {
-      PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID = PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID,
+      PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID = PALETTELIST_FIXED_SINGLE_COLOUR__LENGTH__ID,
       PALETTELIST_FIXED_HOLLOWEEN_OP__ID,
       PALETTELIST_FIXED_HOLLOWEEN_OGP__ID,
       PALETTELIST_FIXED_HOT_PINK_NEON_WITH_NAVY__ID,
@@ -225,23 +246,6 @@ class mPalette
       PALETTELIST_FIXED_CANDLE_FLAME_01__ID,
       PALETTELIST_FIXED_GRADIENT_FIRE_01__ID,
       PALETTELIST_FIXED_SKY_GLOW_01__ID,
-      /**
-       * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
-       *       like grad 1, order of using these will produce sunrising/falling
-       *       linear gradient sunlevel below (dark with no sun point above horizon)
-       *       linear gradient sunlevel low (dark red center, orange sides)
-       *       linear gradient sunlevel med (light red/orange center, orange, then yellow sides, pale blue on farest edges)
-       *       linear gradient sunlevel high (orange sun center, yellow slightly, largely light blue)
-       *       linear gradient sunlevel highest/midday (orange sun center, white edges... pale blue rest)
-       * */
-      //add below horizon gradients (5 below), for black/blue
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_01__ID,
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_02__ID,
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_03__ID,
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_04__ID,
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_05__ID,
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_06__ID,
-      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_07__ID,
 
       PALETTELIST_FIXED_OCEAN_01__ID,
       PALETTELIST_FIXED_CUSTOM_USER_01__ID,
@@ -256,11 +260,32 @@ class mPalette
       PALETTELIST_FIXED_PINK_PURPLE_02__ID,
       PALETTELIST_FIXED_PINK_PURPLE_03__ID,
 
+      #ifdef ENABLE_DEVFEATURE_SUNLEVEL_PALETTES
       /**
        * Create a few palettes that are updated/calculated using sun/azimuth
        * eg: 1) ambilight colours that are calculated to show sun brightness up top
        * */
 
+      /**
+       * GRADIENT_SUNLEVEL_GROUP01 - RGBCCT, Gradient
+       *       like grad 1, order of using these will produce sunrising/falling
+       *       linear gradient sunlevel below (dark with no sun point above horizon)
+       *       linear gradient sunlevel low (dark red center, orange sides)
+       *       linear gradient sunlevel med (light red/orange center, orange, then yellow sides, pale blue on farest edges)
+       *       linear gradient sunlevel high (orange sun center, yellow slightly, largely light blue)
+       *       linear gradient sunlevel highest/midday (orange sun center, white edges... pale blue rest)
+       * 
+       * The reason for adding these should just be an effect going forward, but keeping a few of them as nice palettes
+       * 
+       * */
+      //add below horizon gradients (5 below), for black/blue
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_01__ID,
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_02__ID,
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_03__ID,
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_04__ID,
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_05__ID,
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_06__ID,
+      PALETTELIST_FIXED_GRADIENT_SUNLEVEL_GROUP01_07__ID,
       /**
        * Specialised palettes: Solid single colour
        * */
@@ -271,7 +296,20 @@ class mPalette
       /**
        * Rgbcct colour pairs: For ambilight top/bottom arrangement
        * */
-      PALETTELIST_FIXED_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,      
+      PALETTELIST_FIXED_DUAL_COLOUR_RGBCCT_SUN_ELEVATION_WITH_DEGREES_INDEX_01__ID,    
+      
+      #endif // ENABLE_DEVFEATURE_SUNLEVEL_PALETTES
+
+
+/**
+ * @brief 
+ * 
+ * 
+ * 
+ * Go back and check out my ambilight wallpapers to get duel tone colours I liked before
+ * 
+ */
+
 
       // Count of total handlers and starting point for other modules
       PALETTELIST_FIXED_LENGTH__ID 
@@ -352,9 +390,9 @@ class mPalette
       // enum: Used to call for ctr of friendly name
       uint8_t id;
       // Pointer to name
-      char* friendly_name_ctr;
+      const char* friendly_name_ctr;
       // colour bytes
-      uint8_t* data; // pointer to progmem
+      const uint8_t* data; // pointer to progmem
       // Active pixels
       uint8_t  data_length; // total bytes in palette (includes index information)
       // Contains information on formatting of data buffer
@@ -367,8 +405,10 @@ class mPalette
       PALETTE_ENCODING_DATA encoding;
     };
     std::vector<CUSTOM_PALETTE> custom_palettes;
+ 
+    void addPalette(STATIC_PALETTE palette);
+    void addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding);
 
-          
     uint8_t GetColourMapSizeByPaletteID(uint8_t palette_id);
     uint16_t GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit = 0); 
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );

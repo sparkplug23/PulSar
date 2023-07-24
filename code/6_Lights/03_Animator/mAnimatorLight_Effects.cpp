@@ -514,7 +514,7 @@ void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
   RgbcctColor colour = RgbcctColor(0);
   for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
   {
-    colour = SEGMENT.GetColourFromPalette(pixel, NO_ENCODED_VALUE, PALETTE_SCALED_ON, PALETTE_WRAP_ON);      
+    colour = SEGMENT.GetColourFromPalette(pixel, NO_ENCODED_VALUE, PALETTE_SCALED_ON, PALETTE_WRAP_OFF);      
     colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
   }
@@ -553,7 +553,7 @@ static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;
  **/
 void mAnimatorLight::EffectAnim__Candle_Single()
 {
-  EffectAnim__Flicker_Base(false, 0);//mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
 }
 static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
@@ -561,7 +561,7 @@ static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,
  **/
 void mAnimatorLight::EffectAnim__Candle_Multiple()
 {
-  EffectAnim__Flicker_Base(true,  0);//mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
 }
 static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
@@ -570,7 +570,7 @@ static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = ",,,,,Time,Rate;
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
 {
-  EffectAnim__Flicker_Base(true,  0);//mPalette::PALETTELIST_HTML_COLOUR__White__ID);
+  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__COLDWHITE__ID);
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif
@@ -579,7 +579,7 @@ static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = ",
  **/
 void mAnimatorLight::EffectAnim__Shimmering_Palette() // Same as Candle_Multiple
 {
-  EffectAnim__Flicker_Base(true,  0);//mPalette::PALETTELIST_HTML_COLOUR__Black__ID);
+  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
