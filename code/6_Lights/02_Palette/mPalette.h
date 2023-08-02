@@ -414,6 +414,7 @@ class mPalette
     uint8_t GetEncodedColourWidth( PALETTE_ENCODING_DATA encoded );
     uint16_t GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding, uint8_t data_in_palette);
 
+    uint8_t GetColoursInCRGB16Palette(uint16_t palette_id);
 
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM

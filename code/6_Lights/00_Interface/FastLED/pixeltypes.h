@@ -106,7 +106,7 @@ struct CRGB {
 		uint8_t raw[3];
 	};
 
-  /// Array access operator to index into the crgb object
+    /// Array access operator to index into the crgb object
 	inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return raw[x];

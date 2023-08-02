@@ -13,10 +13,10 @@
 
 //color mangling macros
 #define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
-// #define R(c) (byte((c) >> 16))
-// #define G(c) (byte((c) >> 8))
-// #define B(c) (byte(c))
-// #define W(c) (byte((c) >> 24))
+#define R32(c) (byte((c) >> 16))
+#define G32(c) (byte((c) >> 8))
+#define B32(c) (byte(c))
+#define W32(c) (byte((c) >> 24))
 
 #define WLED_DISABLE_2D
 

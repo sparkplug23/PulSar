@@ -2357,74 +2357,96 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     {
 
       
-      for (int j = 0; j < colours_in_palette; j++) {
+      for (int j = 0; j < colours_in_palette; j++) 
+      {
 
         encoded_gradient = 0;
         
         RgbcctColor color =    RgbcctColor(0);
       
         
-        color = mPaletteI->GetColourFromPreloadedPaletteBuffer(
-            palette_id, segments[getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
-            j, &encoded_gradient,
-            false, false, true
-          );
 
         JsonArray colors =  curPalette_obj.createNestedArray();
 
         WDT_Reset();
 
-        // Serial.println(encoded_gradient);
+        /** first check if the palette is one that uses the colour picker*/       
+        if(
+          (palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+        ){
 
-        /**
-         * @brief 
-         * First colour needs to be applied twice, or at least have the index increased
-         * 
-         */
+          switch(palette_id)
+          {
+            case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID: colors.add("c1"); break;
+            case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_02__ID: colors.add("c2"); break;
+            case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_03__ID: colors.add("c3"); break;
+            case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_04__ID: colors.add("c4"); break;
+            case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_05__ID: colors.add("c5"); break;
+          }
+         
+        }else{
+            
+          color = mPaletteI->GetColourFromPreloadedPaletteBuffer(
+              palette_id, segments[getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
+              j, &encoded_gradient,
+              false, false, true
+            );
+          // Serial.println(encoded_gradient);
 
-        /**
-         * @brief 
-         * Gradient Exists: encoded > 0, then take it directly. If it exists but is 0, then the else will still work to catch it
-         * Gradient Empty:  encoded == 0, scale colour_count into range
-         */
-        if(encoded_gradient)
-        {
-          
-          // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-          // uint8_t range_width = 255/(colours_in_palette+1);
-          // colors.add(map(encoded_gradient, 0,255, range_width,255)); // Rescale encoded value into new scale
-          // #else
-          colors.add(encoded_gradient); // when palette has gradient index value, it should be used instead of this
-          // #endif
-                    
+          /**
+           * @brief 
+           * First colour needs to be applied twice, or at least have the index increased
+           **/
+
+          /**
+           * @brief 
+           * Gradient Exists: encoded > 0, then take it directly. If it exists but is 0, then the else will still work to catch it
+           * Gradient Empty:  encoded == 0, scale colour_count into range
+           */
+          if(encoded_gradient)
+          {
+            
+            // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+            // uint8_t range_width = 255/(colours_in_palette+1);
+            // colors.add(map(encoded_gradient, 0,255, range_width,255)); // Rescale encoded value into new scale
+            // #else
+            colors.add(encoded_gradient); // when palette has gradient index value, it should be used instead of this
+            // #endif
+                      
+
+          }
+          else
+          {
+            // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+            // uint8_t range_width = 255/(colours_in_palette+1);
+            // colors.add(map(j, 0,colours_in_palette, range_width,255)); // when palette has gradient index value, it should be used instead of this
+            // #else
+            // colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
+            // #endif
+
+            if(colours_in_palette>1)
+            {
+              #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+              // uint8_t range_width = 255/(colours_in_palette+1);
+              colors.add(map(j, 0,colours_in_palette-1, 0,255)); // when palette has gradient index value, it should be used instead of this
+              #else
+              colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
+              #endif
+            }else{
+              colors.add(1);
+            }
+
+            banded_gradient = true;                    
+
+          }
+
+          colors.add(color.red);
+          colors.add(color.green);
+          colors.add(color.blue);
 
         }
-        else
-        {
-          // #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-          // uint8_t range_width = 255/(colours_in_palette+1);
-          // colors.add(map(j, 0,colours_in_palette, range_width,255)); // when palette has gradient index value, it should be used instead of this
-          // #else
-          // colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
-          // #endif
 
-          #ifdef ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-          // uint8_t range_width = 255/(colours_in_palette+1);
-          colors.add(map(j, 0,colours_in_palette-1, 0,255)); // when palette has gradient index value, it should be used instead of this
-          #else
-          colors.add(map(j, 0,colours_in_palette, 0,255)); // when palette has gradient index value, it should be used instead of this
-          #endif
-
-          banded_gradient = true;
-                    
-
-        }
-
-        colors.add(color.red);
-        colors.add(color.green);
-        colors.add(color.blue);
-
-      }
+      } //end CSL colours
 
             
         // ALOG_INF(PSTR("palette_id %d"), palette_id);
@@ -3316,11 +3338,8 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   // getVal(elem["tr"], &seg.transition.rate_ms);
 
   uint8_t pal = seg.palette.id;
-  if (seg.getLightCapabilities() & 1) {  // ignore palette for White and On/Off segments
-  
+  if (seg.getLightCapabilities() & 1) {  // ignore palette for White and On/Off segments 
     ALOG_INF(PSTR("getVal(elem[\"pal\"], &pal)"));
-
-
     if (getVal(elem["pal"], &pal)) seg.setPalette(pal);
   }
 

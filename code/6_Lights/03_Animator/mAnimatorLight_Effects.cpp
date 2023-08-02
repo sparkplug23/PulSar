@@ -77,7 +77,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
   RgbcctColor colour = RgbcctColor(0);
   for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
   {
-    colour = SEGMENT.GetColourFromPalette(pixel);      
+    colour = SEGMENT.GetColourFromPalette(pixel, nullptr, false, false, true); // Get all palettes exact values only (no gradient)      
     colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
   }

@@ -2979,15 +2979,6 @@ const byte Pink_Purple_gp[] PROGMEM = {
 // converted for FastLED with gammas (2.6, 2.2, 2.5)
 // Size: 28 bytes of program space.
 
-// const byte Sunset_Real_gp[] PROGMEM = {
-//     0, 1,  255,  0,
-//    22, 2, 0,  255,
-//    51, 3,104,  0,
-//    85, 4, 22, 18,
-//   135, 5,  0,103,
-//   198,  16,  0,130,
-//   255,   0,  0,160};
-
 const byte Sunset_Real_gp[] PROGMEM = {
     0, 120,  0,  0,
    22, 179, 22,  0,

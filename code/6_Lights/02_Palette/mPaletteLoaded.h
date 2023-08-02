@@ -26,7 +26,7 @@ class mPaletteLoaded
 
 	struct CRGB16Palette16_PALETTE
 	{
-		CRGBPalette16 data;
+		CRGBPalette16 data;                 
 		std::vector<uint8_t> encoded_index;
 	};
 	CRGB16Palette16_PALETTE CRGB16Palette16_Palette;

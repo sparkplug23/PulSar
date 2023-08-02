@@ -854,16 +854,6 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
     
     ALOG_INF(PSTR("?????????????????????????????????????????? %d"), palette_id);
 
-    /**
-     * @brief 
-     * 
-     * 
-     * 
-     * 
-     * SHOULD BE INSIDE PALETTE CLASS??
-     * 
-     */
-
     /******************************************************
      * PALETTELIST_FIXED_CRGBPALETTE16__IDS
      * No gradient information in palette bytes, CRGB16 will scale equally
@@ -871,12 +861,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
     switch (palette_id)
     {
       default:
-      case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID:  
-
-      ALOG_HGL(PSTR("HERE???"));
-      
-      
-      SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
+      case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID:  _palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__PARTY_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = PartyColors_p;   break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__CLOUD_COLOURS__ID:   _palette_container->CRGB16Palette16_Palette.data = CloudColors_p;   break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LAVA_COLOURS__ID:    _palette_container->CRGB16Palette16_Palette.data = LavaColors_p;    break;
@@ -4580,6 +4565,31 @@ JBI->Start();
       JBI->Object_End();
     }
     #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+
+    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
+    uint8_t seg_i = 0;
+    JBI->Array_Start("CRGB16Palette16");
+    for(uint8_t elem_i=0;elem_i<16;elem_i++)
+    {
+      JBI->Array_Start();
+        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
+        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
+        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
+      JBI->Array_End();          
+    }
+    JBI->Array_End();
+
+    JBI->Array_Start("CRGB16Palette16MAN");
+    for(uint8_t elem_i=0;elem_i<16;elem_i++)
+    {
+      JBI->Array_Start();
+        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
+        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
+        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
+      JBI->Array_End();          
+    }
+    JBI->Array_End();
+    #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
 
 
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
