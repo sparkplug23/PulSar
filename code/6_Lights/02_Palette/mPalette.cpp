@@ -1412,7 +1412,9 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
 
     if(flag_convert_pixel_index_to_get_exact_crgb_colour)
     {
-      pixel_position_adjust = map(pixel_position_adjust, 0,15, 0,255); //gradient type when exact value is needed needs scaled into full range
+      uint8_t pixels_in_crgb16palette = GetColoursInCRGB16Palette(palette_id);
+      // ALOG_ERR(PSTR("pixels_in_crgb16palette = %d"), pixels_in_crgb16palette);
+      pixel_position_adjust = map(pixel_position_adjust, 0,pixels_in_crgb16palette-1, 0,255); //gradient type when exact value is needed needs scaled into full range
     }
     uint8_t segIdx = pCONT_lAni->_segment_index_primary;
 
@@ -1721,6 +1723,53 @@ mPalette::GetColourFromPreloadedPaletteBuffer(
   return colour;
 }
 
+
+uint8_t mPalette::GetColoursInCRGB16Palette(uint16_t palette_id)
+{
+
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID))
+  ){  
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID;
+    // pCONT_sup->GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
+    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+
+
+    uint8_t colour_count = pSEGMENT_I(0).palette_container->CRGB16Palette16_Palette.encoded_index.size();
+
+    ALOG_INF(PSTR("colour_count=%d, pal%d"), colour_count, palette_id);
+
+    return colour_count;
+
+
+
+
+
+
+  }
+
+
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  ){  
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    // pCONT_sup->GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
+    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+
+    return pSEGMENT_I(0).palette_container->CRGB16Palette16_Palette.encoded_index.size();
+
+
+
+
+
+
+  }
+
+
+
+
+
+}
 
 
 /**
