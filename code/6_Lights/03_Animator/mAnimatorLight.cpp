@@ -405,7 +405,6 @@ void mAnimatorLight::EveryLoop()
 }
 
 
-
 void mAnimatorLight::BootMessage()
 {
   
@@ -415,12 +414,6 @@ void mAnimatorLight::BootMessage()
 
 }
 
-
-/*******************************************************************************************************************
-********************************************************************************************************************
-************ START OF GENERAL INIT PROCESS ********************************************************************************************
-********************************************************************************************************************
-********************************************************************************************************************/
 
 void mAnimatorLight::Pre_Init(void)
 {
@@ -482,13 +475,9 @@ void mAnimatorLight::Init__Palettes()
   
   for (int ii=0;ii<(mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);ii++){ 
     sprintf(buffer, D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR, ii);
-
     uint8_t adjusted_id = ii;//mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID
-
-
     DLI->AddDeviceName(buffer, GetModuleUniqueID(), adjusted_id);
   }
-
 
   for (int ii=0;ii< mPaletteI->user_defined_palette_count;ii++){ 
     sprintf(buffer, D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR, ii);
@@ -507,8 +496,7 @@ void mAnimatorLight::Init(void)
   
   pwm_multi_channels = 0;
 
-  pCONT_set->Settings.pwm_range = PWM_RANGE; //tmp
-
+  pCONT_set->Settings.pwm_range = PWM_RANGE;
   pCONT_set->Settings.light_settings.light_fade = 1;
   pCONT_set->Settings.light_settings.light_speed = 5*2;
   pCONT_set->power = 1;
@@ -555,18 +543,12 @@ void mAnimatorLight::Init(void)
   #endif // ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
   
   settings.light_size_count = STRIP_SIZE_MAX;
-
-  // Allow runtime changes of animation size
-  settings.light_size_count = STRIP_SIZE_MAX; 
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
 
   /**
    * @brief Check if any pin is set
    * Note: this is going to clash with PWM types in Lighting and should probably be moved into there, leaving here to check in both
-   * 
-   * 
-   * REMOVE ALL THIS??
-   */
+   **/
   bool flag_any_pin_set = false;
   for(uint16_t gpio = GPIO_PIXELBUS_01_A_ID; gpio < GPIO_PIXELBUS_10_E_ID; gpio++)
   {
@@ -663,8 +645,7 @@ void mAnimatorLight::EverySecond_AutoOff()
 
   /**
    * @brief Master AutoOff DeCounter
-   * 
-   */
+   **/
   //ALOG_DBM( PSTR(D_LOG_LIGHT "scene.auto_off_settings.tSaved [%d]"),animation.auto_off_settings.time_decounter_secs);
   if(auto_off_settings.time_decounter_secs==1){ //if =1 then turn off and clear to 0
     // animation.name_id = MODE_SINGLECOLOUR_FADE_OFF__ID;
@@ -686,54 +667,43 @@ void mAnimatorLight::EverySecond_AutoOff()
 
   /**
    * @brief Segment(s) AutoOff DeCounter
-   * 
-   */
+   **/
   for (uint8_t seg_i=0; seg_i<segments.size(); seg_i++) 
   {
 
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "seg_i=%d dec"), seg_i);
 
     // ALOG_ERR(PSTR("seg.markForReset();A"));
-
-    // if(SEGMENT_I(seg_i) != nullptr)
-    // {
   
-      if(SEGMENT_I(seg_i).auto_timeoff.UpdateTick())
-      {
-        ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Running Value")), SEGMENT_I(seg_i).auto_timeoff.Value());
-      }
+    if(SEGMENT_I(seg_i).auto_timeoff.UpdateTick())
+    {
+      ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Running Value")), SEGMENT_I(seg_i).auto_timeoff.Value());
+    }
 
-      if(SEGMENT_I(seg_i).auto_timeoff.IsLastTick())
-      {
-        ALOG_INF(PSTR("Segment Turn OFF"));
-        // Set intensity to make all LEDs refresh
-        SEGMENT_I(seg_i).set_intensity(255);
-        pCONT_lAni->SEGMENT_I(seg_i).single_animation_override.time_ms = 1000; // slow turn off
+    if(SEGMENT_I(seg_i).auto_timeoff.IsLastTick())
+    {
+      ALOG_INF(PSTR("Segment Turn OFF"));
+      // Set intensity to make all LEDs refresh
+      SEGMENT_I(seg_i).set_intensity(255);
+      pCONT_lAni->SEGMENT_I(seg_i).single_animation_override.time_ms = 1000; // slow turn off
 
-        ALOG_INF(PSTR("Setting override for off %d"), pCONT_lAni->SEGMENT_I(seg_i).single_animation_override.time_ms);
+      ALOG_INF(PSTR("Setting override for off %d"), pCONT_lAni->SEGMENT_I(seg_i).single_animation_override.time_ms);
 
-        pCONT_lAni->SEGMENT_I(seg_i).flags.fForceUpdate = true;
+      pCONT_lAni->SEGMENT_I(seg_i).flags.fForceUpdate = true;
 
-        SEGMENT_I(seg_i).setBrightnessRGB(0);
-        SEGMENT_I(seg_i).setBrightnessCCT(0);      
-      
-      }
-
-    // }
+      SEGMENT_I(seg_i).setBrightnessRGB(0);
+      SEGMENT_I(seg_i).setBrightnessCCT(0);    
+    }
 
   }
 
-
 }// END EverySecond_AutoOff
 
-#ifdef ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
 
-#endif // ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
+RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness)
+{
 
-
-RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness){
-
-  RgbcctColor colour_adjusted_with_brightness; // No init for speed// = RgbcctColor();//0);
+  RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightness);
   colour_adjusted_with_brightness.G  = mapvalue(full_range_colour.G,  0,255, 0,brightness);
   colour_adjusted_with_brightness.B  = mapvalue(full_range_colour.B,  0,255, 0,brightness);
@@ -744,10 +714,8 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range
 }
 
 
-RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT){
-
-
-  ALOG_DBM( PSTR("full_range_colour=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightnessRGB, uint8_t brightnessCCT)
+{
 
   RgbcctColor colour_adjusted_with_brightness = RgbcctColor(0);
   colour_adjusted_with_brightness.R  = mapvalue(full_range_colour.R,  0,255, 0,brightnessRGB);
@@ -756,7 +724,8 @@ RgbcctColor mAnimatorLight::ApplyBrightnesstoRgbcctColour(RgbcctColor full_range
   colour_adjusted_with_brightness.WW = mapvalue(full_range_colour.WW, 0,255, 0,brightnessCCT);
   colour_adjusted_with_brightness.WC = mapvalue(full_range_colour.WC, 0,255, 0,brightnessCCT);
   
-  ALOG_DBM( PSTR("colour_adjusted_with_brightness=%d,%d,%d,%d,%d"),colour_adjusted_with_brightness.R,colour_adjusted_with_brightness.G,colour_adjusted_with_brightness.B,colour_adjusted_with_brightness.WC,colour_adjusted_with_brightness.WW);
+  // ALOG_DBM( PSTR("full_range_colour=%d,%d,%d,%d,%d"),desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+  // ALOG_DBM( PSTR("colour_adjusted_with_brightness=%d,%d,%d,%d,%d"),colour_adjusted_with_brightness.R,colour_adjusted_with_brightness.G,colour_adjusted_with_brightness.B,colour_adjusted_with_brightness.WC,colour_adjusted_with_brightness.WW);
 
   return colour_adjusted_with_brightness;
 
@@ -795,13 +764,6 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
 #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
 
 
-// /**
-//  * @brief If neccsary this will adjust the id into the correct region
-//  * 
-//  */
-// void mAnimatorLight::GetPaletteID(uint16_t id)
-
-
 /**
  * @brief Function to load palette_id into the segment
  *   (lets just use largest possible byte value without making it dynamic for now)
@@ -824,35 +786,27 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
 {
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
-
   // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, segment_index, pCONT_lAni->_segment_index_primary);
 
-    // DEBUG_LINE_HERE;
   /**
    * @brief If none was passed, then assume its the default for that segment and load its container
-   * 
-   */
+   **/
   if(_palette_container == nullptr)
   {
-    // DEBUG_LINE_HERE;
     _palette_container = SEGMENT_I(segment_index).palette_container;
   }
 
   SEGMENT_I(segment_index).palette_container->loaded_palette_id = palette_id;
 
-
-    // DEBUG_LINE_HERE;
   if(
     ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID))
   ){   
 
     /**
      * @brief Moving out of mPalette since it includes references to PaletteContainer. May need moving back.
-     * 
-     */
+     **/
     // mPaletteI->LoadPalette_CRGBPalette16_Static(palette_id, segment_index); // ie WLED22 "loadPalette"
-    
-    ALOG_INF(PSTR("?????????????????????????????????????????? %d"), palette_id);
+    // ALOG_INF(PSTR("?????????????????????????????????????????? %d"), palette_id);
 
     /******************************************************
      * PALETTELIST_FIXED_CRGBPALETTE16__IDS
@@ -868,15 +822,13 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__OCEAN_COLOUR__ID:    _palette_container->CRGB16Palette16_Palette.data = OceanColors_p;   break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__FOREST_COLOUR__ID:   _palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
+      case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__HEAT_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = HeatColors_p; break;
     }
 
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for(uint8_t i=0;i<16;i++)
-    {
+    for(uint8_t i=0;i<16;i++){
       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
     }
-
-    return;
 
   }else
   if(
@@ -897,31 +849,19 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
      * 
      */    
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-
-
     TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
     TRGBGradientPaletteEntryUnion u;
-
     // Count entries
     uint16_t count = 0;
     do {
         u = *(ent + count);
         count++;
     } while ( u.index != 255);
-
     u = *ent;
     int indexstart = 0;
     while( indexstart < 255) {
       indexstart = u.index;
-
-      // JsonArray colors =  json.createNestedArray();
-      // colors.add(u.index);
-      // colors.add(u.r);
-      // colors.add(u.g);
-      // colors.add(u.b);
-
       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
-
       ent++;
       u = *ent;
     }
@@ -931,21 +871,16 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
   }else
   if(
     ((palette_id >= mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_FIXED_LENGTH__ID))     
-  )
-  {   
-   
+  ){      
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID;
-//     ALOG_HGL(PSTR("ERROR HERE palette_id_adj %d"),palette_id_adj); 
+    // ALOG_HGL(PSTR("ERROR HERE palette_id_adj %d"),palette_id_adj); 
 
-// DEBUG_LINE_HERE;
-    mPalette::STATIC_PALETTE *ptr = &mPaletteI->palettelist[palette_id_adj];
+    mPalette::STATIC_PALETTE *ptr = &mPaletteI->static_palettes[palette_id_adj];
 
-// DEBUG_LINE_HERE;
     #ifdef ESP32
     _palette_container->pData = std::vector<uint8_t>();
     _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
-    // for(int i=0;i<_palette_container->pData.size();i++)
-    // {
+    // for(int i=0;i<_palette_container->pData.size();i++){
     //   Serial.printf("%d,\n\r", _palette_container->pData[i]);
     // }
     #else // ESP8266 requires safe reading out of progmem first
@@ -954,21 +889,17 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
     SEGMENT_I(segment_index).palette_container->pData.assign(buffer, buffer + ptr->data_length);
     #endif  
 
-  }
-  else
+  }else
   if(
     ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
-  )
-  {
+  ){
     // Preloading is not needed, already in ram
-  }
-  else
+  }else
   if(
     (palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
   ){  
     // Preloading is not needed, already in ram
-  }
-  else
+  }else
   if(
     (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID)
   ){  
@@ -987,7 +918,8 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255)),
                           CHSV(random8(), 192, random8(128, 255)),
-                          CHSV(random8(), 255, random8(128, 255)));
+                          CHSV(random8(), 255, random8(128, 255))
+          );
           SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
@@ -1003,8 +935,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255),
                           CHSV(random8(), random8(204, 255), 255)
-                          );
-                          
+          );                          
           SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
@@ -1020,8 +951,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255),
                           CHSV(random8(), random8(153, 255), 255)
-                          );
-                          
+          );                          
           SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
@@ -1037,8 +967,7 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255),
                           CHSV(random8(), random8(153, 217), 255)
-                          );
-                          
+          );                          
           SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
@@ -1062,9 +991,8 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
       break;    
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID: 
       { //primary color only
-        CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0])); //is this stable to do? maybe since its not a pointer but instead an instance of a class
+        CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim); 
-        // length = 1;
       }
       break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY__ID:
@@ -1072,7 +1000,6 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
         CRGB prim = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[0]));
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
         _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,sec,sec); 
-        // length = 4;
       }
       break;
       case mPalette::PALETTELIST_FIXED_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID:
@@ -1081,7 +1008,6 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
         CRGB sec  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[1]));
         CRGB ter  = col_to_crgb(RgbcctColor::GetU32Colour(SEGMENT_I(segment_index).rgbcctcolors[2]));
         SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(ter,sec,prim); 
-        // length = 3; // 3 unique colours
       }
       break;    
       case  mPalette::PALETTELIST_FIXED_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY_REPEATED__ID:
@@ -1095,16 +1021,13 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
         } else {
           SEGMENT_I(segment_index).palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,prim,prim,prim,prim,prim,prim,sec,sec,sec,sec,sec,sec,sec,sec);
         }
-        // length = 16;
       }
       break;
-    } //end switch
+    } // END switch
     
   }
 
 }
-
-
 
 
 /**
@@ -1135,11 +1058,8 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
   ){  
     int8_t adjusted_id = palette_id - mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
     DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), adjusted_id, buffer, buflen);
-  // DEBUG_LINE_HERE;
   // ALOG_INF(PSTR("device name %s %d"),buffer,adjusted_id );
   }
-  // DEBUG_LINE_HERE;
-    
     
   /**
    * @brief All static (progmem) palette names are stored in palette class
@@ -1153,13 +1073,8 @@ const char* mAnimatorLight::GetPaletteNameByID(uint16_t palette_id, char* buffer
   if(
     ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_FIXED_LENGTH__ID))
   ){       
-  // DEBUG_LINE_HERE;
     mPaletteI->GetPaletteNameByID(palette_id, buffer, buflen);
   }
-
-
-  
-  // DEBUG_LINE_HERE;
 
   return buffer;
 
@@ -1316,9 +1231,7 @@ void mAnimatorLight::Init_Segments()
   //reset segment runtimes
   for (segment_new &seg : segments) 
   {
-
-    // ALOG_ERR(PSTR("seg.markForReset();A"));
-  
+    // ALOG_ERR(PSTR("seg.markForReset();A"));  
     seg.markForReset();
     seg.resetIfRequired();
   }
@@ -1326,24 +1239,6 @@ void mAnimatorLight::Init_Segments()
   for (segment_new &seg : segments) 
   {    
     // ALOG_ERR(PSTR("seg.markForReset();B"));
-
-    /**
-     * @brief Adding 5 colours for each segment
-     * 
-     */
-    #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
-
-
-    #else
-    seg.rgbcctcolors.clear();
-    seg.rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
-    seg.rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
-    seg.rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
-    seg.rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
-    seg.rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
-    #endif // ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
     seg.grouping = 1;
     // SEGMENT_I(i).setOption(SEG_OPTION_ON, 1);
     // SEGMENT_I(i).opacity = 255;    
@@ -1351,8 +1246,7 @@ void mAnimatorLight::Init_Segments()
 
   #ifdef USE_MODULE_LIGHTS_PWM
   SEGMENT_I(0).pixel_range.start = 0;
-  SEGMENT_I(0).pixel_range.stop = STRIP_SIZE_MAX; //since STRIP_SIZE_MAX is total pixels, the value in "stop" will also be STRIP_SIZE_MAX
-  
+  SEGMENT_I(0).pixel_range.stop = STRIP_SIZE_MAX; //since STRIP_SIZE_MAX is total pixels, the value in "stop" will also be STRIP_SIZE_MAX  
   SEGMENT_I(0).pixel_range.stop = 2; 
   ALOG_WRN(PSTR("Force fix the stop pixel size"));
   #endif // USE_MODULE_LIGHTS_PWM
@@ -1366,81 +1260,19 @@ void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel
 
   ALOG_INF(PSTR("Segment_AppendNew:: getSegmentsNum() new index %d of count:%d"), seg_index, getSegmentsNum());
 
-  // ALOG_WRN(PSTR("Removed for loop that may be critical"));
-  
-  // Looping ever index, this should be changed instead of for() with nested if()
+  if (seg_index >= getSegmentsNum()) 
+  {
 
-  /**
-   * @brief 
-   * 
-   * The loop was here so edits to segments could be made without changing other ones eg Segment1 could be edited without erasing Seg0
-   * 
-   */
-  // for (size_t s = 0; s < getSegmentsNum(); s++) 
-  // {
-
-    if (seg_index >= getSegmentsNum()) 
-    {
-
-      ALOG_INF(PSTR("Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
-
-
-      // Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
-
-
-      // DEBUG_LINE_HERE;
-      appendSegment(Segment_New(start_pixel, stop_pixel));
-      // DEBUG_LINE_HERE;
-      seg_index = getSegmentsNum()-1; // segments are added at the end of list, -1 for index of LENGTH minus 1
-      // DEBUG_LINE_HERE;
-      ALOG_INF(PSTR("Segment_AppendNew::new seg_index %d"), seg_index);
-      // DEBUG_LINE_HERE;
+    ALOG_INF(PSTR("Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
+    appendSegment(Segment_New(start_pixel, stop_pixel));
+    seg_index = getSegmentsNum()-1; // segments are added at the end of list, -1 for index of LENGTH minus 1
+    ALOG_INF(PSTR("Segment_AppendNew::new seg_index %d"), seg_index);
+      
+  }
+  else{
     
-
-    /**
-     * @brief Both of these need internalised to the creation of a new segment to ensure it is always configured, it is likely the lack of calling rgbcctcolours an issue
-     * 
-     */
-    segments[0].rgbcctcolors[0].debug_print(">A>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-      SEGMENT_I(seg_index).palette_container = new mPaletteLoaded(); // Needs internalised
-      DEBUG_LINE_HERE;
-      
-    segments[0].rgbcctcolors[0].debug_print(">B>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-    // if(SEGMENT_I(seg_index).RGBCCTCOLOURS_SIZE<5)
-    // {
-      DEBUG_LINE_HERE;
-      DEBUG_LINE_HERE;
-      DEBUG_LINE_HERE;
-      DEBUG_LINE_HERE;
-      DEBUG_LINE_HERE;
-      DEBUG_LINE_HERE;
-      DEBUG_LINE_HERE;
-      ALOG_INF(PSTR("seg_index=%d"),seg_index);
-    #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
-    #else
-      SEGMENT_I(seg_index).rgbcctcolors.clear();
-      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
-      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
-      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
-      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
-      SEGMENT_I(seg_index).rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
-      #endif // ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-    // }
-      DEBUG_LINE_HERE;
-    segments[0].rgbcctcolors[0].debug_print(">C>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
-
-      // delay(3000);
-      
-      // Serial.println(SEGMENT_I(seg_index).hardware_element_colour_order.data);
-    
-    }
-    else{
-      
-      ALOG_INF(PSTR("ELSEEEEEEEEEEEEEEEEEEEE Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
-    }
-
-  // }
+    ALOG_INF(PSTR("ELSEEEEEEEEEEEEEEEEEEEE Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
+  }
 
 }
 
@@ -1906,7 +1738,7 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID;
 
 
-    mPalette::STATIC_PALETTE pal = mPaletteI->palettelist[constrain(palette_id_adj,0,mPaletteI->palettelist.size()-1)];
+    mPalette::STATIC_PALETTE pal = mPaletteI->static_palettes[constrain(palette_id_adj,0,mPaletteI->static_palettes.size()-1)];
 
     // Serial.println(ptr->encoding.data, BIN);
 
@@ -1975,16 +1807,11 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
     (palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS) && (palette_id < mPaletteI->GetPaletteListLength())
   ){  
 
-    
     uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS; // adjust back into correct indexing
 
     uint8_t colour_width  = mPaletteI->GetEncodedColourWidth(mPaletteI->custom_palettes[palette_adjusted_id].encoding); 
     palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size()/colour_width;
 
-
-DEBUG_LINE_HERE;
-
-    // palette_colour_count = mPaletteI->custom_palettes[].;    
   }
 
   return palette_colour_count;
@@ -4079,38 +3906,70 @@ void mAnimatorLight::loadCustomPalettes()
   // }
 }
 
+
+
+
+
+
+
+
+
+
+
+
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 IRAM_ATTR 
 #endif 
-mAnimatorLight::Segment_New::GetColourFromPalette(
-  uint16_t _pixel_position,//desired_index_from_palette,  
-  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-  bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-  bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-  uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+mAnimatorLight::Segment_New::GetColourFromPalette2(
+  /**
+   * @brief _pixel_position
+   * ** [0-SEGLEN]
+   * ** [0-255]   
+   */
+  uint16_t pixel_position,
+  /**
+   * @brief flag_spanned_segment
+   * ** [true] : if spanned, then palette should be across segment //                pixel_position should be between 0-255  //pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1); 
+   * ** [false]: if not, then palette should be ??   // pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
+   */
+  bool     flag_spanned_segment,
+  /**
+   * @brief flag_wrap_hard_edge
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  bool     flag_wrap_hard_edge,
+  /**
+   * @brief flag_crgb_exact_colour
+   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+   */
+  bool     flag_crgb_exact_colour,
+  /**
+   * @brief encoded_value
+   * ** [uint32_t*] : encoded value from palette
+   */
+  uint8_t* encoded_value  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
 ){
 
-  // need to add here to load if loaded palette.id does not match desired. This will remove need to loadPalette
-  // if(palette.id != palette_container->loaded_palette_id)
-  // {
-  //   DEBUG_LINE_HERE;
-  //   pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-  // }
+  if(palette.id != palette_container->loaded_palette_id)
+  {
+    pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
+  }
 
-  return mPaletteI->GetColourFromPreloadedPaletteBuffer(
+  return mPaletteI->GetColourFromPreloadedPaletteBuffer2(
     palette.id,
-    (uint8_t*)palette_container->pData.data(),//desired_index_from_palette,  
-    _pixel_position,
+    (uint8_t*)palette_container->pData.data(),
+    pixel_position,
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-    brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    flag_crgb_exact_colour
   );
 
 }
+
 
 /**
  * @brief New method that gets any colour without preloading, and hence will be slower but allows getters to use this for multiple uses e.g. webui population
@@ -4120,41 +3979,29 @@ RgbcctColor
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 IRAM_ATTR 
 #endif 
-mAnimatorLight::GetColourFromUnloadedPalette(
+mAnimatorLight::GetColourFromUnloadedPalette2(
   uint16_t palette_id,
-  uint16_t _pixel_position,//desired_index_from_palette,  
-  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-  bool     flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-  bool     flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-  uint8_t mcol, // will be phased out
-  bool     flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-  uint8_t  brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-  // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+  uint16_t _pixel_position,
+  bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  bool     flag_crgb_exact_colour,
+  uint8_t* encoded_value  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
 ){
 
-  // DEBUG_LINE_HERE;
-
   /**
-   * @brief To get around loading, a temporary loading item will be created
+   * @brief Load palette into temporary buffer first, then handle using the default function 
    **/
   mPaletteLoaded palette_container_temp = mPaletteLoaded();
-
-  // DEBUG_LINE_HERE;
   pCONT_lAni->LoadPalette(palette_id, 0, &palette_container_temp);
-  // DEBUG_LINE_HERE;
-
-  // return RgbcctColor(255,0,0);
-
-  RgbcctColor colour =  mPaletteI->GetColourFromPreloadedPaletteBuffer(
+  
+  RgbcctColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer2(
     palette_id,
-    (uint8_t*)&palette_container_temp.pData[0],
+    &palette_container_temp.pData[0],
     _pixel_position,
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    flag_map_scaling, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    flag_wrap,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    flag_convert_pixel_index_to_get_exact_crgb_colour,   // added by me, to make my effects work with CRGBPalette16
-    brightness_scale //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-    // uint8_t* discrete_colours_in_palette //ie length of palette as optional return
+    flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    flag_crgb_exact_colour
   );
 
   return colour;
@@ -4568,7 +4415,10 @@ JBI->Start();
 
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
     uint8_t seg_i = 0;
-    JBI->Array_Start("CRGB16Palette16");
+
+    JBI->Add("PaletteSize", mPaletteI->GetColoursInCRGB16Palette(SEGMENT.palette.id) );
+    JBI->Array_Start("CRGB16Palette16");   
+
     for(uint8_t elem_i=0;elem_i<16;elem_i++)
     {
       JBI->Array_Start();
@@ -4786,7 +4636,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
 {
 
   JBI->Start();
-  JBI->Add("size", mPaletteI->palettelist.size());
+  JBI->Add("size", mPaletteI->static_palettes.size());
 
 
     char lineBuffer[100] = {0};
@@ -4797,7 +4647,7 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, b
 
     uint16_t i = 0;
 
-    for(auto& pal: mPaletteI->palettelist)
+    for(auto& pal: mPaletteI->static_palettes)
     {
       // mPalette::PALETTE pal = mPaletteI->palettelist[i];
       JBI->Object_Start();

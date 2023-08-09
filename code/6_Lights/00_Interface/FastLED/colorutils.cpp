@@ -467,14 +467,18 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
     
     if( blend ) {
         
+        /**
+         * @brief Get the next colour to blend into
+         * 
+         */
         if( hi4 == 15 ) {
-            entry = &(pal[0]);
+            entry = &(pal[0]);  // wrap to start
         } else {
-            entry++;
+            entry++;   // next index
         }
         
-        uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 255 - f2;
+        uint8_t f2 = lo4 << 4; // distance from current
+        uint8_t f1 = 255 - f2; // distance from next
         
         //    rgb1.nscale8(f1);
         uint8_t red2   = entry->red;

@@ -4,6 +4,18 @@
 
 #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
 
+
+/**
+ * @brief 
+ * 
+ * Palette options
+ * 
+ * * Default: If gradient, span it, if individual then band it
+ * * Optional: Force gradient - any palette with be made into a gradient
+ * * Optional: Force banding, OR, does this depend on the effect? or, should default just be assumed and "force_discrete" only happens on special effects? Most likely!
+ * 
+ */
+
 StaticJsonDocument<JSON_BUFFER_SIZE> doc;
 
 
@@ -2286,19 +2298,20 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
   uint8_t encoded_gradient = 0;
 
-/**
- * @brief 
- * Start by sending the current palette loaded
- */
+  /**
+   * @brief 
+   * Start by sending the current palette loaded
+   */
 
   for (int palette_id = start; palette_id < end; palette_id++) 
   {
         
-    bool banded_gradient = false;
+    bool palette_display_as_banded_gradient = false;
 
     ALOG_INF(PSTR("i=%d|p%d|m%d"),palette_id,page,maxPage);
 
     LoadPalette(palette_id); // Assume segment 1 exists, and use it to load all palettes. Effect should reset to active palette in main loop. Or here, have it then flip back. Though this may cause flickering midanimation. Animation may also need paused on esp32.
+    
     uint16_t colours_in_palette = GetNumberOfColoursInPalette(palette_id);
    
     ALOG_INF(PSTR("colours_in_palette=%d"),colours_in_palette);
@@ -2315,7 +2328,8 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
      * 
      */
     if(
-      (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID)
+      (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID) && 
+      (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID)
     ){ 
 
       uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;
@@ -2329,8 +2343,8 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
       // Count entries
       uint16_t count = 0;
       do {
-          u = *(ent + count);
-          count++;
+        u = *(ent + count);
+        count++;
       } while ( u.index != 255);
 
       ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
@@ -2350,7 +2364,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         u = *ent;
       }
       
-      banded_gradient = false;
+      palette_display_as_banded_gradient = false;
 
     }
     else
@@ -2359,12 +2373,12 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
       
       for (int j = 0; j < colours_in_palette; j++) 
       {
+        
+        palette_display_as_banded_gradient = false;
 
         encoded_gradient = 0;
         
         RgbcctColor color =    RgbcctColor(0);
-      
-        
 
         JsonArray colors =  curPalette_obj.createNestedArray();
 
@@ -2384,13 +2398,26 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
             case mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_05__ID: colors.add("c5"); break;
           }
          
-        }else{
-            
-          color = mPaletteI->GetColourFromPreloadedPaletteBuffer(
-              palette_id, segments[getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
-              j, &encoded_gradient,
-              false, false, true
-            );
+        }else
+        if(
+          (palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id <= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
+        ){
+
+          colors.add("r"); 
+          colors.add("r"); 
+          colors.add("r"); 
+          colors.add("r"); 
+         
+        }
+        else{
+
+          // Load temporary palette
+          color = GetColourFromUnloadedPalette2(
+            palette_id,
+            j,
+            PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON,
+            &encoded_gradient
+          );
           // Serial.println(encoded_gradient);
 
           /**
@@ -2412,6 +2439,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
             // #else
             colors.add(encoded_gradient); // when palette has gradient index value, it should be used instead of this
             // #endif
+
+            
+            palette_display_as_banded_gradient = false; 
                       
 
           }
@@ -2436,7 +2466,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
               colors.add(1);
             }
 
-            banded_gradient = true;                    
+            palette_display_as_banded_gradient = true;                    
 
           }
 
@@ -2449,74 +2479,61 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
       } //end CSL colours
 
             
-        // ALOG_INF(PSTR("palette_id %d"), palette_id);
-      /**************************************************************
-       * 
-       * PALETTELIST_FIXED__IDS
-       * PALETTELIST_VARIABLE_HSBID__IDS
-       * PALETTELIST_VARIABLE_GENERIC__IDS
-       * 
-      ***************************************************************/
       if(
         ((palette_id >= mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_FIXED_LENGTH__ID))
-         ||
-        // ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength()))
       )
       {  
           
-        banded_gradient = true;
+        palette_display_as_banded_gradient = true; // Assume banded, unless gradient index is provided
 
-        mPalette::STATIC_PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+        uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID;
+
+        mPalette::STATIC_PALETTE *ptr = &mPaletteI->static_palettes[adjusted_id];
 
         if(ptr->encoding.index_scaled_to_segment)
         {
-          banded_gradient = false;
+          palette_display_as_banded_gradient = false;
         };
 
       }
 
-      // /**************************************************************
-      //  * 
-      //  * PALETTELIST_FIXED_HTML_COLOUR_CODES__IDS
-      //  * 
-      // ***************************************************************/
-      // if(
-      //   (palette_id >= mPalette::PALETTELIST_HTML_COLOUR__AliceBlue__ID) && (palette_id < mPalette::PALETTELIST_HTML_COLOUR__LENGTH__ID)
-      // ){  
-      //   banded_gradient = false;
-      // }
 
-      /**************************************************************
-       * 
-       * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
-       * 
-      ***************************************************************/
+      if(
+        ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
+      )
+      {  
+          
+        uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS;
+
+        palette_display_as_banded_gradient = true; // Assume banded, unless gradient index is provided
+
+        if(mPaletteI->custom_palettes[adjusted_id].encoding.index_scaled_to_segment)
+        {
+          palette_display_as_banded_gradient = false;
+        };
+
+      }
+
+
       if(
         (palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
       ){  
-        banded_gradient = false;
+        palette_display_as_banded_gradient = false;
       }
 
-      /**************************************************************
-       * 
-       * PALETTELIST_FIXED_CRGBPALETTE16__IDS
-       * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
-       * 
-      ***************************************************************/
+
       if(
-        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__CLOUD_COLOURS__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID)) ||
-        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-        
-        ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID)) ||
+        ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID))   ||
         ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID))
       ){  
-        banded_gradient = false;
+        palette_display_as_banded_gradient = false;
       }
 
-      if(banded_gradient)
+
+      if(palette_display_as_banded_gradient)
       {
-        curPalette_s_obj["bg"] = "L";//"B";
+        curPalette_s_obj["bg"] = "B";//"B";
       }else{
         curPalette_s_obj["bg"] = "L";
       }

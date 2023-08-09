@@ -74,9 +74,7 @@ public:
   // no explicit destructor (not needed)
 
   inline bool isValid(void) const   { return t->type != JSMN_INVALID; }
-  inline size_t size(void) const    { return t->size; }
-
-  
+  inline size_t size(void) const    { return t->size; }  
 
   inline bool isSingleToken(void) const { return (t->type >= JSMN_STRING); }
   inline bool isKey(void) const     { return (t->type == JSMN_KEY); }

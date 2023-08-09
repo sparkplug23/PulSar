@@ -59,8 +59,12 @@
 // DEfines to make it visually easy to read
 #define PALETTE_WRAP_ON   true
 #define PALETTE_WRAP_OFF  false
-#define PALETTE_SCALED_ON true
-#define PALETTE_SCALED_OFF false
+
+#define PALETTE_DISCRETE_ON   true
+#define PALETTE_DISCRETE_OFF  false
+
+#define PALETTE_SPAN_ON true
+#define PALETTE_SPAN_OFF false
 #define NO_ENCODED_VALUE nullptr
 
 
@@ -709,6 +713,9 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__STATIC_PALETTE__ID,
     #endif
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    EFFECTS_FUNCTION__SPANNED_PALETTE__ID,
+    #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     EFFECTS_FUNCTION__SLOW_GLOW__ID,
     #endif
@@ -750,9 +757,6 @@ class mAnimatorLight :
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__SPANNED_PALETTE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
     EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
@@ -1794,12 +1798,8 @@ typedef struct Segment_New {
      * @brief Stores at least 5 full RgbcctColours with all internal manipulations as needed
      * @NOTE: Replaces WLED 3 colour options
      **/
-    #ifdef ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
     #define RGBCCTCOLOURS_SIZE 5
-    RgbcctColor rgbcctcolors[5] = {RgbcctColor(255,0,0,0,0), RgbcctColor(0,255,0,0,0), RgbcctColor(0,0,255,0,0), RgbcctColor(255,0,255,0,0), RgbcctColor(255,255,0,0,0)};// = RgbcctColor();
-    #else
-    std::vector<RgbcctColor> rgbcctcolors; // memory leak as size/memcpy is used with new segments. This needs to be predefined, so maybe move back to array?
-    #endif
+    RgbcctColor rgbcctcolors[5] = {RgbcctColor(255,0,0,0,0), RgbcctColor(0,255,0,0,0), RgbcctColor(0,0,255,0,0), RgbcctColor(255,0,255,0,0), RgbcctColor(255,255,0,0,0)};
 
     void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w )
     {
@@ -2077,10 +2077,7 @@ typedef struct Segment_New {
        * */
       NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
 
-      bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
-      
-      mPaletteLoaded* palette_container = nullptr;
-      // mPaletteLoaded* palette_container = new mPaletteLoaded(0);
+      mPaletteLoaded* palette_container = new mPaletteLoaded();
 
       uint32_t tSaved_LastUpdated = millis();
       uint32_t tTick_maximum_call_ms = 10;
@@ -2089,23 +2086,9 @@ typedef struct Segment_New {
        * Using "index" inside animator as segment index
        * */
       ANIM_FUNCTION_SIGNATURE;
-      
+      bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
 
       uint32_t tSaved_AnimateRunTime = millis();
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // public:
 
     Segment_New(uint16_t sStart=0, uint16_t sStop=30) :
       offset(0),
@@ -2144,26 +2127,6 @@ typedef struct Segment_New {
       params_internal.aux2 = 0;
       params_internal.aux3 = 0;
       
-      // // Init
-      // palette_container = new mPaletteLoaded(0);//nullptr;
-
-      #ifdef ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-      palette_container = new mPaletteLoaded(); 
-      #endif // ENABLE_DEVFEATURE_INTERNALISE_PALETTE_CONTAINER_TO_SEGMENT_NEW
-
-      // DEBUG_LINE_HERE;
-
-      // if(RGBCCTCOLOURS_SIZE != 5) //minimum as default
-      // {
-      //   rgbcctcolors.clear();
-      //   rgbcctcolors.push_back(RgbcctColor(255,0,0,1,2));
-      //   rgbcctcolors.push_back(RgbcctColor(0,255,0,3,4));
-      //   rgbcctcolors.push_back(RgbcctColor(0,0,255,5,6));
-      //   rgbcctcolors.push_back(RgbcctColor(255,0,255,7,8));
-      //   rgbcctcolors.push_back(RgbcctColor(255,255,0,9,10));
-      // }
-      
-
     }
 
     Segment_New(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment_New(sStartX, sStopX) {
@@ -2307,21 +2270,43 @@ typedef struct Segment_New {
     uint8_t get_random_wheel_index(uint8_t pos);
     uint32_t color_wheel(uint8_t pos);
 
-    /**
-     * @brief Adding Palette Get functions inside segment so it can automatically load buffers and set current palette_id
-     **/
+
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
     #endif 
-    GetColourFromPalette(
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255 // 255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+    GetColourFromPalette2(
+      /**
+       * @brief _pixel_position
+       * ** [0-SEGLEN]
+       * ** [0-255]   
+       */
+      uint16_t pixel_position = 0,
+      /**
+       * @brief flag_position_scaled255
+       * ** [true] : pixel_position should be between 0-255
+       * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
+       */
+      bool     flag_position_scaled255 = true,
+      /**
+       * @brief flag_wrap_hard_edge
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      bool     flag_wrap_hard_edge = true,
+      /**
+       * @brief flag_crgb_exact_colour
+       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
+       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
+       */
+      bool     flag_crgb_exact_colour = false,
+      /**
+       * @brief encoded_value
+       * ** [uint32_t*] : encoded value from palette
+       */
+      uint8_t* encoded_value = nullptr // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     );
+
 
     // 2D matrix
     uint16_t virtualWidth(void)  const;
@@ -2393,17 +2378,16 @@ typedef struct Segment_New {
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
     #endif 
-    GetColourFromUnloadedPalette(
+    GetColourFromUnloadedPalette2(
       uint16_t palette_id,
       uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t mcol = 0, // will be phased out
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255//, //255(default): No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-      // uint8_t* discrete_colours_in_palette = nullptr
+      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false,
+      uint8_t* encoded_index = nullptr
     );
+
+    
 
 const char* GetPaletteNameByID(uint16_t palette_id, char* buffer = nullptr, uint8_t buflen = 0);
 int16_t GetPaletteIDbyName(char* buffer);

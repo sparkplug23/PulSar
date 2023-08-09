@@ -876,7 +876,6 @@ public:
 
         int8_t lastSlotUsed = -1;
 
-
         u = *ent;
         CRGB rgbstart( u.r, u.g, u.b);
 

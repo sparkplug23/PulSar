@@ -1,5 +1,8 @@
 #include "mWLEDWebUI.h"
 
+
+
+
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
 
 const char* mWLEDWebUI::PM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__CTR = D_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__CTR;
@@ -2931,7 +2934,7 @@ void serializePalettes(JsonObject root, int page)
           
         banded_gradient = true;
 
-        mPalette::PALETTE *ptr = &mPaletteI->palettelist[palette_id];
+        mPalette::PALETTE *ptr = &mPaletteI->static_palettes[palette_id];
 
         if(ptr->encoding.index_scaled_to_segment)
         {

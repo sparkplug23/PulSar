@@ -475,14 +475,14 @@ DEF_PGM_UINT8(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_04__DATA)
 };
   
 
-#define D_PALETTE_CUSTOM_PALETTE_DEFAULT_05_ENCODING                (PALETTE_ENCODING_TYPE_RGB_NO_INDEX)    
+#define D_PALETTE_CUSTOM_PALETTE_DEFAULT_05_ENCODING                (PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT)    
 DEF_PGM_UINT8(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_05__DATA)
 { // R,G,B
-  RGB_YELLOW
-  RGB_GREEN
-  RGB_PINK
-  RGB_BLUE
-  RGB_RED
+  0, RGB_YELLOW
+  50, RGB_GREEN
+  100, RGB_PINK
+  220, RGB_BLUE
+  255, RGB_RED
 };
 
 
@@ -495,6 +495,8 @@ DEF_PGM_UINT8(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_06__DATA)
   RGB_BLUE
   RGB_RED
   RGB_ORANGE
+  
+
 };
 
 
@@ -720,8 +722,8 @@ DEF_PGM_CTR  (PM_PALETTE_HOLLOWEEN_OGP_NAME_CTR)        D_PALETTE_HOLLOWEEN_OGP_
 DEF_PGM_UINT8(PM_PALETTE_HOLLOWEEN_OGP_RGB__DATA)
 {
   D_RGB_ORANGE_WARM_3
-  D_RGB_PURPLE_BLUE
   D_RGB_GREEN_FADED_ALT_1
+  D_RGB_PURPLE_BLUE
 };
 
 
@@ -979,8 +981,7 @@ DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_10_RGB__DATA)
 };
 
 /**
- * @brief Optimised for 2022 grouped 100 moving palette
- * I want to make a pastel red at the 90% height
+ * @brief from yelmag, make nice palette around these colours
  * 
  */
 #ifndef D_PALETTE_CHRISTMAS_11_NAME_CTR
@@ -992,6 +993,10 @@ DEF_PGM_UINT8(PM_PALETTE_CHRISTMAS_11_RGB__DATA)
 { // R,G,B               
   D_RGB_RED_FULL
   // Redo
+  
+  255,  0,255,
+  255, 55, 45,
+  255,255,  0
 };
 
 
@@ -2297,10 +2302,11 @@ DEF_PGM_CTR  (PM_PALETTE_SKY_GLOW_01_NAME_CTR)        D_PALETTE_SKY_GLOW_01_NAME
 DEF_PGM_UINT8(PM_PALETTE_SKY_GLOW_01_RGB__DATA)
 { //Index,R,G,B,WW,CW
   0,  255, 100, 0, 0, 0,
-  50, 255, 130, 0, 0, 0,
-  90, 255, 153, 0, 255, 255,
+  55, 255, 130, 0, 0, 0,
+  100, 255, 153, 0, 255, 255,
   127, 255, 255,  255, 255, 255,
-  170, 0, 0,  255, 0, 0,
+  154, 0, 0,  255, 0, 0,
+  200, 0, 0,  255, 0, 0,
   255, 0, 0,  255, 0, 0,
 };
 
@@ -3126,16 +3132,12 @@ const byte Blue_Cyan_Yellow_gp[] PROGMEM = {
   191,  42,255, 45,
   255, 255,255,  0};
 
-
-//Custom palette by Aircoookie
-
 const byte Orange_Teal_gp[] PROGMEM = {
     0,   0,150, 92,
    55,   0,150, 92,
   200, 255, 72,  0,
   255, 255, 72,  0};
 
-//Custom palette by Aircoookie
 
 const byte Tiamat_gp[] PROGMEM = {
     0,   1,  2, 14, //gc
@@ -3150,10 +3152,9 @@ const byte Tiamat_gp[] PROGMEM = {
   240, 193,213,253, //gc from 203,239,253
   255, 255,249,255};
   
-//Custom palette by Aircoookie
 
 const byte April_Night_gp[] PROGMEM = {
-    0,   1,  5, 45, //deep blue
+    0,   1,  5, 45, 
    10,   1,  5, 45,
    25,   5,169,175, //light blue
    40,   1,  5, 45,
@@ -3191,7 +3192,33 @@ const byte C9_gp[] PROGMEM = {
   130,   4, 96,  2, //green
   190,   4, 96,  2,
   195,   7,  7, 88, //blue
-  255,   7,  7, 88};
+  255,   7,  7, 88
+
+
+  //   0, 255,  0,  0,
+  // 100, 0,  255,  0,
+  // 255, 0,  0, 255
+
+  
+  //   0, 184,  4,  0, //red
+  //  60, 184,  40,  0,
+  //  65, 100, 100,  100, //amber
+  // // 125, 144, 44,  2,
+
+  // 100, 0,  255,  0,
+  // 255, 0,  0, 255
+
+
+  //   0, 255,  0,  0, //red
+  //  10, 0,  255,  10,
+  //  15, 0, 0,  255, //amber
+  // // 125, 144, 44,  2,
+
+  // 100, 0,  0,  100,
+  // 255, 0,  0, 255
+
+
+};
 
 const byte Sakura_gp[] PROGMEM = {
     0, 196, 19, 10,

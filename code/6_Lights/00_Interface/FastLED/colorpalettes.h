@@ -51,9 +51,6 @@ extern const TProgmemRGBPalette16 Test_p FL_PROGMEM;
 /// which looks wrong.
 extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM;
 
-
-DECLARE_GRADIENT_PALETTE( Rainbow_gp);
-
 FASTLED_NAMESPACE_END
 
 ///@}

@@ -27,15 +27,10 @@
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::EffectAnim__Solid_Colour()
 {
-  ALOG_INF( PSTR("EffectAnim__Solid_Colour"));
 
-  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type)*2) ){ return; }
+  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2) ){ return; } // Pixel_Width * Two_Channels
 
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF( PSTR("SEGMENT[%d].colour_type ===================================== %d"), getCurrSegmentId(), SEGMENT.colour_type);
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-
-  RgbcctColor desired_colour  = SEGMENT.GetColourFromPalette();
+  RgbcctColor desired_colour = SEGMENT.GetColourFromPalette2();
   // desired_colour.debug_print("before brightness");
   desired_colour = ApplyBrightnesstoRgbcctColour( desired_colour, SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
   // desired_colour.debug_print("after brightness");
@@ -60,7 +55,7 @@ static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = ",,,,,Time,Rate;!,!
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name           : Static Palette
- * @description:   : Shows pixels from palette, in order. Gradients can either be displayed over total length of segment, or repeated by X pixels
+ * @description:   : Palettes should be showed all as banded/descrete, regardless of type
  * 
  * @param intensity: None
  * @param speed    : None
@@ -72,12 +67,12 @@ static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = ",,,,,Time,Rate;!,!
 void mAnimatorLight::EffectAnim__Static_Palette()
 {
 
-  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength() )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
+  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
     
   RgbcctColor colour = RgbcctColor(0);
-  for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
+  for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {
-    colour = SEGMENT.GetColourFromPalette(pixel, nullptr, false, false, true); // Get all palettes exact values only (no gradient)      
+    colour = SEGMENT.GetColourFromPalette2(pixel, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
     colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
   }
@@ -89,6 +84,40 @@ void mAnimatorLight::EffectAnim__Static_Palette()
 }
 static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name           : Spanned Static Palette
+ * @description:   : Palettes should all span the full segment, regardless of type
+ * 
+ * @param intensity: None
+ * @param speed    : None
+ * @param rate     : None
+ * @param time     : Blend time on first/only update
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
+{
+
+  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGLEN )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
+    
+  RgbcctColor colour = RgbcctColor(0);
+  for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
+  {    
+    colour = SEGMENT.GetColourFromPalette2(pixel, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
+    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
+  }
+
+  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+
+  SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
+
+}
+static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -149,7 +178,7 @@ void mAnimatorLight::EffectAnim__Slow_Glow()
     
     desired_pixel = random(0, pixels_in_map);
   
-    colour = SEGMENT.GetColourFromPalette(desired_pixel);  
+    colour = SEGMENT.GetColourFromPalette2(desired_pixel, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_ON, NO_ENCODED_VALUE);
 
     #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
     ALOG_DBM(LOG_LEVEL_TEST, 
@@ -337,30 +366,25 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
     {
       redraw_all_pixels = false;
       do_fade = false;
-    *drawmode = *drawmode + 1;
-
+      *drawmode = *drawmode + 1;
     }else
     if(*drawmode>10) // Reset
     {
       *drawmode = 0;
       do_fade = false;
-    *drawmode = *drawmode + 1;
-
+      *drawmode = *drawmode + 1;
     }else{
       // do_fade = true;
       // draw_random_pixels = true;
 
-        if(*drawmode % 2)
-        {
-      do_fade = true;
-        }else{
-      draw_random_pixels = true;
+      if(*drawmode % 2)
+      {
+        do_fade = true;
+      }else{
+        draw_random_pixels = true;
+      }
 
-        }
-
-
-
-    *drawmode = *drawmode + 1;
+      *drawmode = *drawmode + 1;
 
     }
 
@@ -386,7 +410,7 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
           pixel_palette_counter = random(0, pixels_in_palette-1); // Randon colour from palette
         }
 
-        colour = SEGMENT.GetColourFromPalette(pixel_palette_counter);      
+        colour = SEGMENT.GetColourFromPalette2(pixel_palette_counter);      
         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
       }
@@ -428,7 +452,7 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
           random_pixel_to_update = map(random(0,SEGMENT.intensity()), 0,255, 0,SEGLEN); //repick a random pixel to change within segment
         }
 
-        colour = SEGMENT.GetColourFromPalette(pixel_palette_counter);      
+        colour = SEGMENT.GetColourFromPalette2(pixel_palette_counter);      
         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel_to_update, SEGMENT.colour_type, colour);
         do_fade = false ; // block fade on update cycle, since fade relies on getting from the commited neopixel bus
@@ -454,28 +478,6 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
     }
 
 
-
-
-      /////////////////////
-    // for(uint16_t p = SEGMENT.pixel_range.start;
-    //             p <= SEGMENT.pixel_range.stop;
-    //             p++
-    // ){
-
-    //   colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);  // redraw palette
-    //   colour_sec = GetColourFromUnloadedPalette(0);
-
-    //   colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
-
-    //   if(pixel_palette_counter++ >= pixels_in_palette-1)
-    //   {
-    //     pixel_palette_counter = 0;
-    //   }
-
-    //   SEGMENT.SetPixelColor(p, colour_out);
-
-    // }
-
     SEGMENT.params_internal.aux0 = s; 
     SEGMENT.params_internal.aux1 = s_target; 
     SEGMENT.step = fadeStep;
@@ -493,39 +495,6 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name           : Spanned Static Palette
- * @description:   : Shows pixels from palette, in order. Gradients can either be displayed over total length of segment, or repeated by X pixels
- * 
- * @param intensity: None
- * @param speed    : None
- * @param rate     : None
- * @param time     : Blend time on first/only update
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
-{
-
-  if (!SEGMENT.allocateData( GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength() )){ return; } // Pixel_Width * Two_Channels * Pixel_Count
-    
-  RgbcctColor colour = RgbcctColor(0);
-  for(uint16_t pixel = 0; pixel < SEGMENT.virtualLength(); pixel++)
-  {
-    colour = SEGMENT.GetColourFromPalette(pixel, NO_ENCODED_VALUE, PALETTE_SCALED_ON, PALETTE_WRAP_OFF);      
-    colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
-    SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
-  }
-
-  DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
-
-  SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
-
-}
-static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -563,7 +532,7 @@ void mAnimatorLight::EffectAnim__Candle_Multiple()
 {
   EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
 }
-static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = "Speed,Intensity,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 /**
  * @description:   : Flickers by multiple levels towards black
  **/
@@ -705,8 +674,10 @@ void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_p
      **/
     if(i > 0) 
     {
-      colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter);      
-      colour_sec = GetColourFromUnloadedPalette(flicker_palette_id);
+      colour_pri = SEGMENT.GetColourFromPalette2(pixel_palette_counter);    
+      // colour_pri = SEGMENT.GetColourFromPalette2(pixel_palette_counter, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+
+      colour_sec = GetColourFromUnloadedPalette2(flicker_palette_id);
       
       colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
@@ -733,8 +704,10 @@ void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_p
                  p++
       ){
 
-        colour_pri = SEGMENT.GetColourFromPalette(pixel_palette_counter); 
-        colour_sec = GetColourFromUnloadedPalette(flicker_palette_id);
+        colour_pri = SEGMENT.GetColourFromPalette2(pixel_palette_counter); 
+        // colour_pri = SEGMENT.GetColourFromPalette2(pixel_palette_counter, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+
+        colour_sec = GetColourFromUnloadedPalette2(flicker_palette_id);
 
         colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
 
@@ -772,6 +745,8 @@ void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_p
  * 
  * line 2583
  * 
+ * delete, replaced by spanned palette
+ * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
@@ -779,6 +754,7 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
 {
   uint16_t dataSize = GetSizeOfPixel(SEGMENT.colour_type) * 2 * SEGMENT.virtualLength();
 
+    ALOG_ERR( "delete, replaced by spanned palette" );
   if (!SEGMENT.allocateData(dataSize)){    
     ALOG_ERR( PM_JSON_MEMORY_INSUFFICIENT );
     SEGMENT.effect_id = EFFECTS_FUNCTION__SOLID_COLOUR__ID;
@@ -812,8 +788,11 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
         desired_index_upper = 0; //assume its the first and wrap back
       }
       
-      start_colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, grad_pair_index,   &start_pixel_position);
-      end_colour   = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_index_upper, &end_pixel_position);
+      // start_colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, grad_pair_index,   &start_pixel_position);      
+      start_colour = SEGMENT.GetColourFromPalette2(grad_pair_index, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, &start_pixel_position);      
+
+      // end_colour   = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, desired_index_upper, &end_pixel_position);
+      end_colour = SEGMENT.GetColourFromPalette2(desired_index_upper, PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, &end_pixel_position);
 
       // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "grad_pair_index %d|%d  %d|%d"),grad_pair_index,pixels_in_map, grad_pair_index,desired_index_upper);
       // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_NEO "%02d start_pixel_position %d"),grad_pair_index,start_pixel_position);
@@ -825,7 +804,7 @@ void mAnimatorLight::EffectAnim__Static_Gradient_Palette()
       uint16_t start_pixel = 0;
       uint16_t stop_pixel  = SEGLEN;
       
-      mPalette::STATIC_PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
+      mPalette::STATIC_PALETTE* ptr = &mPaletteI->static_palettes[SEGMENT.palette.id];
       
       if(ptr->encoding.index_scaled_to_segment)
       {
@@ -915,7 +894,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette_New()
         SEGMENT.SetPixelColor(pixel, colour, false);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
         #endif
 
       }
@@ -990,14 +969,15 @@ void mAnimatorLight::EffectAnim__Rotating_Palette()
       for (uint16_t pixel = 0; pixel < SEGLEN; pixel++)
       {
 
-        colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
+        // colour = mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pixel);
+        colour = SEGMENT.GetColourFromPalette2(pixel);
         
         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         
         SEGMENT.SetPixelColor(pixel, colour, false);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+        ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
         #endif
 
       }
@@ -1263,7 +1243,7 @@ void mAnimatorLight::EffectAnim__Palette_Colour_Fade_Saturation()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
     #endif
 
   }
@@ -1429,7 +1409,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
     #endif
 
   }
@@ -1465,7 +1445,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
     #endif
 
   }
@@ -1542,7 +1522,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
     #endif
 
   }
@@ -1578,7 +1558,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Decaying_Palette()
     SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), random_pixel, SEGMENT.colour_type, colour);
 
     #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr), colour.R );
+    ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
     #endif
 
   }
@@ -1759,7 +1739,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   /**
 //    * Get total pixels in palette
 //    * */
-//   mPalette::PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
+//   mPalette::PALETTE* ptr = &mPaletteI->static_palettes[SEGMENT.palette.id];
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(palette_p);
 //   // AddLog(LOG_LEVEL_INFO,PSTR("pixels_max=%d"),pixels_max);
 
@@ -2001,7 +1981,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   }
 
 //   SEGMENT.flags.brightness_applied_during_colour_generation = false;
-//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 //   SEGMENT.flags.fForceUpdate = true;
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
@@ -2086,7 +2066,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   }
 
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
-//   uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+//   uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr);
 //   uint8_t desired_pixel;
   
 //   // 25 to 100%
@@ -2094,7 +2074,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__SunPositions_Elevation_On
 //   end = pCONT_iLight->settings.light_size_count;
 //   for(ledout.index=start;ledout.index<end;ledout.index++){ 
 //     desired_pixel = random(0,pixels-1);
-//     colour_random = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel);
+//     colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);
 //     if((ledout.index%3)==0){
 //       colour_random_adjusted = RgbTypeColor(colour_random);
 //       colour_random_adjusted.B = pCONT_iLight->BrtN2F(map(pCONT_iLight->getBriRGB(),0,255,0,100));
@@ -2286,7 +2266,7 @@ void mAnimatorLight::LCDDisplay_showDigit(byte digit, byte color, byte pos) {
 // RgbcctColor mAnimatorLight::ColorFromPaletteLCD(uint16_t palette_id, uint8_t desired_index, bool apply_global_brightness)
 // {
   
-//   mPalette::PALETTE* ptr = &mPaletteI->palettelist[SEGMENT.palette.id];
+//   mPalette::PALETTE* ptr = &mPaletteI->static_palettes[SEGMENT.palette.id];
 
 //   uint8_t pixels_max = GetNumberOfColoursInPalette(ptr);
 
@@ -3003,7 +2983,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 
 //         // Go through strip, randomly change some to coloured or black
 //         mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
-//         uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+//         uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr);
 //         RgbTypeColor colour_random = RgbTypeColor(0);
 
 //         uint16_t random_pixel_index = 0;
@@ -3043,7 +3023,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //             // }else{
               
 //               uint8_t desired_pixel = random(0,4);//pixels-1);
-//               colour_random = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel);  
+//               colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);  
 
 // //if already on, dont change the colour
 //             if(!animation_colours[random_pixel_index].DesiredColour.CalculateBrightness()){// if off, allow new colour 
@@ -3233,7 +3213,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 
 //         // Go through strip, randomly change some to coloured or black
 //         mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
-//         uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr);
+//         uint8_t pixels = GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr);
 //         RgbTypeColor colour_random = RgbTypeColor(0);
 
 //         uint16_t random_pixel_index = 0;
@@ -3261,7 +3241,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //               animation_colours[random_pixel_index].DesiredColour = RgbColor(0,0,0);
 //             }else{
 //               uint8_t desired_pixel = random(0,pixels-1);
-//               colour_random = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel);  
+//               colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);  
 //               // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
 //               //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,pCONT_iLight->getBriRGB());
 //               // }
@@ -3874,7 +3854,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //         //       animation_colours[random_pixel_index].DesiredColour = RgbColor(0,255,0);
 //         //     }else{
 //         //       uint8_t desired_pixel = random(0,pixels-1);
-//         //       colour_random = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel);  
+//         //       colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);  
 //         //       // if(pCONT_iLight->animation.flags.brightness_applied_during_colour_generation){
 //         //       //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,pCONT_iLight->getBriRGB());
 //         //       // }
@@ -4587,7 +4567,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //         //       animation_colours[random_pixel_index].DesiredColour = RgbColor(0,255,0);
 //         //     }else{
 //         //       uint8_t desired_pixel = random(0,pixels-1);
-//         //       colour_random = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel);  
+//         //       colour_random = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel);  
 //         //       //   colour_random = ApplyBrightnesstoDesiredColour(colour_random,pCONT_iLight->getBriRGB());
 //         //       animation_colours[random_pixel_index].DesiredColour =  colour_random;//RgbColor(0,0,255);//
 //         //    }
@@ -4601,7 +4581,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
-//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
@@ -4945,7 +4925,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   mPaletteI->SetPaletteListPtrFromID(pCONT_iLight->animation.palette.id);
 //   // Set up colours
 //   // Brightness is generated internally, and rgbcct solid palettes are output values
-//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
@@ -5424,7 +5404,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
   
 //   pCONT_iLight->animation.flags.fForceUpdate = true;
 
-//   animation_colours_rgbcct.DesiredColour  = c_blended;//mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+//   animation_colours_rgbcct.DesiredColour  = c_blended;//mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
     
@@ -5872,7 +5852,7 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //   }
 
 //   pCONT_iLight->animation.flags.brightness_applied_during_colour_generation = false;
-//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr);
+//   animation_colours_rgbcct.DesiredColour  = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr);
 //   pCONT_iLight->animation.flags.fForceUpdate = true;
 
 //   // AddLog(LOG_LEVEL_TEST, PSTR("DesiredColour1=%d,%d,%d,%d,%d"), animation_colours_rgbcct.DesiredColour.R,animation_colours_rgbcct.DesiredColour.G,animation_colours_rgbcct.DesiredColour.B,animation_colours_rgbcct.DesiredColour.WC,animation_colours_rgbcct.DesiredColour.WW);
@@ -6053,9 +6033,9 @@ void mAnimatorLight::SubTask_Flasher_Animate_LCD_Display_Show_String_01()
 //         for (uint16_t ii = 0; ii < random_amount; ii++){
 //           flashed_brightness = random(0,shared_flasher_parameters.alternate_brightness_max);        
 //           // For random, desired pixel from map will also be random
-//           desired_pixel = random(0,GetNumberOfColoursInPalette(mPaletteI->palettelist.ptr));
+//           desired_pixel = random(0,GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr));
 //           // get colour from palette
-//           flash_colour = mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr,desired_pixel,&pixel_position);
+//           flash_colour = mPaletteI->GetColourFromPalette(mPaletteI->static_palettes.ptr,desired_pixel,&pixel_position);
 //           flash_colour = ApplyBrightnesstoRgbcctColour(flash_colour,flashed_brightness);
 //           SEGMENT.SetPixelColor(
 //             random(0,pCONT_iLight->settings.light_size_count), 
@@ -6315,19 +6295,24 @@ uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
 
 #ifdef ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
 
-  if (SEGMENT.palette.id){
-    return RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pos, nullptr, false, true, 0));
-  }
+  if (SEGMENT.palette.id){ // when default, so it skips this, causes brightness error
+    return RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, pos, nullptr, false, true));
+  }else
+  {
+
+    ALOG_ERR(PSTR("Likely brightness error"));
   
-  pos = 255 - pos;
-  if(pos < 85) {
-    return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
-  } else if(pos < 170) {
-    pos -= 85;
-    return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
-  } else {
-    pos -= 170;
-    return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
+    pos = 255 - pos;
+    if(pos < 85) {
+      return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
+    } else if(pos < 170) {
+      pos -= 85;
+      return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
+    } else {
+      pos -= 170;
+      return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
+    }
+
   }
 
 
@@ -6702,7 +6687,8 @@ void mAnimatorLight::EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t 
 
     uint32_t color = color1;
     if(index > width*2/3-1){
-      color = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1)); // Functionally the same
+      // color = RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 1)); // Functionally the same
+      color = RgbcctColor::GetU32Colour(SEGMENT.GetColourFromPalette2(i, PALETTE_SPAN_ON, PALETTE_WRAP_ON));      
     }
     else if(index > width/3-1) color = color2;
 
@@ -6763,26 +6749,16 @@ void mAnimatorLight::EffectAnim__Chase_Random()
   return;
 }
 static const char PM_EFFECT_CONFIG__CHASE_RANDOM[] PROGMEM = "!,Width;!,,!;!";
-
-/****************************************************************************************************************************
- **************************************************************************************************************************** 
- * Breathe/Fade/Pulse
- ****************************************************************************************************************************
- ****************************************************************************************************************************/
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name : Exploding fireworks effect
  * @note : Converted from WLED Effect
-/*
- * Does the "standby-breathing" of well known i-Devices.
- *
-void mAnimatorLight::mode_breath(void) {
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-
-
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 void mAnimatorLight::EffectAnim__Breath()
 {
   uint16_t var = 0;
@@ -6796,7 +6772,7 @@ void mAnimatorLight::EffectAnim__Breath()
   uint8_t lum = 30 + var;
   for(uint16_t i = 0; i < SEGLEN; i++) 
   {
-    SEGMENT.SetPixelColor(i, ColourBlend(SEGCOLOR_U32(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)), lum));
+    SEGMENT.SetPixelColor(i, ColourBlend(SEGCOLOR_RGBCCT(1), SEGMENT.GetColourFromPalette2(i, PALETTE_SPAN_ON, PALETTE_WRAP_ON), lum) );
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -6804,6 +6780,7 @@ void mAnimatorLight::EffectAnim__Breath()
   
 }
 static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM = "!;!,!;!;01";
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6812,6 +6789,7 @@ static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM = "!;!,!;!;01";
  * @note : 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 void mAnimatorLight::EffectAnim__Fade()
 {
   uint16_t counter = (millis() * ((SEGMENT.speed() >> 3) +10));
@@ -6819,7 +6797,10 @@ void mAnimatorLight::EffectAnim__Fade()
 
   for(uint16_t i = 0; i < SEGLEN; i++)
   {
-    SEGMENT.SetPixelColor(i, ColourBlend(SEGCOLOR_U32(1), RgbcctColor::GetU32Colour(mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, i, nullptr, true, PALETTE_SOLID_WRAP, 0)), lum));
+    SEGMENT.SetPixelColor(
+      i, 
+      ColourBlend(SEGCOLOR_RGBCCT(1), SEGMENT.GetColourFromPalette2(i, PALETTE_SPAN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE), lum)
+    );
   }
 
   SEGMENT.transition.rate_ms = FRAMETIME_MS;
@@ -6828,6 +6809,7 @@ void mAnimatorLight::EffectAnim__Fade()
 }
 static const char PM_EFFECT_CONFIG__FADE[] PROGMEM = "!;!,!;!;01";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 /********************************************************************************************************************************************************************************************************************
@@ -6843,12 +6825,14 @@ static const char PM_EFFECT_CONFIG__FADE[] PROGMEM = "!;!,!;!;01";
 void mAnimatorLight::EffectAnim__Fireworks()
 {
   
-  fade_out(0, SET_BRIGHTNESS);
-
   if (SEGMENT.call == 0) {
+    SEGMENT.fill(SEGCOLOR_U32(1));
     SEGMENT.params_internal.aux0 = UINT16_MAX;
     SEGMENT.params_internal.aux1 = UINT16_MAX;
   }
+
+  SEGMENT.fade_out(128);
+
   bool valid1 = (SEGMENT.params_internal.aux0 < SEGLEN);
   bool valid2 = (SEGMENT.params_internal.aux1 < SEGLEN);
   RgbcctColor sv1 = 0, sv2 = 0;
@@ -6862,19 +6846,14 @@ void mAnimatorLight::EffectAnim__Fireworks()
    * @brief This actually only runs when a new colour is made, 
    * and its index is stored so the next animation call will propogate it out
    **/
+  RgbcctColor colour;
   for(uint16_t i=0; i<MAX(1, SEGLEN/20); i++) 
   { 
     if(random8(129 - (SEGMENT.intensity() >> 1)) == 0) 
     {
       uint16_t index = random(SEGLEN);
-      // AddLog(LOG_LEVEL_TEST, "index=%d\t%d",i,index);
-      #ifdef ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES
-      mPaletteI->SetPaletteListPtrFromID(SEGMENT.palette.id);
-      uint8_t pixels_in_palette = GetNumberOfColoursInPalette();
-      SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPalette(mPaletteI->palettelist.ptr, random(0,pixels_in_palette-1)), true);
-      #else // wled way for now
-      SEGMENT.SetPixelColor(index, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, random8(), nullptr, false, false), SET_BRIGHTNESS);
-      #endif // ENABLE_DEVFEATURE_FIREWORK_EFFECT_GETS_COLOUR_FROM_MY_PALETTES
+      colour = SEGMENT.GetColourFromPalette2(random8(), PALETTE_SPAN_OFF, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+      SEGMENT.SetPixelColor(index, colour, SET_BRIGHTNESS);
       SEGMENT.params_internal.aux1 = SEGMENT.params_internal.aux0;
       SEGMENT.params_internal.aux0 = index;
     }
@@ -8205,10 +8184,7 @@ static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM = "!,Fade;!,!;!;;ix=16";
  *******************************************************************************************************************************************************************************************************************
  * @name : Name
  * @note : Converted from WLED Effects
- * 
-//American Police Light with all LEDs Red and Blue 
-// void mAnimatorLight::police_base(uint32_t color1, uint32_t color2, bool all)
-// {
+ * //American Police Light with all LEDs Red and Blue 
 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
@@ -8260,9 +8236,7 @@ void mAnimatorLight::EffectAnim__Base_Police(uint32_t color1, uint32_t color2, b
 
 //American Police Light with all LEDs Red and Blue 
 void mAnimatorLight::EffectAnim__Polce_All()
-{
-  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
-  
+{  
   return EffectAnim__Base_Police(RED, BLUE, true);
 }
 static const char PM_EFFECT_CONFIG__POLICE_ALL[] PROGMEM = "!,Width;,Bg;0";
@@ -8272,8 +8246,6 @@ static const char PM_EFFECT_CONFIG__POLICE_ALL[] PROGMEM = "!,Width;,Bg;0";
 void mAnimatorLight::EffectAnim__Police()
 {
   fill(SEGCOLOR_U32(1));
-
-  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
   return EffectAnim__Base_Police(RED, BLUE, false);
 }
 static const char PM_EFFECT_CONFIG__POLICE[] PROGMEM = "!,Width;,Bg;0";
@@ -8281,9 +8253,7 @@ static const char PM_EFFECT_CONFIG__POLICE[] PROGMEM = "!,Width;,Bg;0";
 
 //Police All with custom colors
 void mAnimatorLight::EffectAnim__Two_Areas()
-{
-  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
-  
+{  
   return EffectAnim__Base_Police(SEGCOLOR_U32(0), SEGCOLOR_U32(1), true);
 }
 static const char PM_EFFECT_CONFIG__TWO_AREAS[] PROGMEM = "!,Dot size,,,,,,,Overlay;1,2,Bg;!";
@@ -8813,14 +8783,9 @@ static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM = "Colorwaves@!,Hue;!;!
  *******************************************************************************************************************************************************************************************************************
  * @name : Name
  * @note : Converted from WLED Effects
- * 
-// colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-// void mAnimatorLight::mode_bpm()
-// {
-
+ * colored stripes pulsing at a defined Beats-Per-Minute (BPM)
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-
 void mAnimatorLight::EffectAnim__BPM()
 {
 
@@ -8842,14 +8807,9 @@ static const char PM_EFFECT_CONFIG__BPM[] PROGMEM = "!;!;!;;sx=64";
  *******************************************************************************************************************************************************************************************************************
  * @name : Name
  * @note : Converted from WLED Effects
- * 
-//based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
-// void mAnimatorLight::mode_colortwinkle()
-// {
-
+ * based on https://gist.github.com/kriegsman/5408ecd397744ba0393e
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-
 void mAnimatorLight::EffectAnim__Twinkle_Colour()
 {
   uint16_t dataSize = (SEGLEN+7) >> 3; //1 bit per LED
@@ -9320,13 +9280,15 @@ uint16_t mAnimatorLight::mode_palette()
   }
   
   bool noWrap = (paletteBlend == 2 || (paletteBlend == 0 && SEGMENT.speed() == 0));
+  RgbcctColor colour;
   for (uint16_t i = 0; i < SEGLEN; i++)
   {
     uint8_t colorIndex = (i * 255 / SEGLEN) - counter;
     
-    if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
+    colour = SEGMENT.GetColourFromPalette2(colorIndex, PALETTE_SPAN_OFF, PALETTE_WRAP_ON);
+    colour = ApplyBrightnesstoRgbcctColour( colour, SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
     
-    SEGMENT.SetPixelColor(i, mPaletteI->GetColourFromPreloadedPalette(SEGMENT.palette.id, colorIndex, nullptr, false, true, 255));
+    SEGMENT.SetPixelColor(i, colour);
   }
   return FRAMETIME_MS;
   SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
@@ -12294,6 +12256,7 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR
 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 // const uint32_t MUSIC_TIMING[] = {
 
 // 0,
@@ -12939,6 +12902,9 @@ const uint32_t MUSIC_TIMING[] = {
 
 };
 
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name           : Slow Glow 
@@ -13131,6 +13097,9 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__STATIC_PALETTE__ID,                &mAnimatorLight::EffectAnim__Static_Palette,                  PM_EFFECTS_FUNCTION__STATIC_PALETTE__NAME_CTR,                                 PM_EFFECT_CONFIG__STATIC_PALETTE);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  addEffect3(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,  PM_EFFECTS_FUNCTION__SPANNED_PALETTE__NAME_CTR,                           PM_EFFECT_CONFIG__SPANNED_PALETTE);
+  #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR,                                      PM_EFFECT_CONFIG__SLOW_GLOW);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -13157,9 +13126,6 @@ void mAnimatorLight::LoadEffects()
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,                           &mAnimatorLight::EffectAnim__Stepping_Palette,                      PM_EFFECTS_FUNCTION__STEPPING_PALETTE__NAME_CTR,                                  PM_EFFECT_CONFIG__STEPPING_PALETTE);
   #endif 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__SPANNED_PALETTE__ID,                            &mAnimatorLight::EffectAnim__Spanned_Static_Palette,                PM_EFFECTS_FUNCTION__SPANNED_PALETTE__NAME_CTR,                                 PM_EFFECT_CONFIG__SPANNED_PALETTE);
-  #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect3(EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID,             &mAnimatorLight::EffectAnim__Palette_Colour_Fade_Saturation,        PM_EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__NAME_CTR,                             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE);
   #endif 
@@ -13192,7 +13158,7 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR,              PM_EFFECT_CONFIG__STATIC_PATTERN);
   addEffect3(EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR,          PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
   #endif
-  addEffect3(EFFECTS_FUNCTION__WLED_SPOTS__ID,                 &mAnimatorLight::EffectAnim__Spots,                                PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
+  addEffect3(EFFECTS_FUNCTION__WLED_SPOTS__ID,                &mAnimatorLight::EffectAnim__Spots,                                 PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR,                     PM_EFFECT_CONFIG__PERCENT);
   #endif
@@ -13251,10 +13217,10 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID,        &mAnimatorLight::EffectAnim__Running_Lights,     PM_EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_LIGHTS);
   addEffect3(EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID,         &mAnimatorLight::EffectAnim__Rainbow_Cycle,      PM_EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__NAME_CTR,              PM_EFFECT_CONFIG__RAINBOW_CYCLE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Chase
    **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID,           &mAnimatorLight::EffectAnim__Chase_Colour,          PM_EFFECTS_FUNCTION__WLED_CHASE_COLOR__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_COLOR);
   addEffect3(EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID,          &mAnimatorLight::EffectAnim__Chase_Random,          PM_EFFECTS_FUNCTION__WLED_CHASE_RANDOM__NAME_CTR,            PM_EFFECT_CONFIG__CHASE_RANDOM);
   addEffect3(EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID,         &mAnimatorLight::EffectAnim__Chase_Rainbow,         PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__CHASE_RAINBOW);
@@ -13265,10 +13231,10 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID, &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow, PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE_RAINBOW__NAME_CTR,   PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW);
   addEffect3(EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID,        &mAnimatorLight::EffectAnim__Chase_TriColour,       PM_EFFECTS_FUNCTION__WLED_TRICOLOR_CHASE__NAME_CTR,          PM_EFFECT_CONFIG__TRICOLOR_CHASE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    *  Breathe/Fade/Pulse
    **/    
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_BREATH__ID,                &mAnimatorLight::EffectAnim__Breath,                PM_EFFECTS_FUNCTION__WLED_BREATH__NAME_CTR,                  PM_EFFECT_CONFIG__BREATH);
   addEffect3(EFFECTS_FUNCTION__WLED_FADE__ID,                  &mAnimatorLight::EffectAnim__Fade,                  PM_EFFECTS_FUNCTION__WLED_FADE__NAME_CTR,                    PM_EFFECT_CONFIG__FADE);
   addEffect3(EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,         &mAnimatorLight::EffectAnim__Fade_TriColour,        PM_EFFECTS_FUNCTION__WLED_TRICOLOR_FADE__NAME_CTR,           PM_EFFECT_CONFIG__TRICOLOR_FADE);
@@ -13295,10 +13261,10 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_COLORFUL__ID,        &mAnimatorLight::EffectAnim__ColourFul,                   PM_EFFECTS_FUNCTION__WLED_COLORFUL__NAME_CTR,                PM_EFFECT_CONFIG__COLORFUL);
   addEffect3(EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,   &mAnimatorLight::EffectAnim__Traffic_Light,               PM_EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__NAME_CTR,           PM_EFFECT_CONFIG__TRAFFIC_LIGHT);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Blink/Strobe
    **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_BLINK__ID,           &mAnimatorLight::EffectAnim__Blink,                       PM_EFFECTS_FUNCTION__WLED_BLINK__NAME_CTR,                   PM_EFFECT_CONFIG__BLINK);
   addEffect3(EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,   &mAnimatorLight::EffectAnim__Blink_Rainbow,               PM_EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__BLINK_RAINBOW);
   addEffect3(EFFECTS_FUNCTION__WLED_STROBE__ID,          &mAnimatorLight::EffectAnim__Strobe,                      PM_EFFECTS_FUNCTION__WLED_STROBE__NAME_CTR,                  PM_EFFECT_CONFIG__STROBE);
@@ -13310,10 +13276,10 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_RAILWAY__ID,         &mAnimatorLight::EffectAnim__Railway,                     PM_EFFECTS_FUNCTION__WLED_RAILWAY__NAME_CTR,                 PM_EFFECT_CONFIG__RAILWAY);
   addEffect3(EFFECTS_FUNCTION__WLED_HEARTBEAT__ID,       &mAnimatorLight::EffectAnim__Heartbeat,                   PM_EFFECTS_FUNCTION__WLED_HEARTBEAT__NAME_CTR,               PM_EFFECT_CONFIG__HEARTBEAT);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Noise
    **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_FILLNOISE8__ID,      &mAnimatorLight::EffectAnim__FillNoise8,                  PM_EFFECTS_FUNCTION__WLED_FILLNOISE8__NAME_CTR,              PM_EFFECT_CONFIG__FILLNOISE8);
   addEffect3(EFFECTS_FUNCTION__WLED_NOISE16_1__ID,       &mAnimatorLight::EffectAnim__Noise16_1,                   PM_EFFECTS_FUNCTION__WLED_NOISE16_1__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_1);
   addEffect3(EFFECTS_FUNCTION__WLED_NOISE16_2__ID,       &mAnimatorLight::EffectAnim__Noise16_2,                   PM_EFFECTS_FUNCTION__WLED_NOISE16_2__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_2);
@@ -13323,10 +13289,10 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID,     &mAnimatorLight::EffectAnim__PhasedNoise,                 PM_EFFECTS_FUNCTION__WLED_PHASEDNOISE__NAME_CTR,             PM_EFFECT_CONFIG__PHASEDNOISE);
   addEffect3(EFFECTS_FUNCTION__WLED_PHASED__ID,          &mAnimatorLight::EffectAnim__Phased,                      PM_EFFECTS_FUNCTION__WLED_PHASED__NAME_CTR,                  PM_EFFECT_CONFIG__PHASED);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Scan
    **/
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_SCAN__ID,                &mAnimatorLight::EffectAnim__Scan,                    PM_EFFECTS_FUNCTION__WLED_SCAN__NAME_CTR,                    PM_EFFECT_CONFIG__SCAN);
   addEffect3(EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID,           &mAnimatorLight::EffectAnim__Scan_Dual,               PM_EFFECTS_FUNCTION__WLED_DUAL_SCAN__NAME_CTR,               PM_EFFECT_CONFIG__DUAL_SCAN);
   addEffect3(EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID,      &mAnimatorLight::EffectAnim__Larson_Scanner,          PM_EFFECTS_FUNCTION__WLED_LARSON_SCANNER__NAME_CTR,          PM_EFFECT_CONFIG__LARSON_SCANNER);
@@ -13469,16 +13435,3 @@ void mAnimatorLight::LoadEffects()
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 }
 
-
-
-// TEMPLATE
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name : Fireworks Starburst
- * @note : Converted from WLED Effects
- * 
- * @param aux0 
- * @param aux1 
- * @param aux2 
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/

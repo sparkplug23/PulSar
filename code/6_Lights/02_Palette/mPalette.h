@@ -391,14 +391,14 @@ class mPalette
       uint8_t id;
       // Pointer to name
       const char* friendly_name_ctr;
-      // colour bytes
+      // colour bytes 
       const uint8_t* data; // pointer to progmem
       // Active pixels
       uint8_t  data_length; // total bytes in palette (includes index information)
       // Contains information on formatting of data buffer
       PALETTE_ENCODING_DATA encoding;
     };
-    std::vector<STATIC_PALETTE> palettelist;
+    std::vector<STATIC_PALETTE> static_palettes;
 
     struct CUSTOM_PALETTE{
       std::vector<uint8_t> data;
@@ -446,32 +446,30 @@ class mPalette
       uint8_t  brightness_scale = 255 // 255 No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
     );
 
+    RgbcctColor 
+    #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+    IRAM_ATTR 
+    #endif 
+    GetColourFromPreloadedPaletteBuffer2(
+      uint16_t palette_id = 0,
+      uint8_t* palette_elements = nullptr,
+      uint16_t desired_index_from_palette = 0,
+      uint8_t* encoded_index = nullptr,
+      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false
+    );
+
 
     RgbcctColor SubGet_Encoded_PaletteList_Colour(
       uint16_t palette_id = 0,
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255 // 255 No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      uint8_t* encoded_index = nullptr
     );
 
 
     RgbcctColor SubGet_Encoded_UserPalette_Colour(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr,
-      bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255 // 255 No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
-    );
-
-
-    RgbcctColor SubGet_Encoded_PaletteList_Colour_WithoutScaling(
       uint16_t palette_id = 0,
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
@@ -485,9 +483,8 @@ class mPalette
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,
       bool     flag_map_scaling = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_convert_pixel_index_to_get_exact_crgb_colour = false,   // added by me, to make my effects work with CRGBPalette16
-      uint8_t  brightness_scale = 255 // 255 No scaling, 0-255 scales the brightness of returned colour (remember all colours are saved in full 255 scale)
+      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      bool     flag_crgb_exact_colour = false
     );
     
 };
