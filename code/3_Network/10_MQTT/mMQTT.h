@@ -222,11 +222,19 @@ class MQTTConnection
 
     MQTTConnection(Client* client_in, char* url, uint16_t _port, ConnectionClient_t _type)
     {
+      
+      Serial.printf("MQTT::CreateConnection \n\r"); Serial.flush();
+
       network_client = client_in;
+      Serial.printf("MQTT::CreateConnection \n\r"); Serial.flush();
       SetPubSubClient(client_in);
+      Serial.printf("MQTT::CreateConnection \n\r"); Serial.flush();
       port = _port;
       client_type = _type;
+      Serial.printf("MQTT::CreateConnection \n\r"); Serial.flush();
       snprintf(broker_url, sizeof(broker_url), url);
+
+      Serial.printf("MQTT::CreateConnection \n\r"); Serial.flush();
     };
 
     MQTTConnection(IPAddress addr, uint16_t port, Client& client)
@@ -315,9 +323,12 @@ class mMQTT :
     bool CreateConnection(Client* client_in, char* url, uint16_t _port, ConnectionClient_t type)
     {
 
+      // DEBUG_LINE_HERE;
       
-          // Serial.printf("CreateConnectionn\r\n\r\n\r\n\r\n\r\n");
+          Serial.printf("CreateConnectionn\r\n\r\n\r\n\r\n\r\n");
           
+          Serial.printf("CreateConnectionn\r\n\r\n\r\n\r\n\r\n");
+          Serial.flush();
 
 
       /**
@@ -328,6 +339,7 @@ class mMQTT :
       for(auto& con:brokers)
       {
         Serial.printf("Checking \"%s\" against existing \"%s\"\n\r\r\n\r\n\r\n\r\n\r\n", url, con->broker_url);
+        Serial.flush();
         if(strcmp(con->broker_url, url)==0)
         {
           // Serial.printf("found existing connection with \"%s\" Index:%d\n\r", url, search_index);
@@ -341,12 +353,13 @@ class mMQTT :
 
       if(search_index==0) // None found
       {
-        // Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", url, search_index, brokers.size());
+        Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", url, search_index, brokers.size());
+        Serial.flush();
         brokers.push_back(new MQTTConnection(client_in, url, _port, type));
       }
 
-      // Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", url, _port, search_index);
-
+      Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", url, _port, search_index);
+Serial.flush();
     }
 
     

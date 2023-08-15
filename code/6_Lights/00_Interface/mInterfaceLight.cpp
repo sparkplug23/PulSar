@@ -145,7 +145,9 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
      * WEB SECTION * 
     *******************/   
     case FUNC_WEB_ADD_HANDLER:    
+      #ifdef USE_MODULE_NETWORK_WEBSERVER23
       MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
+      #endif
     break;
 
   } // end switch

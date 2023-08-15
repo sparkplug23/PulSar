@@ -227,10 +227,10 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       // register uint32_t *sp asm("a1"); 
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
       SERIAL_DEBUG.printf(PSTR("R%05d%c %02d%02d %s %s\r\n"), 
-        ESP.getFreeHeap(), //4 * (sp - g_pcont->stack), 
+        ESP.getFreeHeap(), // 4 * (sp - g_pcont->stack), 
         isconnected ? 'Y' : 'N',
-        pCONT_time->uptime.minute,pCONT_time->uptime.second,
-        pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),
+        pCONT_time->uptime.minute, pCONT_time->uptime.second,
+        pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),
         pCONT_set->log_data
       );
     #else

@@ -49,10 +49,10 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       Test_Config();
       #endif
 
-      #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+      #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
       initServer();
       pCONT_web->server->begin();
-      #endif // ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+      #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
     break;
     /************
@@ -503,6 +503,31 @@ void mAnimatorLight::Init(void)
 
   auto_off_settings.time_decounter_secs = 0;
 
+    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  sprintf(serverDescription, "WLED");
+
+  sprintf(ntpServerName, "0.wled.pool.ntp.org");
+  
+  sprintf(apPass, CLIENT_SSID);
+  sprintf(otaPass, "WLED");
+
+  sprintf(clientSSID, CLIENT_SSID);
+  sprintf(clientPass, CLIENT_PASS);
+
+  sprintf(alexaInvocationName, "Light");
+
+    #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
+
+
+
+
+
+
+
+
   Init__Palettes();  
 
   // Allow runtime changes of animation size
@@ -538,9 +563,8 @@ void mAnimatorLight::Init(void)
 
   #ifndef ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
   finalizeInit();
-
   makeAutoSegments();
-  #endif // ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
+  #endif 
   
   settings.light_size_count = STRIP_SIZE_MAX;
   pCONT_set->Settings.flag_animations.clear_on_reboot = false; //flag
@@ -884,9 +908,11 @@ void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPal
     //   Serial.printf("%d,\n\r", _palette_container->pData[i]);
     // }
     #else // ESP8266 requires safe reading out of progmem first
-    uint8_t buffer[ptr->data_length];
-    memcpy_P(buffer, ptr->data, sizeof(uint8_t)*ptr->data_length);
-    SEGMENT_I(segment_index).palette_container->pData.assign(buffer, buffer + ptr->data_length);
+    // _palette_container->pData = std::vector<uint8_t>();
+    // _palette_container->pData.assign(ptr->data, ptr->data + ptr->data_length);
+    uint8_t buffer3[255];//ptr->data_length];
+    memcpy_P(buffer3, ptr->data, sizeof(uint8_t)*ptr->data_length);
+    _palette_container->pData.assign(buffer3, buffer3 + ptr->data_length);
     #endif  
 
   }else
@@ -1375,8 +1401,11 @@ void mAnimatorLight::SubTask_Segments_Effects()
       #ifdef ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
       // if(!seg.transitional)  // Needs better integration before it can be used
       // {
+        // Moved so load on change now when asked to get
         LoadPalette(seg.palette.id, _segment_index_primary);
       // }
+      #else
+        #warning "disabled LoadPalette"
       #endif // ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
 
       
@@ -1828,6 +1857,14 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
  * Fills segment with color
  */
 void mAnimatorLight::fill(uint32_t c, bool apply_brightness) 
+{
+  for(uint16_t i = 0; i < _virtualSegmentLength; i++) 
+  {
+    SEGMENT.SetPixelColor(i, c, apply_brightness);
+  }
+}
+
+void mAnimatorLight::fill(RgbcctColor c, bool apply_brightness) 
 {
   for(uint16_t i = 0; i < _virtualSegmentLength; i++) 
   {
@@ -2811,11 +2848,8 @@ uint8_t mAnimatorLight::Segment_New::getBrightnessRGB_WithGlobalApplied()
   uint8_t brightness_RGB_global = pCONT_iLight->getBriRGB_Global();
   uint8_t brightness_total = scale8(brightness_RGB_segment,  brightness_RGB_global);
 
-  
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF(PSTR("mAnimatorLight::Segment_New::getBrightnessRGB() s%d g%d -> u%d"), brightness_RGB_segment, brightness_RGB_global, brightness_total);
-  #endif
-
+  ALOG_DBM(PSTR("mAnimatorLight::Segment_New::getBrightnessRGB() s%d g%d -> u%d"), brightness_RGB_segment, brightness_RGB_global, brightness_total);
+ 
   return brightness_total;
 
   #endif
@@ -2833,10 +2867,8 @@ uint8_t mAnimatorLight::Segment_New::getBrightnessCCT_WithGlobalApplied()
   uint8_t brightness_CCT_global = pCONT_iLight->getBriCCT_Global();
   uint8_t brightness_total = scale8(brightness_CCT_segment,  brightness_CCT_global);
 
-  
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF(PSTR("mAnimatorLight::Segment_New::getBrightnessCCT() s%d g%d -> u%d"), brightness_CCT_segment, brightness_CCT_global, brightness_total);
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
+  ALOG_DBM(PSTR("mAnimatorLight::Segment_New::getBrightnessCCT() s%d g%d -> u%d"), brightness_CCT_segment, brightness_CCT_global, brightness_total);
 
   return brightness_total;
 
@@ -3921,7 +3953,7 @@ RgbcctColor
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 IRAM_ATTR 
 #endif 
-mAnimatorLight::Segment_New::GetColourFromPalette2(
+mAnimatorLight::Segment_New::GetPaletteColour(
   /**
    * @brief _pixel_position
    * ** [0-SEGLEN]
@@ -4915,6 +4947,7 @@ void mAnimatorLight::MQTTHandler_Sender(uint8_t id)
 /**
  * @brief MQTTHandler_AddWebURL_PayloadRequests
  * */
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
 void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 {    
 
@@ -4966,6 +4999,7 @@ void mAnimatorLight::MQTTHandler_AddWebURL_PayloadRequests()
 
 
 }
+#endif // USE_MODULE_NETWORK_WEBSERVER23
 
 
 #ifdef ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
@@ -5076,7 +5110,7 @@ void realtimeLock2(uint32_t timeoutMs, byte md);
 
 void setRealtimePixel(uint16_t i, byte r, byte g, byte b, byte w = 0);
 
-#ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 //scales the brightness with the briMultiplier factor
 byte scaledBri2(byte in)
@@ -5085,9 +5119,6 @@ byte scaledBri2(byte in)
   if (val > 255) val = 255;
   return (byte)val;
 }
-
-
-
 
 
 void notify(byte callMode, bool followUp)
@@ -5929,7 +5960,7 @@ uint8_t realtimeBroadcast(uint8_t type, IPAddress client, uint16_t length, uint8
   return 0;
 }
 
-#endif // ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 
 

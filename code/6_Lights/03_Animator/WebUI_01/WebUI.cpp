@@ -1,9 +1,6 @@
-// #include "mChild_WebUI.h"
-
 #include "6_Lights/03_Animator/mAnimatorLight.h"
 
-#ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
-
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 /**
  * @brief 
@@ -2382,7 +2379,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
         JsonArray colors =  curPalette_obj.createNestedArray();
 
+        #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
         WDT_Reset();
+        #endif
 
         /** first check if the palette is one that uses the colour picker*/       
         if(
@@ -3967,4 +3966,4 @@ void mAnimatorLight::initServer()
   });
 }
 
-#endif // ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI

@@ -89,8 +89,6 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 //   #define DEBUG_LINE   //nothing, no code
 // #endif
 
-#define ENABLE_DEBUG_MULTIPIN
-
 
 #ifdef ENABLE_DEBUG_MULTIPIN
   #define DEBUG_PRINT(x) SERIAL_DEBUG.print(x)

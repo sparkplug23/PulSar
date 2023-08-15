@@ -29,6 +29,7 @@
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
 #include "0_ConfigUser/03_mFirmwareCustom_Secret_DevTestGroups.h"
+#include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
 #endif // D_USER_MICHAEL
 
 /*********************************************************************************************\

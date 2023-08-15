@@ -63,19 +63,25 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
     break;
     case FUNC_WIFI_CONNECTED:
+
+      DEBUG_LINE_HERE;
     
       #ifdef USE_NETWORK_MDNS
         StartMdns();
       #endif  // USE_NETWORK_MDNS
+      DEBUG_LINE_HERE;
 
       #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
       ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
       #ifdef USE_MODULE_NETWORK_MQTT
       mqtt_client = new WiFiClient();
+      DEBUG_LINE_HERE;
       pCONT_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+      DEBUG_LINE_HERE;
       #endif // USE_MODULE_NETWORK_MQTT
       #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
       
+      DEBUG_LINE_HERE;
     break;
   }
 
@@ -1262,15 +1268,19 @@ bool mWiFi::WifiConfigCounter(void)
 
 void mWiFi::StartMdns(void) {
   // if (Settings.flag3.mdns_enabled) {  // SetOption55 - Control mDNS service
+      DEBUG_LINE_HERE;
   if (!Mdns.begun) {
     // close existing or MDNS.begin will fail
     MDNS.end(); 
+      DEBUG_LINE_HERE;
     // Begin with devicename
     Mdns.begun = (uint8_t)MDNS.begin(pCONT_set->Settings.system_name.device);
     
+      DEBUG_LINE_HERE;
     ALOG_INF( PSTR(D_LOG_MDNS "%s" " with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), pCONT_set->Settings.system_name.device);
   
   }
+      DEBUG_LINE_HERE;
 }
 
 

@@ -671,12 +671,23 @@ void mPalette::Init_Palettes()
    * CustomPalettes
    ****************/
 
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+    DEBUG_LINE_HERE;
+
   addCustomPalette(
     0, 
     PM_PALETTE_CUSTOM_PALETTE_DEFAULT_01__DATA, 
     sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_01__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_01_ENCODING
   );
+    DEBUG_LINE_HERE;
   
   addCustomPalette(
     1, 
@@ -745,7 +756,13 @@ void mPalette::Init_Palettes()
 
 
 
-/** NEW METHOD: To test this, creating a json constructor that can produce each palette under its desired ways
+/** NEW METHOD: 
+ * 
+ * With my thought, I may need to switch the indexing of all my palettes to be 0-255, regardless of length. Hence,
+ * 5 pixels in a palette would address as 0,50,100,150,200 (the 255/5), no longer as 0,1,2,3,4. This would make things more uniform when getting colours from any palette
+ * * Note: The 255 indexing would be reguired to fix the issue with Effect "Colorful" where only the start of palettes are got, and hence short (e.g. 5) colour palettes appear static.
+ * 
+ * To test this, creating a json constructor that can produce each palette under its desired ways
  * Gets a single color from the currently selected palette.
  * @param id                  Palette Index, default (0) will be random from colour wheel
  * @param index_from_palette  [0..x] where x is total colours in palette. If `flag_mapping` is enabled, palette will be scaled out to be Y length >>> Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
@@ -753,20 +770,7 @@ void mPalette::Init_Palettes()
  * @param flag_wrap_hard_edge           FastLED palettes will usally wrap back to the start smoothly. Set false to get a hard edge
  * @param brightness_scale255 Value to scale the brightness of the returned color by. Default is 255. (no scaling)
  * @param encoded_index*      If format of palette includes encoded data (ie sun_value,R,G,B) then return by inserting into pointer position
- * 
- * @returns RgbCCTColour      Single color from palette in RgbCCT format. Use intermediate function to convert to UINT32_T if WRGB is needed for WLED effect
- 
- without IRAM_ATTR, function takes 10.5 per call
- with IRAM_ATTR, STILL 10.5 per call
-
-Conversion map
-  GetColourFromPalette_Intermediate(palette_id, pixel_num,       *pixel_position)
-  GetColourFromPreloadedPalette    (palette_id, _pixel_position,  encoded_value)
-Conversion map
-  color_from_palette_Intermediate  (                 uint16_t i,                     bool mapping, bool wrap, uint8_t mcol,                                          uint8_t pbri                              )
-  GetColourFromPreloadedPalette    (UNSET,      _pixel_position, *encoded_value, flag_map_scaling, flag_wrap_hard_edge, flag_crgb_exact_colour, brightness_scale, *discrete_colours_in_palette) 
-     mcol is now mPalette::PALETTELIST_VARIABLE_FASTLED_SEGMENT__COLOUR_01__ID
-     mPaletteI->GetColourFromPreloadedPaletteU32(SEGMENT.palette.id, A, nullptr, B, C, D)  <<<< copy and fill in as needed
+ * @param flag_crgb_exact_colour If true, the index_from_palette is the exact pixel index, if false, the index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)
  */
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
@@ -838,6 +842,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer2(
     {
       pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
     }
+
     // else{
     //   uint8_t pixels_in_crgb16palette = GetColoursInCRGB16Palette(palette_id);
     //   pixel_position_adjust = _pixel_position % pixels_in_crgb16palette; // convert incoming pixels into repeating 0-15 numbers.
@@ -919,6 +924,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer2(
     */
     else
     {
+
       colour = SubGet_Encoded_PaletteList_Colour(
         palette_adjusted_id,
         palette_buffer,
@@ -944,9 +950,11 @@ mPalette::GetColourFromPreloadedPaletteBuffer2(
   ){   
     
     uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS;
-
-    uint8_t colour_width  = GetEncodedColourWidth(custom_palettes[palette_adjusted_id].encoding); 
-    uint8_t pixels_in_map = custom_palettes[palette_adjusted_id].data.size()/colour_width;
+    
+    // if(flag_spanned_segment) // added to fix twinkleup, likely cause other issues
+    // {
+    //   _pixel_position = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+    // }
     
     return SubGet_Encoded_UserPalette_Colour(
       palette_adjusted_id,
@@ -1319,5 +1327,515 @@ RgbcctColor mPalette::SubGet_Encoded_PaletteList_Colour_Gradient
   return colour;
 
 }
+
+
+
+
+
+
+
+
+int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
+{
+
+  if(*c=='\0'){
+    return -1;
+  }
+
+  char buffer[100] = {0};
+  int16_t index_found = -1;
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID
+   * 
+  ***************************************************************/
+  int16_t id = -1;
+  for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID-PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID);
+            ii++
+  ){    
+    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_NAMES_CTR))>=0)
+    {
+      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      return id+PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID;            
+    }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID
+   * 
+  ***************************************************************/
+  for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID-PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID);
+            ii++
+  ){    
+    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR))>=0)
+    {
+      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      return id+PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;            
+    }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID
+   * 
+  ***************************************************************/
+  for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID-PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID);
+            ii++
+  ){    
+    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_RANDOMISED_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_RANDOMISED_NAMES_CTR))>=0)
+    {
+      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      return id+PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;            
+    }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED_SINGLE_COLOUR__LENGTH__ID
+   * 
+  ***************************************************************/
+  for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_FIXED_SINGLE_COLOUR__LENGTH__ID-PALETTELIST_FIXED_SINGLE_COLOUR__RED__ID);
+            ii++
+  ){    
+    ALOG_INF( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_SINGLE_COLOUR_NAMES_CTR ); 
+    if((id=mSupport::GetCommandID16_P(c, PM_STATIC_SINGLE_COLOUR_NAMES_CTR))>=0)
+    {
+      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      return id+PALETTELIST_FIXED_SINGLE_COLOUR__RED__ID;            
+    }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED__IDS
+   * 
+  ***************************************************************/
+  for( // loops relative to exact palette id
+    uint8_t ii=PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID;
+            ii<(PALETTELIST_FIXED_LENGTH__ID - PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID);
+            ii++
+  ){
+    if(mSupport::CheckCommand_P(c, static_palettes[ii].friendly_name_ctr))
+    {
+      ALOG_DBM( PSTR("MATCH \"%c\" %d"), c, ii ); 
+      return ii;            
+      }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS - undefined user names, default naming
+   * 
+  ***************************************************************/ 
+  for(
+    uint8_t ii=0;
+            ii<(PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID);
+            ii++
+  ){
+    memset(buffer,0,sizeof(buffer));
+    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), ii + 1); // names are 1-10
+    ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Searching with \"%s\" for \"%s\""),buffer,c );
+    if(strcmp(c,buffer)==0)
+    {
+      return ii+PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE_GENERIC__IDS - undefined user names, default naming
+   * 
+  ***************************************************************/
+  for( // loops relative to 0
+    uint8_t ii=0;
+            ii<(MAX_USER_DEFINED_ENCODED_PALETTES);
+            ii++
+  ){
+
+    memset(buffer,0,sizeof(buffer));
+    sprintf_P(buffer, PSTR(D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR), ii + 1);
+    
+    ALOG_DBG( PSTR("s> \"%s\""), buffer ); 
+    // Default names
+    if(strcmp(c,buffer)==0){
+      return ii+PALETTELIST_LENGTH_OF_STATIC_IDS; // new palettes start at the end of the predefined ones
+    }
+    
+  }
+
+  /**************************************************************
+   * 
+   * Final check, palette id was given as string number
+   * 
+  ***************************************************************/
+  // uint8_t found_index = (!strlen(c)) ? 0 : atoi(c);
+  // if(WithinLimits(found_index, (uint8_t)0, (uint8_t)PALETTELIST_FIXED_LENGTH__ID)){
+  //   return found_index;
+  // }
+
+  return -1; // Must be -1 to show name not found
+}
+
+void mPalette::addPalette(STATIC_PALETTE palette)
+{
+
+  if (palette.id < static_palettes.size()) {
+    static_palettes[palette.id] = palette;
+  } else {
+    static_palettes.push_back(palette);
+  }
+
+}
+
+
+void mPalette::addCustomPalette(uint16_t id, const uint8_t* data, const uint8_t length, uint16_t encoding)
+{
+
+  CUSTOM_PALETTE palette_tmp;
+
+  #ifdef ESP32
+  for(int i=0;i<length;i++){ palette_tmp.data.push_back(data[i]); }
+  #else // ESP8266
+  uint8_t data_t[length];
+  memcpy_P(data_t, data, length);
+  for(int i=0;i<length;i++){ palette_tmp.data.push_back(data_t[i]); }
+  #endif
+
+  palette_tmp.encoding = {encoding};
+
+  if (id < custom_palettes.size()) {
+    custom_palettes[id] = palette_tmp;
+  } else {
+    custom_palettes.push_back(palette_tmp);
+  }
+
+}
+
+
+const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8_t buflen)
+{
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED_CRGBPALETTE16__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID))
+  ){  
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID;
+    pCONT_sup->GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
+    ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  ){  
+    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR);   
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_SEGMENTS_STORED_FIXED_CRGBPALETTE16_PALETTES__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_USER__LENGTH__ID))
+  ){  
+    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;
+    pCONT_sup->GetTextIndexed_P(buffer, buflen, adjusted_id, PM_STATIC_CRGBPALETTE16_RANDOMISED_NAMES_CTR);   
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED_CRGBPALETTE16__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__LENGTH__ID))
+  ){  
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__RED__ID;
+    pCONT_sup->GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_SINGLE_COLOUR_NAMES_CTR);   
+    ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_FIXED__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_FIXED_LENGTH__ID))
+  ){           
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_COLOURFUL_DEFAULT__ID;
+    ALOG_DBG( PSTR("AName id%d|a%d \"%S\""), palette_id,palette_id_adj,static_palettes[palette_id_adj].friendly_name_ctr );
+    snprintf_P(buffer, buflen, static_palettes[palette_id_adj].friendly_name_ctr);
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)    && (palette_id < mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID))
+  ){  
+    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), adjusted_id); // names are 1-10
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_VARIABLE_GENERIC__IDS - undefined user names, default naming
+   * 
+  ***************************************************************/
+ if(
+    ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)    && (palette_id < GetPaletteListLength()))
+  ){  
+    uint16_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS;
+    sprintf_P(buffer, PSTR(D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR), adjusted_id); // names are 1-10
+  }
+    
+  return buffer;
+
+}
+
+
+/**
+ * Refresh value stored in palette, and return new value
+ * */
+uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
+  
+  uint8_t new_size = 1; // assumed 1 at least
+  
+  if((palette_id>=PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
+
+    mPalette::STATIC_PALETTE *ptr_tmp = &mPaletteI->static_palettes[palette_id];
+
+    new_size = 5; // only 1*5
+    
+    ptr_tmp->data_length = new_size;
+
+  }else
+  if((palette_id>=PALETTELIST_LENGTH_OF_STATIC_IDS)&&(palette_id<GetPaletteListLength())){
+
+    // mPalette::PALETTE *ptr_tmp = &mPaletteI->static_palettes[palette_id];
+    
+    new_size = 5; // ASSUME 10 RIGHT NOW  
+    ALOG_ERR(PSTR("ERROR ON SIZE GET £$%"));
+    // ptr_tmp->data_length; // currently refreshed when init is triggered, about this may need changing, leaving unchanged for now
+  }
+  else
+  {
+
+    new_size = 1;//ptr_tmp->data_length;
+    ALOG_INF(PSTR("GetColourMapSizeByPaletteID ELSE  ERORRRRRRRRRRRRRRRRRRRRRRR"));
+    DEBUG_LINE_HERE;
+
+  }
+
+  return new_size;
+}
+
+
+
+uint8_t mPalette::GetColoursInCRGB16Palette(uint16_t palette_id)
+{
+
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16__LENGTH__ID))
+  ){  
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16__RAINBOW_COLOUR__ID;
+    // pCONT_sup->GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
+    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+
+    uint8_t colour_count = pSEGMENT_I(0).palette_container->CRGB16Palette16_Palette.encoded_index.size();
+
+    // ALOG_INF(PSTR("colour_count=%d, pal%d"), colour_count, palette_id);
+
+    return colour_count;
+
+  }
+
+
+  if(
+    ((palette_id >= mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  ){  
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_FIXED_CRGBPALETTE16_GRADIENT__SUNSET__ID;
+    // pCONT_sup->GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
+    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+
+    return pSEGMENT_I(0).palette_container->CRGB16Palette16_Palette.encoded_index.size();
+
+  }
+
+  return 16;
+
+}
+
+
+
+
+/**
+ * @brief private function
+ * 
+ * By having this as a subfunction, it should enable iterative multiple calls function the main GetColour
+ * 
+ * @param palette_id 
+ * @param seg_i 
+ * @return RgbcctColor 
+ */
+RgbcctColor mPalette::SubGet_Encoded_UserPalette_Colour(
+  uint16_t custom_id,
+  uint8_t* palette_buffer,
+  uint16_t _pixel_position,  
+  uint8_t* encoded_value
+){
+
+  RgbcctColor colour = RgbcctColor(0);
+
+  // ALOG_INF(PSTR("SubGet_Encoded_UserPalette_Colour %d"), custom_id);
+
+  uint8_t colour_width  = GetEncodedColourWidth(custom_palettes[custom_id].encoding); 
+  uint8_t pixels_in_map = custom_palettes[custom_id].data.size()/colour_width;
+
+  palette_buffer = &custom_palettes[custom_id].data[0];
+
+  PALETTE_ENCODING_DATA encoding = custom_palettes[custom_id].encoding;
+  
+  // Serial.println(pixels_in_map);
+
+  if(pixels_in_map != 0){
+    _pixel_position = _pixel_position%pixels_in_map;  // /ERROR, REUSING NAME!!!
+  }
+  
+  uint16_t index_relative = 0; // get expected pixel position
+
+  #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+  Serial.println(encoding.data, BIN);
+  Serial.println(encoding.index_scaled_to_segment);
+  #endif // ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+  
+
+  if(
+    (encoding.red_enabled)||
+    (encoding.green_enabled)||
+    (encoding.blue_enabled)||
+    (encoding.white_cold_enabled)||
+    (encoding.white_warm_enabled)
+  ){
+    
+    // ALOG_INF(PSTR("enabled %d,%d,%d,%d,%d"), encoding.red_enabled, encoding.green_enabled, encoding.blue_enabled, encoding.white_cold_enabled, encoding.white_warm_enabled);
+    // ALOG_INF(PSTR("palette_elements %d"), palette_elements[0]);   
+    // ALOG_INF(PSTR("p = %d, r = %d, v = %d|%d, w=%d"), pixel_position, index_relative, palette_elements[index_relative], palette_elements[index_relative+1],colour_width);
+
+    // Get Start of Colour Information by adjusting for indexing
+    index_relative = _pixel_position*GetEncodedColourWidth(encoding); // get expected pixel position
+      
+    // ALOG_INF(PSTR("index_relative=%d"), index_relative);
+
+    if(encoding.index_scaled_to_segment)
+    {
+      // ALOG_INF(PSTR("index_relativeB=%d"),index_relative);
+      if(encoded_value != nullptr){
+        *encoded_value = palette_buffer[index_relative];
+      }
+      // Set the index to move beyond the indexing information
+      index_relative++;
+    }
+      // ALOG_INF(PSTR("encoded_valueC=%d"), *encoded_value);
+    
+    // Get colour
+    colour = RgbcctColor(
+      encoding.red_enabled         ? palette_buffer[index_relative  ] : 0,
+      encoding.green_enabled       ? palette_buffer[index_relative+1] : 0,
+      encoding.blue_enabled        ? palette_buffer[index_relative+2] : 0,
+      encoding.white_cold_enabled  ? palette_buffer[index_relative+3] : 0,
+      encoding.white_warm_enabled  ? palette_buffer[index_relative+4] : 0
+    );
+
+  }
+
+
+  return colour;
+
+}
+
+
+
+
+
+
+uint16_t mPalette::GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit)
+{
+  STATIC_PALETTE pal = static_palettes[palette_id];
+  return GetNumberOfColoursFromEncoded(pal.encoding, pal.data_length);
+}
+
+
+uint16_t mPalette::GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding, uint8_t data_in_palette)
+{
+  uint16_t encoded_colour_width = GetEncodedColourWidth(encoding);
+  return data_in_palette/encoded_colour_width;   
+}
+
+
+/**
+ * @brief Get elements in a colour type
+ * 
+ * @param ptr 
+ * @param pixel_width_contrained_limit 
+ * @return uint16_t 
+ */
+uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
+{
+
+  uint16_t encoded_colour_width = 0;
+
+  if(encoding.red_enabled){ encoded_colour_width++; }
+  if(encoding.green_enabled){ encoded_colour_width++; }
+  if(encoding.blue_enabled){ encoded_colour_width++; }
+  if(encoding.white_warm_enabled){ encoded_colour_width++; }
+
+  if(encoding.white_cold_enabled){ encoded_colour_width++; }
+  if(encoding.encoded_value_byte_width){ encoded_colour_width += encoding.encoded_value_byte_width; }
+
+  if(encoding.index_exact){ encoded_colour_width++; }
+  if(encoding.index_scaled_to_segment){ encoded_colour_width++; }
+  if(encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
+  if(encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
+  
+  if(encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
+  if(encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
+  if(encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
+  if(encoding.palette_can_be_modified){ encoded_colour_width++; }
+
+  // ALOG_INF(PSTR("encoded_colour_width=%d"),encoded_colour_width);
+
+  return encoded_colour_width;
+
+}
+
+
+
 
 #endif // header gaurd

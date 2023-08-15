@@ -533,8 +533,8 @@ function loadFXData(callback = null)
 	.then((json)=>{
 		fxdata = json||[];
 		// add default value for Solid
-		fxdata.shift()
-		fxdata.unshift(";!;");
+		// fxdata.shift()
+		// fxdata.unshift(";!;");
 	})
 	.catch((e)=>{
 		fxdata = [];

@@ -6,6 +6,28 @@ Section Next, will always be "Development", which with copy and paste will becom
 
 ## [Unreleased] - Development
 
+## [D0.117.0.0] - Created 12-AUG-23
+### Milestone Point
+Introduction of Lighting TestGroup for garage as debug suite.
+
+### Added
+- template
+
+### Breaking Changed
+- template
+
+### Changed
+- template
+
+### Fixed
+- templete
+
+### Removed
+- template
+
+
+## [Unreleased] - Development
+
 ## [D0.116.0.0] - Created 29-JUN-23
 ### Milestone Point
 Created with Multipin support on I2S (dual neopixel) and PWM. Introduction of TestGroups.

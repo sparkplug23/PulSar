@@ -93,30 +93,30 @@ uint32_t i = 0;
 
     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings_Temporary, sizeof(Settings_Temporary));
     
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("\n\r"
-        "cfg_holder\t\t\t%d\n\r"
-        "cfg_size\t\t\t%d\n\r"
-        "save_flag\t\t\t%d\n\r"
-        "version\t\t\t%d\n\r"
-        "bootcount\t\t\t%d\n\r"
-        "cfg_crc\t\t\t%d\n\r"
-        //Test data
-        "%d:%d:%d:%d"
-      ),
-        Settings_Temporary.cfg_holder,
-        Settings_Temporary.cfg_size,
-        Settings_Temporary.save_flag,
-        Settings_Temporary.version,
-        Settings_Temporary.bootcount,
-        Settings_Temporary.cfg_crc
-        //Testdata
-        ,Settings.animation_settings.xmas_controller_params[0]
-        ,Settings.animation_settings.xmas_controller_params[1]
-        ,Settings.animation_settings.xmas_controller_params[2]
-        ,Settings.animation_settings.xmas_controller_params[3]
-    );
-    #endif// ENABLE_LOG_LEVEL_INFO
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // AddLog(LOG_LEVEL_TEST, PSTR("\n\r"
+    //     "cfg_holder\t\t\t%d\n\r"
+    //     "cfg_size\t\t\t%d\n\r"
+    //     "save_flag\t\t\t%d\n\r"
+    //     "version\t\t\t%d\n\r"
+    //     "bootcount\t\t\t%d\n\r"
+    //     "cfg_crc\t\t\t%d\n\r"
+    //     //Test data
+    //     "%d:%d:%d:%d"
+    //   ),
+    //     Settings_Temporary.cfg_holder,
+    //     Settings_Temporary.cfg_size,
+    //     Settings_Temporary.save_flag,
+    //     Settings_Temporary.version,
+    //     Settings_Temporary.bootcount,
+    //     Settings_Temporary.cfg_crc
+    //     //Testdata
+    //     ,Settings.animation_settings.xmas_controller_params[0]
+    //     ,Settings.animation_settings.xmas_controller_params[1]
+    //     ,Settings.animation_settings.xmas_controller_params[2]
+    //     ,Settings.animation_settings.xmas_controller_params[3]
+    // );
+    // #endif// ENABLE_LOG_LEVEL_INFO
 
 // DEBUG_LINE_HERE;
 
@@ -223,31 +223,31 @@ uint32_t i = 0;
 
   SettingsMerge(&Settings, &Settings_Temporary);
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_TEST, PSTR("AFTER SettingsMerge\n\r"
-        "cfg_holder\t\t\t%d\n\r"
-        "cfg_size\t\t\t%d\n\r"
-        "save_flag\t\t\t%d\n\r"
-        "version\t\t\t%d\n\r"
-        "bootcount\t\t\t%d\n\r"
-        "cfg_crc\t\t\t%d\n\r"
-        //Test data
-        "%d:%d:%d:%d"
-      ),
-        Settings_Temporary.cfg_holder,
-        Settings_Temporary.cfg_size,
-        Settings_Temporary.save_flag,
-        Settings_Temporary.version,
-        Settings_Temporary.bootcount,
-        Settings_Temporary.cfg_crc
-        //Testdata
-        ,Settings.animation_settings.xmas_controller_params[0]
-        ,Settings.animation_settings.xmas_controller_params[1]
-        ,Settings.animation_settings.xmas_controller_params[2]
-        ,Settings.animation_settings.xmas_controller_params[3]
-    );
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    // AddLog(LOG_LEVEL_TEST, PSTR("AFTER SettingsMerge\n\r"
+    //     "cfg_holder\t\t\t%d\n\r"
+    //     "cfg_size\t\t\t%d\n\r"
+    //     "save_flag\t\t\t%d\n\r"
+    //     "version\t\t\t%d\n\r"
+    //     "bootcount\t\t\t%d\n\r"
+    //     "cfg_crc\t\t\t%d\n\r"
+    //     //Test data
+    //     "%d:%d:%d:%d"
+    //   ),
+    //     Settings_Temporary.cfg_holder,
+    //     Settings_Temporary.cfg_size,
+    //     Settings_Temporary.save_flag,
+    //     Settings_Temporary.version,
+    //     Settings_Temporary.bootcount,
+    //     Settings_Temporary.cfg_crc
+    //     //Testdata
+    //     ,Settings.animation_settings.xmas_controller_params[0]
+    //     ,Settings.animation_settings.xmas_controller_params[1]
+    //     ,Settings.animation_settings.xmas_controller_params[2]
+    //     ,Settings.animation_settings.xmas_controller_params[3]
+    // );
 
-    #endif // ENABLE_LOG_LEVEL_INFO
+    // #endif // ENABLE_LOG_LEVEL_INFO
     
 #ifndef FIRMWARE_MINIMAL
 

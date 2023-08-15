@@ -2855,7 +2855,7 @@ void serializePalettes(JsonObject root, int page)
         
         RgbcctColor color =    RgbcctColor(0);
         
-        color = mPaletteI->GetColourFromPreloadedPaletteBuffer(
+        color = mPaletteI->GetColourFromPreloadedPaletteBuffer2(
             palette_id, pCONT_lAni->segments[pCONT_lAni->getCurrSegmentId()].palette_container->pData.data(),//desired_index_from_palette,  
             j, &encoded_gradient,
             false, true,

@@ -15,6 +15,39 @@
 // // color = RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_SPAN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE)); // Functionally the same
 // color = RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_SPAN_ON, PALETTE_WRAP_ON));     
 
+
+// control HTML elements for Slider and Color Control (original ported form WLED-SR)
+// Technical notes
+// ===============
+// If an effect name is followed by an @, slider and color control is effective.
+// If not effective then:
+//      - For AC effects (id<128) 2 sliders and 3 colors and the palette will be shown
+//      - For SR effects (id>128) 5 sliders and 3 colors and the palette will be shown
+// If effective (@)
+//      - a ; seperates slider controls (left) from color controls (middle) and palette control (right)
+//      - if left, middle or right is empty no controls are shown
+//      - a , seperates slider controls (max 5) or color controls (max 3). Palette has only one value
+//      - a ! means that the default is used.
+//             - For sliders: Effect speeds, Effect intensity, Custom 1, Custom 2, Custom 3
+//             - For colors: Fx color, Background color, Custom
+//             - For palette: prompt for color palette OR palette ID if numeric (will hide palette selection)
+//
+// Note: If palette is on and no colors are specified 1,2 and 3 is shown in each color circle.
+//       If a color is specified, the 1,2 or 3 is replaced by that specification.
+// Note: Effects can override default pattern behaviour
+//       - FadeToBlack can override the background setting
+//       - Defining SEGCOL(<i>) can override a specific palette using these values (e.g. Color Gradient)
+
+
+// m12=0
+// pal=11
+// 01
+// ix=16
+// o2
+// sx=64
+// 12
+
+
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @name           : Solid Colour
@@ -43,17 +76,14 @@ void mAnimatorLight::EffectAnim__Solid_Colour()
   SetTransitionColourBuffer_DesiredColour (SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type, desired_colour); 
   SetTransitionColourBuffer_StartingColour(SEGMENT.Data(), SEGMENT.DataLength(), 0, SEGMENT.colour_type, starting_colour);
 
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF( PSTR("startin_colour = %d,%d,%d,%d,%d"), starting_colour.R,starting_colour.G,starting_colour.B,starting_colour.WC,starting_colour.WW);
-  ALOG_INF( PSTR("desired_colour = %d,%d,%d,%d,%d"), desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-
+  ALOG_DBM( PSTR("startin_colour = %d,%d,%d,%d,%d"), starting_colour.R,starting_colour.G,starting_colour.B,starting_colour.WC,starting_colour.WW);
+  ALOG_DBM( PSTR("desired_colour = %d,%d,%d,%d,%d"), desired_colour.R,desired_colour.G,desired_colour.B,desired_colour.WC,desired_colour.WW);
+ 
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(param); } );
 
 }
 static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -100,7 +130,7 @@ static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM = ",,,,,Time,Rate;!
  * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
 {
 
@@ -120,7 +150,7 @@ void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
 
 }
 static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!";
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -132,6 +162,9 @@ static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;
  * @param speed    : None
  * @param rate     : Period of time (ms) between updates
  * @param time     : Blend time
+ * 
+ * ^^ 4 options really needs to be reduced down
+ * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -204,8 +237,237 @@ void mAnimatorLight::EffectAnim__Slow_Glow()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-static const char PM_EFFECT_CONFIG__SLOW_GLOW[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+static const char PM_EFFECT_CONFIG__SLOW_GLOW[] PROGMEM = ",!,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+
+
+
+/********************************************************************************************************************************************************************************************************************
+ *******************************************************************************************************************************************************************************************************************
+ * @name           : Candle Flicker Base Function
+ * @description:   : Randomly changes colours of pixels, and blends to the new one
+ *                   Values close to 100 (speed) produce 5Hz flicker, which looks very candle-y
+ *                   Inspired by https://github.com/avanhanegem/ArduinoCandleEffectNeoPixel
+ *                   and https://cpldcpu.wordpress.com/2016/01/05/reverse-engineering-a-real-cand
+ * @note           : derived from WLED effects
+ * 
+ * @param intensity: Depth of variation from max/min brightness
+ * @param speed    : How often it occurs
+ * @param rate     : None
+ * @param time     : None
+ * @param aux0     : brightness saved
+ * @param aux1     : target brightness
+ * @param aux2     : (U) Second target palette
+ * @param aux3     : Reserved for random palette refresh rate
+ *******************************************************************************************************************************************************************************************************************
+ ********************************************************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+/**
+ * @description:   : Flickers pixels by the same amount towards black
+ **/
+void mAnimatorLight::EffectAnim__Candle_Single()
+{
+  EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
+}
+static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+/**
+ * @description:   : Flickers by multiple levels towards black
+ **/
+void mAnimatorLight::EffectAnim__Candle_Multiple()
+{
+  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
+}
+static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = "Speed,Intensity,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+/**
+ * @description:   : Flickers by multiple levels towards black
+ **/
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
+{
+  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__COLDWHITE__ID);
+}
+static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = "Speed,Intensity,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+#endif
+/**
+ * @description:   : Flicker between primary and secondary palette
+ * 
+     * Desc: Animation, that fades from selected palette to anothor palette,
+     *       The intensity of fade (closer to palette B) will depend on intensity value
+     *       ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
+ * */
+#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+void mAnimatorLight::EffectAnim__Shimmering_Two_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
+{
+  EffectAnim__Flicker_Base(true, SEGMENT.params_user.val0);
+}
+static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM = "Speed,Intensity,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+/**
+ * @description:   : Base function for flickering
+ * */
+void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_palette_id )
+{
+
+  uint8_t pixels_in_palette = GetNumberOfColoursInPalette(SEGMENT.palette.id);
+
+  RgbcctColor colour_pri;
+  RgbcctColor colour_sec;
+  RgbcctColor colour_out;
+
+  if (use_multi)
+  {
+    uint16_t dataSize = (SEGLEN -1) *3;
+    if(!SEGMENT.allocateData(dataSize) ){ return; }
+  }
+
+  // max. flicker range controlled by intensity()
+  uint8_t valrange = SEGMENT.intensity();
+  uint8_t rndval = valrange >> 1; // divide by 2
+
+  #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+  ALOG_DBG(PSTR("step=%d"),    SEGMENT.step);
+  ALOG_DBG(PSTR("valrange=%d"),valrange);
+  ALOG_DBG(PSTR("rndval=%d"),  rndval);
+  #endif
+
+  uint8_t pixel_palette_counter = 0;
+
+  // step (how much to move closer to target per frame) coarsely set by speed()
+  uint8_t speedFactor = 4;
+  if (SEGMENT.speed() > 252) { // epilepsy
+    speedFactor = 1;
+  } else 
+  if (SEGMENT.speed() > 99) { // regular candle (mode called every ~25 ms, so 4 frames to have a new target every 100ms)
+    speedFactor = 2;
+  } else 
+  if (SEGMENT.speed() > 49) { // slower fade
+    speedFactor = 3;
+  } //else 4 (slowest)
+
+  uint16_t numCandles = (use_multi) ? SEGLEN : 1;
+  #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+  ALOG_DBG(PSTR("numCandles=%d"), numCandles);
+  #endif
+
+  for (uint16_t i = 0; i < numCandles; i++)
+  {
+    #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+    ALOG_DBG(PSTR("i=%d|%d"),i,numCandles);
+    #endif
+
+    uint16_t d = 0; //data location
+
+    uint8_t s        = SEGMENT.params_internal.aux0, 
+            s_target = SEGMENT.params_internal.aux1, 
+            fadeStep = SEGMENT.step;
+
+    if (i > 0) {
+      d = (i-1) *3;
+      s = SEGMENT.data[d]; 
+      s_target = SEGMENT.data[d+1]; 
+      fadeStep = SEGMENT.data[d+2];
+    }
+    if (fadeStep == 0) { //init vals
+      s = 128; s_target = 130 + random8(4); fadeStep = 1;
+    }
+
+    bool newTarget = false;
+    if (s_target > s) { //fade up
+
+      #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+      ALOG_DBG(PSTR("fade up s_target > s %d=%d"), s_target, s);
+      #endif
+
+      s = qadd8(s, fadeStep);
+      if (s >= s_target) newTarget = true;
+    } else {
+      s = qsub8(s, fadeStep);
+      if (s <= s_target) newTarget = true;
+          
+      #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
+      ALOG_DBG(PSTR("fade down=%d"),s);
+      #endif
+
+    }
+
+    if (newTarget) {
+      s_target = random8(rndval) + random8(rndval);
+      if (s_target < (rndval >> 1)) s_target = (rndval >> 1) + random8(rndval);
+      uint8_t offset = (255 - valrange) >> 1;
+      s_target += offset;
+
+      uint8_t dif = (s_target > s) ? s_target - s : s - s_target;
+    
+      fadeStep = dif >> speedFactor;
+      if (fadeStep == 0) fadeStep = 1;
+    }
+
+    // flicker_palette_id = mPalette::PALETTELIST_HTML_COLOUR__White__ID;
+
+    /**
+     * Apply colour to output: different per pixel
+     **/
+    if(i > 0) 
+    {
+      colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter);    
+      // colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+
+      colour_sec = GetColourFromUnloadedPalette2(flicker_palette_id, pixel_palette_counter);
+
+      colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
+
+      if(pixel_palette_counter++ >= pixels_in_palette-1)
+      {
+        pixel_palette_counter = 0;
+      }
+
+      SEGMENT.SetPixelColor(SEGMENT.pixel_range.start + i, colour_out);
+
+      SEGMENT.data[d  ] = s; 
+      SEGMENT.data[d+1] = s_target; 
+      SEGMENT.data[d+2] = fadeStep;
+
+    } 
+    /**
+     * Single mode, one colour applied across all leds??????????
+     * */
+    else
+    {
+      
+      for(uint16_t p = SEGMENT.pixel_range.start;
+                 p <= SEGMENT.pixel_range.stop;
+                 p++
+      ){
+
+        colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter); 
+        // colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
+
+        colour_sec = GetColourFromUnloadedPalette2(flicker_palette_id, pixel_palette_counter);
+
+        colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
+
+        if(pixel_palette_counter++ >= pixels_in_palette-1)
+        {
+          pixel_palette_counter = 0;
+        }
+
+        SEGMENT.SetPixelColor(p, colour_out);
+
+      }
+
+      SEGMENT.params_internal.aux0 = s; 
+      SEGMENT.params_internal.aux1 = s_target; 
+      SEGMENT.step = fadeStep;
+
+    }
+  }
+
+  SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
+
+}
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+
+
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -498,242 +760,6 @@ void mAnimatorLight::EffectAnim__Popping_Decay_Base(bool draw_palette_inorder)
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
-
-
-/********************************************************************************************************************************************************************************************************************
- *******************************************************************************************************************************************************************************************************************
- * @name           : Candle Flicker Base Function
- * @description:   : Randomly changes colours of pixels, and blends to the new one
- *                   Values close to 100 (speed) produce 5Hz flicker, which looks very candle-y
- *                   Inspired by https://github.com/avanhanegem/ArduinoCandleEffectNeoPixel
- *                   and https://cpldcpu.wordpress.com/2016/01/05/reverse-engineering-a-real-cand
- * @note           : derived from WLED effects
- * 
- * @param intensity: Depth of variation from max/min brightness
- * @param speed    : How often it occurs
- * @param rate     : None
- * @param time     : None
- * @param aux0     : brightness saved
- * @param aux1     : target brightness
- * @param aux2     : (U) Second target palette
- * @param aux3     : Reserved for random palette refresh rate
- *******************************************************************************************************************************************************************************************************************
- ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-/**
- * @description:   : Flickers pixels by the same amount towards black
- **/
-void mAnimatorLight::EffectAnim__Candle_Single()
-{
-  EffectAnim__Flicker_Base(false, mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
-}
-static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-/**
- * @description:   : Flickers by multiple levels towards black
- **/
-void mAnimatorLight::EffectAnim__Candle_Multiple()
-{
-  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
-}
-static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM = "Speed,Intensity,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-/**
- * @description:   : Flickers by multiple levels towards black
- **/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
-{
-  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__COLDWHITE__ID);
-}
-static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-#endif
-/**
- * @description:   : Flickers by multiple levels towards black
- **/
-void mAnimatorLight::EffectAnim__Shimmering_Palette() // Same as Candle_Multiple
-{
-  EffectAnim__Flicker_Base(true,  mPalette::PALETTELIST_FIXED_SINGLE_COLOUR__BLACK__ID);
-}
-static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-/**
- * @description:   : Flicker between primary and secondary palette
- * 
-     * Desc: Animation, that fades from selected palette to anothor palette,
-     *       The intensity of fade (closer to palette B) will depend on intensity value
-     *       ie intensity of 255 means Palette A (primary) can fade into palette B (set by option)
-     * 
-     *       New method to set options
-     *        option8  for 255 value range.... ie allows animations to be configured and saved in their "aux0"
-     *        option16 for 65000 value range
- * */
-void mAnimatorLight::EffectAnim__Shimmering_Two_Palette() // Also add another here (or really segcolour is also it) to flicker into a second palette!! this will require direct load of second palette
-{
-  EffectAnim__Flicker_Base(true, SEGMENT.params_user.val0);
-}
-static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-/**
- * @description:   : Base function for flickering
- * */
-void mAnimatorLight::EffectAnim__Flicker_Base(bool use_multi, uint16_t flicker_palette_id )
-{
-
-  uint8_t pixels_in_palette = GetNumberOfColoursInPalette(SEGMENT.palette.id);
-
-  RgbcctColor colour_pri;
-  RgbcctColor colour_sec;
-  RgbcctColor colour_out;
-
-  if (use_multi)
-  {
-    uint16_t dataSize = (SEGLEN -1) *3;
-    if(!SEGMENT.allocateData(dataSize) ){ return; }
-  }
-
-  //max. flicker range controlled by intensity()
-  uint8_t valrange = SEGMENT.intensity();
-  uint8_t rndval = valrange >> 1;
-
-  #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-  ALOG_DBG(PSTR("step=%d"),    SEGMENT.step);
-  ALOG_DBG(PSTR("valrange=%d"),valrange);
-  ALOG_DBG(PSTR("rndval=%d"),  rndval);
-  #endif
-
-  uint8_t pixel_palette_counter = 0;
-
-  //step (how much to move closer to target per frame) coarsely set by speed()
-  uint8_t speedFactor = 4;
-  if (SEGMENT.speed() > 252) { // epilepsy
-    speedFactor = 1;
-  } else 
-  if (SEGMENT.speed() > 99) { // regular candle (mode called every ~25 ms, so 4 frames to have a new target every 100ms)
-    speedFactor = 2;
-  } else 
-  if (SEGMENT.speed() > 49) { // slower fade
-    speedFactor = 3;
-  } //else 4 (slowest)
-
-  uint16_t numCandles = (use_multi) ? SEGLEN : 1;
-  #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-  ALOG_DBG(PSTR("numCandles=%d"), numCandles);
-  #endif
-
-  for (uint16_t i = 0; i < numCandles; i++)
-  {
-    #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-    ALOG_DBG(PSTR("i=%d|%d"),i,numCandles);
-    #endif
-
-    uint16_t d = 0; //data location
-
-    uint8_t s        = SEGMENT.params_internal.aux0, 
-            s_target = SEGMENT.params_internal.aux1, 
-            fadeStep = SEGMENT.step;
-
-    if (i > 0) {
-      d = (i-1) *3;
-      s = SEGMENT.data[d]; 
-      s_target = SEGMENT.data[d+1]; 
-      fadeStep = SEGMENT.data[d+2];
-    }
-    if (fadeStep == 0) { //init vals
-      s = 128; s_target = 130 + random8(4); fadeStep = 1;
-    }
-
-    bool newTarget = false;
-    if (s_target > s) { //fade up
-
-      #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-      ALOG_DBG(PSTR("fade up s_target > s %d=%d"), s_target, s);
-      #endif
-
-      s = qadd8(s, fadeStep);
-      if (s >= s_target) newTarget = true;
-    } else {
-      s = qsub8(s, fadeStep);
-      if (s <= s_target) newTarget = true;
-          
-      #ifdef ENABLE__DEBUG_POINT__ANIMATION_EFFECTS
-      ALOG_DBG(PSTR("fade down=%d"),s);
-      #endif
-
-    }
-
-    if (newTarget) {
-      s_target = random8(rndval) + random8(rndval);
-      if (s_target < (rndval >> 1)) s_target = (rndval >> 1) + random8(rndval);
-      uint8_t offset = (255 - valrange) >> 1;
-      s_target += offset;
-
-      uint8_t dif = (s_target > s) ? s_target - s : s - s_target;
-    
-      fadeStep = dif >> speedFactor;
-      if (fadeStep == 0) fadeStep = 1;
-    }
-
-    // flicker_palette_id = mPalette::PALETTELIST_HTML_COLOUR__White__ID;
-
-    /**
-     * Apply colour to output: different per pixel
-     **/
-    if(i > 0) 
-    {
-      colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter);    
-      // colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
-
-      colour_sec = GetColourFromUnloadedPalette2(flicker_palette_id);
-      
-      colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
-
-      if(pixel_palette_counter++ >= pixels_in_palette-1)
-      {
-        pixel_palette_counter = 0;
-      }
-
-      SEGMENT.SetPixelColor(SEGMENT.pixel_range.start + i, colour_out);
-
-      SEGMENT.data[d  ] = s; 
-      SEGMENT.data[d+1] = s_target; 
-      SEGMENT.data[d+2] = fadeStep;
-
-    } 
-    /**
-     * Single mode, one colour applied across all leds??????????
-     * */
-    else
-    {
-      
-      for(uint16_t p = SEGMENT.pixel_range.start;
-                 p <= SEGMENT.pixel_range.stop;
-                 p++
-      ){
-
-        colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter); 
-        // colour_pri = SEGMENT.GetPaletteColour(pixel_palette_counter, PALETTE_SPAN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE);
-
-        colour_sec = GetColourFromUnloadedPalette2(flicker_palette_id);
-
-        colour_out = ColourBlend(colour_pri, colour_sec, s); // s = flicker level (i.e. brightness)
-
-        if(pixel_palette_counter++ >= pixels_in_palette-1)
-        {
-          pixel_palette_counter = 0;
-        }
-
-        SEGMENT.SetPixelColor(p, colour_out);
-
-      }
-
-      SEGMENT.params_internal.aux0 = s; 
-      SEGMENT.params_internal.aux1 = s_target; 
-      SEGMENT.step = fadeStep;
-
-    }
-  }
-
-  SetSegment_AnimFunctionCallback_WithoutAnimator(SEGIDX);  
-
-}
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -6299,6 +6325,7 @@ uint32_t mAnimatorLight::color_wheel(uint8_t pos) {
 #ifdef ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
 
   if (SEGMENT.palette.id){ // when default, so it skips this, causes brightness error
+    // Again this assumes palette colour index is ranged 0 to 255, so I NEED to fix mine to be the same
     return SEGMENT.GetPaletteColour(pos, PALETTE_SPAN_OFF, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE).getU32();
   }else
   {
@@ -9973,6 +10000,7 @@ static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM = "!;,!;!;01";
  * @name : Name
  * @note : Converted from WLED Effects
  * Cycles all LEDs at once through a rainbow.
+ * Note: SEGMENT.intensity() < 128 = pastel rainbow, SEGMENT.intensity() > 128 = full saturation rainbow
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Rainbow()
@@ -12224,7 +12252,6 @@ void mAnimatorLight::SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid(
 
 
 
-#endif //USE_MODULE_LIGHTS_ANIMATOR
 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 // const uint32_t MUSIC_TIMING[] = {
@@ -13051,7 +13078,7 @@ void mAnimatorLight::EffectAnim__Christmas_Musical__01()
 
 }
 static const char PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;!"; // 7 sliders + 4 options before first ;
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
 
 
@@ -13075,7 +13102,8 @@ void mAnimatorLight::LoadEffects()
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR,                             PM_EFFECT_CONFIG__CANDLE_SINGLE);  
   addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR,                           PM_EFFECT_CONFIG__CANDLE_MULTIPLE);
-  addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,            &mAnimatorLight::EffectAnim__Shimmering_Palette,              PM_EFFECTS_FUNCTION__SHIMMERING_PALETTE__NAME_CTR,                             PM_EFFECT_CONFIG__SHIMMERING_PALETTE);
+  #endif 
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECTS_FUNCTION__SHIMMERING_TWO_PALETTES__NAME_CTR,                        PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES);
   #endif  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
@@ -13128,7 +13156,9 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR,              PM_EFFECT_CONFIG__STATIC_PATTERN);
   addEffect3(EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR,          PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
   #endif
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect3(EFFECTS_FUNCTION__WLED_SPOTS__ID,                &mAnimatorLight::EffectAnim__Spots,                                 PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
+  #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect3(EFFECTS_FUNCTION__WLED_PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR,                     PM_EFFECT_CONFIG__PERCENT);
   #endif
@@ -13405,3 +13435,5 @@ void mAnimatorLight::LoadEffects()
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
 }
 
+
+#endif //USE_MODULE_LIGHTS_ANIMATOR

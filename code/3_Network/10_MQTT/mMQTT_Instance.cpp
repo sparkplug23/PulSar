@@ -238,7 +238,9 @@ boolean MQTTConnection::psubscribe(const char* topic) {
  */
 void MQTTConnection::SetPubSubClient(Client* client_in)
 {
+      Serial.printf("MQTT::SetPubSubClient A\n\r"); Serial.flush();
   pubsub = new PubSubClient(*client_in);
+      Serial.printf("MQTT::SetPubSubClient B\n\r"); Serial.flush();
   flag_start_reconnect = true;
   DEBUG_LINE_HERE;
 }

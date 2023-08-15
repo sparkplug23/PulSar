@@ -293,6 +293,38 @@ DEBUG_LINE_HERE;
       
       data_buffer.isserviced++;
     }
+  }else{
+
+    char keyname[10];
+    for(int i=0;i<4;i++)
+    {
+      snprintf(keyname, sizeof(keyname), "Param%d", i);
+      if(jtok = obj["Effects"].getObject()[keyname])
+      { 
+        // SEGMENT_I(segment_index).params_user.val[i] = jtok.getInt();
+
+        switch(i)
+        {
+          case 0: SEGMENT_I(segment_index).params_user.val0 = jtok.getInt(); break;
+          case 1: SEGMENT_I(segment_index).params_user.val1 = jtok.getInt(); break;
+          case 2: SEGMENT_I(segment_index).params_user.val2 = jtok.getInt(); break;
+          case 3: SEGMENT_I(segment_index).params_user.val3 = jtok.getInt(); break;
+        }
+
+        data_buffer.isserviced++;
+        
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_PIXEL "Effects.Params Segment[%d] = %d,%d,%d,%d"),
+        segment_index,
+        SEGMENT_I(segment_index).params_user.val0,
+        SEGMENT_I(segment_index).params_user.val1,
+        SEGMENT_I(segment_index).params_user.val2,
+        SEGMENT_I(segment_index).params_user.val3
+      );
+      
+      }
+    }
+
+
   }
 
 

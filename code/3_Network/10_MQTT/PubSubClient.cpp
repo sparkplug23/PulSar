@@ -15,9 +15,13 @@ PubSubClient::PubSubClient() {
 }
 
 PubSubClient::PubSubClient(Client& client) {
+      Serial.printf("MQTT::PubSubClient 1\n\r"); Serial.flush();
     this->_state = MQTT_DISCONNECTED;
+      Serial.printf("MQTT::PubSubClient 2\n\r"); Serial.flush();
     setClient(client);
+      Serial.printf("MQTT::PubSubClient 3\n\r"); Serial.flush();
     this->stream = NULL;
+      Serial.printf("MQTT::PubSubClient 4\n\r"); Serial.flush();
 }
 
 PubSubClient::PubSubClient(IPAddress addr, uint16_t port, Client& client) {

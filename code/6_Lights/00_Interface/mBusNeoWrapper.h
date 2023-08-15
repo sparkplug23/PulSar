@@ -534,9 +534,9 @@ class PolyBus {
   {
     
     RgbcctColor colour_hardware = colour_internal; // Start with original
-    #ifdef ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
+    // #ifdef ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
     colour_hardware = RgbcctColor(0); // To debug, clear conversion
-    #endif
+    // #endif
 
     // colour_order.red=0;colour_order.green=1;colour_order.blue=2;
   
@@ -855,9 +855,6 @@ class PolyBus {
       }
       #else //ESP32
       uint8_t offset = 0; //0 = RMT (num 0-7) 8 = I2S0 9 = I2S1
-      #ifdef ENABLE_DEVFEATURE__PIXEL_USE_I2S_FOR_BUS
-      offset = 0; // I2S0
-      #endif // ENABLE_DEVFEATURE__PIXEL_USE_I2S_FOR_BUS
       #if defined(CONFIG_IDF_TARGET_ESP32S2)
       // ESP32-S2 only has 4 RMT channels
       if (num > 4) return I_NONE;

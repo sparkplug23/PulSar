@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+// #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+#include <Arduino.h>
 
 #include "webpages/html_ui.h"
 #ifdef WLED_ENABLE_SIMPLE_UI
@@ -32,5 +34,5 @@ const char JSON_palette_names[] PROGMEM = R"=====([
 
 
 
-#endif // ENABLE_DEVFEATURE_LIGHT__WEBUI_STYLE01
+// #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
