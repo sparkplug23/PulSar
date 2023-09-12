@@ -317,13 +317,6 @@ void mSonoffIFan::SpeedRefresh(void)
 void mSonoffIFan::EverySecond()
 {
   
-  #if FIRMWARE_VERSION_MINOR > 114
-  #warning "DEPRECIATION_WARNING"
-  #endif
-  #if FIRMWARE_VERSION_MINOR > 115
-  #error "DEPRECIATION_ERROR"
-  #endif
-
   if(time_on->UpdateTick())
   {
     ALOG_INF( PSTR(D_LOG_GARAGE D_JSON_COMMAND_NVALUE_K("Running Value")), time_on->Value());

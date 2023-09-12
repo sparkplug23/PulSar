@@ -25,8 +25,6 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-//--------------------------------[Enable Device]-------------------------------------
-
 
 /**
  * @brief Bedroom
@@ -52,6 +50,7 @@
 
 
 
+
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
 ****** Bedroom ****************************************************************************************************************************************************
@@ -71,47 +70,96 @@
 
   #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
 
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_RGBCCT_PWM_H801
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"    // PWM RGBCCT
     "},"
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
-  
-  #define STRIP_SIZE_MAX 1
+
   #define USE_LIGHTING_TEMPLATE
+  #define STRIP_SIZE_MAX 1
+  #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
-    "HardwareType":"RGBCCT_PWM",
-    "AnimationMode":"Effects",
-    "ColourOrder":"RGBCW",
-    "ColourPalette":"Rgbcct 01",
-    "Effects": {
-      "Function":0
+    "BusConfig":[
+      {
+        "Pin":[15,13,12,14,4],
+        "ColourOrder":"RGBCW",
+        "BusType":"ANALOG_5CH",
+        "Start":0,
+        "Length":1
+      }
+    ],    
+    "Segment0":{
+      "PixelRange": [
+        0,
+        1
+      ],
+      "ColourPalette":16,
+      "SegColour0": {
+        "Hue": 0,
+        "Sat": 100,
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100,
+        "CCT_TempPercentage":90,
+        "ColourType":4
+      },
+      "Effects": {
+        "Function":1
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB":100,
+      "BrightnessCCT":100
     },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "SegColour": {
-      "Hue": 120,
-      "Sat": 100,
-      "SubType":4,
-      "CCT_TempPercentage":100
-    },
-    "BrightnessRGB_255": 0,
-    "BrightnessCCT_255": 0
+    "BrightnessRGB":100,
+    "BrightnessCCT":100
   }
   )=====";
+
 
 #endif
 
@@ -537,7 +585,7 @@
 
   // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   // #define USE_MODULE_DRIVERS_LEDS
 
@@ -1110,7 +1158,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1185,7 +1233,7 @@
 
   // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 
-  // //#define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // //#define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   // #define USE_MODULE_TEMPLATE
   // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1360,7 +1408,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  // #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1443,7 +1491,7 @@
 
   // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 
-  // //#define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // //#define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   // #define USE_MODULE_TEMPLATE
   // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1938,115 +1986,134 @@
   #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
   #define DEVICENAME_ROOMHINT_CTR   "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
   
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_ADDRESSABLE
-  // #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  // #define USE_SK6812_METHOD_DEFAULT
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
   
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-  // #define ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
 
-  #define USE_SCREEN_RGB_RESOLUTION_P32_TEMP_FIX // set with commands later
-  #define USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
- 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    // #define STRIP_SIZE_MAX 55
-    #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-    #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-    
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_JSON_GPIOC "\":{"
-  //     "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-  //   "},"
-  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  // "}";
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
 
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+    #define USE_DEVFEATURE_PIXEL0_BOTTOM_LEFT_ANTICLOCKWISE_TO_BE_FEATURE_OPTION
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+  #define USE_LIGHTING_TEMPLATE
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+  #define STRIP_SIZE_MAX 133
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":133
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        133
+      ],
+      "ColourPalette":110,
+      "SegColour0": {
+        "Hue": 330,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 5,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+      #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  //ADALIGHT_ViaSerialAndWifi
-  //SCREENEDGES
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
 
-  #define STRIP_SIZE_MAX 133
-
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  "Ambilight"  "\","
-  //   "\"" D_JSON_EFFECTS "\":{"
-  //     "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
-  //   "},"
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME_MS "\":1000,"
-  //     "\"" D_JSON_RATE_MS "\":1000,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-  //   "},"
-  //   "\"" D_JSON_CCT_PERCENTAGE "\":100,"
-  //   "\"" D_JSON_HUE "\":15,"
-  //   "\"" D_JSON_SAT "\":90,"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"RGBCCTColour 00\","
-  //   "\"" D_JSON_BRIGHTNESS_CCT "\":40,"
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":0"
-  // "}";
-
-
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","                //should be default
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"GRBw\","    
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\"," 
-    "\"ColourPalette\":10," 
-    "\"Hue\":20," 
-    "\"Sat\":90," 
-    "\"Effects\":{"
-      "\"Function\":\"Solid\""
-    "},"
-    "\"Transition\":{"
-      "\"TimeMs\":900,"
-      "\"RateMs\":1000"
-    "},"    
-    "\"" D_JSON_CCT_PERCENTAGE "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT "\":40,"
-    "\"BrightnessRGB\":0"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
 #endif

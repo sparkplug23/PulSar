@@ -929,12 +929,12 @@ void setSat255(uint8_t sat_new);
     UpdateInternalColour();
   }
 
-  void setCCT(uint16_t cct) 
+   void setCCT(uint16_t cct) 
   {
     
-Serial.printf("_cct_min_range=%d\n\r",_cct_min_range);
-Serial.printf("cct_max_range=%d\n\r",_cct_max_range);
-Serial.printf("cctA=%d\n\r",cct);
+// Serial.printf("_cct_min_range=%d\n\r",_cct_min_range);
+// Serial.printf("cct_max_range=%d\n\r",_cct_max_range);
+// Serial.printf("cctA=%d\n\r",cct);
 
     if (0 == cct) {
       // disable cct mode

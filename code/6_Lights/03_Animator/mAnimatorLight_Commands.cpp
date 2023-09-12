@@ -1403,9 +1403,9 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
     if(segment_index > pCONT_lAni->segments.size()-1)
     { 
       ALOG_HGL(PSTR("Creating new segment %d|%d"), segment_index, pCONT_lAni->segments.size());
-    segments[0].rgbcctcolors[0].debug_print(">>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
+      segments[0].rgbcctcolors[0].debug_print(">>>>>>>>>>>>>>>>>>pre segment Segment 0 colour");
       Segment_AppendNew(data[1],data[2], segment_index+1);
-    segments[0].rgbcctcolors[0].debug_print("<<<<<<<<<<<<<<<<<<post segment Segment 0 colour");
+      segments[0].rgbcctcolors[0].debug_print("<<<<<<<<<<<<<<<<<<post segment Segment 0 colour");
     }
 
 

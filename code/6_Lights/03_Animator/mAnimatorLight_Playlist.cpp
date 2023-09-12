@@ -332,7 +332,7 @@
 //   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].pixel_multiplier_enabled = false;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-//   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_09_ID;
+//   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 //   mixer.group[EFFECTS_FUNCTION_MIXER_01_ID].starttime = {8, 1, 2, 3};
 
 // //   // Group 1 "Random, slow, few"
@@ -348,7 +348,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_09_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_02_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
 // //   // Group 2 "Random, fast, many"
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].flags.enable_force_preset_brightness_scaler = true;
@@ -363,7 +363,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_10_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_03_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_10_ID;
 
 // // // Section B
 
@@ -380,7 +380,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].pixel_multiplier_enabled = true;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_11_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_04_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_11_ID;
 
 // //   // Group 4 "Random, rows, faster"
 // //   // EFFECTS_FUNCTION_MIXER_05_ID
@@ -396,7 +396,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].pixel_multiplier_enabled = true;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_12_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_05_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 // //   // Group 5 "Static/Inorder, rows, few  colours"
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].flags.enable_force_preset_brightness_scaler = true;
@@ -411,7 +411,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].pixel_multiplier_enabled = true;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_09_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_06_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
 // //   // Group 6 "Now rotate the rows"
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].flags.enable_force_preset_brightness_scaler = true;
@@ -426,7 +426,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].pixel_multiplier_enabled = true;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].flashersettings_function = EFFECTS_FUNCTION_SEQUENTIAL_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_09_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_07_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_09_ID;
 
 // // // Berry green
 // // // Group 7
@@ -442,7 +442,7 @@
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = true;
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette.id = mPaletteI->PALETTELIST_FIXED_BERRY_GREEN_ID;
+// // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
 
 // // // // 8
 
@@ -458,7 +458,7 @@
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_enabled = false;
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette.id = mPaletteI->PALETTELIST_FIXED_BERRY_GREEN_ID;
+// // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
 
 // // //   // Idea
 // // //   // Darker many colours, with a few (instant) bright leds changing to brighter (and thus transitioning into the new twinkle modes)
@@ -475,7 +475,7 @@
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_enabled = false;
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flashersettings_function = EFFECTS_FUNCTION_SEQUENTIAL_ID;
-// // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette.id = mPaletteI->PALETTELIST_FIXED_BERRY_GREEN_ID;
+// // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette.id = mPaletteI->PALETTELIST_STATIC_BERRY_GREEN_ID;
 
 
 
@@ -494,7 +494,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].flashersettings_function = EFFECTS_FUNCTION_STEPPING_PALETTE_ID;//EFFECTS_FUNCTION_FLASH_TWINKLE_SINGLE_COLOUR_RANDOM_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_12_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_08_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 // // // Step thorugh
 
@@ -512,7 +512,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].flashersettings_function = EFFECTS_FUNCTION_STEPPING_PALETTE_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_15_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_09_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_15_ID;
 
 // // //too much pink
 // //   // Group 11 "where palette 5 has off colours too" NEW method, move in "steps across palette" (ie show 1, 2, or 3, or 4, moving in order/randomly picking (but never repeating))
@@ -528,7 +528,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].flashersettings_function = EFFECTS_FUNCTION_STEPPING_PALETTE_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_12_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_10_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 
 
@@ -550,7 +550,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].animation_transition_order = TRANSITION_ORDER_RANDOM_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_12_ID;  // palette is the desired brightness!
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;  // palette is the desired brightness!
 
 // // //testing
 // //   // mixer.group[EFFECTS_FUNCTION_MIXER_11_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
@@ -570,7 +570,7 @@
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].pixel_multiplier_enabled = false;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].animation_transition_order = TRANSITION_ORDER_INORDER_ID;
 // //   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].flashersettings_function = EFFECTS_FUNCTION_SLOW_GLOW_ID;
-// //   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].palette_id = mPaletteI->PALETTELIST_FIXED_CHRISTMAS_12_ID;
+// //   mixer.group[EFFECTS_FUNCTION_MIXER_12_ID].palette_id = mPaletteI->PALETTELIST_STATIC_CHRISTMAS_12_ID;
 
 
 //   // Animation idea #1
@@ -1007,7 +1007,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CHRISTMAS_01__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CHRISTMAS_01__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 127;
 //   SEGMENT_I(seg_idx).transition.time_ms = 0;
@@ -1021,7 +1021,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CHRISTMAS_05__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CHRISTMAS_05__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__SLOW_GLOW__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 127;
 //   SEGMENT_I(seg_idx).transition.time_ms = 2000;
@@ -1034,7 +1034,7 @@
 //   // // SEGMENT_I(seg_idx).grouping = 1;
 //   // // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   // // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CHRISTMAS_01__ID;
+//   // // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CHRISTMAS_01__ID;
 //   // // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__ROTATING_PALETTE__ID;
 //   // // SEGMENT_I(seg_idx).intensity_value = 127;
 //   // // SEGMENT_I(seg_idx).transition.time_ms = 500;
@@ -1047,7 +1047,7 @@
 //   // // SEGMENT_I(seg_idx).grouping = 1;
 //   // // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   // // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CHRISTMAS_01__ID;
+//   // // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CHRISTMAS_01__ID;
 //   // // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__STEPPING_PALETTE__ID;
 //   // // SEGMENT_I(seg_idx).intensity_value = 127;
 //   // // SEGMENT_I(seg_idx).transition.time_ms = 500;
@@ -1165,7 +1165,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CRGBPALETTE16__PARTY_COLOUR__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 127;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
@@ -1199,7 +1199,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CRGBPALETTE16__PARTY_COLOUR__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIREWORKS__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
@@ -1216,7 +1216,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CRGBPALETTE16__PARTY_COLOUR__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 100;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
@@ -1233,7 +1233,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CRGBPALETTE16__PARTY_COLOUR__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 100;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
@@ -1250,7 +1250,7 @@
 //   SEGMENT_I(seg_idx).grouping = 1;
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CRGBPALETTE16__PARTY_COLOUR__ID;
+//   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
 //   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_RAIN__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 100;
 //   SEGMENT_I(seg_idx).transition.time_ms = FRAMETIME_MS;
@@ -1361,7 +1361,7 @@
 //   // SEGMENT_I(seg_idx).grouping = 1;
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
-//   // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_FIXED_CHRISTMAS_01__ID;
+//   // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CHRISTMAS_01__ID;
 //   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
 //   // SEGMENT_I(seg_idx).intensity_value = 127;
 //   // SEGMENT_I(seg_idx).transition.time_ms = 500;

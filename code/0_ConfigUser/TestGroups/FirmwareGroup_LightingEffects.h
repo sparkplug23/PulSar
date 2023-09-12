@@ -64,8 +64,8 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L4__H801_5CH_PWM_RGBCCT
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L5__H801_3CHRGB_AND_2CHCW
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L6__H801_FIVE_1CH_WHITE_CHANNELS
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_60LEDS
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS
+#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L9__ESP8266_WEBUI_OPTIM_3LEDS
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3200,7 +3200,7 @@
   #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7n8__ESP32_PALETTE_WEBUI_DESIGN
   #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
 #endif
-#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_60LEDS
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
   #define DEVICENAME_CTR          "testgroup_lighting_L8"
   #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7n8__ESP32_PALETTE_WEBUI_DESIGN
   #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
@@ -3233,6 +3233,8 @@
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
   /***********************************
    * SECTION: Network Configs
   ************************************/    
@@ -3259,6 +3261,8 @@
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
   #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
 
@@ -3354,7 +3358,7 @@
   #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
   
   #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
-  #define STRIP_SIZE_MAX 59
+  #define STRIP_SIZE_MAX 144
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -3364,33 +3368,33 @@
         "ColourOrder":"GRBW",
         "BusType":"SK6812_RGBW",
         "Start":0,
-        "Length":59
+        "Length":144
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        59
+        144
       ],
-      "ColourPalette":0,
+      "ColourPalette":110,
       "SegColour0": {
-        "Hue": 330,
+        "Hue": 0,
         "Sat":100,
         "BrightnessRGB":5
       },
       "Effects": {
-        "Function": 0,
+        "Function": 1,
         "Speed":1,
         "Intensity":255
       },
       "Transition": {
-        "TimeMs": 900,
-        "RateMs": 1000
+        "TimeMs": 0,
+        "RateMs": 2000
       },
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
     },
-    "BrightnessRGB": 100,
+    "BrightnessRGB": 5,
     "BrightnessCCT": 0
   }
   )=====";
@@ -3461,6 +3465,8 @@
 
 
   #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION

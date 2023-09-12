@@ -224,10 +224,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID, new mDevelopmentDebugging());
   #endif
-  // Subsystems
-  #ifdef USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
-  addTasker(EM_MODULE_SUBSYSTEM_SOLAR_LUNAR_ID, new mSolarLunar());
-  #endif
   
 
   // Network  
@@ -442,6 +438,9 @@ uint8_t mTaskerManager::Instance_Init(){
   #endif
   #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
     addTasker(EM_MODULE__SENSORS_BATTERY_MODEM__ID, new mDB18x20_ESP32());
+  #endif
+  #ifdef USE_MODULE_SENSORS_SOLAR_LUNAR
+  addTasker(EM_MODULE_SENSORS_SOLAR_LUNAR_ID, new mSolarLunar());
   #endif
 
   // Controllers

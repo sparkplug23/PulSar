@@ -77,12 +77,17 @@ class mSolarLunar :
     {
       double azimuth = 0;
       double elevation = 0;
+      double elevation_min = -29;
+      double elevation_max = 40;
       struct DIRECTION_OF_CHANGE{
         uint8_t is_ascending = true;
       }direction;
       uint32_t tUpdated_millis = 0;
       bool isvalid = false;
     }solar_position;
+
+
+
 
     solar_position_t solar_position_testing;
 

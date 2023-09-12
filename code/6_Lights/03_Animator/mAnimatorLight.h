@@ -27,6 +27,7 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
@@ -63,7 +64,7 @@
 #define PALETTE_DISCRETE_ON   true
 #define PALETTE_DISCRETE_OFF  false
 
-#define PALETTE_SPAN_ON true
+#define PALETTE_INDEX_SPANS_SEGLEN_ON true
 #define PALETTE_SPAN_OFF false
 #define NO_ENCODED_VALUE nullptr
 
@@ -533,15 +534,8 @@ class mAnimatorLight :
      * */
     enum AMBILIGHT_SCREEN_INDEX{SCREEN_CENTRE=0,SCREEN_LEFT=1,SCREEN_RIGHT=2};
 
-    // enum RgbColorTypeID{
-    //   RgbColorTypeID_RGB=0,
-    //   RgbColorTypeID_RGB_CW,
-    //   RgbColorTypeID_RGB_WW,
-    //   RgbColorTypeID_RGB_WW_CW}; 
-
-
     struct AMBILIGHT_SCREEN_SETTINGS{
-      uint8_t ambilight_mode=AMBILIGHT_SIDES_ID;
+      uint8_t ambilight_mode = AMBILIGHT_SIDES_ID;
       uint32_t tSavedUpdate = millis();
       uint32_t ratemsSavedUpdate = 1000;
       uint8_t fUpdate = false;
@@ -584,15 +578,14 @@ class mAnimatorLight :
     #define FRAMETIME_MS     24
     #define FRAMETIME        getFrameTime()
 
-    /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
-      insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
+    /* Each segment uses 52 bytes of SRAM memory, so if you're application fails because of insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
     #ifdef ESP8266
       #define MAX_NUM_SEGMENTS    3
       /* How much data bytes all segments combined may allocate */
       #define MAX_SEGMENT_DATA  5120
     #else
       #ifndef MAX_NUM_SEGMENTS
-        #define MAX_NUM_SEGMENTS  6//32
+        #define MAX_NUM_SEGMENTS  6
       #endif
       #define MAX_SEGMENT_DATA  32767
     #endif
@@ -686,8 +679,7 @@ class mAnimatorLight :
      * 
      */
     #define SEGCOLOR_U32(x)      RgbcctColor::GetU32ColourBrightnessApplied(segments[getCurrSegmentId()].rgbcctcolors[x])
-    #define SEGCOLOR_RGBCCT(x)      segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
-    // #define SEGCOLOR_U32(s,x)  RgbcctColor::GetU32Colour(segments[s].rgbcctcolors[x])
+    #define SEGCOLOR_RGBCCT(x)   segments[getCurrSegmentId()].rgbcctcolors[x].GetColourWithBrightnessApplied()
 
     #define SEGMENT          segments[getCurrSegmentId()]
     #define SEGMENT_I(X)     segments[X]
@@ -699,16 +691,13 @@ class mAnimatorLight :
     void fill(uint32_t c, bool apply_brightness = false);
     void fill(RgbcctColor c, bool apply_brightness = false);
     void fill_ranged(uint32_t c, bool apply_brightness = false); 
-    // void seg_fill_ranged(uint32_t c, bool apply_brightness = false);
 
     uint32_t color_wheel(uint8_t pos);
     uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
 
     void Init_Segments();
 
-    /**
-     * Minor Code version 96 onwards requires names, as reshuffle is happening. Any old device will not respond to the correct command via number until remap is performed
-     * */
+
     enum EFFECTS_FUNCTION__IDS
     {
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -729,6 +718,9 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID,
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
     #endif
+    // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    // EFFECTS_FUNCTION__STATIC_PALETTE_AGED_COLOURS__ID, // new palette that makes sure colours from the palettes, will have very slight changes in colouring to make them look like vintage lights (faded, more warm yellowness and redness. Greens/Blues should have their colour shifted red)
+    // #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID,
     #endif
@@ -760,35 +752,14 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID, //ie use "FadeOut()"
+    EFFECTS_FUNCTION__TWINKLE_DECAYING_PALETTE__ID,
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS 
     EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
     EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
     EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
     EFFECTS_FUNCTION__NOTIFICATION_PULSING__ID,    
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS // SELECTIVE meaning optional extras then "of type notification"
-    /**
-     * Palette is drawn "inorder" and animations are drawn with X outputs (4 or 5 like normal lights) to create the effect like real lights
-     *
-      1 - Combination (ommited, can be performed using mixer)
-      2 - In Waves
-      3 - Sequentials
-      4 - Slo-Glo
-      5 - Chasing / Flash
-      6 - Slow Fade
-      7 - Twinkle / Flash
-      8 - Steady on (already added)
-     * */
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER_IN_WAVES_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SEQUENTIAL_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLO_GLO_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__CHASING_AND_FLASHING_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__SLOW_FADE_ID
-    // EFFECTS_FUNCTION__CHRISTMAS_EIGHT_FUNCTION_CONTROLLER__TWINKLE_AND_FLASH_ID
-    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-    // EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
         
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__ID,
@@ -798,6 +769,53 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
     #endif
+
+    /******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Christmas Multifunction Effects  ***************************************************************************************************************************************************************************
+    **  Replicate how traditional 2/4 ouput controllers and their effects look
+          - Option1: Make the same LEDs maintain colour, as if they are painted glass bulbs. So a sequence of 4 RGBO would mean every 1 pixel in order would be turned off
+          - Option2: Replicate the same effects, but keep as many LEDs on as possible.
+    **************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/  
+    /**
+     * Palette is drawn "inorder" and animations are drawn with X outputs (4 or 5 like normal lights) to create the effect like real lights
+     *
+      1 - Combination (omited, can be performed using mixer)
+      2 - In Waves
+      3 - Sequentials
+      4 - Slo-Glo
+      5 - Chasing / Flash
+      6 - Slow Fade
+      7 - Twinkle / Flash
+      8 - Steady on (already added)
+     * */
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL__FUNCTION_CONTROLLER_IN_WAVES_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL__FUNCTION_CONTROLLER__SEQUENTIAL_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL__FUNCTION_CONTROLLER__SLO_GLO_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL__FUNCTION_CONTROLLER__CHASING_AND_FLASHING_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL__FUNCTION_CONTROLLER__SLOW_FADE_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL__FUNCTION_CONTROLLER__TWINKLE_AND_FLASH_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL____XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL____XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    // EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL____XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    // EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__  ID,
+    #endif
+    /**
+     * @brief Turn random Lights off, but when they are off (and hence shunted from in series) the rest of the LEDs in that region should get brighter
+     * Note: Part of why these look good is the inherent initial brightness from a cold incandenct bulb turning on, then stabilising. 
+     * This will also be the case for the other traditional christmas effects... not sure how to programmatically replicate this
+     * Option1: Randomly turn LEDs off, entire string gets marginally brighter
+     * Option2: Divide all LED string into sections of 8 (ie. 24V filament sets) and randomly turn 1 led off in each section, and that section brightness changes
+     * 
+     */
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    EFFECTS_FUNCTION__CHRISTMAS_TRADITIONAL_TWINKLE_LIGHTS_ID,
+    #endif
+
 
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -967,78 +985,6 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__WLED_DRIP__ID,   
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE  
 
-    /**
-     * Development effects
-     * @note These need to be last since without proper defines of effect names they can only be addressed by their numeric ID
-     * 
-     */
-    
-    // /**
-    //  * Desc: Twinkle on, fade off
-    //  *      Random burst of pixels are turned on based on palette, then fade off
-    //  * 
-    //  * Method: randomly pick burst of pixels to turn on, ie animation period starts of Y, then decays (thereby increasing next run time)
-    //  *         Do this until X pixels (animation periods) have occured,
-    //  *         Every 1 second of animation that elapses, half the brightness of all pixels (ie the fade)
-    //  *         Intensity1: will dictate how many pixels are turned on
-    //  *         Intensity2: may dictate the decay rate (ie much slower would leave pixels on for longer meaning more of the lights remain on) 
-    //  * NotActive
-    //  * EFFECTS_FUNCTION__PULSE_RANDOM_ON_FADE_OFF_ID
-    //  * */
-    // EFFECTS_FUNCTION__TWINKLE_RANDOM_BURSTS_ON_WITH_SLOW_FADE_OFF__ID,
-    // /**
-    //  * Palette is first drawn with certain lower brightness level, then
-    //  * additional changes takes those colours and bumbs their brightness up to desired brightness
-    //  * Few change, random pixels bumped up
-    //  * Check if their brightness is <upper, before asserting them brighter (or convert to hsbcolour, flick up brightness if needed then change back to rgb)
-    //  * Goes from low to high then stops
-    //  * */
-    // EFFECTS_FUNCTION__POPPING_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_BOUNDERY,
-    // /**
-    //  * Desc: Twinkle
-    //  *  Random pixels will turn off for random times (ie apply inorder palette always, then random turn colours to off and on(brightness) again)
-    //  * */
-
-    // /**
-    //  * Desc: Twinkle with glimmer
-    //  *  Twinkle as above, but the entire global brightness will flicker gently (so limit how much) based on pixels energy count ie twinkle filament lights
-    //  * */
-
-    // /**
-    //  * 0/100% animaiton progress is low brightness, 50% flips to upper brightness
-    //  * ie randomly change pixels between two brightness levels, with optional boundaries only or as range
-    // */
-    // EFFECTS_FUNCTION__TWINKLE_PALETTE_BRIGHTNESS_FROM_LOWER_TO_UPPER_AND_BACK,
-
-    // /**
-    //  *  Instead of just applying new colours, also randomise the brightness levels between range
-    //  * */
-    // EFFECTS_FUNCTION__SLOW_GLOW_ON_BRIGHTNESS__ID,
-
-    // /**
-    //  * Desc: randomly slow glow with triangular brightness between colours
-    //  * Or, so at 50% transition, the new colour is at 100%, with 100% brightness, then fade brightness back down to lower_global brightness
-    //  * So, pixel red (50%) changing to pixel blue, would go red to blue (bright 100%) then fade down brightness 50%
-    //  * Optional, could also be non-equal triangle ie have value for peak of traingle, so 20% would mean 0.2 seconds flash to new colour then slowly decay (0.8 seconds) to new brightness
-    //  * */
-
-    /******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    *** Specialised: Matric 3D Animations (with MxN pixel grid) ***************************************************************************************************************************************************************************
-    **  Requires:     **************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-
-
-
-    // EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_ALL__ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION__SLOW_FADE_SATURATION_ALL__ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION__SLOW_FADE_BRIGHTNESS_RANDOM__ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION__SLOW_FADE_SATURATION_RANDOM__ID, // change ALL, 0 - 100%
-    // EFFECTS_FUNCTION__FLASH_TWINKLE_SINGLE_COLOUR_RANDOM__ID, //random leds flash to 100% brightness (modes=instant on/off, multiple pulses)
-    // EFFECTS_FUNCTION__FLASH_TWINKLE_PALETTE_COLOUR_RANDOM__ID,   
-   
     /******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -1047,145 +993,48 @@ class mAnimatorLight :
     ******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    // //linear palette group colour, changing by triggered and over a period of time (eg an alarm -30 minutes)
-    // EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01, //group01? bring all together, have settings to configure how the effect runs
-    // //linear palettes group colour, enabled by a time window, but sets linear gradient by sun azimuth
-    // EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_01, //this is elevation only
-    // //enabled by a time window, GENERATE manually, brightness by sun elevaltion, sun position from left to right by azimuth
-    // //far left = east from position, and far right = wast from position using sunset position
-    // EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_01,
-    // EFFECTS_FUNCTION__SUNPOSITIONS_GRADIENT_SUN_ELEVATION_AND_AZIMUTH_2D_01, // If matrix/grid is connected, enable drawing this
 
-    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_01__ID,
-    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_02__ID,
-    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_03__ID, // Using stored rgbcct palette
-    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_04__ID, // Using stored rgbcct palette
-    // EFFECTS_FUNCTION__SUNPOSITIONS_SOLID_COLOUR_BASED_ON_SUN_ELEVATION_ONLY_05__ID, // CCT only, mapped directly, no palette
+// These should actually be made into palettes, so they can be used with any effect
 
+
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
     /**
-     * @brief 
-     * 
-     * sunrise/sunset, ie day is one colour of rgbcct and night is another (two colours only) 
-     * sunrise/sunset controls colour_temp. Note: I need optional "elevation above horizon for transition" ie 5 degrees above horizon consider "sun down"
-     *         or, instead of sun position, start change 30 minutes priod to sun elevation (with adjustment allowed)
-     * 
-     * 
-     */
-    
-    // /**
-    //  * Eleveation controls that use rgbcct palette (that has elevation in its index byte) to display solid colour only
-    //  * */
-    // EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_01__ID,
-    // EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_RGBCCT_PALETTE_INDEXED_POSITIONS_WITH_AUGMENTED_TRANSITIONS_01__ID,
-
-    // /**
-    //  * Elevation controls the CCT channels only
-    //  **/
-    // EFFECTS_FUNCTION__SUNPOSITIONS_ELEVATION_ONLY_CONTROLLED_CCT_TEMPERATURE_01__ID,
-
-
-    // // palette to step through, which gives single colour sun
-    // EFFECTS_FUNCTION__SUNPOSITIONS_STEP_RGBCCT_ALARM_01,
-    // //enabled CCT by azimuth 
-    // EFFECTS_FUNCTION__SUNPOSITIONS_STEP_RGBCCT_SUN_ELEVATION_01,
-
-    
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS 
-    /**
-     * @brief Same as above, but no blending on palette colours, just use stepped values
+     * @brief  linear palette group colour, changing by triggered and over a period of time (eg an alarm -30 minutes)
      **/
-    EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_STEP__ID,
+    EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,
     /**
-     * @brief Using the elevation of the sun stored in settings, linear blend between all colours in a palette
-     *        The start and end colour from the palette (0 to 100% index) is defined by the max/min elevation for that day
+     * @brief  Azimuth min/max selects 0-255 for index to get from palette (so map(az, az_min, az_max, 0, 255) which is 0-colours_in_palette)
+     **/
+    EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,
+    /**
+     * @brief Daytime: Palette 1
+     *       Nightime: Palette 2
+     *        Option1: 0 means it considers the full daily movement as transition, otherwise it means 0.1-degree of movement is considered transition around horizon (ie. +- 5.5 degrees would be 55)
+     **/
+    EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,
+    /**
+     * @brief  Draw Sun will either draw single pixel, or bloom gradient (ie 1 pixel to 5 pixels blended) on a 1D LED strip
+     * Option1: for background to be drawn (ie. sky)
+     * Option2: background sky colour may be time of day reactive and change colour (ie. blue during day, black at night)
+     **/
+    EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_01__ID,
+    EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,    
+    EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID, // 2D LED matrix, elevation and azimuth
+    /**
+     * @brief  As the traditional solid white light, but reactive to the time of day (lightness outside)
      *        I will also want a way to pick what these max/min are (ie setting dusk/dawn as limits for transition for CCT colours etc)
      **/
-    EFFECTS_FUNCTION__SUNPOSITION_ELEVATION_PALETTE_PROGRESS_LINEAR__ID,
-   
+    EFFECTS_FUNCTION__SUNPOSITIONS_WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__ID, // Daywhite in daylight, and warm white at night
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 
-    // /******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // *** Specialised: RGB Segment Clock  ***************************************************************************************************************************************************************************
-    // **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************/
+    /******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Specialised: RGB Segment Clock  ***************************************************************************************************************************************************************************
+    **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
 
-    // EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
-    // EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID,
-    // EFFECTS_FUNCTION__LCD_DISPLAY_BASIC_01__ID, // show number commanded via mqtt
-
-
-    // /******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // *** Specialised: RGB Segment Clock  ***************************************************************************************************************************************************************************
-    // **  Requires:    Based on 3D printed clock, requires pixels in grid formation. In the future, perhaps parts of number could be wled segments with segments added to be number **************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************
-    // ******************************************************************************************************************************************************************************/
-
-
-
-
-    // // Apply sinewave to brightness, 25% increasing, 50% decreasing, 25% off
-    // EFFECTS_FUNCTION__PULSE_SINE_WAVE_BRIGHTNESS, //pul
-    // // The one when applybrightness was broke
-    // // done by applying new cl/brightness to some, then each call reducing the colour crushing it
-    // //do with percent to show on at one time
-    // EFFECTS_FUNCTION__PULSE_RANDOM_ON, 
-    // EFFECTS_FUNCTION__PULSE_RANDOM_ON_TWO__ID,    
-    // EFFECTS_FUNCTION__FLASH_TWINKLE_SEQUENTIAL__ID, // sequential flash of white on x leds 
-    // EFFECTS_FUNCTION__FADE_GRADIENT__ID, //single pixels: static, twinkle, pick from palette
-    // //another flash to "off" or simple set flash colour to off??
-    // EFFECTS_FUNCTION__FLASH_GLIMMER_RANDOM__ID, // tinkle=leds flash independant, glimmer=leds flash with dimming effect on others
-    /**
-     * Show an exact amount of pixels only from a palette, where "show_length" would be pixel=0:pixel_length
-     * */
-    // EFFECTS_FUNCTION__SHOWING_MULTIPLES_OF_COLOURS__ID,
-    /**
-     * Sun positional effects
-     */
-    // New with solarlunar
-
-
-    /**
-     * Christmas Controller Effects: 6 (without static) that replicate christmas lights
-     * Note: This will take several extra forms, as I will want fading of those lights with the animations, some lights are instant
-     * Also, I might keep 5 lights static and apply the pattern by turned off bulbs like real lights 
-     * 8 different control settings
-
-      make special christmas ones that apply this over a group, ie single red, green, blue,pink light would instead be a sine wave of brightness (including into)
-
-      basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), with an "off" section in between
-      basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), BUT "off" section in between IS INSTEAD INVERTING WITH ON SECTION
-      basic xmas inwaves, but lights are drawn (in sine wave with size/length parameter), but no off section, instead it blends evening between the two colours with varying blend weights (ie even blend, or only 10% of pixel length blend of each colour group)
-
-    EFFECTS_FUNCTION__XMAS_INWAVES_SINE_WINE_BLEND_OF_GROUP_ID
-
-
-     * */
-
-
-    // need to make another effect, at least until later palettes can be stretched (wrapped?) across the segment
-    // This effect here "Static Palette Spanned" will allow immerison tank to show the colour from paletteEdit 15 correctly
-
-    /**
-     * Development methods
-     * */
-
-    /**
-     * Functional methods of sunrise
-     * EFFECTS_FUNCTION__SUNPOSITIONS_<SOLIDCOLOUR/2D_ARRAY>
-     * */
-    //create a palette to leave on ALL the time, ie deep red at night instead of blue... testing for the clocks later I guess
-
-    /**
-     * Not currently working
-     * */
-    /**
-     * Clock animations for 3d printed display
-     **/
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
     EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
     EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID,
@@ -1193,9 +1042,21 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_STRING_01__ID,
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
-    /**
-     * Create special musical christmas lights, that will only be available on esp32 with a speaker (larger RAM)
-     * */
+    /******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    *** Specialised: Border Wallpapers i.e. Edge colours for displays or pictures  ***************************************************************************************************************************************************************************
+    **  Requires:     **************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+    EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,
+    EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__ID,
+    EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__ID,
+    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+
+
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
     /**
      * Palette developing
@@ -1231,22 +1092,6 @@ class mAnimatorLight :
   void SubTask_Segments_Effects();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
   
-  // //realtime modes
-  // #define REALTIME_MODE_INACTIVE    0
-  // #define REALTIME_MODE_GENERIC     1
-  // #define REALTIME_MODE_UDP         2
-  // #define REALTIME_MODE_HYPERION    3
-  // #define REALTIME_MODE_E131        4
-  // #define REALTIME_MODE_ADALIGHT    5
-  // #define REALTIME_MODE_ARTNET      6
-  // #define REALTIME_MODE_TPM2NET     7
-
-  // //realtime override modes
-  // #define REALTIME_OVERRIDE_NONE    0
-  // #define REALTIME_OVERRIDE_ONCE    1
-  // #define REALTIME_OVERRIDE_ALWAYS  2
-// byte realtimeMode _INIT(REALTIME_MODE_INACTIVE);
-  
   // // realtime
   byte realtimeMode = REALTIME_MODE_INACTIVE;
   // byte realtimeOverride = REALTIME_OVERRIDE_NONE;
@@ -1277,11 +1122,8 @@ class mAnimatorLight :
   /**
    * Transition settings
    * */
-  struct TRANSITION_SETTINGS{
-    /**
-     * Pixels to change up to maximum of segment
-     * */
-    // uint16_t pixels_to_update_as_number  = 1;     // Phase this out, it should be calculated from the Intensity option
+  struct TRANSITION_SETTINGS
+  {
     /**
      * Refresh rate, calculate new colours
      * */
@@ -1540,23 +1382,27 @@ class mAnimatorLight :
   void EffectAnim__Drip();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  void EffectAnim__SunPositions_Elevation_Palette_Progress_Step();       
-  void EffectAnim__SunPositions_Elevation_Palette_Progress_LinearBlend();   
-  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_RGBCCT_Palette_Indexed_Positions_01();
-  void SubTask_Segment_Animate_Function__SunPositions_Elevation_Only_Controlled_CCT_Temperature_01();
+  void EffectAnim__SunPositions__Sunrise_Alarm_01();
+  void EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01();
+  void EffectAnim__SunPositions__Sunset_Blended_Palettes_01();
+  void EffectAnim__SunPositions__DrawSun_1D_Elevation_01();
+  void EffectAnim__SunPositions__DrawSun_1D_Azimuth_01();
+  void EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01();
+  void EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void SubTask_Flasher_Animate_Function_Tester_01();
   void SubTask_Flasher_Animate_Function_Tester_02();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-  void EffectAnim__Static_Palette_New();
-  void EffectAnim__Slow_Glow_New();
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-  void SubTask_Segment_Animate_Function__BoxEdge_TwoColour_Gradient();
-  void SubTask_Segment_Animate_Function__BoxEdge_FourColour_Gradient();
-  void SubTask_Segment_Animate_Function__BoxEdge_FourColour_Solid();
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+  void EffectAnim__BorderWallpaper__TwoColour_Gradient();
+  void EffectAnim__BorderWallpaper__FourColour_Gradient();
+  void EffectAnim__BorderWallpaper__FourColour_Solid();
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_TRACKING
+  void EffectAnim__SolarTriggers__Sunrise_01();
+  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_TRACKING
+  
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void EffectAnim__Christmas_Musical__01();
   #endif 
@@ -1603,11 +1449,8 @@ class mAnimatorLight :
   byte startColor = 0;                             // "index" for the palette color used for drawing
   // byte displayMode = 0;                            // 0 = 12h, 1 = 24h (will be saved to EEPROM once set using buttons)
   byte colorOffset = 29;//32;                           // default distance between colors on the color palette used between digits/leds (in overlayMode)
-
   void LCDDisplay_colorOverlay() ;
   void LCDDisplay_updateDisplay(byte color, byte colorSpacing) ;
-
-  #define LED_PWR_LIMIT 750                        // 750mA - Power limit in mA (voltage is set in setup() to 5v)
   #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
   // notice 3 less below since I soldered, no single strip
   #define LED_PER_DIGITS_STRIP 44//47                  // ...two digits are made out of one piece of led strip with 47 leds...
@@ -1652,33 +1495,24 @@ class mAnimatorLight :
     {   0,   1,   1,   1,   1,   0,   1 }   // d
   };
 
-  void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_01();
-  void SubTask_Segment_Animate_Function__LCD_Clock_Time_Basic_02();
-  void SubTask_Flasher_Animate_LCD_Display_Show_Numbers_Basic_01();
-  void SubTask_Flasher_Animate_LCD_Display_Show_String_01();
+  void EffectAnim__7SegmentDisplay__ClockTime_01();
+  void EffectAnim__7SegmentDisplay__ClockTime_02();
+  void EffectAnim__7SegmentDisplay__ManualNumber_01();
+  void EffectAnim__7SegmentDisplay__ManualString_01();
   void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
   void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
   void LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing);
   void LCDDisplay_showDigit(byte digit, byte color, byte pos);
   void LCDDisplay_showSegment(byte segment, byte color, byte segDisplay);
   void LCDDisplay_showDots(byte dots, byte color);
-  // RgbcctColor ColorFromPaletteLCD(uint16_t palette_id, uint8_t index, bool apply_global_brightness = true);
   uint8_t tempcol = 0;
   uint16_t lcd_display_show_number = 0;
   char lcd_display_show_string[5] = {0}; //temporary solution, will be removed once newer commend to save effect runtime struct works
 
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
-
   void Segment_SubTask_Flasher_Animate_Function__TEST_SolidRandom();
   void Segments_SetLEDOutAmountByPercentage(uint8_t percentage, uint8_t segment_index = 0); 
-
-  /***************
-   * 
-   * Command List
-   * 
-   * START
-   * *********************/
   
   void CommandSet_PaletteID(uint8_t value, uint8_t segment_index = 0);
 
@@ -1696,17 +1530,11 @@ class mAnimatorLight :
 
   void CommandSet_Animation_Transition_Time_Ms(uint16_t value, uint8_t segment_index= 0);
   void CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index= 0);
-
-   
+ 
   void CommandSet_Effect_Intensity(uint8_t value, uint8_t segment_index = 0);
   void CommandSet_Effect_Speed(uint8_t value, uint8_t segment_index = 0);
   
-
-  /**
-   * rgbcctcontroller commands
-   */
-
-  // void CommandSet_ActiveRgbcctColourPaletteIDUsedAsScene(uint8_t palette_id, uint8_t segment_index = 0); //remove
+  
   void CommandSet_SegColour_RgbcctColour_Hue_360(uint16_t hue_new, uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_Sat_255(uint8_t sat_new , uint8_t colour_index = 0, uint8_t segment_index = 0);
   void CommandSet_SegColour_RgbcctColour_ColourTemp_Kelvin(uint16_t ct, uint8_t colour_index = 0, uint8_t segment_index = 0);
@@ -1746,19 +1574,9 @@ class mAnimatorLight :
   float minf2(float v, float w);
   float maxf2(float v, float w);
 
+  void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index = 0);
 
-
-
-  // #define DEBUG_LINE_HERE    Serial.printf("DEBUG HERE: ");\
-  //                       Serial.print(__FILE__);\
-  //                       Serial.println(__LINE__);\
-  //                       Serial.flush();
-
-
-void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index = 0);
-
-
-void SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i = 0);
+  void SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i = 0);
 
 
 
@@ -2042,6 +1860,9 @@ typedef struct Segment_New {
     byte* Data(){ return data; };
 
 
+    
+
+
     #ifdef ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
     // transition data, valid only if transitional==true, holds values during transition
     struct Transition {
@@ -2078,6 +1899,14 @@ typedef struct Segment_New {
       }
     } *_t;
     #endif // ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+
+    #ifdef ENABLE_DEBUGFEATURE__SEGMENT_FRAME_TIME
+    float frames_per_second = 0;
+
+    //gradient method is currently slow and needs improved
+
+
+    #endif
 
 
       /**

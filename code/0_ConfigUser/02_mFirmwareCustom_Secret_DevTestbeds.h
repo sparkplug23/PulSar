@@ -231,6 +231,8 @@
 
 // #define DEVICE_H801__TESTBED_H801V2_2023
 
+// #define DEVICE_RGBCLOCK__TESTCLOCK
+
 
 
 /**
@@ -268,6 +270,149 @@
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
+
+
+#ifdef DEVICE_RGBCLOCK__TESTCLOCK
+  #define DEVICENAME_CTR            "rgbclock_testclock_01"
+  #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
+  #define DEVICENAME_ROOMHINT_CTR   "Temporary_Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+  
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER
+
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+
+  #define USE_LIGHTING_TEMPLATE
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+  #define STRIP_SIZE_MAX 93 
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":93
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        93
+      ],
+      "ColourPalette":97,
+      "SegColour0": {
+        "Hue": 330,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function":"Clock Basic 01",
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+      #endif
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+#endif
+
+
 
 
 
@@ -8247,7 +8392,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -8326,7 +8471,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -8420,7 +8565,7 @@
   
   #define USE_MODULE_CORE_RULES
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -11482,104 +11627,6 @@
 #endif
 
 
-
-
-
-
-//rgbmicro2/set/light///Scene
-//{"//SceneName":"COLOUR//Scene","hue":25,"sat":100,"brt_rgb":100,"cct_temp":500,"brt_cct":100,"Time":0,"time_on":3600}
-#ifdef DEVICE_TESTBED_RGBCLOCK
-  #define DEVICENAME_CTR          "testbed_rgbclock"
-  #define DEVICENAME_FRIENDLY_CTR "RGB Clock 02"
-
-  // TEST DEVICE, NOT WORKING
- 
-  //#define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 1
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  //#define ENABLE_FEATURE_PIXEL__MODE_NOTIFICATION  // BREAKS
-  #define USE_SK6812_METHOD_DEFAULT
-
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-
-  // #define ENABLE_GAMMA_BRIGHTNESS_ON_DESIRED_COLOUR_GENERATION
-  // // #define ENABLE_BUG_TRACING
-  // // #define DEBUG_PRINT_FUNCTION_NAME
-  // //  #define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-  // //#define ENABLE_LOG_FILTERING_TEST_ONLY
-  // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-  // // #define USE_DEBUG_PRINT_FUNCTION_NAME_TEST
-  // #define DISABLE_WEBSERVER 
-  
-  // #define ENABLE_PIXEL_AUTOMATION_PLAYLIST
-  
-  // //#define ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-
-  #define STRIP_SIZE_MAX 93// 750   *15 //changing gazebo to be 12v
-
-  // #define DISABLE_NETWORK
-  // // #define DISABLE_FOR_FAULTY_ESP32_FLICKERING
-
-  // #define DISABLE_SLEEP
-    
-  #define DISABLE_WEBSERVER
-
-  // #define USE_MODULE_SENSORS_BME
-  
-  // #define USE_MODULE_SENSORS_MOTION
-
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE)   
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR   "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "WS28XX" "\","
-    #ifdef STRIP_SIZE_MAX
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    #else
-    "\"" D_JSON_STRIP_SIZE       "\":50,"
-    #endif //STRIP_SIZE_MAX
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grbw\","
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":0,"
-      "\"" D_JSON_RATE_MS "\":5000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":29"
-    "},"
-    // "\"CCT_Temp\": 152,"
-    // "\"Hue\":25,"
-    // "\"Sat\":100,"
-    "\"" D_JSON_COLOUR_PALETTE "\":34,"
-    "\"BrightnessCCT\":0,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":5"
-
-  "}";
-
-
-#endif
-
-
-
 /**
  * Basic version of measurement system
  * GPS will be recorded at 10Hz, and logged to SD card in json format for matlab parsing
@@ -13222,7 +13269,7 @@
 
   // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
 
-  // //#define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  // //#define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   // #define USE_MODULE_TEMPLATE
   // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -16991,7 +17038,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_ANIMATOR
   #define USE_MODULE_LIGHTS_PWM
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -17048,7 +17095,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
    * 
    * */
 
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -17103,7 +17150,7 @@ Flash: [======    ]  56.9% (used 582400 bytes from 1023984 bytes)*/
   #define USE_MODULE_LIGHTS_PWM
   
   
-  #define USE_MODULE_SUBSYSTEM_SOLAR_LUNAR
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
