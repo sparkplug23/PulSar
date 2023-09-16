@@ -15,7 +15,7 @@
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/00_Interface/FastLED/FastLED.h"
 
-#include "mPalette_Encoding_Options.h"
+#include "internal/mPalette_Encoding_Options.h"
 
 class mPalette 
 {
@@ -245,6 +245,7 @@ class mPalette
       PALETTELIST_STATIC_HOLLOWEEN_OGP__ID,
       PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID,
       PALETTELIST_STATIC_RAINBOW__ID,
+      PALETTELIST_STATIC_COMPRESSED_RAINBOW__ID,
       PALETTELIST_STATIC_RAINBOW_INVERTED__ID,
       PALETTELIST_STATIC_PASTEL_01__ID,
       PALETTELIST_STATIC_PASTEL_02__ID,
@@ -257,8 +258,6 @@ class mPalette
       PALETTELIST_STATIC_WINTER_04__ID,
       PALETTELIST_STATIC_AUTUMN_GREEN__ID,
       PALETTELIST_STATIC_AUTUMN_RED__ID,
-      PALETTELIST_STATIC_GRADIENT_01__ID,
-      PALETTELIST_STATIC_GRADIENT_02__ID,
       PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID,
 
       PALETTELIST_STATIC__CHRISTMAS_TRADITIONAL_RGPBO__ID,
@@ -294,27 +293,22 @@ class mPalette
       PALETTELIST_STATIC_SUNRISE_04__ID,
       PALETTELIST_STATIC_SUNSET_01__ID,
       PALETTELIST_STATIC_SUNSET_02__ID,
-      PALETTELIST_STATIC_CANDLE_FLAME_01__ID,
-      PALETTELIST_STATIC_GRADIENT_FIRE_01__ID,
+      PALETTELIST_STATIC_SUNSET_RED__ID,
+      PALETTELIST_STATIC_SUNSET_BEACH__ID,
       PALETTELIST_STATIC_SKY_GLOW_01__ID,
 
+      
+      PALETTELIST_STATIC_CANDLE_FLAME_01__ID,
+      PALETTELIST_STATIC_GRADIENT_FIRE_01__ID,
+
       PALETTELIST_STATIC_OCEAN_01__ID,
-      PALETTELIST_STATIC_CUSTOM_USER_01__ID,
-      PALETTELIST_STATIC_SINGLE_FIRE_01__ID,
 
       /**
        * Patterns for Gazebo
        * */
-      PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID,
-      PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID,
-      PALETTELIST_STATIC_PINK_PURPLE_01__ID,
-      PALETTELIST_STATIC_PINK_PURPLE_02__ID,
-      PALETTELIST_STATIC_PINK_PURPLE_03__ID,
-
-      /**
-       * SOLAR
-       * */
-      PALETTELIST_STATIC__SOLAR__SUNRISE_01__ID,    
+      PALETTELIST_STATIC_FLOWER_SWEATPEA__ID,
+      PALETTELIST_STATIC_PINK_PURPLE__ID,
+      PALETTELIST_STATIC_PURPLE_PINK__ID,
       
       // Count of total handlers and starting point for other modules
       PALETTELIST_STATIC_LENGTH__ID 
@@ -508,7 +502,7 @@ class mPalette
     );
 
 
-
+    // Dynamic palettes should do any calculations, then rely on the other methods to get colours
     RgbcctColor Get_Encoded_DynamicPalette_Colour(
       uint16_t palette_id = 0,
       uint8_t* palette_elements = nullptr,
@@ -519,27 +513,6 @@ class mPalette
       bool     flag_crgb_exact_colour = false,
       bool     flag_forced_gradient = false
     );
-    RgbcctColor Get_DynamicPalette_Encoded_Colour_255Index(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t colour_index = 0,
-      uint8_t* encoded_index = nullptr
-    );
-    RgbcctColor Get_DynamicPalette_Encoded_Colour_IterativeIndex(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t colour_index = 0,
-      uint8_t* encoded_index = nullptr
-    );
-    RgbcctColor Get_DynamicPalette_Encoded_Colour_ReadBuffer(
-      uint16_t palette_id = 0,
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t* encoded_index = nullptr
-    );
-
-
-
 
 
 

@@ -55,7 +55,7 @@ int8_t mMQTT::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTI
     case FUNC_EVERY_HOUR:
       if(brokers.size())
       {
-        brokers[0]->Send_LWT_Online();
+        brokers[0]->Send_LWT_Online(); // this does work, but how about wrapping the LWT into the normal status messages? Just the LWT offline would be its own.
       }
     break;
     case FUNC_UPTIME_10_MINUTES:
@@ -179,6 +179,35 @@ void mMQTT::CallMQTTSenders()
       pCONT->Tasker_Interface(FUNC_MQTT_SENDER);
     }
   }
+
+}
+
+/**
+ * @brief Transmit on any connected brokers with connection checking
+ * 
+ * @param topic 
+ * @param payload 
+ * @param retained 
+ * @return boolean 
+ */
+boolean mMQTT::Publish(const char* topic, const char* payload, boolean retained)
+{
+  
+  if(brokers.size())
+  {
+    if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
+    {
+      for (auto& broker : brokers)
+      {
+        if(broker->pubsub->connected())
+        {
+          return broker->ppublish(topic,payload,retained);
+        }
+      }
+    }
+  }
+
+
 
 }
 

@@ -39,8 +39,54 @@
 
 #ifdef ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 #include <WiFi.h>
+
+#ifndef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 #include <WebServer.h>
 #include <WiFiManager.h>
+
+
+
+#else
+
+#ifdef ESP32
+  #include <WiFi.h>
+  #ifndef DISABLE_NETWORK
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+#endif
+
+
+const char HTTP_HEAD3[] PROGMEM            = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
+const char HTTP_STYLE3[] PROGMEM           = "<style>.c{text-align: center;} div,input{padding:5px;font-size:1em;} input{width:95%;} body{text-align: center;font-family:verdana;} button{border:0;border-radius:0.3rem;background-color:#1fa3ec;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;} .q{float: right;width: 64px;text-align: right;} .l{background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEX///8EBwfBwsLw8PAzNjaCg4NTVVUjJiZDRUUUFxdiZGSho6OSk5Pg4eFydHTCjaf3AAAAZElEQVQ4je2NSw7AIAhEBamKn97/uMXEGBvozkWb9C2Zx4xzWykBhFAeYp9gkLyZE0zIMno9n4g19hmdY39scwqVkOXaxph0ZCXQcqxSpgQpONa59wkRDOL93eAXvimwlbPbwwVAegLS1HGfZAAAAABJRU5ErkJggg==\") no-repeat left center;background-size: 1em;}</style>";
+const char HTTP_SCRIPT3[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>";
+const char HTTP_HEAD_END3[] PROGMEM        = "</head><body><div style='text-align:left;display:inline-block;min-width:260px;'>";
+const char HTTP_PORTAL_OPTIONS3[] PROGMEM  = "<form action=\"/wifi\" method=\"get\"><button>Configure WiFi</button></form><br/><form action=\"/0wifi\" method=\"get\"><button>Configure WiFi (No Scan)</button></form><br/>";
+//<form action=\"/i\" method=\"get\"><button>Info</button></form><br/><form action=\"/r\" method=\"post\"><button>Reset</button></form>";
+const char HTTP_ITEM3[] PROGMEM            = "<div><a href='#p' onclick='c(this)'>{v}</a>&nbsp;<span class='q {i}'>{r}%</span></div>";
+const char HTTP_FORM_START3[] PROGMEM      = "<form method='get' action='wifisave'><input id='s' name='s' length=32 placeholder='SSID'><br/><input id='p' name='p' length=64 type='password' placeholder='password'><br/>";
+const char HTTP_FORM_PARAM3[] PROGMEM      = "<br/><input id='{i}' name='{n}' length={l} placeholder='{p}' value='{v}' {c}>";
+const char HTTP_FORM_END3[] PROGMEM        = "<br/><button type='submit'>save</button></form>";
+const char HTTP_SCAN_LINK3[] PROGMEM       = "<br/><div class=\"c\"><a href=\"/wifi\">Scan</a></div>";
+const char HTTP_SAVED3[] PROGMEM           = "<div>Credentials Saved<br />Trying to connect Weread to network.<br />If it fails reconnect to AP to try again</div>";
+const char HTTP_END3[] PROGMEM             = "</div></body></html>";
+
+#define CONTENT_LENGTH_UNKNOWN ((size_t) -1)
+#define CONTENT_LENGTH_NOT_SET ((size_t) -2)
+
+
+
+
+#endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
@@ -413,14 +459,17 @@ int8_t Tasker_Web(uint8_t function);
 
 void WebPage_Root_AddHandlers();
 
-void Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request);
+// void Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request);
 
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
 #ifdef ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+
+#ifndef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 WebServer* webServer = nullptr;//(80);
-void webHandleRoot();
-void webHandleNotFound();
+#endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+
+
 
 #endif // ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
@@ -698,33 +747,56 @@ unsigned long updateCheckFirstRun = 60000;            // First-run check offset
     void espWifiReconnect();
 //    void espWifiConfigCallback(WiFiManager *myWiFiManager);
     void espSetupOta();
-    void espReset();
     void configRead();
     void configSaveCallback();
     void configSave();
     void configClearSaved();
     
-    void webHandleSaveConfig();
-    void webHandleResetConfig();
+    
     void webHandleNextionFirmware();
     void webHandleNextionFirmware_PhaseOut();
     
-    void webHandleLcdUpload();
     void webHandleLcdUpdateSuccess();
     void webHandleLcdUpdateFailure();
     void webHandleLcdDownload();
-    void webHandleTftFileSize();
     void webHandleReboot();
-    void webHandleResetBacklight();
-    void webHandleFirmware();
-    void webHandleEspFirmware();
-    void WebPage_LCD_Update_TFT();
+
+    bool update_in_progress = false;
     
     void nextionOtaStartDownload(const String &lcdOtaUrl);
     void nextionUpdateProgress(const unsigned int &progress, const unsigned int &total);
-    void espStartOta(const String &espOtaUrl);
 
+void webHandleNotFound();
 #endif // ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+
+  #ifndef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  void webHandleTftFileSize();
+
+  void webHandleRoot();
+  void WebPage_LCD_Update_TFT();
+    void webHandleLcdUpload();
+    void espReset();
+    void webHandleFirmware();
+
+    
+    
+  #endif
+#ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  void webHandleTftFileSize(AsyncWebServerRequest* request);
+
+  void webHandleRoot(AsyncWebServerRequest* request);
+
+  void WebPage_LCD_Update_TFT(AsyncWebServerRequest *request);
+  
+void webHandleLcdUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
+    void espReset();
+
+    uint32_t transmitted_bytes = 0;
+
+    
+void webHandleFirmware(AsyncWebServerRequest *request);
+
+#endif 
 
     void CommandSet_Baud(uint32_t baud);
 

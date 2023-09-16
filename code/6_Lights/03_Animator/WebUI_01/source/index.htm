@@ -54,17 +54,16 @@
 </head>
 <body>
 
-<div id="cv" class="overlay">Loading WLED UI...</div>
-<noscript><div class="overlay" style="opacity:1;">Sorry, WLED UI needs JavaScript!</div></noscript>
+<div id="cv" class="overlay">Loading PulSar</div>
+<noscript><div class="overlay" style="opacity:1;">Sorry, PulSar UI needs JavaScript!</div></noscript>
 <div id="bg"></div>
 
 <div class="wrapper" id="top">
 	<div class="tab top">
 		<div class="btnwrap">
 			<button id="buttonPower" onclick="togglePower()" class="tgl"><i class="icons">&#xe08f;</i><p class="tab-label">Power</p></button>
-			<button id="buttonNl" onclick="toggleNl()"><i class="icons">&#xe2a2;</i><p class="tab-label">Timer</p></button>
 			<button id="buttonSync" onclick="toggleSync()"><i class="icons">&#xe116;</i><p class="tab-label">Sync</p></button>
-			<button id="buttonSr" onclick="toggleLiveview()"><i class="icons">&#xe410;</i><p class="tab-label">Peek</p></button>
+			<button id="buttonSr" onclick="toggleLiveview()"><i class="icons">&#xe410;</i><p class="tab-label">Liveview</p></button>
 			<button id="buttonI" onclick="toggleInfo()"><i class="icons">&#xe066;</i><p class="tab-label">Info</p></button>
 			<button id="buttonNodes" onclick="toggleNodes()"><i class="icons">&#xe22d;</i><p class="tab-label">Nodes</p></button>
 			<button onclick="window.location.href=getURL('/settings');"><i class="icons">&#xe0a2;</i><p class="tab-label">Config</p></button>
@@ -362,6 +361,22 @@
 		<div id="putil" class="staybot">
 		</div>
 	</div>
+	 <!-- Start at the end for debugging, but should be moved to primary (left) tab later -->
+	<div id="Overview" class="tabcontent">
+		<div id="pql">
+		</div>
+		<p class="labels hd">Overview</p>
+		<div class="staytop fnd" id="psFind">
+			<input type="text" placeholder="Search" oninput="search(this,'pcont')" onfocus="search(this,'pcont')" />
+			<i class="icons clear-icon" onclick="clean(this);">&#xe38f;</i>
+			<i class="icons search-icon">&#xe0a1;</i>
+		</div>
+		<div id="pcont" class="list">
+			<span onclick="loadPresets()">Loading...</span>
+		</div>
+		<div id="putil" class="staybot">
+		</div>
+	</div>
 </div>
 
 <div class="tab bot" id="bot">
@@ -369,6 +384,7 @@
 	<button class="tablinks" onclick="openTab(1)"><i class="icons">&#xe23d;</i><p class="tab-label">Effects</p></button>
 	<button class="tablinks" onclick="openTab(2)"><i class="icons">&#xe34b;</i><p class="tab-label">Segments</p></button>
 	<button class="tablinks" onclick="openTab(3)"><i class="icons">&#xe04c;</i><p class="tab-label">Presets</p></button>
+	<button class="tablinks" onclick="openTab(4)"><i class="icons">&#xe04c;</i><p class="tab-label">Overview</p></button>
 </div>
 
 <div id="connind"></div>

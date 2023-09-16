@@ -49,10 +49,18 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       Test_Config();
       #endif
 
-      #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-      initServer();
-      pCONT_web->server->begin();
-      #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+      #ifndef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+
+        #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+        initServer();
+        pCONT_web->server->begin();
+        #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+      #endif // ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+      #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+        initServer_LightOnly();
+      #endif
+
 
     break;
     /************

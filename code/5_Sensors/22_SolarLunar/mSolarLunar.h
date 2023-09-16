@@ -84,7 +84,39 @@ class mSolarLunar :
       }direction;
       uint32_t tUpdated_millis = 0;
       bool isvalid = false;
+
     }solar_position;
+
+    struct DEBUG
+    {
+      bool enabled = false;
+      double azimuth = 0;
+      double elevation = 0;
+    }debug;
+
+    double GetAzimuth()
+    {
+      #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+        if(debug.enabled)
+          return debug.azimuth;
+        else
+          return solar_position.azimuth;
+      #else
+        return solar_position.azimuth;
+      #endif
+    }
+
+    double GetElevation()
+    {
+      #ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+        if(debug.enabled)
+          return debug.elevation;
+        else
+          return solar_position.elevation;
+      #else
+        return solar_position.elevation;
+      #endif
+    }
 
 
 

@@ -25,162 +25,154 @@ void mPalette::Init_Palettes()
   addStaticPalette({
     PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID, 
     PM_PALETTE_COLOURFUL_DEFAULT_NAME_CTR,
-    PM_PALETTE_COLOURFUL_DEFAULT_RGB__DATA, 
-    sizeof(PM_PALETTE_COLOURFUL_DEFAULT_RGB__DATA),
+    PM_PALETTE_COLOURFUL_DEFAULT__DATA, 
+    sizeof(PM_PALETTE_COLOURFUL_DEFAULT__DATA),
     D_PALETTE_COLOURFUL_DEFAULT_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_HOLLOWEEN_OP__ID, 
     PM_PALETTE_HOLLOWEEN_OP_NAME_CTR,
-    PM_PALETTE_HOLLOWEEN_OP_RGB__DATA, 
-    sizeof(PM_PALETTE_HOLLOWEEN_OP_RGB__DATA),
+    PM_PALETTE_HOLLOWEEN_OP__DATA, 
+    sizeof(PM_PALETTE_HOLLOWEEN_OP__DATA),
     D_PALETTE_HOLLOWEEN_OP_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_HOLLOWEEN_OGP__ID, 
     PM_PALETTE_HOLLOWEEN_OGP_NAME_CTR,
-    PM_PALETTE_HOLLOWEEN_OGP_RGB__DATA, 
-    sizeof(PM_PALETTE_HOLLOWEEN_OGP_RGB__DATA),
+    PM_PALETTE_HOLLOWEEN_OGP__DATA, 
+    sizeof(PM_PALETTE_HOLLOWEEN_OGP__DATA),
     D_PALETTE_HOLLOWEEN_OGP_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID, 
-    PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_NAME_CTR,
-    PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_RGB__DATA, 
-    sizeof(PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_RGB__DATA),
-    D_PALETTE_HOT_PINK_NEON_WITH_NAVY_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_RAINBOW__ID, 
     PM_PALETTE_RAINBOW_NAME_CTR,
-    PM_PALETTE_RAINBOW_RGB__DATA, 
-    sizeof(PM_PALETTE_RAINBOW_RGB__DATA),
+    PM_PALETTE_RAINBOW__DATA, 
+    sizeof(PM_PALETTE_RAINBOW__DATA),
     D_PALETTE_RAINBOW_ENCODING
+  });
+
+  addStaticPalette({
+    PALETTELIST_STATIC_COMPRESSED_RAINBOW__ID, 
+    PM_PALETTE_COMPRESSED_RAINBOW_NAME_CTR,
+    PM_PALETTE_COMPRESSED_RAINBOW__DATA, 
+    sizeof(PM_PALETTE_COMPRESSED_RAINBOW__DATA),
+    D_PALETTE_COMPRESSED_RAINBOW_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_RAINBOW_INVERTED__ID, 
     PM_PALETTE_RAINBOW_INVERTED_NAME_CTR,
-    PM_PALETTE_RAINBOW_INVERTED_RGB__DATA, 
-    sizeof(PM_PALETTE_RAINBOW_INVERTED_RGB__DATA),
+    PM_PALETTE_RAINBOW_INVERTED__DATA, 
+    sizeof(PM_PALETTE_RAINBOW_INVERTED__DATA),
     D_PALETTE_RAINBOW_INVERTED_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_PASTEL_01__ID, 
     PM_PALETTE_PASTEL_01_NAME_CTR,
-    PM_PALETTE_PASTEL_01_RGB__DATA, 
-    sizeof(PM_PALETTE_PASTEL_01_RGB__DATA),
+    PM_PALETTE_PASTEL_01__DATA, 
+    sizeof(PM_PALETTE_PASTEL_01__DATA),
     D_PALETTE_PASTEL_01_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_PASTEL_02__ID, 
     PM_PALETTE_PASTEL_02_NAME_CTR,
-    PM_PALETTE_PASTEL_02_RGB__DATA, 
-    sizeof(PM_PALETTE_PASTEL_02_RGB__DATA),
+    PM_PALETTE_PASTEL_02__DATA, 
+    sizeof(PM_PALETTE_PASTEL_02__DATA),
     D_PALETTE_PASTEL_02_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_PASTEL_03__ID, 
     PM_PALETTE_PASTEL_03_NAME_CTR,
-    PM_PALETTE_PASTEL_03_RGB__DATA, 
-    sizeof(PM_PALETTE_PASTEL_03_RGB__DATA),
+    PM_PALETTE_PASTEL_03__DATA, 
+    sizeof(PM_PALETTE_PASTEL_03__DATA),
     D_PALETTE_PASTEL_03_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_PASTEL_04__ID, 
     PM_PALETTE_PASTEL_04_NAME_CTR,
-    PM_PALETTE_PASTEL_04_RGB__DATA, 
-    sizeof(PM_PALETTE_PASTEL_04_RGB__DATA),
+    PM_PALETTE_PASTEL_04__DATA, 
+    sizeof(PM_PALETTE_PASTEL_04__DATA),
     D_PALETTE_PASTEL_04_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_PASTEL_05__ID, 
     PM_PALETTE_PASTEL_05_NAME_CTR,
-    PM_PALETTE_PASTEL_05_RGB__DATA, 
-    sizeof(PM_PALETTE_PASTEL_05_RGB__DATA),
+    PM_PALETTE_PASTEL_05__DATA, 
+    sizeof(PM_PALETTE_PASTEL_05__DATA),
     D_PALETTE_PASTEL_05_ENCODING
   });
   
   addStaticPalette({
     PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID, 
     PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_NAME_CTR,
-    PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_RGB__DATA, 
-    sizeof(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_RGB__DATA),
+    PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE__DATA, 
+    sizeof(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE__DATA),
     D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_ENCODING
   });
   
+  addStaticPalette({
+    PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID, 
+    PM_PALETTE_HOT_PINK_NEON_WITH_NAVY_NAME_CTR,
+    PM_PALETTE_HOT_PINK_NEON_WITH_NAVY__DATA, 
+    sizeof(PM_PALETTE_HOT_PINK_NEON_WITH_NAVY__DATA),
+    D_PALETTE_HOT_PINK_NEON_WITH_NAVY_ENCODING
+  });
+
 
   addStaticPalette({
     PALETTELIST_STATIC_WINTER_01__ID, 
     PM_PALETTE_WINTER_01_NAME_CTR,
-    PM_PALETTE_WINTER_01_RGB__DATA, 
-    sizeof(PM_PALETTE_WINTER_01_RGB__DATA),
+    PM_PALETTE_WINTER_01__DATA, 
+    sizeof(PM_PALETTE_WINTER_01__DATA),
     D_PALETTE_WINTER_01_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_WINTER_02__ID, 
     PM_PALETTE_WINTER_02_NAME_CTR,
-    PM_PALETTE_WINTER_02_RGB__DATA, 
-    sizeof(PM_PALETTE_WINTER_02_RGB__DATA),
+    PM_PALETTE_WINTER_02__DATA, 
+    sizeof(PM_PALETTE_WINTER_02__DATA),
     D_PALETTE_WINTER_02_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_WINTER_03__ID, 
     PM_PALETTE_WINTER_03_NAME_CTR,
-    PM_PALETTE_WINTER_03_RGB__DATA, 
-    sizeof(PM_PALETTE_WINTER_03_RGB__DATA),
+    PM_PALETTE_WINTER_03__DATA, 
+    sizeof(PM_PALETTE_WINTER_03__DATA),
     D_PALETTE_WINTER_03_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_WINTER_04__ID, 
     PM_PALETTE_WINTER_04_NAME_CTR,
-    PM_PALETTE_WINTER_04_RGB__DATA, 
-    sizeof(PM_PALETTE_WINTER_04_RGB__DATA),
+    PM_PALETTE_WINTER_04__DATA, 
+    sizeof(PM_PALETTE_WINTER_04__DATA),
     D_PALETTE_WINTER_04_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_AUTUMN_GREEN__ID, 
     PM_PALETTE_AUTUMN_GREEN_NAME_CTR,
-    PM_PALETTE_AUTUMN_GREEN_RGB__DATA, 
-    sizeof(PM_PALETTE_AUTUMN_GREEN_RGB__DATA),
+    PM_PALETTE_AUTUMN_GREEN__DATA, 
+    sizeof(PM_PALETTE_AUTUMN_GREEN__DATA),
     D_PALETTE_AUTUMN_GREEN_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_AUTUMN_RED__ID, 
     PM_PALETTE_AUTUMN_RED_NAME_CTR,
-    PM_PALETTE_AUTUMN_RED_RGB__DATA, 
-    sizeof(PM_PALETTE_AUTUMN_RED_RGB__DATA),
+    PM_PALETTE_AUTUMN_RED__DATA, 
+    sizeof(PM_PALETTE_AUTUMN_RED__DATA),
     D_PALETTE_AUTUMN_RED_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_GRADIENT_01__ID, 
-    PM_PALETTE_GRADIENT_01_NAME_CTR,
-    PM_PALETTE_GRADIENT_01_RGB__DATA, 
-    sizeof(PM_PALETTE_GRADIENT_01_RGB__DATA),
-    D_PALETTE_GRADIENT_01_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_GRADIENT_02__ID, 
-    PM_PALETTE_GRADIENT_02_NAME_CTR,
-    PM_PALETTE_GRADIENT_02_RGB__DATA, 
-    sizeof(PM_PALETTE_GRADIENT_02_RGB__DATA),
-    D_PALETTE_GRADIENT_02_ENCODING
   });
 
   addStaticPalette({
@@ -381,14 +373,7 @@ void mPalette::Init_Palettes()
     sizeof(PM_PALETTE__COLOURFUL_GREENLESS__DATA),
     D_PALETTE__COLOURFUL_GREENLESS__ENCODING
   });
-
-
-
-
-
-
-
-
+  
   addStaticPalette({
     PALETTELIST_STATIC__GOLDEN__ID, 
     PM_PALETTE__GOLDEN__NAME_CTR,
@@ -401,172 +386,122 @@ void mPalette::Init_Palettes()
   addStaticPalette({
     PALETTELIST_STATIC_SUNRISE_01__ID, 
     PM_PALETTE_SUNRISE_01_NAME_CTR,
-    PM_PALETTE_SUNRISE_01_RGB__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_01_RGB__DATA),
+    PM_PALETTE_SUNRISE_01__DATA, 
+    sizeof(PM_PALETTE_SUNRISE_01__DATA),
     D_PALETTE_SUNRISE_01_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_SUNRISE_02__ID, 
     PM_PALETTE_SUNRISE_02_NAME_CTR,
-    PM_PALETTE_SUNRISE_02_RGB__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_02_RGB__DATA),
+    PM_PALETTE_SUNRISE_02__DATA, 
+    sizeof(PM_PALETTE_SUNRISE_02__DATA),
     D_PALETTE_SUNRISE_02_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_SUNRISE_03__ID, 
     PM_PALETTE_SUNRISE_03_NAME_CTR,
-    PM_PALETTE_SUNRISE_03_RGB__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_03_RGB__DATA),
+    PM_PALETTE_SUNRISE_03__DATA, 
+    sizeof(PM_PALETTE_SUNRISE_03__DATA),
     D_PALETTE_SUNRISE_03_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_SUNRISE_04__ID, 
     PM_PALETTE_SUNRISE_04_NAME_CTR,
-    PM_PALETTE_SUNRISE_04_RGB__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_04_RGB__DATA),
+    PM_PALETTE_SUNRISE_04__DATA, 
+    sizeof(PM_PALETTE_SUNRISE_04__DATA),
     D_PALETTE_SUNRISE_04_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_SUNSET_01__ID, 
     PM_PALETTE_SUNSET_01_NAME_CTR,
-    PM_PALETTE_SUNSET_01_RGB__DATA, 
-    sizeof(PM_PALETTE_SUNSET_01_RGB__DATA),
+    PM_PALETTE_SUNSET_01__DATA, 
+    sizeof(PM_PALETTE_SUNSET_01__DATA),
     D_PALETTE_SUNSET_01_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_SUNSET_02__ID, 
     PM_PALETTE_SUNSET_02_NAME_CTR,
-    PM_PALETTE_SUNSET_02_RGB__DATA, 
-    sizeof(PM_PALETTE_SUNSET_02_RGB__DATA),
+    PM_PALETTE_SUNSET_02__DATA, 
+    sizeof(PM_PALETTE_SUNSET_02__DATA),
     D_PALETTE_SUNSET_02_ENCODING
   });
 
   addStaticPalette({
+    PALETTELIST_STATIC_SUNSET_RED__ID, 
+    PM_PALETTE_SUNSET_RED_NAME_CTR,
+    PM_PALETTE_SUNSET_RED__DATA, 
+    sizeof(PM_PALETTE_SUNSET_RED__DATA),
+    D_PALETTE_SUNSET_RED_ENCODING
+  });
+
+  addStaticPalette({
+    PALETTELIST_STATIC_SUNSET_BEACH__ID, 
+    PM_PALETTE_SUNSET_BEACH_NAME_CTR,
+    PM_PALETTE_SUNSET_BEACH__DATA, 
+    sizeof(PM_PALETTE_SUNSET_BEACH__DATA),
+    D_PALETTE_SUNSET_BEACH_ENCODING
+  });
+
+  addStaticPalette({
+    PALETTELIST_STATIC_SKY_GLOW_01__ID, 
+    PM_PALETTE_SKY_GLOW_01_NAME_CTR,
+    PM_PALETTE_SKY_GLOW_01__DATA, 
+    sizeof(PM_PALETTE_SKY_GLOW_01__DATA),
+    D_PALETTE_SKY_GLOW_01_ENCODING
+  });
+  
+  addStaticPalette({
     PALETTELIST_STATIC_CANDLE_FLAME_01__ID, 
     PM_PALETTE_CANDLE_FLAME_01_NAME_CTR,
-    PM_PALETTE_CANDLE_FLAME_01_RGB__DATA, 
-    sizeof(PM_PALETTE_CANDLE_FLAME_01_RGB__DATA),
+    PM_PALETTE_CANDLE_FLAME_01__DATA, 
+    sizeof(PM_PALETTE_CANDLE_FLAME_01__DATA),
     D_PALETTE_CANDLE_FLAME_01_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_GRADIENT_FIRE_01__ID, 
     PM_PALETTE_GRADIENT_FIRE_01_NAME_CTR,
-    PM_PALETTE_GRADIENT_FIRE_01_RGB__DATA, 
-    sizeof(PM_PALETTE_GRADIENT_FIRE_01_RGB__DATA),
+    PM_PALETTE_GRADIENT_FIRE_01__DATA, 
+    sizeof(PM_PALETTE_GRADIENT_FIRE_01__DATA),
     D_PALETTE_GRADIENT_FIRE_01_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_SKY_GLOW_01__ID, 
-    PM_PALETTE_SKY_GLOW_01_NAME_CTR,
-    PM_PALETTE_SKY_GLOW_01_RGB__DATA, 
-    sizeof(PM_PALETTE_SKY_GLOW_01_RGB__DATA),
-    D_PALETTE_SKY_GLOW_01_ENCODING
   });
 
   addStaticPalette({
     PALETTELIST_STATIC_OCEAN_01__ID, 
     PM_PALETTE_OCEAN_01_NAME_CTR,
-    PM_PALETTE_OCEAN_01_RGB__DATA, 
-    sizeof(PM_PALETTE_OCEAN_01_RGB__DATA),
+    PM_PALETTE_OCEAN_01__DATA, 
+    sizeof(PM_PALETTE_OCEAN_01__DATA),
     D_PALETTE_OCEAN_01_ENCODING
   });
 
   addStaticPalette({
-    PALETTELIST_STATIC_CUSTOM_USER_01__ID, 
-    PM_PALETTE_CUSTOM_USER_01_NAME_CTR,
-    PM_PALETTE_CUSTOM_USER_01_RGB__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_USER_01_RGB__DATA),
-    D_PALETTE_CUSTOM_USER_01_ENCODING
+    PALETTELIST_STATIC_FLOWER_SWEATPEA__ID, 
+    PM_PALETTE_FLOWER_SWEATPEA_NAME_CTR,
+    PM_PALETTE_FLOWER_SWEATPEA__DATA, 
+    sizeof(PM_PALETTE_FLOWER_SWEATPEA__DATA),
+    D_PALETTE_FLOWER_SWEATPEA_ENCODING
   });
 
   addStaticPalette({
-    PALETTELIST_STATIC_SINGLE_FIRE_01__ID, 
-    PM_PALETTE_SINGLE_FIRE_01_NAME_CTR,
-    PM_PALETTE_SINGLE_FIRE_01_RGB__DATA, 
-    sizeof(PM_PALETTE_SINGLE_FIRE_01_RGB__DATA),
-    D_PALETTE_SINGLE_FIRE_01_ENCODING
+    PALETTELIST_STATIC_PINK_PURPLE__ID, 
+    PM_PALETTE_PINK_PURPLE_NAME_CTR,
+    PM_PALETTE_PINK_PURPLE__DATA, 
+    sizeof(PM_PALETTE_PINK_PURPLE__DATA),
+    D_PALETTE_PINK_PURPLE_ENCODING
   });
 
   addStaticPalette({
-    PALETTELIST_STATIC_FLOWER_SWEATPEAS_01__ID, 
-    PM_PALETTE_FLOWER_SWEATPEAS_01_NAME_CTR,
-    PM_PALETTE_FLOWER_SWEATPEAS_01_RGB__DATA, 
-    sizeof(PM_PALETTE_FLOWER_SWEATPEAS_01_RGB__DATA),
-    D_PALETTE_FLOWER_SWEATPEAS_01_ENCODING
+    PALETTELIST_STATIC_PURPLE_PINK__ID, 
+    PM_PALETTE_PURPLE_PINK_NAME_CTR,
+    PM_PALETTE_PURPLE_PINK__DATA, 
+    sizeof(PM_PALETTE_PURPLE_PINK__DATA),
+    D_PALETTE_PURPLE_PINK_ENCODING
   });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_FLOWER_SWEATPEAS_02__ID, 
-    PM_PALETTE_FLOWER_SWEATPEAS_02_NAME_CTR,
-    PM_PALETTE_FLOWER_SWEATPEAS_02_RGB__DATA, 
-    sizeof(PM_PALETTE_FLOWER_SWEATPEAS_02_RGB__DATA),
-    D_PALETTE_FLOWER_SWEATPEAS_02_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_PINK_PURPLE_01__ID, 
-    PM_PALETTE_PINK_PURPLE_01_NAME_CTR,
-    PM_PALETTE_PINK_PURPLE_01_RGB__DATA, 
-    sizeof(PM_PALETTE_PINK_PURPLE_01_RGB__DATA),
-    D_PALETTE_PINK_PURPLE_01_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_PINK_PURPLE_02__ID, 
-    PM_PALETTE_PINK_PURPLE_02_NAME_CTR,
-    PM_PALETTE_PINK_PURPLE_02_RGB__DATA, 
-    sizeof(PM_PALETTE_PINK_PURPLE_02_RGB__DATA),
-    D_PALETTE_PINK_PURPLE_02_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC_PINK_PURPLE_03__ID, 
-    PM_PALETTE_PINK_PURPLE_03_NAME_CTR,
-    PM_PALETTE_PINK_PURPLE_03_RGB__DATA, 
-    sizeof(PM_PALETTE_PINK_PURPLE_03_RGB__DATA),
-    D_PALETTE_PINK_PURPLE_03_ENCODING
-  });
-
-  addStaticPalette({
-    PALETTELIST_STATIC__SOLAR__SUNRISE_01__ID, 
-    PM_PALETTE__SOLAR__SUNRISE_01_NAME_CTR,
-    PM_PALETTE__SOLAR__SUNRISE_01_RGB__DATA, 
-    sizeof(PM_PALETTE__SOLAR__SUNRISE_01_RGB__DATA),
-    D_PALETTE__SOLAR__SUNRISE_01_ENCODING
-  });
-
-  /****************
-   * DynamicPalettes
-   ****************/
-
-  addDynamicPalette(
-    0, 
-    PM_PALETTE__SOLAR__CCT_ELEVATION_01_RGB__DATA,   //remove?? or its null when not used
-    sizeof(PM_PALETTE__SOLAR__CCT_ELEVATION_01_RGB__DATA), 
-    D_PALETTE__SOLAR__CCT_ELEVATION_01_ENCODING
-  );
-
-  addDynamicPalette(
-    1, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_02__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_02__DATA), 
-    D_PALETTE_CUSTOM_PALETTE_DEFAULT_02_ENCODING
-  );
-
-  addDynamicPalette(
-    2, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_02__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_02__DATA), 
-    D_PALETTE_CUSTOM_PALETTE_DEFAULT_02_ENCODING
-  );
-
 
   /****************
    * CustomPalettes
@@ -1088,6 +1023,240 @@ uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
   // ALOG_INF(PSTR("encoded_colour_width=%d"),encoded_colour_width);
 
   return encoded_colour_width;
+
+}
+
+
+
+
+/** NEW METHOD: 
+ * 
+ * With my thought, I may need to switch the indexing of all my palettes to be 0-255, regardless of length. Hence,
+ * 5 pixels in a palette would address as 0,50,100,150,200 (the 255/5), no longer as 0,1,2,3,4. This would make things more uniform when getting colours from any palette
+ * * Note: The 255 indexing would be reguired to fix the issue with Effect "Colorful" where only the start of palettes are got, and hence short (e.g. 5) colour palettes appear static.
+ * 
+ * To test this, creating a json constructor that can produce each palette under its desired ways
+ * Gets a single color from the currently selected palette.
+ * @param id                  Palette Index, default (0) will be random from colour wheel
+ * @param index_from_palette  [0..x] where x is total colours in palette. If `flag_mapping` is enabled, palette will be scaled out to be Y length >>> Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
+ * @param flag_mapping        if true, LED position in segment is considered for color
+ * @param flag_wrap_hard_edge           FastLED palettes will usally wrap back to the start smoothly. Set false to get a hard edge
+ * @param brightness_scale255 Value to scale the brightness of the returned color by. Default is 255. (no scaling)
+ * @param encoded_index*      If format of palette includes encoded data (ie sun_value,R,G,B) then return by inserting into pointer position
+ * @param flag_crgb_exact_colour If true, the index_from_palette is the exact pixel index, if false, the index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)
+ */
+RgbcctColor 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::GetColourFromPreloadedPaletteBuffer_2023(
+  uint16_t palette_id,
+  uint8_t* palette_buffer,
+  uint16_t _pixel_position,    
+  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly //encoded value needs to be U32 since they can be 3 bytes wide
+  bool     flag_spanned_segment, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+  bool     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+  bool     flag_crgb_exact_colour
+){
+
+  RgbcctColor colour = RgbcctColor(0);
+
+  #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+  Serial.println(palette_id);
+  DEBUG_LINE_HERE;
+  #endif
+
+  // ALOG_INF(PSTR("Bflag_crgb_exact_colour=%d"), flag_crgb_exact_colour);
+    
+  /**************************************************************
+   * 
+   * "CRGBPALETTE16"
+   * 
+   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * PALETTELIST_DYNAMIC_CRGBPALETTE16_PALETTES__IDS
+   * 
+  ***************************************************************/
+  if(
+    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
+    ((palette_id >= PALETTELIST_DYNAMIC_CRGBPALETTE16__CUSTOM_COLOURS_PAIRED_TWO_12__ID)    && (palette_id < PALETTELIST_DYNAMIC_CRGBPALETTE16_USER__LENGTH__ID))
+  ){
+
+    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+
+    CRGB fastled_col;
+    
+    // ALOG_INF(PSTR("id_adjusted %d  \tpixel_pos%d in_palette{%d}"), palette_id_adjusted, _pixel_position, colours_in_palette);
+
+    uint8_t pixel_position_adjust = _pixel_position;    
+
+
+    if(flag_crgb_exact_colour)
+    {
+      uint8_t pixels_in_crgb16palette = GetColoursInCRGB16Palette(palette_id);
+      pixel_position_adjust = _pixel_position % pixels_in_crgb16palette; // convert incoming pixels into repeating 0-15 numbers.
+      /**
+       * @brief If exact, instead of scale I should use the index to get the position
+       * Convert index (that wraps by amount of colours) to get scaled 255 version
+       **/
+      // ALOG_INF(PSTR("Cpixel_position_adjust %d|%d==%d"), _pixel_position, pixel_position_adjust, pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size());
+      if(pixel_position_adjust < pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index.size())
+      {
+        pixel_position_adjust = pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.encoded_index[pixel_position_adjust];
+      }
+    }
+    
+    
+    if(flag_spanned_segment)
+    {
+      pixel_position_adjust = (_pixel_position*255)/(pCONT_lAni->_virtualSegmentLength -1);  // This scales out segment_index to segment_length as 0 to 255
+    }
+
+
+    if(flag_wrap_hard_edge==true) // If OFF, then cut end of palette off (rescale to 240)
+    {
+      pixel_position_adjust = scale8(pixel_position_adjust, 240); // cut off blend at palette "end", 240, or 15/16*255=>240/255, so drop last 16th (15 to wrapped 0) gradient of colour
+    }
+
+    // if(palette_id==72)
+    //     ALOG_INF(PSTR("pixel_position_adjust %d|%d"), _pixel_position, pixel_position_adjust);
+    
+    fastled_col = ColorFromPalette( pSEGMENT_I(segIdx).palette_container->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, NOBLEND);
+  
+    colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b);
+
+    return colour;
+
+  } // END of CRGBPalette's
+
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC_SINGLE_COLOURS__IDS
+   * 
+  ***************************************************************/
+  else
+  if(
+    (palette_id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
+  ){  
+
+    uint8_t adjusted_id  = palette_id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
+    const uint8_t* data  = PM_STATIC_SINGLE_COLOURS__DATA;
+    uint8_t adjust_buf_i =  adjusted_id*3;
+    return RgbcctColor(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2]);
+
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC__IDS
+   * 
+  ***************************************************************/
+  else
+  if(
+    ((palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC_LENGTH__ID))
+  ){  
+
+    uint16_t palette_adjusted_id = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; // adjust back into correct indexing
+
+    colour = Get_Encoded_StaticPalette_Colour(
+        palette_adjusted_id,
+        palette_buffer,
+        _pixel_position,  
+        encoded_value,
+        flag_spanned_segment,
+        flag_wrap_hard_edge,
+        flag_crgb_exact_colour
+      );
+
+    return colour;
+
+  } // end of my palettes
+
+  /**************************************************************
+   * 
+   * PALETTELIST_STATIC__IDS
+   * 
+  ***************************************************************/
+  else
+  if(
+    ((palette_id >= PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
+  ){  
+
+    uint16_t palette_adjusted_id = palette_id - PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID; // adjust back into correct indexing
+
+    colour = Get_Encoded_DynamicPalette_Colour(
+        palette_adjusted_id,
+        palette_buffer,
+        _pixel_position,  
+        encoded_value,
+        flag_spanned_segment,
+        flag_wrap_hard_edge,
+        flag_crgb_exact_colour
+      );
+
+    return colour;
+
+  } // end of my palettes
+
+
+  /**************************************************************
+   * 
+   * PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR__IDS
+   * 
+  ***************************************************************/
+  else
+  if(
+    (palette_id >= PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)
+  ){  
+
+    uint8_t adjusted_id = palette_id - PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;
+    uint8_t segIdx = pCONT_lAni->_segment_index_primary;
+
+    if(adjusted_id < RGBCCTCOLOURS_SIZE)
+    {
+      return pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
+    }
+  }
+
+
+  /**************************************************************
+   * 
+   * Custom palettes: custom_palettes 
+   * 
+  ***************************************************************/
+  else
+  if(
+    ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
+  ){   
+    
+    uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS;        
+
+    return SubGet_Encoded_CustomPalette_Colour(
+      palette_adjusted_id,
+      palette_buffer,
+      _pixel_position,  
+      encoded_value,
+      flag_spanned_segment,
+      flag_wrap_hard_edge,
+      flag_crgb_exact_colour
+    );
+    
+  }
+
+  
+  /**************************************************************
+   * 
+   * Errors
+   * 
+  ***************************************************************/
+  else
+  {
+    ALOG_INF(PSTR("Missing %d"), palette_id);
+  }
+
+  return colour;
 
 }
 

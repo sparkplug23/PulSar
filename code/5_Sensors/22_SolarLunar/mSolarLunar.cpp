@@ -323,6 +323,22 @@ void mSolarLunar::parse_JSONCommand(JsonParserObject obj)
   }
 
 
+	#ifdef ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+  if(jtok = obj["DebugSolar"].getObject()["Enabled"])
+  {
+    debug.enabled = jtok.getBool();
+  }
+
+  if(jtok = obj["DebugSolar"].getObject()["Elevation"])
+  {
+    debug.elevation = jtok.getFloat();
+  }
+
+  if(jtok = obj["DebugSolar"].getObject()["Azimuth"])
+  {
+    debug.azimuth = jtok.getFloat();
+  }
+	#endif // ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
   
   
 

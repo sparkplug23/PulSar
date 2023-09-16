@@ -1,4 +1,4 @@
-#include "mPalette.h"
+#include "6_Lights/02_Palette/mPalette.h"
 
 #ifdef USE_MODULE_LIGHTS_INTERFACE
 

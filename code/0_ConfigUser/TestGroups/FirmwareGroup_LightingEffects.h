@@ -65,7 +65,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L5__H801_3CHRGB_AND_2CHCW
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L6__H801_FIVE_1CH_WHITE_CHANNELS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L9__ESP8266_WEBUI_OPTIM_3LEDS
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3234,6 +3234,7 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
   #define USE_MODULE_SENSORS_SOLAR_LUNAR
+    #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
 
   /***********************************
    * SECTION: Network Configs
@@ -3250,6 +3251,8 @@
 
   #define USE_MODULE_NETWORK_WEBSERVER23
   #define USE_MODULE_NETWORK_WEBSERVER
+
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
 
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   

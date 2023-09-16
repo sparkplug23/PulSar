@@ -1710,18 +1710,6 @@ function togglePower()
 	requestJson(obj);
 }
 
-function toggleNl()
-{
-	nlA = !nlA;
-	if (nlA)
-	{
-		showToast(`Timer active. Your light will turn ${nlTar > 0 ? "on":"off"} ${nlMode ? "over":"after"} ${nlDur} minutes.`);
-	} else {
-		showToast('Timer deactivated.');
-	}
-	var obj = {"nl": {"on": nlA}};
-	requestJson(obj);
-}
 
 function toggleSync()
 {
@@ -2857,7 +2845,7 @@ function unfocusSliders()
 }
 
 // sliding UI
-const _C = d.querySelector('.container'), N = 4;
+const _C = d.querySelector('.container'), N = 5; // Overview Added as 5th UI tab
 
 let iSlide = 0, x0 = null, scrollS = 0, locked = false;
 

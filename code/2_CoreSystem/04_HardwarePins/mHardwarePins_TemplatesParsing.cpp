@@ -354,6 +354,7 @@ void mHardwarePins::GpioInit(void)
     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MODULE "ValidModule %d"),pCONT_set->Settings.module);
     #endif // ENABLE_LOG_LEVEL_INFO
   }
+  DEBUG_LINE_HERE;
   SetModuleType();
 
   /**
@@ -375,6 +376,7 @@ void mHardwarePins::GpioInit(void)
     }
   }
 
+  DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
 
   /**
@@ -384,6 +386,7 @@ void mHardwarePins::GpioInit(void)
   myio def_gp;
   TemplateGPIOs(&def_gp); // Get template values
 
+  DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
 
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
@@ -447,6 +450,7 @@ void mHardwarePins::GpioInit(void)
 
   }
   
+  DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
   pCONT_set->my_module_flag = ModuleFlag();
   // DEBUG_LINE_HERE;
@@ -552,6 +556,7 @@ void mHardwarePins::GpioInit(void)
   analogWriteFreq(pCONT_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
   // #endif
 
+  DEBUG_LINE_HERE;
 /**
  * @brief Configure SPI if needed
  * 
@@ -682,6 +687,7 @@ void mHardwarePins::GpioInit(void)
     }
   }
 
+  DEBUG_LINE_HERE;
 /**
  * @brief Configure I2C
  * 
@@ -729,6 +735,7 @@ void mHardwarePins::GpioInit(void)
 
 
 
+  DEBUG_LINE_HERE;
 
   /**
    *  Use pins to configure lights present
@@ -817,6 +824,7 @@ void mHardwarePins::GpioInit(void)
   // }
 
 
+  DEBUG_LINE_HERE;
 /**
  * @brief Configure Serial
  * 

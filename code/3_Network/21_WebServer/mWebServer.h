@@ -1278,8 +1278,12 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 
 
 
+#ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
+#include "6_Lights/03_Animator/WebUI_01/webpages/html_settings.h"
+#include "6_Lights/03_Animator/WebUI_01/webpages/html_other.h"
 
+#endif // ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
 //  :
 //   public mTaskerInterface
@@ -1310,6 +1314,9 @@ public mTaskerInterface{
 
     AsyncWebServer* server = nullptr; //(80);
 
+#ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+void initServer();
+#endif
 
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -1434,6 +1441,19 @@ public mTaskerInterface{
     // void HandleRestoreConfiguration(AsyncWebServerRequest *request);
     // void HandleConfiguration(AsyncWebServerRequest *request);
     // void HandleUpgradeFirmwareStart(AsyncWebServerRequest *request);
+
+
+
+#ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+bool captivePortal(AsyncWebServerRequest *request);
+
+void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
+
+bool isIp(String str);
+
+#endif // ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+
+
 
 
     // /***************

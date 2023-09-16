@@ -2277,7 +2277,6 @@ upload_port = COM5
 
 
 
-
 [env:esp_8266_socket_numbered_20]
 platform                  = ${common.platform}
 build_flags               = ${common.build_flags}

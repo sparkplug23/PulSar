@@ -2808,6 +2808,9 @@ void  notFound(AsyncWebServerRequest *request);
 
 
 void initServer();
+#ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
+void initServer_LightOnly();
+#endif
 
 #define JSON_PATH_STATE      1
 #define JSON_PATH_INFO       2

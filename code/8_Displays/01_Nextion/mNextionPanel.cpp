@@ -11,6 +11,13 @@
  *       Latest code revision with oneHASP is version 1.03 on 9Aug22
 
  * @desc To enable control of Nextion panels using mqtt, allowing pass through commands and improved automation (eg dimmer, regexp of colours)
+
+https://www.youtube.com/watch?v=v8Uyam9u6QI
+
+
+Should I implement a parser for the commands? This would make openhab much easier
+ie p[2].b[2] command, should be able to be parsed json style message and sharing as normal mqtt. 
+
  */
 #include "mNextionPanel.h"
 
@@ -18,6 +25,26 @@
 
 const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_CTR = D_MODULE_DISPLAYS_NEXTION_CTR;
 const char* mNextionPanel::PM_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR = D_MODULE_DISPLAYS_NEXTION_FRIENDLY_CTR;
+
+#ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+
+#define webServer pCONT_web->server
+
+void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+  if(!index){
+    Serial.printf("UploadStart: %s\n", filename.c_str());
+  }
+  for(size_t i=0; i<len; i++){
+    Serial.print(data[i], HEX);
+  }
+  if(final){
+    Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index+len);
+  }
+}
+
+
+#endif
+
 
 int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
 {
@@ -27,12 +54,17 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
   *******************/
   switch(function){
     case FUNC_PRE_INIT:
+    
+      DEBUG_LINE_HERE;
       Pre_Init();  
+      DEBUG_LINE_HERE;
+
       break;
     case FUNC_INIT:
       Init();
-      break;
+    break;
   }
+
 
   // if(!settings.flags.EnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID;}
 
@@ -41,13 +73,17 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case FUNC_LOOP:
-      EveryLoop();
+    
+      if(!update_in_progress)
+        EveryLoop();
 
       #ifdef ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+      #ifndef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
       if(webServer)
       {
         webServer->handleClient();
-      }
+      }      
+      #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
       #endif // ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
     break;
@@ -72,52 +108,148 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
 
       
       #ifdef ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-      webServer = new WebServer(80);
 
-      webServer->on("/", [this](void){ webHandleRoot(); });
+        #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 
-      webServer->on("/nextion_update", [this](void){ WebPage_LCD_Update_TFT(); } );
+        // webServer->on("/", [this](void){ webHandleRoot(); });
+        
 
-      webServer->on(
+
+
+        pCONT_web->server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
+          request->send(200, "text/plain", (String)millis());
+        });
+
+        
+        pCONT_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+          this->webHandleRoot(request);
+        });
+        pCONT_web->server->on("/nextion_update", HTTP_GET, [this](AsyncWebServerRequest *request){
+          this->WebPage_LCD_Update_TFT(request);
+        });
+
+        pCONT_web->server->on("/firmware", HTTP_GET, [this](AsyncWebServerRequest *request){
+          this->webHandleFirmware(request);
+        });
+
+        
+
+
+// AsyncCallbackWebHandler& AsyncWebServer::on(const char* uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest, ArUploadHandlerFunction onUpload, ArBodyHandlerFunction onBody){
+//   AsyncCallbackWebHandler* handler = new AsyncCallbackWebHandler();
+        
+        // pCONT_web->server->on("/lcdupload", HTTP_POST, 
+        //   [this](AsyncWebServerRequest *request){ request->send(200); },          
+        //   [this](AsyncWebServerRequest *request){ webHandleLcdUpload(request); }
+        // );          
+        
+        pCONT_web->server->on(
+                              "/lcdupload", 
+                              HTTP_POST, 
+                              [this](AsyncWebServerRequest *request) { 
+                                
+                                // DEBUG_LINE_HERE;
+                                
+                                // DEBUG_LINE_HERE;
+update_in_progress = true;
+
+                                request->send(200); }, 
+                                // handleUpload
+
+
+                              [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+
+update_in_progress = true;
+
+
+Serial.println(data[0]);
+Serial.println(data[1]);
+Serial.println(data[2]);
+Serial.println(data[3]);
+Serial.println(data[4]);
+Serial.println(data[5]);
+                                  this->webHandleLcdUpload(request, filename, index, data, len, final);
+                              }
+                            );
+
+
+
+        // pCONT_web->server->on("/lcddownload", HTTP_GET, [this](AsyncWebServerRequest *request){
+        //   this->webHandleLcdDownload(request);
+        // });
+        // pCONT_web->server->on("/lcdOtaSuccess", HTTP_GET, [this](AsyncWebServerRequest *request){
+        //   this->webHandleLcdUpdateSuccess(request);
+        // });
+        // pCONT_web->server->on("/lcdOtaFailure", HTTP_GET, [this](AsyncWebServerRequest *request){
+        //   this->webHandleLcdUpdateFailure(request);
+        // });
+        // pCONT_web->server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
+        //   this->webHandleReboot(request);
+        // });
+        // pCONT_web->server->onNotFound( [this](AsyncWebServerRequest *request){
+        //   this->webHandleNotFound(request);
+        // });
+
+
+
+        pCONT_web->server->on("/tftFileSize", HTTP_GET, [this](AsyncWebServerRequest *request){
+          this->webHandleTftFileSize(request);
+        });
+
+        #else
+        webServer = new WebServer(80);
+
+        webServer->on("/", [this](void){ webHandleRoot(); });
+
+        webServer->on("/nextion_update", [this](void){ WebPage_LCD_Update_TFT(); } );
+
+        webServer->on(
           "/lcdupload", HTTP_POST, 
           [this](){ pCONT_nex->webServer->send(200); },          
           [this](){ webHandleLcdUpload(); }
-      );          
+        );          
 
-      webServer->on("/tftFileSize", [this](void){ webHandleTftFileSize(); } );
-      webServer->on("/lcddownload", [this](void){ webHandleLcdDownload(); } );
-      webServer->on("/lcdOtaSuccess", [this](void){ webHandleLcdUpdateSuccess(); } );
-      webServer->on("/lcdOtaFailure", [this](void){ webHandleLcdUpdateFailure(); } );
-      webServer->on("/reboot", [this](void){ webHandleReboot(); } );
-      webServer->onNotFound( [this](void){ webHandleNotFound(); } );
+        webServer->on("/tftFileSize", [this](void){ 
+          
+          // DEBUG_LINE_HERE;
+          
+          webHandleTftFileSize(); } );
+        webServer->on("/lcddownload", [this](void){ webHandleLcdDownload(); } );
+        webServer->on("/lcdOtaSuccess", [this](void){ webHandleLcdUpdateSuccess(); } );
+        webServer->on("/lcdOtaFailure", [this](void){ webHandleLcdUpdateFailure(); } );
+        webServer->on("/reboot", [this](void){ webHandleReboot(); } );
+        webServer->onNotFound( [this](void){ webHandleNotFound(); } );
 
-      /**
-       * @brief  Probably don't need
-       * */
-      webServer->on("/saveConfig", [this](void){ webHandleSaveConfig(); } );
-      webServer->on("/resetConfig", [this](void){ webHandleResetConfig(); } );
-      webServer->on("/resetBacklight", [this](void){ webHandleResetBacklight(); } );
-      webServer->on("/firmware", [this](void){ webHandleFirmware(); } );
-      webServer->on("/espfirmware", [this](void){ webHandleEspFirmware(); } );
-      
-      webServer->begin();
+        /**
+         * @brief  Probably don't need
+         * */
+        
+        webServer->on("/firmware", [this](void){ webHandleFirmware(); } );
+        
+        
+        webServer->begin();
 
-      ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Server started @ http://%s"), WiFi.localIP().toString());
-      
+        ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Server started @ http://%s"), WiFi.localIP().toString());
+
+
+        #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+
       #endif // ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
 
 
 
     break;
     case FUNC_WIFI_DISCONNECTED:
-      // wifiDisconnected();
       Show_ConnectionNotWorking();
     break;
     /************
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
-      parse_JSONCommand(obj);
+    
+      if(!update_in_progress)
+        parse_JSONCommand(obj);
+        
     break;
     /************
      * MQTT SECTION * 
@@ -151,9 +283,6 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
 }
 
 
-
-
-
 /**
  * @brief Using a template for "working" and another for "not working"
  * hardcoding for now
@@ -179,9 +308,13 @@ void mNextionPanel::Show_ConnectionWorking()
 void mNextionPanel::Show_ConnectionNotWorking()
 {
 
+  #ifdef ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE
+
   nextionSendCmd("page message");
   nextionSetAttr("message.main.txt", "\"Show_ConnectionNotWorking\"");
   nextionSetAttr("message.main.bco", "\"#ff0000\"");
+
+  #endif
   
 }
 
@@ -191,7 +324,33 @@ void mNextionPanel::Pre_Init(void)
 {
 
   #ifdef USE_HARDWARE_SERIAL_TEMP
+
+  DEBUG_LINE_HERE;
+  
+    SERIAL_NEXTION_RX.flush();
+  DEBUG_LINE_HERE;
+    SERIAL_NEXTION_RX.end();
+  DEBUG_LINE_HERE;
+    delay(10);
+  DEBUG_LINE_HERE;
+
+    // uartFlushTxOnly(2,false);
+
+    while(SERIAL_NEXTION_RX.available()){
+  DEBUG_LINE_HERE;
+      Serial.println(SERIAL_NEXTION_RX.read());
+  DEBUG_LINE_HERE;
+    }
+  DEBUG_LINE_HERE;
+    SERIAL_NEXTION_RX.flush();
+  DEBUG_LINE_HERE;
+    SERIAL_NEXTION_RX.end();
+  DEBUG_LINE_HERE;
+    delay(10);
+
+  DEBUG_LINE_HERE;
     SERIAL_NEXTION_RX.begin(NEXTION_BAUD);
+  DEBUG_LINE_HERE;
   #endif
   
 }
@@ -208,7 +367,7 @@ void mNextionPanel::Pre_Init(void)
 void mNextionPanel::Init()
 { 
 
-  SERIAL_NEXTION_TX.begin(115200);
+  // SERIAL_NEXTION_TX.begin(115200);
 
   if (!nextionConnect())
   {
@@ -262,6 +421,7 @@ void mNextionPanel::Init()
 
 
   #endif // TEMPLATE_DEFINED_BOOT_MESSAGE
+
 
 
 
@@ -932,7 +1092,7 @@ void mNextionPanel::nextionSetAttr(const char* hmiAttribute, const char* hmiValu
 }
 
 
-void mNextionPanel::nextionGetAttr(const char* c_str)//String hmiAttribute)
+void mNextionPanel::nextionGetAttr(const char* c_str)
 { // Get the value of a Nextion component attribute
   // This will only send the command to the panel requesting the attribute, the actual
   // return of that value will be handled by nextionProcessInput and placed into mqttGetSubtopic
@@ -1180,7 +1340,14 @@ void mNextionPanel::nextionReset()
   lcdConnected = false;
   while (!lcdConnected && (millis() < (lcdResetTimer + lcdResetTimeout)))
   {
-    Serial.println("while-nextionReset");
+    
+    SERIAL_NEXTION_TX.print("rest");
+    SERIAL_NEXTION_TX.write(nextionSuffix, sizeof(nextionSuffix));
+    SERIAL_NEXTION_TX.flush();
+
+  delay(100);
+
+    // Serial.println("while-nextionReset");
     nextionHandleInput();
   }
   if (lcdConnected)
@@ -1240,6 +1407,7 @@ bool mNextionPanel::nextionConnect()
   //   }
   // }
 
+DEBUG_LINE_HERE;
 
   memset(nextionSuffix,0xFF,sizeof(nextionSuffix));
 
@@ -1443,10 +1611,10 @@ void mNextionPanel::nextionProcessInput()
 
   // Serial.printf("nextionProcessInput Instruction= %d\n\r", nextionReturnBuffer[0]);
 
-  ALOG_INF(PSTR("nextionProcessInput = %d, %d, %d, %d, %d"), nextionReturnBuffer[0], nextionReturnBuffer[1], nextionReturnBuffer[2], nextionReturnBuffer[3], nextionReturnBuffer[4] );
+  // ALOG_INF(PSTR("nextionProcessInput = %d, %d, %d, %d, %d"), nextionReturnBuffer[0], nextionReturnBuffer[1], nextionReturnBuffer[2], nextionReturnBuffer[3], nextionReturnBuffer[4] );
 
 
-  DEBUG_LINE_HERE;
+  // DEBUG_LINE_HERE;
   
   char event_ctr[30];
   //https://www.itead.cc/wiki/Nextion_Instruction_Set
@@ -1490,8 +1658,8 @@ void mNextionPanel::nextionProcessInput()
         JsonBuilderI->Add("value", D_JSON_ON);
       JsonBuilderI->End();
 
-      pCONT_mqtt->ppublish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
-      pCONT_mqtt->ppublish("status/nextion/event/start",JsonBuilderI->GetBufferPtr(),0);
+      pCONT_mqtt->Publish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
+      pCONT_mqtt->Publish("status/nextion/event/start",JsonBuilderI->GetBufferPtr(),0);
 
     }
     if (nextionButtonAction == 0x00) // OFF - LET_GO
@@ -1515,8 +1683,8 @@ void mNextionPanel::nextionProcessInput()
 
       if(!fEnableIgnoreNextOffEvent){
         AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "fEnableIgnoreNextOffEvent = NOT set"));
-        pCONT_mqtt->ppublish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
-        pCONT_mqtt->ppublish("status/nextion/event/end",JsonBuilderI->GetBufferPtr(),0);
+        pCONT_mqtt->Publish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
+        pCONT_mqtt->Publish("status/nextion/event/end",JsonBuilderI->GetBufferPtr(),0);
         MQTTSend_PressEvent();
       }else{
         fEnableIgnoreNextOffEvent = false;// reset to listen to next event
@@ -1548,7 +1716,7 @@ void mNextionPanel::nextionProcessInput()
       String mqttPageTopic = mqttStateTopic + "/page";      
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: mqttPageTopic=\"%s\" nextionPage=\"%s\""),mqttPageTopic.c_str(),nextionPage.c_str());
       //mqttClient.publish(mqttPageTopic, nextionPage);
-      pCONT_mqtt->ppublish("status/nextion/event4",nextionPage.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/event4",nextionPage.c_str(),0);
     }
   }
   else if (nextionReturnBuffer[0] == 0x67)
@@ -1570,14 +1738,14 @@ void mNextionPanel::nextionProcessInput()
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"),xyCoord.c_str());
       String mqttTouchTopic = mqttStateTopic + "/touchOn";
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
-      pCONT_mqtt->ppublish("status/nextion/xyCoord",xyCoord.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/xyCoord",xyCoord.c_str(),0);
     }
     else if (nextionTouchAction == 0x00)
     {
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"),xyCoord.c_str());
       String mqttTouchTopic = mqttStateTopic + "/touchOff";
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"),mqttTouchTopic.c_str(),xyCoord.c_str());
-      pCONT_mqtt->ppublish("status/nextion/event6",xyCoord.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/event6",xyCoord.c_str(),0);
     }
   }
   else if (nextionReturnBuffer[0] == 0x70)
@@ -1598,13 +1766,13 @@ void mNextionPanel::nextionProcessInput()
     if (mqttGetSubtopic == "")
     { // If there's no outstanding request for a value, publish to mqttStateTopic
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttStateTopic.c_str(),getString.c_str());
-      pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/getString",getString.c_str(),0);
     }
     else
     { // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
       String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;      
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),mqttReturnTopic.c_str(),getString.c_str());
-      pCONT_mqtt->ppublish("status/nextion/getString",getString.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/getString",getString.c_str(),0);
       mqttGetSubtopic = "";
     }
   }
@@ -1633,7 +1801,7 @@ void mNextionPanel::nextionProcessInput()
   DEBUG_LINE_HERE;
       //mqttClient.publish(mqttStateTopic, getString);
       Serial.println(getString);
-      pCONT_mqtt->ppublish("status/nextion/event9",getString.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/event9",getString.c_str(),0);
     }
     // Otherwise, publish the to saved mqttGetSubtopic and then reset mqttGetSubtopic
     else
@@ -1641,10 +1809,10 @@ void mNextionPanel::nextionProcessInput()
   DEBUG_LINE_HERE;
       String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
       //mqttClient.publish(mqttReturnTopic, getString);
-      pCONT_mqtt->ppublish("status/nextion/event10",getString.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/event10",getString.c_str(),0);
       String mqttButtonJSONEvent = String(F("{\"event\":\"")) + mqttGetSubtopicJSON + String(F("\", \"value\":")) + getString + String(F("}"));
       //mqttClient.publish(mqttStateJSONTopic, mqttButtonJSONEvent);
-      pCONT_mqtt->ppublish("status/nextion/event11",mqttButtonJSONEvent.c_str(),0);
+      pCONT_mqtt->Publish("status/nextion/event11",mqttButtonJSONEvent.c_str(),0);
       mqttGetSubtopic = "";
     }
   DEBUG_LINE_HERE;
@@ -2776,7 +2944,7 @@ void mNextionPanel::MQTTSend_PressEvent(){
 
   tSaved_MQTTSend_PressEvent = millis();
 
-  pCONT_mqtt->ppublish("status/nextion/event/press",JsonBuilderI->GetBufferPtr(),false);
+  pCONT_mqtt->Publish("status/nextion/event/press",JsonBuilderI->GetBufferPtr(),false);
 
 }
 
@@ -2797,8 +2965,8 @@ void mNextionPanel::MQTTSend_LongPressEvent(){
     JsonBuilderI->Add("duration_threshold", LONG_PRESS_DURATION);
   JsonBuilderI->End();
 
-  pCONT_mqtt->ppublish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
-  pCONT_mqtt->ppublish("status/nextion/event/start",JsonBuilderI->GetBufferPtr(),0);
+  pCONT_mqtt->Publish("status/nextion/event",JsonBuilderI->GetBufferPtr(),0);
+  pCONT_mqtt->Publish("status/nextion/event/start",JsonBuilderI->GetBufferPtr(),0);
 
 }
 
@@ -3056,7 +3224,6 @@ void mNextionPanel::WebPage_Root_AddHandlers(){
   // webServer->on("/", webHandleRoot);
   // webServer->on("/saveConfig", webHandleSaveConfig);
   // webServer->on("/resetConfig", webHandleResetConfig);
-  // webServer->on("/resetBacklight", webHandleResetBacklight);
   // webServer->on("/firmware", webHandleFirmware);
   // webServer->on("/espfirmware", webHandleEspFirmware);
   // webServer->on(
@@ -3230,21 +3397,6 @@ void mNextionPanel::WebPage_Root_AddHandlers(){
 } //add handlers
 
 
-  // #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
-void mNextionPanel::Web_RGBLightSettings_UpdateURLs(AsyncWebServerRequest *request){
-  
-  // JsonBuilderI->Start();
-  //   JsonBuilderI->Object_Start("function");
-  //     JsonBuilderI->Object_Start("Parse_Urls");        
-  //       JsonBuilderI->Add("/fetch/animation_control_list_options.json",-1);
-  //     JsonBuilderI->Object_End();
-  //   JsonBuilderI->Object_End();
-  // JsonBuilderI->End();
-
-  // request->send_P(200, CONTENT_TYPE_APPLICATION_JSON_ID, data_buffer.payload.ctr);
-  
-}
-
 
 
 /*
@@ -3413,9 +3565,7 @@ void mNextionPanel::WebCommand_Parse(void)
 
 
 
-
-
-
+#ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 
 
 // TO BE DELETED
@@ -3663,6 +3813,8 @@ const char kRGBPickerItems[] PROGMEM = "Red" "|" "Green" "|" "Blue";
 const char HTTP_BTN_MENU_NEXTION_SETTINGS[] PROGMEM =
   "<p><form action='" WEB_HANDLE_NEXTION_SETTINGS "' method='get'><button>" D_NEXTION_SETTINGS "</button></form></p>";
 
+
+#endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 
 
 void mNextionPanel::WebSave_NextionSettings(void)
@@ -4419,458 +4571,6 @@ void mNextionPanel::nextionStartOtaDownload(String otaUrl)
 
 // const char HTTP_STYLE[] PROGMEM           = "<style>.c{text-align: center;} div,input{padding:5px;font-size:1em;} input{width:95%;} body{text-align: center;font-family:verdana;} button{border:0;border-radius:0.3rem;background-color:#1fa3ec;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;} .q{float: right;width: 64px;text-align: right;} .l{background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEX///8EBwfBwsLw8PAzNjaCg4NTVVUjJiZDRUUUFxdiZGSho6OSk5Pg4eFydHTCjaf3AAAAZElEQVQ4je2NSw7AIAhEBamKn97/uMXEGBvozkWb9C2Zx4xzWykBhFAeYp9gkLyZE0zIMno9n4g19hmdY39scwqVkOXaxph0ZCXQcqxSpgQpONa59wkRDOL93eAXvimwlbPbwwVAegLS1HGfZAAAAABJRU5ErkJggg==\") no-repeat left center;background-size: 1em;}</style>";
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleNotFound()
-{ // webServer 404
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending 404 to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);//FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " 404");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(404, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-  webServer->sendContent(F("<h1>404: File Not Found</h1>One of us appears to have done something horribly wrong-><hr/><b>URI: </b>"));
-  webServer->sendContent(webServer->uri());
-  webServer->sendContent(F("<br/><b>Method: </b>"));
-  webServer->sendContent((webServer->method() == HTTP_GET) ? F("GET") : F("POST"));
-  webServer->sendContent(F("<br/><b>Arguments: </b>"));
-  webServer->sendContent(String(webServer->args()));
-  for (uint8_t i = 0; i < webServer->args(); i++)
-  {
-    webServer->sendContent(F("<br/><b>"));
-    webServer->sendContent(String(webServer->argName(i)));
-    webServer->sendContent(F(":</b> "));
-    webServer->sendContent(String(webServer->arg(i)));
-  }
-  webServer->sendContent("");
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleRoot()
-{ // http://plate01/
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-
-  ALOG_INF(PSTR(D_LOG_NEXTION DEBUG_INSERT_PAGE_BREAK "HTTP: Sending root page to client connected from: %s"), webServer->client().remoteIP().toString());
-
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode));
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent(httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F("</h1>"));
-
-  webServer->sendContent(F("<form method='POST' action='saveConfig'>"));
-  webServer->sendContent(F("<b>WiFi SSID</b> <i><small>(required)</small></i><input id='wifiSSID' required name='wifiSSID' maxlength=32 placeholder='WiFi SSID' value='"));
-  webServer->sendContent(WiFi.SSID());
-  webServer->sendContent(F("'><br/><b>WiFi Password</b> <i><small>(required)</small></i><input id='wifiPass' required name='wifiPass' type='password' maxlength=64 placeholder='WiFi Password' value='********'>"));
-  webServer->sendContent(F("<br/><br/><b>HASPone Node Name</b> <i><small>(required. lowercase letters, numbers, and _ only)</small></i><input id='haspNode' required name='haspNode' maxlength=15 placeholder='HASPone Node Name' pattern='[a-z0-9_]*' value='"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F("'><br/><b>Group Name</b> <i><small>(required)</small></i><input id='groupName' required name='groupName' maxlength=15 placeholder='Group Name' value='"));
-  webServer->sendContent(groupName);
-  webServer->sendContent(F("'><br/><br/><b>MQTT Broker</b> <i><small>(required, IP address is preferred)</small></i><input id='mqttServer' required name='mqttServer' maxlength=127 placeholder='mqttServer' value='"));
-  if (strcmp(mqttServer, "") != 0)
-  {
-    webServer->sendContent(mqttServer);
-  }
-  webServer->sendContent(F("'><br/><b>MQTT Port</b> <i><small>(required)</small></i><input id='mqttPort' required name='mqttPort' type='number' maxlength=5 placeholder='mqttPort' value='"));
-  if (strcmp(mqttPort, "") != 0)
-  {
-    webServer->sendContent(mqttPort);
-  }
-  webServer->sendContent(F("'><br/><b>MQTT User</b> <i><small>(optional)</small></i><input id='mqttUser' name='mqttUser' maxlength=127 placeholder='mqttUser' value='"));
-  if (strcmp(mqttUser, "") != 0)
-  {
-    webServer->sendContent(mqttUser);
-  }
-  webServer->sendContent(F("'><br/><b>MQTT Password</b> <i><small>(optional)</small></i><input id='mqttPassword' name='mqttPassword' type='password' maxlength=127 placeholder='mqttPassword' value='"));
-  if (strcmp(mqttUser, "") != 0)
-  {
-    webServer->sendContent(F("********"));
-  }
-  webServer->sendContent(F("'>"));
-
-  webServer->sendContent(F("<br/><b>MQTT TLS enabled:</b><input id='mqttTlsEnabled' name='mqttTlsEnabled' type='checkbox'"));
-  if (mqttTlsEnabled)
-  {
-    webServer->sendContent(F(" checked='checked'"));
-  }
-  webServer->sendContent(F("><br/><b>MQTT TLS Fingerpint</b> <i><small>(leave blank to disable fingerprint checking)</small></i><input id='mqttFingerprint' name='mqttFingerprint' maxlength=59 minlength=59 placeholder='01:02:03:04:05:06:07:08:09:0A:0B:0C:0D:0E:0F:10:11:12:13:14' value='"));
-  if (strcmp(mqttFingerprint, "") != 0)
-  {
-    webServer->sendContent(mqttFingerprint);
-  }
-  webServer->sendContent(F("'>"));
-
-  webServer->sendContent(F("<br/><br/><b>HASPone Admin Username</b> <i><small>(optional)</small></i><input id='configUser' name='configUser' maxlength=31 placeholder='Admin User' value='"));
-  if (strcmp(configUser, "") != 0)
-  {
-    webServer->sendContent(configUser);
-  }
-  webServer->sendContent(F("'><br/><b>HASPone Admin Password</b> <i><small>(optional)</small></i><input id='configPassword' name='configPassword' type='password' maxlength=31 placeholder='Admin User Password' value='"));
-  if (strcmp(configPassword, "") != 0)
-  {
-    webServer->sendContent(F("********"));
-  }
-  webServer->sendContent(F("'><br/><br/><b>Home Assistant discovery topic</b> <i><small>(required, should probably be \"homeassistant\")</small></i><input id='hassDiscovery' name='hassDiscovery' maxlength=127 placeholder='homeassistant' value='"));
-  if (strcmp(hassDiscovery, "") != 0)
-  {
-    webServer->sendContent(hassDiscovery);
-  }
-  webServer->sendContent(F("'><br/><b>Nextion project page count</b> <i><small>(required, probably \"11\")</small></i><input id='nextionMaxPages' required name='nextionMaxPages' type='number' maxlength=2 placeholder='nextionMaxPages' value='"));
-  if (nextionMaxPages != 0)
-  {
-    webServer->sendContent(String(nextionMaxPages));
-  }
-  webServer->sendContent(F("'><br/><hr>"));
-  // Big menu of possible serial speeds
-  if ((lcdVersion != 1) && (lcdVersion != 2))
-  { // HASPone lcdVersion 1 and 2 have `bauds=115200` in the pre-init script of page 0.  Don't show this option if either of those two versions are running.
-    webServer->sendContent(F("<b>LCD Serial Speed:&nbsp;</b><select id='nextionBaud' name='nextionBaud'>"));
-
-uint8_t nextionSpeedsLength = 5;
-    for (unsigned int nextionSpeedsIndex = 0; nextionSpeedsIndex < nextionSpeedsLength; nextionSpeedsIndex++)
-    {
-      char nextionSpeedItem[sizeof(unsigned long) * 3 + 2];
-      snprintf(nextionSpeedItem, sizeof nextionSpeedItem, "%ld", nextionSpeedsIndex);//nextionSpeeds[nextionSpeedsIndex]);
-      webServer->sendContent(F("<option value='"));
-      webServer->sendContent(nextionSpeedItem);
-      webServer->sendContent(F("'"));
-      if (strcmp(nextionSpeedItem, nextionBaud) == 0)
-      {
-        webServer->sendContent(F(" selected"));
-      }
-      webServer->sendContent(F(">"));
-      webServer->sendContent(nextionSpeedItem);
-      webServer->sendContent(F("</option>"));
-    }
-    webServer->sendContent(F("</select><br/>"));
-  }
-
-  webServer->sendContent(F("<b>USB serial debug output enabled:</b><input id='debugSerialEnabled' name='debugSerialEnabled' type='checkbox'"));
-  if (debugSerialEnabled)
-  {
-    webServer->sendContent(F(" checked='checked'"));
-  }
-  webServer->sendContent(F("><br/><b>Telnet debug output enabled:</b><input id='debugTelnetEnabled' name='debugTelnetEnabled' type='checkbox'"));
-  if (debugTelnetEnabled)
-  {
-    webServer->sendContent(F(" checked='checked'"));
-  }
-  webServer->sendContent(F("><br/><b>mDNS enabled:</b><input id='mdnsEnabled' name='mdnsEnabled' type='checkbox'"));
-  if (mdnsEnabled)
-  {
-    webServer->sendContent(F(" checked='checked'"));
-  }
-  webServer->sendContent(F("><br/><b>Motion Sensor Pin:&nbsp;</b><select id='motionPinConfig' name='motionPinConfig'><option value='0'"));
-  if (!motionPin)
-  {
-    webServer->sendContent(F(" selected"));
-  }
-  webServer->sendContent(F(">disabled/not installed</option><option value='D0'"));
-  // if (motionPin == D0)
-  // {
-  //   webServer->sendContent(F(" selected"));
-  // }
-  // webServer->sendContent(F(">D0</option><option value='D1'"));
-  // if (motionPin == D1)
-  // {
-  //   webServer->sendContent(F(" selected"));
-  // }
-  webServer->sendContent(F(">D1</option></select>"));
-  webServer->sendContent(F("<br/><b>Keypress beep enabled on D2:</b><input id='beepEnabled' name='beepEnabled' type='checkbox'"));
-  if (beepEnabled)
-  {
-    webServer->sendContent(F(" checked='checked'"));
-  }
-  webServer->sendContent(F("><br/><b>Ignore touchevents when backlight is off:</b><input id='ignoreTouchWhenOff' name='ignoreTouchWhenOff' type='checkbox'"));
-  if (ignoreTouchWhenOff)
-  {
-    webServer->sendContent(F(" checked='checked'"));
-  }
-  webServer->sendContent(F("><br/><hr><button type='submit'>save settings</button></form>"));
-
-  if (updateEspAvailable)
-  {
-    String espFirmwareUrl = "espFirmwareUrl";
-    webServer->sendContent(F("<br/><hr><font color='green'><center><h3>HASPone Update available!</h3></center></font>"));
-    webServer->sendContent(F("<form method='get' action='espfirmware'>"));
-    webServer->sendContent(F("<input id='espFirmwareURL' type='hidden' name='espFirmware' value='"));
-    webServer->sendContent(espFirmwareUrl);
-    webServer->sendContent(F("'><button type='submit'>update HASPone to v"));
-    webServer->sendContent(String(updateEspAvailableVersion));
-    webServer->sendContent(F("</button></form>"));
-  }
-
-  webServer->sendContent(F("<hr><form method='get' action='firmware'>"));
-  webServer->sendContent(F("<button type='submit'>update firmware</button></form>"));
-
-  webServer->sendContent(F("<hr><form method='get' action='reboot'>"));
-  webServer->sendContent(F("<button type='submit'>reboot device</button></form>"));
-
-  webServer->sendContent(F("<hr><form method='get' action='resetBacklight'>"));
-  webServer->sendContent(F("<button type='submit'>reset lcd backlight</button></form>"));
-
-  webServer->sendContent(F("<hr><form method='get' action='resetConfig'>"));
-  webServer->sendContent(F("<button type='submit'>factory reset settings</button></form>"));
-
-  webServer->sendContent(F("<hr><b>MQTT Status: </b>"));
-  // if (mqttClient.connected())
-  // { // Check MQTT connection
-  //   webServer->sendContent(F("Connected"));
-  // }
-  // else
-  // {
-    webServer->sendContent(F("<font color='red'><b>Disconnected</b></font><br/><b>MQTT return code:</b> "));
-    webServer->sendContent("String(mqttClient.returnCode())");
-    webServer->sendContent(F("<br/><b>MQTT last error:</b> "));
-    webServer->sendContent("String(mqttClient.lastError())");
-    webServer->sendContent(F("<br/><b>MQTT broker ping check:</b> "));
-    if (mqttPingCheck)
-    {
-      webServer->sendContent(F("<font color='green'>SUCCESS</font>"));
-    }
-    else
-    {
-      webServer->sendContent(F("<font color='red'>FAILED</font>"));
-    }
-    webServer->sendContent(F("<br/><b>MQTT broker port check:</b> "));
-    if (mqttPortCheck)
-    {
-      webServer->sendContent(F("<font color='green'>SUCCESS</font>"));
-    }
-    else
-    {
-      webServer->sendContent(F("<font color='red'>FAILED</font>"));
-    }
-  // }
-  webServer->sendContent(F("<br/><b>MQTT ClientID: </b>"));
-  if (mqttClientId != "")
-  {
-    webServer->sendContent(mqttClientId);
-  }
-  webServer->sendContent(F("<br/><b>HASPone FW Version: </b>"));
-  webServer->sendContent(String(haspVersion));
-  webServer->sendContent(F("<br/><b>LCD Model: </b>"));
-  if (nextionModel != "")
-  {
-    webServer->sendContent(nextionModel);
-  }
-  webServer->sendContent(F("<br/><b>LCD FW Version: </b>"));
-  webServer->sendContent(String(lcdVersion));
-  webServer->sendContent(F("<br/><b>LCD Active Page: </b>"));
-  webServer->sendContent(String(nextionActivePage));
-  webServer->sendContent(F("<br/><b>LCD Serial Speed: </b>"));
-  webServer->sendContent(nextionBaud);
-  webServer->sendContent(F("<br/><b>CPU Frequency: </b>"));
-  webServer->sendContent(String(ESP.getCpuFreqMHz()));
-  webServer->sendContent(F("MHz"));
-  webServer->sendContent(F("<br/><b>Sketch Size: </b>"));
-  webServer->sendContent(String(ESP.getSketchSize()));
-  webServer->sendContent(F(" bytes"));
-  webServer->sendContent(F("<br/><b>Free Sketch Space: </b>"));
-  webServer->sendContent(String(ESP.getFreeSketchSpace()));
-  webServer->sendContent(F(" bytes"));
-  webServer->sendContent(F("<br/><b>Heap Free: </b>"));
-  webServer->sendContent(String(ESP.getFreeHeap()));
-  // webServer->sendContent(F("<br/><b>Heap Fragmentation: </b>"));
-  // webServer->sendContent(String(ESP.getHeapFragmentation()));
-  // webServer->sendContent(F("<br/><b>ESP core version: </b>"));
-  // webServer->sendContent(ESP.getCoreVersion());
-  webServer->sendContent(F("<br/><b>IP Address: </b>"));
-  webServer->sendContent(WiFi.localIP().toString());
-  webServer->sendContent(F("<br/><b>Signal Strength: </b>"));
-  webServer->sendContent(String(WiFi.RSSI()));
-  webServer->sendContent(F("<br/><b>Uptime: </b>"));
-  webServer->sendContent(String(long(millis() / 1000)));
-  // webServer->sendContent(F("<br/><b>Last reset: </b>"));
-  // webServer->sendContent(ESP.getResetInfo());
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-}
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::nextionOtaStartDownload(const String &lcdOtaUrl)
-{ // Upload firmware to the Nextion LCD via HTTP download
-  // based in large part on code posted by indev2 here:
-  // http://support.iteadstudio.com/support/discussions/topics/11000007686/page/2
-
-  uint32_t lcdOtaFileSize = 0;
-  String lcdOtaNextionCmd;
-  uint32_t lcdOtaChunkCounter = 0;
-  uint16_t lcdOtaPartNum = 0;
-  uint32_t lcdOtaTransferred = 0;
-  uint8_t lcdOtaPercentComplete = 0;
-  const uint32_t lcdOtaTimeout = 30000; // timeout for receiving new data in milliseconds
-  static uint32_t lcdOtaTimer = 0;      // timer for lcdOtaTimeout
-
-  HTTPClient lcdOtaHttp;
-  WiFiClientSecure lcdOtaWifiSecure;
-  WiFiClient lcdOtaWifi;
-  if (lcdOtaUrl.startsWith(F("https")))
-  {
-    debugPrintln("LCDOTA: Attempting firmware update from HTTPS host: " + lcdOtaUrl);
-
-    lcdOtaHttp.begin(lcdOtaWifiSecure, lcdOtaUrl);
-    lcdOtaWifiSecure.setInsecure();
-    // lcdOtaWifiSecure.setBufferSizes(512, 512);
-  }
-  else
-  {
-    debugPrintln("LCDOTA: Attempting firmware update from HTTP host: " + lcdOtaUrl);
-    lcdOtaHttp.begin(lcdOtaWifi, lcdOtaUrl);
-  }
-
-  int lcdOtaHttpReturn = lcdOtaHttp.GET();
-  if (lcdOtaHttpReturn > 0)
-  { // HTTP header has been sent and Server response header has been handled
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: HTTP GET return code: %d"), lcdOtaHttpReturn);
-    if (lcdOtaHttpReturn == HTTP_CODE_OK)
-    {                                                 // file found at server
-      int32_t lcdOtaRemaining = lcdOtaHttp.getSize(); // get length of document (is -1 when Server sends no Content-Length header)
-      lcdOtaFileSize = lcdOtaRemaining;
-      static uint16_t lcdOtaParts = (lcdOtaRemaining / 4096) + 1;
-      static const uint16_t lcdOtaBufferSize = 1024; // upload data buffer before sending to UART
-      static uint8_t lcdOtaBuffer[lcdOtaBufferSize] = {};
-
-      ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: File found at Server. Size %d bytes in %d 4k chunks"), lcdOtaRemaining, lcdOtaParts);
-
-      // WiFiUDP::stop(); // Keep mDNS responder and MQTT traffic from breaking things
-      // if (mqttClient.connected())
-      // {
-      //   ALOG_INF(PSTR("LCDOTA: LCD firmware upload starting, closing MQTT connection."));
-      //   mqttClient.publish(mqttStatusTopic, "OFF", true, 0);
-      //   debugPrintln(String(F("MQTT OUT: '")) + mqttStatusTopic + String(F("' : 'OFF'")));
-      //   mqttClient.disconnect();
-      // }
-
-      WiFiClient *stream = lcdOtaHttp.getStreamPtr();      // get tcp stream
-      Serial2.write(nextionSuffix, sizeof(nextionSuffix)); // Send empty command
-      Serial2.flush();
-      nextionHandleInput();
-
-      String lcdOtaNextionCmd = "whmi-wri " + String(lcdOtaFileSize) + "," + String(nextionBaud) + ",0";
-      ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Sending LCD upload command: %s"), lcdOtaNextionCmd);
-
-      Serial2.print(lcdOtaNextionCmd);
-      Serial2.write(nextionSuffix, sizeof(nextionSuffix));
-      Serial2.flush();
-
-      if (nextionOtaResponse())
-      {
-        ALOG_INF(PSTR("LCDOTA: LCD upload command accepted."));
-      }
-      else
-      {
-        ALOG_INF(PSTR("LCDOTA: LCD upload command FAILED.  Restarting device."));
-        espReset();
-      }
-      ALOG_INF(PSTR("LCDOTA: Starting update"));
-      lcdOtaTimer = millis();
-      while (lcdOtaHttp.connected() && (lcdOtaRemaining > 0 || lcdOtaRemaining == -1))
-      {                                                // Write incoming data to panel as it arrives
-        uint16_t lcdOtaHttpSize = stream->available(); // get available data size
-
-        if (lcdOtaHttpSize)
-        {
-          uint16_t lcdOtaChunkSize = 0;
-          if ((lcdOtaHttpSize <= lcdOtaBufferSize) && (lcdOtaHttpSize <= (4096 - lcdOtaChunkCounter)))
-          {
-            lcdOtaChunkSize = lcdOtaHttpSize;
-          }
-          else if ((lcdOtaBufferSize <= lcdOtaHttpSize) && (lcdOtaBufferSize <= (4096 - lcdOtaChunkCounter)))
-          {
-            lcdOtaChunkSize = lcdOtaBufferSize;
-          }
-          else
-          {
-            lcdOtaChunkSize = 4096 - lcdOtaChunkCounter;
-          }
-          stream->readBytes(lcdOtaBuffer, lcdOtaChunkSize);
-          Serial2.flush();                              // make sure any previous writes the UART have completed
-          Serial2.write(lcdOtaBuffer, lcdOtaChunkSize); // now send buffer to the UART
-          lcdOtaChunkCounter += lcdOtaChunkSize;
-          if (lcdOtaChunkCounter >= 4096)
-          {
-            Serial2.flush();
-            lcdOtaPartNum++;
-            lcdOtaTransferred += lcdOtaChunkCounter;
-            lcdOtaPercentComplete = (lcdOtaTransferred * 100) / lcdOtaFileSize;
-            lcdOtaChunkCounter = 0;
-            if (nextionOtaResponse())
-            { // We've completed a chunk
-              ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Part %d OK, %d%% complete"), lcdOtaPartNum, lcdOtaPercentComplete);
-              lcdOtaTimer = millis();
-            }
-            else
-            {
-              ALOG_ERR(PSTR(D_LOG_NEXTION "LCDOTA: Part %d FAILED, %d%% complete"), lcdOtaPartNum, lcdOtaPercentComplete);
-              delay(2000); // extra delay while the LCD does its thing
-              espReset();
-            }
-          }
-          else
-          {
-            delay(20);
-          }
-          if (lcdOtaRemaining > 0)
-          {
-            lcdOtaRemaining -= lcdOtaChunkSize;
-          }
-        }
-        delay(10);
-        if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
-        { // Our timer expired so reset
-          ALOG_INF(PSTR("LCDOTA: ERROR: LCD upload timeout. Restarting."));
-          espReset();
-        }
-      }
-      lcdOtaPartNum++;
-      lcdOtaTransferred += lcdOtaChunkCounter;
-      if ((lcdOtaTransferred == lcdOtaFileSize) && nextionOtaResponse())
-      {
-        ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
-        uint32_t lcdOtaDelay = millis();
-        ALOG_INF(PSTR("LCDOTA: Waiting 5 seconds to allow LCD to apply updates we've sent."));
-        while ((millis() - lcdOtaDelay) < 5000)
-        { // extra 5sec delay while the LCD handles any local firmware updates from new versions of code sent to it
-          webServer->handleClient();
-          yield();
-        }
-        espReset();
-      }
-      else
-      {
-        ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Failure, lcdOtaTransferred: %d lcdOtaFileSize: %d"), lcdOtaTransferred, lcdOtaFileSize);
-        espReset();
-      }
-    }
-  }
-  else
-  {
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: HTTP GET failed, error code %s"), lcdOtaHttp.errorToString(lcdOtaHttpReturn));
-    espReset();
-  }
-  lcdOtaHttp.end();
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool mNextionPanel::nextionOtaResponse()
@@ -4883,6 +4583,7 @@ bool mNextionPanel::nextionOtaResponse()
     if (Serial2.available())
     {
       byte inByte = Serial2.read();
+      // Serial.println(inByte, HEX);
       if (inByte == 0x5)
       {
         otaSuccessVal = true;
@@ -4894,6 +4595,13 @@ bool mNextionPanel::nextionOtaResponse()
       delay(1);
     }
   }
+
+  if(!otaSuccessVal){
+    AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_NEXTION "QUIT OTA and NOOOOOOOOOT Restart display"));
+    // nextionReset();
+  }
+
+
   return otaSuccessVal;
 }
 
@@ -4902,920 +4610,6 @@ void mNextionPanel::nextionUpdateProgress(const unsigned int &progress, const un
 {
   uint8_t progressPercent = (float(progress) / float(total)) * 100;
   nextionSetAttr("p[0].b[4].val", String(progressPercent).c_str());
-}
-
-
-
-
-void mNextionPanel::webHandleTftFileSize()
-{ // http://plate01/tftFileSize
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /tftFileSize page to client connected from: %s"), webServer->client().remoteIP().toString());
-
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", String(pCONT_set->Settings.system_name.friendly) + " TFT Filesize");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_HEAD_END);
-  tftFileSize = webServer->arg("tftFileSize").toInt();
-  
-  ALOG_INF(PSTR(D_LOG_NEXTION "Received tftFileSize: %d"), tftFileSize);
-
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::espStartOta(const String &espOtaUrl)
-{ // Update ESP firmware from HTTP/HTTPS URL
-
-  // nextionSetAttr("p[0].b[1].txt", "\"\\rHASPone update:\\r\\r\\r \"");
-  // nextionSendCmd("page 0");
-  // nextionSendCmd("vis 4,1");
-
-  // WiFiUDP::stopAll(); // Keep mDNS responder from breaking things
-  // delay(1);
-  // ESPhttpUpdate.rebootOnUpdate(false);
-  // ESPhttpUpdate.onProgress(nextionUpdateProgress);
-  // t_httpUpdate_return espOtaUrlReturnCode;
-  // if (espOtaUrl.startsWith(F("https")))
-  // {
-  //   debugPrintln(String(F("ESPFW: Attempting firmware update from HTTPS host: ")) + espOtaUrl);
-  //   WiFiClientSecure wifiEspOtaClientSecure;
-  //   wifiEspOtaClientSecure.setInsecure();
-  //   wifiEspOtaClientSecure.setBufferSizes(512, 512);
-  //   espOtaUrlReturnCode = ESPhttpUpdate.update(wifiEspOtaClientSecure, espOtaUrl);
-  // }
-  // else
-  // {
-  //   debugPrintln(String(F("ESPFW: Attempting firmware update from HTTP host: ")) + espOtaUrl);
-  //   espOtaUrlReturnCode = ESPhttpUpdate.update(wifiClient, espOtaUrl);
-  // }
-
-  // switch (espOtaUrlReturnCode)
-  // {
-  // case HTTP_UPDATE_FAILED:
-  //   debugPrintln(String(F("ESPFW: HTTP_UPDATE_FAILED error ")) + String(ESPhttpUpdate.getLastError()) + " " + ESPhttpUpdate.getLastErrorString());
-  //   nextionSendCmd("vis 4,0");
-  //   nextionSetAttr("p[0].b[1].txt", "\"HASPone update:\\r FAILED\\rerror: " + ESPhttpUpdate.getLastErrorString() + "\"");
-  //   break;
-
-  // case HTTP_UPDATE_NO_UPDATES:
-  //   ALOG_INF(PSTR("ESPFW: HTTP_UPDATE_NO_UPDATES"));
-  //   nextionSendCmd("vis 4,0");
-  //   nextionSetAttr("p[0].b[1].txt", "\"HASPone update:\\rNo update\"");
-  //   break;
-
-  // case HTTP_UPDATE_OK:
-  //   ALOG_INF(PSTR("ESPFW: HTTP_UPDATE_OK"));
-  //   nextionSetAttr("p[0].b[1].txt", "\"\\rHASPone update:\\r\\r Complete!\\rRestarting.\"");
-  //   nextionSendCmd("vis 4,1");
-  //   delay(1000);
-  //   espReset();
-  // }
-  // delay(1000);
-  // nextionSendCmd("page " + String(nextionActivePage));
-}
-
-/**
- * @brief 
- * 
- */
-void mNextionPanel::webHandleLcdUpload()
-{ // http://plate01/lcdupload
-  // Upload firmware to the Nextion LCD via HTTP upload
-
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-
-  ALOG_INF(PSTR("webHandleLcdUpload"));
-
-  static uint32_t lcdOtaTransferred = 0;
-  static uint32_t lcdOtaRemaining;
-  static uint16_t lcdOtaParts;
-  const uint32_t lcdOtaTimeout = 30000; // timeout for receiving new data in milliseconds
-  static uint32_t lcdOtaTimer = 0;      // timer for upload timeout
-
-  HTTPUpload &upload = webServer->upload();
-
-  if (tftFileSize == 0)
-  {
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: FAILED, no filesize sent."));
-    String httpHeader = FPSTR(HTTP_HEAD_START);
-    httpHeader.replace("{v}", String(pCONT_set->Settings.system_name.friendly) + " LCD update error");
-    webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-    webServer->send(200, "text/html", httpHeader);
-    webServer->sendContent_P(HTTP_SCRIPT);
-    webServer->sendContent_P(HTTP_STYLE);
-    webServer->sendContent_P(HASP_STYLE);
-    webServer->sendContent(F("<meta http-equiv='refresh' content='5;url=/firmware' />"));
-    webServer->sendContent_P(HTTP_HEAD_END);
-    webServer->sendContent(F("<h1>"));
-    webServer->sendContent(haspNode);
-    webServer->sendContent(F(" LCD update FAILED</h1>"));
-    webServer->sendContent(F("No update file size reported. You must use a modern browser with Javascript enabled."));
-    webServer->sendContent_P(HTTP_END);
-    webServer->sendContent("");
-  }
-  else if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
-  { // Our timer expired so reset
-    ALOG_INF(PSTR("LCDOTA: ERROR: LCD upload timeout.  Restarting."));
-    espReset();
-  }
-  else if (upload.status == UPLOAD_FILE_START)
-  {
-    // WiFiUDP::stopAll(); // Keep mDNS responder from breaking things
-    // WiFiUDP::stop(); // Keep mDNS responder from breaking things
-  
-    ALOG_INF(PSTR("(upload.status == UPLOAD_FILE_START)"));
-
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Attempting firmware upload"));
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: upload.filename: %s"), upload.filename);
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: TFTfileSize: %d"), tftFileSize);
-
-    lcdOtaRemaining = tftFileSize;
-    lcdOtaParts = (lcdOtaRemaining / 4096) + 1;
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: File upload beginning. Size %d bytes in %d 4k chunks"), lcdOtaRemaining, lcdOtaParts);
-    
-    Serial2.write(nextionSuffix, sizeof(nextionSuffix)); // Send empty command to LCD
-    Serial2.flush();
-    nextionHandleInput();
-
-    String lcdOtaNextionCmd = "whmi-wri " + String(tftFileSize) + "," + String(nextionBaud) + ",0";
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Sending LCD upload command: %s"), lcdOtaNextionCmd);
-    Serial2.print(lcdOtaNextionCmd);
-    Serial2.write(nextionSuffix, sizeof(nextionSuffix));
-    Serial2.flush();
-
-    
-    if (nextionOtaResponse())
-    {
-      ALOG_INF(PSTR("LCDOTA: LCD upload command accepted"));
-    }
-    else
-    {
-      ALOG_INF(PSTR("LCDOTA: LCD upload command FAILED."));
-      espReset();
-    }
-    lcdOtaTimer = millis();
-  }
-  else if (upload.status == UPLOAD_FILE_WRITE)
-  { // Handle upload data
-    static int lcdOtaChunkCounter = 0;
-    static uint16_t lcdOtaPartNum = 0;
-    static int lcdOtaPercentComplete = 0;
-    static const uint16_t lcdOtaBufferSize = 1024; // upload data buffer before sending to UART
-    static uint8_t lcdOtaBuffer[lcdOtaBufferSize] = {};
-    uint16_t lcdOtaUploadIndex = 0;
-    int32_t lcdOtaPacketRemaining = upload.currentSize;
-
-    while (lcdOtaPacketRemaining > 0)
-    { 
-      
-      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-      WDT_Reset();
-      #endif
-                
-      // Write incoming data to panel as it arrives
-      // determine chunk size as lowest value of lcdOtaPacketRemaining, lcdOtaBufferSize, or 4096 - lcdOtaChunkCounter
-      uint16_t lcdOtaChunkSize = 0;
-      if ((lcdOtaPacketRemaining <= lcdOtaBufferSize) && (lcdOtaPacketRemaining <= (4096 - lcdOtaChunkCounter)))
-      {
-        lcdOtaChunkSize = lcdOtaPacketRemaining;
-      }
-      else if ((lcdOtaBufferSize <= lcdOtaPacketRemaining) && (lcdOtaBufferSize <= (4096 - lcdOtaChunkCounter)))
-      {
-        lcdOtaChunkSize = lcdOtaBufferSize;
-      }
-      else
-      {
-        lcdOtaChunkSize = 4096 - lcdOtaChunkCounter;
-      }
-
-      for (uint16_t i = 0; i < lcdOtaChunkSize; i++)
-      { // Load up the UART buffer
-        lcdOtaBuffer[i] = upload.buf[lcdOtaUploadIndex];
-        lcdOtaUploadIndex++;
-      }
-      Serial2.flush();                              // Clear out current UART buffer
-      Serial2.write(lcdOtaBuffer, lcdOtaChunkSize); // And send the most recent data
-      lcdOtaChunkCounter += lcdOtaChunkSize;
-      lcdOtaTransferred += lcdOtaChunkSize;
-      if (lcdOtaChunkCounter >= 4096)
-      {
-        Serial2.flush();
-        lcdOtaPartNum++;
-        lcdOtaPercentComplete = (lcdOtaTransferred * 100) / tftFileSize;
-        lcdOtaChunkCounter = 0;
-        if (nextionOtaResponse())
-        {
-          ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Part %d OK, %d%% complete"), lcdOtaPartNum, lcdOtaPercentComplete);
-        }
-        else
-        {
-          ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Part %d FAILED, %d%% complete"), lcdOtaPartNum, lcdOtaPercentComplete);
-        }
-      }
-      else
-      {
-        delay(10);
-      }
-      if (lcdOtaRemaining > 0)
-      {
-        lcdOtaRemaining -= lcdOtaChunkSize;
-      }
-      if (lcdOtaPacketRemaining > 0)
-      {
-        lcdOtaPacketRemaining -= lcdOtaChunkSize;
-      }
-    }
-
-    if (lcdOtaTransferred >= tftFileSize)
-    {
-      if (nextionOtaResponse())
-      {
-        ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
-        webServer->sendHeader("Location", "/lcdOtaSuccess");
-        webServer->send(303);
-        uint32_t lcdOtaDelay = millis();
-        while ((millis() - lcdOtaDelay) < 5000)
-        { // extra 5sec delay while the LCD handles any local firmware updates from new versions of code sent to it
-          webServer->handleClient();
-          delay(1);
-        }
-        espReset();
-      }
-      else
-      {
-        ALOG_INF(PSTR("LCDOTA: Failure"));
-        webServer->sendHeader("Location", "/lcdOtaFailure");
-        webServer->send(303);
-        uint32_t lcdOtaDelay = millis();
-        while ((millis() - lcdOtaDelay) < 1000)
-        { // extra 1sec delay for client to grab failure page
-          webServer->handleClient();
-          delay(1);
-        }
-        espReset();
-      }
-    }
-    lcdOtaTimer = millis();
-  }
-  else if (upload.status == UPLOAD_FILE_END)
-  { // Upload completed
-    if (lcdOtaTransferred >= tftFileSize)
-    {
-      if (nextionOtaResponse())
-      { // YAY WE DID IT
-        ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
-        webServer->sendHeader("Location", "/lcdOtaSuccess");
-        webServer->send(303);
-        uint32_t lcdOtaDelay = millis();
-        while ((millis() - lcdOtaDelay) < 5000)
-        { // extra 5sec delay while the LCD handles any local firmware updates from new versions of code sent to it
-          webServer->handleClient();
-          yield();
-        }
-        espReset();
-      }
-      else
-      {
-        ALOG_INF(PSTR("LCDOTA: Failure"));
-        webServer->sendHeader("Location", "/lcdOtaFailure");
-        webServer->send(303);
-        uint32_t lcdOtaDelay = millis();
-        while ((millis() - lcdOtaDelay) < 1000)
-        { // extra 1sec delay for client to grab failure page
-          webServer->handleClient();
-          yield();
-        }
-        espReset();
-      }
-    }
-  }
-  else if (upload.status == UPLOAD_FILE_ABORTED)
-  { // Something went kablooey
-    ALOG_INF(PSTR("LCDOTA: ERROR: upload.status returned: UPLOAD_FILE_ABORTED"));
-    ALOG_INF(PSTR("LCDOTA: Failure"));
-    webServer->sendHeader("Location", "/lcdOtaFailure");
-    webServer->send(303);
-    uint32_t lcdOtaDelay = millis();
-    while ((millis() - lcdOtaDelay) < 1000)
-    { // extra 1sec delay for client to grab failure page
-      webServer->handleClient();
-      yield();
-    }
-    espReset();
-  }
-  else
-  { // Something went weird, we should never get here...
-    ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: upload.status returned: %s"), String(upload.status));
-    ALOG_INF(PSTR("LCDOTA: Failure"));
-    webServer->sendHeader("Location", "/lcdOtaFailure");
-    webServer->send(303);
-    uint32_t lcdOtaDelay = millis();
-    while ((millis() - lcdOtaDelay) < 1000)
-    { // extra 1sec delay for client to grab failure page
-      webServer->handleClient();
-      yield();
-    }
-    espReset();
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleLcdUpdateSuccess()
-{ // http://plate01/lcdOtaSuccess
-//   if (configPassword[0] != '\0')
-//   { //Request HTTP auth if configPassword is set
-//     if (!webServer->authenticate(configUser, configPassword))
-//     {
-//       return webServer->requestAuthentication();
-//     }
-//   }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /lcdOtaSuccess page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " LCD firmware update success");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent(F("<meta http-equiv='refresh' content='15;url=/' />"));
-  webServer->sendContent_P(HTTP_HEAD_END);
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F(" LCD update success</h1>"));
-  webServer->sendContent(F("Restarting HASwitchPlate to apply changes..."));
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleLcdUpdateFailure()
-{ // http://plate01/lcdOtaFailure
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /lcdOtaFailure page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " LCD firmware update failed");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent(F("<meta http-equiv='refresh' content='15;url=/' />"));
-  webServer->sendContent_P(HTTP_HEAD_END);
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F(" LCD update failed :(</h1>"));
-  webServer->sendContent(F("Restarting HASwitchPlate to apply changes..."));
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleLcdDownload()
-{ // http://plate01/lcddownload
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /lcddownload page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " LCD firmware update");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F(" LCD update</h1>"));
-  webServer->sendContent(F("<br/>Updating LCD firmware from: "));
-  webServer->sendContent(webServer->arg("lcdFirmware"));
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-  nextionOtaStartDownload(webServer->arg("lcdFirmware"));
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleReboot()
-{ // http://plate01/reboot
-//   if (configPassword[0] != '\0')
-//   { //Request HTTP auth if configPassword is set
-//     if (!webServer->authenticate(configUser, configPassword))
-//     {
-//       return webServer->requestAuthentication();
-//     }
-//   }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /reboot page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " reboot");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent(F("<meta http-equiv='refresh' content='10;url=/' />"));
-  webServer->sendContent_P(HTTP_HEAD_END);
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F(" Reboot</h1>"));
-  webServer->sendContent(F("<br/>Rebooting device"));
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-  nextionSendCmd("page 0");
-  nextionSetAttr("p[0].b[1].txt", "\"Rebooting...\"");
-  espReset();
-}
-
-void mNextionPanel::espReset(){
-esp_restart();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleResetBacklight()
-{ // http://plate01/resetBacklight
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /resetBacklight page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " Backlight reset");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent(F("<meta http-equiv='refresh' content='3;url=/' />"));
-  webServer->sendContent_P(HTTP_HEAD_END);
-
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F("</h1>"));
-  webServer->sendContent(F("<br/>Resetting backlight to 100%"));
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-  ALOG_INF(PSTR("HTTP: Resetting backlight to 100%"));
-  nextionSetAttr("dims", "100");
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleFirmware()
-{ // http://plate01/firmware
-
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-
-  
-
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /firmware page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " Firmware updates");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F(" Firmware updates</h1><b>Note:</b> If updating firmware for both the ESP8266 and the Nextion LCD, you'll want to update the ESP8266 first followed by the Nextion LCD<br/><hr/>"));
-
-  // Display main firmware page
-  webServer->sendContent(F("<form method='get' action='/espfirmware'>"));
-  if (updateEspAvailable)
-  {
-    webServer->sendContent(F("<font color='green'><b>HASPone ESP8266 update available!</b></font>"));
-  }
-  webServer->sendContent(F("<br/><b>Update ESP8266 from URL</b>"));
-  webServer->sendContent(F("<br/><input id='espFirmwareURL' name='espFirmware' value='"));
-  webServer->sendContent("espFirmwareUrl");
-  webServer->sendContent(F("'><br/><br/><button type='submit'>Update ESP from URL</button></form>"));
-
-  webServer->sendContent(F("<br/><form method='POST' action='/update' enctype='multipart/form-data'>"));
-  webServer->sendContent(F("<b>Update ESP8266 from file</b><input type='file' id='espSelect' name='espSelect' accept='.bin'>"));
-  webServer->sendContent(F("<br/><br/><button type='submit' id='espUploadSubmit' onclick='ackEspUploadSubmit()'>Update ESP from file</button></form>"));
-
-  webServer->sendContent(F("<br/><br/><hr><h1>WARNING!</h1>"));
-  webServer->sendContent(F("<b>Nextion LCD firmware updates can be risky.</b> If interrupted, the LCD will display an error message until a successful firmware update has completed. "));
-  webServer->sendContent(F("<br/><br/><i>Note: Failed LCD firmware updates on HASPone hardware prior to v1.0 may require a hard power cycle of the device, via a circuit breaker or by physically disconnecting the device.</i>"));
-
-  webServer->sendContent(F("<br/><hr><form method='get' action='lcddownload'>"));
-  if (updateLcdAvailable)
-  {
-    webServer->sendContent(F("<font color='green'><b>HASPone LCD update available!</b></font>"));
-  }
-  webServer->sendContent(F("<br/><b>Update Nextion LCD from URL</b><small><i> http only</i></small>"));
-  webServer->sendContent(F("<br/><input id='lcdFirmware' name='lcdFirmware' value='"));
-  webServer->sendContent("lcdFirmwareUrl");
-  webServer->sendContent(F("'><br/><br/><button type='submit'>Update LCD from URL</button></form>"));
-
-  webServer->sendContent(F("<br/><form method='POST' action='/lcdupload' enctype='multipart/form-data'>"));
-  webServer->sendContent(F("<br/><b>Update Nextion LCD from file</b><input type='file' id='lcdSelect' name='files[]' accept='.tft'/>"));
-  webServer->sendContent(F("<br/><br/><button type='submit' id='lcdUploadSubmit' onclick='ackLcdUploadSubmit()'>Update LCD from file</button></form>"));
-
-  // Javascript to collect the filesize of the LCD upload and send it to /tftFileSize
-  webServer->sendContent(F("<script>function handleLcdFileSelect(evt) {"));
-  webServer->sendContent(F("var uploadFile = evt.target.files[0];"));
-  webServer->sendContent(F("document.getElementById('lcdUploadSubmit').innerHTML = 'Upload LCD firmware ' + uploadFile.name;"));
-  webServer->sendContent(F("var tftFileSize = '/tftFileSize?tftFileSize=' + uploadFile.size;"));
-  webServer->sendContent(F("var xhttp = new XMLHttpRequest();xhttp.open('GET', tftFileSize, true);xhttp.send();}"));
-  webServer->sendContent(F("function ackLcdUploadSubmit() {document.getElementById('lcdUploadSubmit').innerHTML = 'Uploading LCD firmware...';}"));
-  webServer->sendContent(F("function handleEspFileSelect(evt) {var uploadFile = evt.target.files[0];document.getElementById('espUploadSubmit').innerHTML = 'Upload ESP firmware ' + uploadFile.name;}"));
-  webServer->sendContent(F("function ackEspUploadSubmit() {document.getElementById('espUploadSubmit').innerHTML = 'Uploading ESP firmware...';}"));
-  webServer->sendContent(F("document.getElementById('lcdSelect').addEventListener('change', handleLcdFileSelect, false);"));
-  webServer->sendContent(F("document.getElementById('espSelect').addEventListener('change', handleEspFileSelect, false);</script>"));
-
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-
-}
-
-
-/**
- * @brief New 2023 version of my nextion code
- * Basic webui page that will permit uploading TFT files to update the panel
- * 
- * Ideally, this page can easily be integrated with NETWORK_WEBSERVER on the unified system
- * 
- */
-void mNextionPanel::WebPage_LCD_Update_TFT()
-{ 
-  
-  // if (configPassword[0] != '\0')  // Keep! I will want to integrate this in the future too
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-
-  ALOG_INF(PSTR("HTTP: Sending /firmware page to client connected from:  %s"), webServer->client().remoteIP().toString());
-
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", String(pCONT_set->Settings.system_name.friendly) + " Firmware updates");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(pCONT_set->Settings.system_name.friendly);
-  webServer->sendContent(F(" Nextion Firmware Update</h1>"));
-  
-  /**
-   * @brief Title on pagw
-   **/
-  webServer->sendContent(F("<br/><br/><hr><h1>WARNING!</h1>"));
-  webServer->sendContent(F("<b>Nextion LCD firmware updates can be risky.</b> If interrupted, the LCD will display an error message until a successful firmware update has completed. "));
-  webServer->sendContent(F("<br/><br/><i>Note: Failed LCD firmware updates on HASPone hardware prior to v1.0 may require a hard power cycle of the device, via a circuit breaker or by physically disconnecting the device.</i>"));
-
-
-  /**
-   * @brief Update with URL only
-   **/
-  webServer->sendContent(F("<br/><hr><form method='get' action='lcddownload'>"));
-  if(updateLcdAvailable){ webServer->sendContent(F("<font color='green'><b>LCD update available!</b></font>")); }
-  webServer->sendContent(F("<br/><b>Update Nextion LCD from URL</b><small><i> http only</i></small>"));
-  webServer->sendContent(F("<br/><input id='lcdFirmware' name='lcdFirmware' value='"));
-  webServer->sendContent("No Url Set");
-  webServer->sendContent(F("'><br/><br/><button type='submit'>Update LCD from URL</button></form>"));
-
-  /**
-   * @brief Update with File
-   **/
-  webServer->sendContent(F("<br/><form method='POST' action='/lcdupload' enctype='multipart/form-data'>"));
-  webServer->sendContent(F("<br/><b>Update Nextion LCD from file</b><input type='file' id='lcdSelect' name='files[]' accept='.tft'/>"));
-  webServer->sendContent(F("<br/><br/><button type='submit' id='lcdUploadSubmit' onclick='ackLcdUploadSubmit()'>Update LCD from file</button></form>"));
-
-  /**
-   * @brief Javascript to collect the filesize of the LCD upload and send it to /tftFileSize
-   **/
-  webServer->sendContent(F("<script>function handleLcdFileSelect(evt) {"));
-  webServer->sendContent(F("var uploadFile = evt.target.files[0];"));
-  webServer->sendContent(F("document.getElementById('lcdUploadSubmit').innerHTML = 'Upload LCD firmware ' + uploadFile.name;"));
-  webServer->sendContent(F("var tftFileSize = '/tftFileSize?tftFileSize=' + uploadFile.size;"));
-  webServer->sendContent(F("var xhttp = new XMLHttpRequest();xhttp.open('GET', tftFileSize, true);xhttp.send();}"));
-  webServer->sendContent(F("function ackLcdUploadSubmit() {document.getElementById('lcdUploadSubmit').innerHTML = 'Uploading LCD firmware...';}"));
-  webServer->sendContent(F("function handleEspFileSelect(evt) {var uploadFile = evt.target.files[0];document.getElementById('espUploadSubmit').innerHTML = 'Upload ESP firmware ' + uploadFile.name;}"));
-  webServer->sendContent(F("function ackEspUploadSubmit() {document.getElementById('espUploadSubmit').innerHTML = 'Uploading ESP firmware...';}"));
-  webServer->sendContent(F("document.getElementById('lcdSelect').addEventListener('change', handleLcdFileSelect, false);"));
-  webServer->sendContent(F("document.getElementById('espSelect').addEventListener('change', handleEspFileSelect, false);</script>"));
-
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleSaveConfig()
-{ // http://plate01/saveConfig
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /saveConfig page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " Saving configuration");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-
-  bool shouldSaveWifi = false;
-  // Check required values
-  if ((webServer->arg("wifiSSID") != "") && (webServer->arg("wifiSSID") != String(WiFi.SSID())))
-  { // Handle WiFi SSID
-    shouldSaveConfig = true;
-    shouldSaveWifi = true;
-    webServer->arg("wifiSSID").toCharArray(wifiSSID, 32);
-  }
-  if ((webServer->arg("wifiPass") != String(wifiPass)) && (webServer->arg("wifiPass") != String("********")))
-  { // Handle WiFi password
-    shouldSaveConfig = true;
-    shouldSaveWifi = true;
-    webServer->arg("wifiPass").toCharArray(wifiPass, 64);
-  }
-
-  if (webServer->arg("haspNode") != "" && webServer->arg("haspNode") != String(haspNode))
-  { // Handle haspNode
-    shouldSaveConfig = true;
-    String lowerHaspNode = webServer->arg("haspNode");
-    lowerHaspNode.toLowerCase();
-    lowerHaspNode.toCharArray(haspNode, 16);
-  }
-  if (webServer->arg("groupName") != "" && webServer->arg("groupName") != String(groupName))
-  { // Handle groupName
-    shouldSaveConfig = true;
-    webServer->arg("groupName").toCharArray(groupName, 16);
-  }
-
-  if (webServer->arg("mqttServer") != "" && webServer->arg("mqttServer") != String(mqttServer))
-  { // Handle mqttServer
-    shouldSaveConfig = true;
-    webServer->arg("mqttServer").toCharArray(mqttServer, 128);
-  }
-  if (webServer->arg("mqttPort") != "" && webServer->arg("mqttPort") != String(mqttPort))
-  { // Handle mqttPort
-    shouldSaveConfig = true;
-    webServer->arg("mqttPort").toCharArray(mqttPort, 6);
-  }
-  if (webServer->arg("mqttUser") != String(mqttUser))
-  { // Handle mqttUser
-    shouldSaveConfig = true;
-    webServer->arg("mqttUser").toCharArray(mqttUser, 128);
-  }
-  if (webServer->arg("mqttPassword") != String("********"))
-  { // Handle mqttPassword
-    shouldSaveConfig = true;
-    webServer->arg("mqttPassword").toCharArray(mqttPassword, 128);
-  }
-  if ((webServer->arg("mqttTlsEnabled") == String("on")) && !mqttTlsEnabled)
-  { // mqttTlsEnabled was disabled but should now be enabled
-    shouldSaveConfig = true;
-    mqttTlsEnabled = true;
-  }
-  else if ((webServer->arg("mqttTlsEnabled") == String("")) && mqttTlsEnabled)
-  { // mqttTlsEnabled was enabled but should now be disabled
-    shouldSaveConfig = true;
-    mqttTlsEnabled = false;
-  }
-  if (webServer->arg("mqttFingerprint") != String(mqttFingerprint))
-  { // Handle mqttFingerprint
-    shouldSaveConfig = true;
-    webServer->arg("mqttFingerprint").toCharArray(mqttFingerprint, 60);
-  }
-  if (webServer->arg("configUser") != String(configUser))
-  { // Handle configUser
-    shouldSaveConfig = true;
-    webServer->arg("configUser").toCharArray(configUser, 32);
-  }
-  if (webServer->arg("configPassword") != String("********"))
-  { // Handle configPassword
-    shouldSaveConfig = true;
-    webServer->arg("configPassword").toCharArray(configPassword, 32);
-  }
-  if (webServer->arg("hassDiscovery") != String(hassDiscovery))
-  { // Handle hassDiscovery
-    shouldSaveConfig = true;
-    webServer->arg("hassDiscovery").toCharArray(hassDiscovery, 128);
-  }
-  if ((webServer->arg("nextionMaxPages") != String(nextionMaxPages)) && (webServer->arg("nextionMaxPages").toInt() < 256) && (webServer->arg("nextionMaxPages").toInt() > 0))
-  {
-    shouldSaveConfig = true;
-    nextionMaxPages = webServer->arg("nextionMaxPages").toInt();
-  }
-  if (webServer->arg("nextionBaud") != String(nextionBaud))
-  { // Handle nextionBaud
-    shouldSaveConfig = true;
-    webServer->arg("nextionBaud").toCharArray(nextionBaud, 7);
-  }
-  if (webServer->arg("motionPinConfig") != String(motionPinConfig))
-  { // Handle motionPinConfig
-    shouldSaveConfig = true;
-    webServer->arg("motionPinConfig").toCharArray(motionPinConfig, 3);
-  }
-  if ((webServer->arg("debugSerialEnabled") == String("on")) && !debugSerialEnabled)
-  { // debugSerialEnabled was disabled but should now be enabled
-    shouldSaveConfig = true;
-    debugSerialEnabled = true;
-  }
-  else if ((webServer->arg("debugSerialEnabled") == String("")) && debugSerialEnabled)
-  { // debugSerialEnabled was enabled but should now be disabled
-    shouldSaveConfig = true;
-    debugSerialEnabled = false;
-  }
-  if ((webServer->arg("debugTelnetEnabled") == String("on")) && !debugTelnetEnabled)
-  { // debugTelnetEnabled was disabled but should now be enabled
-    shouldSaveConfig = true;
-    debugTelnetEnabled = true;
-  }
-  else if ((webServer->arg("debugTelnetEnabled") == String("")) && debugTelnetEnabled)
-  { // debugTelnetEnabled was enabled but should now be disabled
-    shouldSaveConfig = true;
-    debugTelnetEnabled = false;
-  }
-  if ((webServer->arg("mdnsEnabled") == String("on")) && !mdnsEnabled)
-  { // mdnsEnabled was disabled but should now be enabled
-    shouldSaveConfig = true;
-    mdnsEnabled = true;
-  }
-  else if ((webServer->arg("mdnsEnabled") == String("")) && mdnsEnabled)
-  { // mdnsEnabled was enabled but should now be disabled
-    shouldSaveConfig = true;
-    mdnsEnabled = false;
-  }
-  if ((webServer->arg("beepEnabled") == String("on")) && !beepEnabled)
-  { // beepEnabled was disabled but should now be enabled
-    shouldSaveConfig = true;
-    beepEnabled = true;
-  }
-  else if ((webServer->arg("beepEnabled") == String("")) && beepEnabled)
-  { // beepEnabled was enabled but should now be disabled
-    shouldSaveConfig = true;
-    beepEnabled = false;
-  }
-  if ((webServer->arg("ignoreTouchWhenOff") == String("on")) && !ignoreTouchWhenOff)
-  { // ignoreTouchWhenOff was disabled but should now be enabled
-    shouldSaveConfig = true;
-    ignoreTouchWhenOff = true;
-  }
-  else if ((webServer->arg("ignoreTouchWhenOff") == String("")) && ignoreTouchWhenOff)
-  { // ignoreTouchWhenOff was enabled but should now be disabled
-    shouldSaveConfig = true;
-    ignoreTouchWhenOff = false;
-  }
-
-  if (shouldSaveConfig)
-  { // Config updated, notify user and trigger write to SPIFFS
-
-    webServer->sendContent(F("<meta http-equiv='refresh' content='15;url=/' />"));
-    webServer->sendContent_P(HTTP_HEAD_END);
-    webServer->sendContent(F("<h1>"));
-    webServer->sendContent(haspNode);
-    webServer->sendContent(F("</h1>"));
-    webServer->sendContent(F("<br/>Saving updated configuration values and restarting device"));
-    webServer->sendContent_P(HTTP_END);
-    webServer->sendContent(F(""));
-    // configSave();
-    if (shouldSaveWifi)
-    {
-      ALOG_INF(PSTR(D_LOG_NEXTION "CONFIG: Attempting connection to SSID: %s"), webServer->arg("wifiSSID"));
-      // espWifiConnect();
-    }
-    // espReset();
-  }
-  else
-  { // No change found, notify user and link back to config page
-    webServer->sendContent(F("<meta http-equiv='refresh' content='3;url=/' />"));
-    webServer->sendContent_P(HTTP_HEAD_END);
-    webServer->sendContent(F("<h1>"));
-    webServer->sendContent(haspNode);
-    webServer->sendContent(F("</h1>"));
-    webServer->sendContent(F("<br/>No changes found, returning to <a href='/'>home page</a>"));
-    webServer->sendContent_P(HTTP_END);
-    webServer->sendContent(F(""));
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleResetConfig()
-{ // http://plate01/resetConfig
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /resetConfig page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " Resetting configuration");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent_P(HTTP_HEAD_END);
-
-  if (webServer->arg("confirm") == "yes")
-  { // User has confirmed, so reset everything
-    webServer->sendContent(F("<h1>"));
-    webServer->sendContent(haspNode);
-    webServer->sendContent(F("</h1><b>Resetting all saved settings and restarting device into WiFi AP mode</b>"));
-    webServer->sendContent_P(HTTP_END);
-    webServer->sendContent("");
-    delay(100);
-    // configClearSaved();
-  }
-  else
-  {
-    webServer->sendContent(F("<h1>Warning</h1><b>This process will reset all settings to the default values and restart the device.  You may need to connect to the WiFi AP displayed on the panel to re-configure the device before accessing it again."));
-    webServer->sendContent(F("<br/><hr><br/><form method='get' action='resetConfig'>"));
-    webServer->sendContent(F("<br/><br/><button type='submit' name='confirm' value='yes'>reset all settings</button></form>"));
-    webServer->sendContent(F("<br/><hr><br/><form method='get' action='/'>"));
-    webServer->sendContent(F("<button type='submit'>return home</button></form>"));
-    webServer->sendContent_P(HTTP_END);
-    webServer->sendContent("");
-  }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mNextionPanel::webHandleEspFirmware()
-{ // http://plate01/espfirmware
-  // if (configPassword[0] != '\0')
-  // { //Request HTTP auth if configPassword is set
-  //   if (!webServer->authenticate(configUser, configPassword))
-  //   {
-  //     return webServer->requestAuthentication();
-  //   }
-  // }
-
-  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: Sending /espfirmware page to client connected from: %s"), webServer->client().remoteIP().toString());
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone " + String(haspNode) + " ESP8266 firmware update");
-  webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  webServer->send(200, "text/html", httpHeader);
-  webServer->sendContent_P(HTTP_SCRIPT);
-  webServer->sendContent_P(HTTP_STYLE);
-  webServer->sendContent_P(HASP_STYLE);
-  webServer->sendContent(F("<meta http-equiv='refresh' content='60;url=/' />"));
-  webServer->sendContent_P(HTTP_HEAD_END);
-  webServer->sendContent(F("<h1>"));
-  webServer->sendContent(haspNode);
-  webServer->sendContent(F(" ESP8266 firmware update</h1>"));
-  webServer->sendContent(F("<br/>Updating ESP firmware from: "));
-  webServer->sendContent(webServer->arg("espFirmware"));
-  webServer->sendContent_P(HTTP_END);
-  webServer->sendContent("");
-
-  debugPrintln("ESPFW: Attempting ESP firmware update from: " + String(webServer->arg("espFirmware")));
-  espStartOta(webServer->arg("espFirmware"));
 }
 
 

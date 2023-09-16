@@ -310,6 +310,9 @@ class mMQTT :
     void parse_JSONCommand(JsonParserObject obj);
 
     std::vector<MQTTConnection*> brokers;
+
+
+    boolean Publish(const char* topic, const char* payload, boolean retained = false);
     
 
     char* TopicFormatted(const char* module_name, uint8_t topic_type_id, const char* topic_postfix, char* buffer, uint8_t buflen);
