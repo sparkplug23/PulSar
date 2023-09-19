@@ -51,7 +51,7 @@ struct DATA_BUFFER{
     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
     uint16_t len = 0;
   }payload;
-  uint8_t isserviced = 0; // Set to 0 on new mqtt
+  uint16_t isserviced = 0; // Set to 0 on new mqtt
   DATA_BUFFER_FLAGS flags;
 };
 extern struct DATA_BUFFER data_buffer;

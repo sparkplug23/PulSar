@@ -106,6 +106,9 @@ enum TASKER_FUNCTION_TYPES {
   
   // Saving/EEPROM related
   FUNC_SAVE_BEFORE_RESTART, //phase out
+
+  // Added Sep2023. This should be called prior to a restart when the system is healthy. For example, Nextion Display updating should show messages that the system is restarting
+  FUNC_RESTART_STABLE, 
   
   /**
    * Transfer any local variables into settings struct for saving
@@ -128,6 +131,7 @@ enum TASKER_FUNCTION_TYPES {
   FUNC_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID,
   // FUNC_JSON_COMMAND_START_PARSER_ID,
   // Wifi 
+  FUNC_WIFI_STARTING_CONNECTION,
   FUNC_WIFI_CONNECTED, FUNC_WIFI_DISCONNECTED,
   // Mqtt
   FUNC_MQTT_SUBSCRIBE, FUNC_MQTT_CONNECTED, FUNC_MQTT_DISCONNECTED, FUNC_MQTT_COMMAND, FUNC_MQTT_SENDER,

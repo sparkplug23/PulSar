@@ -1451,10 +1451,13 @@ void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
 
 bool isIp(String str);
 
+
+void webHandleRoot(AsyncWebServerRequest* request);
+
 #endif // ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
 
-
+void webHandleReboot(AsyncWebServerRequest* request);
 
     // /***************
     //  * 

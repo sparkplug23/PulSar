@@ -177,6 +177,8 @@ void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
 
   ALOG_INF(PSTR("mWiFi::WifiBegin %d:%d"), flag, channel);
 
+  pCONT->Tasker_Interface(FUNC_WIFI_STARTING_CONNECTION);
+
   const char kWifiPhyMode[] = " BGN";
 
 // #ifdef ARDUINO_ESP8266_RELEASE_2_3_0  // (!strncmp_P(ESP.getSdkVersion(),PSTR("1.5.3"),5))

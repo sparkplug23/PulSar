@@ -1351,6 +1351,10 @@ void mWebServer::initServer()
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
 
+  pCONT_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->webHandleRoot(request);
+  });
+  
   // releaseJSONBufferLock();
 
   // #ifdef WLED_ENABLE_WEBSOCKETS
@@ -1476,6 +1480,11 @@ void mWebServer::initServer()
 //   pCONT_web->server->on("/freeheap", HTTP_GET, [](AsyncWebServerRequest *request){
 //     request->send(200, "text/plain", (String)ESP.getFreeHeap());
 //   });
+
+
+  pCONT_web->server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->webHandleReboot(request);
+  });
 
 // #ifdef WLED_ENABLE_USERMOD_PAGE
 //   pCONT_web->server->on("/u", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -1662,6 +1671,54 @@ void mWebServer::initServer()
   });
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void mWebServer::webHandleReboot(AsyncWebServerRequest* request)
+{ 
+
+  // CAUTION: This is an async file, and may cause unknown behavior so needs testing
+
+  pCONT->Tasker_Interface(FUNC_RESTART_STABLE);
+  
+  request->redirect("/"); // redirect to root, to avoid webui forever requested a reboot
+
+  delay(2000); // Allow redirect to be sent
+
+  esp_restart();
+
+}
+
+
+void mWebServer::webHandleRoot(AsyncWebServerRequest* request)
+{ 
+
+  ALOG_INF(PSTR(D_LOG_NEXTION DEBUG_INSERT_PAGE_BREAK "HTTP: Sending root page to client connected from: %s"), request->host());
+
+  String conv = String();
+
+  String httpHeader = FPSTR(HTTP_HEAD_START);
+  httpHeader.replace("{v}", "HASPone ");
+  conv += httpHeader;
+  conv += FPSTR(HTTP_SCRIPT3);
+  conv += FPSTR(HTTP_STYLE3);
+  conv += FPSTR(HASP_STYLE);
+  conv += FPSTR(HTTP_HEAD_END3);
+
+  conv += (F("<br/><hr><button type='submit'>save settings</button></form>"));
+
+  conv += (F("<hr><form method='get' action='firmware'>"));
+  conv += (F("<button type='submit'>update firmware</button></form>"));
+
+  conv += (F("<hr><form method='get' action='reboot'>"));
+  conv += (F("<button type='submit'>reboot device</button></form>"));
+
+  conv += (F("<hr><form method='get' action='resetConfig'>"));
+  conv += (F("<button type='submit'>factory reset settings</button></form>"));
+
+  conv += FPSTR(HTTP_END3);
+  
+  request->send(200, "text/html", conv);
+
+}
 
 
 bool  mWebServer::captivePortal(AsyncWebServerRequest *request)

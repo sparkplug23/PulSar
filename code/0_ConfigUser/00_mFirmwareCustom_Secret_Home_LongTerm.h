@@ -894,6 +894,7 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Kitchen Light 2 [Table/Window]"
   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
     
   /*
     Method should only activate if boot loop happens 10 times
@@ -915,8 +916,8 @@ Bathroom
     #define ENABLE_DEVFEATURE_DISABLE_PHASEDOUT_RELAY_ONOFF
     #define MAX_RELAYS 2
   
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_ADE7953
+  // #define USE_MODULE_ENERGY_INTERFACE
+  // #define USE_MODULE_ENERGY_ADE7953
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 

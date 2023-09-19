@@ -1100,7 +1100,7 @@
 
 
 
-#ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE
+#ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE_OLD
   #define DEVICENAME_CTR          "h801_bedroom_wardrobe"
   #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
@@ -1300,6 +1300,482 @@
     
 #endif
 
+
+
+
+#ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE
+
+  #define DEVICENAME_CTR          "h801_bedroom_wardrobe"
+  #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
+  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+
+    #define MQTT_PORT     1883
+
+
+  #define USE_SERIAL_ALTERNATE_TX
+  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  // #define USE_MODULE_DRIVERS_PWM
+
+#define USE_SERIAL_ALTERNATE_TX
+  
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  // #define USE_MODULE_NETWORK_WEBSERVER23
+  // #define USE_MODULE_NETWORK_WEBSERVER
+    // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  // #define ESP8266
+  // #undef ESP32
+  
+
+  
+
+
+    
+
+
+
+  // #define USE_MODULE_NETWORK_WEBSERVER23
+  // #define USE_MODULE_NETWORK_WEBSERVER
+
+  // #define ESP32
+  // #undef ESP8266
+
+  // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+
+  // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+
+  // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
+  // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
+
+  
+
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  //mqtt debug
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #undef ESP32
+  // #define ESP8266
+
+  
+
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define USE_BUILD_TYPE_LIGHTING
+  #define USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ADDRESSABLE
+    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+    /********* Group: Needed to build ************************/
+    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+    /********* Group: Ready for full integration ************************/
+    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    /********* Group: Testing ************************/
+    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+    
+    #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+    #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+    #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+    /********* Group: Debug options only ************************/
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+    #define ENABLE_DEBUG_SERIAL
+
+    // Needs significant change to merge WLED and HACS
+    #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
+    // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+
+    #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
+
+    #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
+
+    #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
+
+    // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
+
+    // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+    // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
+    
+    #define ENABLE_DEBUG_LINE_HERE
+    #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+
+    #define ENABLE_DEVFEATURE_LIGHT__HYPERION
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
+    // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+    #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
+
+
+
+    // #define ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+
+
+
+    // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
+
+    // #define ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
+
+
+    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+    // #define ENABLE_LOG_LEVEL_DEBUG
+    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+    
+    
+
+    // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
+    #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
+
+
+
+//   #define USE_SERIAL_ALTERNATE_TX
+//   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+//   // #define USE_MODULE_DRIVERS_PWM
+
+
+  
+
+//     
+
+
+// // Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
+// // Gain complete understanding/implemenation as is, only then start changes. 
+// // WebUI of WLED style should become its own webserver option (not just the debug version).
+
+//   #define ENABLE_FEATURE_WATCHDOG_TIMER
+//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+//   #define USE_MODULE_NETWORK_WEBSERVER23
+//   #define USE_MODULE_NETWORK_WEBSERVER
+
+//   // #define ESP32
+//   // #undef ESP8266
+
+//   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
+//   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+
+//   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
+//   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+
+//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
+//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
+
+//   
+
+
+//   // #define ENABLE_ADVANCED_DEBUGGING
+//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+//   // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+
+//   //mqtt debug
+//   #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+//   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+//   // #define DISABLE_NETWORK
+//   // #define DISABLE_NETWORK_WIFI
+//   #define USE_MODULE_NETWORK_WIFI
+//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+//   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+
+//   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+
+//   // #define DISABLE_SERIAL
+//   // #define DISABLE_SERIAL0_CORE
+//   // #define DISABLE_SERIAL_LOGGING
+
+//   // #undef ESP32
+//   // #define ESP8266
+
+//   
+
+//   #define ENABLE_DEBUG_MANUAL_DELAYS
+
+//   #define ENABLE_FEATURE_WATCHDOG_TIMER
+//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+//   #define USE_BUILD_TYPE_LIGHTING
+//   #define USE_MODULE_LIGHTS_INTERFACE
+//   #define USE_MODULE_LIGHTS_ANIMATOR
+//   #define USE_MODULE_LIGHTS_ADDRESSABLE
+//     #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
+//     /********* Group: Needed to build ************************/
+//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
+//     /********* Group: Ready for full integration ************************/
+//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     /********* Group: Testing ************************/
+//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
+//     #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
+//     #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+//     #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
+//     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
+//     #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
+//     #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS
+//     #define ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+//     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+//     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
+//     // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+//     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+//     // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
+//     /********* Group: Debug options only ************************/
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
+//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
+//     #define ENABLE_DEVFEATURE_PALETTE_GET_NAMES_FROM_PALETTE_WHEN_STATIC
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+//     #define ENABLE_DEBUG_SERIAL
+
+//     #define ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
+
+//     // Needs significant change to merge WLED and HACS
+//     #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
+//     // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+
+//     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
+
+//     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
+
+//     #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
+
+//     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
+
+//     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
+//     // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
+    
+//     #define ENABLE_DEBUG_LINE_HERE
+//     #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
+
+//     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
+//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
+//     // #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
+
+//     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
+
+
+//     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+//     // #define ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+
+
+
+//     // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
+
+//     // #define ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+
+
+
+//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
+//     // #define ENABLE_LOG_LEVEL_DEBUG
+//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
+//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+
+//     
+    
+
+//     // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
+//     #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
+    "},"
+    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+
+
+  #define USE_LIGHTING_TEMPLATE
+  #define USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_FIVE_SEGMENTS
+
+  #ifdef USE_LIGHTING_TEMPLATE__H801_FIVE_WHITE_CHANNELS_FIVE_SEGMENTS
+    #define STRIP_SIZE_MAX 5
+    #define ENABLE_DEVFEATURE_LIGHT__BUS_MANAGER_DEFAULT_FORCED_AS_PWM
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":[15],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":0,
+          "Length":1
+        },
+        {
+          "Pin":[13],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":1,
+          "Length":1
+        },
+        {
+          "Pin":[14],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":2,
+          "Length":1
+        },
+        {
+          "Pin":[4],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":3,
+          "Length":1
+        },
+        {
+          "Pin":[12],
+          "ColourOrder":"W",
+          "BusType":"ANALOG_1CH",
+          "Start":4,
+          "Length":1
+        }
+      ],      
+      "Segment0":{
+        "PixelRange": [
+          0,
+          2
+        ],
+        "ColourPalette":0,
+        "SegColour0": {
+          "Hue": 25,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":100,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 1000
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":10
+      },      
+      "Segment1":{
+        "PixelRange": [
+          3,
+          5
+        ],
+        "ColourPalette":0,
+        "SegColour0": {
+          "Hue": 0,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":100,
+          "ColourType":4
+        },
+        "Effects": {
+          "Function":0
+        },
+        "Transition": {
+          "TimeMs": 0,
+          "RateMs": 1000
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":10
+      },
+      "BrightnessRGB":100,
+      "BrightnessCCT":10
+    }
+    )=====";
+
+
+#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__L6__H801_FIVE_1CH_WHITE_CHANNELS
+
+
+#endif
 
 
 #ifdef DEVICE_H801__MASTERBEDROOM_UPLIGHT
