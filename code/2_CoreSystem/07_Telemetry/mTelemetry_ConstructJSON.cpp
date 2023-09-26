@@ -11,6 +11,19 @@
 #include "mTelemetry.h"
 
 
+
+uint8_t mTelemetry::ConstructJSON_LWT_Online(uint8_t json_level, bool json_appending)
+{ 
+
+  JBI->Start();
+    JBI->Add("LWT", "Online");
+    JBI->Add("ResetReason", "TBA");
+  return JBI->End();
+    
+}
+
+
+
 uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending)
 { //BuildHealth
 

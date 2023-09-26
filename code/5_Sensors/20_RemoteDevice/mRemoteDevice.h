@@ -7,10 +7,10 @@
 
 #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
 #include <ESPAsyncTCP.h>
 // //?#include <ESPAsyncWebServer.h>
-#endif //USE_MODULE_NETWORK_WEBSERVER
+#endif //USE_MODULE_NETWORK_WEBSERVER23
 
 #include "1_TaskerManager/mTaskerInterface.h"
 

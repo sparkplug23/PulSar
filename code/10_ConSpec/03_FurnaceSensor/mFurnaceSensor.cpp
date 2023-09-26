@@ -293,7 +293,7 @@ uint8_t mFurnaceSensor::ConstructJSON_State(uint8_t json_level, bool json_append
     #endif // USE_MODULE_SENSORS_DS18X
     // ambient temp
     #ifdef USE_MODULE_SENSORS_BME
-    JBI->Add("garage_temp", pCONT_bme->sensor[0].temperature);
+    JBI->Add("garage_temp", pCONT_bme->bmp_sensors[0].temperature);
     #endif 
 
     JBI->Object_End();

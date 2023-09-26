@@ -5,7 +5,7 @@
 
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER_2022
 
 void mLDRBasic::WebAppend_Root_Draw_Table(){
 
@@ -47,6 +47,6 @@ void mLDRBasic::WebAppend_Root_Status_Table(){
 }
 
 
-#endif// USE_MODULE_NETWORK_WEBSERVER
+#endif// USE_MODULE_NETWORK_WEBSERVER_2022
 
 #endif

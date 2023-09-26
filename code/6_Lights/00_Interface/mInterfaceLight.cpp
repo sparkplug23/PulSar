@@ -519,8 +519,9 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
 void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
 {
 
+  const uint16_t _STRIP_SIZE_MAX = 100;
   const uint8_t defDataPins[] = {4};
-  const uint16_t defCounts[] = {STRIP_SIZE_MAX};
+  const uint16_t defCounts[] = {_STRIP_SIZE_MAX};
   const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
   const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
 
@@ -547,8 +548,9 @@ void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
 void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
 {
 
+  const uint16_t _STRIP_SIZE_MAX = 100;
   const uint8_t defDataPins[] = {15,13,12,14,4};
-  const uint16_t defCounts[] = {STRIP_SIZE_MAX};
+  const uint16_t defCounts[] = {_STRIP_SIZE_MAX};
   const uint8_t defNumBusses = ((sizeof defDataPins) / (sizeof defDataPins[0]));
   const uint8_t defNumCounts = ((sizeof defCounts)   / (sizeof defCounts[0]));
 

@@ -14,10 +14,10 @@
 class DHTesp;
 #include "1_TaskerManager/mTaskerManager.h"
 
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER23
 // #include <ESPAsyncTCP.h>
 // //?#include <ESPAsyncWebServer.h>
-// #endif //USE_MODULE_NETWORK_WEBSERVER
+// #endif //USE_MODULE_NETWORK_WEBSERVER23
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -90,8 +90,8 @@ class mSensorsDHT :
     // #define WEB_HANLDE_JSON_DHT_SENSOR_TABLE "/fetch/tab_dht_sensor.json"
     void EveryLoop();
 
-    void WebAppend_Root_Status_Table_Draw();
-    void WebAppend_Root_Status_Table_Data();
+    // void WebAppend_Root_Status_Table_Draw();
+    // void WebAppend_Root_Status_Table_Data();
 
     // uint8_t fSensorCount = 0; // 0 also means not enabled
 

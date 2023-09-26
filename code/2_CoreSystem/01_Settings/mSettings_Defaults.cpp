@@ -706,10 +706,10 @@ void mSettings::SettingsResetDst(void)
 // void mSettings::SettingsDefaultWebColor(void)
 // {
   
-//   #ifdef USE_MODULE_NETWORK_WEBSERVER
+//   #ifdef USE_MODULE_NETWORK_WEBSERVER23
 //   char scolor[10];
 //   for (uint8_t i = 0; i < COL_LAST; i++) {
 //     pCONT_web->WebHexCode(i, pCONT_sup->GetTextIndexed_P(scolor, sizeof(scolor), i, kWebColors));
 //   }
-//   #endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
+//   #endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER23
 // }

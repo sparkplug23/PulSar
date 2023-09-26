@@ -515,6 +515,9 @@ class mPalette
     );
 
 
+uint8_t GetPaletteDiscreteWidth(
+  uint16_t palette_id,
+  uint8_t* palette_buffer);
 
     
     RgbcctColor Get_StaticPalette_Encoded_Colour_255Index(
@@ -540,9 +543,9 @@ class mPalette
       uint8_t* palette_elements = nullptr,
       uint16_t desired_index_from_palette = 0,
       uint8_t* encoded_index = nullptr,
-      bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      bool     flag_crgb_exact_colour = false
+      uint8_t     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
+      uint8_t     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+      uint8_t     flag_crgb_exact_colour = false
     );
   
 

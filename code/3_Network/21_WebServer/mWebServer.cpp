@@ -1,7 +1,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
 
 
 #include "mWebServer.h"
@@ -1351,7 +1351,7 @@ void mWebServer::initServer()
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
 
-  pCONT_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+  pCONT_web->server->on("/root", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->webHandleRoot(request);
   });
   
@@ -1643,32 +1643,33 @@ void mWebServer::initServer()
   // pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);/
   pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
 
-  //called when the url is not defined here, ajax-in; get-settings
-  pCONT_web->server->onNotFound([this](AsyncWebServerRequest *request){
-    DEBUG_PRINTLN("Not-Found HTTP call:");
-    DEBUG_PRINTLN("URI: " + request->url());
-    if (this->captivePortal(request)) return;
+  // //called when the url is not defined here, ajax-in; get-settings
+  // pCONT_web->server->onNotFound([this](AsyncWebServerRequest *request){
+  //    DEBUG_PRINTLN("Not-Found HTTP call:");
+  //   DEBUG_PRINTLN("URI: " + request->url());
+  //   if (this->captivePortal(request)) return;
 
-    //make API CORS compatible
-    if (request->method() == HTTP_OPTIONS)
-    {
-      AsyncWebServerResponse *response = request->beginResponse(200);
-      response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-      request->send(response);
-      return;
-    }
+  //   //make API CORS compatible
+  //   if (request->method() == HTTP_OPTIONS)
+  //   {
+  //     AsyncWebServerResponse *response = request->beginResponse(200);
+  //     response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+  //     request->send(response);
+  //     return;
+  //   }
 
-    static const char s_content_enc2[] PROGMEM = "Content-Encoding";
-    // if(handleSet(request, request->url())) return;
-    // #ifndef WLED_DISABLE_ALEXA
-    // if(espalexa.handleAlexaApiCall(request)) return;
-    // #endif
-    // if(handleFileRead(request, request->url())) return;
-    AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-    response->addHeader(FPSTR(s_content_enc2),"gzip");
-    this->setStaticContentCacheHeaders(response);
-    request->send(response);
-  });
+  //   DEBUG_LINE_HERE;
+
+  //   // if(handleSet(request, request->url())) return;
+  //   // #ifndef WLED_DISABLE_ALEXA
+  //   // if(espalexa.handleAlexaApiCall(request)) return;
+  //   // #endif
+  //   if(handleFileRead(request, request->url())) return;
+  //   AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
+  //   response->addHeader(FPSTR(s_content_enc),"gzip");
+  //   this->setStaticContentCacheHeaders(response);
+  //   request->send(response);
+  // });
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

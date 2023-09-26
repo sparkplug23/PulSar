@@ -23,7 +23,7 @@
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER_2022
 
 // no class, include within header class
 
@@ -32,7 +32,7 @@ int test = 0;
 int8_t Tasker_Web(uint8_t function);
 
 
-#endif // USE_MODULE_NETWORK_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER_2022
 
 
 

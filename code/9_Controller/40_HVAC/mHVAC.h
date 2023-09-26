@@ -188,6 +188,17 @@ class mHVAC :
     void init_program_temps();
     void init_program_scheduling(void);
 
+    struct HEATING_STATUS{
+      char message_ctr[100];
+      char message_len = 0;
+    }heating_status[HEATING_DEVICE_MAX];
+
+
+    #ifdef USE_MODULE_NETWORK_WEBSERVER_2022
+    void WebPage_Root_AddHandlers();
+    void WebAppend_Root_Status_Table();
+    void Web_Root_Draw(AsyncWebServerRequest *request);
+    
     void Web_Append_Program_Timers_Buttons();
     void Web_Append_Program_Temps_Buttons();
 
@@ -197,17 +208,7 @@ class mHVAC :
     void WebAppend_Root_Draw_Program_Buttons();
     void WebAppend_Root_Draw_PageTable();
 
-    struct HEATING_STATUS{
-      char message_ctr[100];
-      char message_len = 0;
-    }heating_status[HEATING_DEVICE_MAX];
-
-
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    void WebPage_Root_AddHandlers();
-    void WebAppend_Root_Status_Table();
-    void Web_Root_Draw(AsyncWebServerRequest *request);
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER_2022
 
 
     void HandleTimerConfiguration(void);

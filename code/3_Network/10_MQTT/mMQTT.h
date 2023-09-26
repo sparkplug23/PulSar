@@ -70,6 +70,7 @@ enum TOPIC_TYPE_IDS{
   MQTT_TOPIC_TYPE_ROC10M_ID,
   MQTT_TOPIC_TYPE_SENSOR_TELEPERIOD_ID,   // 1 second
   MQTT_TOPIC_TYPE_SETTINGS_TELEPERIOD_ID, //show settings, but 1 hour increments
+  MQTT_TOPIC_LWT_ONLINE_ID,
   MQTT_TOPIC_TYPE_TELEPERIOD_ID,
   MQTT_TOPIC_TYPE__DEBUG__ID,  
   MQTT_TOPIC_TYPE_LENGTH_ID
@@ -87,6 +88,7 @@ enum MQTT_FREQUENCY_REDUCTION_LEVEL_IDS{
 #define MQTT_TOPIC_TYPE_TELEPERIOD_CTR "tele"     //send blocks of information, with another parameter controlling the size of the block (important, all)
 
 // Put all shared ones here, eg "settings" and "sensor", with specific inside module.h when needed
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LWT_ONLINE_CTR)   "LWT";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR)       "health";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR)     "settings";    
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR)          "log";        

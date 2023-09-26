@@ -83,12 +83,6 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
   
-  /************
-   * WEBPAGE SECTION * 
-  *******************/  
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
 
 } // END Tasker
 

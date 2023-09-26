@@ -19,6 +19,33 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   }
 
 
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+
+
+
+  if(jtok = obj["ListDir"]){
+
+    // CommandSet_SerialPrint_FileNames(jtok.getStr());
+    listDir(WLED_FS, "/", 0);
+    
+  }
+
+  if(jtok = obj["ReadFile"]){
+
+    CommandSet_ReadFile(jtok.getStr());
+    
+  }
+
+
+
+
+
+  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+
+
+
+
+
   uint8_t segments_found = 0;
 
 
@@ -43,7 +70,7 @@ DEBUG_LINE_HERE;
 DEBUG_LINE_HERE;
         ALOG_HGL(PSTR("Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
         // Segment_AppendNew(0, 0, segment_i+1);
-        Segment_AppendNew(0, STRIP_SIZE_MAX, segment_i);
+        Segment_AppendNew(0, 100, segment_i); // STRIP_SIZE_MAX
         ALOG_HGL(PSTR("size check Creating new segment %d|%d"),segment_i,pCONT_lAni->segments.size());
       }
 DEBUG_LINE_HERE;
@@ -76,6 +103,81 @@ DEBUG_LINE_HERE;
   ALOG_DBM(PSTR(D_LOG_LIGHT D_TOPIC "mAnimatorLight::parse_JSONCommand::End"));
 
 }
+
+
+
+
+
+
+
+void mAnimatorLight::listDir(fs::FS &fs, const char * dirname, uint8_t levels){
+    Serial.printf("Listing directory: %s\n", dirname);
+
+    File root = fs.open(dirname);
+    if(!root){
+        Serial.println("Failed to open directory");
+        return;
+    }
+    if(!root.isDirectory()){
+        Serial.println("Not a directory");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(file.isDirectory()){
+            Serial.print("  DIR : ");
+            Serial.println(file.name());
+            if(levels){
+                listDir(fs, file.name(), levels -1);
+            }
+        } else {
+            Serial.print("  FILE: ");
+            Serial.print(file.name());
+            Serial.print("  SIZE: ");
+            Serial.println(file.size());
+        }
+        file = root.openNextFile();
+    }
+}
+
+
+void mAnimatorLight::readFile(fs::FS &fs, const char * path){
+    Serial.printf("Reading file: %s\n\r", path);
+
+    File file = fs.open(path);
+    if(!file){
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    Serial.print("Read from file: \n\r");
+    while(file.available()){
+        Serial.write(file.read());
+    }
+
+    Serial.println();
+}
+
+
+void mAnimatorLight::CommandSet_ReadFile(const char* filename){
+
+  readFile(WLED_FS, filename);
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
+  #endif // ENABLE_LOG_LEVEL_COMMANDS
+
+} 
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -146,10 +248,10 @@ DEBUG_LINE_HERE;
       SEGMENT_I(segment_index).pixel_range.start = arrobj[0].getInt();
       SEGMENT_I(segment_index).pixel_range.stop  = arrobj[1].getInt();
       
-      if(SEGMENT_I(segment_index).pixel_range.stop > STRIP_SIZE_MAX)
+      if(SEGMENT_I(segment_index).pixel_range.stop > PIXEL_RANGE_LIMIT)
       {
-        ALOG_ERR( PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, STRIP_SIZE_MAX);
-        SEGMENT_I(segment_index).pixel_range.stop = STRIP_SIZE_MAX;
+        ALOG_ERR( PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, PIXEL_RANGE_LIMIT);
+        SEGMENT_I(segment_index).pixel_range.stop = PIXEL_RANGE_LIMIT;
       }
 
       ALOG_COM( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).pixel_range.start, SEGMENT_I(segment_index).pixel_range.stop );
@@ -443,12 +545,12 @@ DEBUG_LINE_HERE;
         // #endif// ENABLE_LOG_LEVEL_DEBUG          
       }
 
-      if(SEGMENT_I(segment_index).pixel_range.stop > STRIP_SIZE_MAX+1)
+      if(SEGMENT_I(segment_index).pixel_range.stop > PIXEL_RANGE_LIMIT+1)
       {
     #ifdef ENABLE_LOG_LEVEL_ERROR
-        AddLog(LOG_LEVEL_ERROR, PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, STRIP_SIZE_MAX);
+        AddLog(LOG_LEVEL_ERROR, PSTR("SEGMENT_I(segment_index).pixel_range.stop exceeds max %d %d"),SEGMENT_I(segment_index).pixel_range.stop, PIXEL_RANGE_LIMIT);
     #endif //ef ENABLE_LOG_LEVEL_INFO
-       SEGMENT_I(segment_index).pixel_range.stop = STRIP_SIZE_MAX+1;
+       SEGMENT_I(segment_index).pixel_range.stop = PIXEL_RANGE_LIMIT+1;
       }
 
 
@@ -936,11 +1038,13 @@ DEBUG_LINE_HERE;
    * 
    */
   if(jtok = obj[PM_JSON_STRIP_SIZE]){
-    CommandSet_LightSizeCount(jtok.getInt());
-    data_buffer.isserviced++;
-    #ifdef ENABLE_LOG_LEVEL_DEBUG
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
-    #endif // ENABLE_LOG_LEVEL_DEBUG
+
+    ALOG_ERR(PSTR("PM_JSON_STRIP_SIZE no longer supported - use PixelRange instead"));
+    // CommandSet_LightSizeCount(jtok.getInt());
+    // data_buffer.isserviced++;
+    // #ifdef ENABLE_LOG_LEVEL_DEBUG
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
+    // #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
 
@@ -969,7 +1073,7 @@ DEBUG_LINE_HERE;
 
 
     uint16_t start = id;
-    uint16_t stop = STRIP_SIZE_MAX;
+    uint16_t stop = 100;//STRIP_SIZE_MAX;
 
 
 
@@ -1925,14 +2029,14 @@ void mAnimatorLight::CommandSet_Auto_Time_Off_Secs(uint16_t value){
 *******************************************************************************************************************************
 *******************************************************************************************************************************/
 
-void mAnimatorLight::CommandSet_LightSizeCount(uint16_t value){
+// void mAnimatorLight::CommandSet_LightSizeCount(uint16_t value){
 
-  settings.light_size_count = value;
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
+//   settings.light_size_count = value;
+//   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+//   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_JSON_COMMAND_NVALUE_K(D_JSON_STRIP_SIZE)), settings.light_size_count);
+//   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
-}
+// }
 
 /******************************************************************************************************************************
 *******************************************************************************************************************************

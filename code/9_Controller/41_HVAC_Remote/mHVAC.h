@@ -203,11 +203,11 @@ class mHVAC :
     }heating_status[HEATING_DEVICE_MAX];
 
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     void WebPage_Root_AddHandlers();
     void WebAppend_Root_Status_Table();
     void Web_Root_Draw(AsyncWebServerRequest *request);
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 
     void HandleTimerConfiguration(void);

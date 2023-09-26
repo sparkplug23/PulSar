@@ -237,7 +237,7 @@ DEFINE_PGM_CTR(PM_JSON_TYPE)              D_JSON_TYPE;
 
 DEFINE_PGM_CTR(PM_JSON_TEMPERATURE_HEATMAP_RGBSTRING) "TemperatureHeatmap";
 
-DEFINE_PGM_CTR(PM_JSON_TEMPERATURE_HEATMAP_ADJUSTED_BRIGHTNESS_RGBSTRING) "TemperatureHeatMap_AdjustedBrightness";
+DEFINE_PGM_CTR(PM_JSON_TEMPERATURE_HEATMAP_ADJUSTED_BRIGHTNESS_RGBSTRING) "TemperaTESTtureHeatMap_AdjustedBrightness";
 
 
 DEFINE_PGM_CTR(PM_JSON_TIME_ELASPED)        D_JSON_TIME_ELASPED;
@@ -599,7 +599,7 @@ DEFINE_PGM_CTR(kOptionFollowInv)        "FollowInv|Inverted";
 
 
 // xdrv_02_webserver.ino
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER23
 // const char HTTP_SNS_TEMP[] PROGMEM = "{s}%s " D_TEMPERATURE "{m}%s&deg;%c{e}";                    // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 // const char HTTP_SNS_HUM[] PROGMEM = "{s}%s " D_HUMIDITY "{m}%s%%{e}";                             // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
 // const char HTTP_SNS_PRESSURE[] PROGMEM = "{s}%s " D_PRESSURE "{m}%s %s{e}";                       // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
@@ -643,7 +643,7 @@ const char S_RESTORE_CONFIGURATION[] PROGMEM = D_RESTORE_CONFIGURATION;
 // const char S_CONSOLE[] PROGMEM = D_CONSOLE;
 // const char PM_INFORMATION[] PROGMEM = D_INFORMATION;
 const char S_RESTART[] PROGMEM = D_RESTART;
-// #endif  // USE_MODULE_NETWORK_WEBSERVER
+// #endif  // USE_MODULE_NETWORK_WEBSERVER23
 
 
 

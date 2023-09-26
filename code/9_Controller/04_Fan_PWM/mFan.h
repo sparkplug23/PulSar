@@ -86,13 +86,13 @@ void SpeedRefresh(void);
 void CommandSet_FanSpeed_Manual(uint16_t value);
 
 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
 void WebCommand_Parse(void);
 
 
 void WebAppend_Root_Draw_PageTable();
 void WebAppend_Root_Status_Table();
-  #endif// USE_MODULE_NETWORK_WEBSERVER
+  #endif// USE_MODULE_NETWORK_WEBSERVER23
 
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);

@@ -2,7 +2,7 @@
 #include "mTankVolume.h"
 
 #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
 
 
 
@@ -255,6 +255,6 @@
 
 
 
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 #endif

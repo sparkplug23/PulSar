@@ -85,7 +85,7 @@
 
 
 
-//#ifdef USE_MODULE_NETWORK_WEBSERVER
+//#ifdef USE_MODULE_NETWORK_WEBSERVER23
   #define D_MODULE_NETWORK_WEBSERVER_CTR              "mWebServer"
   #define D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR              "webserver"
 //#endif

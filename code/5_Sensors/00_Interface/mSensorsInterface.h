@@ -4,6 +4,9 @@
 #define D_UNIQUE_MODULE_SENSORS_INTERFACE_ID   ((5*1000)+00)  // Unique value across all classes from all groups (e.g. sensor, light, driver, energy)
 #define D_GROUP_MODULE_SENSORS_INTERFACE_ID    0    // Numerical accesending order of module within a group
 
+
+#define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+
 #include "stdint.h"
 
 #include "5_Sensors/00_Interface/mSensorType.h"
@@ -41,7 +44,7 @@ typedef struct sensorset_location_s
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "sensors/colours";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "unified/heatmap";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)                 "unified";
   
 
@@ -79,6 +82,11 @@ class mSensorsInterface :
     }
     settings;
 
+    #ifdef USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    uint32_t GetColourValueUsingMaps_FullBrightness(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+    uint32_t GetColourValueUsingMaps_AdjustedBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
+    void HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t* g8, uint8_t* b8);
+    #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
     void MQTT_Report_Event_Button();
 

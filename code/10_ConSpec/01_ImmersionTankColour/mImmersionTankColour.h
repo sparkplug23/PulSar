@@ -76,7 +76,7 @@ class mImmersionTankColour :
     void SubTask_StripSet_Showing();
 
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     void WebCommand_Parse(void);
     void WebAppend_Root_Draw_PageTable();
     void WebAppend_Root_Status_Table();

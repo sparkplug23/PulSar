@@ -157,7 +157,7 @@ void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     case FUNC_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
@@ -167,7 +167,7 @@ void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
     break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER23
     /************
      * MQTT SECTION * 
     *******************/

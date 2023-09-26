@@ -1,5 +1,6 @@
 #include "6_Lights/03_Animator/mAnimatorLight.h"
 
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 /**
@@ -12,8 +13,6 @@
  * * Optional: Force banding, OR, does this depend on the effect? or, should default just be assumed and "force_discrete" only happens on special effects? Most likely!
  * 
  */
-
-StaticJsonDocument<JSON_BUFFER_SIZE> doc;
 
 
 // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
@@ -1214,7 +1213,8 @@ void mAnimatorLight::createEditHandler(bool enable) {
   }
 }
 
-//Un-comment any file types you need
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+// //Un-comment any file types you need
 String mAnimatorLight::getContentType(AsyncWebServerRequest* request, String filename){
   if(request->hasArg("download")) return "application/octet-stream";
   else if(filename.endsWith(".htm")) return "text/html";
@@ -1232,6 +1232,7 @@ String mAnimatorLight::getContentType(AsyncWebServerRequest* request, String fil
 //  else if(filename.endsWith(".gz")) return "application/x-gzip";
   return "text/plain";
 }
+#endif
 
 
 bool mAnimatorLight::handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request)
@@ -1260,22 +1261,33 @@ void mAnimatorLight::setStaticContentCacheHeaders(AsyncWebServerResponse *respon
 }
 
 
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+
 bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path){
   DEBUG_PRINTLN("WS FileRead: " + path);
+  DEBUG_LINE_HERE;
   if(path.endsWith("/")) path += "index.htm";
+  DEBUG_LINE_HERE;
   if(path.indexOf("sec") > -1) return false;
+  DEBUG_LINE_HERE;
   String contentType = getContentType(request, path);
+  DEBUG_LINE_HERE;
   /*String pathWithGz = path + ".gz";
   if(WLED_FS.exists(pathWithGz)){
     request->send(WLED_FS, pathWithGz, contentType);
     return true;
   }*/
+  ALOG_INF(PSTR("mAnimatorLight::handleFileReadA"));
   if(WLED_FS.exists(path)) {
+  ALOG_INF(PSTR("mAnimatorLight::handleFileReadB"));
     request->send(WLED_FS, path, contentType);
     return true;
   }
+  ALOG_INF(PSTR("mAnimatorLight::handleFileReadC"));
   return false;
 }
+#endif// ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+
 
 
 
@@ -1922,8 +1934,8 @@ bool mAnimatorLight::requestJSONBufferLock(uint8_t module)
   DEBUG_PRINT(F("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOCKED    JSON buffer locked. ("));
   DEBUG_PRINT(jsonBufferLock);
   DEBUG_PRINTLN(")");
-  // fileDoc = &doc;  // used for applying presets (presets.cpp)
-  // doc.clear();
+  fileDoc = &doc;  // used for applying presets (presets.cpp)
+  doc.clear();
   return true;
 }
 
@@ -1932,7 +1944,7 @@ void mAnimatorLight::releaseJSONBufferLock()
   DEBUG_PRINT(F("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNLOCKED JSON buffer released. ("));
   DEBUG_PRINT(jsonBufferLock);
   DEBUG_PRINTLN(")");
-  // fileDoc = nullptr;
+  fileDoc = nullptr;
   jsonBufferLock = 0;
 }
 
@@ -2917,7 +2929,9 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     case JSON_PATH_STATE:
       serializeState(lDoc); break;
     case JSON_PATH_INFO:
-      serializeInfo(lDoc); break;
+      serializeInfo(lDoc); 
+      
+      break;
     case JSON_PATH_PALETTES:
       serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
       break;
@@ -2932,6 +2946,10 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       serializeState(state);
       JsonObject info = lDoc.createNestedObject("info");
       serializeInfo(info);
+      
+      SEGMENT_I(0).flags.fForceUpdate = true; // New data in, so we should update
+      // ALOG_HGL(PSTR("froce update"));
+
       if (subJson != JSON_PATH_STATE_INFO)
       {
         JsonArray effects = lDoc.createNestedArray(F("effects"));
@@ -3289,6 +3307,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   byte segbri = seg.opacity;
   if (getVal(elem["bri"], &segbri)) {
+    ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
     if (segbri > 0) seg.setOpacity(segbri);
     seg.setOption(SEG_OPTION_ON, segbri); // use transition
   }
@@ -3386,7 +3405,8 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   if (getVal(elem["fx"], &fx, 0, getModeCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
     ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);
     // if (!presetId && currentPlaylist>=0) unloadPlaylist();
-    // if (fx != seg.animation_mode_id) 
+    // if (fx != seg.animation_mode_id)
+    DEBUG_LINE_HERE; 
     seg.setMode(fx, elem[F("fxdef")]);
   }
 
@@ -3494,7 +3514,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 // presetId is non-0 if called from handlePreset()
 bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte presetId)
 {
-  ALOG_INF(PSTR("================deserializeState"));
+  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "================deserializeState why is this still loading*&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"));
 
 
   bool stateResponse = root[F("v")] | false;
@@ -3628,19 +3648,25 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   // loadLedmap = root[F("ledmap")] | loadLedmap;
 
-  // byte ps = root[F("psave")];
-  // if (ps > 0 && ps < 251) savePreset(ps, nullptr, root);
 
-  // ps = root[F("pdel")]; //deletion
-  // if (ps > 0 && ps < 251) deletePreset(ps);
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  byte ps = root[F("psave")];
+  if (ps > 0 && ps < 251) savePreset(ps, nullptr, root);
 
-  // // HTTP API commands (must be handled before "ps")
-  // const char* httpwin = root["win"];
-  // if (httpwin) {
-  //   String apireq = "win"; apireq += '&'; // reduce flash string usage
-  //   apireq += httpwin;
-  //   handleSet(nullptr, apireq, false);    // may set stateChanged
-  // }
+  ps = root[F("pdel")]; //deletion
+  if (ps > 0 && ps < 251) deletePreset(ps);
+
+#endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+
+  // HTTP API commands (must be handled before "ps")
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__SETTINGS   // setting with URL args, not what I want
+  const char* httpwin = root["win"];
+  if (httpwin) {
+    String apireq = "win"; apireq += '&'; // reduce flash string usage
+    apireq += httpwin;
+    handleSet(nullptr, apireq, false);    // may set stateChanged
+  }
+  #endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
   // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
   byte presetToRestore = 0;
@@ -3651,22 +3677,28 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
     //unloadPlaylist(); // applying a preset unloads the playlist, may be needed here too?
   } else if (!root["ps"].isNull()) {
-    // ps = presetCycCurr;
-    // if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
-    //   // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
-    //   presetCycCurr = ps;
-    //   // unloadPlaylist();          // applying a preset unloads the playlist
-    //   // applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
-    //   return stateResponse;
-    // }
+    ps = presetCycCurr;
+    if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
+      // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
+      presetCycCurr = ps;
+      unloadPlaylist();          // applying a preset unloads the playlist
+      applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
+      return stateResponse;
+    }
   }
 
-  // JsonObject playlist = root[F("playlist")];
-  // if (!playlist.isNull() && loadPlaylist(playlist, presetId)) {
-  //   //do not notify here, because the first playlist entry will do
-  //   if (root["on"].isNull()) callMode = CALL_MODE_NO_NOTIFY;
-  //   else callMode = CALL_MODE_DIRECT_CHANGE;  // possible bugfix for playlist only containing HTTP API preset FX=~
-  // }
+  JsonObject playlist = root[F("playlist")];
+  if (!playlist.isNull() && loadPlaylist(playlist, presetId)) {
+    //do not notify here, because the first playlist entry will do
+    if (root["on"].isNull()) callMode = CALL_MODE_NO_NOTIFY;
+    else callMode = CALL_MODE_DIRECT_CHANGE;  // possible bugfix for playlist only containing HTTP API preset FX=~
+
+
+    ALOG_INF(PSTR("JsonObject playlist = root[F(\"playlist\")];"));
+
+  }else{
+    ALOG_INF(PSTR("playlist.isNull()"));
+  }
 
   if (root.containsKey(F("rmcpal")) && root[F("rmcpal")].as<bool>()) {
     if (customPalettes.size()) {
@@ -4321,31 +4353,37 @@ void mAnimatorLight::initServer_LightOnly()
   // // pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);/
   // pCONT->Tasker_Interface(FUNC_WEB_ADD_HANDLER);
 
-  // //called when the url is not defined here, ajax-in; get-settings
-  // pCONT_web->server->onNotFound([this](AsyncWebServerRequest *request){
-  //   DEBUG_PRINTLN("Not-Found HTTP call:");
-  //   DEBUG_PRINTLN("URI: " + request->url());
-  //   if (this->captivePortal(request)) return;
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
-  //   //make API CORS compatible
-  //   if (request->method() == HTTP_OPTIONS)
-  //   {
-  //     AsyncWebServerResponse *response = request->beginResponse(200);
-  //     response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-  //     request->send(response);
-  //     return;
-  //   }
+  //called when the url is not defined here, ajax-in; get-settings
+  pCONT_web->server->onNotFound([this](AsyncWebServerRequest *request){
+    DEBUG_PRINTLN("Not-Found HTTP call:");
+    DEBUG_PRINTLN("URI: " + request->url());
+    if (this->captivePortal(request)) return;
 
-  //   // if(handleSet(request, request->url())) return;
-  //   // #ifndef WLED_DISABLE_ALEXA
-  //   // if(espalexa.handleAlexaApiCall(request)) return;
-  //   // #endif
-  //   // if(handleFileRead(request, request->url())) return;
-  //   AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-  //   response->addHeader(FPSTR(s_content_enc),"gzip");
-  //   this->setStaticContentCacheHeaders(response);
-  //   request->send(response);
-  // });
+    //make API CORS compatible
+    if (request->method() == HTTP_OPTIONS)
+    {
+      AsyncWebServerResponse *response = request->beginResponse(200);
+      response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+      request->send(response);
+      return;
+    }
+
+    DEBUG_LINE_HERE;
+
+    // if(handleSet(request, request->url())) return;
+    // #ifndef WLED_DISABLE_ALEXA
+    // if(espalexa.handleAlexaApiCall(request)) return;
+    // #endif
+    if(handleFileRead(request, request->url())) return;
+    AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
+    response->addHeader(FPSTR(s_content_enc),"gzip");
+    this->setStaticContentCacheHeaders(response);
+    request->send(response);
+  });
+
+  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 
   
 }
@@ -4356,3 +4394,5 @@ void mAnimatorLight::initServer_LightOnly()
 
 
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+#endif // USE_MODULE_LIGHTS_ANIMATOR

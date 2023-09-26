@@ -4,19 +4,19 @@
 
 #include <Arduino.h>
 
-#include "webpages/html_ui.h"
+#include "webpages_generated/html_ui.h"
 #ifdef WLED_ENABLE_SIMPLE_UI
-  #include "webpages/html_simple.h"
+  #include "webpages_generated/html_simple.h"
 #endif
-#include "webpages/html_settings.h"
-#include "webpages/html_other.h"
+#include "webpages_generated/html_settings.h"
+#include "webpages_generated/html_other.h"
 #ifdef WLED_ENABLE_PIXART
-  #include "webpages/html_pixart.h"
+  #include "webpages_generated/html_pixart.h"
 #endif
 #ifndef WLED_DISABLE_PXMAGIC
-  #include "webpages/html_pxmagic.h"
+  #include "webpages_generated/html_pxmagic.h"
 #endif
-#include "webpages/html_cpal.h"
+#include "webpages_generated/html_cpal.h"
 
 
 const char JSON_mode_names[] PROGMEM = R"=====(["FX names moved"])=====";

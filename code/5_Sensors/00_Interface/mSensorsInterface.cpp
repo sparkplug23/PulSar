@@ -860,7 +860,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
   JBI->Start();
 
-
+mqtthandler_sensor_temperature_colours.tRateSecs = 1;
 
   // return 0;
   
@@ -919,19 +919,20 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
               // val.sensor_id is used to since the order of devicename list may not match in accending order
               // DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
 
+              // sensor_data = pCONT_debug->debug_data.input_float1;//map(pCONT_debug->debug_data.input_float1, 0,59, 0,70);
 
               // Convert into colour
               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-              #ifdef USE_MODULE_LIGHTS_INTERFACE
-              RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
-
+              #ifdef USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP // I need to make a version that does not require lighting at all, so simple colour conversion
+              uint32_t colour  = GetColourValueUsingMaps_FullBrightness(temperature, 0);
               JBI->Add_FV(
                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
                 PSTR("\"%02X%02X%02X\""),
-                colour.R, colour.G, colour.B
+                R32(colour), G32(colour), B32(colour)
               );
-              #endif // USE_MODULE_LIGHTS_INTERFACE
+              #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
+              // ALOG_INF(PSTR("%s %d \"%02X%02X%02X\""), buffer, (int)(sensor_data*1000), R32(colour), G32(colour), B32(colour));
 
               // JBI->Add(buffer, sensor_data);
               
@@ -1067,15 +1068,15 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
               // Convert into colour
               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-              #ifdef USE_MODULE_LIGHTS_INTERFACE
-              RgbColor colour  = pCONT_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
+              #ifdef USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+              uint32_t colour  = GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
 
               JBI->Add_FV(
                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
                 PSTR("\"%02X%02X%02X\""),
-                colour.R, colour.G, colour.B
+                R32(colour), G32(colour), B32(colour)
               );
-              #endif // USE_MODULE_LIGHTS_INTERFACE
+              #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
 
               // JBI->Add(buffer, sensor_data);
@@ -1175,6 +1176,213 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
   return JBI->End();
 
 }
+
+
+
+#ifdef USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+/**
+ * @brief future global way to map colours using palette
+ * 
+ * Option in the future to apply different colours to the map.
+ * 
+ * Global temp colours reporting should have flag otpion to pick between full/adjusted brightness inside primary unified sensor.
+ * I should still produce them all for the sub mqtt colours
+ * 
+ * @param value 
+ * @param map_style_id 
+ * @param value_min 
+ * @param value_max 
+ * @param map_is_palette_id 
+ * @return uint32_t colour packed W,R,G,B 
+ */
+uint32_t mSensorsInterface::GetColourValueUsingMaps_AdjustedBrightness(float value, 
+                                            uint8_t map_style_id,
+                                            float value_min, float value_max, //not need for some mappings
+                                            bool map_is_palette_id
+                                          ){
+
+  // map_style_id can use some internal ones here, or else scale and get from palettes
+
+  // Heating rainbow with brighter red end
+  uint16_t hue = 0;
+  uint8_t  sat = 0;
+  uint8_t  brt = 0;
+
+  // if(map is water temperature in celcius ie have different range styles) then convert into rainbow gradient
+
+    // Generate Hue and Brt values
+    if(value<20){
+      hue = 240;
+      brt = 10;
+    }else
+    if((value>=20)&&(value<50)){
+      hue = mSupport::mapfloat(value, 20,50, 180,0);
+      brt = mSupport::mapfloat(value, 20,50, 10,100);
+    }else
+    if((value>=50)&&(value<60)){      
+      hue = mSupport::mapfloat(value, 50,60, 359,345);
+      brt = 100;
+    }else
+    if(value>=60){
+      hue = 340;
+      brt = 100;
+    }
+
+  uint8_t r = 0;
+  uint8_t g = 0;
+  uint8_t b = 0;
+  uint8_t w = 0;
+  
+  HsbToRgb(hue/360.0f,1.0f,1.0f,&r,&g,&b);
+
+  return RGBW32(r,g,b,w);
+
+
+
+}
+
+/**
+ * @brief maximum sat/brt, hue changes
+ * 
+ * In the future, simply create "profiles" that have common temp to colour mappings
+ * ie "Hot Water", "Room Comfort"
+ * 
+ * @param value 
+ * @param map_style_id 
+ * @param value_min 
+ * @param value_max 
+ * @param map_is_palette_id 
+ * @return RgbColor 
+ */
+uint32_t mSensorsInterface::GetColourValueUsingMaps_FullBrightness(float value, 
+                                            uint8_t map_style_id,
+                                            float value_min, float value_max, //not need for some mappings
+                                            bool map_is_palette_id
+                                          ){
+
+  // map_style_id can use some internal ones here, or else scale and get from palettes
+
+  // Heating rainbow with brighter red end
+  uint16_t hue = 0;
+  uint8_t  sat = 0;
+  uint8_t  brt = 100;
+
+  // if(map is water temperature in celcius ie have different range styles) then convert into rainbow gradient
+
+  // Generate Hue and Brt values
+  if(value<15){
+    hue = 240;
+    brt = 100;
+  }else
+  if((value>=15)&&(value<25)){  // BLUE to GREEN
+    hue = mSupport::mapfloat(value, 15,25, 240,120);
+  }else
+  if((value>=25)&&(value<30)){  //         GREEN to YELLOW
+    hue = mSupport::mapfloat(value, 25,30, 120,60);
+  }else
+  if((value>=30)&&(value<35)){  //                  YELLOW to ORANGE
+    hue = mSupport::mapfloat(value, 30,35, 60,17);
+  }else
+  if((value>=35)&&(value<40)){  //                            ORANGE to RED
+    hue = mSupport::mapfloat(value, 35,40, 17,0);
+  }else
+  if((value>=40)&&(value<50)){  //                                      RED
+    hue = 0;
+  }else
+  if((value>=50)&&(value<60)){  //                                      RED to PINK
+    hue = mSupport::mapfloat(value, 50,60, 360,340);
+  }else
+  if(value>=60){   // PINK
+    hue = 340;
+  }
+
+  uint8_t r = 0;
+  uint8_t g = 0;
+  uint8_t b = 0;
+  uint8_t w = 0;
+
+  // hue = 180;
+
+  // char buffer[20];
+  // mSupport::float2CString(value, JSON_VARIABLE_FLOAT_PRECISION_LENGTH, buffer);       
+  // ALOG_INF(PSTR("value=%s, hue=%d"), buffer, hue);
+  
+  HsbToRgb((float)hue/360.0f,1.0f,1.0f,&r,&g,&b);
+  // HsbToRgb(0.0f,1.0f,1.0f,&r,&g,&b);
+
+  return  RGBW32(r,g,b,w);
+
+}
+
+
+void mSensorsInterface::HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t* g8, uint8_t* b8)
+{
+  float r, g, b;
+
+  if (s == 0.0f)
+  {
+    r = g = b = v; // achromatic or black
+  }
+  else
+  {
+    if (h < 0.0f)
+    {
+      h += 1.0f;
+    }
+    else if (h >= 1.0f)
+    {
+      h -= 1.0f;
+    }
+    h *= 6.0f;
+    int i = (int)h;
+    float f = h - i;
+    float q = v * (1.0f - s * f);
+    float p = v * (1.0f - s);
+    float t = v * (1.0f - s * (1.0f - f));
+    switch (i)
+    {
+    case 0:
+      r = v;
+      g = t;
+      b = p;
+      break;
+    case 1:
+      r = q;
+      g = v;
+      b = p;
+      break;
+    case 2:
+      r = p;
+      g = v;
+      b = t;
+      break;
+    case 3:
+      r = p;
+      g = q;
+      b = v;
+      break;
+    case 4:
+      r = t;
+      g = p;
+      b = v;
+      break;
+    default:
+      r = v;
+      g = p;
+      b = q;
+      break;
+    }
+  }
+
+  *r8 = r * 255;
+  *g8 = g * 255;
+  *b8 = b * 255;
+
+}
+
+#endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+
+
 
 
 
@@ -1373,7 +1581,7 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs; 
+  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;

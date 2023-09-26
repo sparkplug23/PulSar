@@ -59,10 +59,32 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
     case FUNC_EVERY_MIDNIGHT:
     
     break;
+    case FUNC_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
   }
 
 }//end
 
+
+void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+	if(jtok = obj["DebugInput"].getObject()["Float1"])
+	{
+		debug_data.input_float1 = jtok.getFloat();
+    char buffer[20];
+    mSupport::float2CString(debug_data.input_float1, JSON_VARIABLE_FLOAT_PRECISION_LENGTH, buffer);    
+    ALOG_INF(PSTR("DebugInput Float1: %s"), buffer);
+	}
+
+
+
+    
+}
 
 void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
 {
@@ -206,6 +228,18 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #endif
   #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
   #error "ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE"
+  #endif
+  #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
+  #error "ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN"
+  #endif 
+  #ifdef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
+  #error "ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS"
+  #endif 
+  #ifdef ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
+  #error "ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS"
+  #endif 
+  #ifdef STRIP_SIZE_MAX
+  #warning "STRIP_SIZE_MAX phase out"
   #endif
 
 

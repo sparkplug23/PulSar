@@ -18,6 +18,7 @@ int8_t mAnimatorLight::Tasker_Web(uint8_t function)
     case FUNC_WEB_ADD_HANDLER:
     
       // MQTTHandler_AddWebURL_PayloadRequests(); // Therefore MQTT must be initialised before webui
+     
 
     break;
 
@@ -27,6 +28,13 @@ int8_t mAnimatorLight::Tasker_Web(uint8_t function)
 
 }
 
+
+void mAnimatorLight::WebPage_Root_AddHandlers()
+{
+ initServer_LightOnly();
+
+
+}
 
 
 #endif // USE_MODULE_NETWORK_WEBSERVER23
@@ -41,9 +49,6 @@ int8_t mAnimatorLight::Tasker_Web(uint8_t function){
 
     // case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:
 
-    // break;
-    // case FUNC_WEB_ADD_HANDLER:
-    //   WebPage_Root_AddHandlers();
     // break;
     // case FUNC_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER:
     //   WebAppend_Root_Draw_Table();
@@ -2281,7 +2286,7 @@ void mAnimatorLight::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServer
 // #include "mAnimatorLight.h"
 
 // #ifdef USE_MODULE_LIGHTS_ANIMATOR
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER23
 
 // int8_t mAnimatorLight::Tasker_Web(uint8_t function){
 
@@ -4529,8 +4534,8 @@ void mAnimatorLight::WebAppend_JSON_RootPage_LiveviewPixels()//{//AsyncWebServer
 
 
 // #endif
-// #endif // USE_MODULE_NETWORK_WEBSERVER
+// #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 
 #endif
-#endif // USE_MODULE_NETWORK_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER23

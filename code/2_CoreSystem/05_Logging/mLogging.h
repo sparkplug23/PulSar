@@ -90,16 +90,16 @@ enum LoggingLevels {LOG_LEVEL_NONE,
 // #endif
 
 
-#ifdef ENABLE_DEBUG_MULTIPIN
+// #ifdef ENABLE_DEBUG_MULTIPIN
   #define DEBUG_PRINT(x) SERIAL_DEBUG.print(x)
   #define DEBUG_PRINTLN(x) SERIAL_DEBUG.println(x); \
                             Serial.flush();
   #define DEBUG_PRINTF(x...) SERIAL_DEBUG.printf(x)
-#else
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTF(x...)
-#endif
+// #else
+//   #define DEBUG_PRINT(x)
+//   #define DEBUG_PRINTLN(x)
+//   #define DEBUG_PRINTF(x...)
+// #endif
 
 
 

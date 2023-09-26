@@ -124,11 +124,11 @@ void mWiFi::WifiConfig(uint8_t type)
     WiFi.disconnect();                       // Solve possible Wifi hangs
     connection.config_type = type;
 
-    #ifndef USE_MODULE_NETWORK_WEBSERVER
+    #ifndef USE_MODULE_NETWORK_WEBSERVER23
     if (WIFI_MANAGER == connection.config_type) { 
       connection.config_type = WIFI_SERIAL; 
     }
-    #endif  // USE_MODULE_NETWORK_WEBSERVER
+    #endif  // USE_MODULE_NETWORK_WEBSERVER23
 //  DEBUG_LINE_HERE;
     connection.config_counter = WIFI_CONFIG_SEC;   // Allow up to WIFI_CONFIG_SECS seconds for phone to provide ssid/pswd
     connection.counter = connection.config_counter +5;
@@ -145,14 +145,14 @@ void mWiFi::WifiConfig(uint8_t type)
       AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_6_SERIAL " " D_ACTIVE_FOR_3_MINUTES));
     #endif// ENABLE_LOG_LEVEL_INFO
     }
-    // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER23
     // else if (WIFI_MANAGER == connection.config_type || WIFI_MANAGER_RESET_ONLY == connection.config_type) {
     // #ifdef ENABLE_LOG_LEVEL_INFO
     //  AddLog(LOG_LEVEL_INFO, S_LOG_WIFI, PSTR(D_WCFG_2_WIFIMANAGER " " D_ACTIVE_FOR_3_MINUTES));
     // #endif// ENABLE_LOG_LEVEL_INFO
     //  pCONT_web->WifiManagerBegin(WIFI_MANAGER_RESET_ONLY == connection.config_type);
     // }
-    // #endif  // USE_MODULE_NETWORK_WEBSERVER
+    // #endif  // USE_MODULE_NETWORK_WEBSERVER23
   }else{
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(LOG_LEVEL_INFO, PSTR("else connection.config_type"));
@@ -1001,13 +1001,13 @@ void mWiFi::WifiCheck(uint8_t param)
             }
 
             
-            // #ifdef USE_MODULE_NETWORK_WEBSERVER
+            // #ifdef USE_MODULE_NETWORK_WEBSERVER23
             //   if (pCONT_set->Settings.webserver) {
             //     pCONT_web->StartWebserver(pCONT_set->Settings.webserver, WiFi.localIP());
             //   } else {
             //     pCONT_web->StopWebserver();
             //   }
-            // #endif  // USE_MODULE_NETWORK_WEBSERVER
+            // #endif  // USE_MODULE_NETWORK_WEBSERVER23
 
 
           } 

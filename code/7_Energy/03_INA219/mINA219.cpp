@@ -65,14 +65,14 @@ int8_t mEnergyINA219::Tasker(uint8_t function, JsonParserObject obj){
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Status_Table_Draw();
       break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table_Data();
       break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER23
     /************
      * MQTT SECTION * 
     *******************/
@@ -188,7 +188,7 @@ void mEnergyINA219::EveryLoop(){
   
 }
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
 void mEnergyINA219::WebAppend_Root_Status_Table_Draw(){
 
   char buffer[30];
@@ -249,7 +249,7 @@ void mEnergyINA219::WebAppend_Root_Status_Table_Data(){
 
 }
 
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER23
 
 // New function that breaks things up into switch statements
 // Extra argument -- "require_completion" ie loop until status SPLIT_TASK_DONE_ID

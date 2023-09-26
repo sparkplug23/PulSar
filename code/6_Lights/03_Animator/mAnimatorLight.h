@@ -12,17 +12,12 @@
 #include "6_Lights/Toki.h"
 
 //color mangling macros
-#define RGBW32(r,g,b,w) (uint32_t((byte(w) << 24) | (byte(r) << 16) | (byte(g) << 8) | (byte(b))))
-#define R32(c) (byte((c) >> 16))
-#define G32(c) (byte((c) >> 8))
-#define B32(c) (byte(c))
-#define W32(c) (byte((c) >> 24))
 
 #define WLED_DISABLE_2D
 
 
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
@@ -30,7 +25,8 @@
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+#define PIXEL_RANGE_LIMIT 3000
 
 
 #ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
@@ -61,8 +57,9 @@
 #define PALETTE_WRAP_ON   true
 #define PALETTE_WRAP_OFF  false
 
-#define PALETTE_DISCRETE_ON   true
 #define PALETTE_DISCRETE_OFF  false
+#define PALETTE_DISCRETE_ON   true
+#define PALETTE_DISCRETE_DEFAULT   2 // Use the prefered method depending on the palette. Gradients will be shown across the segment, discrete will be shown as a single colours sequenced
 
 #define PALETTE_INDEX_SPANS_SEGLEN_ON true
 #define PALETTE_SPAN_OFF false
@@ -80,17 +77,17 @@
 #ifdef ESP32
   #include <WiFi.h>
   #ifndef DISABLE_NETWORK
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER23
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
   #include <ESP8266WiFi.h>
   #include <ESPAsyncTCP.h>
   #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif // USE_MODULE_NETWORK_WEBSERVER23
 #endif
 
 #include "math.h"
@@ -162,7 +159,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
 #define ARDUINOJSON_DECODE_UNICODE 0
 #include "3_Network/21_WebServer/AsyncJson-v6.h"
 #include "3_Network/21_WebServer/ArduinoJson-v6.h"
-#include "6_Lights/03_Animator/WebUI_01/mWebUI_Headers.h" // Not inside the class
+#include "6_Lights/03_Animator/mWebUI_Headers.h" // Not inside the class
 #endif
 
 
@@ -220,7 +217,7 @@ class mAnimatorLight :
           uint8_t TemplateProvidedInProgMem = false;
           uint8_t EnableModule = false;
       }flags;
-      uint16_t light_size_count = 1;
+      // uint16_t light_size_count = 1;  // phase out
       uint8_t pwm_offset = 0;
     }settings;
 
@@ -236,7 +233,7 @@ class mAnimatorLight :
 
     #define NEO_ANIMATION_TIMEBASE NEO_MILLISECONDS
     #define PRESET_COLOUR_MAP_INDEXES_MAX COLOUR_MAP_LENGTH_ID 
-    uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;  // This may not be the right thing I want animation.transition.pixels_to_update_as_number
+    // uint16_t strip_size_requiring_update = STRIP_SIZE_MAX;  // This may not be the right thing I want animation.transition.pixels_to_update_as_number
     
     
 
@@ -280,7 +277,7 @@ class mAnimatorLight :
     void CommandSet_LightPowerState(uint8_t value);
     bool CommandGet_LightPowerState();
     void CommandSet_Auto_Time_Off_Secs(uint16_t value);    
-    void CommandSet_LightSizeCount(uint16_t value);
+    // void CommandSet_LightSizeCount(uint16_t value);
     void CommandSet_EnabledAnimation_Flag(uint8_t value);
     void CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_id, uint8_t* buffer, uint8_t buflen);
     
@@ -335,7 +332,7 @@ class mAnimatorLight :
     RgbcctColor ApplyBrightnesstoRgbcctColour(RgbcctColor full_range_colour, uint8_t brightness);
 
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     #ifdef USE_WEBSERVER_ADVANCED_MULTIPAGES
     void Web_RGBLightSettings_Draw(AsyncWebServerRequest *request);
     void Web_RGBLightSettings_RunTimeScript(AsyncWebServerRequest *request);
@@ -363,7 +360,7 @@ class mAnimatorLight :
     void WebPage_Root_AddHandlers();
     void WebAppend_JSON_RootPage_LiveviewPixels();
     void WebPage_Root_SendInformationModule();
-    #endif //USE_MODULE_NETWORK_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER23
 
     #ifdef USE_DEVFEATURE_ANIMATOR_INIT_CODE__SEGMENT_MATRIX_TESTER
     void Test_Config();
@@ -698,6 +695,133 @@ class mAnimatorLight :
     void Init_Segments();
 
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+// General filesystem
+ size_t fsBytesUsed =0;
+ size_t fsBytesTotal =0;
+ unsigned long presetsModifiedTime =0L;
+ JsonDocument* fileDoc;
+ bool doCloseFile =false;
+
+ 
+
+
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
+void readFile(fs::FS &fs, const char * path);
+void CommandSet_ReadFile(const char* filename);
+
+
+void closeFile();
+bool bufferedFind(const char *target, bool fromStart = true);
+bool bufferedFindSpace(size_t targetLen, bool fromStart = true);
+bool bufferedFindObjectEnd() ;
+void writeSpace(size_t l);
+bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
+bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
+bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
+bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
+bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
+void updateFSInfo();
+String getContentType(AsyncWebServerRequest* request, String filename);
+bool handleFileRead(AsyncWebServerRequest* request, String path);
+
+#else
+
+static String getContentType(AsyncWebServerRequest* request, String filename);
+bool handleFileRead(AsyncWebServerRequest* request, String path);
+
+#endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+
+StaticJsonDocument<JSON_BUFFER_SIZE> doc;
+
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+
+
+volatile byte presetToApply = 0;
+volatile byte callModeToApply = 0;
+volatile byte presetToSave = 0;
+volatile int8_t saveLedmap = -1;
+char quickLoad[9] = {0};
+char saveName[33] = {0};
+bool includeBri = true, segBounds = true, selectedOnly = false, playlistSave = false;;
+
+//Notifier callMode
+#define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
+#define CALL_MODE_DIRECT_CHANGE  1
+#define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
+#define CALL_MODE_NOTIFICATION   3
+#define CALL_MODE_NIGHTLIGHT     4
+#define CALL_MODE_NO_NOTIFY      5
+#define CALL_MODE_FX_CHANGED     6     //no longer used
+#define CALL_MODE_HUE            7
+#define CALL_MODE_PRESET_CYCLE   8
+#define CALL_MODE_BLYNK          9     //no longer used
+#define CALL_MODE_ALEXA         10
+#define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
+#define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
+
+const char *getFileName(bool persist = true);
+void doSaveState();
+bool getPresetName(byte index, String& name);
+void initPresetsFile();
+bool applyPreset(byte index, byte callMode = CALL_MODE_DIRECT_CHANGE);
+void applyPresetWithFallback(uint8_t presetID, uint8_t callMode, uint8_t effectID = 0, uint8_t paletteID = 0);
+void handlePresets();
+inline bool applyTemporaryPreset() {return applyPreset(255);};
+void savePreset(byte index, const char* pname = nullptr, JsonObject saveobj = JsonObject());
+inline void saveTemporaryPreset() {savePreset(255);};
+void deletePreset(byte index);
+#endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+
+/*
+ * Handles playlists, timed sequences of presets
+ */
+
+typedef struct PlaylistEntry 
+{
+  uint8_t preset; //ID of the preset to apply
+  uint16_t dur;   //Duration of the entry (in tenths of seconds)
+  uint16_t tr;    //Duration of the transition TO this entry (in tenths of seconds)
+} ple;
+
+
+byte           playlistRepeat = 1;        //how many times to repeat the playlist (0 = infinitely)
+byte           playlistEndPreset = 0;     //what preset to apply after playlist end (0 = stay on last preset)
+byte           playlistOptions = 0;       //bit 0: shuffle playlist after each iteration. bits 1-7 TBD
+
+PlaylistEntry *playlistEntries = nullptr;
+byte           playlistLen;               //number of playlist entries
+int8_t         playlistIndex = -1;
+uint16_t       playlistEntryDur = 0;      //duration of the current entry in tenths of seconds
+
+
+void shufflePlaylist();
+void unloadPlaylist();
+int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
+void handlePlaylist();
+void serializePlaylist(JsonObject sObj);
+#endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+
+
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+int16_t currentPlaylist = -1;
+ 
+
+#endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+
+#ifdef ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+//set.cpp
+bool isAsterisksOnly(const char* str, byte maxLen);
+void handleSettingsSet(AsyncWebServerRequest *request, byte subPage);
+bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=true);
+#endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+
+
+
     enum EFFECTS_FUNCTION__IDS
     {
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
@@ -766,7 +890,7 @@ class mAnimatorLight :
     EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__ID,
     #endif
         
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
     EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
     #endif
 
@@ -828,7 +952,6 @@ class mAnimatorLight :
     /**
      * Static
      **/
-    EFFECTS_FUNCTION__WLED_STATIC__ID,
     EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,
     EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,
     #endif
@@ -850,8 +973,10 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,
     EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID, // 1 direction only
+    EFFECTS_FUNCTION__WLED_COLOR_WIPE_PALETTE__ID, // 1 direction only
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,
     EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID, //start to end to start again
+    EFFECTS_FUNCTION__WLED_COLOR_SWEEP_PALETTE__ID, //start to end to start again
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     /**
      * Fireworks
@@ -1081,6 +1206,10 @@ class mAnimatorLight :
   };         
 
 
+  #define WLED_GROUP_IDS_FIRST  EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID
+  #define WLED_GROUP_IDS_LAST   EFFECTS_FUNCTION__WLED_DRIP__ID
+
+
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   #define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
   #else
@@ -1168,8 +1297,8 @@ class mAnimatorLight :
   void AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(const AnimationParam& param);
   void AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSegColours(const AnimationParam& param);
 
-  bool SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
-  bool SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
+  void SetTransitionColourBuffer_StartingColour(byte* buffer, uint16_t buflen, uint16_t pixel_index, RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
+  void SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
@@ -1237,7 +1366,6 @@ class mAnimatorLight :
   void EffectAnim__Twinkle_Decaying_Palette();
   #endif
   // Static
-  void EffectAnim__Static_Solid();
   void EffectAnim__Static_Pattern();
   void EffectAnim__Tri_Static_Pattern();
   void EffectAnim__Base_Spots(uint16_t threshold);
@@ -1250,11 +1378,13 @@ class mAnimatorLight :
   void EffectAnim__Random_Colour();
   #endif
   // Wipe/Sweep/Runners 
-  void BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomColors);
+  void BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomColors, bool useIterateOverPalette = false);
   void EffectAnim__Colour_Wipe();
   void EffectAnim__Colour_Wipe_Random();
+  void EffectAnim__Colour_Wipe_Palette();
   void EffectAnim__Colour_Sweep();
   void EffectAnim__Colour_Sweep_Random();
+  void EffectAnim__Colour_Sweep_Palette();
   void EffectAnim__TriColour();
   void EffectAnim__Android();
   void EffectAnim__Base_Running(bool saw);
@@ -1403,7 +1533,7 @@ class mAnimatorLight :
   void EffectAnim__SolarTriggers__Sunrise_01();
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_TRACKING
   
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
   void EffectAnim__Christmas_Musical__01();
   #endif 
 
@@ -1559,7 +1689,7 @@ class mAnimatorLight :
   void setLedsStandard(bool justColors = false);
   bool colorChanged();
   void colorUpdated(int callMode);
-  void updateInterfaces(uint8_t callMode);
+  // void updateInterfaces(uint8_t callMode);
   void handleTransitions();
 
   void colorFromUint32(uint32_t in, bool secondary = false);
@@ -1578,6 +1708,7 @@ class mAnimatorLight :
 
   void SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i = 0);
 
+    int16_t extractModeDefaults(uint8_t mode, const char *segVar);
 
 
 /**
@@ -1654,7 +1785,7 @@ typedef struct Segment_New {
     uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
     {
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-      if(effect_id >= EFFECTS_FUNCTION__WLED_STATIC__ID)
+      if(effect_id >= WLED_GROUP_IDS_FIRST)
       {
         return FRAMETIME_MS;
       }
@@ -1798,6 +1929,8 @@ typedef struct Segment_New {
       bool    check3  : 1;        // checkmark 3
     };
     #endif // ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
+
+
     uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
     uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
     char *name; // Keep, segment name to be added later by me
@@ -2109,6 +2242,7 @@ typedef struct Segment_New {
     uint32_t color_wheel(uint8_t pos);
 
 
+
     RgbcctColor 
     #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
     IRAM_ATTR 
@@ -2125,25 +2259,27 @@ typedef struct Segment_New {
        * ** [true] : pixel_position should be between 0-255
        * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
        */
-      bool     flag_position_scaled255 = false,
+      uint8_t     flag_position_scaled255 = false,
       /**
        * @brief flag_wrap_hard_edge
        * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
        * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
        */
-      bool     flag_wrap_hard_edge = false,
+      uint8_t     flag_wrap_hard_edge = false,
       /**
        * @brief flag_crgb_exact_colour
        * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
        * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
        */
-      bool     flag_crgb_exact_colour = false,
+      uint8_t     flag_crgb_exact_colour = false,
       /**
        * @brief encoded_value
        * ** [uint32_t*] : encoded value from palette
        */
       uint8_t* encoded_value = nullptr // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
     );
+
+    uint8_t GetPaletteDiscreteWidth();
 
 
     // 2D matrix
@@ -2388,6 +2524,8 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
 
     const char *
       getModeData(uint8_t id = 0) { return (id && id<effects.count) ? effects.data[id] : PSTR("Solid"); }
+    const char *
+      getModeData_Config(uint8_t id = 0) { return (/*id &&*/ id<effects.count) ? effects.data_config[id] : PSTR("Unknown"); }
 
     const char **
       getModeDataSrc(void) { return &(effects.data[0]); } // vectors use arrays for underlying data
@@ -2738,10 +2876,8 @@ void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& h
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveSettings(AsyncWebServerRequest* request, bool post = false);
 
-static String getContentType(AsyncWebServerRequest* request, String filename);
 bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
 void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
-bool handleFileRead(AsyncWebServerRequest* request, String path);
 
 
 void serveIndex(AsyncWebServerRequest* request);
@@ -3308,7 +3444,7 @@ byte improvActive _INIT(0); //0: no improv packet received, 1: improv active, 2:
 byte improvError _INIT(0);
 
 //playlists
-int16_t currentPlaylist _INIT(-1);
+// int16_t currentPlaylist _INIT(-1);
 //still used for "PL=~" HTTP API command
 byte presetCycCurr _INIT(0);
 byte presetCycMin _INIT(1);
@@ -3330,6 +3466,7 @@ bool useMainSegmentOnly _INIT(false);
 
 
     #endif
+
 
 
 };

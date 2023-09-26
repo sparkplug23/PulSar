@@ -189,7 +189,7 @@ const char* DeviceNameList::GetDeviceNameWithEnumNumber(int16_t module_id, int8_
 const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_module_id, int8_t device_id, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found)
 {
 
-  ALOG_INF( PSTR("GetDeviceNameWithEnumNumber(%d,%d)"),unique_module_id, device_id);
+  ALOG_DBM( PSTR("GetDeviceNameWithEnumNumber(%d,%d)"),unique_module_id, device_id);
 
 
 // DEBUG_LINE_HERE;

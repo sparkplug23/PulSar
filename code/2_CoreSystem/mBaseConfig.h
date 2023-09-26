@@ -16,6 +16,11 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+With latest version, all longer term shared debug features should be added here as defaults
+
+
 **/
 #ifndef MUSERCONFIG_DEFAULTS_H
 #define MUSERCONFIG_DEFAULTS_H
@@ -97,30 +102,6 @@
 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
 
-
-/*********************************************************************************************\
- *  Wifi
-\*********************************************************************************************/
-#define WIFI_IP_ADDRESS               "0.0.0.0"         // [IpAddress1] Set to 0.0.0.0 for using DHCP or enter a static IP address
-#define WIFI_GATEWAY                  "192.168.1.1"     // [IpAddress2] If not using DHCP set Gateway IP address
-#define WIFI_SUBNETMASK               "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
-#define WIFI_DNS                      "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
-
-#define STA_SSID1                     ""                // [Ssid1] Wifi SSID
-#define STA_PASS1                     ""                // [Password1] Wifi password
-#define STA_SSID2                     ""                // [Ssid2] Optional alternate AP Wifi SSID
-#define STA_PASS2                     ""                // [Password2] Optional alternate AP Wifi password
-#define STA_SSID3                     ""                // [Ssid2] Optional alternate AP Wifi SSID
-#define STA_PASS3                     ""                // [Password2] Optional alternate AP Wifi password
-
-#define WIFI_CONFIG_TOOL              WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
-                                                        //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
-#define WIFI_CONFIG_NO_SSID           WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
-                                                        //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
-                                                        //   *** NOTE: When WPS is disabled by USE_WPS below, WIFI_WPSCONFIG will execute WIFI_MANAGER ***
-                                                        //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_CORE_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
-                                                        //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
-
 /*********************************************************************************************\
  *  Logging
 \*********************************************************************************************/
@@ -133,10 +114,121 @@
 #define TELNET_LOG_LEVEL              LOG_LEVEL_DEBUG
 #define LOGTIME_DEFAULT_FORMAT        1                       //  true == short
 
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  /***********************************
+   * SECTION: Networking
+  ************************************/    
+  #define WIFI_IP_ADDRESS               "0.0.0.0"         // [IpAddress1] Set to 0.0.0.0 for using DHCP or enter a static IP address
+  #define WIFI_GATEWAY                  "192.168.1.1"     // [IpAddress2] If not using DHCP set Gateway IP address
+  #define WIFI_SUBNETMASK               "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
+  #define WIFI_DNS                      "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
+
+  #define STA_SSID1                     ""                // [Ssid1] Wifi SSID
+  #define STA_PASS1                     ""                // [Password1] Wifi password
+  #define STA_SSID2                     ""                // [Ssid2] Optional alternate AP Wifi SSID
+  #define STA_PASS2                     ""                // [Password2] Optional alternate AP Wifi password
+  #define STA_SSID3                     ""                // [Ssid2] Optional alternate AP Wifi SSID
+  #define STA_PASS3                     ""                // [Password2] Optional alternate AP Wifi password
+
+  #define WIFI_CONFIG_TOOL              WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
+                                                          //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
+  #define WIFI_CONFIG_NO_SSID           WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
+                                                          //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
+                                                          //   *** NOTE: When WPS is disabled by USE_WPS below, WIFI_WPSCONFIG will execute WIFI_MANAGER ***
+                                                          //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_CORE_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
+                                                          //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
+
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+  /***********************************
+   * SECTION: Lighting Configs: Features
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+
+  #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD // To switch between I2S and RMT as primary channels
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING // Testing only, should be optimised to load when needed
+  
+  #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW // Phase in
+  #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT // Phase in
+  #define ENABLE_DEVFEATURE_SWITCH_TO_U16_GPIO_FUNCTIONS // Phase in
+  #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED // Phase in
+  #define ENABLE_DEVFEATURE_LIGHT__MOVE_ALL_BUS_STARTING_CODE_UNTIL_LOOP // Phase in
+  #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL // Phase in
+  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Phase in
+  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Phase in
+  #define USE_MODULE_LIGHTS_ADDRESSABLE // Phase in, with busses its always enabled
+  #define USE_MODULE_LIGHTS_PWM // Phase in, with busses its always enabled
+
+  /***********************************
+   * SECTION: Lighting Configs: Debugging (to remain for testing)
+  ************************************/    
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+
+  
+    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
+
+  /**
+   * @brief Send extra mqtt messages for debugging the palette
+   * */
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
+    // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
+
+  /**
+   * @brief Send extra mqtt messages for debugging the ?
+   * */
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
+  
+
+  /***********************************
+   * SECTION: Sensors
+  ************************************/    
+
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+    #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+
+
+
 /*********************************************************************************************\
  *  OTA
 \*********************************************************************************************/
 #define D_OTA_URL                       "http://minimal.bin"  // [OtaUrl]
+
+
+
+/*********************************************************************************************\
+ *  Cellular
+\*********************************************************************************************/
+
+//#ifndef defined then assumed wifi
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
 
 /*********************************************************************************************\
  *  MQTT
@@ -152,11 +244,16 @@
 #endif
 
 
+#define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+
+
 // temporary, to be phased out into "MQTT_HOST"
 #ifdef D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 #define MQTT_HOST       D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 #endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
 
 

@@ -75,7 +75,7 @@
 
 
 
-#define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__7INCH
+// #define DEVICE_TESTBED__NEXTION_DISPLAY__GENERIC_WITH_WEBUI__7INCH
 
 /**
  * EVERYTHING BELOW THIS NEEDS SORTED
@@ -277,146 +277,6 @@
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
-
-#ifdef DEVICE_RGBCLOCK__TESTCLOCK
-  #define DEVICENAME_CTR            "rgbclock_testclock_01"
-  #define DEVICENAME_FRIENDLY_CTR   "RGB Dell 32"
-  #define DEVICENAME_ROOMHINT_CTR   "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-    #define MQTT_PORT     1883
-  
-  /***********************************
-   * SECTION: System Configs
-  ************************************/    
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-
-  #define USE_MODULE_SENSORS_SOLAR_LUNAR
-
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
-
-  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
-  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
-  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
-
-  // #define DISABLE_NETWORK
-  // #define DISABLE_NETWORK_WIFI
-  #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-  #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER
-
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
-  
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/    
-
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
-  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
-  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-  #define ENABLE_DEBUG_MANUAL_DELAYS
-
-  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
-
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
-
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
-  #define USE_LIGHTING_TEMPLATE
-  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
-
-  #define STRIP_SIZE_MAX 93 
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":4,
-        "ColourOrder":"GRBW",
-        "BusType":"SK6812_RGBW",
-        "Start":0,
-        "Length":93
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        93
-      ],
-      "ColourPalette":97,
-      "SegColour0": {
-        "Hue": 330,
-        "Sat":100,
-        "BrightnessRGB":5
-      },
-      "Effects": {
-        "Function":"Clock Basic 01",
-        "Speed":1,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 2000
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
-  }
-  )=====";
-
-  /***********************************
-   * SECTION: Template Configs
-  ************************************/    
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIO_FUNCTION "\":{" 
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
-      #endif
-    "},"
-    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  /***********************************
-   * SECTION: Device Configs
-  ************************************/    
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
-    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
-  "}";
-
-#endif
 
 
 
@@ -6682,7 +6542,7 @@
   #define DEVICENAME_CTR            "testbed_nextion_display"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
   // #define USE_MODULE_SENSORS_INTERFACE
@@ -6784,7 +6644,7 @@
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER23
 
   #define ESP32
   #undef ESP8266
@@ -6833,7 +6693,7 @@
   #define ENABLE_DEBUG_FUNCTION_NAMES
   
   // #define USE_MODULE_NETWORK_WEBSERVER23
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
     // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   // #define ESP8266
@@ -6848,7 +6708,7 @@
 
 
   // #define USE_MODULE_NETWORK_WEBSERVER23
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
 
   // #define ESP32
   // #undef ESP8266
@@ -7086,7 +6946,7 @@
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER23
 
   #define ESP32
   #undef ESP8266
@@ -7407,7 +7267,7 @@
   #define DEVICENAME_CTR            "testbed_nextion_display"
   #define DEVICENAME_FRIENDLY_CTR   "Testbed Nextion Display"
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
   // #define USE_MODULE_SENSORS_INTERFACE
@@ -7421,7 +7281,7 @@
   
   #define ENABLE_DEVFEATURE_NEXTION_WEBUI
 
-  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER23
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -7469,7 +7329,7 @@
 
   #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
     #define USE_MODULE_NETWORK_WEBSERVER23
-    #define USE_MODULE_NETWORK_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER23
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
@@ -7493,7 +7353,7 @@
   
   #define ENABLE_DEVFEATURE_NEXTION_WEBUI
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -7529,10 +7389,10 @@
       "hTimeWB": 9,
       "hBoostWB": 14,
       "hAutoWB": 19,
-      "hIconDryer": 124,
-      "hTimeDryer": 125,
-      "hBoostDryer": 126,
-      "hAutoDryer": 127
+      "hIconDryer": 122,
+      "hTimeDryer": 123,
+      "hBoostDryer": 124,
+      "hAutoDryer": 125
     }
   }
   )=====";
@@ -10131,7 +9991,7 @@
   #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
   #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
   // #define ENABLE_DEVFEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES

@@ -143,7 +143,13 @@ void mNextionPanel::Pre_Init(void)
 
   display->flush(); // Clear TX Buffers
   while (display->available()) { display->read(); } // Clear RX Buffers
+  delay(1000);
   display->end(); // End Serial
+
+  pinMode(16, OUTPUT); // RX - try forcing these to GPIO to stop serial comms
+  pinMode(17, OUTPUT); // TX - try forcing these to GPIO to stop serial comms
+
+  delay(1000);
 
   display->begin(
     115200,
@@ -152,7 +158,7 @@ void mNextionPanel::Pre_Init(void)
     17  // TX
   );
 
-  display->println("BOOT SUCCESFUL");
+  // display->println("BOOT SUCCESFUL");
   
 }
 
@@ -2353,7 +2359,13 @@ void mNextionPanel::webHandleFirmware(AsyncWebServerRequest *request)
 void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
 { // http://plate01/lcdupload
 
-  update_in_progress = true;
+
+  if(update_in_progress == false) // Not previously set, and hence upload
+  {
+    update_in_progress = true;
+    ALOG_INF(PSTR("LCDOTA: LCD update started, update_in_progress SET, short delay for async"));
+    delay(500);
+  }
 
   // ALOG_INF(PSTR("================================================================\r\nUpload i=%d|len=%d|rem=%d|final=%d|tx=%d"), index, len, tftFileSize-len, final, transmitted_bytes);
 

@@ -557,19 +557,437 @@
   #define DEVICENAME_FRIENDLY_CTR "Desk Sensor"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define MQTT_PORT     1883
 
-  // I need to add a mqtt send limit to telemetry to prevent race conditions in OH. Add as option in configm with 0 meaning none and then MS values going up
-  // mqtt.h will need to check if original is from telemetry type, then only permit sending when last was greater than config amount. 
-  // The effect should be hourly update are stagarded by few seconds
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+    #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER23
+
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+  #define USE_LIGHTING_TEMPLATE
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+  // #ifdef USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+  // #define STRIP_SIZE_MAX 30
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":30
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       30
+  //     ],
+  //     "ColourPalette":0,
+  //     "SegColour0": {
+  //       "Hue": 330,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 0,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 900,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  // #endif // USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+
+  
+  // #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+  // #define STRIP_SIZE_MAX 100
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":0,
+  //     "SegColour0": {
+  //       "Hue": 330,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 0,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 900,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  // #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+  
+  // #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
+  // #define STRIP_SIZE_MAX 144
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"GRBW",
+  //       "BusType":"SK6812_RGBW",
+  //       "Start":0,
+  //       "Length":144
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       144
+  //     ],
+  //     "ColourPalette":110,
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 2000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 5,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  // #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  // #define USE_MODULE_TEMPLATE
+  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  // "{"
+  //   "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  //   "\"" D_JSON_GPIO_FUNCTION "\":{" 
+  //     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+  //     "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+  //     "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+  //     "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+  //     "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+  //     #endif
+  //   "},"
+  //   "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+  //   "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  // "}";
+
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  //   "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  // "}";
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+    #define ENABLE_DEBUGFEATURE__SENSOR_SOLARLUNAR
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER23
+
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+  #define USE_LIGHTING_TEMPLATE
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+  #define STRIP_SIZE_MAX 14
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":14
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        14
+      ],
+      "ColourPalette":96,
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 5,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  
+
+  // /***********************************
+  //  * SECTION: Template Configs
+  // ************************************/    
+  // // I need to add a mqtt send limit to telemetry to prevent race conditions in OH. Add as option in configm with 0 meaning none and then MS values going up
+  // // mqtt.h will need to check if original is from telemetry type, then only permit sending when last was greater than config amount. 
+  // // The effect should be hourly update are stagarded by few seconds
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define   ENABLE_DEBUG_LINE_HERE
+
+
+  // #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // // #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+
+  // // #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // //   #define USE_MODULE_NETWORK_WEBSERVER23
+  // //   #define USE_MODULE_NETWORK_WEBSERVER23
+  // // #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // // // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // // #define USE_MODULE_SENSORS_INTERFACE
+  // // #define USE_MODULE_SENSORS_BME
+  // // #define USE_MODULE_SENSORS_MOTION
+
+  // // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_NEXTION
+
+  
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  // #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+  //   #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+  //   // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+  //   #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+  //   #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+
+  // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  // #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+  // // #define USE_MODULE_NETWORK_WEBSERVER23
+
+
+
+
+
+
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER23
+    #define USE_MODULE_NETWORK_WEBSERVER23
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_MOTION
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
+  // #define ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
 
   // #define ENABLE_LOG_LEVEL__DEBUG_TRACE
   // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
@@ -594,6 +1012,7 @@
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
     // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
     #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
     #define USE_MODULE_SENSORS_DHT
@@ -610,122 +1029,103 @@
     #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
   #endif // USE_MODULE_SENSORS_LDR_BASIC
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define STRIP_SIZE_MAX 12
-    #define USE_SK6812_METHOD_DEFAULT
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    #define ENABLE_DEVFEATURE_INTERFACELIGHT_NEW_UNIQUE_TIMEON
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
+  
 
-  // #define ENABLE_DEVFEATURE_DEBUG_SLOW_LOOPS
+
+
+
+
+
+
+
 
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define SHOW_SPLASH
-  #define USE_MODULE_DISPLAYS_NEXTION
-    // Note from now on, the top few pages will also follow the exaxt same so logging/error pages will always be the same!! 
-    // Any special pages will follow
-    #define NEXTION_DEFAULT_PAGE_NUMBER 2   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
-    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-    #define ENABLE_DEVFEATURE_NEXTION_INCREASE_BAUDRATE
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  //   // Note from now on, the top few pages will also follow the exaxt same so logging/error pages will always be the same!! 
+  //   // Any special pages will follow
+  //   #define NEXTION_DEFAULT_PAGE_NUMBER 2   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+  //   #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+  //   #define ENABLE_DEVFEATURE_NEXTION_INCREASE_BAUDRATE
 
-  //  Work on ability to increase nextion baud if possible via code
+  // //  Work on ability to increase nextion baud if possible via code
 
-  //   #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-  //   #define ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
+  // //   #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+  // //   #define ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
 
 
-  /**
-   * @brief USe Logic analyser to find out where the delays in lighting code are
-   * - around drawing new palette
-   * - time to update each blend function
-   * - time to output "Show"
-   * Add header that breaks out multiple pins into a nice female header for easy logic analyzer connection
-   * 
-   */
+  // /**
+  //  * @brief USe Logic analyser to find out where the delays in lighting code are
+  //  * - around drawing new palette
+  //  * - time to update each blend function
+  //  * - time to output "Show"
+  //  * Add header that breaks out multiple pins into a nice female header for easy logic analyzer connection
+  //  * 
+  //  */
 
-  #define USE_MODULE_CONTROLLER_HVAC
-    #define HEATING_DEVICE_MAX 2
-    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-    // #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
-  // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
+  // #define USE_MODULE_CONTROLLER_HVAC
+  //   #define HEATING_DEVICE_MAX 2
+  //   #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
+  //   // #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
+  // // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
+  // #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_RELAY
 
   
 
-  // Actual
-  #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
-  #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
-  // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
-  // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
-  /**
-   * Debug pins
-   * */
-  // #define ENABLE_FEATURE_DEBUG_PINS
+  // // Actual
+  // #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
+  // #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
+  // // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
+  // // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
 
-  // #define DEBUG_PIN1_GPIO     32
-  // #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
-  // #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
-  // #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
 
-  // #define DEBUG_PIN2_GPIO     33
-  // #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
-  // #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
-  // #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
 
-  // #define DEBUG_PIN3_GPIO     25
-  // #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
-  // #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
-  // #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
 
-  // #define DEBUG_PIN4_GPIO     14
-  // #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
-  // #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
-  // #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
 
-  // #define DEBUG_PIN5_GPIO     12
-  // #define DEBUG_PIN5_INIT()   pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
-  // #define DEBUG_PIN5_SET(X)   digitalWrite(DEBUG_PIN5_GPIO, X);
-  // #define DEBUG_PIN5_TOGGLE()   digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
 
-  // #define DEBUG_PIN6_GPIO     13
-  // #define DEBUG_PIN6_INIT()   pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
-  // #define DEBUG_PIN6_SET(X)   digitalWrite(DEBUG_PIN6_GPIO, X);
-  // #define DEBUG_PIN6_TOGGLE()   digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
+
+
+
+
+
+
+  // //here
+  // /**
+  //  * Debug pins
+  //  * */
+  // // #define ENABLE_FEATURE_DEBUG_PINS
+
+  // // #define DEBUG_PIN1_GPIO     32
+  // // #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  // // #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
+  // // #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+
+  // // #define DEBUG_PIN2_GPIO     33
+  // // #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  // // #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
+  // // #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+
+  // // #define DEBUG_PIN3_GPIO     25
+  // // #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  // // #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
+  // // #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+
+  // // #define DEBUG_PIN4_GPIO     14
+  // // #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  // // #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
+  // // #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+
+  // // #define DEBUG_PIN5_GPIO     12
+  // // #define DEBUG_PIN5_INIT()   pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
+  // // #define DEBUG_PIN5_SET(X)   digitalWrite(DEBUG_PIN5_GPIO, X);
+  // // #define DEBUG_PIN5_TOGGLE()   digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
+
+  // // #define DEBUG_PIN6_GPIO     13
+  // // #define DEBUG_PIN6_INIT()   pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
+  // // #define DEBUG_PIN6_SET(X)   digitalWrite(DEBUG_PIN6_GPIO, X);
+  // // #define DEBUG_PIN6_TOGGLE()   digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
 
   #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
   #define USE_MODULE_TEMPLATE
@@ -798,6 +1198,10 @@
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
   /**
    * @brief HVAC zones
    **/
@@ -853,7 +1257,7 @@
         "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
         "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
       "]," 
-      "\"" D_MODULE_SUBSYSTEM_SOLAR_LUNAR_FRIENDLY_CTR "\":["
+      "\"" D_MODULE_SENSORS_SOLAR_LUNAR_FRIENDLY_CTR "\":["
         "\"" "Bedroom" "\""
       "],"  
       "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
@@ -953,28 +1357,28 @@
   //   "}"
   // "}";
 
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"SK6812",
-    "ColourOrder":"grbw",
-    "AnimationMode":"Effects",
-    "ColourPalette":"Christmas 01",
-    "Effects": {
-      "Function":1,
-      "Intensity":50,
-      "Grouping":2
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 1
-  }
-  )=====";
-  #endif // USE_MODULE_LIGHTS_INTERFACE
+  // #ifdef USE_MODULE_LIGHTS_INTERFACE
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "HardwareType":"SK6812",
+  //   "ColourOrder":"grbw",
+  //   "AnimationMode":"Effects",
+  //   "ColourPalette":"Christmas 01",
+  //   "Effects": {
+  //     "Function":1,
+  //     "Intensity":50,
+  //     "Grouping":2
+  //   },
+  //   "Transition": {
+  //     "TimeMs": 0,
+  //     "RateMs": 1000
+  //   },
+  //   "BrightnessRGB": 1
+  // }
+  // )=====";
+  // #endif // USE_MODULE_LIGHTS_INTERFACE
 
 
 
@@ -992,6 +1396,33 @@
   "}";
 
 
+  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  R"=====(
+  {
+    "ObjectNameIDList": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 124,
+      "hTimeDryer": 125,
+      "hBoostDryer": 126,
+      "hAutoDryer": 127
+    }
+  }
+  )=====";
 
 #endif
 
@@ -1327,7 +1758,7 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   
   // #define USE_MODULE_NETWORK_WEBSERVER23
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
     // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   // #define ESP8266
@@ -1342,7 +1773,7 @@
 
 
   // #define USE_MODULE_NETWORK_WEBSERVER23
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define USE_MODULE_NETWORK_WEBSERVER23
 
   // #define ESP32
   // #undef ESP8266
@@ -1499,7 +1930,7 @@
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
 //   #define USE_MODULE_NETWORK_WEBSERVER23
-//   #define USE_MODULE_NETWORK_WEBSERVER
+//   #define USE_MODULE_NETWORK_WEBSERVER23
 
 //   // #define ESP32
 //   // #undef ESP8266
@@ -2500,7 +2931,7 @@
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
   #define USE_MODULE_NETWORK_WEBSERVER23
-  #define USE_MODULE_NETWORK_WEBSERVER
+  #define USE_MODULE_NETWORK_WEBSERVER23
 
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
   
@@ -2701,70 +3132,136 @@
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
 
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS // Not ready to remove
-  #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-  #define STRIP_SIZE_MAX 94//93  
-  #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
-  #define USE_SK6812_METHOD_DEFAULT
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
 
-    // #define USE_DEVFEATURE_SK6812_METHOD_DEFAULT_ALTERNATE
-    #define ENABLE_DEVFEATURE_LIGHTING_CANSHOW_TO_PINNED_CORE_ESP32
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    // #define USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
 
-  #define DISABLE_WEBSERVER
+  #define USE_MODULE_SENSORS_SOLAR_LUNAR
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
+  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+
+  // #define DISABLE_NETWORK
+  // #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_WIFI
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define USE_MODULE_NETWORK_WEBSERVER23
+
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+  #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
+  #define ENABLE_DEBUG_MANUAL_DELAYS
+
+  #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+
+  #define USE_LIGHTING_TEMPLATE
+  // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
+
+  #define STRIP_SIZE_MAX 93 
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":93
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        93
+      ],
+      "ColourPalette":97,
+      "SegColour0": {
+        "Hue": 330,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function":"Clock Basic 01",
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+      #endif
     "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "SK6812" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"grb\","
-    "\"" D_JSON_COLOUR_TYPE "\":3,"//\"RGBW\","   //3=rgb, 4=rgbw
-    "\"" D_JSON_TRANSITION       "\":{"
-      "\"" D_JSON_TIME_MS "\":950,"
-      "\"" D_JSON_RATE_MS "\":1000,"
-      "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-      "\"" D_JSON_ORDER "\":\"" D_JSON_INORDER "\""
-    "},"
-    "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-    "\"" D_JSON_EFFECTS "\":{" 
-      "\"" D_JSON_FUNCTION "\":\"Clock Basic 01\""
-    "},"
-    "\"" D_JSON_COLOUR_PALETTE "\":34,"
-    "\"BrightnessCCT\":0,"
-    "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
-
 
 #endif
 

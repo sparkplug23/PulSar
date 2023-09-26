@@ -288,7 +288,7 @@ void mDB18x20_ESP32::EverySecond(void)
         sensor_vector[i].reading.isvalid   = D_SENSOR_VALID_TIMEOUT_SECS;
         sensor_vector[i].reading.val = t;
         sensor_vector[i].reading.capture_time_millis = millis();
-        ALOG_INF(PSTR(D_LOG_DSB "Read i%02d a%03d Alias%02d =-> %d"), i, sensor_vector[i].address[7], sensor_vector[i].device_name_index, (int)t);
+        ALOG_DBM(PSTR(D_LOG_DSB "Read i%02d a%03d Alias%02d =-> %d"), i, sensor_vector[i].address[7], sensor_vector[i].device_name_index, (int)t);
       } else {
         if (sensor_vector[i].reading.isvalid) { sensor_vector[i].reading.isvalid--; }
         ALOG_ERR(PSTR(D_LOG_DB18 "Missed Reading %d"), sensor_vector[i].reading.isvalid, D_SENSOR_VALID_TIMEOUT_SECS - sensor_vector[i].reading.isvalid);

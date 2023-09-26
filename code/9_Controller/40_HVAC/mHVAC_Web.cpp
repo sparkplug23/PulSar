@@ -20,7 +20,7 @@
 
 #ifdef USE_MODULE_CONTROLLER_HVAC
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER_2022
 
 int8_t mHVAC::Tasker_Web(uint8_t function){
 
@@ -442,7 +442,7 @@ void mHVAC::WebPage_Root_AddHandlers(){
 
 // }
 
-#endif // USE_MODULE_NETWORK_WEBSERVER
+#endif // USE_MODULE_NETWORK_WEBSERVER_2022
 
 
 #endif

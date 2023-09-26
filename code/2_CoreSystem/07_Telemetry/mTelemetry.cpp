@@ -50,17 +50,17 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WEB SECTION * 
     *******************/   
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     case FUNC_WEB_ADD_HANDLER:    
       WebPage_Root_AddHandlers();
     break;
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+    #endif // USE_MODULE_NETWORK_WEBSERVER23
   }
 
 }
 
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
 void mTelemetry::WebPage_Root_AddHandlers()
 {
 
@@ -71,7 +71,7 @@ void mTelemetry::WebPage_Root_AddHandlers()
   #endif
 
 }
-#endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER
+#endif //  #ifdef USE_MODULE_NETWORK_WEBSERVER23
 
 
 #ifdef USE_MODULE_NETWORK_MQTT
@@ -80,6 +80,19 @@ void mTelemetry::MQTTHandler_Init()
 {
 
   handler<mTelemetry>* ptr;
+  
+  ptr = &mqtthandler_lwt_online;
+  ptr->handler_id = MQTT_HANDLER_SYSTEM_LWT_ONLINE_ID;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 3600; // Hourly 
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_LWT_ONLINE_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LWT_ONLINE_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_LWT_Online;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_health;
   ptr->handler_id = MQTT_HANDLER_SYSTEM_HEALTH_ID;

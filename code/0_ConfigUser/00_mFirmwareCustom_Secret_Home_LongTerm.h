@@ -1225,12 +1225,46 @@ Bathroom
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define   ENABLE_DEBUG_LINE_HERE
+
+
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER23
+    #define USE_MODULE_NETWORK_WEBSERVER23
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define USE_MODULE_SENSORS_BME
+  // #define USE_MODULE_SENSORS_MOTION
+
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
+
+  
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   #define NEXTION_DEFAULT_PAGE_NUMBER 2  
     #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
 
   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+  // #define USE_MODULE_NETWORK_WEBSERVER23
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1244,6 +1278,35 @@ Bathroom
     "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  
+  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  R"=====(
+  {
+    "ObjectNameIDList": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 122,
+      "hTimeDryer": 123,
+      "hBoostDryer": 124,
+      "hAutoDryer": 125
+    }
+  }
+  )=====";
 
 #endif
 
@@ -2332,285 +2395,6 @@ Bathroom
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-/**
- * @brief 
- * Cat5e Cable to Generic Room Sensor with BH1750, BME280 and HC-SR501 PIR
- * "*" pin = confirmed soldering
- * Ethernet      Function       ESP32         Note        
- * 
- * ** Blue (Upstairs Link) **************************************************************************
- * w/o           GND            GND           
- * o/w           5V             5V            
- * w/g           R_IH           21*           Immersion relay (5v IO)
- * bl/w          I2D            12*           DHT22?     
- * w/bl          I2C            13*           UNUSED   
- * g/w           3V3            3V3           
- * w/br                      
- * br/w          DSX            14*           ds18b20 water, 4k7 pulled high        (comes from blue by connector)   NOT WORKING, wiring too long, Needs rerouted
- * ** Green (Downstairs Sensors) **************************************************************************
- * w/o           GND            GND           Black
- * o/w           5V             5V            Red
- * w/g           1Wire          4*            DS18B20 water pipe sensors
- * bl/w          I2D            22*           BME in Dinning Room (Alternatively, DHT22 data pin)
- * w/bl          I2C            23*           BME in Dinning Room
- * g/w           3V3            3V3           White
- * w/br                                       NC
- * br/w          DHT22          25*           DHT22 (until BME is working)
- * ** Red (Relay Board) **************************************************************************
- * w/o           GND            GND           
- * o/w           5V             5V            
- * w/g                          5*             
- * bl/w          R_DS           18*                   
- * w/bl                         19*            
- * g/w           R_WB           3V3           
- * w/br           -                           
- * br/w          R_US                         
- * ** Orange (Nextion Display) **************************************************************************
- * w/o           GND            GND           
- * o/w           5V             5V            
- * w/g           NEO            27*             SK6812 4 pixels of rgbW
- * bl/w                                      
- * w/bl                                      
- * g/w           3V3            3V3           
- * w/br          RX2            17*              Nextion TX
- * br/w          TX2            16*              Nextion RX   -- "SERIAL TX" of Serial will always be dominant colour (brown) as its important to know the output pin
- * Twin          Switch
- * Twin          Switch
- * ** Power Screw Jacks **************************************************************************
- * 4 (Top)       12V
- * 3             5V
- * 2
- * 1 (Bottom)    GND
- * ** ADC Input **************************************************************************
- * 4 (Top)       LDR_US         33
- *               LDR_DS         32 
- *               LDR_WB         35
- * Extra Ethernet for LDRs hot glued onto the red led of the servos?
- * 
- * Upstairs Connectors
- * 3pin (DHT22)    - gnd,5v,dht_data 
- * 3pin (relay US) - gnd,5v,relay_ih
- * 3pin (water sensors) - gnd,3v3,ds18b20
- * 
- * Create seond device dad can swap in, only have basic relay control, no sensors, so it should be the most stable.
- * 
- **/
-#ifdef DEVICE_HVAC_HEATING_MAIN
-  #define DEVICENAME_CTR          "heating"
-  #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating"
-  #define DEVICENAME_ROOMHINT_CTR "Hallway"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-  
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define ENABLE_DEVFEATURE_GETDEVICEIDBYNAME_V3
-
-  #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
-  
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
-    #define STRIP_SIZE_MAX 10
-
-    #define USE_RGB_OUT_BASIC_SHOW_PALETTE
-
-  #define USE_MODULE_CONTROLLER_HVAC
-    #define HEATING_DEVICE_MAX 4
-    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    #define DS18X20_MAX_SENSORS 20
-      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
-  // #define USE_MODULE_SENSORS_BME //removing for now, will place short wire one understairs and use for long term debugging
-  #define USE_MODULE_SENSORS_DHT
-              //add 3 LDRs onto the motor neons, so I can check if they are turned on ((hot glue them on)) 30+ pins == use this to know what has been turned on manually.
-              //Also need to add a mains detector for the furnace trigger (orange wire from servos)
-              
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
-  
-    // #define SHOW_SPLASH
-    // #define USE_MODULE_DISPLAYS_NEXTION
-    // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
-
-
-  // Actual
-  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
-  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
-  #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
-  #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
-
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"19\":\"" GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  "\","
-      "\"5\":\""  GPIO_NAME_ZONE1_UPSTAIRS_RELAY    "\","
-      "\"21\":\"" GPIO_NAME_ZONE3_IMMERISON_RELAY   "\"," // phase out
-      "\"18\":\"" GPIO_NAME_ZONE4_BOILER_RELAY      "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
-      #endif
-      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      #endif
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-        "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
-      #endif    
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-  /**
-   * @brief Drivers and Sensors for HVAC zones
-   **/
-  #define D_DEVICE_DRIVER_RELAY_0_NAME "Downstairs"
-  #define D_DEVICE_DRIVER_RELAY_1_NAME "Upstairs"
-  #define D_DEVICE_DRIVER_RELAY_2_NAME "Immersion"
-  #define D_DEVICE_DRIVER_RELAY_3_NAME "Boiler"
-
-  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
-
-  /**
-   * @brief HVAC zones
-   **/
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Downstairs"
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Upstairs"
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
-
-  /** 
-   * Pin_DS
-   * */
-  #define D_DEVICE_SENSOR_DB18S20_06_NAME        "Water21-Upstairs"
-  #define D_DEVICE_SENSOR_DB18S20_06_ADDRESS     "[40,208,174,149,240,1,60,127]"
-
-  #define D_DEVICE_SENSOR_DB18S20_07_NAME        "Water22-HotCross"
-  #define D_DEVICE_SENSOR_DB18S20_07_ADDRESS     "[40,168,253,149,240,1,60,157]"
-
-  #define D_DEVICE_SENSOR_DB18S20_08_NAME        "Water23-R/C"
-  #define D_DEVICE_SENSOR_DB18S20_08_ADDRESS     "[40,12,164,2,0,0,0,72]"
-
-  #define D_DEVICE_SENSOR_DB18S20_09_NAME        "Water24-Mains"
-  #define D_DEVICE_SENSOR_DB18S20_09_ADDRESS     "[40,9,77,4,0,0,0,131]"
-
-  #define D_DEVICE_SENSOR_DB18S20_10_NAME        "Water25-HotFromBoiler"
-  #define D_DEVICE_SENSOR_DB18S20_10_ADDRESS     "[40,121,172,3,0,0,0,138]"
-
-  #define D_DEVICE_SENSOR_DB18S20_11_NAME        "Water26-Downstairs"
-  #define D_DEVICE_SENSOR_DB18S20_11_ADDRESS     "[40,205,241,149,240,1,60,148]"
-
-  #define D_DEVICE_SENSOR_DB18S20_12_NAME        "Water27-R/H"
-  #define D_DEVICE_SENSOR_DB18S20_12_ADDRESS     "[40,195,112,2,0,0,0,178]"
-
-  #define D_DEVICE_SENSOR_DB18S20_13_NAME        "Water28-HotFromFurnace"
-  #define D_DEVICE_SENSOR_DB18S20_13_ADDRESS     "[40,103,49,3,0,0,0,153]"
-
-  #define D_DEVICE_SENSOR_DB18S20_14_NAME        "Water29-WaterBoiler"
-  #define D_DEVICE_SENSOR_DB18S20_14_ADDRESS     "[40,183,162,149,240,1,60,24]"
-
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        // Downstairs
-        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
-      "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
-      "]"
-    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
-        // Downstairs
-        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\":" D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\":" D_DEVICE_SENSOR_DB18S20_07_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\":" D_DEVICE_SENSOR_DB18S20_08_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\":" D_DEVICE_SENSOR_DB18S20_09_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\":" D_DEVICE_SENSOR_DB18S20_10_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\":" D_DEVICE_SENSOR_DB18S20_11_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\":" D_DEVICE_SENSOR_DB18S20_12_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\":" D_DEVICE_SENSOR_DB18S20_13_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\":" D_DEVICE_SENSOR_DB18S20_14_ADDRESS ""
-      "}"  
-    "},"
-    "\"" "HVACZone" "\":{"
-      "\"" "SetSensor" "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\""
-      "],"
-      "\"" "SetOutput" "\":["
-        "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-        "},"
-        "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-        "},"
-        "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
-          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-        "},"
-        "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_3_NAME "\","
-          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-        "}"
-      "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":60,\"TelePeriod\":60,\"ConfigPeriod\":60}"  
-  "}";
-  
-#endif
-
 
 
 /**
@@ -2714,13 +2498,14 @@ Bathroom
 
   //   #define USE_RGB_OUT_BASIC_SHOW_PALETTE
 
-  #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
   #define USE_MODULE_CONTROLLER_HVAC
     #define HEATING_DEVICE_MAX 3
     #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
     #define DS18X20_MAX_SENSORS 20
       #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
@@ -3414,6 +3199,7 @@ Bathroom
    */
 
   #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
   #define USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   #define USE_MODULE_SENSORS_SWITCHES
@@ -4824,6 +4610,7 @@ Bathroom
 
   #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
     #define DS18X20_MAX_SENSORS 20
     #define ENABLE_DEVFEATURE_DS18B20_SEARCHING_SENSOR_LOCATION_WITH_ADDRESS_TEMP_SPLASH
@@ -4835,17 +4622,55 @@ Bathroom
   //   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
   //   #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
-    #define STRIP_SIZE_MAX 40
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
+  //   #define STRIP_SIZE_MAX 40
 
     // #define USE_RGB_OUT_TANK
-    #define USE_RGB_OUT_LANDING_PANEL
+    // #define USE_RGB_OUT_LANDING_PANEL
 
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
-    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  // #define NEXTION_DEFAULT_PAGE_NUMBER 2  
+  //   #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+
+
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    #define USE_MODULE_NETWORK_WEBSERVER23
+    #define USE_MODULE_NETWORK_WEBSERVER23
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+
+  DEFINE_PGM_CTR(NEXTION_HMI_CONTROL_MAP)
+  R"=====(
+  {
+    "ObjectNameIDList": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 124,
+      "hTimeDryer": 125,
+      "hBoostDryer": 126,
+      "hAutoDryer": 127
+    }
+  }
+  )=====";
 
   
   #define USE_MODULE_DISPLAYS_INTERFACE
@@ -5061,7 +4886,7 @@ Bathroom
         "}"
       "]"
     "}"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
   // #ifdef USE_RGB_OUT_LANDING_PANEL

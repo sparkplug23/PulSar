@@ -299,20 +299,30 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
   char topic_id_ctr[30]; memset(topic_id_ctr,0,sizeof(topic_id_ctr));
 
   // pCONT_mqtt->TopicFormatted(module_name, topic_type_id, topic_postfix, topic_ctr, sizeof(topic_ctr));  // Needs fixed
-  
-  //can be replaced with a function call
-  switch(topic_type_id){
-    case MQTT_TOPIC_TYPE_SYSTEM_ID: break; // nothing
-    case MQTT_TOPIC_TYPE_IFCHANGED_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
-    case MQTT_TOPIC_TYPE_ROC1M_ID: sprintf(topic_id_ctr,"%s/","roc1m"); break;
-    case MQTT_TOPIC_TYPE_ROC10M_ID: sprintf(topic_id_ctr,"%s/","roc10m"); break;
-    case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_TELEPERIOD_CTR); break;
-    case MQTT_TOPIC_TYPE__DEBUG__ID: sprintf(topic_id_ctr,"%s/","debug"); break;
-    default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
+
+  if(topic_type_id == MQTT_TOPIC_LWT_ONLINE_ID)
+  {
+
+    // case MQTT_TOPIC_TYPE_LWT_ONLINE_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
+
+    snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/LWT", D_TOPIC_STATUS);//, D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
   }
+  else
+  {
+    //can be replaced with a function call
+    switch(topic_type_id){
+      case MQTT_TOPIC_TYPE_SYSTEM_ID: break; // nothing
+      case MQTT_TOPIC_TYPE_IFCHANGED_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_IFCHANGED_CTR); break;
+      case MQTT_TOPIC_TYPE_ROC1M_ID: sprintf(topic_id_ctr,"%s/","roc1m"); break;
+      case MQTT_TOPIC_TYPE_ROC10M_ID: sprintf(topic_id_ctr,"%s/","roc10m"); break;
+      case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_id_ctr,"%s/",MQTT_TOPIC_TYPE_TELEPERIOD_CTR); break;
+      case MQTT_TOPIC_TYPE__DEBUG__ID: sprintf(topic_id_ctr,"%s/","debug"); break;
+      default: sprintf(topic_id_ctr,"%s/","ERROR"); break;
+    }
 
-  snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
+    snprintf_P(topic_ctr, sizeof(topic_ctr), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_id_ctr, topic_postfix);  //PSTR may broke this?
 
+  }
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
   ALOG_TRA( PSTR(D_LOG_MQTT "topic_ctr=\"%s\""), topic_ctr );
   #endif

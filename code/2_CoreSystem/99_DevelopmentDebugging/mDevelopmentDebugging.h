@@ -16,6 +16,13 @@ class mDevelopmentDebugging :
   public:
     mDevelopmentDebugging(){};
     void init(void);
+
+    struct DEBUG_DATA
+    {
+      float input_float1 = 0;
+    }debug_data;
+    void parse_JSONCommand(JsonParserObject obj);
+
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 

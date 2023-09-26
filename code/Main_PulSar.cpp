@@ -519,19 +519,22 @@ DEBUG_LINE_HERE;
   // pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   // pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
     
-  #ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
   bool fsinit = false;
   DEBUG_PRINTLN(F("Mount FS"));
-#ifdef ARDUINO_ARCH_ESP32
-  fsinit = WLED_FS.begin(true);
-#else
-  fsinit = WLED_FS.begin();
-#endif
+  #ifdef ARDUINO_ARCH_ESP32
+    fsinit = WLED_FS.begin(true);
+  #else
+    fsinit = WLED_FS.begin();
+  #endif
   if (!fsinit) {
     DEBUG_PRINTLN(F("FS failed!"));
     // errorFlag = ERR_FS_BEGIN;
+  }else{
+    DEBUG_PRINTLN(F("FS mounted."));
   }
-  #endif // USE_MODULE_NETWORK_WEBSERVER23
+  pCONT_lAni->initPresetsFile();
+  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
 
   /********************************************************************************************

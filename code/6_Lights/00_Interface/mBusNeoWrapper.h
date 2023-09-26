@@ -3,7 +3,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 #include "NeoPixelBus.h"
 
@@ -534,13 +534,8 @@ class PolyBus {
   {
     
     RgbcctColor colour_hardware = colour_internal; // Start with original
-    // #ifdef ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
     colour_hardware = RgbcctColor(0); // To debug, clear conversion
-    // #endif
 
-    // colour_order.red=0;colour_order.green=1;colour_order.blue=2;
-  
-    #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
     if(colour_order.red        != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.red]         = colour_internal.R;  }
     if(colour_order.green      != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.green]       = colour_internal.G;  }
     if(colour_order.blue       != COLOUR_ORDER_DISABLED){ colour_hardware.raw[colour_order.blue]        = colour_internal.B;  }
@@ -557,7 +552,6 @@ class PolyBus {
       );
     }
     #endif // ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-    #endif // ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
 
 
     switch (busType) {
@@ -708,9 +702,6 @@ class PolyBus {
     
     RgbcctColor color_internal = col; 
   
-    // colour_order.red=0;colour_order.green=1;colour_order.blue=2;
-
-    #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
     if(colour_order.red        != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.red] = col.R; }
     if(colour_order.green      != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.green] = col.G; }
     if(colour_order.blue       != COLOUR_ORDER_DISABLED){ color_internal.raw[colour_order.blue] = col.B; }
@@ -727,7 +718,6 @@ class PolyBus {
       );
     }
     #endif // ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-    #endif // ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
 
     return color_internal;
 
@@ -911,6 +901,6 @@ class PolyBus {
   }
 };
 
-#endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+#endif // USE_MODULE_LIGHTS_ANIMATOR
 
 #endif // guard

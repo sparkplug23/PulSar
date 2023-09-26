@@ -35,16 +35,17 @@
 
 
 
-
-#define D_EFFECTS_FUNCTION__WLED_STATIC__NAME_CTR                  "Static Single Colour"
 #define D_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR          "Static Pattern Lit"
 #define D_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR      "Static Pattern Tri"
 #define D_EFFECTS_FUNCTION__WLED_BLINK__NAME_CTR                   "Blink"
 #define D_EFFECTS_FUNCTION__WLED_BREATH__NAME_CTR                  "Breathe"
-#define D_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR              "Wipe"
+#define D_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR              "Wipe Over"
 #define D_EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__NAME_CTR       "Wipe Random"
+#define D_EFFECTS_FUNCTION__WLED_COLOR_WIPE_PALETTE__NAME_CTR      "Wipe Palette"
 #define D_EFFECTS_FUNCTION__WLED_RANDOM_COLOR__NAME_CTR            "Random Colors"
-#define D_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR             "Sweep"
+#define D_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR             "Sweep Over"
+#define D_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR      "Sweep Random"
+#define D_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_PALETTE__NAME_CTR     "Sweep Palette"
 #define D_EFFECTS_FUNCTION__WLED_DYNAMIC__NAME_CTR                 "Dynamic"
 #define D_EFFECTS_FUNCTION__WLED_RAINBOW__NAME_CTR                 "Colorloop"
 #define D_EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__NAME_CTR           "Rainbow"
@@ -74,7 +75,6 @@
 #define D_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__NAME_CTR     "Rainbow Runner"
 #define D_EFFECTS_FUNCTION__WLED_COLORFUL__NAME_CTR                "Colorful"
 #define D_EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__NAME_CTR           "Traffic Light"
-#define D_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR      "Sweep Random"
 #define D_EFFECTS_FUNCTION__WLED_RUNNING_COLOR__NAME_CTR           "Running 2"
 #define D_EFFECTS_FUNCTION__WLED_RUNNING_RED_BLUE__NAME_CTR        "Red & Blue"
 #define D_EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__NAME_CTR          "Stream"
@@ -118,8 +118,11 @@
 #define D_EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__NAME_CTR           "Meteor Smooth"
 #define D_EFFECTS_FUNCTION__WLED_RAILWAY__NAME_CTR                 "Railway"
 #define D_EFFECTS_FUNCTION__WLED_RIPPLE__NAME_CTR                  "Ripple"
-#define D_EFFECTS_FUNCTION__WLED_TWINKLEFOX__NAME_CTR              "Twinklefox"
-#define D_EFFECTS_FUNCTION__WLED_TWINKLECAT__NAME_CTR              "Twinklecat"
+
+#define D_EFFECTS_FUNCTION__WLED_TWINKLEFOX__NAME_CTR              "Twinkle SlowIn/SlowOut"
+#define D_EFFECTS_FUNCTION__WLED_TWINKLECAT__NAME_CTR              "Twinkle FastIn/SlowOut"
+#define D_EFFECTS_FUNCTION__WLED_TWINKLEUP__NAME_CTR               "Twinkleup"
+
 #define D_EFFECTS_FUNCTION__WLED_HALLOWEEN_EYES__NAME_CTR          "Halloween Eyes"
 #define D_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR                   "Spots"
 #define D_EFFECTS_FUNCTION__WLED_SPOTS_FADE__NAME_CTR              "Spots Fade"
@@ -144,7 +147,6 @@
 #define D_EFFECTS_FUNCTION__WLED_SOLID_GLITTER__NAME_CTR           "Solid Glitter"
 #define D_EFFECTS_FUNCTION__WLED_SUNRISE__NAME_CTR                 "Sunrise"
 #define D_EFFECTS_FUNCTION__WLED_PHASED__NAME_CTR                  "Phased"
-#define D_EFFECTS_FUNCTION__WLED_TWINKLEUP__NAME_CTR               "Twinkleup"
 #define D_EFFECTS_FUNCTION__WLED_NOISEPAL__NAME_CTR                "Noise Pal"
 #define D_EFFECTS_FUNCTION__WLED_SINEWAVE__NAME_CTR                "Sine"
 #define D_EFFECTS_FUNCTION__WLED_PHASEDNOISE__NAME_CTR             "Phased Noise"

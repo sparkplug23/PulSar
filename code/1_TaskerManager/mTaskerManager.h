@@ -28,6 +28,21 @@
 #include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
+
+/***
+ * Include template structure
+ * 
+ * First add the base level defaults
+ * Then add any custom header layouts
+ * finish with firmware defaults that may ovverride above
+ * 
+ * 
+ * 
+ * 
+*/
+
+
+
 // Minimal base configurations required for stable operation
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
 // Optional user configs, which override defaults
@@ -35,22 +50,18 @@
 // #include "2c_Internal_IsolatedNoTaskerSystems/Averaging/AveragingData.h"
 
 #ifndef D_USER_MICHAEL // Include my personally named secret file
-#include "0_ConfigUser/mFirmwareCustom_Secret.h"
+  #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 #endif // D_USER_MICHAEL // Include my personally named secret file
 #ifdef D_USER_MICHAEL // Include my personally named secret file
-/**
- * In order of importance
- * */
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
-#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-#include "0_ConfigUser/03_mFirmwareCustom_Secret_DevTestGroups.h"
-#include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
-
-/**
- * Temporary files
- * */
+  /**
+   * In order of importance
+   * */
+  #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+  #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
+  #include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
+  #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
+  #include "0_ConfigUser/03_mFirmwareCustom_Secret_DevTestGroups.h"
+  #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
 #endif // D_USER_MICHAEL
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
@@ -63,6 +74,12 @@
 #endif
 
 #include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
+
+
+
+
+
+
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "1_TaskerManager/mTaskerManager_Defines.h"
 #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"                // Hardware configuration
@@ -190,10 +207,10 @@ enum FUNCTION_RESULT_IDS{
   #include <ArduinoOTA.h>
   #include <WiFiUdp.h>
   #include <ESP8266WiFi.h>
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
     // #include <ESPAsyncTCP.h>
     //?#include <ESPAsyncWebServer.h>
-  #endif //USE_MODULE_NETWORK_WEBSERVER
+  #endif //USE_MODULE_NETWORK_WEBSERVER23
 #endif
 
 #include "2_CoreSystem/08_JSON/mJSON.h"
@@ -611,7 +628,7 @@ enum TASKER_ID{
 #endif
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   #include "2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h"
-  #define   pCONT_mDevelopmentDebugging             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
+  #define   pCONT_debug             static_cast<mDevelopmentDebugging*>(pCONT->pModule[EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID])
 #endif 
 
 // Network
@@ -619,10 +636,6 @@ enum TASKER_ID{
   #include "3_Network/00_Interface/mInterface.h"
   #define pCONT_interface_network                                static_cast<mInterfaceNetwork*>(pCONT->pModule[EM_MODULE__NETWORK_INTERFACE__ID])
 #endif 
-#ifdef USE_MODULE_NETWORK_WEBSERVER23
-  #include "3_Network/21_WebServer/mWebServer.h"
-  #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
-#endif
 #ifdef USE_MODULE_NETWORK_WIFI
   #include "3_Network/03_WiFi/mWiFi.h"
   #define pCONT_wif                                 static_cast<mWiFi*>(pCONT->pModule[EM_MODULE_NETWORK_WIFI_ID])
@@ -635,6 +648,10 @@ enum TASKER_ID{
   #include "3_Network/10_MQTT/mMQTT.h"
   #define pCONT_mqtt                                static_cast<mMQTT*>(pCONT->pModule[EM_MODULE_NETWORK_MQTT_ID])
 #endif 
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
+  #include "3_Network/21_WebServer/mWebServer.h"
+  #define pCONT_web                                 static_cast<mWebServer*>(pCONT->pModule[EM_MODULE_NETWORK_WEBSERVER_ID])
+#endif
 
 // Displays (30-39)
 #ifdef USE_MODULE_DISPLAYS_INTERFACE

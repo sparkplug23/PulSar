@@ -88,14 +88,14 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WEBPAGE SECTION * 
     *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef USE_MODULE_NETWORK_WEBSERVER23
     case FUNC_WEB_ADD_ROOT_TABLE_ROWS:
       WebAppend_Root_Draw_Table();
     break;
     case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
       WebAppend_Root_Status_Table();
     break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
+    #endif //USE_MODULE_NETWORK_WEBSERVER23
     /************
      * MQTT SECTION * 
     *******************/
@@ -1640,7 +1640,7 @@ uint8_t mEnergyInterface::ConstructJSON_EnergyStats(uint8_t json_level, bool jso
 //       KnxSensor(KNX_ENERGY_START, Energy.start_energy);
 //     }
 // #endif  // USE_KNX
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
+// #ifdef USE_MODULE_NETWORK_WEBSERVER23
 //   // } else {
 
 // /**
@@ -1678,7 +1678,7 @@ uint8_t mEnergyInterface::ConstructJSON_EnergyStats(uint8_t json_level, bool jso
 //       if (!isnan(Energy.export_active)) {
 //         pCONT_web->WSContentSend_PD(HTTP_ENERGY_SNS3, export_active_chr[0]);
 //       }
-// #endif  // USE_MODULE_NETWORK_WEBSERVER
+// #endif  // USE_MODULE_NETWORK_WEBSERVER23
   //} //if json
 
   
@@ -1808,7 +1808,7 @@ void mEnergyInterface::MQTTHandler_Sender(uint8_t id)
 
 
 
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #ifdef USE_MODULE_NETWORK_WEBSERVER23
 void mEnergyInterface::WebAppend_Root_Draw_Table(){
   char buffer[30];
   BufferWriterI->Append_P(PSTR("{t}"));
@@ -1897,7 +1897,7 @@ void mEnergyInterface::WebAppend_Root_Status_Table(){
 }
 
 
-  #endif// USE_MODULE_NETWORK_WEBSERVER
+  #endif// USE_MODULE_NETWORK_WEBSERVER23
 
 
 
