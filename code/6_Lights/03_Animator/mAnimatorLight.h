@@ -80,6 +80,7 @@
   #ifdef USE_MODULE_NETWORK_WEBSERVER23
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
+    #include <SPIFFSEditor.h>
   #endif // USE_MODULE_NETWORK_WEBSERVER23
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
@@ -2866,10 +2867,6 @@ void sappends(char stype, const char* key, char* val);
 void sappend(char stype, const char* key, int val);
 
 
-static String msgProcessor(const String& var);
-void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
-
-
 
 
 
@@ -2883,7 +2880,6 @@ void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
 void serveIndex(AsyncWebServerRequest* request);
 void getSettingsJS(byte subPage, char* dest);
 
-void createEditHandler(bool enable);
 
 void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte id, bool forPreset = false, bool segmentBounds = true);
 void serializeState(JsonObject root, bool forPreset = false, bool includeBri = true, bool segmentBounds = true, bool selectedSegmentsOnly = false);

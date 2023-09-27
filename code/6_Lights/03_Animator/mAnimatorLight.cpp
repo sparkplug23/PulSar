@@ -317,9 +317,6 @@ void mAnimatorLight::EveryLoop()
     handlePresets();
     #endif
 
-
-
-
   } // End of !realtimeMode and Effect methods
 
 }
@@ -430,6 +427,11 @@ void mAnimatorLight::Init(void)
   sprintf(clientPass, CLIENT_PASS);
   sprintf(alexaInvocationName, "Light");
   #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  initPresetsFile();
+  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
   Init__Palettes();  
 

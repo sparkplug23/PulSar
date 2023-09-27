@@ -7,6 +7,10 @@
 #include "mWebServer.h"
 
 
+String messageHead, messageSub;
+byte optionType;
+
+
 const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
 const char* mWebServer::PM_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR = D_MODULE_NETWORK_WEBSERVER_FRIENDLY_CTR;
 
@@ -40,6 +44,101 @@ void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char
 }
 
 #endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+
+
+
+
+
+
+
+
+
+void mWebServer::createEditHandler(bool enable) 
+{
+  if (editHandler != nullptr) pCONT_web->server->removeHandler(editHandler);
+  if (enable) 
+  {
+    #ifdef WLED_ENABLE_FS_EDITOR
+      #ifdef ARDUINO_ARCH_ESP32
+      editHandler = &pCONT_web->server->addHandler(new SPIFFSEditor(WLED_FS));//http_username,http_password));
+      #else
+      editHandler = &server.addHandler(new SPIFFSEditor("","",WLED_FS));//http_username,http_password));
+      #endif
+    #else
+      editHandler = &pCONT_web->server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
+        this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
+      });
+    #endif
+  } 
+  else 
+  {
+    editHandler = &pCONT_web->server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
+      this->serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);
+    });
+  }
+}
+
+String mWebServer::msgProcessor(const String& var)
+{
+  if (var == "MSG") {
+    String messageBody = messageHead;
+    messageBody += F("</h2>");
+    messageBody += messageSub;
+    uint32_t optt = optionType;
+
+    if (optt < 60) //redirect to settings after optionType seconds
+    {
+      messageBody += F("<script>setTimeout(RS,");
+      messageBody +=String(optt*1000);
+      messageBody += F(")</script>");
+    } else if (optt < 120) //redirect back after optionType-60 seconds, unused
+    {
+      //messageBody += "<script>setTimeout(B," + String((optt-60)*1000) + ")</script>";
+    } else if (optt < 180) //reload parent after optionType-120 seconds
+    {
+      messageBody += F("<script>setTimeout(RP,");
+      messageBody += String((optt-120)*1000);
+      messageBody += F(")</script>");
+    } else if (optt == 253)
+    {
+      messageBody += F("<br><br><form action=/settings><button class=\"bt\" type=submit>Back</button></form>"); //button to settings
+    } else if (optt == 254)
+    {
+      messageBody += F("<br><br><button type=\"button\" class=\"bt\" onclick=\"B()\">Back</button>");
+    }
+    return messageBody;
+  }
+  return String();
+}
+
+
+void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT)
+{
+  messageHead = headl;
+  messageSub = subl;
+  optionType = optionT;
+
+  request->send_P(code, "text/html", PAGE_msg, msgProcessor);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // bool mWebServer::WifiIsInManagerMode(){
 //   return (HTTP_MANAGER == webserver_state || HTTP_MANAGER_RESET_ONLY == webserver_state);
@@ -1530,7 +1629,7 @@ void mWebServer::initServer()
 //     request->send(response);
 //   });
 
-//   // createEditHandler(correctPIN);
+  createEditHandler(true);//correctPIN);
 
 // #ifndef WLED_DISABLE_OTA
 //   //init ota page

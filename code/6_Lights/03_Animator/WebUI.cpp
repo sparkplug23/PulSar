@@ -1136,103 +1136,8 @@ void mAnimatorLight::sappend(char stype, const char* key, int val)
 // AsyncWebServer server(80);
 // #endif  // ESP32
 
-// define flash strings once (saves flash memory)
-static const char s_redirecting[] PROGMEM = "Redirecting...";
-static const char s_content_enc[] PROGMEM = "Content-Encoding";
-static const char s_unlock_ota [] PROGMEM = "Please unlock OTA in security settings!";
-static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN code!";
 
 
-String messageHead, messageSub;
-byte optionType;
-
-String mAnimatorLight::msgProcessor(const String& var)
-{
-  if (var == "MSG") {
-    String messageBody = messageHead;
-    messageBody += F("</h2>");
-    messageBody += messageSub;
-    uint32_t optt = optionType;
-
-    if (optt < 60) //redirect to settings after optionType seconds
-    {
-      messageBody += F("<script>setTimeout(RS,");
-      messageBody +=String(optt*1000);
-      messageBody += F(")</script>");
-    } else if (optt < 120) //redirect back after optionType-60 seconds, unused
-    {
-      //messageBody += "<script>setTimeout(B," + String((optt-60)*1000) + ")</script>";
-    } else if (optt < 180) //reload parent after optionType-120 seconds
-    {
-      messageBody += F("<script>setTimeout(RP,");
-      messageBody += String((optt-120)*1000);
-      messageBody += F(")</script>");
-    } else if (optt == 253)
-    {
-      messageBody += F("<br><br><form action=/settings><button class=\"bt\" type=submit>Back</button></form>"); //button to settings
-    } else if (optt == 254)
-    {
-      messageBody += F("<br><br><button type=\"button\" class=\"bt\" onclick=\"B()\">Back</button>");
-    }
-    return messageBody;
-  }
-  return String();
-}
-
-
-void mAnimatorLight::serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT)
-{
-  messageHead = headl;
-  messageSub = subl;
-  optionType = optionT;
-
-  request->send_P(code, "text/html", PAGE_msg, msgProcessor);
-}
-
-
-AsyncWebHandler *editHandler = nullptr;
-
-void mAnimatorLight::createEditHandler(bool enable) {
-  if (editHandler != nullptr) pCONT_web->server->removeHandler(editHandler);
-  if (enable) {
-    #ifdef WLED_ENABLE_FS_EDITOR
-      #ifdef ARDUINO_ARCH_ESP32
-      editHandler = &server.addHandler(new SPIFFSEditor(WLED_FS));//http_username,http_password));
-      #else
-      editHandler = &server.addHandler(new SPIFFSEditor("","",WLED_FS));//http_username,http_password));
-      #endif
-    #else
-      editHandler = &pCONT_web->server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
-        this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
-      });
-    #endif
-  } else {
-    editHandler = &pCONT_web->server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
-      this->serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);
-    });
-  }
-}
-
-#ifndef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-// //Un-comment any file types you need
-String mAnimatorLight::getContentType(AsyncWebServerRequest* request, String filename){
-  if(request->hasArg("download")) return "application/octet-stream";
-  else if(filename.endsWith(".htm")) return "text/html";
-  else if(filename.endsWith(".html")) return "text/html";
-  else if(filename.endsWith(".css")) return "text/css";
-  else if(filename.endsWith(".js")) return "application/javascript";
-  else if(filename.endsWith(".json")) return "application/json";
-  else if(filename.endsWith(".png")) return "image/png";
-  else if(filename.endsWith(".gif")) return "image/gif";
-  else if(filename.endsWith(".jpg")) return "image/jpeg";
-  else if(filename.endsWith(".ico")) return "image/x-icon";
-//  else if(filename.endsWith(".xml")) return "text/xml";
-//  else if(filename.endsWith(".pdf")) return "application/x-pdf";
-//  else if(filename.endsWith(".zip")) return "application/x-zip";
-//  else if(filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
-}
-#endif
 
 
 bool mAnimatorLight::handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request)
@@ -2920,6 +2825,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     request->send(503, "application/json", F("{\"error\":3}"));
     return;
   }
+
   AsyncJsonResponse *response = new AsyncJsonResponse(&doc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
   JsonVariant lDoc = response->getRoot();
@@ -2927,20 +2833,23 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   switch (subJson)
   {
     case JSON_PATH_STATE:
-      serializeState(lDoc); break;
+      serializeState(lDoc); 
+    break;
     case JSON_PATH_INFO:
-      serializeInfo(lDoc); 
-      
-      break;
+      serializeInfo(lDoc);     
+    break;
     case JSON_PATH_PALETTES:
       serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
-      break;
+    break;
     case JSON_PATH_EFFECTS:
-      serializeModeNames2(lDoc); break;
+      serializeModeNames2(lDoc); 
+    break;
     case JSON_PATH_FXDATA:
-      serializeModeData(lDoc); break;
+      serializeModeData(lDoc); 
+    break;
     case JSON_PATH_NETWORKS:
-      serializeNetworks(lDoc); break;
+      serializeNetworks(lDoc); 
+    break;
     default: // All
       JsonObject state = lDoc.createNestedObject("state");
       serializeState(state);
@@ -2955,27 +2864,19 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
         JsonArray effects = lDoc.createNestedArray(F("effects"));
         serializeModeNames2(effects); // remove WLED-SR extensions from effect names
 
-        lDoc[F("palettes")] = serialized((const __FlashStringHelper*)JSON_palette_names);
-
-      //   char lineBuffer[100] = {0};
-      //   JsonArray pal = lDoc.createNestedArray(F("palettes"));
-      //   // for(size_t i = 0; i < 10; i++)
-      //   // {
-      //   //   pal.add(GetPaletteNameByID(i, buffer, sizeof(buffer)));
-      //   // }
-
-      // bool flag_get_first_name_only = true;
-        
-      //   for(uint16_t i = 0; i < 3; i++)
-      //   {
-      //     GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
-      //     if(flag_get_first_name_only)
-      //     {    
-      //       char* dataPtr = strchr(lineBuffer,'|');
-      //       if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
-      //     }
-      //     pal.add(lineBuffer);
-      //   }
+        bool flag_get_first_name_only = true;        
+        char lineBuffer[100] = {0};
+        JsonArray pal = lDoc.createNestedArray(F("palettes"));
+        for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
+        {
+          GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
+          if(flag_get_first_name_only)
+          {    
+            char* dataPtr = strchr(lineBuffer,'|');
+            if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+          }
+          pal.add(lineBuffer);
+        }
 
       }
       lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
@@ -3092,8 +2993,8 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
     #endif
     case SUBPAGE_LOCK    : {
       correctPIN = !strlen(settingsPIN); // lock if a pin is set
-      createEditHandler(correctPIN);
-      serveMessage(request, 200, strlen(settingsPIN) > 0 ? PSTR("Settings locked") : PSTR("No PIN set"), FPSTR(s_redirecting), 1);
+      pCONT_web->createEditHandler(true);
+      pCONT_web->serveMessage(request, 200, strlen(settingsPIN) > 0 ? PSTR("Settings locked") : PSTR("No PIN set"), FPSTR(s_redirecting), 1);
       return;
     }
     case SUBPAGE_PINREQ  : response = request->beginResponse_P(200, "text/html", PAGE_settings_pin,  PAGE_settings_pin_length);  break;
@@ -3797,7 +3698,7 @@ void mAnimatorLight::initServer()
   });
 
   pCONT_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
+    pCONT_web->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
     // doReboot = true;
   });
 
@@ -3885,7 +3786,7 @@ void mAnimatorLight::initServer()
 #endif
 
   pCONT_web->server->on("/teapot", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
+    pCONT_web->serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
   });
 
   pCONT_web->server->on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request) {},
@@ -3937,9 +3838,9 @@ void mAnimatorLight::initServer()
     //   return;
     // }
     if (Update.hasError() || otaLock) {
-      this->serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
+      pCONT_web->serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
     } else {
-      this->serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
+      pCONT_web->serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
       // doReboot = true;
     }
   },[this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
@@ -3978,7 +3879,7 @@ void mAnimatorLight::initServer()
   });
   #else
   pCONT_web->server->on("/dmxmap", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
+    pCONT_web->serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
   });
   #endif
 
@@ -4119,7 +4020,7 @@ void mAnimatorLight::initServer_LightOnly()
   });
 
   pCONT_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
+    pCONT_web->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
     // doReboot = true;
   });
 
@@ -4207,7 +4108,7 @@ void mAnimatorLight::initServer_LightOnly()
 #endif
 
   pCONT_web->server->on("/teapot", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
+    pCONT_web->serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
   });
 
   pCONT_web->server->on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request) {},
@@ -4240,8 +4141,6 @@ void mAnimatorLight::initServer_LightOnly()
     request->send(response);
   });
 
-  // createEditHandler(correctPIN);
-
 #ifndef WLED_DISABLE_OTA
   //init ota page
   pCONT_web->server->on("/update", HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -4259,9 +4158,9 @@ void mAnimatorLight::initServer_LightOnly()
     //   return;
     // }
     if (Update.hasError() || otaLock) {
-      this->serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
+      pCONT_web->serveMessage(request, 500, F("Update failed!"), F("Please check your file and retry!"), 254);
     } else {
-      this->serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
+      pCONT_web->serveMessage(request, 200, F("Update successful!"), F("Rebooting..."), 131);
       // doReboot = true;
     }
   },[this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
@@ -4300,7 +4199,7 @@ void mAnimatorLight::initServer_LightOnly()
   });
   #else
   pCONT_web->server->on("/dmxmap", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
+    pCONT_web->serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
   });
   #endif
 

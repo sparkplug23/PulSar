@@ -3138,6 +3138,11 @@
   #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
   #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+  #define WLED_ENABLE_FS_EDITOR
+
+  // editor exists, so I can upload/download xmas23 design.
+  // make the garage tester with it. Design the effects for this year to upload.
   
   #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
   #define USE_LIGHTING_TEMPLATE

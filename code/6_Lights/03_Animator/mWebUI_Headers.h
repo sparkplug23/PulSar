@@ -4,6 +4,9 @@
 
 #include <Arduino.h>
 
+// #ifndef HEADER_GUARD_ADD_PAGES
+// #define HEADER_GUARD_ADD_PAGES 
+
 #include "webpages_generated/html_ui.h"
 #ifdef WLED_ENABLE_SIMPLE_UI
   #include "webpages_generated/html_simple.h"
@@ -18,6 +21,7 @@
 #endif
 #include "webpages_generated/html_cpal.h"
 
+// #endif // HEADER_GUARD_ADD_PAGES
 
 const char JSON_mode_names[] PROGMEM = R"=====(["FX names moved"])=====";
 const char JSON_palette_names[] PROGMEM = R"=====([

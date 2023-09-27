@@ -1229,7 +1229,6 @@ function updatePA()
 function updateUI()
 {
 	gId('buttonPower').className = (isOn) ? 'active':'';
-	gId('buttonNl').className = (nlA) ? 'active':'';
 	gId('buttonSync').className = (syncSend) ? 'active':'';
 
 	updateSelectedFx();

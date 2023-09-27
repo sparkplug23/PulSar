@@ -40,6 +40,13 @@ const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
 DEFINE_PGM_CTR(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT) "application/json";
 const char PM_WEB_CONTENT_TYPE_TEXT_CSS[] PROGMEM = "text/css";
 
+// define flash strings once (saves flash memory)
+static const char s_redirecting[] PROGMEM = "Redirecting...";
+static const char s_content_enc[] PROGMEM = "Content-Encoding";
+static const char s_unlock_ota [] PROGMEM = "Please unlock OTA in security settings!";
+static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN code!";
+
+
 // #include <DNSServer.h>
 // #include "2_CoreSystem/02_Time/mTime.h"
 // #include "2_CoreSystem/01_Settings/mSettings.h"
@@ -1335,6 +1342,10 @@ public mTaskerInterface{
 
     AsyncWebServer* server = nullptr; //(80);
 
+void createEditHandler(bool enable);
+static String msgProcessor(const String& var);
+
+
 #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 void initServer();
 #endif
@@ -1355,6 +1366,13 @@ void initServer();
 
 
     const char* GetContentTypeCtrP_By_ID(uint8_t id);
+
+AsyncWebHandler *editHandler = nullptr;
+
+
+void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
+
+
 
 
     // /***************

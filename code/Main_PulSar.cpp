@@ -352,20 +352,15 @@ DEBUG_LINE_HERE;
 //   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str()); // This function GetDeviceHardware needs added and supporting functions
 // #endif // ESP32
 
-#ifdef USE_UFILESYS
-  UfsInit();  // xdrv_50_filesystem.ino
-#endif
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
+  #endif
 
 /********************************************************************************************
  ** Settings ********************************************************************************
  ********************************************************************************************/
 
-DEBUG_LINE_HERE;
-
-delay(2000);
   pCONT_set->SettingsInit();
-
-DEBUG_LINE_HERE;
 
   #ifdef USE_EMERGENCY_RESET
     EmergencySerial_SettingsReset();
@@ -519,24 +514,6 @@ DEBUG_LINE_HERE;
   // pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   // pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
     
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  bool fsinit = false;
-  DEBUG_PRINTLN(F("Mount FS"));
-  #ifdef ARDUINO_ARCH_ESP32
-    fsinit = WLED_FS.begin(true);
-  #else
-    fsinit = WLED_FS.begin();
-  #endif
-  if (!fsinit) {
-    DEBUG_PRINTLN(F("FS failed!"));
-    // errorFlag = ERR_FS_BEGIN;
-  }else{
-    DEBUG_PRINTLN(F("FS mounted."));
-  }
-  pCONT_lAni->initPresetsFile();
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
-
-
   /********************************************************************************************
    ** Initialise System and Modules ***********************************************************
   ********************************************************************************************/

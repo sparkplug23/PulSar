@@ -21,7 +21,7 @@
   #endif  // USE_SDCARD
 #endif  // ESP8266
 #ifdef ESP32
-  #include <LITTLEFS.h>
+  #include <LittleFS.h>
   #ifdef USE_SDCARD
     #include <SD.h>
   #endif  // USE_SDCARD
@@ -72,7 +72,7 @@ class mFileSystem :
 void UfsInitOnce(void);
 void UfsInit(void);
 // void UfsCheckSDCardInit(void);
-uint32_t UfsInfo(uint32_t sel, uint32_t type);
+// uint32_t UfsInfo(uint32_t sel, uint32_t type);
 // uint8_t UfsReject(char *name);
 // bool TfsFileExists(const char *fname){
 // bool TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len);
@@ -107,6 +107,60 @@ struct SETTINGS{
 
 
 
+
+char *folderOnly(char *fname);
+char *fileOnly(char *fname);
+void UfsCheckSDCardInit(void);
+uint32_t UfsInfo(uint32_t sel, uint32_t type);
+uint32_t UfsSize(void);
+uint32_t UfsFree(void);
+uint8_t UfsReject(char *name);
+bool TfsFileExists(const char *fname);
+size_t TfsFileSize(const char *fname);
+bool TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len);
+bool TfsInitFile(const char *fname, uint32_t len, uint8_t init_value);
+bool TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len);
+String TfsLoadString(const char *fname);
+bool TfsDeleteFile(const char *fname);
+bool TfsRenameFile(const char *fname1, const char *fname2);
+bool UfsExecuteCommandFileReady(void);
+void UfsExecuteCommandFileLoop(void);
+bool UfsExecuteCommandFile(const char *fname);
+char* UfsFilename(char* fname, char* fname_in);
+void UFSInfo(void);
+void UFSType(void);
+void UFSSize(void);
+void UFSFree(void);
+void UFSDelete(void);
+void UFSRename(void);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 void createDir(fs::FS &fs, const char * path);
 void removeDir(fs::FS &fs, const char * path);
@@ -125,8 +179,9 @@ void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
 void CommandSet_ReadFile(const char* filename);
 
 
+
 int8_t CheckAndExecute_JSONCommands();
-void parse_JSONCommand(void);
+void parse_JSONCommand(JsonParserObject obj);
 
 uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_appending);
 
@@ -157,6 +212,8 @@ void WebAppend_Root_Status_Table();
     struct handler<mFileSystem> mqtthandler_sensor_ifchanged;
     struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
     
+    std::vector<struct handler<mFileSystem>*> mqtthandler_list;
+
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
 
