@@ -3,33 +3,16 @@
  * Basic class that holds event type only
  * The event size will be changed to dynamic later, allowing more complex rules to be save as data
  * */
-
-
 #ifndef _MEVENT_H
 #define _MEVENT_H
 
-// #define D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID 6
-
-// #include "1_TaskerManager/mTaskerManager.h"
-
-// #ifdef USE_MODULE_CORE_RULES
 
 #include <stdint.h>
-// #include "3_Network/MQTT/mMQTT.h"
-// #include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
-// #include "1_TaskerManager/mTaskerInterface.h"
 
 class mEvent
 {
-    
-  private:
-    /* Prevent others from being created */
-    // RuleEngine(RuleEngine const& other) = delete;
-    // RuleEngine(RuleEngine&& other) = delete;
-    /* Private constructor to prevent instancing. */
-    // RuleEngine(){};
-    
+
   public:
   
     mEvent(){};

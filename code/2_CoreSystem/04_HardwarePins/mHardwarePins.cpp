@@ -64,6 +64,46 @@ void mHardwarePins::Pre_Init(){
   #ifdef DEBUG_PIN6_GPIO
     DEBUG_PIN6_INIT();
   #endif
+  #ifdef DEBUG_PIN7_GPIO
+    DEBUG_PIN7_INIT();
+  #endif
+  #ifdef DEBUG_PIN8_GPIO
+    DEBUG_PIN8_INIT();
+  #endif
+
+
+  #ifdef USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
+
+  DEBUG_PIN1_SET(1);
+  DEBUG_PIN2_SET(1);
+  DEBUG_PIN3_SET(1);
+  DEBUG_PIN4_SET(1);
+  DEBUG_PIN5_SET(1);
+  DEBUG_PIN6_SET(1);
+  DEBUG_PIN7_SET(1);
+  DEBUG_PIN8_SET(1);
+
+  DEBUG_PIN1_SET(0);
+  delay(100);
+  DEBUG_PIN2_SET(0);
+  delay(100);
+  DEBUG_PIN3_SET(0);
+  delay(100);
+  DEBUG_PIN4_SET(0);
+  delay(100);
+  DEBUG_PIN5_SET(0);
+  delay(100);
+  DEBUG_PIN6_SET(0);
+  delay(100);
+  DEBUG_PIN7_SET(0);
+  delay(100);
+  DEBUG_PIN8_SET(0);
+  
+  #endif // USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
+
+
+
+
 
 }
 

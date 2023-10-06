@@ -153,6 +153,8 @@ void mFileSystem::UfsInit(void)
 {
 
   AddLog(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInit"));
+
+
   
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
   bool fsinit = false;
@@ -170,13 +172,131 @@ void mFileSystem::UfsInit(void)
   }
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
-  // UfsData.run_file_pos = -1;
-  // UfsInitOnce();
-  // if (ufs_type) {
-  //   AddLog(LOG_LEVEL_INFO, PSTR("UFS: FlashFS mounted with %d kB free"), UfsInfo(1, 0));
-  // }
+  #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE
+
+  UfsData.run_file_pos = -1;
+  UfsInitOnce();
+  if (ufs_type) {
+    AddLog(LOG_LEVEL_INFO, PSTR("UFS: FlashFS mounted with %d kB free"), UfsInfo(1, 0));
+  }
+
+  #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE
 
 }
+
+
+// // Init flash file system
+void mFileSystem::UfsInitOnce(void) {
+  AddLog(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInitOnce"));
+  ufs_type = 0;
+  ffsp = 0;
+  ufs_dir = 0;
+
+#ifdef ESP8266
+  ffsp = &LittleFS;
+  if (!LittleFS.begin()) {
+  	AddLog(LOG_LEVEL_INFO, PSTR("UFS: !LittleFS.begin()"));
+    ffsp = 0;
+    return;
+  }
+  AddLog(LOG_LEVEL_INFO, PSTR("UFS: LittleFS.begin()"));
+#endif  // ESP8266
+
+#ifdef ESP32
+#ifdef ENABLE_LITTLEFS
+  // try lfs first
+  ffsp = &LittleFS;
+ if (!LittleFS.begin(true, "") && !LittleFS.begin(true, "", 5, "fs_1")) {         // force empty mount point to make it the fallback FS
+    // ffat is second
+    ffsp = &FFat;
+   if (!FFat.begin(true, "")) {
+      ffsp = nullptr;
+      return;
+    }
+    ffs_type = UFS_TFAT;
+    ufs_type = ffs_type;
+    ufsp = ffsp;
+    dfsp = ffsp;
+    return;
+  }
+#endif // ENABLE_LITTLEFS
+#endif // ESP32
+  ffs_type = UFS_TLFS;
+  ufs_type = ffs_type;
+  ufsp = ffsp;
+  dfsp = ffsp;
+}
+
+
+
+uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
+  uint64_t result = 0;
+  FS *ifsp = ufsp;
+  uint8_t itype = ufs_type;
+  if (type) {
+    ifsp = ffsp;
+    itype = ffs_type;
+  }
+
+#ifdef ESP8266
+  FSInfo64 fsinfo;
+#endif  // ESP8266
+
+  switch (itype) {
+    case UFS_TSDC:
+#ifdef USE_SDCARD
+#ifdef ESP8266
+      ifsp->info64(fsinfo);
+      if (sel == 0) {
+        result = fsinfo.totalBytes;
+      } else {
+        result = (fsinfo.totalBytes - fsinfo.usedBytes);
+      }
+#endif  // ESP8266
+#ifdef ESP32
+      if (sel == 0) {
+        result = SD.totalBytes();
+      } else {
+        result = (SD.totalBytes() - SD.usedBytes());
+      }
+#endif  // ESP32
+#endif  // USE_SDCARD
+      break;
+
+    case UFS_TLFS:
+#ifdef ESP8266
+      ifsp->info64(fsinfo);
+      if (sel == 0) {
+        result = fsinfo.totalBytes;
+      } else {
+        result = (fsinfo.totalBytes - fsinfo.usedBytes);
+      }
+#endif  // ESP8266
+#ifdef ESP32
+      if (sel == 0) {
+        result = LITTLEFS.totalBytes();
+      } else {
+        result = LITTLEFS.totalBytes() - LITTLEFS.usedBytes();
+      }
+#endif  // ESP32
+      break;
+
+    case UFS_TFAT:
+#ifdef ESP32
+      if (sel == 0) {
+        result = FFat.totalBytes();
+      } else {
+        result = FFat.freeBytes();
+      }
+#endif  // ESP32
+      break;
+
+  }
+  return result / 1024;
+}
+
+
+
 
 
 
@@ -473,50 +593,7 @@ void mFileSystem::parse_JSONCommand(JsonParserObject obj)
 
 
 
-// /*********************************************************************************************/
-
-// // // Init flash file system
-// void mFileSystem::UfsInitOnce(void) {
-//   AddLog(LOG_LEVEL_INFO, PSTR("UFS: mFileSystem::UfsInitOnce"));
-//   ufs_type = 0;
-//   ffsp = 0;
-//   ufs_dir = 0;
-
-// #ifdef ESP8266
-//   ffsp = &LittleFS;
-//   if (!LittleFS.begin()) {
-//   	AddLog(LOG_LEVEL_INFO, PSTR("UFS: !LittleFS.begin()"));
-//     ffsp = 0;
-//     return;
-//   }
-//   AddLog(LOG_LEVEL_INFO, PSTR("UFS: LittleFS.begin()"));
-// #endif  // ESP8266
-
-// #ifdef ESP32
-// #ifdef ENABLE_LITTLEFS
-//   // try lfs first
-//   ffsp = &LittleFS;
-//  if (!LittleFS.begin(true, "") && !LittleFS.begin(true, "", 5, "fs_1")) {         // force empty mount point to make it the fallback FS
-//     // ffat is second
-//     ffsp = &FFat;
-//    if (!FFat.begin(true, "")) {
-//       ffsp = nullptr;
-//       return;
-//     }
-//     ffs_type = UFS_TFAT;
-//     ufs_type = ffs_type;
-//     ufsp = ffsp;
-//     dfsp = ffsp;
-//     return;
-//   }
-// #endif // ENABLE_LITTLEFS
-// #endif // ESP32
-//   ffs_type = UFS_TLFS;
-//   ufs_type = ffs_type;
-//   ufsp = ffsp;
-//   dfsp = ffsp;
-// }
-
+/*********************************************************************************************/
 
 // // #ifdef USE_SDCARD
 // // void mFileSystem::UfsCheckSDCardInit(void) {
@@ -557,74 +634,6 @@ void mFileSystem::parse_JSONCommand(JsonParserObject obj)
 // //   }
 // // }
 // // #endif // USE_SDCARD
-
-// uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
-//   uint64_t result = 0;
-//   FS *ifsp = ufsp;
-//   uint8_t itype = ufs_type;
-//   if (type) {
-//     ifsp = ffsp;
-//     itype = ffs_type;
-//   }
-
-// #ifdef ESP8266
-//   FSInfo64 fsinfo;
-// #endif  // ESP8266
-
-//   switch (itype) {
-//     case UFS_TSDC:
-// #ifdef USE_SDCARD
-// #ifdef ESP8266
-//       ifsp->info64(fsinfo);
-//       if (sel == 0) {
-//         result = fsinfo.totalBytes;
-//       } else {
-//         result = (fsinfo.totalBytes - fsinfo.usedBytes);
-//       }
-// #endif  // ESP8266
-// #ifdef ESP32
-//       if (sel == 0) {
-//         result = SD.totalBytes();
-//       } else {
-//         result = (SD.totalBytes() - SD.usedBytes());
-//       }
-// #endif  // ESP32
-// #endif  // USE_SDCARD
-//       break;
-
-//     case UFS_TLFS:
-// #ifdef ESP8266
-//       ifsp->info64(fsinfo);
-//       if (sel == 0) {
-//         result = fsinfo.totalBytes;
-//       } else {
-//         result = (fsinfo.totalBytes - fsinfo.usedBytes);
-//       }
-// #endif  // ESP8266
-// #ifdef ESP32
-//       if (sel == 0) {
-//         result = LITTLEFS.totalBytes();
-//       } else {
-//         result = LITTLEFS.totalBytes() - LITTLEFS.usedBytes();
-//       }
-// #endif  // ESP32
-//       break;
-
-//     case UFS_TFAT:
-// #ifdef ESP32
-//       if (sel == 0) {
-//         result = FFat.totalBytes();
-//       } else {
-//         result = FFat.freeBytes();
-//       }
-// #endif  // ESP32
-//       break;
-
-//   }
-//   return result / 1024;
-// }
-
-
 
 
 

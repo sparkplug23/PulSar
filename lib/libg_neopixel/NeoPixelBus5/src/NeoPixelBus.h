@@ -209,14 +209,9 @@ public:
         ClearTo(0);
     }
 
-  #define DEBUG_PIN4_GPIO     14
-  #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
-  #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
-  #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
-
     void Show(bool maintainBufferConsistency = true)
     {
-        DEBUG_PIN4_SET(LOW);
+        
         if (!IsDirty())
         {
             return;
@@ -225,7 +220,6 @@ public:
         _method.Update(maintainBufferConsistency);
 
         ResetDirty();
-        DEBUG_PIN4_SET(HIGH);
     }
 
     inline bool CanShow() const

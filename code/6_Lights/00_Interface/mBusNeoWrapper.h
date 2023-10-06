@@ -384,6 +384,7 @@ class PolyBus {
   {
     
     // DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
+
     
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
@@ -453,6 +454,8 @@ class PolyBus {
       // case BUSTYPE__HS_P98_3__ID: (static_cast<NEOPIXELBUS_HS_P98_3*>(busPtr))->Show(); break;
       // case BUSTYPE__SS_P98_3__ID: (static_cast<NEOPIXELBUS_SS_P98_3*>(busPtr))->Show(); break;
     }
+
+
   };
   static bool canShow(void* busPtr, uint8_t busType) 
   {
@@ -552,6 +555,26 @@ class PolyBus {
       );
     }
     #endif // ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
+    #ifdef ENABLE_DEVFEATURE_DEBUG_GARGAE_PIXEL_OUTPUT
+    if(pix>0){ // Just first pixel
+      // Serial.printf("set %d colour_order R=%d, G=%d, B=%d, CW=%d, WW=%d\n\r",
+      //   pix,
+      //   colour_order.red,
+      //   colour_order.green,
+      //   colour_order.blue,
+      //   colour_order.white_cold,
+      //   colour_order.white_warm
+      // );
+      // Serial.printf("set %03d\tR=%d\tG=%d\tB=%d\tCW=%d\tWW=%d\n\r",
+      //   pix,
+      //   colour_internal.R,
+      //   colour_internal.G,
+      //   colour_internal.B,
+      //   colour_internal.W1,
+      //   colour_internal.W2
+      // );
+    }
+    #endif // ENABLE_DEVFEATURE_DEBUG_GARGAE_PIXEL_OUTPUT
 
 
     switch (busType) {

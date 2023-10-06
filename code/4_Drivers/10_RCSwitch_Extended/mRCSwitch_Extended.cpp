@@ -704,9 +704,11 @@ void mRCSwitch::Init(void)
 
   if (pCONT_pins->PinUsed(GPIO_RF_433MHZ_RX_ID)) 
   {
+
     if (pCONT_set->Settings.rf_duplicate_time < 10) {
       pCONT_set->Settings.rf_duplicate_time = RF_TIME_AVOID_DUPLICATE;
     }
+
     pinMode( pCONT_pins->GetPin(GPIO_RF_433MHZ_RX_ID), INPUT);
 
     if(mySwitch==nullptr)
@@ -727,7 +729,6 @@ void mRCSwitch::Init(void)
     mySwitch->setReceiveProtocolMask(pCONT_set->Settings.rf_protocol_mask);
     #endif // ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
 
-
     settings.fEnableSensor = true;
   }
 
@@ -742,9 +743,6 @@ void mRCSwitch::Init(void)
     mySwitch->enableTransmit(pCONT_pins->GetPin(GPIO_RF_433MHZ_TX_ID));
     settings.fEnableSensor = true;
   }
-
-//   pinMode(22, OUTPUT);
-// digitalWrite(22, LOW); // set low first, header will toggle high again
 
 }
 
@@ -1062,6 +1060,17 @@ void mRCSwitch::parse_JSONCommand(JsonParserObject obj)
     	AddLog(LOG_LEVEL_TEST, PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
 		// 	pCONT_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
 		// }
+
+	}
+	if(jtok = obj["RfSend"])
+	{
+
+		if(jtok.isNum())
+		{
+			mySwitch->send(jtok.getInt(), 24);
+		}
+
+    AddLog(LOG_LEVEL_TEST, PSTR("RfSend = %d / %d"), jtok.getInt(), 24 );
 
 	}
 

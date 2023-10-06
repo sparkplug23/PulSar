@@ -69,10 +69,93 @@ class mFileSystem :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_FILESYSTEM_ID; }
 
     
+// saves 80 bytes of flash, makes the UI cleaner for folders containing lots of files.
+// disables recursive folder listing in file UI
+//#define UFILESYS_NO_RECURSE_GUI
+
+// Enables serving of static files on /fs/
+// costs 1844 bytes of flash and 40 bytes of RAM
+// probably not useful on esp8266, but useful on esp32
+// You could serve a whole webapp from Tas itself.
+//#define UFILESYS_STATIC_SERVING
+
+/*********************************************************************************************\
+This driver adds universal file system support for
+- ESP8266 (sd card or littlefs on  > 1 M devices with special linker file e.g. eagle.flash.4m2m.ld)
+  (makes no sense on 1M devices without sd card)
+- ESP32 (sd card or littlefs or sfatfile system).
+
+The sd card chip select is the standard SDCARD_CS or when not found SDCARD_CS_PIN and initializes
+the FS System Pointer ufsp which can be used by all standard file system calls.
+
+The only specific call is UfsInfo() which gets the total size (0) and free size (1).
+
+A button is created in the setup section to show up the file directory to download and upload files
+subdirectories are supported.
+
+Supported commands:
+ufs       fs info
+ufstype   get filesytem type 0=none 1=SD  2=Flashfile
+ufssize   total size in kB
+ufsfree   free size in kB
+\*********************************************************************************************/
+
+#define XDRV_50           50
+
+#define UFS_TNONE         0
+#define UFS_TSDC          1
+#define UFS_TFAT          2
+#define UFS_TLFS          3
+
+/*
+// In tasmota.ino
+#ifdef ESP8266
+#include <LittleFS.h>
+#include <SPI.h>
+#ifdef USE_SDCARD
+#include <SD.h>
+#include <SDFAT.h>
+#endif  // USE_SDCARD
+#endif  // ESP8266
+#ifdef ESP32
+#include <LITTLEFS.h>
+#ifdef USE_SDCARD
+#include <SD.h>
+#endif  // USE_SDCARD
+#include "FFat.h"
+#include "FS.h"
+#endif  // ESP32
+*/
+
+// Global file system pointer
+FS *ufsp;
+// Flash file system pointer
+FS *ffsp;
+// Local pointer for file managment
+FS *dfsp;
+
+char ufs_path[48];
+File ufs_upload_file;
+uint8_t ufs_dir;
+// 0 = None, 1 = SD, 2 = ffat, 3 = littlefs
+uint8_t ufs_type;
+uint8_t ffs_type;
+
+struct {
+  char run_file[48];
+  int run_file_pos = -1;
+  bool run_file_mutex = 0;
+  bool download_busy;
+} UfsData;
+
+
+
 void UfsInitOnce(void);
 void UfsInit(void);
+
+
+
 // void UfsCheckSDCardInit(void);
-// uint32_t UfsInfo(uint32_t sel, uint32_t type);
 // uint8_t UfsReject(char *name);
 // bool TfsFileExists(const char *fname){
 // bool TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len);

@@ -216,10 +216,10 @@ Store the SF inside the pic32 in RAM, then send after its full, maybe I need two
     }
     snprintf(buffer + strlen(buffer), sizeof(buffer), "]}");
 
-    digitalWrite(5, HIGH);
+    // digitalWrite(5, HIGH);
     AddLog(LOG_LEVEL_TEST, PSTR("buffer=\"%s\""), buffer);
     Serial2.println(buffer);
-    digitalWrite(5, LOW);
+    // digitalWrite(5, LOW);
 
     pic32.sequencenum+=50;
     

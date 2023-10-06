@@ -1060,7 +1060,10 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   uint8_t     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
   uint8_t     flag_crgb_exact_colour
 ){
+  
+  DEBUG_PIN4_SET(0);
 
+  // ALOG_INF(PSTR("palette_id  = %d %d"), palette_id, palette_id);
   RgbcctColor colour = RgbcctColor(0);
 
   #ifdef ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
@@ -1128,7 +1131,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
   
     colour = RgbcctColor(fastled_col.r, fastled_col.g, fastled_col.b);
 
-    return colour;
 
   } // END of CRGBPalette's
 
@@ -1146,7 +1148,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     uint8_t adjusted_id  = palette_id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
     const uint8_t* data  = PM_STATIC_SINGLE_COLOURS__DATA;
     uint8_t adjust_buf_i =  adjusted_id*3;
-    return RgbcctColor(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2]);
+    colour = RgbcctColor(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2]);
 
   }
 
@@ -1162,6 +1164,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
 
     uint16_t palette_adjusted_id = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; // adjust back into correct indexing
 
+  DEBUG_PIN5_SET(0);
     colour = Get_Encoded_StaticPalette_Colour(
         palette_adjusted_id,
         palette_buffer,
@@ -1171,8 +1174,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
         flag_wrap_hard_edge,
         flag_crgb_exact_colour
       );
-
-    return colour;
+  DEBUG_PIN5_SET(1);
 
   } // end of my palettes
 
@@ -1198,8 +1200,6 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
         flag_crgb_exact_colour
       );
 
-    return colour;
-
   } // end of my palettes
 
 
@@ -1218,7 +1218,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
 
     if(adjusted_id < RGBCCTCOLOURS_SIZE)
     {
-      return pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
+      colour = pCONT_lAni->segments[segIdx].rgbcctcolors[adjusted_id];
     }
   }
 
@@ -1235,7 +1235,7 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     
     uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS;        
 
-    return SubGet_Encoded_CustomPalette_Colour(
+    colour = SubGet_Encoded_CustomPalette_Colour(
       palette_adjusted_id,
       palette_buffer,
       _pixel_position,  
@@ -1258,6 +1258,9 @@ mPalette::GetColourFromPreloadedPaletteBuffer_2023(
     ALOG_INF(PSTR("Missing %d"), palette_id);
   }
 
+
+
+  DEBUG_PIN4_SET(1);
   return colour;
 
 }

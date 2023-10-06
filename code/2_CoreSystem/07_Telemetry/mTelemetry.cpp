@@ -309,6 +309,21 @@ void mTelemetry::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
+  #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+  ptr = &mqtthandler_debug__settings_storage;
+  ptr->handler_id = MQTT_HANDLER_SYSTEM_DEBUG_SETTINGS_STORAGE;
+  ptr->tSavedLastSent = millis();
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 60; 
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  ptr->json_level = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_SETTINGS_STORAGE_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug__Settings_Storage;
+  mqtthandler_list.push_back(ptr);
+  #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+
   #endif // ENABLE_MQTT_DEBUG_TELEMETRY
   
   ptr = &mqtthandler_debug_minimal;

@@ -31,11 +31,6 @@
  * 
  * 
  * **/
-
-#include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
-#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
-
 /**
  * @brief 
  * 
@@ -73,6 +68,11 @@
  *     *** serial2_tx transmit out on brown wire (serial as gpio on esp32 can be anything too)
  *  
  */
+
+
+#include "2_CoreSystem/mGlobalMacros.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+#include "2_CoreSystem/03_HardwareTemplates/mHardwareTemplates.h"
 
 
 /**************************************************************************************************************************************************
@@ -125,11 +125,6 @@ LivingRoom
   - sensor = pir inside, bme..... ultrasonic, outside pir
 **/
 // #define DEVICE_LIVINGROOMSENSOR
-// #define DEVICE_RGBFIREPLACE
-// #define DEVICE_DEFAULT_SONOFF_BASIC_LAMP1
-// #define DEVICE_DEFAULT_SONOFF_BASIC_LAMP2
-// #define DEVICE_DEFAULT_SONOFF_BASIC_LAMP3
-// #define DEVICE_DEFAULT_SHELLY_DIMMER_LAMP1
 // #define DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP1
 // #define DEVICE_DEFAULT_SONOFF_BASIC__LIVING_ROOM_LAMP2
 
@@ -146,9 +141,7 @@ Hallway + Understairs
   - hallway table
  */
 // #define DEVICE_RADIATORFAN
-// #define DEVICE_CANDLE_ELECTRIC_HALLWAY  // Socket_SocketNumber16_Power
 // #define DEVICE_DEFAULT_SHELLY_DIMMER__HALLWAY_TABLE_LAMP
-// #define DEVICE_HVAC_HEATING_MAIN
 // #define DEVICE_HVAC_HEATING_MAIN_2023V2
 
 /**
@@ -171,14 +164,13 @@ Outside + Garage
 // #define DEVICE_OILTANK
 // #define DEVICE_OILFURNACE
 // #define DEVICE_GARAGELIGHT
+// #define DEVICE_GARAGE_OUTSIDE_433MHZ_TRANSCEIVER
 
 /**
 TV Room (prev. spareroom)
   - CeilingLight
 **/
 // #define DEVICE_SHELLYDIMMER_TVROOM_CEILING
-// #define DEVICE_TVROOM_H801_UPLIGHTS
-// #define DEVICE_AMBILIGHT_SAMSUNG_SPAREROOM
 
 /**
  * 
@@ -189,9 +181,7 @@ Masterbedroom
   - non camera home display
  */
 // #define DEVICE_SHELLYDIMMER_MASTERBEDROOM_CEILING
-// #define DEVICE_MASTERBEDROOMSENSOR
-// #define DEVICE_FLOORFAN3                   
-// #define DEVICE_MASTERBEDROOM_DRESSER_LIGHTS
+// #define DEVICE_FLOORFAN3
 
 /**
  * 
@@ -221,9 +211,7 @@ Bathroom
  **/
 // #define DEVICE_BEDROOMSENSOR
 // #define DEVICE_BEDROOM_CEILINGFAN
-// #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
 // #define DEVICE_DEFAULT_SHELLY_DIMMER__BEDROOM_GLOBE
-// #define DEVICE_BEDROOM_LOUVOLITE_HUB
 
 /**
  * Roaming
@@ -1401,7 +1389,7 @@ Bathroom
   }
   )=====";
 
-#endif // DEVICE_RGBSHELF
+#endif
 
 
 #ifdef DEVICE_RGBCOOKER
@@ -1551,7 +1539,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
     "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}" 
   "}";
   
   #define USE_RULES_TEMPLATE
@@ -1861,6 +1849,7 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Consumer Unit"
   #define DEVICENAME_ROOMHINT_CTR "Downstairs Toilet"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
     
   #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
 
@@ -1877,9 +1866,61 @@ Bathroom
   #define USE_MODULE_ENERGY_PZEM004T_V3
     #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
-    #define STRIP_SIZE_MAX 60
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
+
+  
+#define USE_LIGHTING_TEMPLATE
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+R"=====(
+{
+  "BusConfig":[
+    {
+      "Pin":4,
+      "ColourOrder":"GRBW",
+      "BusType":"SK6812_RGBW",
+      "Start":0,
+      "Length":60
+    }
+  ],
+  "Segment0": {
+    "PixelRange": [
+      0,
+      60
+    ],
+    "ColourPalette":"Colourful Default",
+    "SegColour0": {
+      "Hue": 0,
+      "Sat":100,
+      "BrightnessRGB":100
+    },
+    "Effects": {
+      "Function": 1,
+      "Speed":1,
+      "Intensity":255
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  },
+  "BrightnessRGB": 100,
+  "BrightnessCCT": 0
+}
+)=====";
+
+
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -2007,7 +2048,7 @@ Bathroom
     "\"" D_JSON_ENERGY "\":{"
         "\"DeviceCount\":12"    
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
@@ -2709,7 +2750,7 @@ Bathroom
         "}"
       "]"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1}"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
   "}";
   
 #endif
@@ -3101,6 +3142,38 @@ Bathroom
 ****** ROOM: Garage ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
+
+#ifdef DEVICE_GARAGE_OUTSIDE_433MHZ_TRANSCEIVER
+  #define DEVICENAME_CTR          "garage_transceiver_433mhz"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define DEVICENAME_ROOMHINT_CTR "Example"
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
+
+
+
 
 #ifdef DEVICE_OILTANK
   #define DEVICENAME_CTR          "oiltank"

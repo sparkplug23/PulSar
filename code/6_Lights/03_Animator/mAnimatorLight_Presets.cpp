@@ -299,7 +299,7 @@ void mAnimatorLight::handlePresets()
 
   if (presetToApply == 0 || fileDoc)
   {
-    ALOG_INF(PSTR("(presetToApply == 0 || fileDoc)()"));    
+    // ALOG_INF(PSTR("(presetToApply == 0 || fileDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
   }
 

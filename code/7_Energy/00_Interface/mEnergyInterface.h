@@ -142,10 +142,10 @@ class mEnergyInterface :
     #endif
     
 
-    void WebCommand_Parse();
+//     void WebCommand_Parse();
     
-void WebAppend_Root_Draw_Table();
-void WebAppend_Root_Status_Table();
+// void WebAppend_Root_Draw_Table();
+// void WebAppend_Root_Status_Table();
     
     //phase out, in headers
     enum ENERGY_MODULE_ID{

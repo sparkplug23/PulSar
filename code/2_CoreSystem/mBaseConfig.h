@@ -31,9 +31,8 @@ With latest version, all longer term shared debug features should be added here 
 #ifdef D_USER_MICHAEL
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-#include "0_ConfigUser/03_mFirmwareCustom_Secret_DevTestGroups.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
 #endif // D_USER_MICHAEL
 
@@ -154,12 +153,17 @@ With latest version, all longer term shared debug features should be added here 
   ************************************/    
 
   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
+
+  #ifndef ANIMATION_UPDATOR_TIME_MINIMUM
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
+  #endif 
+
   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-
+  #ifndef ENABLE_DEVFEATURE_LIGHT_ESP32_RMT_METHOD_AS_PRIMARY
   #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD // To switch between I2S and RMT as primary channels
+  #endif
 
   #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
 
@@ -244,7 +248,7 @@ With latest version, all longer term shared debug features should be added here 
 #endif
 
 
-#define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+// #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
 
 
 // temporary, to be phased out into "MQTT_HOST"
@@ -403,6 +407,29 @@ With latest version, all longer term shared debug features should be added here 
 #endif
 
 /*********************************************************************************************\
+ * ESP32 only features
+\*********************************************************************************************/
+
+#ifdef ESP32
+
+#define SET_ESP32_STACK_SIZE  (8 * 1024)         // Set the stack size for Tasmota. The default value is 8192 for Arduino, some builds might need to increase it
+
+#ifdef SOC_TOUCH_VERSION_1                       // ESP32
+  #define ESP32_TOUCH_THRESHOLD   40             // [TouchThres] Below this level a touch is detected
+#endif
+#ifdef SOC_TOUCH_VERSION_2                       // ESP32-S2 and ESP32-S3
+  #define ESP32_TOUCH_THRESHOLD   40000          // [TouchThres] Above this level a touch is detected
+#endif
+
+
+
+
+#endif // ESP32
+
+
+
+
+/*********************************************************************************************\
  * END OF SECTION 1
  *
  * SECTION 2
@@ -425,6 +452,75 @@ With latest version, all longer term shared debug features should be added here 
 #define USE_DISCOVERY                            // Enable mDNS for the following services (+8k code, +0.3k mem)
   #define USE_NETWORK_MDNS                    // Provide access to webserver by name <Hostname>.local/
   #define MQTT_HOST_DISCOVERY                    // Find MQTT host server (overrides MQTT_HOST if found)
+
+#ifndef LATITUDE
+#define LATITUDE                    48.858360  // [Latitude] Your location to be used with sunrise and sunset
+#endif
+#ifndef LONGITUDE
+#define LONGITUDE                   2.294442   // [Longitude] Your location to be used with sunrise and sunset
+#endif
+
+
+// Sunrise and Sunset DawnType
+#define DAWN_NORMAL            -0.8333
+#define DAWN_CIVIL             -6.0
+#define DAWN_NAUTIC            -12.0
+#define DAWN_ASTRONOMIC        -18.0
+
+#ifndef COLOR_TEXT
+#define COLOR_TEXT                  "#000"     // Global text color - Black
+#endif
+#ifndef COLOR_BACKGROUND
+#define COLOR_BACKGROUND            "#fff"     // Global background color - White
+#endif
+#ifndef COLOR_FORM
+#define COLOR_FORM                  "#000000"  // Form background color - Greyish
+#endif
+#ifndef COLOR_INPUT_TEXT
+#define COLOR_INPUT_TEXT            "#000"     // Input text color - Black
+#endif
+#ifndef COLOR_INPUT
+#define COLOR_INPUT                 "#fff"     // Input background color - White
+#endif
+#ifndef COLOR_CONSOLE_TEXT
+#define COLOR_CONSOLE_TEXT          "#000"     // Console text color - Black
+#endif
+#ifndef COLOR_CONSOLE
+#define COLOR_CONSOLE               "#fff"     // Console background color - White
+#endif
+#ifndef COLOR_TEXT_WARNING
+#define COLOR_TEXT_WARNING          "#f00"     // Warning text color - Red
+#endif
+#ifndef COLOR_TEXT_SUCCESS
+#define COLOR_TEXT_SUCCESS          "#008000"  // Success text color - Green
+#endif
+#ifndef COLOR_BUTTON_TEXT
+#define COLOR_BUTTON_TEXT           "#fff"     // Button text color - White
+#endif
+#ifndef COLOR_BUTTON
+#define COLOR_BUTTON                "#1fa3ec"  // Button color - Blueish
+#endif
+#ifndef COLOR_BUTTON_HOVER
+#define COLOR_BUTTON_HOVER          "#0e70a4"  // Button color when hovered over - Darker blueish
+#endif
+#ifndef COLOR_BUTTON_RESET
+#define COLOR_BUTTON_RESET          "#d43535"  // Restart/Reset/Delete button color - Redish
+#endif
+#ifndef COLOR_BUTTON_RESET_HOVER
+#define COLOR_BUTTON_RESET_HOVER    "#931f1f"  // Restart/Reset/Delete button color when hovered over - Darker redish
+#endif
+#ifndef COLOR_BUTTON_SAVE
+#define COLOR_BUTTON_SAVE           "#47c266"  // Save button color - Greenish
+#endif
+#ifndef COLOR_BUTTON_SAVE_HOVER
+#define COLOR_BUTTON_SAVE_HOVER     "#5aaf6f"  // Save button color when hovered over - Darker greenish
+#endif
+#ifndef COLOR_TIMER_TAB_TEXT
+#define COLOR_TIMER_TAB_TEXT        "#fff"     // Config timer tab text color - White
+#endif
+#ifndef COLOR_TIMER_TAB_BACKGROUND
+#define COLOR_TIMER_TAB_BACKGROUND  "#999"     // Config timer tab background color - Light grey
+#endif
 
 // -- Time ----------------------------------------
 #define USE_RTC

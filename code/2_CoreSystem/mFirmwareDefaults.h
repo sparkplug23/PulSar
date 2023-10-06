@@ -28,9 +28,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 #ifdef D_USER_MICHAEL
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
+#include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-#include "0_ConfigUser/03_mFirmwareCustom_Secret_DevTestGroups.h"
 #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
 #endif // D_USER_MICHAEL
 
@@ -148,6 +147,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
     
     #define USE_WS28XX_FEATURE_4_PIXEL_TYPE
     #define USE_SK6812_METHOD_DEFAULT
+
+    #error "Remove this and follow normal method"
     
 
 #endif // USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
@@ -185,7 +186,11 @@ void WifiWpsStatusCallback(wps_cb_status status);
   #endif // USE_MODULE_LIGHTS_INTERFACE
 
 
+  #error "Remove this and follow normal method"
+
 #endif // USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
+
+
 
 
 
@@ -212,6 +217,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
       "}"
     "}"
   "}";
+
+  // #error "hitting here"
 
 
 #endif // USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
@@ -283,6 +290,8 @@ void WifiWpsStatusCallback(wps_cb_status status);
 */
 
 #ifdef USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+
+  #error "switch to USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023"
 
   #define USE_BUILD_TYPE_LIGHTING
   #define USE_MODULE_LIGHTS_INTERFACE
@@ -358,6 +367,19 @@ void WifiWpsStatusCallback(wps_cb_status status);
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
+
+    
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
+  // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
+  // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+  #define WLED_ENABLE_FS_EDITOR
+  #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+
 
 #endif // USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
 

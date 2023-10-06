@@ -860,8 +860,6 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
   JBI->Start();
 
-mqtthandler_sensor_temperature_colours.tRateSecs = 1;
-
   // return 0;
   
   float sensor_data = -1;
@@ -1581,8 +1579,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->tSavedLastSent = millis();
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;

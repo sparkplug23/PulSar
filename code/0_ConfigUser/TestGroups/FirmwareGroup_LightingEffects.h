@@ -54,6 +54,26 @@
  * - Single Bus, Single Segment
  * - Single RGBW 60 Strip on metal holder   SK6812_RGBW
  * 
+ * Device L9: 
+ * - ESP32
+ * - Single Bus, Single Segment
+ * - Single RGBW 60 Strip on metal holder   SK6812_RGBW
+ * 
+ * Device L10: 
+ * - ESP32
+ * - Single Bus, Single Segment
+ * - Single RGBW 60 Strip on metal holder   SK6812_RGBW
+ * 
+ * Device L11: 
+ * - ESP32
+ * - Single Bus, Single Segment
+ * - Single RGBW 60 Strip on metal holder   SK6812_RGBW
+ * 
+ * Device L12: 
+ * - ESP32
+ * - Single Bus, Single Segment
+ * - Single RGBW 60 Strip on metal holder   SK6812_RGBW
+ * 
  */
 
 //--------------------------------[Enable Device]-------------------------------------
@@ -64,11 +84,12 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L4__H801_5CH_PWM_RGBCCT
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L5__H801_3CHRGB_AND_2CHCW
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L6__H801_FIVE_1CH_WHITE_CHANNELS
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS   // change this to something useful
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L9__ESP8266_WEBUI_OPTIM_3LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L10__ESP32__7SEGMENTCLOCK
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER    // Outside Tree Tester
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L12__ESP32_LARGE_SINGLE_PIN_TESTER_WITH_DEBUG_PINS // Timing Tester
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3076,7 +3097,7 @@
 
 /**
  * @brief 
- * Primary testbed for all new lighting code on nodemcu
+ * Primary testgroup for most addresable light cases
  */
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS
   #define DEVICENAME_CTR          "testgroup_lighting_L7"
@@ -3086,6 +3107,7 @@
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
   #define DEVICENAME_CTR          "testgroup_lighting_L8"
   #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7n8__ESP32_PALETTE_WEBUI_DESIGN
+  // #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
   #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
 #endif
 
@@ -3125,24 +3147,14 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
+
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
-  // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
-  // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
-  #define USE_MODULE_DRIVERS_FILESYSTEM
-  #define WLED_ENABLE_FS_EDITOR
-
-  // editor exists, so I can upload/download xmas23 design.
-  // make the garage tester with it. Design the effects for this year to upload.
+  // #define ENABLE_DEVFEATURE_LIGHT_ESP32_RMT_METHOD_AS_PRIMARY
   
   #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
   #define USE_LIGHTING_TEMPLATE
@@ -3229,6 +3241,102 @@
   }
   )=====";
   #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+
+  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_LARGE_OUTPUT_ERROR
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":600
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        600
+      ],
+      "ColourPalette":"Colourful Default",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_LARGE_OUTPUT_ERROR
+
+  
+  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_LARGE_OUTPUT_TWO_PINS
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRBW",
+        "BusType":"SK6812_RGBW",
+        "Start":0,
+        "Length":1000
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":2000
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        2000
+      ],
+      "ColourPalette":"Colourful Default",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_LARGE_OUTPUT_TWO_PINS
+
+
 
   #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL_TWO_SEGMENTS
   #define USE_LIGHTING_TEMPLATE
@@ -3642,8 +3750,7 @@
 
 
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER
-  #define DEVICENAME_CTR          "testgroup_lighting_L8"
-  #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7n8__ESP32_PALETTE_WEBUI_DESIGN
+  #define DEVICENAME_CTR          "testgroup_lighting_L11"
   #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
   #ifndef DEVICENAME_CTR
     #define DEVICENAME_CTR          "testbed_default"
@@ -3685,72 +3792,168 @@
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
 
-  
-  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
-  #define STRIP_SIZE_MAX 100
+  // #define ENABLE_DEVFEATURE_LIGHT_ESP32_RMT_METHOD_AS_PRIMARY
+
+    // #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE // view so I can replicate in json
+    // #define ENABLE_DEVFEATURE_DEBUG_GARGAE_PIXEL_OUTPUT
+
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":2
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       2
+  //     ],
+  //     "ColourPalette":"*Two Colours",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":3
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       3
+  //     ],
+  //     "ColourPalette":"*Colour 01",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":100
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
+
+
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":500
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       500
+  //     ],
+  //     "ColourPalette":"*Two Colours",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
     "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1000
+      },
       {
         "Pin":4,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":100
+        "Start":1001,
+        "Length":1000
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        100
+        2000
       ],
-      "ColourPalette":0,
-      "SegColour0": {
-        "Hue": 330,
-        "Sat":100,
-        "BrightnessRGB":5
-      },
-      "Effects": {
-        "Function": 0,
-        "Speed":1,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 900,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
-  }
-  )=====";
-  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
-  
-  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
-  #define STRIP_SIZE_MAX 144
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":4,
-        "ColourOrder":"GRBW",
-        "BusType":"SK6812_RGBW",
-        "Start":0,
-        "Length":144
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        144
-      ],
-      "ColourPalette":"Colourful Default",
+      "ColourPalette":"*Two Colours",
       "SegColour0": {
         "Hue": 0,
         "Sat":100,
@@ -3763,7 +3966,7 @@
       },
       "Transition": {
         "TimeMs": 0,
-        "RateMs": 2000
+        "RateMs": 1000
       },
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
@@ -3772,7 +3975,197 @@
     "BrightnessCCT": 0
   }
   )=====";
-  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      #endif
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+#endif // DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
+
+
+
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L12__ESP32_LARGE_SINGLE_PIN_TESTER_WITH_DEBUG_PINS
+  #define DEVICENAME_CTR          "testgroup_lighting_L12"
+  #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
+
+
+      // {
+      //   "Pin":4,
+      //   "ColourOrder":"GRBW",
+      //   "BusType":"SK6812_RGBW",
+      //   "Start":0,
+      //   "Length":3
+      // },
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":5,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":3
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        3
+      ],
+      "ColourPalette":"*Two Colours",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":5,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1000,
+  //       "Length":2000
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       2000
+  //     ],
+  //     "ColourPalette":"Colourful Default",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+  /***********************************
+   * SECTION: Debug Pins
+  ************************************/    
+
+  #define DEBUG_PIN1_GPIO       32
+  #define DEBUG_PIN2_GPIO       33
+  #define DEBUG_PIN3_GPIO       25
+  #define DEBUG_PIN4_GPIO       14
+  #define DEBUG_PIN5_GPIO       12
+  #define DEBUG_PIN6_GPIO       13
+  #define DEBUG_PIN7_GPIO       5 //motion pin
+
+  #define USE_FEATURE_DEBUG_PIN_INIT_LOGIC_LEVEL_SEQUENCE_CHECK
 
   /***********************************
    * SECTION: Template Configs
@@ -3802,7 +4195,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 

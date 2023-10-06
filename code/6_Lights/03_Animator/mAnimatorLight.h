@@ -402,9 +402,9 @@ class mAnimatorLight :
     #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0, bool json_appending = true); // probably falls into the E131 type, but here set my mqtt
     #endif
-    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_appending = true);
-    #endif
+    // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_appending = true);
+    // #endif
     #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
     uint8_t ConstructJSON_Auto_Playlists(uint8_t json_level = 0, bool json_appending = true);
     #endif  
@@ -488,8 +488,11 @@ class mAnimatorLight :
     #ifdef ENABLE_PIXEL_AUTOMATION_PLAYLIST
     #include "mAnimatorLight_Auto_Playlists.h"
     #endif
-    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    #include "mAnimatorLight_Auto_Presets.h"
+    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETSUSE_MODULE_LIGHTS_ANIMATOR_OLD
+    #include "mAnimatorLight_Presets.h"
+    #endif
+    #ifdef USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
+    void LoadPreset_ManualUserCustom_ByID(uint8_t id);
     #endif
 
     /*****************************************************************************************************************************************************************************
@@ -574,7 +577,7 @@ class mAnimatorLight :
     #define WLED_FPS         42
     #define FRAMETIME_FIXED  (1000/WLED_FPS)
     #define FRAMETIME_MS     24
-    #define FRAMETIME        getFrameTime()
+    #define FRAMETIME        25//getFrameTime()
 
     /* Each segment uses 52 bytes of SRAM memory, so if you're application fails because of insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
     #ifdef ESP8266
@@ -624,7 +627,8 @@ class mAnimatorLight :
     #ifdef ESP8266
     #define MAX_SEGMENT_DATA 2048
     #else
-    #define MAX_SEGMENT_DATA 8192
+    // #define MAX_SEGMENT_DATA 8192
+    #define MAX_SEGMENT_DATA 12000//6*2000
     #endif
 
     #define FLASH_COUNT 4 
@@ -868,9 +872,6 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-    EFFECTS_FUNCTION__PALETTE_COLOUR_FADE_SATURATION__ID,
-    #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
     #endif
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
@@ -887,8 +888,10 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
         
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-    EFFECTS_FUNCTION__POPPING_DECAY_PALETTE__ID,
-    EFFECTS_FUNCTION__POPPING_DECAY_RANDOM__ID,
+    EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,
+    EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_BLACK__ID,
+    EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_WHITE__ID,
+    EFFECTS_FUNCTION__POPPING_DECAY_RANDOM_TO_WHITE__ID,
     #endif
         
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
@@ -1302,6 +1305,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   void SetTransitionColourBuffer_DesiredColour(byte* buffer, uint16_t buflen, uint16_t pixel_index,  RgbcctColor::ColourType pixel_type, RgbcctColor starting_colour);
 
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel();
+  void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_WithFade(uint8_t fade = 0);
   void DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_FromBus();
   void Segments_Dynamic_Buffer_UpdateStartingColourWithGetPixel();
 
@@ -1335,9 +1339,11 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   void EffectAnim__Stepping_Palette();
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void EffectAnim__Popping_Decay_Palette();
-  void EffectAnim__Popping_Decay_Random();
-  void EffectAnim__Popping_Decay_Base(bool draw_palette_inorder);
+  void EffectAnim__Popping_Decay_Palette_To_Black();
+  void EffectAnim__Popping_Decay_Random_To_Black();
+  void EffectAnim__Popping_Decay_Palette_To_White();
+  void EffectAnim__Popping_Decay_Random_To_White();
+  void EffectAnim__Popping_Decay_Base(bool draw_palette_inorder, bool fade_to_black);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   void EffectAnim__Spanned_Static_Palette();
@@ -1354,9 +1360,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  void EffectAnim__Palette_Colour_Fade_Saturation();
-  #endif
+  // #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  // void EffectAnim__Palette_Colour_Fade_Saturation();
+  // #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   void EffectAnim__Blend_Two_Palettes();
   #endif

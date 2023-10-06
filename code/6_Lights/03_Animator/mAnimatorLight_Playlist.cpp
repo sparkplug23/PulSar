@@ -174,7 +174,7 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
   JsonObject playlist = sObj.createNestedObject(F("playlist"));
   JsonArray ps = playlist.createNestedArray("ps");
   JsonArray dur = playlist.createNestedArray("dur");
-  JsonArray transition = playlist.createNestedArray(F("transition"));
+  // JsonArray transition = playlist.createNestedArray(F("transition"));
   playlist[F("repeat")] = (playlistIndex < 0) ? playlistRepeat - 1 : playlistRepeat; // remove added repetition count (if not yet running)
   playlist["end"] = playlistEndPreset;
   playlist["r"] = playlistOptions & PL_OPTION_SHUFFLE;
@@ -183,7 +183,7 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
   {
     ps.add(playlistEntries[i].preset);
     dur.add(playlistEntries[i].dur);
-    transition.add(playlistEntries[i].tr);
+    // transition.add(playlistEntries[i].tr);
   }
 
 }

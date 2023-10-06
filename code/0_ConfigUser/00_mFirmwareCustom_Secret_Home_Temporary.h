@@ -34,21 +34,14 @@
 // #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_HVAC_HAIRDRYER
 // #define DEVICE_DESKSENSOR
-// #define DEVICE_SHELLYDIMMER_BEDROOM_LAMP
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_U2515H // 3rd display (far left)
 // #define DEVICE_RGB_COMPUTER_SCREEN_DELL_P3222QE   // 1st New primary display
 // #define DEVICE_RGBCLOCK_BEDROOM_WALL                             // Make this into an alarm? flashing effect and buzzer/speaker with esp32
 // #define DEVICE_RGBDISPLAY_BEDROOM_DOUBLE_DIGIT
 // #define DEVICE_BLACK_STAND_LIGHT
-// #define DEVICE_RGBCLOCK_TVROOM
 // #define DEVICE_H801_INSIDE_BEDROOM_WARDROBE
-// #define DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
-// #define DEVICE_HVAC_OIL_RADIATOR
 // #define DEVICE_PORTABLE_TEMPERATURE_SENSOR
-// #define DEVICE_TESTBED_SR04
 // #define DEVICE_H801__MASTERBEDROOM_UPLIGHT
-
-
 
 
 /**************************************************************************************************************************************************
@@ -322,206 +315,6 @@
 #endif
 
 
-/**
- * New heating controller, designed to work from single device to multizone system
- * For development of hvac with pzem to monitor power
- * 
- * Taken from testbeds for insitu development and openhab integration, this will remain the primary hvac dev code (unless I use a 4 LED tester)
- * Long USB will be used for always debugging
- * 
- * To include:
- *  - BME? If I could place this on the plug into the wall, it would be elevated heat sensing? with 1m cable
- *  - Optional Ds18 that can be added to oil heater
- *  - Relay output (requiring level shifter)
- *  - PZEM at 5v, via level shifter
- *  - Power with mains internal? (possible danger with sensors?) -- 
- *  - Since pzem, this needs to esp32, but good practive for house hvac
- * 
- * Use two zones, so second zone can be a remote tester
- * 
- * */
-#ifdef DEVICE_HVAC_OIL_RADIATOR 
-  #define DEVICENAME_CTR          "hvac_oil_radiator"
-  #define DEVICENAME_FRIENDLY_CTR "HVAC Oil Radiator with Energy Sensor"
-  #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  //Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
-  #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  #define USE_DEVFEATURE_JSON_ADD_FLOAT_AS_OWN_FUNCTION
-  #define ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS   
-  
-  #define USE_MODULE_SENSORS_INTERFACE  
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  #define USE_MODULE_SENSORS_REMOTE_DEVICE
-
-  #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
-  #define REMOTE_SENSOR_JSON_NAME "Bedroom"
-  
-  #define USE_MODULE_ENERGY_INTERFACE
-  #define USE_MODULE_ENERGY_PZEM004T_V3
-
-  #define USE_MODULE_DRIVERS_INTERFACE
-  #define USE_MODULE_DRIVERS_RELAY
-
-  #define USE_MODULE_CONTROLLER_HVAC
-    #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_NEW_HVAC_TIMEON
-    #define HEATING_DEVICE_MAX 2
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
-      #endif
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_REL2_INV_CTR  "\""  // Using Builtin LED
-      #endif  
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-  
-  #define D_DEVICE_DRIVER_RELAY_0_NAME "DriverZone0"
-  #define D_DEVICE_DRIVER_RELAY_1_NAME "DriverZone1"
-
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Zone0"
-  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Zone1"
-
-  #define D_DEVICE_SENSOR_ZONE_0_NAME "BME0"
-  #define D_DEVICE_SENSOR_ZONE_1_NAME REMOTE_SENSOR_JSON_NAME // tESTING REMOTE SENSOR VIA MQTT (LATER OPTIONS SHOULD INCLUDE DIRECT udp) "BME0"
-
-  #define D_DEVICE_SENSOR_BME_0_NAME "BME0"
-  #define D_DEVICE_SENSOR_BME_1_NAME "BME1"
-
-  #define D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "RemoteBedroomBME"
-
-  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
-  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
-
-  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "Zone0"
-  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "Power"
-  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
-      "],"      
-      "\"" D_MODULE_SENSORS_BME_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_BME_0_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
-      "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
-        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\""
-      "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_FRIENDLY_CTR "\":["
-        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
-      "],"
-      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":["
-        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
-      "],"
-    "},"
-    "\"" D_JSON_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_FRIENDLY_CTR "\":{" 
-        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-      "},"  
-      "\"" D_MODULE_ENERGY_INTERFACE_FRIENDLY_CTR "\":[" 
-        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
-      "]"  
-    "},"
-    "\"" "HVACZone" "\":{"
-      "\"" "SetSensor" "\":["
-        "\"" D_DEVICE_SENSOR_ZONE_0_NAME "\","
-        "\"" D_DEVICE_SENSOR_ZONE_1_NAME "\""
-      "],"
-      "\"" "SetOutput" "\":["
-        "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
-          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-        "},"
-        "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_FRIENDLY_CTR "\","
-          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-        "}"
-      "]"
-    "},"
-    "\"" D_JSON_ENERGY "\":{"
-        "\"DeviceCount\":1"    
-    "}"
-  "}";
-  
-#endif
-
-
-#ifdef DEVICE_BEDROOM_CONTROLLER_BUTTONS_01
-  #define DEVICENAME_CTR          "bedroom_controller_buttons_01"
-  #define DEVICENAME_FRIENDLY_CTR "Bedside Controller for Room 01"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_MODULE_SENSORS_INTERFACE
-  #define USE_MODULE_SENSORS_BUTTONS
-    #define ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES
-    #define ENABLE_DEVFEATURE_DISABLE_BUTTON_CAN_RESET_DEVICE
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"D1\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"D3\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
-      "\"D4\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
-      "\"D5\":\"" D_GPIO_FUNCTION_KEY5_INV_CTR  "\","
-      "\"D6\":\"" D_GPIO_FUNCTION_KEY6_INV_CTR  "\","
-      "\"D7\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-#endif
-
-
-
 
 /**
  * @brief 
@@ -610,8 +403,6 @@
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
   #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
-
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
 
   #define USE_LIGHTING_TEMPLATE
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
@@ -805,7 +596,7 @@
   ************************************/    
 
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
-  #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
+  // #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
   // #define DISABLE_NETWORK
@@ -832,7 +623,7 @@
 
   #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
 
   #define USE_LIGHTING_TEMPLATE
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
@@ -947,9 +738,6 @@
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  // #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_MOTION
 
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
@@ -1021,7 +809,7 @@
     #define USE_MODULE_SENSORS_BH1750
     #define USE_MODULE_SENSORS_SWITCHES
     #define USE_MODULE_SENSORS_BUTTONS
-    // #define USE_MODULE_SENSORS_MOTION
+    #define USE_MODULE_SENSORS_MOTION
     #define USE_MODULE_SENSORS_LDR_BASIC
 
   #ifdef USE_MODULE_SENSORS_LDR_BASIC
@@ -1253,6 +1041,9 @@
         "\"" D_DEVICE_SENSOR_CLIMATE_BME1 "\","
         "\"" D_DEVICE_SENSOR_CLIMATE_BME2 "\""
       "],"  
+      "\"" D_MODULE_SENSORS_BH1750_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "],"  
       "\"" D_MODULE_SENSORS_DHT_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
         "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
@@ -1319,43 +1110,44 @@
         "}"
       "]"
     "}," 
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTTSubscribe\":["
         "\"desksensor_slave/status/drivers_interface/+/drivers/unified\""
     "]"
   "}";
 
   
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  R"=====(
-  {
-    "AddRule": {
-      "Default":["Switch1Change->Relay1Follow"]
-    }
-  }
-  )=====";
-
   // #define USE_RULES_TEMPLATE
-  // DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
-  // "{"
-  //   // "\"AddRuleDefault\":\"Motion0=0\","
-  //   // MOTION
-  //   "\"Rule0\":{"
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
-  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
-  //       "\"DeviceName\":0,"
-  //       "\"State\":\"On\""
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-  //       "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
-  //       "\"DeviceName\":0," 
-  //       "\"State\":\"Follow\""
-  //     "}"
-  //   "}"
-  // "}";
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // R"=====(
+  // {
+  //   "AddRule": {
+  //     "Default":["Switch1Change->Relay1Follow"]
+  //   }
+  // }
+  // )=====";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_FUNC_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "}"
+  "}";
+
+  #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
   // #ifdef USE_MODULE_LIGHTS_INTERFACE
   // #define USE_LIGHTING_TEMPLATE
@@ -1528,210 +1320,6 @@
 
 
 #endif
-
-
-
-#ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE_OLD
-  #define DEVICENAME_CTR          "h801_bedroom_wardrobe"
-  #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-      
-  #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  #define DISABLE_WEBSERVER
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
-    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  
-  
-  // #define USE_SERIAL_ALTERNATE_TX
-  // #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  // //#define FORCE_TEMPLATE_LOADING
-  // // #define SETTINGS_HOLDER 2 
-
-  #define USE_MODULE_SENSORS_BUTTONS
-
-  // #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-
-  // #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_PWM
-  
-  // #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-  // #define D_EFFECT_INSIDE_TEMPLATE "Effects"
-
-  // #define MAX_NUM_SEGMENTS 5
-  
-  
-  // #define 
-  
-  
-  
-
-
-  // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
-  
-  #define USE_MODULE_CORE_RULES
-
-  // #define USE_MODULE_SENSORS_SOLAR_LUNAR
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"0\":\""  D_GPIO_FUNCTION_KEY1_INV_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
-  "}";
- 
-
-  #define STRIP_SIZE_MAX 2
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"GRBcw\","
-    "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":0,\"" D_JSON_RATE "\":1\"},"
-    "\"" D_JSON_COLOUR_PALETTE "\":10,"
-    "\"Hue\":120,\"Sat\":100\","
-    "\"" D_JSON_ANIMATIONMODE  "\":\"" D_JSON_EFFECTS "\","
-    "\"Effects\":{\"Function\":\"Solid\"},"//Sun Elevation RGBCCT Solid Palette 01\"},"
-    "\"BrightnessRGB\": 100,"
-    "\"CCT_TempPercentage\":0,"
-    "\"BrightnessCCT\":100,"
-    "\"Light\":{\"TimeOn\":60}"
-  "}";
-
-
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  "{"
-    "\"Rule0\":{" //switch example
-      "\"Trigger\":{"
-        "\"Module\":\"Buttons\","    //sensor
-        "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-        "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_LIGHTS_INTERFACE_FRIENDLY_CTR "\","
-        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-        "\"DeviceName\":0," //number, name, or all
-        "\"State\":\"Toggle\"" // toggle
-      "}"
-    "}"
-  "}";
-
-
-  // //#define FORCE_TEMPLATE_LOADING
-  // #define SETTINGS_HOLDER 1   
-
-  
-  // // #define USE_MODULE_CORE_RULES
-  
-  // // #define USE_MODULE_SENSORS_INTERFACE
-  // // #define USE_MODULE_SENSORS_BUTTONS
-
-  // #define USE_BUILD_TYPE_LIGHTING
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  // #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_PWM
-
-
-  // #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT
-
-  // // need to add motion here
-
-  // // // #define USE_DEVFEATURE_SUNPOSITION_ELEVATION_USE_TESTING_VALUE
-
-  // //#define USE_MODULE_SENSORS_SOLAR_LUNAR
-
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //    "\"" D_JSON_GPIOC "\":{"
-  //     #ifdef USE_MODULE_SENSORS_BUTTONS
-  //     "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
-  //     #endif    
-  //   "},"
-  //   "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\""
-  // "}";
-  
-  // #define STRIP_SIZE_MAX 1 // PWM type, set size to 1
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":" STR2(STRIP_SIZE_MAX) ","
-  //   "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBwc\","
-  //   "\"" D_JSON_ANIMATIONMODE    "\":\""  D_JSON_EFFECTS  "\","
-  //   "\"" D_JSON_EFFECTS "\":{" 
-  //     // "\"" D_JSON_FUNCTION "\":\"" D_EFFECTS_FUNCTION_SOLID_COLOUR_NAME_CTR "\""
-  //     "\"" D_JSON_FUNCTION "\":8"//\"Sun Elevation RGBCCT Solid Palette 01\""
-  //   "},"
-  //   "\"" D_JSON_TRANSITION       "\":{"
-  //     "\"" D_JSON_TIME "\":1,"
-  //     "\"" D_JSON_RATE "\":5,"
-  //     "\"" D_JSON_PIXELS_UPDATE_PERCENTAGE "\":2,"
-  //     "\"" D_JSON_ORDER "\":\"" D_JSON_RANDOM "\""
-  //   "},"
-  //   "\"" D_JSON_CCT_TEMP "\":300,"
-  //   "\"" D_JSON_HUE "\":25,"
-  //   "\"" D_JSON_SAT "\":100,"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":67,"
-  //   "\"" D_JSON_BRIGHTNESS_CCT "\":100,"
-  //   "\"" D_JSON_BRIGHTNESS_RGB "\":100"
-  // "}";
-
-
-  // #define USE_RULES_TEMPLATE
-  // DEFINE_PGM_CTR(RULES_TEMPLATE)
-  // "{"
-  //   "\"Rule0\":{" //switch example
-  //     "\"Trigger\":{"
-  //       "\"Module\":\"Buttons\","    //sensor
-  //       "\"Function\":\"" D_FUNC_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
-  //       "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
-  //       "\"State\":2" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
-  //     "},"
-  //     "\"Command\":{"
-  //       "\"Module\":\"Relays\","
-  //       "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
-  //       "\"DeviceName\":0," //number, name, or all
-  //       "\"State\":2" // toggle
-  //     "}"
-  //   "}"
-  // "}"
-    
-#endif
-
-
 
 
 #ifdef DEVICE_H801_INSIDE_BEDROOM_WARDROBE
@@ -2210,7 +1798,7 @@
 
 
 #ifdef DEVICE_H801__MASTERBEDROOM_UPLIGHT
-  #define DEVICENAME_CTR          "h801_mbedroom_wardrobe_uplight"
+  #define DEVICENAME_CTR          "h801_mbedroom_wardrobe_uplight" //now underbed light
   #define DEVICENAME_FRIENDLY_CTR "H801 h801_bedroom_wardrobe 3"
   #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
   #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
@@ -2654,129 +2242,6 @@
 #endif
 
 
-
-#ifdef DEVICE_SHELLYDIMMER_BEDROOM_LAMP
-  #define DEVICENAME_CTR          "dimmer_bedroom_lamp"
-  #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
-  
-  //#define FORCE_TEMPLATE_LOADING
-  #define SETTINGS_HOLDER 2
-
-  // #define ENABLE_DEVFEATURE_SHELLYDIMMER2_INVERTED_EDGE_FOR_ERROR
-  
-  #define USE_MODULE_SENSORS_SWITCHES
-
-  #define USE_MODULE_CORE_RULES
-  #define USE_HARDWARE_DEFAULT_RULES_1
-
-  #define DISABLE_SERIAL_LOGGING //temp measure
-  // #define DISABLE_SERIAL0_CORE //dont think its needed
-
-  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\""
-  "}";
-
-  #define D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "Light"
-  #define D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "Switch1"
-  #define D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "Switch2"
-  
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_JSON_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_FRIENDLY_CTR "\":["
-        "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
-        "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
-      "]"
-    "}"
-  "}";
-
-#endif
-
-
-
-
-#ifdef DEVICE_BEDROOM_BEDLIGHT
-  #define DEVICENAME_CTR          "bedroom_bedlight"
-  #define DEVICENAME_FRIENDLY_CTR "Bedroom Bedlight H801"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-      
-  #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
-
-  #define DISABLE_WEBSERVER
-    
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
-  #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    #define ENABLE_DEVFEATURE_SOLAR_PALETTES
-    #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
-    #define DEBUG_TARGET_ANIMATOR_SEGMENTS
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT  
-
-    #define ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
-    #define ENABLE_DEVFEATURE_FIXING_SEGMENT_LENGTH_SIZE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEVFEATURE_INCREMENTING_PALETTE_ID
-    #define ENABLE_DEVFEATURE_PALETTE_INTERMEDIATE_FUNCTION__USE_NEW_FUNCTIONS
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  
-  #define STRIP_SIZE_MAX 1
-  #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // "{"
-  //   "\"" D_JSON_HARDWARE_TYPE  "\":\"" "RGBCCT_PWM" "\","
-  //   "\"" D_JSON_STRIP_SIZE       "\":1,"
-  //   "\"" D_JSON_RGB_COLOUR_ORDER   "\":\"RGBCW\","
-  //   "\"" D_JSON_TRANSITION     "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-  //   "\"" D_JSON_COLOUR_PALETTE "\":\"Solid Rgbcct 00\","
-  //   "\"" D_JSON_ANIMATIONMODE  "\":\"Effects\","
-  //   "\"" D_JSON_EFFECTS        "\"{\"Function\":\"Solid RGBCCT\"},"
-  //   "\"" D_JSON_BRIGHTNESS     "\":100"
-  // "}";
-
-  
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  "{"
-    "\"" D_JSON_HARDWARE_TYPE    "\":\"" "RGBCCT_PWM" "\","
-    "\"" D_JSON_STRIP_SIZE       "\":1,"
-    "\"" D_JSON_RGB_COLOUR_ORDER "\":\"RGBCW\","
-    "\"" D_JSON_TRANSITION       "\":{\"" D_JSON_TIME "\":2,\"" D_JSON_RATE "\":20},"
-    "\"" D_JSON_COLOUR_PALETTE   "\":\"Solid Rgbcct 00\","
-    "\"Hue\":345,\"Sat\":100,"
-    "\"" D_JSON_ANIMATIONMODE    "\":\"Effects\","
-    "\"" D_JSON_EFFECTS          "\":{\"Function\":\"Solid RGBCCT\"},"
-    "\"" D_JSON_BRIGHTNESS_RGB   "\":100,"
-    "\"" D_JSON_BRIGHTNESS_CCT   "\":100"
-  "}";
-
-
-
-#endif
 
 
 /**
@@ -3265,7 +2730,12 @@
 
 #endif
 
-
+/*************************************************************************************************************************************************************
+ * ***********************************************************************************************************************************************************
+ * ***********************************************************************************************************************************************************
+ * TV ROOM ***********************************************************************************************************************************************************
+ * ***********************************************************************************************************************************************************
+ * ***********************************************************************************************************************************************************/
 
 
 #ifdef DEVICE_AMBILIGHT_SAMSUNG_SPAREROOM

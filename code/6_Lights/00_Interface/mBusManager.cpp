@@ -103,6 +103,7 @@ BusDigital::BusDigital(BusConfig &bc, uint8_t digital_bus_number, const ColorOrd
 
 void BusDigital::show() 
 {
+  // ALOG_INF(PSTR("show() %d"), micros());
   PolyBus::show(_busPtr, _iType);
 }
 
@@ -643,6 +644,7 @@ void BusManager::show()
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
     Serial.printf("busses[%d|%d]->show()------------------------------------\n\r", i,numBusses);
     #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
+  
     busses[i]->show();
   }
 }

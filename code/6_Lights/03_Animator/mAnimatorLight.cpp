@@ -10,6 +10,7 @@ uint16_t mAnimatorLight::_usedSegmentData = 0;
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
 
+
   /************
    * INIT SECTION * 
   *******************/
@@ -31,6 +32,9 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case FUNC_EVERY_SECOND:{      
       //EverySecond();
       EverySecond_AutoOff(); 
+
+      // ALOG_INF(PSTR("param users %d, %d, %d, %d"), SEGMENT_I(0).params_user.val0, SEGMENT_I(0).params_user.val1, SEGMENT_I(0).params_user.val2, SEGMENT_I(0).params_user.val3);
+
     }break;
     case FUNC_LOOP:     
       EveryLoop();  
@@ -85,6 +89,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #endif // USE_MODULE_NETWORK_WEBSERVER23
   } // switch(command)
+
 
 } // END FUNCTION
 
@@ -195,6 +200,8 @@ void mAnimatorLight::EveryLoop()
     #endif  
 
     uint8_t flag_animations_needing_updated = 0;
+
+    DEBUG_PIN3_SET(0);
       
     for (uint16_t seg_i = 0; seg_i < segments.size(); seg_i++)
     {
@@ -210,6 +217,7 @@ void mAnimatorLight::EveryLoop()
           **/
           if(mTime::TimeReached(&SEGMENT_I(seg_i).tSaved_AnimateRunTime, ANIMATION_UPDATOR_TIME_MINIMUM))
           {
+  DEBUG_PIN4_TOGGLE();
             SEGMENT_I(seg_i).animator->UpdateAnimations(seg_i);
             flag_animations_needing_updated++; // channels needing updated
           } //end TimeReached
@@ -274,6 +282,7 @@ void mAnimatorLight::EveryLoop()
       // }
 
     }
+    DEBUG_PIN3_SET(1);
 
 
     /**
@@ -1393,6 +1402,8 @@ void mAnimatorLight::SubTask_Segments_Effects()
  */
 void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const AnimationParam& param)
 {    
+  
+  DEBUG_PIN6_SET(0);
 
   RgbcctColor updatedColor;
   TransitionColourPairs colour_pairs;
@@ -1401,15 +1412,25 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
                 pixel < SEGMENT.virtualLength();
                 pixel++
   ){  
+    
+  // DEBUG_PIN1_SET(0);
     GetTransitionColourBuffer(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_type, &colour_pairs);
+  // DEBUG_PIN1_SET(1);
 
-    updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress);  
+  // DEBUG_PIN2_SET(0);
+    updatedColor = RgbcctColor::LinearBlend(colour_pairs.StartingColour, colour_pairs.DesiredColour, param.progress); 
+  // DEBUG_PIN2_SET(1); 
 
     // AddLog(LOG_LEVEL_TEST, PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
 
+  // DEBUG_PIN3_SET(0);
     SEGMENT.SetPixelColor(pixel, updatedColor);
+  // DEBUG_PIN3_SET(1);
 
   }
+  
+  DEBUG_PIN6_SET(1);
+
 
 }
 
@@ -1995,7 +2016,7 @@ RgbcctColor starting_colour, RgbcctColor desired_colour)
  * @return RgbcctColor 
  */
 // mAnimatorLight::TransitionColourPairs* 
-void mAnimatorLight::GetTransitionColourBuffer(
+void IRAM_ATTR mAnimatorLight::GetTransitionColourBuffer(
   byte* buffer, 
   uint16_t buflen, 
   uint16_t pixel_index, 
@@ -2095,6 +2116,25 @@ void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel()
                                               pixel, 
                                               SEGMENT.colour_type, 
                                               SEGMENT.GetPixelColor(pixel)
+                                            );
+  }
+
+}
+
+void mAnimatorLight::DynamicBuffer_Segments_UpdateStartingColourWithGetPixel_WithFade(uint8_t fade)
+{
+  RgbcctColor colour;
+  for(int pixel=0;
+          pixel<SEGMENT.virtualLength();
+          pixel++
+  ){
+    colour = SEGMENT.GetPixelColor(pixel);
+    colour.Fade(fade);
+    SetTransitionColourBuffer_StartingColour( SEGMENT.Data(), 
+                                              SEGMENT.DataLength(),
+                                              pixel, 
+                                              SEGMENT.colour_type, 
+                                              colour
                                             );
   }
 
@@ -4651,18 +4691,18 @@ void mAnimatorLight::MQTTHandler_Init()
   mqtthandler_list.push_back(ptr);
   #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     
-  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  ptr = &mqtthandler_automation_presets;
-  ptr->tSavedLastSent = millis();
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // ptr = &mqtthandler_automation_presets;
+  // ptr->tSavedLastSent = millis();
+  // ptr->flags.PeriodicEnabled = true;
+  // ptr->flags.SendNow = true;
+  // ptr->tRateSecs = 1;//pCONT_set->Settings.sensors.teleperiod_secs; 
+  // ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  // ptr->json_level = JSON_LEVEL_DETAILED;
+  // ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
+  // ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
+  // mqtthandler_list.push_back(ptr);
+  // #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
     
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
   ptr = &mqtthandler_manual_setpixel;
@@ -4746,12 +4786,12 @@ void mAnimatorLight::MQTTHandler_Set_RefreshAll()
  * */
 void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 {
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  // }
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  }
 }
 
 /**

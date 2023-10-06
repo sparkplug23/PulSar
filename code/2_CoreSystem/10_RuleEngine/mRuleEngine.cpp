@@ -266,12 +266,12 @@ void mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_even
   event_triggered.device_id = _index;
   
   va_list arg;
-// DEBUG_LINE_HERE;
 
-  ALOG_DBM( PSTR("module_id, function_id, device_id = %d,%d,%d"), event_triggered.module_id, event_triggered.function_id, event_triggered.device_id);
+  ALOG_INF( PSTR("module_id, function_id, device_id = %d,%d,%d"), event_triggered.module_id, event_triggered.function_id, event_triggered.device_id);
   
   va_start(arg, _data_length);
-  for(int i = 0; i < _data_length; i++) {
+  for(int i = 0; i < _data_length; i++) 
+  {
 
     if(i>D_RULE_DATA_VALUE_MAX_LENGTH-1){
       ALOG_ERR(PSTR("NewEventRun_NumArg Exceeded"));

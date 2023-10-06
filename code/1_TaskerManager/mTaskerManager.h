@@ -58,11 +58,14 @@
    * */
   #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
   #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-  #include "0_ConfigUser/01_mFirmwareCustom_Secret_Templates.h"
+  #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-  #include "0_ConfigUser/03_mFirmwareCustom_Secret_DevTestGroups.h"
   #include "0_ConfigUser/TestGroups/FirmwareGroup_LightingEffects.h"
 #endif // D_USER_MICHAEL
+
+
+
+
 
 #include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
 #include "2_CoreSystem/09_Events/mEvents.h"
@@ -798,7 +801,7 @@ enum TASKER_ID{
 #endif
 #ifdef USE_MODULE_ENERGY_PZEM004T_V3
   #include "7_Energy/01_Pzem004T_v3/mPZEM004T.h"
-  #define pCONT_pzem                            static_cast<mEnergyPZEM004T*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_V3_ID])
+  #define pCONT_pzem                              static_cast<mEnergyPZEM004T*>(pCONT->pModule[EM_MODULE_ENERGY_PZEM004T_V3_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_ADE7953
   #include "7_Energy/02_ADE7953/mADE7953.h"

@@ -17,28 +17,7 @@
  * When new BT fibre comes, put front door smart hub 2 into garage as new AP: "Lucida" ie brightest sky in a constellation
  * */
 
-#ifdef USE_SSIDS_OUTSIDE_HOUSE
-
-// BT box, phasing out
-// Dedicated SSID for home controllers
-#undef  STA_SSID1
-#define STA_SSID1            "HACS2400"                // [Ssid2] Optional alternate AP Wifi SSID
-#undef  STA_PASS1
-#define STA_PASS1            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
-
-// Garage wifi for devices in there or garden
-#undef  STA_SSID2
-#define STA_SSID2            "UniFi_AP_1"                // [Ssid2] Optional alternate AP Wifi SSID
-#undef  STA_PASS2
-#define STA_PASS2            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
-
-// Will remain unpowered, and will only be used if failsafe SSID is needed when primary does not work
-#undef  STA_SSID3
-#define STA_SSID3            "RecoverySSID"                // [Ssid1] Wifi SSID
-#undef  STA_PASS3
-#define STA_PASS3            "af4d8bc9ab"                // [Password1] Wifi password
-
-#elif defined(USE_SSIDS_NONE_DEBUGGING)
+#if defined(USE_SSIDS_NONE_DEBUGGING)
 
 // BT box, phasing out
 // Dedicated SSID for home controllers
@@ -113,6 +92,38 @@
 #define CELLULAR_APN "giffgaff.com"
 #define CELLULAR_GPRS_USERNAME "gg"
 #define CELLULAR_GPRS_PASSWORD "p"
+
+/**
+ * @brief If all 4 fobs have unique IDs, then they can be changed in software without repairing them for different tasks
+ * 
+ */
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_A 1011
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_B 1012
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_C 1013
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_D 1014
+
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_A 1021
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_B 1022
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_C 1023
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_D 1024
+
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_A 1031
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_B 1032
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_C 1033
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_D 1034
+
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_A 1041
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_B 1042
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_C 1043
+#define RADIO_CODES_24BIT__KEYFOB_BLACK_1__BUTTON_D 1044
+
+
+#define RADIO_CODES_64BIT__LOUVOLITE_BLINDS_1__BEDROOM_COMMAND_UP (uint64_t)0xACA0F2F73F000BD3
+
+#define RADIO_CODES_24BIT__SOS_DOORBELL_1 5736251
+    #define RADIO_PROTOCOL_24BIT__SOS_DOORBELL_1 1
+    #define RADIO_DELAY_24BIT__SOS_DOORBELL_1 205
+
 
 
 #endif // MUSERCONFIG_SECRET_HEADER

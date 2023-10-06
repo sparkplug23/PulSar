@@ -121,7 +121,10 @@ void mMotion::Rules_Add_Rule()
  * @param DeviceName gives the index to the stored location index from sensor list
  * @param State gives the ON/Started (1) or OFF/Ended (0)
  * */
-void mMotion::RulesEvent_Motion_Change(){
+void mMotion::RulesEvent_Motion_Change()
+{
+
+  ALOG_INF(PSTR("RulesEvent_Motion_Change"));
 
 
   // for(
@@ -257,7 +260,7 @@ char buffer[100];
   //   }
   // }
 
-  // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
+  AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "MOTION Event %d"),sensor_id);
 
 }
 
@@ -293,6 +296,8 @@ uint8_t mMotion::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 
 
 uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
+
+  ALOG_INF( PSTR("ConstructJSON_Sensor %d"), millis() );
 
   char buffer[80];
 
@@ -355,6 +360,8 @@ uint8_t mMotion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
       
     }
   }
+
+  // ALOG_INF(PSTR("JBI MOTION %s"), JsonBuilderI->GetBufferPtr());
 
 
   return JsonBuilderI->End();

@@ -333,9 +333,9 @@ void mSwitches::SwitchHandler(uint8_t mode)
         switches[i].ischanged = true;
 
         ALOG_DBM( PSTR(D_LOG_SWITCHES "#%d Changed : Level %d | %s"), 
-                              i, 
-                              state,
-                              state==active_state?"ACTIVE":"Not Active"
+                  i, 
+                  state,
+                  state==active_state?"ACTIVE":"Not Active"
         );
       
         ALOG_DBM( PSTR("state%d != lastwallswitch[%d]%d\n\r\n\r\n\r"),state,i,switches[i].lastwallswitch);
@@ -392,39 +392,22 @@ void mSwitches::SwitchHandler(uint8_t mode)
         if (switchflag < 3) 
         {
           #ifndef ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
-          #ifdef USE_MODULE_CORE_RULES
-            // Active high means start of motion always, so check for inversion
-            uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
+
+            #ifdef USE_MODULE_CORE_RULES
+              // Active high means start of motion always, so check for inversion
+              uint8_t new_state = switches[i].active_state_value == LOW ? /*invert*/ !state : /*else, just follow*/ state;
+              
+              ALOG_INF( PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
+    
+              pCONT_rules->NewEventRun_NumArg(
+                D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
+                FUNC_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
+                i, // SWitch index
+                1, // Embedded data length
+                new_state); // Event has occured, save and check it            
+
+            #endif
             
-            ALOG_DBM( PSTR("switchflag=%d, new_state=%d, state=%d"),switchflag,new_state,state);
-
-
-            // #ifdef ENABLE_RULES_TRIGGER_METHOD_V2
-              // pCONT_rules->NewEventRun(E M_MODULE_SENSORS_SWITCHES_ID, FUNC_EVENT_INPUT_STATE_CHANGED_ID, i, new_state); // Event has occured, save and check it            
-             pCONT_rules->NewEventRun_NumArg(
-               D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
-               FUNC_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
-               i, // SWitch index
-               1, // Embedded data length
-               new_state); // Event has occured, save and check it            
-
-
-
-            // #else // OLD METHOD, to delete
-            //   pCONT_rules->NewEvent(E M_MODULE_SENSORS_SWITCHES_ID, i, new_state); // Event has occured, save and check it
-            //   pCONT->Tasker_Interface(FUNC_EVENT_INPUT_STATE_CHANGED_ID); // This should maybe be rolled into "NewEvent" so NewEvent of switch would automtically call this        
-            // #endif
-
-          #endif
-          
-          // This is the manual way of starting rules, but probably should be phased out?
-
-          /**
-           * @brief 
-           * The "NewEvent" if rules are enabled should automatically fire checking of rules
-           * 
-           */
-
           #endif // ENABLE_DEVFEATURE_TO_PARTIAL_DISABLE_SWITCH_FOR_DEBUG
         }
 
@@ -432,8 +415,10 @@ void mSwitches::SwitchHandler(uint8_t mode)
         switches[i].state = state;
 
       }
-    }else{
-        switches[i].ischanged = false;
+    }
+    else
+    {
+      switches[i].ischanged = false;
     }
   }
 }

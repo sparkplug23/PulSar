@@ -6,6 +6,7 @@ mTaskerManager* mTaskerManager::instance = nullptr;
 int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
+
   int8_t result = 0;
 
   if(target_tasker){
@@ -182,15 +183,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
 
 void mTaskerManager::addTasker(TASKER_ID id, mTaskerInterface* mod)
 {
-  if (id < pModule.size()) 
-  {
-    pModule[id]     = mod;
-  } 
-  else
-  {
-    pModule.push_back(mod);
-  }
-
+  pModule.push_back(mod);
+  Serial.printf("AddTasker[%d]\t%S\n\r", id, mod->GetModuleFriendlyName());
 }
 
 
@@ -219,13 +213,12 @@ uint8_t mTaskerManager::Instance_Init(){
   addTasker(EM_MODULE_CORE_RULES_ID, new mRuleEngine());
   #endif
   #ifdef USE_MODULE_CORE_UPDATES
-  addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());
+  addTasker(EM_MODULE_CORE_UPDATES_ID, new mUpdates());  // this should be enabled by default and OTA/HTTP flashing moved here
   #endif
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(EM_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID, new mDevelopmentDebugging());
   #endif
   
-
   // Network  
   #ifdef USE_MODULE_NETWORK_INTERFACE
   addTasker(EM_MODULE__NETWORK_INTERFACE__ID, new mInterfaceNetwork());
@@ -256,6 +249,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
     addTasker(EM_MODULE_DISPLAYS_OLED_SH1106_ID, new mOLED_SH1106());
   #endif
+
   // Drivers (Range 40-129)
   #ifdef USE_MODULE_DRIVERS_INTERFACE
     addTasker(EM_MODULE_DRIVERS_INTERFACE_ID, new mDriverInterface());
@@ -320,7 +314,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS__CELLULAR_SIM7000
     addTasker(EM_MODULE_DRIVERS__CELLULAR_SIM7000__ID, new mCellular_SIM7000());
   #endif
-  
   #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
     addTasker(EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID, new mWebCamera());
   #endif
@@ -330,8 +323,6 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
     addTasker(EM_MODULE_DRIVERS__CAMERA_MULTICLIENT__ID, new mWebCamera());
   #endif
-
-
 
   // Energy
   #ifdef USE_MODULE_ENERGY_INTERFACE
@@ -346,6 +337,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_ENERGY_INA219
     addTasker(EM_MODULE_ENERGY_INA219_ID, new X());
   #endif
+
   // Lights
   #ifdef USE_MODULE_LIGHTS_INTERFACE
     addTasker(EM_MODULE_LIGHTS_INTERFACE_ID, new mInterfaceLight());
@@ -496,7 +488,7 @@ uint8_t mTaskerManager::Instance_Init(){
     addTasker(EM_MODULE_CONTROLLER_USERMOD_01_ID, new mUserMod_01());
   #endif
   
-// 10 Controller (Unique to one use case)
+  // Specialised Controllers
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     addTasker(EM_MODULE_CONTROLLER_RADIATORFAN_ID, new mRadiatorFan());
   #endif
@@ -525,6 +517,12 @@ uint8_t mTaskerManager::Instance_Init(){
     addTasker(EM_MODULE_CONTROLLER_CUSTOM__WLED_WEBUI_DEVELOPER__ID, new mWLEDWebUI());
   #endif
 
+  Serial.printf(D_LOG_CLASSLIST "Loaded %d|%d modules\n\r",  pModule.size(), GetClassCount());
+  if(pModule.size() != GetClassCount())
+  {    
+    Serial.printf(D_LOG_CLASSLIST "ERROR, mismatch in modules added\n\r");
+    delay(5000);
+  }
 
 };
 
@@ -561,6 +559,7 @@ int16_t mTaskerManager::GetModuleIndexbyFriendlyName(const char* c)
   return -1;
 }
 
+
 uint16_t mTaskerManager::GetModule_UniqueID_byFriendlyName(const char* c)
 {
   if(*c=='\0'){ return -1; }
@@ -574,42 +573,16 @@ uint16_t mTaskerManager::GetModule_UniqueID_byFriendlyName(const char* c)
 }
 
 
-/**
- * @brief Method for going between EM_MODULE_ID (ie small int) and UniqueID (ie 1000's)
- * 
- * @return uint16_t 
- */
-// uint16_t mTaskerManager::GetModuleUniqueID_UsingEmNumberID()
-// {
-
-//   for(int ii=0;ii<GetClassCount();ii++)
-//   {
-
-//     if()
-
-
-
-//   }
-
-// }
-
 uint16_t mTaskerManager::GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id)
-// ModuleUniqueID_UsingEmNumberID()
 {
-
   for(int ii=0;ii<GetClassCount();ii++)
   {
-
     if( unique_id == pModule[ii]->GetModuleUniqueID() )
     {
       return ii;
     }
-
   }
-
 }
-
-
 
 
 int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)
@@ -620,6 +593,7 @@ int16_t mTaskerManager::GetModuleUniqueIDbyFriendlyName(const char* c)
     return GetModuleUniqueIDbyVectorIndex(index);
   }
 }
+
 
 /**
  * @brief Using the unique ID each module must have, get the TaskerInterface array enum ID
@@ -642,6 +616,7 @@ uint16_t mTaskerManager::GetModuleUniqueIDbyVectorIndex(uint8_t id)
   return pModule[id]->GetModuleUniqueID();
 }
 
+
 mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
 {
   int16_t mod_id = GetEnumVectorIndexbyModuleUniqueID(id);
@@ -650,23 +625,14 @@ mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID(uint16_t id)
 
 /**
  * @brief Must check for validity, if not, returns nullptr
- * 
  * @param id 
  * @return mTaskerInterface* 
  */
-// mTaskerInterface* mTaskerManager::GetModuleObjectbyUniqueID_Protected(uint16_t id)
-// {
-
-// safe way by returning a default class
-
-//   return pModule[GetEnumVectorIndexbyModuleUniqueID(id)];
-// }
-
-
 bool mTaskerManager::ValidTaskID(uint8_t id)
 {
   return id <= GetClassCount() ? true : false;
 }
+
 
 PGM_P mTaskerManager::GetModuleFriendlyName(uint16_t id)
 {
@@ -677,11 +643,10 @@ PGM_P mTaskerManager::GetModuleFriendlyName(uint16_t id)
   return PM_SEARCH_NOMATCH;
 }
 
+
 PGM_P mTaskerManager::GetModuleFriendlyName_WithUniqueID(uint16_t unique_id)
 {
-
   uint8_t enum_id = GetEnumVectorIndexbyModuleUniqueID(unique_id);
-
   if(ValidTaskID(enum_id))
   {
     return pModule[enum_id]->GetModuleFriendlyName();

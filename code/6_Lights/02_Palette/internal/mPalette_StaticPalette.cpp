@@ -91,8 +91,6 @@ RgbcctColor mPalette::Get_Encoded_StaticPalette_Colour(
 
   STATIC_PALETTE *ptr = &mPaletteI->static_palettes[palette_adjusted_id];
   
-
-
   uint8_t pixels_in_map = GetNumberOfColoursInPalette(palette_adjusted_id);  
   uint8_t colour_width  = GetEncodedColourWidth(ptr->encoding); 
 

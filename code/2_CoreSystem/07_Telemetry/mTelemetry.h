@@ -60,6 +60,9 @@ class mTelemetry :
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_System_Stored_Settings(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_method = 0, bool json_appending = true);
+      #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+      uint8_t ConstructJSON_Debug__Settings_Storage(uint8_t json_method = 0, bool json_appending = true);
+      #endif
     #endif
 
     #ifdef USE_MODULE_NETWORK_MQTT    
@@ -85,7 +88,10 @@ class mTelemetry :
           MQTT_HANDLER_SYSTEM_DEBUG_MODULEINTERFACE_ID,
           MQTT_HANDLER_SYSTEM_DEBUG_MINIMAL_ID,
           MQTT_HANDLER_SYSTEM_DEBUG_SYSTEM_SAVED_SETTINGS_ID,
-          MQTT_HANDLER_SYSTEM_DEBUG_TASKER_INTERFACE_PERFORMANCE,
+          MQTT_HANDLER_SYSTEM_DEBUG_TASKER_INTERFACE_PERFORMANCE,          
+          #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+          MQTT_HANDLER_SYSTEM_DEBUG_SETTINGS_STORAGE,
+          #endif
         #endif
         MQTT_HANDLER_SYSTEM_SYSTEM_LENGTH_ID // last holds length      
       };
@@ -117,6 +123,9 @@ class mTelemetry :
         handler<mTelemetry> mqtthandler_debug_system_saved_settings;
         #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
         handler<mTelemetry> mqtthandler_debug_tasker_interface_performance;
+        #endif
+        #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+        handler<mTelemetry> mqtthandler_debug__settings_storage;
         #endif
       #endif
     

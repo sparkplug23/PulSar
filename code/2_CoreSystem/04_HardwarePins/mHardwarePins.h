@@ -20,43 +20,81 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
   
+#include "jsmn.h"
 
-  #include "jsmn.h"
 
-
-#ifndef ENABLE_FEATURE_DEBUG_PINS // Nicely set them to nothing so they can be used inline without worring about ifdef gaurds each time
-
-  // #define DEBUG_PIN1_GPIO     32
-  #define DEBUG_PIN1_INIT()   //pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
-  #define DEBUG_PIN1_SET(X)   //digitalWrite(DEBUG_PIN1_GPIO, X);
-  #define DEBUG_PIN1_TOGGLE()   //digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
-
-  // #define DEBUG_PIN2_GPIO     33
-  #define DEBUG_PIN2_INIT()   //pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
-  #define DEBUG_PIN2_SET(X)   //digitalWrite(DEBUG_PIN2_GPIO, X);
-  #define DEBUG_PIN2_TOGGLE()   //digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
-
-  // #define DEBUG_PIN3_GPIO     25
-  #define DEBUG_PIN3_INIT()   //pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
-  #define DEBUG_PIN3_SET(X)   //digitalWrite(DEBUG_PIN3_GPIO, X);
-  #define DEBUG_PIN3_TOGGLE()   //digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
-
-  // #define DEBUG_PIN4_GPIO     14
-  #define DEBUG_PIN4_INIT()   //pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
-  #define DEBUG_PIN4_SET(X)   //digitalWrite(DEBUG_PIN4_GPIO, X);
-  #define DEBUG_PIN4_TOGGLE()   //digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
-
-  // #define DEBUG_PIN5_GPIO     12
-  #define DEBUG_PIN5_INIT()   //pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
-  #define DEBUG_PIN5_SET(X)   //digitalWrite(DEBUG_PIN5_GPIO, X);
-  #define DEBUG_PIN5_TOGGLE()   //digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
-
-  // #define DEBUG_PIN6_GPIO     13
-  #define DEBUG_PIN6_INIT()   //pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
-  #define DEBUG_PIN6_SET(X)   //digitalWrite(DEBUG_PIN6_GPIO, X);
-  #define DEBUG_PIN6_TOGGLE()   //digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
-
-#endif // ENABLE_FEATURE_DEBUG_PINS
+#ifdef DEBUG_PIN1_GPIO
+  #define DEBUG_PIN1_INIT()     pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
+  #define DEBUG_PIN1_SET(X)     digitalWrite(DEBUG_PIN1_GPIO, X);
+  #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
+#else
+  #define DEBUG_PIN1_INIT()
+  #define DEBUG_PIN1_SET(X)
+  #define DEBUG_PIN1_TOGGLE()
+#endif
+#ifdef DEBUG_PIN2_GPIO
+  #define DEBUG_PIN2_INIT()     pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
+  #define DEBUG_PIN2_SET(X)     digitalWrite(DEBUG_PIN2_GPIO, X);
+  #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
+#else
+  #define DEBUG_PIN2_INIT()
+  #define DEBUG_PIN2_SET(X)
+  #define DEBUG_PIN2_TOGGLE()
+#endif
+#ifdef DEBUG_PIN3_GPIO
+  #define DEBUG_PIN3_INIT()     pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
+  #define DEBUG_PIN3_SET(X)     digitalWrite(DEBUG_PIN3_GPIO, X);
+  #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
+#else 
+  #define DEBUG_PIN3_INIT()
+  #define DEBUG_PIN3_SET(X)
+  #define DEBUG_PIN3_TOGGLE()
+#endif
+#ifdef DEBUG_PIN4_GPIO
+  #define DEBUG_PIN4_INIT()     pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
+  #define DEBUG_PIN4_SET(X)     digitalWrite(DEBUG_PIN4_GPIO, X);
+  #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
+#else
+  #define DEBUG_PIN4_INIT()
+  #define DEBUG_PIN4_SET(X)
+  #define DEBUG_PIN4_TOGGLE()
+#endif
+#ifdef DEBUG_PIN5_GPIO
+  #define DEBUG_PIN5_INIT()     pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
+  #define DEBUG_PIN5_SET(X)     digitalWrite(DEBUG_PIN5_GPIO, X);
+  #define DEBUG_PIN5_TOGGLE()   digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
+#else
+  #define DEBUG_PIN5_INIT()
+  #define DEBUG_PIN5_SET(X)
+  #define DEBUG_PIN5_TOGGLE()
+#endif
+#ifdef DEBUG_PIN6_GPIO
+  #define DEBUG_PIN6_INIT()     pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
+  #define DEBUG_PIN6_SET(X)     digitalWrite(DEBUG_PIN6_GPIO, X);
+  #define DEBUG_PIN6_TOGGLE()   digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
+#else
+  #define DEBUG_PIN6_INIT()
+  #define DEBUG_PIN6_SET(X)
+  #define DEBUG_PIN6_TOGGLE()
+#endif
+#ifdef DEBUG_PIN7_GPIO
+  #define DEBUG_PIN7_INIT()     pinMode(DEBUG_PIN7_GPIO, OUTPUT); digitalWrite(DEBUG_PIN7_GPIO, HIGH);
+  #define DEBUG_PIN7_SET(X)     digitalWrite(DEBUG_PIN7_GPIO, X);
+  #define DEBUG_PIN7_TOGGLE()   digitalWrite(DEBUG_PIN7_GPIO, !digitalRead(DEBUG_PIN7_GPIO));
+#else
+  #define DEBUG_PIN7_INIT()
+  #define DEBUG_PIN7_SET(X)
+  #define DEBUG_PIN7_TOGGLE()
+#endif
+#ifdef DEBUG_PIN8_GPIO
+  #define DEBUG_PIN8_INIT()     pinMode(DEBUG_PIN8_GPIO, OUTPUT); digitalWrite(DEBUG_PIN8_GPIO, HIGH);
+  #define DEBUG_PIN8_SET(X)     digitalWrite(DEBUG_PIN8_GPIO, X);
+  #define DEBUG_PIN8_TOGGLE()   digitalWrite(DEBUG_PIN8_GPIO, !digitalRead(DEBUG_PIN8_GPIO));
+#else
+  #define DEBUG_PIN8_INIT()
+  #define DEBUG_PIN8_SET(X)
+  #define DEBUG_PIN8_TOGGLE()
+#endif
 
 
 class mHardwarePins :
@@ -80,36 +118,33 @@ class mHardwarePins :
     
     void parse_JSONCommand(JsonParserObject obj);
 
-    
-// #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+
+    // #ifdef USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
 
-int8_t GetPinByIndex(uint8_t index);
-int8_t GetPinIndexedLocation(uint8_t pin_number);
-bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
+    int8_t GetPinByIndex(uint8_t index);
+    int8_t GetPinIndexedLocation(uint8_t pin_number);
+    bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
 
-// #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
+    // #endif // USE_DEVFEATURE_GPIO_INDEX_ARRAY_METHOD
 
-bool flag_serial_set_tx_set = false;
-
-    
-  /**
-   * Module that is attached to the pin, indexed by ascending order of pins available on chip
-   */
-  uint16_t pin_attached_gpio_functions[MAX_USER_PINS] = {0};  
+    bool flag_serial_set_tx_set = false;
 
 
+    /**
+     * Module that is attached to the pin, indexed by ascending order of pins available on chip
+     */
+    uint16_t pin_attached_gpio_functions[MAX_USER_PINS] = {0};  
 
-int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
+
+
+    int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
 
     // uint8_t works = 0;
 
     void ModuleSettings_FlashSerial();
-    
-// int jsoneq(const char *json, jsmntok_t *tok, const char *s);
-    
+        
     void ParseModuleTemplate();
-
 
     void ModuleSettings_ShowTemplateLog();
 

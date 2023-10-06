@@ -241,6 +241,9 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef STRIP_SIZE_MAX
   #warning "STRIP_SIZE_MAX phase out"
   #endif
+  #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+  #error "ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS should stay, but I dont want this enabled by default until motion bug is fixed"
+  #endif
 
 
 

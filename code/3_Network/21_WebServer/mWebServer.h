@@ -23,6 +23,8 @@ typedef struct  FREEMEM_HANDLER{
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
+#include <SPIFFSEditor.h>
+
 #ifdef ESP32
   #include <AsyncTCP.h>
   #include <ESPAsyncWebServer.h>

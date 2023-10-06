@@ -99,7 +99,7 @@ void mEnergyPZEM004T::Init(void)
 
   uint8_t result = modbus->Begin(9600);
 
-  AddLog(LOG_LEVEL_TEST, PSTR("modbus result = %d"),result);
+  ALOG_INF(PSTR("modbus result = %d"),result);
 
   if (result) {
     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used

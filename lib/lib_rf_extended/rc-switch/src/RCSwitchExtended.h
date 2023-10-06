@@ -27,8 +27,8 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#ifndef _RCSwitch_h
-#define _RCSwitch_h
+#ifndef _RCSwitch_h2
+#define _RCSwitch_h2
 
 #if defined(ARDUINO) && ARDUINO >= 100
     #include "Arduino.h"

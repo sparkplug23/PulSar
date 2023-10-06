@@ -330,31 +330,30 @@ DEBUG_LINE_HERE;
  ** File System *****************************************************************************
  ********************************************************************************************/
 
-// #ifdef USE_UFILESYS
-//   UfsInit();  // xdrv_50_filesystem.ino
-// #endif
-  // #ifdef USE_MODULE_DRIVERS_FILESYSTEM
-  // pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
-  // #endif
-
-
-//  AddLog(LOG_LEVEL_INFO, PSTR("ADR: Settings %p, Log %p"), Settings, TasmotaGlobal.log_buffer);
-// #ifdef ESP32
-//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
-//             FoundPSRAM() ? (CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-//   AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
-//   #if !defined(HAS_PSRAM_FIX)
-//   if (FoundPSRAM() && !CanUsePSRAM()) {
-//     AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
-//   }
-//   #endif
-// #else // ESP32
-//   AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str()); // This function GetDeviceHardware needs added and supporting functions
-// #endif // ESP32
-
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
     pCONT_mfile->UfsInit();  // xdrv_50_filesystem.ino
   #endif
+
+  #ifdef ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
+  if (pCONT_set->Settings2 == nullptr) {
+    pCONT_set->Settings2 = (mSettings::TSettings2*)malloc(sizeof(mSettings::TSettings2));
+  }
+  #endif
+
+
+  #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
+    pCONT_set->SettingsLoad();
+  // SettingsDelta();
+
+  // OsWatchInit();
+
+
+
+
+  #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
+
+
+
 
 /********************************************************************************************
  ** Settings ********************************************************************************
@@ -719,7 +718,7 @@ void loop(void)
 
   if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
-    ALOG_DBM(PSTR("LOOPSEC = \t\t\t\t\t%d %d last %d"), pCONT_sup->activity.loop_counter, pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
+    ALOG_INF(PSTR("LOOPSEC = \t\t\t\t\tLPS=%d, LoopTime=%d"), pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
     pCONT_sup->activity.loop_counter=0;
   }
 

@@ -9,6 +9,8 @@
  *     of code should be copied into the "DevTesting" file to be worked on. Only when stable, should the config be copied
  *     back into this file to be used as a template for a production device
  * 
+ * Rename folder and devicenames below into "Example"
+ * 
 \*********************************************************************************************/
 
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -30,17 +32,10 @@
  * TESTBED_CUSTOM
  *  ** Built using NodeMCU/Doit DevKit
 **/
-// #define DEVICE_TEMPLATE_LIGHT_SEGMENT_EFFECTS
-// #define DEVICE_TEMPLATE_LIGHT_SEGMENT_MULTIPIN
 // #define DEVICE_TEMPLATE_RJ45_STANDARD_CONFIG_ALL_SENSORS
+// #define DEVICE_EXAMPLE_TEMPLATE__433MHZ_SAW_RF
 
-
-// Include the home devices, which should ONLY contain final hardware
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
-
-
-/*
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,8 +44,7 @@
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-*/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 /**
  * Device Type: Shelly 1
@@ -784,410 +778,6 @@
 
 
 /**
- * @brief 
- * To test all effects
- * Set difference between 3 and 4 pixel types in ini
- */
-#ifdef DEVICE_TEMPLATE_LIGHT_SEGMENT_EFFECTS
-  #define DEVICENAME_CTR          "testbed_segment_effects"             APPEND_ESP_TYPE_MQTT_STRING
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Animation Segment"   APPEND_ESP_TYPE_NAME_STRING
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
-  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
-
-
-  // #define DISABLE_NETWORK
-
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-    
-    #ifdef ESP8266 // default pins for ws28xx
-      "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    #else
-      "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-    #endif
-
-      // #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      // "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-      // #endif 
-      // #ifdef USE_MODULE_LIGHTS_PWM
-      // "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // "\"22\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      // "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","      
-      // #endif 
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-/**
- * @brief The issue is template loading is not boot safe.
- * I need to move this to init() and have it configure after boot has happened using the new segment method
- * */
-  #define STRIP_SIZE_MAX 100
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  #endif // USE_MODULE_LIGHTS_INTERFACE
-
-  #define USE_LIGHTING_TEMPLATE__SINGLE
-  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
-  // #define USE_LIGHTING_TEMPLATE_3
-
-  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"WS28XX",
-    "AnimationMode":"Effects",
-    "ColourPalette":74,
-    "Effects": {
-      "Function":0,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
-  #endif // USE_LIGHTING_TEMPLATE__SINGLE
-
-
-  #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"WS28XX",
-    "AnimationMode":"Effects",
-    "Segment0":{
-      "PixelRange": [
-        0,
-        10
-      ],
-      "ColourPalette":"Christmas 01",
-      "Effects": {
-        "Function":1,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 900,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 10
-    },
-    "Segment1": {
-      "PixelRange": [
-        10,
-        20
-      ],
-      "ColourPalette": "Christmas 01",
-      "Effects": {
-        "Function": 24,
-        "Speed":255,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 23
-      },
-      "BrightnessRGB": 100
-    },
-    "Segment2": {
-      "PixelRange": [
-        20,
-        80
-      ],
-      "ColourPalette": "Rainbow",
-      "Effects": {
-        "Function":1,
-        "Speed":100
-      },
-      "Transition": {
-        "TimeMs": 400,
-        "RateMs": 500
-      },
-      "BrightnessRGB": 100
-    },
-    "Segment3": {
-      "PixelRange": [
-        80,
-        100
-      ],
-      "ColourPalette": "Rainbow",
-      "Effects": {
-        "Function":22,
-        "Speed":255
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 23
-      },
-      "BrightnessRGB": 100
-    }
-  }
-  )=====";
-  #endif // USE_LIGHTING_TEMPLATE_1
-
-#endif // DEVICE_TEMPLATE_LIGHT_SEGMENT_EFFECTS
-
-
-
-/**
- * @brief 
- * Using multibus outputs
- */
-#ifdef DEVICE_TEMPLATE_LIGHT_SEGMENT_MULTIPIN
-  #define DEVICENAME_CTR          "testbed_segment_multipin"             APPEND_ESP_TYPE_MQTT_STRING
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Animation Segment"   APPEND_ESP_TYPE_NAME_STRING
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
-
-  // #define DISABLE_NETWORK
-
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define ENABLE_PIXEL_FUNCTION_SEGMENTS_ANIMATION_EFFECTS
-    /********* Group: Needed to build ************************/
-    #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-    /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    /********* Group: Testing ************************/
-    #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-    #define ENABLE_DEVFEATURE_REMOVE_INIT_OUTSIDE_OF_PALETTE_CLASS
-    #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-    #define ENABLE_DEVFEATURE_UNNEEDED_WLED_ONLY_PARAMETERS
-    #define ENABLE_DEVFEATURE_ALWAYS_LOAD_PALETTE_WHEN_NOT_TRANSITIONING
-    // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
-    // #define ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-    /********* Group: Debug options only ************************/
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-    #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-    #define ENABLE_DEBUG_SERIAL
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_JSON_GPIOC "\":{"
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-      #endif 
-      #ifdef USE_MODULE_LIGHTS_PWM
-      "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"22\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"23\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","      
-      #endif 
-    "},"
-    "\"" D_JSON_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-/**
- * @brief The issue is template loading is not boot safe.
- * I need to move this to init() and have it configure after boot has happened using the new segment method
- * */
-  #define STRIP_SIZE_MAX 100
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  #define USE_LIGHTING_TEMPLATE
-  #endif // USE_MODULE_LIGHTS_INTERFACE
-
-  #define USE_LIGHTING_TEMPLATE__SINGLE
-  // #define USE_LIGHTING_TEMPLATE__MULTIPLE_1
-  // #define USE_LIGHTING_TEMPLATE_3
-
-  #ifdef USE_LIGHTING_TEMPLATE__SINGLE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"WS28XX",
-    "AnimationMode":"Effects",
-    "ColourPalette":74,
-    "Effects": {
-      "Function":0,
-      "Intensity":50
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RateMs": 1000
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
-  #endif // USE_LIGHTING_TEMPLATE__SINGLE
-
-
-  #ifdef USE_LIGHTING_TEMPLATE__MULTIPLE_1
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "HardwareType":"WS28XX",
-    "AnimationMode":"Effects",
-    "Segment0":{
-      "PixelRange": [
-        0,
-        10
-      ],
-      "ColourPalette":"Christmas 01",
-      "Effects": {
-        "Function":1,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 900,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 10
-    },
-    "Segment1": {
-      "PixelRange": [
-        10,
-        20
-      ],
-      "ColourPalette": "Christmas 01",
-      "Effects": {
-        "Function": 24,
-        "Speed":255,
-        "Intensity":255
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 23
-      },
-      "BrightnessRGB": 100
-    },
-    "Segment2": {
-      "PixelRange": [
-        20,
-        80
-      ],
-      "ColourPalette": "Rainbow",
-      "Effects": {
-        "Function":1,
-        "Speed":100
-      },
-      "Transition": {
-        "TimeMs": 400,
-        "RateMs": 500
-      },
-      "BrightnessRGB": 100
-    },
-    "Segment3": {
-      "PixelRange": [
-        80,
-        100
-      ],
-      "ColourPalette": "Rainbow",
-      "Effects": {
-        "Function":22,
-        "Speed":255
-      },
-      "Transition": {
-        "TimeMs": 0,
-        "RateMs": 23
-      },
-      "BrightnessRGB": 100
-    }
-  }
-  )=====";
-  #endif // USE_LIGHTING_TEMPLATE_1
-
-#endif // DEVICE_TEMPLATE_LIGHT_SEGMENT_EFFECTS
-
-
-
-/**
  * Basic version of measurement system
  * GPS will be recorded at 10Hz, and logged to SD card in json format for matlab parsing
  * */
@@ -1271,7 +861,7 @@
   "}";
 
   // #define INSERT_CODE_INIT
-  #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
+  // #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
 
   // WILL ADD THIS toggle via rules (per second) in the future
   
@@ -1319,7 +909,7 @@
   "}";
 
   // #define INSERT_CODE_INIT
-  #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
+  // #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
 
   // WILL ADD THIS toggle via rules (per second) in the future
   
@@ -1368,7 +958,7 @@
   "}";
 
   // #define INSERT_CODE_INIT
-  #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
+  // #define INSERT_CODE_EVERY_SECOND digitalWrite(4,!digitalRead(4)); digitalWrite(5,!digitalRead(5)); 
 
   // WILL ADD THIS toggle via rules (per second) in the future
   
@@ -1651,13 +1241,36 @@
 #endif // DEVICE_TEMPLATE__ESP8266_LOW_MEMORY
 
 
+#ifdef DEVICE_EXAMPLE_TEMPLATE__433MHZ_SAW_RF
+  #define DEVICENAME_CTR          "testbed_rcs_ext"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define DEVICENAME_ROOMHINT_CTR "Example"
 
+  // #define USE_MODULE_DRIVERS_INTERFACE
 
-
-
-
-
-
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
 
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_TEMPLATES_H

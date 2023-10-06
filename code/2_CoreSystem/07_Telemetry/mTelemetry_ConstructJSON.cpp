@@ -799,3 +799,24 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
   return JBI->End();
 }
 #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
+
+
+
+
+#ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+uint8_t mTelemetry::ConstructJSON_Debug__Settings_Storage(uint8_t json_level, bool json_appending)
+{
+
+  mqtthandler_debug__settings_storage.tRateSecs = 1;
+
+  JBI->Start();
+
+  char buffer2[100];
+  
+  JBI->Add("bootcount", pCONT_set->Settings.bootcount);
+
+  return JBI->End();
+}
+#endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+

@@ -907,38 +907,41 @@ DEBUG_LINE_HERE;
    **/
 
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  if(jtok = obj["Presets"].getObject()["SetPresetManual"]){  
-    // void mAnimatorLight::
-    // CommandSet_Mixer_RunningID(jtok.getInt());
-    uint8_t val = jtok.getInt();
-    mixer.running_id = val;
-    LoadMixerGroupByID(val);
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  }
+  // if(jtok = obj["Presets"].getObject()["SetPresetManual"]){  
+  //   // void mAnimatorLight::
+  //   // CommandSet_Mixer_RunningID(jtok.getInt());
+  //   uint8_t val = jtok.getInt();
+  //   // mixer.running_id = val;
+  //   LoadMixerGroupByID(val);
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // }
 
-  if(jtok = obj["Presets"].getObject()["SetPresetManual_Testing"]){  
-    // void mAnimatorLight::
-    // CommandSet_Mixer_RunningID(jtok.getInt());
-    uint8_t val = jtok.getInt();
-    mixer.running_id = val;
-    LoadPreset_ManualTesting_ByID(val);
-    #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
-    #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  }
+  // if(jtok = obj["Presets"].getObject()["SetPresetManual_Testing"]){  
+  //   // void mAnimatorLight::
+  //   // CommandSet_Mixer_RunningID(jtok.getInt());
+  //   uint8_t val = jtok.getInt();
+  //   // mixer.running_id = val;
+  //   LoadPreset_ManualTesting_ByID(val);
+  //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  //   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
+  //   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  // }
 
+  #ifdef USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
+  // #error "error"
   if(jtok = obj["Presets"].getObject()["SetPreset_ManualUserCustom"]){  
     // void mAnimatorLight::
     // CommandSet_Mixer_RunningID(jtok.getInt());
     uint8_t val = jtok.getInt();
-    mixer.running_id = val;
+    // mixer.running_id = val;
     LoadPreset_ManualUserCustom_ByID(val);
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
     AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_RUNNING_ID)), val);
     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
   }
+  #endif // USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE
 
   
 
