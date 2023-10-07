@@ -222,7 +222,7 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending
     JBI->Add(PM_JSON_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
     JBI->Add(PM_JSON_HEAPSIZE,         ESP.getFreeHeap()/1024);
     JBI->Add(PM_JSON_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
-    JBI->Add(PM_JSON_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
+    // JBI->Add(PM_JSON_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
     // JBI->Add(PM_JSON_FLASHCHIPID,      ESP.getFlashChipId());
     #endif // ESP8266
     JBI->Add(PM_JSON_FLASHMODE,        (uint8_t)ESP.getFlashChipMode()); //FlashMode_t
