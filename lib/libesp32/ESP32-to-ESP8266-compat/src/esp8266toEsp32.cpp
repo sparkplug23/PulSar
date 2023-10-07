@@ -64,6 +64,7 @@ static uint32_t  timer_freq_hz[MAX_TIMERS] = {0};
 static uint8_t   timer_duty_resolution[MAX_TIMERS] = {0};
 
 // channel mapping
+#define SOC_GPIO_PIN_COUNT              40
 static int8_t pin_to_channel[SOC_GPIO_PIN_COUNT] = { 0 }; // contains the channel assigned to each pin, 0 means unassigned, substract 1
 static uint8_t  pwm_timer[MAX_PWMS] = {0};          // contains the timer assigned to each channel
 

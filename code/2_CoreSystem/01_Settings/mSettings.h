@@ -97,7 +97,6 @@ typedef union {
 #define D_DEFAULT_DEVICE_BUFFER_LENGTH 50 
 
 
-
 enum DATABUILDER_JSON_LEVEL{ //in order of importance
   JSON_LEVEL_NONE=0,
   // Only show what has changed over mqtt
