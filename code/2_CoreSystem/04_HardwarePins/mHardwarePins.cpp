@@ -771,7 +771,7 @@ void mHardwarePins::ModuleDefault(uint8_t module)
 
 void mHardwarePins::SetModuleType()
 {
-  pCONT_set->my_module_type = (USER_MODULE == pCONT_set->Settings.module) ? pCONT_set->Settings.user_template2.base : pCONT_set->Settings.module;
+  pCONT_set->runtime.my_module_type = (USER_MODULE == pCONT_set->Settings.module) ? pCONT_set->Settings.user_template2.base : pCONT_set->Settings.module;
 }
 
 /**

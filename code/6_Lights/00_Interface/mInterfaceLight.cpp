@@ -119,6 +119,15 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
       EveryLoop();
     break;
     /************
+     * STORAGE SECTION * 
+    *******************/    
+    case FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
+      Template_Load_DefaultConfig();
+    break;
+    case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
+      FileSystem_JsonAppend_Save_Module();
+    break;
+    /************
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
@@ -215,6 +224,69 @@ void mInterfaceLight::EveryLoop()
         
 } // END everyloop
 
+/**
+ * @brief If this function is called, it is already assumed that the command required overriding filesystem settings (e.g. file "config_module.json" is missing, "reset" is requested)
+ * 
+ */
+void mInterfaceLight::Template_Load_DefaultConfig()
+{
+
+  #ifdef USE_LIGHTING_TEMPLATE_DEFAULT
+  
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return;
+  }
+
+  // load from progmem into local
+  D_DATA_BUFFER_CLEAR();
+  memcpy_P(data_buffer.payload.ctr, LIGHTING_TEMPLATE_DEFAULT, sizeof(LIGHTING_TEMPLATE_DEFAULT));
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  ALOG_DBM( PSTR("LIGHTING_TEMPLATE_DEFAULT" " READ = \"%s\""), data_buffer.payload.ctr);
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  JBI->ReleaseLock();
+
+  #endif // LIGHTING_TEMPLATE_DEFAULT
+
+}
+
+
+
+
+void mInterfaceLight::FileSystem_JsonAppend_Save_Module()
+{
+
+  uint8_t bus_appended = 0;
+
+  char buffer[100] = {0};
+
+  JBI->Array_Start("BusConfig");
+  for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
+  {    
+    JBI->Object_Start();
+
+      uint8_t pins[5] = {0};
+      uint8_t pin_count = bus_manager->busses[bus_i]->getPins(pins);
+      JBI->Array_Start("Pin");
+        for(uint8_t ii=0;ii<pin_count;ii++){ JBI->Add(pins[ii]); }
+      JBI->Array_End();
+
+      JBI->Add("Start", bus_manager->busses[bus_i]->getStart());
+      JBI->Add("Length", bus_manager->busses[bus_i]->getLength());
+      JBI->Add_P("BusType", bus_manager->busses[bus_i]->getTypeName());
+
+      JBI->Add_P("ColourOrder", bus_manager->getColourOrderName(bus_manager->busses[bus_i]->getColorOrder(), buffer, sizeof(buffer)) );
+
+    JBI->Object_End();
+  }
+  JBI->Array_End();
+
+  JBI->Add("BrightnessRGB", getBriRGB_Global());
+  JBI->Add("BrightnessCCT", getBriCCT_Global());
+
+}
 
 /********************************************************************************************************************
 *******************************************************************************************************************
@@ -756,7 +828,7 @@ int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
 
   //nodemcu/wemos named
   if     (strcmp(c,"WS2812_1CH")==0){ return BUSTYPE_WS2812_1CH; }
-  else if(strcmp(c,"WS2812_1CH_X3")==0){ return BUSTYPE_WS2812_1CH; }
+  else if(strcmp(c,"WS2812_1CH_X3")==0){ return BUSTYPE_WS2812_1CH_X3; }
   else if(strcmp(c,"WS2812_2CH_X3")==0){ return BUSTYPE_WS2812_2CH_X3; }
   else if(strcmp(c,"WS2812_WWA")==0){ return BUSTYPE_WS2812_WWA; }
   else if(strcmp(c,"WS2812_RGB")==0){ return BUSTYPE_WS2812_RGB; }
@@ -785,6 +857,8 @@ int8_t mInterfaceLight::Get_BusTypeID_FromName(const char* c)
   return BUSTYPE_NONE;
   
 }
+
+
 
 
 
@@ -833,6 +907,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   pCONT_lAni->parse_JSONCommand(obj);
   
 
+  DEBUG_LINE_HERE;
 
   /**
    * @brief Master (previously global) shall control the final output, but per segment within animator can exist. 
@@ -881,6 +956,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 
 
 
+  DEBUG_LINE_HERE;
 
 
   ALOG_DBM(PSTR("void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)======================"));
@@ -892,6 +968,9 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
 void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
     
   // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->setBrightness255(brt_new);
+
+  if(!pCONT_lAni->segments.size()){ return; }
+
   pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
   setBriRGB_Global(brt_new);
   // probably needs to check if they are linked here, or internally
@@ -910,6 +989,8 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 
 void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index)
 {
+  if(!pCONT_lAni->segments.size()){ return; }
+
   // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessRGB255(bri);
  pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true;
 
@@ -928,6 +1009,7 @@ void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_
 
 void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index) 
 {
+  if(!pCONT_lAni->segments.size()){ return; }
   pCONT_lAni->SEGMENT_I(segment_index).flags.fForceUpdate = true; 
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS

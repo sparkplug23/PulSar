@@ -187,6 +187,12 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     pCONT->Tasker_Interface(FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
+  if(jtok = obj["BootCount"])
+  {
+    Settings.bootcount = jtok.getInt();
+    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("BootCount %d"),Settings.bootcount);
+  }
+
 
 
 

@@ -857,12 +857,12 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 
 // void initPresetsFile()
 // {
-//   if (WLED_FS.exists(getFileName())) return;
+//   if (FILE_SYSTEM.exists(getFileName())) return;
 
 //   StaticJsonDocument<64> doc;
 //   JsonObject sObj = doc.to<JsonObject>();
 //   sObj.createNestedObject("0");
-//   File f = WLED_FS.open(getFileName(), "w");
+//   File f = FILE_SYSTEM.open(getFileName(), "w");
 //   if (!f) {
 //     errorFlag = ERR_FS_GENERAL;
 //     return;
@@ -1178,14 +1178,14 @@ bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path)
   String contentType = getContentType(request, path);
   DEBUG_LINE_HERE;
   /*String pathWithGz = path + ".gz";
-  if(WLED_FS.exists(pathWithGz)){
-    request->send(WLED_FS, pathWithGz, contentType);
+  if(FILE_SYSTEM.exists(pathWithGz)){
+    request->send(FILE_SYSTEM, pathWithGz, contentType);
     return true;
   }*/
   ALOG_INF(PSTR("mAnimatorLight::handleFileReadA"));
-  if(WLED_FS.exists(path)) {
+  if(FILE_SYSTEM.exists(path)) {
   ALOG_INF(PSTR("mAnimatorLight::handleFileReadB"));
-    request->send(WLED_FS, path, contentType);
+    request->send(FILE_SYSTEM, path, contentType);
     return true;
   }
   ALOG_INF(PSTR("mAnimatorLight::handleFileReadC"));
@@ -1767,7 +1767,7 @@ void mAnimatorLight::handleUpload(AsyncWebServerRequest *request, const String& 
       finalname = '/' + finalname; // prepend slash if missing
     }
 
-    request->_tempFile = WLED_FS.open(finalname, "w");
+    request->_tempFile = FILE_SYSTEM.open(finalname, "w");
     DEBUG_PRINT(F("Uploading "));
     DEBUG_PRINTLN(finalname);
     if (finalname.equals("/presets.json"))
@@ -3704,7 +3704,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     if (customPalettes.size()) {
       char fileName[32];
       sprintf_P(fileName, PSTR("/palette%d.json"), customPalettes.size()-1);
-      if (WLED_FS.exists(fileName)) WLED_FS.remove(fileName);
+      if (FILE_SYSTEM.exists(fileName)) FILE_SYSTEM.remove(fileName);
       loadCustomPalettes();
     }
   }

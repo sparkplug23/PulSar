@@ -11,7 +11,7 @@
  */
 
 #ifdef ARDUINO_ARCH_ESP32 //FS info bare IDF function until FS wrapper is available for ESP32
-#if WLED_FS != LITTLEFS && ESP_IDF_VERSION_MAJOR < 4
+#if FILE_SYSTEM != LITTLEFS && ESP_IDF_VERSION_MAJOR < 4
   #include "esp_spiffs.h"
 #endif
 #endif
@@ -319,9 +319,9 @@ bool mAnimatorLight::writeObjectToFile(const char* file, const char* key, JsonDo
 
   size_t pos = 0;
   DEBUG_LINE_HERE;
-  f = WLED_FS.open(file, "r+");
+  f = FILE_SYSTEM.open(file, "r+");
   DEBUG_LINE_HERE;
-  if (!f && !WLED_FS.exists(file)) f = WLED_FS.open(file, "w+");
+  if (!f && !FILE_SYSTEM.exists(file)) f = FILE_SYSTEM.open(file, "w+");
   DEBUG_LINE_HERE;
   if (!f) {
   DEBUG_LINE_HERE;
@@ -394,7 +394,7 @@ bool mAnimatorLight::readObjectFromFile(const char* file, const char* key, JsonD
     Serial.printf("Read from %s with key %s >>>\n", file, (key==nullptr)?"nullptr":key);
     uint32_t s = millis();
   #endif
-  f = WLED_FS.open(file, "r");
+  f = FILE_SYSTEM.open(file, "r");
   if (!f) return false;
 
   if (key != nullptr && !bufferedFind(key)) //key does not exist in file
@@ -415,15 +415,15 @@ bool mAnimatorLight::readObjectFromFile(const char* file, const char* key, JsonD
 void mAnimatorLight::updateFSInfo() 
 {
   #ifdef ARDUINO_ARCH_ESP32
-    #if WLED_FS == LITTLEFS || ESP_IDF_VERSION_MAJOR >= 4
-    fsBytesTotal = WLED_FS.totalBytes();
-    fsBytesUsed = WLED_FS.usedBytes();
+    #if FILE_SYSTEM == LITTLEFS || ESP_IDF_VERSION_MAJOR >= 4
+    fsBytesTotal = FILE_SYSTEM.totalBytes();
+    fsBytesUsed = FILE_SYSTEM.usedBytes();
     #else
     esp_spiffs_info(nullptr, &fsBytesTotal, &fsBytesUsed);
     #endif
   #else
     FSInfo fsi;
-    WLED_FS.info(fsi);
+    FILE_SYSTEM.info(fsi);
     fsBytesUsed  = fsi.usedBytes;
     fsBytesTotal = fsi.totalBytes;
   #endif
@@ -462,14 +462,14 @@ bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path)
   String contentType = getContentType(request, path);
   DEBUG_LINE_HERE;
   /*String pathWithGz = path + ".gz";
-  if(WLED_FS.exists(pathWithGz)){
-    request->send(WLED_FS, pathWithGz, contentType);
+  if(FILE_SYSTEM.exists(pathWithGz)){
+    request->send(FILE_SYSTEM, pathWithGz, contentType);
     return true;
   }*/
   ALOG_INF(PSTR("mAnimatorLight::handleFileReadA %s"), path.c_str());
-  if(WLED_FS.exists(path)) {
-    ALOG_INF(PSTR("mAnimatorLight::handleFileRead request->send(WLED_FS"));
-    request->send(WLED_FS, path, contentType);
+  if(FILE_SYSTEM.exists(path)) {
+    ALOG_INF(PSTR("mAnimatorLight::handleFileRead request->send(FILE_SYSTEM"));
+    request->send(FILE_SYSTEM, path, contentType);
     return true;
   }
   ALOG_INF(PSTR("mAnimatorLight::handleFileReadC"));

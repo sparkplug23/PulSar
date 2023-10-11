@@ -13,10 +13,12 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   uint16_t isserviced_start_count = data_buffer.isserviced;
 
 
+  DEBUG_LINE_HERE;
   if(isserviced_start_count != data_buffer.isserviced) //ie something was parsed inside this function
   {
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;
   }
+  DEBUG_LINE_HERE;
 
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -26,7 +28,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["ListDir"]){
 
     // CommandSet_SerialPrint_FileNames(jtok.getStr());
-    listDir(WLED_FS, "/", 0);
+    listDir(FILE_SYSTEM, "/", 0);
     
   }
 
@@ -43,6 +45,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 
 
+  DEBUG_LINE_HERE;
 
 
 
@@ -81,8 +84,6 @@ DEBUG_LINE_HERE;
       segments_found++;
 
 DEBUG_LINE_HERE;
-      // If segment commands updated, some effects may need reset
-      SEGMENT_I(segment_i).call = 0; 
 
 DEBUG_LINE_HERE;
     }
@@ -162,7 +163,7 @@ void mAnimatorLight::readFile(fs::FS &fs, const char * path){
 
 void mAnimatorLight::CommandSet_ReadFile(const char* filename){
 
-  readFile(WLED_FS, filename);
+  readFile(FILE_SYSTEM, filename);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_SDCARD D_JSON_COMMAND_SVALUE_K("ReadFile")), filename);
@@ -208,7 +209,19 @@ DEBUG_LINE_HERE;
    
   }
 
-DEBUG_LINE_HERE;
+  /**
+   * @brief Exit if segment has not been created to stop errors
+   * 
+   */
+  if(!pCONT_lAni->segments.size())
+  {
+    ALOG_ERR(PSTR("Segment Index %d exceeds max %d"), segment_index, pCONT_lAni->segments.size());
+    DEBUG_LINE_HERE;
+    return 0;
+  }
+
+  DEBUG_LINE_HERE;
+  
   /**
    * @brief Important this remains above other commands, as some others rely on states being set (eg. Rgbcct user palettes)
    **/
@@ -238,7 +251,7 @@ DEBUG_LINE_HERE;
     ALOG_COM( PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_COLOUR_PALETTE)), GetPaletteNameByID(SEGMENT_I(segment_index).palette.id, buffer, sizeof(buffer)) );
   }
 
-DEBUG_LINE_HERE;
+  DEBUG_LINE_HERE;
 
   if(jtok = obj[D_JSON_PIXELRANGE])
   { 
@@ -261,6 +274,7 @@ DEBUG_LINE_HERE;
     }
   }
 
+  DEBUG_LINE_HERE;
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_FUNCTION])
   { // Might move to "Mode" instead of function later
@@ -280,6 +294,7 @@ DEBUG_LINE_HERE;
     ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_SVALUE_K(D_JSON_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
   }
   
+  DEBUG_LINE_HERE;
 
   // if(jtok = obj[PM_JSON_EFFECTS].getObject()[PM_JSON_COLOUR_REFRESH_RATE])
   // { 
@@ -340,6 +355,8 @@ DEBUG_LINE_HERE;
     // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_PIXEL  D_JSON_COMMAND_NVALUE_K(D_JSON_EFFECTS D_JSON_COLOUR_REFRESH_RATE)), flashersettings.update_colour_region.refresh_secs);
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
+
+  DEBUG_LINE_HERE;
 
   if(jtok = obj[PM_JSON_EFFECTS].getObject()["Opacity"])
   { 
@@ -514,6 +531,7 @@ DEBUG_LINE_HERE;
     #endif // ENABLE_LOG_LEVEL_DEBUG
   }
 
+  DEBUG_LINE_HERE;
   if(jtok = obj["PixelRange"]){ 
     if(jtok.isArray()){
       uint8_t array[2];
@@ -524,11 +542,13 @@ DEBUG_LINE_HERE;
 
         
 
+  DEBUG_LINE_HERE;
         switch(arrlen)
         {
           case 0:SEGMENT_I(segment_index).pixel_range.start = v.getInt(); break;
           case 1:SEGMENT_I(segment_index).pixel_range.stop  = v.getInt(); break;
         }
+  DEBUG_LINE_HERE;
 
         array[arrlen++] = v.getInt();
         #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -567,6 +587,7 @@ DEBUG_LINE_HERE;
 
    
 
+  DEBUG_LINE_HERE;
   
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   if(jtok = obj[PM_JSON_RGB_CLOCK].getObject()[PM_JSON_MANUAL_NUMBER]){
@@ -623,6 +644,7 @@ DEBUG_LINE_HERE;
 
 
   }
+  DEBUG_LINE_HERE;
 
 
   if(jtok = obj["Override"].getObject()["Animation"].getObject()["TimeMs"])
@@ -633,6 +655,7 @@ DEBUG_LINE_HERE;
   }
 
 
+  DEBUG_LINE_HERE;
   if(jtok = obj["Override"].getObject()["Animation_Off"].getObject()["TimeMs"])
   {
   
@@ -641,6 +664,7 @@ DEBUG_LINE_HERE;
 
   }
 
+  DEBUG_LINE_HERE;
   
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_TIME]){ // default to secs
     CommandSet_Animation_Transition_Time_Ms(jtok.getInt()*1000, segment_index);
@@ -656,6 +680,7 @@ DEBUG_LINE_HERE;
     AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_NVALUE_K(D_JSON_TRANSITION, D_JSON_TIME_MS)), SEGMENT_I(segment_index).transition.time_ms);  
     #endif
   }
+  DEBUG_LINE_HERE;
   
   if(jtok = obj[PM_JSON_TRANSITION].getObject()[PM_JSON_RATE]){ // default to secs
     CommandSet_Animation_Transition_Rate_Ms(jtok.getInt()*1000, segment_index);
@@ -681,6 +706,7 @@ DEBUG_LINE_HERE;
  * 
  */
   
+  DEBUG_LINE_HERE;
   if(jtok = obj[PM_JSON_COLOUR_TYPE])
   {
     // if(jtok.isStr()){
@@ -696,6 +722,7 @@ DEBUG_LINE_HERE;
     // ALOG_COM(PSTR(D_LOG_LIGHT D_JSON_COMMAND_SVALUE_K(D_JSON_RGB_COLOUR_ORDER)), GetHardwareColourTypeName(buffer, sizeof(buffer))); // should be internal to rgbcct
   }
 
+  DEBUG_LINE_HERE;
   /**
    * @brief Segment colours
    * 
@@ -715,6 +742,7 @@ DEBUG_LINE_HERE;
 
 
   
+  DEBUG_LINE_HERE;
     if(jtok = obj[PM_JSON_BRIGHTNESS_CCT]){ // Assume range 0-100
       SEGMENT_I(segment_index).setBrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255));
       // CommandSet_SegColour_RgbcctColour_BrightnessCCT(mapvalue(jtok.getInt(), 0,100, 0,255), colour_index, segment_index);
@@ -729,6 +757,7 @@ DEBUG_LINE_HERE;
     }
   
   
+  DEBUG_LINE_HERE;
       if(jtok = obj["TimeOnSecs"]){ // Assume range 0-359
 
         SEGMENT_I(segment_index).auto_timeoff.Start(jtok.getInt());
@@ -754,6 +783,7 @@ DEBUG_LINE_HERE;
 
 
 
+  DEBUG_LINE_HERE;
   /**
    * @brief RgbcctColours
    * 
@@ -772,6 +802,26 @@ DEBUG_LINE_HERE;
     {
       
       ALOG_COM(PSTR(D_LOG_PIXEL "SegColour[%d] = %s"), colour_index, buffer);
+
+      // Direct way, used mostly for storage
+      if(jtok = seg_obj["RGBWC"]){ 
+        
+          
+        if(jtok.isArray()){
+          uint8_t array[5];
+          uint8_t arrlen = 0;
+          JsonParserArray arrobj = jtok;
+          for(auto v : arrobj){
+            if(arrlen > 5){ break; }
+            array[arrlen++] = v.getInt();
+          }
+          SEGMENT_I(segment_index).rgbcctcolors[colour_index].setChannelsRaw(array[0],array[1],array[2],array[3],array[4]);
+        }
+
+        data_buffer.isserviced++;
+        // ALOG_COM(PSTR(D_LOG_PIXEL D_JSON_COMMAND_NVALUE_K("Raw")), SEGMENT_I(segment_index).rgbcctcolors[colour_index].getHue360());
+      }
+
 
     
       if(jtok = seg_obj[PM_JSON_HUE]){ // Assume range 0-359
@@ -1378,6 +1428,8 @@ DEBUG_LINE_HERE;
   #endif // ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
 
 
+    // If segment commands updated, some effects may need reset
+    SEGMENT_I(segment_index).call = 0; 
 
   //  If command source was webui, then override changes
   if(data_buffer.flags.source_id == DATA_BUFFER_FLAG_SOURCE_WEBUI)
@@ -1387,6 +1439,8 @@ DEBUG_LINE_HERE;
   
 
  ALOG_DBG(PSTR(D_LOG_LIGHT D_TOPIC "Checking all commands mAnimatorLight::parse_JSONCommand EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"));
+
+
 
 } // END PARSE COMMANDS
 
@@ -2086,12 +2140,12 @@ void mAnimatorLight::CommandSet_PaletteColour_RGBCCT_Raw_By_ID(uint8_t palette_i
   if((palette_id>=mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)&&(palette_id<mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID)){
  
 
-    palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;    
-    palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
-    memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
+    // palette_id_adjusted_to_array_index = palette_id - mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID;    
+    // palette_buffer = &pCONT_set->Settings.animation_settings.palette_rgbcct_users_colour_map[(mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_LENGTH__ID-mPaletteI->PALETTELIST_MODIFIABLE__RGBCCT_SEGMENT_COLOUR_01__ID)*palette_id_adjusted_to_array_index];
+    // memset(palette_buffer,0,5); // change COLOUR_MAP_NONE_ID to be 0 going forward, and as "black", although considered unset
 
-    // Add to select correct buffer depending on palette type
-    memcpy(palette_buffer,buffer,buflen);
+    // // Add to select correct buffer depending on palette type
+    // memcpy(palette_buffer,buffer,buflen);
 
     // pCONT_lAni->SEGMENT_I(0).rgbcct_controller->UpdateFromExternalBuffer();
     pCONT_lAni->SEGMENT_I(0).flags.fForceUpdate = true;

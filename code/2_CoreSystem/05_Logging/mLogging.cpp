@@ -129,7 +129,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 //     if(pCONT_time->uptime.seconds_nonreset>30){
   // pCONT_log->Telnet.println("AddLog: ");
 //     //   if(pCONT_log->client.connected()) {
-//     //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+//     //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
 //     //   }
 //     // }
 //     // }else{
@@ -145,29 +145,29 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
 
   #ifdef DEBUG_FOR_FAULT
-    pCONT_set->Settings.seriallog_level = LOG_LEVEL_ALL;
+    pCONT_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
   #endif
   // SERIAL_DEBUG.printf("%s %d\r\n","START",millis()); 
-  // pCONT_set->Settings.seriallog_level = LOG_LEVEL_ALL;
+  // pCONT_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
 
   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
   if(
-    (loglevel>pCONT_set->Settings.seriallog_level)&&
-    (loglevel>pCONT_set->Settings.weblog_level)
+    (loglevel>pCONT_set->Settings.logging.serial_level)&&
+    (loglevel>pCONT_set->Settings.logging.web_level)
     ){
     return;
   }
   
   // Filtering
-  if(pCONT_set->enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
-    if(loglevel == pCONT_set->Settings.seriallog_level){
+  if(pCONT_set->runtime.enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
+    if(loglevel == pCONT_set->Settings.logging.serial_level){
       //permit messages
     }else{
       return;
     }
   }
-  if(pCONT_set->enable_web_logging_filtering){ // if true, only permit exact log level and not all above
-    if(loglevel == pCONT_set->Settings.weblog_level){
+  if(pCONT_set->runtime.enable_web_logging_filtering){ // if true, only permit exact log level and not all above
+    if(loglevel == pCONT_set->Settings.logging.web_level){
       //permit messages
     }else{
       return;
@@ -180,7 +180,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   va_list arg;
   va_start(arg, formatP);
-  vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
+  vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
   va_end(arg);
 
   // DEBUG_LINE_HERE;
@@ -195,7 +195,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   memset(mxtime,0,sizeof(mxtime));
   // if time is short, ie debugging, them only show uptime (not RTCTime)
-  if(pCONT_set->Settings.log_time_isshort){
+  if(pCONT_set->Settings.logging.time_isshort){
     if(pCONT_time->uptime.hour<1){
       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
         pCONT_time->uptime.minute,pCONT_time->uptime.second
@@ -222,7 +222,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   #ifndef DISABLE_SERIAL_LOGGING
   // LOG : SERIAL
-  if (loglevel <= pCONT_set->Settings.seriallog_level) {
+  if (loglevel <= pCONT_set->Settings.logging.serial_level) {
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
       // register uint32_t *sp asm("a1"); 
       // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
@@ -231,7 +231,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         isconnected ? 'Y' : 'N',
         pCONT_time->uptime.minute, pCONT_time->uptime.second,
         pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),
-        pCONT_set->log_data
+        log_data
       );
     #else
 
@@ -241,7 +241,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
 
 
-      SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),  pCONT_set->log_data);
+      SERIAL_DEBUG.printf(PSTR("%s%s %s\r\n"), mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
 
       if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r\n\r>>HIGHLIGHT END<<\n\r\n\r"); }
       #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
@@ -258,7 +258,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 	// you want to print all serial BEFORE tripping the reset, so only enable when fault tracing
 	// #ifdef ENABLE_SERIAL_DEBUG_FLUSH
 
-    if(pCONT_set->Settings.seriallog_level == LOG_LEVEL_ALL){ SERIAL_DEBUG.flush(); } 
+    if(pCONT_set->Settings.logging.serial_level == LOG_LEVEL_ALL){ SERIAL_DEBUG.flush(); } 
   } 
   #endif //DISABLE_SERIAL_LOGGING
 
@@ -282,7 +282,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     // "uptime2: ");
     //   if(pCONT_log->client.connected()) {
     //     pCONT_log->client.printf(
-      "%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_set->log_data);
+      "%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
     //   }
     // }
     }
@@ -295,24 +295,24 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   // LOG : WEBSERVER
   // #ifdef USE_MODULE_NETWORK_WEBSERVER23
   // if(pCONT_web->fConsole_active && !pCONT_web->fConsole_history){ //only append values when active, however, this stops history
-  //   if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
+  //   if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.logging.web_level)) {
   //     // Delimited, zero-terminated buffer of log lines.
   //     // Each entry has this format: [index][log data]['\1']
-  //     if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+  //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
       
-  //     while (pCONT_set->web_log_index == pCONT_set->web_log[0] ||  // If log already holds the next index, remove it
-  //           strlen(pCONT_set->web_log) + strlen(pCONT_set->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
+  //     while (web_log_index == web_log[0] ||  // If log already holds the next index, remove it
+  //           strlen(web_log) + strlen(log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
   //     {
-  //       char* it = pCONT_set->web_log;
+  //       char* it = web_log;
   //       it++;                                  // Skip web_log_index
   //       it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
   //       it++;                                  // Skip delimiting "\1"
   //       // circle uffer
-  //       memmove(pCONT_set->web_log, it, WEB_LOG_SIZE -(it-pCONT_set->web_log));  // Move buffer forward to remove oldest log line
+  //       memmove(web_log, it, WEB_LOG_SIZE -(it-web_log));  // Move buffer forward to remove oldest log line
   //     }
   //     // creates line formatted with \1 meaning EOL
-  //     snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
-  //     if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+  //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%s %s\1"), web_log, web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
+  //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
   //   }
   // }
@@ -353,14 +353,14 @@ void mLogging::handleTelnet(){
 
 //   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
 //   if(
-//     (loglevel>pCONT_set->Settings.seriallog_level)
+//     (loglevel>pCONT_set->Settings.logging.serial_level)
 //     ){
 //     return;
 //   }
   
 //   // Filtering
 //   if(pCONT_set->enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
-//     if(loglevel == pCONT_set->Settings.seriallog_level){
+//     if(loglevel == pCONT_set->Settings.logging.serial_level){
 //       //permit messages
 //     }else{
 //       return;
@@ -369,7 +369,7 @@ void mLogging::handleTelnet(){
 
 //   va_list arg;
 //   va_start(arg, formatP);
-//   vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
+//   vsnprintf_P(log_data, sizeof(log_data), formatP, arg);
 //   va_end(arg);
 
 //   //AddLogAddLog(loglevel);
@@ -410,12 +410,12 @@ void mLogging::handleTelnet(){
 //   // Overrides
 //   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
 //   //pCONT_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
-//   //pCONT_set->Settings.seriallog_level = LOG_LEVEL_DEBUG;
-//   //pCONT_set->Settings.weblog_level = LOG_LEVEL_INFO;
+//   //pCONT_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG;
+//   //pCONT_set->Settings.logging.web_level = LOG_LEVEL_INFO;
 
 //   // LOG : SERIAL
-//   if (loglevel <= pCONT_set->Settings.seriallog_level) {
-//     SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  pCONT_set->log_data);
+//   if (loglevel <= pCONT_set->Settings.logging.serial_level) {
+//     SERIAL_DEBUG.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  log_data);
 //     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
 //     // SERIAL_DEBUG.flush();
 //   }
@@ -429,15 +429,15 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
   if(
-    (loglevel>pCONT_set->Settings.seriallog_level)&&
-    (loglevel>pCONT_set->Settings.weblog_level)
+    (loglevel>pCONT_set->Settings.logging.serial_level)&&
+    (loglevel>pCONT_set->Settings.logging.web_level)
     ){
     return;
   }
 
   va_list arg;
   va_start(arg, formatP);
-  vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
+  vsnprintf_P(pCONT_log->log_data, sizeof(pCONT_log->log_data), formatP, arg);
   va_end(arg);
 
   //AddLogAddLog(loglevel);
@@ -470,15 +470,15 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   // Overrides
   //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
   //pCONT_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //pCONT_set->Settings.seriallog_level = LOG_LEVEL_DEBUG;
-  //pCONT_set->Settings.weblog_level = LOG_LEVEL_INFO;
+  //pCONT_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG;
+  //pCONT_set->Settings.logging.web_level = LOG_LEVEL_INFO;
 
   // LOG : SERIAL
-  if (loglevel <= pCONT_set->Settings.seriallog_level) {
+  if (loglevel <= pCONT_set->Settings.logging.serial_level) {
     SERIAL_DEBUG.printf("%s%s %s\r\n", 
     mxtime,
     pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),  
-    pCONT_set->log_data);
+    pCONT_log->log_data);
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // SERIAL_DEBUG.flush();
   }
@@ -490,7 +490,7 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
   //       pCONT_log->client = pCONT_log->server->available();
   //     }
   //     if(pCONT_log->client.connected()) {
-  //       pCONT_log->client.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+  //       pCONT_log->client.printf("%s%s %s\r\n", mxtime,pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
   //     }
   //   }
   // }
@@ -502,37 +502,37 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
     
   pCONT_log->Telnet.println("uptime: ");
     //   if(pCONT_log->client.connected()) {
-    //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), pCONT_set->log_data);
+    //     pCONT_log->client.printf("%s%s %s\r\n", mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer), log_data);
     //   }
     // }
     }
 
   // LOG : WEBSERVER
   #ifdef USE_MODULE_NETWORK_WEBSERVER23
-  if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.weblog_level)) {
+  if (pCONT_set->Settings.webserver && (loglevel <= pCONT_set->Settings.logging.web_level)) {
     // Delimited, zero-terminated buffer of log lines.
     // Each entry has this format: [index][log data]['\1']
-    if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+    if (!pCONT_log->web_log_index) pCONT_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
-    while (pCONT_set->web_log_index == pCONT_set->web_log[0] ||  // If log already holds the next index, remove it
-           strlen(pCONT_set->web_log) + strlen(pCONT_set->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
+    while (pCONT_log->web_log_index == pCONT_log->web_log[0] ||  // If log already holds the next index, remove it
+           strlen(pCONT_log->web_log) + strlen(pCONT_log->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
     {
-      char* it = pCONT_set->web_log;
+      char* it = pCONT_log->web_log;
       it++;                                  // Skip web_log_index
       it += pCONT_sup->strchrspn(it, '\1'); // Skip log line
       it++;                                  // Skip delimiting "\1"
-      memmove(pCONT_set->web_log, it, WEB_LOG_SIZE -(it-pCONT_set->web_log));  // Move buffer forward to remove oldest log line
+      memmove(pCONT_log->web_log, it, WEB_LOG_SIZE -(it-pCONT_log->web_log));  // Move buffer forward to remove oldest log line
     }
 
     // creates line formatted with \1 meaning EOL
-    snprintf_P(pCONT_set->web_log, sizeof(pCONT_set->web_log), PSTR("%s%c%s%s %s\1"), pCONT_set->web_log, 
-    pCONT_set->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_set->log_data);
-    if (!pCONT_set->web_log_index) pCONT_set->web_log_index++;   // Index 0 is not allowed as it is the end of char string
+    snprintf_P(pCONT_log->web_log, sizeof(pCONT_log->web_log), PSTR("%s%c%s%s %s\1"), pCONT_log->web_log, 
+    pCONT_log->web_log_index++, mxtime, pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)), pCONT_log->log_data);
+    if (!pCONT_log->web_log_index) pCONT_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
   
   // SERIAL_DEBUG.printf("WEBLOG");
-  // SERIAL_DEBUG.printf(pCONT_set->web_log_index);
-  // // for(int i=pCONT_set->web_log_index;i<500;i++){
-  // //   SERIAL_DEBUG.printf(pCONT_set->web_log[i]);
+  // SERIAL_DEBUG.printf(web_log_index);
+  // // for(int i=web_log_index;i<500;i++){
+  // //   SERIAL_DEBUG.printf(web_log[i]);
   // // }
   // SERIAL_DEBUG.printf("END WEBLOG");
 
@@ -548,25 +548,25 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 
 //   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
 //   if(
-//     (loglevel>pCONT_set->Settings.seriallog_level)&&
-//     (loglevel>pCONT_set->Settings.weblog_level)
+//     (loglevel>pCONT_set->Settings.logging.serial_level)&&
+//     (loglevel>pCONT_set->Settings.logging.web_level)
 //     ){
 //     return;
 //   }
 
 //   va_list arg;
 //   va_start(arg, formatP);
-//   vsnprintf_P(pCONT_set->log_data, sizeof(pCONT_set->log_data), formatP, arg);
+//   vsnprintf_P(log_data, sizeof(log_data), formatP, arg);
 //   va_end(arg);
 
 //   char level_buffer[10];
 
 //   // LOG : SERIAL
-//   if (loglevel <= pCONT_set->Settings.seriallog_level) {
+//   if (loglevel <= pCONT_set->Settings.logging.serial_level) {
 //     SERIAL_DEBUG.printf("%s%s %s\r\n", 
 //       mxtime,
 //       pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer),  
-//       pCONT_set->log_data
+//       log_data
 //     );
 //   }
 
@@ -625,7 +625,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
   size_t len = 0;
 
   if (idx) {
-    char* it = pCONT_set->web_log;
+    char* it = web_log;
     // get line
     do {
       uint8_t cur_idx = *it;
@@ -638,7 +638,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
         break;
       }
       it += tmp;
-    } while (it < pCONT_set->web_log + WEB_LOG_SIZE && *it != '\0');
+    } while (it < web_log + WEB_LOG_SIZE && *it != '\0');
   }
   *entry_pp = entry_p;
   *len_p = len;

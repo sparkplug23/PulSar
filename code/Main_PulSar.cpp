@@ -285,8 +285,8 @@ pCONT_sup->CmndCrash();
 DEBUG_LINE_HERE;
 
   // Set boot method
-  pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
-  pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
+  pCONT_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
+  pCONT_set->Settings.logging.serial_level = pCONT_set->runtime.seriallog_level_during_boot;
   
   RESET_BOOT_STATUS();
 
@@ -327,7 +327,7 @@ DEBUG_LINE_HERE;
   pCONT_time->RtcPreInit();
 
 /********************************************************************************************
- ** File System *****************************************************************************
+ ** File System : Init *****************************************************************************
  ********************************************************************************************/
 
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
@@ -383,7 +383,7 @@ DEBUG_LINE_HERE;
 
   ALOG_DBG(PSTR("Loading settings from saved memory"));
   
-  // Overwrite with latest values, including template if new SETTINGS_CONFIG exists
+  // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
   pCONT_set->SettingsLoad();    //overwrite stored settings from defaults
   // Check Load was successful
   pCONT_set->SettingsLoad_CheckSuccessful();
@@ -410,6 +410,7 @@ DEBUG_LINE_HERE;
 //     }
 // #endif
 //   }
+
 
 /********************************************************************************************
  ** OsWatch ********************************************************************************
@@ -511,7 +512,7 @@ DEBUG_LINE_HERE;
   
   // // Set boot method
   // pCONT_set->seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
-  // pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;  
+  // pCONT_set->Settings.logging.serial_level = pCONT_set->seriallog_level_during_boot;  
     
   /********************************************************************************************
    ** Initialise System and Modules ***********************************************************
@@ -534,6 +535,13 @@ DEBUG_LINE_HERE;
   pCONT->Tasker_Interface(FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE);
   // load
   
+/********************************************************************************************
+ ** File System : Load after settings for now, so this method overrides any defaults   ******
+ ********************************************************************************************/
+
+  #ifdef ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+    pCONT_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
+  #endif
 
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
@@ -601,7 +609,9 @@ void LoopTasker()
     
     pCONT->Tasker_Interface(FUNC_EVERY_SECOND); 
 
-    if(pCONT_time->RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    // if(pCONT_time->RtcTime.second==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
+    // Make every minute trigger with uptime, not RTC time, this will make all firmware/devices trigger randomly at 1 minute intervals and stop race conditions with openhab
+    if((pCONT_time->uptime.seconds_nonreset%60)==0){                  pCONT->Tasker_Interface(FUNC_EVERY_MINUTE); }
     
     if(
       ((pCONT_time->uptime.seconds_nonreset%5)==0)&&
@@ -678,12 +688,12 @@ void SmartLoopDelay()
   // #ifndef DISABLE_SLEEP
   // if(pCONT_set->Settings.enable_sleep){
   //   if (pCONT_set->Settings.flag_network.sleep_normal) {
-  //     pCONT_sup->SleepDelay(pCONT_set->runtime_var.sleep);
+  //     pCONT_sup->SleepDelay(pCONT_set->runtime.sleep);
   //   } else {
   //     // Loop time < sleep length of time
-  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime_var.sleep) {
+  //     if (pCONT_sup->loop_runtime_millis < (uint32_t)pCONT_set->runtime.sleep) {
   //       //delay by loop time
-  //       pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime_var.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
+  //       pCONT_sup->SleepDelay((uint32_t)pCONT_set->runtime.sleep - pCONT_sup->loop_runtime_millis);  // Provide time for background tasks like wifi
   //     } else {
 
   //       // if loop takes longer than sleep period, no delay, IF wifi is down, devote half loop time to wifi connect 
@@ -716,7 +726,7 @@ void loop(void)
       
   pCONT_sup->loop_runtime_millis = millis() - pCONT_sup->loop_start_millis;
 
-  if(mTime::TimeReached(&pCONT_set->runtime_var.tSavedUpdateLoopStatistics, 1000)){
+  if(mTime::TimeReached(&pCONT_set->runtime.tSavedUpdateLoopStatistics, 1000)){
     pCONT_sup->activity.cycles_per_sec = pCONT_sup->activity.loop_counter; 
     ALOG_INF(PSTR("LOOPSEC = \t\t\t\t\tLPS=%d, LoopTime=%d"), pCONT_sup->activity.cycles_per_sec, pCONT_sup->loop_runtime_millis);
     pCONT_sup->activity.loop_counter=0;
@@ -737,10 +747,10 @@ void loop(void)
 
   DEBUG_LINE;
   if (!pCONT_sup->loop_runtime_millis) { pCONT_sup->loop_runtime_millis++; } // We cannot divide by 0
-  pCONT_sup->loop_delay_temp = pCONT_set->runtime_var.sleep; 
+  pCONT_sup->loop_delay_temp = pCONT_set->runtime.sleep; 
   if (!pCONT_sup->loop_delay_temp) { pCONT_sup->loop_delay_temp++; }              // We cannot divide by 0
   pCONT_sup->loops_per_second = 1000 / pCONT_sup->loop_delay_temp;  // We need to keep track of this many loops per second, 20ms delay gives 1000/20 = 50 loops per second (50hz)
   pCONT_sup->this_cycle_ratio = 100 * pCONT_sup->loop_runtime_millis / pCONT_sup->loop_delay_temp;
-  pCONT_set->loop_load_avg = pCONT_set->loop_load_avg - (pCONT_set->loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
+  pCONT_set->runtime.loop_load_avg = pCONT_set->runtime.loop_load_avg - (pCONT_set->runtime.loop_load_avg / pCONT_sup->loops_per_second) + (pCONT_sup->this_cycle_ratio / pCONT_sup->loops_per_second); // Take away one loop average away and add the new one
 
 }

@@ -85,7 +85,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L5__H801_3CHRGB_AND_2CHCW
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L6__H801_FIVE_1CH_WHITE_CHANNELS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7__ESP32_ROOM_CEILING_100LEDS   // change this to something useful
-// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
+#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L9__ESP8266_WEBUI_OPTIM_3LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L10__ESP32__7SEGMENTCLOCK
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER    // Outside Tree Tester
@@ -3108,7 +3108,7 @@
   #define DEVICENAME_CTR          "testgroup_lighting_L8"
   #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L7n8__ESP32_PALETTE_WEBUI_DESIGN
   // #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
-  #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
+  // #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
 #endif
 
 
@@ -3134,9 +3134,27 @@
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+
   /***********************************
    * SECTION: System Configs
   ************************************/    
+
+  #define SETTINGS_HOLDER 1238
+
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+    #define WLED_ENABLE_FS_EDITOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+    #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+    // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+    #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+    #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+    #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+    // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+
+    
+  #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_200LED_DEFAULT
  
   /***********************************
    * SECTION: Network Configs
@@ -3152,7 +3170,7 @@
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
 
-  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
   // #define ENABLE_DEVFEATURE_LIGHT_ESP32_RMT_METHOD_AS_PRIMARY
   
@@ -3199,8 +3217,98 @@
   )=====";
   #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
   
+  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL_DEFAULT
+  #define USE_LIGHTING_TEMPLATE_DEFAULT
+  // template should be loaded only if the file did not exist already
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE_DEFAULT) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":144
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        144
+      ],
+      "ColourPalette":"Colourful Default",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+
+  #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_200LED_DEFAULT
+  #define USE_LIGHTING_TEMPLATE_DEFAULT
+  // template should be loaded only if the file did not exist already
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE_DEFAULT) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        200
+      ],
+      "ColourPalette":"Colourful Default",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":1,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 0,
+        "RateMs": 2000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+
+  
   #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
   #define USE_LIGHTING_TEMPLATE
+  // template should be loaded only if the file did not exist already
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
@@ -3241,6 +3349,7 @@
   }
   )=====";
   #endif // USE_LIGHTING_TEMPLATE__PALETTE_TESTING_CEILING
+
 
   #ifdef USE_LIGHTING_TEMPLATE__PALETTE_TESTING_LARGE_OUTPUT_ERROR
   #define USE_LIGHTING_TEMPLATE

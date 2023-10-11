@@ -6,6 +6,12 @@
 #define D_UNIQUE_MODULE_CORE_TIME_ID 5
 
 
+enum WeekInMonthOptions {Last, First, Second, Third, Fourth};
+enum DayOfTheWeekOptions {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
+enum MonthNamesOptions {Jan=1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
+enum HemisphereOptions {North, South};
+enum GetDateAndTimeOptions { DT_LOCAL, DT_UTC, DT_LOCALNOTZ, DT_DST, DT_STD, DT_RESTART, DT_ENERGY, DT_BOOTCOUNT, DT_LOCAL_MILLIS, DT_TIMEZONE, DT_SUNRISE, DT_SUNSET };
+
 typedef struct datetime{
   uint8_t Wday; // week day [0-7]
   uint8_t Mday; // month day [0-30]
@@ -203,6 +209,8 @@ class mTime :
       uint16_t SunMinutes(uint32_t dawn);
     #endif //  USE_SUNRISE
 
+    uint32_t UtcTime(void);
+
 
     uint32_t tSavedUptime;
 
@@ -312,7 +320,19 @@ void RtcSync(void);
     
     uint32_t GetUTCTime();
     
+typedef union {
+  uint16_t data;
+  struct {
+    uint16_t hemis : 1;                    // bit 0        = 0=Northern, 1=Southern Hemisphere (=Opposite DST/STD)
+    uint16_t week : 3;                     // bits 1 - 3   = 0=Last week of the month, 1=First, 2=Second, 3=Third, 4=Fourth
+    uint16_t month : 4;                    // bits 4 - 7   = 1=Jan, 2=Feb, ... 12=Dec
+    uint16_t dow : 3;                      // bits 8 - 10  = day of week, 1=Sun, 2=Mon, ... 7=Sat
+    uint16_t hour : 5;                     // bits 11 - 15 = 0-23
+  };
+} TimeRule;
 uint32_t RuleToTime(TimeRule r, int yr);
+TimeRule tflag[2];
+int16_t       toffset[2];                // 30E
 
 // void BreakTime(uint32_t time_input, struct TIME_T &tm);
 // uint32_t MakeTime(struct TIME_T &tm);

@@ -51,5 +51,6 @@ class BufferWriter{
 };
 
 #define BufferWriterI BufferWriter::GetInstance()
+#define BUFF BufferWriter::GetInstance()
 
 #endif

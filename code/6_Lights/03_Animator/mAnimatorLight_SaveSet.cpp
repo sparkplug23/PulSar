@@ -464,7 +464,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   // {
   //   if (request->hasArg(F("RS"))) //complete factory reset
   //   {
-  //     WLED_FS.format();
+  //     FILE_SYSTEM.format();
   //     #ifdef WLED_ADD_EEPROM_SUPPORT
   //     clearEEPROM();
   //     #endif

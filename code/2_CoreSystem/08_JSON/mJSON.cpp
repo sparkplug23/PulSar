@@ -55,6 +55,23 @@ uint16_t JsonBuilder::GetBufferSize(){
   return writer.buffer_size;
 }
 
+
+void JsonBuilder::Write(const char* buff)
+{
+  if(writer.buffer == nullptr) { return; }  
+  writer.length += snprintf_P(&writer.buffer[writer.length], writer.buffer_size, buff);
+}
+
+void JsonBuilder::Write_P(const char* formatP, ...)
+{
+  if((writer.buffer == nullptr)) { return; }  
+  va_list arg;
+  va_start(arg, formatP);
+  writer.length += vsnprintf_P(&writer.buffer[writer.length], writer.buffer_size, formatP, arg);
+  va_end(arg);
+}
+
+
 void JsonBuilder::Start(char* _buffer, uint16_t _length, uint16_t _buffer_size)
 {
   // PRINT_FLUSHED("JsonBuilder::Start(,,)");
@@ -63,8 +80,12 @@ void JsonBuilder::Start(char* _buffer, uint16_t _length, uint16_t _buffer_size)
   writer.buffer_size = _buffer_size;
   Start();
 }
-void JsonBuilder::Start()
+void JsonBuilder::Start(bool override_lock)
 {
+  // I should introduce a lock here, to prevent multiple calls with async methods like WLED web
+  // It should return false when it is already in use
+
+
   // PRINT_FLUSHED("JsonBuilder::Start()");
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) {  
     //PRINT_FLUSHED("JsonBuilder::return()");

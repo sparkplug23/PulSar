@@ -41,6 +41,7 @@
   #define mSupportHardware SupportESP32
 #endif
 
+enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
 
 #include "1_TaskerManager/mTaskerInterface.h"
 #include "2_CoreSystem/02_Time/mTime.h"
@@ -90,6 +91,8 @@ class mWiFi :
     
     uint16_t wifi_counter_tester = 0;
     
+    uint8_t loglevel_with_connection_status = 4; // When connected
+    
     bool WifiCheckIpConnected();
 
     #ifndef WIFI_RSSI_THRESHOLD
@@ -118,14 +121,14 @@ class mWiFi :
     }connection;
 
 
-void StartMdns(void);
-void MqttDiscoverServer(void);
-void MdnsAddServiceHttp(void);
-void MdnsUpdate(void);
+    void StartMdns(void);
+    void MqttDiscoverServer(void);
+    void MdnsAddServiceHttp(void);
+    void MdnsUpdate(void);
 
-struct {
-  uint8_t begun = 0;                  // mDNS active
-} Mdns;
+    struct {
+      uint8_t begun = 0;                  // mDNS active
+    } Mdns;
 
     uint8_t wps_result;
 

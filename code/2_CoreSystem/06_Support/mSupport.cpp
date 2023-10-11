@@ -746,7 +746,7 @@ void mSupport::ArduinoOTAInit(void)
   if(ota_init_success){ return; }
 
   #ifndef TEST_OTA_ISSUE
-    ArduinoOTA.setHostname(pCONT_set->my_hostname);
+    ArduinoOTA.setHostname(pCONT_set->runtime.my_hostname);
   #endif
   ArduinoOTA.onStart([this]()
   {
@@ -764,6 +764,10 @@ void mSupport::ArduinoOTAInit(void)
     // #endif
     arduino_ota_triggered = true;
     arduino_ota_progress_dot_count = 0;
+    
+    #ifdef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+    pCONT_set->SettingsSaveAll();
+    #endif
 
     /**
      * @brief Disable parts (e.g. RF receive interrupts) before starting update
@@ -783,7 +787,7 @@ void mSupport::ArduinoOTAInit(void)
 
   ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
   {
-    if (pCONT_set->seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
+    if (pCONT_set->runtime.seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
       uint8_t progress_now = (progress/(total/100));
       if(arduino_ota_progress_dot_count != progress_now){
         Serial.println(progress_now);
@@ -961,37 +965,37 @@ void mSupport::init_FirmwareVersion(){
 //DEBUG_PRINTF("pCONT_set->my_version=%s\n\r",pCONT_set->my_version);
 
   // Version Current
-  pCONT_set->firmware_version.current.part_branch = (PROJECT_VERSION >> 30) & 0x03;
-  pCONT_set->firmware_version.current.part_major =  (PROJECT_VERSION >> 24) & 0x3F;
-  pCONT_set->firmware_version.current.part_minor =  (PROJECT_VERSION >> 16) & 0xff;
-  pCONT_set->firmware_version.current.part_system = (PROJECT_VERSION >> 8 ) & 0xff;
-  pCONT_set->firmware_version.current.part_module = (PROJECT_VERSION      ) & 0xff;
-  pCONT_set->firmware_version.current.number =       PROJECT_VERSION;
+  pCONT_set->runtime.firmware_version.current.part_branch = (PROJECT_VERSION >> 30) & 0x03;
+  pCONT_set->runtime.firmware_version.current.part_major =  (PROJECT_VERSION >> 24) & 0x3F;
+  pCONT_set->runtime.firmware_version.current.part_minor =  (PROJECT_VERSION >> 16) & 0xff;
+  pCONT_set->runtime.firmware_version.current.part_system = (PROJECT_VERSION >> 8 ) & 0xff;
+  pCONT_set->runtime.firmware_version.current.part_module = (PROJECT_VERSION      ) & 0xff;
+  pCONT_set->runtime.firmware_version.current.number =       PROJECT_VERSION;
 
   // Display Version Output
 
   // DEBUG_PRINTF("firmware_version.current = %X\n\r",PROJECT_VERSION);
     
   // char firmware_current[40];
-  memset(pCONT_set->firmware_version.current.name_ctr,0,sizeof(pCONT_set->firmware_version.current.name_ctr));
-  sprintf_P(pCONT_set->firmware_version.current.name_ctr,PSTR("%c%d.%d.%d.%d"),
-      pCONT_sup->GetVersionBranchTypeCharNameByID(pCONT_set->firmware_version.current.part_branch),
-      pCONT_set->firmware_version.current.part_major,
-      pCONT_set->firmware_version.current.part_minor,
-      pCONT_set->firmware_version.current.part_system,
-      pCONT_set->firmware_version.current.part_module
+  memset(pCONT_set->runtime.firmware_version.current.name_ctr,0,sizeof(pCONT_set->runtime.firmware_version.current.name_ctr));
+  sprintf_P(pCONT_set->runtime.firmware_version.current.name_ctr,PSTR("%c%d.%d.%d.%d"),
+      pCONT_sup->GetVersionBranchTypeCharNameByID(pCONT_set->runtime.firmware_version.current.part_branch),
+      pCONT_set->runtime.firmware_version.current.part_major,
+      pCONT_set->runtime.firmware_version.current.part_minor,
+      pCONT_set->runtime.firmware_version.current.part_system,
+      pCONT_set->runtime.firmware_version.current.part_module
   );
 
   
   // char message_version1[100];
   // sprintf(message_version1,PSTR("%s %c%d.%d.%d.%d%s"),
   //   PROJECT_NAME_CTR,
-  //   pCONT_sup->GetVersionBranchTypeCharNameByID(pCONT_set->firmware_version.current.part_branch),
-  //   pCONT_set->firmware_version.current.part_major,
-  //   pCONT_set->firmware_version.current.part_minor,
-  //   pCONT_set->firmware_version.current.part_system,
-  //   pCONT_set->firmware_version.current.part_module,
-  //   pCONT_set->firmware_version.fNewVersionAvailable ? " Update Available" : ""  
+  //   pCONT_sup->GetVersionBranchTypeCharNameByID(pCONT_set->runtime.firmware_version.current.part_branch),
+  //   pCONT_set->runtime.firmware_version.current.part_major,
+  //   pCONT_set->runtime.firmware_version.current.part_minor,
+  //   pCONT_set->runtime.firmware_version.current.part_system,
+  //   pCONT_set->runtime.firmware_version.current.part_module,
+  //   pCONT_set->runtime.firmware_version.fNewVersionAvailable ? " Update Available" : ""  
   // );
 
 
@@ -1010,10 +1014,10 @@ void mSupport::init_FirmwareVersion(){
 
 char* mSupport::GetVersionColour(char* buffer){
 
-  if(pCONT_set->firmware_version.fCurrentVersionNotSupported){ //most important
+  if(pCONT_set->runtime.firmware_version.fCurrentVersionNotSupported){ //most important
     sprintf_P(buffer,"%s","#ff0000");
   }else
-  if(pCONT_set->firmware_version.fNewVersionAvailable){
+  if(pCONT_set->runtime.firmware_version.fNewVersionAvailable){
     sprintf_P(buffer,"%s","#ffef00");
   }else{
     sprintf_P(buffer,"%s","#00ff00");
@@ -2737,12 +2741,12 @@ uint32_t mSupport::GetHash(const char *buffer, size_t size)
 
 void mSupport::ShowSource(int source)
 {
-  if ((source > 0) && (source < SRC_MAX)) {
-    char stemp1[20];
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_INFO, PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
-    #endif// ENABLE_LOG_LEVEL_INFO
-  }
+  // if ((source > 0) && (source < SRC_MAX)) {
+  //   char stemp1[20];
+  //   #ifdef ENABLE_LOG_LEVEL_INFO
+  //   AddLog(LOG_LEVEL_INFO, PSTR("SRC: %s"), GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource));
+  //   #endif// ENABLE_LOG_LEVEL_INFO
+  // }
 }
 
 
@@ -2922,11 +2926,13 @@ void mSupport::Handle_Check_Power_Saving()
 void mSupport::Handle_OTA_URLS()
 {
 
-    if (pCONT_set->ota_state_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
-      pCONT_set->ota_state_flag--;
-      if (2 == pCONT_set->ota_state_flag) {
+    if (pCONT_set->runtime.ota_state_flag && (pCONT_set->runtime.backlog_pointer == pCONT_set->runtime.backlog_index)) {
+      pCONT_set->runtime.ota_state_flag--;
+      if (2 == pCONT_set->runtime.ota_state_flag) {
         // pCONT_set->ota_url = pCONT_set->Settings.ota_url;
+        #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
         pCONT_set->RtcSettings.ota_loader = 0;  // Try requested image first
+        #endif
         // pCONT_set->ota_retry_counter = OTA_ATTEMPTS;
         
         #ifdef ESP8266
@@ -2939,7 +2945,7 @@ DEBUG_LINE_HERE;
       }
       
 // DEBUG_LINE_HERE;
-      if (pCONT_set->ota_state_flag <= 0) {
+      if (pCONT_set->runtime.ota_state_flag <= 0) {
 
 // DEBUG_LINE_HERE;
 #ifdef USE_MODULE_NETWORK_WEBSERVER23
@@ -2948,8 +2954,8 @@ DEBUG_LINE_HERE;
 // #ifdef USE_ARILUX_RF
 //         AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
 // #endif  // USE_ARILUX_RF
-        pCONT_set->ota_state_flag = 92;
-        pCONT_set->ota_result = 0;
+        pCONT_set->runtime.ota_state_flag = 92;
+        pCONT_set->runtime.ota_result = 0;
         // pCONT_set->ota_retry_counter--;
 
 
@@ -3012,9 +3018,9 @@ DEBUG_LINE_HERE;
 //           }
 //         }
       }
-      if (90 == pCONT_set->ota_state_flag) {  // Allow MQTT to reconnect
-        pCONT_set->ota_state_flag = 0;
-        if (pCONT_set->ota_result) {
+      if (90 == pCONT_set->runtime.ota_state_flag) {  // Allow MQTT to reconnect
+        pCONT_set->runtime.ota_state_flag = 0;
+        if (pCONT_set->runtime.ota_result) {
          pCONT_set->SetFlashModeDout();      // Force DOUT for both ESP8266 and ESP8285
           // Response_mP(PSTR(D_JSON_SUCCESSFUL ". " D_JSON_RESTARTING));
         } else {
@@ -3023,7 +3029,7 @@ DEBUG_LINE_HERE;
           // Response_mP(PSTR(D_JSON_FAILED " %s"), ESPhttpUpdate.getLastErrorString().c_str());
           // #endif
         }
-        pCONT_set->restart_flag = 2;          // Restart anyway to keep memory clean webserver
+        pCONT_set->runtime.restart_flag = 2;          // Restart anyway to keep memory clean webserver
         //MqttPublishPrefixTopic_P(STAT, PSTR(D_JSON_UPGRADE));
       }
     }
@@ -3031,8 +3037,8 @@ DEBUG_LINE_HERE;
 
 void mSupport::CheckResetConditions()
 {
-    if (pCONT_set->restart_flag && (pCONT_set->backlog_pointer == pCONT_set->backlog_index)) {
-      if ((214 == pCONT_set->restart_flag) || (215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
+    if (pCONT_set->runtime.restart_flag && (pCONT_set->runtime.backlog_pointer == pCONT_set->runtime.backlog_index)) {
+      if ((214 == pCONT_set->runtime.restart_flag) || (215 == pCONT_set->runtime.restart_flag) || (216 == pCONT_set->runtime.restart_flag)) {
 // Backup current SSIDs and Passwords
 
 
@@ -3072,7 +3078,7 @@ void mSupport::CheckResetConditions()
         // if (216 == pCONT_set->restart_flag) {
         //   memcpy(storage_mqtt, pCONT_set->Settings.mqtt_host, sizeof(storage_mqtt));  // Backup mqtt host, port, client, username and password
         // }
-        if ((215 == pCONT_set->restart_flag) || (216 == pCONT_set->restart_flag)) {
+        if ((215 == pCONT_set->runtime.restart_flag) || (216 == pCONT_set->runtime.restart_flag)) {
           pCONT_set->SettingsErase(0);  // Erase all flash from program end to end of physical flash
         }
         pCONT_set->SettingsDefault();
@@ -3081,26 +3087,26 @@ void mSupport::CheckResetConditions()
         //   memcpy(pCONT_set->Settings.mqtt_host, storage_mqtt, sizeof(storage_mqtt));  // Restore the mqtt host, port, client, username and password
         //   strlcpy(pCONT_set->Settings.mqtt_client, MQTT_CLIENT_ID, sizeof(pCONT_set->Settings.mqtt_client));  // Set client to default
         // }
-        pCONT_set->restart_flag = 2;
+        pCONT_set->runtime.restart_flag = 2;
       }
 
 
 
-      else if (213 == pCONT_set->restart_flag) {
+      else if (213 == pCONT_set->runtime.restart_flag) {
         pCONT_set->SettingsSdkErase();  // Erase flash SDK parameters
-        pCONT_set->restart_flag = 2;
+        pCONT_set->runtime.restart_flag = 2;
       }
-      else if (212 == pCONT_set->restart_flag) {
+      else if (212 == pCONT_set->runtime.restart_flag) {
         pCONT_set->SettingsErase(0);    // Erase all flash from program end to end of physical flash
-        pCONT_set->restart_flag = 211;
+        pCONT_set->runtime.restart_flag = 211;
       }
-      if (211 == pCONT_set->restart_flag) {
+      if (211 == pCONT_set->runtime.restart_flag) {
         pCONT_set->SettingsDefault();
-        pCONT_set->restart_flag = 2;
+        pCONT_set->runtime.restart_flag = 2;
       }
       // pCONT_set->SettingsSaveAll();
-      pCONT_set->restart_flag--;
-      if (pCONT_set->restart_flag <= 0) 
+      pCONT_set->runtime.restart_flag--;
+      if (pCONT_set->runtime.restart_flag <= 0) 
       {
 
         #ifdef ENABLE_LOG_LEVEL_INFO
@@ -3561,7 +3567,7 @@ void mSupport::DebugFreeMem(void)
 //   char *p;
 
 //   uint8_t *buffer = (uint8_t *) &Settings;
-//   maxrow = ((sizeof(SYSCFG)+CFG_COLS)/CFG_COLS);
+//   maxrow = ((sizeof(SETTINGS)+CFG_COLS)/CFG_COLS);
 
 //   uint16_t srow = strtol(parms, &p, 16) / CFG_COLS;
 //   uint16_t mrow = strtol(p, &p, 10);
@@ -3605,7 +3611,7 @@ void mSupport::DebugFreeMem(void)
 //   char *p;
 
 //   uint16_t address = strtol(parms, &p, 16);
-//   if (address > sizeof(SYSCFG)) address = sizeof(SYSCFG) -4;
+//   if (address > sizeof(SETTINGS)) address = sizeof(SETTINGS) -4;
 //   address = (address >> 2) << 2;
 
 //   uint8_t *buffer = (uint8_t *) &Settings;

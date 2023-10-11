@@ -82,7 +82,7 @@ void mHardwarePins::ModuleTemplateJsonParser(char* buffer){
    */
   if((rootObj[PM_JSON_GPIOC])||(rootObj[D_JSON_GPIO_FUNCTION]))
   {
-    pCONT_set->boot_status.module_template_parse_success = true;
+    pCONT_set->runtime.boot_status.module_template_parse_success = true;
     for(int ii=0;ii<ARRAY_SIZE(pCONT_set->Settings.user_template2.hardware.gp.io);ii++){
       pCONT_set->Settings.user_template2.hardware.gp.io[ii] = GPIO_NONE_ID;
     }
@@ -418,15 +418,15 @@ void mHardwarePins::GpioInit(void)
     }
     // Set any user pins 
     else if (pCONT_set->Settings.module_pins.io[i] > GPIO_NONE_ID) {
-      pCONT_set->my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
+      pCONT_set->runtime.my_module.io[i] = pCONT_set->Settings.module_pins.io[i];
       ALOG_DBM(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,pCONT_set->my_module.io[i]);
     }
 
     // Set any pins set in template
     if ((def_gp.io[i] >= GPIO_NONE_ID) && (def_gp.io[i] < GPIO_USER_ID)) { //ADDED >= to also copy NONE 
-      pCONT_set->my_module.io[i] = def_gp.io[i];
+      pCONT_set->runtime.my_module.io[i] = def_gp.io[i];
       #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-      if(pCONT_set->my_module.io[i] > GPIO_NONE_ID){
+      if(pCONT_set->runtime.my_module.io[i] > GPIO_NONE_ID){
       #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
       #ifdef ENABLE_LOG_LEVEL_INFO
       ALOG_DBM(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%S\""),
@@ -452,7 +452,7 @@ void mHardwarePins::GpioInit(void)
   
   DEBUG_LINE_HERE;
   // DEBUG_LINE_HERE;
-  pCONT_set->my_module_flag = ModuleFlag();
+  pCONT_set->runtime.my_module_flag = ModuleFlag();
   // DEBUG_LINE_HERE;
 
   #ifdef USE_DEBUG_DISABLE_GLOBAL_PIN_INIT
@@ -470,7 +470,7 @@ void mHardwarePins::GpioInit(void)
    *  Take module io and configure pins
    * Unlike Tas, each pin function has its unique name maintained (ie SWT_INV for switch inverted maintained its ID, and it not saved simply as INV then shifted back to standard SWT. Internal classes must handle this)
    * */
-  for (uint8_t index = 0; index < ARRAY_SIZE(pCONT_set->my_module.io); index++) 
+  for (uint8_t index = 0; index < ARRAY_SIZE(pCONT_set->runtime.my_module.io); index++) 
   {
 
   // DEBUG_LINE_HERE;
@@ -485,7 +485,7 @@ void mHardwarePins::GpioInit(void)
   // uint8_t i = pin;
   // if()
 
-  uint16_t gpio = pCONT_set->my_module.io[index];
+  uint16_t gpio = pCONT_set->runtime.my_module.io[index];
   // uint8_t pin = i;
   // AddLog(LOG_LEVEL_DEBUG, PSTR("pin=%d, gpio=%d"), pin, gpio);
 
@@ -518,7 +518,7 @@ void mHardwarePins::GpioInit(void)
       
       //PWM
       if ((mgpio >= GPIO_PWM1_INV_ID) && (mgpio < (GPIO_PWM1_INV_ID + MAX_PWMS))) {
-        bitSet(pCONT_set->pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
+        bitSet(pCONT_set->runtime.pwm_inverted, mgpio - GPIO_PWM1_INV_ID);
         mgpio -= (GPIO_PWM1_INV_ID - GPIO_PWM1_ID);
       } 
 
@@ -663,11 +663,11 @@ void mHardwarePins::GpioInit(void)
 // Set any non-used GPIO to INPUT - Related to resetPins() in support_legacy_cores.ino
   // Doing it here solves relay toggles at restart.
   for (uint32_t i = 0; 
-                i < ARRAY_SIZE(pCONT_set->my_module.io);
+                i < ARRAY_SIZE(pCONT_set->runtime.my_module.io);
                 i++
   ){
     
-    uint32_t mgpio = ValidPin_AdjustGPIO(i, pCONT_set->my_module.io[i]);
+    uint32_t mgpio = ValidPin_AdjustGPIO(i, pCONT_set->runtime.my_module.io[i]);
     
     ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
     
@@ -678,7 +678,7 @@ void mHardwarePins::GpioInit(void)
 
       // #ifndef USE_SERIAL_ALTERNATE_TX
         if (!((1 == i) || (3 == i))) {             // Skip serial
-          if((MODULE_H801_ID == pCONT_set->my_module_type) && (i !=2 ))
+          if((MODULE_H801_ID == pCONT_set->runtime.my_module_type) && (i !=2 ))
           {
             pinMode(i, INPUT);
           }
@@ -696,8 +696,8 @@ void mHardwarePins::GpioInit(void)
  * 
  */
 #ifdef USE_I2C
-  pCONT_set->i2c_enabled = (PinUsed(GPIO_I2C_SCL_ID) && PinUsed(GPIO_I2C_SDA_ID));
-  if (pCONT_set->i2c_enabled)
+  pCONT_set->runtime.i2c_enabled = (PinUsed(GPIO_I2C_SCL_ID) && PinUsed(GPIO_I2C_SDA_ID));
+  if (pCONT_set->runtime.i2c_enabled)
   { 
     if(pCONT_sup->wire == nullptr)
     {
@@ -740,7 +740,7 @@ void mHardwarePins::GpioInit(void)
   /**
    *  Use pins to configure lights present
    * */
-  pCONT_set->devices_present = 0;
+  pCONT_set->runtime.devices_present = 0;
   pCONT_set->Settings.light_settings.type = 0;//LT_BASIC;                     // Use basic PWM control if SetOption15 = 0
   // for a light type, func_module should see light as basic and return servicec
   // #ifdef ENABLE_LOG_LEVEL_INFO
@@ -804,7 +804,7 @@ void mHardwarePins::GpioInit(void)
       #ifdef ESP32
       analogAttach(Pin(GPIO_PWM1_ID, i),i);
       // analogWriteFreqRange(i,pCONT_set->Settings.pwm_frequency,pCONT_set->Settings.pwm_range);
-      pCONT_set->pwm_present = true;
+      pCONT_set->runtime.pwm_present = true;
       #endif
 
       #ifdef ESP8266

@@ -43,6 +43,12 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       BootMessage();
     break;
     /************
+     * STORAGE SECTION * 
+    *******************/  
+    case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID:
+      FileSystem_JsonAppend_Save_Module();
+    break;
+    /************
      * TRIGGERS SECTION * 
     *******************/
     case FUNC_EVENT_INPUT_STATE_CHANGED_ID:
@@ -414,7 +420,7 @@ void mAnimatorLight::Init__Palettes()
 void mAnimatorLight::Init(void)
 { 
 
-  device = pCONT_set->devices_present;
+  device = pCONT_set->runtime.devices_present;
   
   subtype = RgbcctColor::ColourType::COLOUR_TYPE__RGBCCT__ID;
   
@@ -423,7 +429,7 @@ void mAnimatorLight::Init(void)
   pCONT_set->Settings.pwm_range = PWM_RANGE;
   pCONT_set->Settings.light_settings.light_fade = 1;
   pCONT_set->Settings.light_settings.light_speed = 5*2;
-  pCONT_set->power = 1;
+  pCONT_set->runtime.power = 1;
 
   auto_off_settings.time_decounter_secs = 0;
 
@@ -2255,14 +2261,64 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen,
 }
 
 
-const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen)
+const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found)
 {
   if(id<getEffectsAmount()){
     snprintf_P(buffer, buflen, effects.data[id]);  
   }else{
     snprintf(buffer, buflen, "id_err %d", id);  
   }
+
+  // Insert a null termination early if requested
+  if(return_first_option_if_not_found)
+  {    
+    char* dataPtr = strchr(buffer,'|');
+    if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+  }
+
   return buffer;
+
+}
+
+
+void mAnimatorLight::FileSystem_JsonAppend_Save_Module()
+{
+
+  uint8_t bus_appended = 0;
+
+  char buffer[100] = {0};
+
+  for(uint8_t seg_i = 0; seg_i< getSegmentsNum(); seg_i++)
+  {
+    JBI->Object_Start_F("Segment%d",seg_i);      
+
+      JBI->Array_Start("PixelRange");
+        JBI->Add(segments[seg_i].pixel_range.start);
+        JBI->Add(segments[seg_i].pixel_range.stop);
+      JBI->Array_End();
+
+      JBI->Add("ColourPalette", GetPaletteNameByID(segments[seg_i].palette.id, buffer, sizeof(buffer)) );
+
+      JBI->Object_Start_F("Effects");      
+        JBI->Add("Function",  GetFlasherFunctionNamebyID(segments[seg_i].effect_id, buffer, sizeof(buffer), true));
+        JBI->Add("Speed",     segments[seg_i].speed() );
+        JBI->Add("Intensity", segments[seg_i].intensity() );
+      JBI->Object_End();
+      JBI->Object_Start_F("Transition");
+        JBI->Add("TimeMs",  segments[seg_i].transition.time_ms );
+        JBI->Add("RateMs",  segments[seg_i].transition.rate_ms );
+      JBI->Object_End();
+
+      for(uint8_t seg_col = 0; seg_col < 5; seg_col++)
+      {
+        JBI->Array_Start_P(PSTR("SegColour%d"), seg_col);
+          for(uint8_t p=0;p<5;p++){ JBI->Add(segments[seg_i].rgbcctcolors[seg_col][p]); }
+        JBI->Array_End();
+      }
+
+    JBI->Object_End();
+  }
+
 
 }
 
@@ -2420,11 +2476,16 @@ bool mAnimatorLight::Segment_New::allocateData(size_t len) {
     effect_id = EFFECTS_FUNCTION__STATIC_PALETTE__ID;
     return false; //allocation failed
   }
-  // Serial.printf("NEW_MEMORY of %d for segment index %d\n\r\n\r\n\r\n\r", len, palette.id ); delay(2000);
+
+  Serial.printf("NEW_MEMORY of %d for segment index %d\n\r", len, palette.id );// delay(2000);
+
   addUsedSegmentData(len);
   _dataLen = len;
   memset(data, 0, len);
-      DEBUG_LINE_HERE;
+      
+      
+  // DEBUG_LINE_HERE;
+
   return true;
 }
 
@@ -3768,7 +3829,7 @@ void mAnimatorLight::loadCustomPalettes()
   //   sprintf_P(fileName, PSTR("/palette%d.json"), index);
 
   //   StaticJsonDocument<1536> pDoc; // barely enough to fit 72 numbers
-  //   if (WLED_FS.exists(fileName)) {
+  //   if (FILE_SYSTEM.exists(fileName)) {
   //     DEBUG_PRINT(F("Reading palette from "));
   //     DEBUG_PRINTLN(fileName);
 
@@ -3913,7 +3974,7 @@ void mAnimatorLight::deserializeMap(uint8_t n) {
   // strcpy_P(fileName, PSTR("/ledmap"));
   // if (n) sprintf(fileName +7, "%d", n);
   // strcat(fileName, ".json");
-  // bool isFile = WLED_FS.exists(fileName);
+  // bool isFile = FILE_SYSTEM.exists(fileName);
 
   // if (!isFile) {
   //   // erase custom mapping if selecting nonexistent ledmap.json (n==0)
@@ -4200,7 +4261,8 @@ RgbcctColor IRAM_ATTR mAnimatorLight::Segment_New::GetPixelColor(uint16_t indexP
 
 
 
-uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
+{
 
   JBI->Start();
 
@@ -4227,9 +4289,13 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
 
     JBI->Add("millis", millis());
 
-    JBI->Add("Start", SEGMENT_I(0).pixel_range.start);
-    JBI->Add("Stop", SEGMENT_I(0).pixel_range.stop);
+    for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
+    {
+        
+      JBI->Add("Start", SEGMENT_I(seg_i).pixel_range.start);
+      JBI->Add("Stop",  SEGMENT_I(seg_i).pixel_range.stop);
 
+    }
   return JBI->End();
 
 }
@@ -4308,29 +4374,34 @@ JBI->Start();
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
     uint8_t seg_i = 0;
 
-    JBI->Add("PaletteSize", mPaletteI->GetColoursInCRGB16Palette(SEGMENT.palette.id) );
-    JBI->Array_Start("CRGB16Palette16");   
-
-    for(uint8_t elem_i=0;elem_i<16;elem_i++)
+    if(segments.size())
     {
-      JBI->Array_Start();
-        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
-        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
-        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
-      JBI->Array_End();          
-    }
-    JBI->Array_End();
 
-    JBI->Array_Start("CRGB16Palette16MAN");
-    for(uint8_t elem_i=0;elem_i<16;elem_i++)
-    {
-      JBI->Array_Start();
-        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
-        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
-        JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
-      JBI->Array_End();          
+      JBI->Add("PaletteSize", mPaletteI->GetColoursInCRGB16Palette(SEGMENT.palette.id) );
+      JBI->Array_Start("CRGB16Palette16");   
+
+      for(uint8_t elem_i=0;elem_i<16;elem_i++)
+      {
+        JBI->Array_Start();
+          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
+          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
+          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
+        JBI->Array_End();          
+      }
+      JBI->Array_End();
+
+      JBI->Array_Start("CRGB16Palette16MAN");
+      for(uint8_t elem_i=0;elem_i<16;elem_i++)
+      {
+        JBI->Array_Start();
+          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].r );
+          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].g );
+          JBI->Add( SEGMENT_I(seg_i).palette_container->CRGB16Palette16_Palette.data[elem_i].b );
+        JBI->Array_End();          
+      }
+      JBI->Array_End();
+
     }
-    JBI->Array_End();
     #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
 
 
@@ -4446,7 +4517,6 @@ return JBI->End();
  */
 uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool json_appending)
 {
-
   JBI->Start();
 
   JBI->Add("Brightness_Master",    pCONT_iLight->getBri_Global());
@@ -4456,40 +4526,39 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
   for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
   {
 
-    Segment_New &seg = getSegment(seg_i);
-    JBI->Object_Start_F("Segment%d",seg_i);
+    JBI->Object_Start_F("Segment%d", seg_i);
 
-      JBI->Add("BrightnessRGB", seg.getBrightnessRGB());
-      JBI->Add("BrightnessCCT", seg.getBrightnessCCT());
+      JBI->Add("BrightnessRGB", SEGMENT_I(seg_i).getBrightnessRGB());
+      JBI->Add("BrightnessCCT", SEGMENT_I(seg_i).getBrightnessCCT());
       
-      JBI->Add("BrightnessRGB_wMaster", seg.getBrightnessRGB_WithGlobalApplied());
-      JBI->Add("BrightnessCCT_wMaster", seg.getBrightnessCCT_WithGlobalApplied());
+      JBI->Add("BrightnessRGB_wMaster", SEGMENT_I(seg_i).getBrightnessRGB_WithGlobalApplied());
+      JBI->Add("BrightnessCCT_wMaster", SEGMENT_I(seg_i).getBrightnessCCT_WithGlobalApplied());
       
       JBI->Array_Start("PixelRange");
-        JBI->Add(seg.pixel_range.start);
-        JBI->Add(seg.pixel_range.stop);
+        JBI->Add(SEGMENT_I(seg_i).pixel_range.start);
+        JBI->Add(SEGMENT_I(seg_i).pixel_range.stop);
       JBI->Array_End();
-      JBI->Add("Offset",    seg.offset);
-      JBI->Add("Speed",     seg.speed());
-      JBI->Add("Intensity", seg.intensity());
+      JBI->Add("Offset",    SEGMENT_I(seg_i).offset);
+      JBI->Add("Speed",     SEGMENT_I(seg_i).speed());
+      JBI->Add("Intensity", SEGMENT_I(seg_i).intensity());
       JBI->Object_Start("Options");
-        JBI->Add("Selected",     seg.selected);
-        JBI->Add("Reverse",      seg.reverse);
-        JBI->Add("On",           seg.on);
-        JBI->Add("Mirror",       seg.mirror);
-        JBI->Add("Freeze",       seg.freeze);
-        JBI->Add("Reset",        seg.reset);
-        JBI->Add("Transitional", seg.transitional);
-        JBI->Add("Reverse_y",    seg.reverse_y);
-        JBI->Add("Mirror_y",     seg.mirror_y);
-        JBI->Add("Transpose",    seg.transpose);
-        JBI->Add("Map1D2D",      seg.map1D2D);
-        JBI->Add("SoundSim",     seg.soundSim);
+        JBI->Add("Selected",     SEGMENT_I(seg_i).selected);
+        JBI->Add("Reverse",      SEGMENT_I(seg_i).reverse);
+        JBI->Add("On",           SEGMENT_I(seg_i).on);
+        JBI->Add("Mirror",       SEGMENT_I(seg_i).mirror);
+        JBI->Add("Freeze",       SEGMENT_I(seg_i).freeze);
+        JBI->Add("Reset",        SEGMENT_I(seg_i).reset);
+        JBI->Add("Transitional", SEGMENT_I(seg_i).transitional);
+        JBI->Add("Reverse_y",    SEGMENT_I(seg_i).reverse_y);
+        JBI->Add("Mirror_y",     SEGMENT_I(seg_i).mirror_y);
+        JBI->Add("Transpose",    SEGMENT_I(seg_i).transpose);
+        JBI->Add("Map1D2D",      SEGMENT_I(seg_i).map1D2D);
+        JBI->Add("SoundSim",     SEGMENT_I(seg_i).soundSim);
       JBI->Object_End();
-      JBI->Add("ColourType",     (uint8_t)seg.colour_type);
+      JBI->Add("ColourType",     (uint8_t)SEGMENT_I(seg_i).colour_type);
       JBI->Object_Start("Transition");
-        JBI->Add("Rate",         seg.transition.rate_ms);
-        JBI->Add("Time",         seg.transition.time_ms);
+        JBI->Add("Rate",         SEGMENT_I(seg_i).transition.rate_ms);
+        JBI->Add("Time",         SEGMENT_I(seg_i).transition.time_ms);
       JBI->Object_End();
       JBI->Object_Start("RgbcctColours");
       for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
@@ -4497,13 +4566,13 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
         JBI->Array_Start_P("Colour%d", rgb_i);
         for(uint8_t c_i=0;c_i<5;c_i++)
         {
-          JBI->Add(seg.rgbcctcolors[rgb_i].raw[c_i]);
+          JBI->Add(SEGMENT_I(seg_i).rgbcctcolors[rgb_i].raw[c_i]);
         }
         JBI->Array_End();
         JBI->Object_Start("ColourTemp");
-          JBI->Add("Min",      seg.rgbcctcolors[rgb_i].get_CTRangeMin());
-          JBI->Add("Max",      seg.rgbcctcolors[rgb_i].get_CTRangeMax());
-          JBI->Add("Set",      seg.rgbcctcolors[rgb_i].getCCT());
+          JBI->Add("Min",      SEGMENT_I(seg_i).rgbcctcolors[rgb_i].get_CTRangeMin());
+          JBI->Add("Max",      SEGMENT_I(seg_i).rgbcctcolors[rgb_i].get_CTRangeMax());
+          JBI->Add("Set",      SEGMENT_I(seg_i).rgbcctcolors[rgb_i].getCCT());
         JBI->Object_End();
       }
       JBI->Object_End();
@@ -4786,12 +4855,12 @@ void mAnimatorLight::MQTTHandler_Set_RefreshAll()
  * */
 void mAnimatorLight::MQTTHandler_Set_DefaultPeriodRate()
 {
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
-  }
+  // for(auto& handle:mqtthandler_list){
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.teleperiod_secs;
+  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+  //     handle->tRateSecs = pCONT_set->Settings.sensors.ifchanged_secs;
+  // }
 }
 
 /**
@@ -5821,7 +5890,5 @@ uint8_t realtimeBroadcast(uint8_t type, IPAddress client, uint16_t length, uint8
 }
 
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
-
-
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR

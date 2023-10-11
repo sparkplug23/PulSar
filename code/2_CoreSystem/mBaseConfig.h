@@ -426,6 +426,29 @@ With latest version, all longer term shared debug features should be added here 
 
 #endif // ESP32
 
+/*********************************************************************************************\
+ * File system
+\*********************************************************************************************/
+
+
+#define UFS_FILE_WRITE              "w"
+#define UFS_FILE_READ               "r"
+#define FS_FILE_WRITE               "w"
+#define FS_FILE_READ                "r"
+#define FS_FILE_APPEND              "a"
+
+// #define TASM_FILE_SETTINGS          "/.settings"       // Settings binary blob
+#define TASM_FILE_SETTINGS          "/settings.txt"       // Settings binary blob as text so I can view on webui
+// #define TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD      "/.settings.lkg"   // Last Known Good Settings binary blob
+#define TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD      "/settings_lkg.txt"   // Last Known Good Settings binary blob
+#define TASM_FILE_DRIVER            "/.drvset%03d"
+#define TASM_FILE_SENSOR            "/.snsset%03d"
+#define TASM_FILE_TLSKEY            "/tlskey"          // TLS private key
+#define TASM_FILE_ZIGBEE_LEGACY_V2  "/zb"              // Zigbee devices information blob, legacy v2
+#define TASM_FILE_ZIGBEE            "/zbv4"            // Zigbee devices information blob, now v4
+#define TASM_FILE_ZIGBEE_DATA       "/zbdata"          // Zigbee last known values of devices
+#define TASM_FILE_AUTOEXEC          "/autoexec.bat"    // Commands executed after restart
+#define TASM_FILE_CONFIG            "/config.sys"      // Settings executed after restart
 
 
 

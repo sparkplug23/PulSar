@@ -1522,6 +1522,7 @@
   #define D_LOG_I2C "I2C: "          // I2C
   #define D_LOG_IRR "IRR: "          // Infra Red Received
   #define D_LOG_LOG "LOG: "          // Logging
+  #define D_LOG_FILESYSTEM "UFS: "
   #define D_LOG_MODULE "MOD: "       // Module
   #define D_LOG_MDNS "DNS: "         // mDNS
   #define D_LOG_MQTT "MQT: "         // MQTT

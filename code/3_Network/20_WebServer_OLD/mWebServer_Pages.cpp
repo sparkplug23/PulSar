@@ -74,7 +74,7 @@
 //           JBI->Add("fc", colour_ctr);    
 //         }break;
 //         case 2:
-//           JBI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+//           JBI->Add("ihr",pCONT_set->runtime.firmware_version.current.name_ctr);
 //           JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
 
 //         break;
@@ -84,7 +84,7 @@
 //                 ESP.getFreeHeap(), 
 //                 F(__DATE__), 
 //                 F(__TIME__), 
-//                 pCONT_set->boot_status.module_template_used ? "Y" : "N", 
+//                 pCONT_set->runtime.boot_status.module_template_used ? "Y" : "N", 
 //                 pCONT_sup->activity.cycles_per_sec
 //             );
 //         break;
@@ -96,7 +96,7 @@
   
 //   // JBI->Array_Start("debug_line");// Class name
 //   //   JBI->Object_Start();
-//   //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
+//   //     JBI->Add_FV("ih",PSTR("\"%dc %d %s|%s PT(%s) LPS(%d)\""), pCONT_set->Settings.bootcount, ESP.getFreeHeap(), F(__DATE__), F(__TIME__), pCONT_set->runtime.boot_status.module_template_used ? "Y" : "N", pCONT_sup->activity.cycles_per_sec);
 //   //   JBI->Object_End();
 //   // JBI->Array_End();
 //   JBI->End();
@@ -135,14 +135,14 @@
 //           JBI->Add("fc", colour_ctr);   
 //         }break;
 //         case 2:
-//           JBI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+//           JBI->Add("ihr",pCONT_set->runtime.firmware_version.current.name_ctr);
 //           JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
 //         break;
 //         case 3:
-//           JBI->Add_FV("ih",PSTR("\"Boot: %dc PT(%s)\""), pCONT_set->Settings.bootcount, pCONT_set->boot_status.module_template_used ? "Y" : "N");
+//           JBI->Add_FV("ih",PSTR("\"Boot: %dc PT(%s)\""), pCONT_set->Settings.bootcount, pCONT_set->runtime.boot_status.module_template_used ? "Y" : "N");
 //         break;
 //         case 4:
-//           JBI->Add_FV("ih",PSTR("\"Firmware: %s %s|%s\""), pCONT_set->firmware_version.current.name_ctr, F(__DATE__), F(__TIME__));
+//           JBI->Add_FV("ih",PSTR("\"Firmware: %s %s|%s\""), pCONT_set->runtime.firmware_version.current.name_ctr, F(__DATE__), F(__TIME__));
 //           JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));    
 //         break;
 //         case 5:
@@ -324,7 +324,7 @@
 //   // char buffer[10];
 //   // JBI->Array_Start("row_version_data");// Class name
 //   //   JBI->Object_Start();
-//   //     JBI->Add("ihr",pCONT_set->firmware_version.current.name_ctr);
+//   //     JBI->Add("ihr",pCONT_set->runtime.firmware_version.current.name_ctr);
 //   //     JBI->Add("fc", pCONT_sup->GetVersionColour(buffer));           
 //   //   JBI->Object_End();
 //   // JBI->Array_End();
@@ -770,7 +770,7 @@
 //   // char stemp2[32];
 //   // uint8_t dlevel[3] = { LOG_LEVEL_INFO, LOG_LEVEL_INFO, LOG_LEVEL_NONE };
 //   // for (uint8_t idx = 0; idx < 3; idx++) {
-//   //   uint8_t llevel = (0==idx)?pCONT_set->Settings.seriallog_level:(1==idx)?pCONT_set->Settings.weblog_level:pCONT_set->Settings.syslog_level;
+//   //   uint8_t llevel = (0==idx)?pCONT_set->Settings.logging.serial_level:(1==idx)?pCONT_set->Settings.logging.web_level:pCONT_set->Settings.syslog_level;
 //   //   WSBufferAppend_P(response, PSTR("<p><b>%s</b> (%s)<br/><select id='l%d' name='l%d'>"),
 //   //     pCONT_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), idx, kLoggingOptions),
 //   //     pCONT_sup->GetTextIndexed_P(stemp2, sizeof(stemp2), dlevel[idx], kLoggingLevels),
@@ -793,9 +793,9 @@
 //   // char tmp[sizeof(pCONT_set->Settings.syslog_host)];  // Max length is currently 33
 
 //   // WebGetArg(request,"l0", tmp, sizeof(tmp));
-//   // pCONT_set->Settings.seriallog_level = (!strlen(tmp)) ? SERIAL_LOG_LEVEL : atoi(tmp);
+//   // pCONT_set->Settings.logging.serial_level = (!strlen(tmp)) ? SERIAL_LOG_LEVEL : atoi(tmp);
 //   // WebGetArg(request,"l1", tmp, sizeof(tmp));
-//   // pCONT_set->Settings.weblog_level = (!strlen(tmp)) ? WEB_LOG_LEVEL : atoi(tmp);
+//   // pCONT_set->Settings.logging.web_level = (!strlen(tmp)) ? WEB_LOG_LEVEL : atoi(tmp);
 //   // WebGetArg(request,"l2", tmp, sizeof(tmp));
 //   // pCONT_set->Settings.syslog_level = (!strlen(tmp)) ? SYS_LOG_LEVEL : atoi(tmp);
 //   // pCONT_set->syslog_level = pCONT_set->Settings.syslog_level;
@@ -810,7 +810,7 @@
 //   //   pCONT_set->Settings.tele_period = 10;   // Do not allow periods < 10 seconds
 //   // }
 //   // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LOG D_JSON_SERIALLOG " %d, " D_JSON_WEBLOG " %d, " D_JSON_SYSLOG " %d, " D_JSON_LOGHOST " %s, " D_JSON_LOGPORT " %d, " D_JSON_TELEPERIOD " %d"),
-//   //   pCONT_set->Settings.seriallog_level, pCONT_set->Settings.weblog_level, pCONT_set->Settings.syslog_level, pCONT_set->Settings.syslog_host, pCONT_set->Settings.syslog_port, pCONT_set->Settings.tele_period);
+//   //   pCONT_set->Settings.logging.serial_level, pCONT_set->Settings.logging.web_level, pCONT_set->Settings.syslog_level, pCONT_set->Settings.syslog_host, pCONT_set->Settings.syslog_port, pCONT_set->Settings.tele_period);
 // }
 
 // /*-------------------------------------------------------------------------------------------*/
@@ -2291,17 +2291,17 @@
 // // void mWebServer::WebAppend_SystemVersionBar(){  
 
 // //   uint32_t text_colour = WebColor(255,255,255);
-// //   if(pCONT_set->firmware_version.fNewVersionAvailable){
+// //   if(pCONT_set->runtime.firmware_version.fNewVersionAvailable){
 // //     text_colour = WebColor(pCONT_set->COL_TEXT_SUCCESS);
 // //   }
-// //   if(pCONT_set->firmware_version.fCurrentVersionNotSupported){
+// //   if(pCONT_set->runtime.firmware_version.fCurrentVersionNotSupported){
 // //     text_colour = WebColor(pCONT_set->COL_TEXT_WARNING);
 // //   }
 
 // //   char message_version1[100];
 // //   sprintf(message_version1,PSTR("%s %s%s"),
 // //     PROJECT_NAME_CTR,
-// //     pCONT_set->firmware_version.current.name_ctr,
+// //     pCONT_set->runtime.firmware_version.current.name_ctr,
 // //     pCONT_set->firmware_version.fNewVersionAvailable ? " Update Available" : ""  
 // //   );
 

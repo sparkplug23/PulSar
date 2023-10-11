@@ -120,6 +120,15 @@ bool mTime::SystemTime_NTPUpdate_GetNTPTime(uint32_t* ntp_time)
 }
 #endif // ENABLE_DEVFEATURE__TIME_NTP_UPDATE_WITH_VERSION2
 
+
+
+
+uint32_t mTime::UtcTime(void)
+{
+  return Rtc.utc_time;
+}
+
+
 /**********************************************************************************************************************************************************************************************************
  * @brief
  * 

@@ -442,8 +442,8 @@ void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 {
 
   // if(
-  //   (loglevel>pCONT_set->Settings.seriallog_level)&&
-  //   (loglevel>pCONT_set->Settings.weblog_level)
+  //   (loglevel>pCONT_set->Settings.logging.serial_level)&&
+  //   (loglevel>pCONT_set->Settings.logging.web_level)
   //   ){
   //   return;
   // }  
@@ -627,6 +627,26 @@ public:
     void AddLogBuffer(uint8_t loglevel, uint8_t *buffer, int count);
     void AddLogSerial(uint8_t loglevel);
     void AddLogMissed(char *sensor, uint8_t misses);
+
+    
+/****
+ * Internal buffers, should I move these elsewhere? They are not settings, logs??
+*/
+
+#ifndef WEB_LOG_SIZE
+#define WEB_LOG_SIZE 200       // Max number of characters in weblog
+#endif // WEB_LOG_SIZE
+#ifndef LOG_BUFFER_SIZE
+
+#ifdef ESP8266
+#define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
+#else //esp32
+#define LOG_BUFFER_SIZE 1000
+#endif
+#endif // LOG_BUFFER_SIZE
+char log_data[LOG_BUFFER_SIZE];                       // Logging
+char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
+uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
 
 // template<typename T, typename U>
 // void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len);

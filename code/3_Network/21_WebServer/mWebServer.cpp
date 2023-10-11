@@ -60,9 +60,9 @@ void mWebServer::createEditHandler(bool enable)
   {
     #ifdef WLED_ENABLE_FS_EDITOR
       #ifdef ARDUINO_ARCH_ESP32
-      editHandler = &pCONT_web->server->addHandler(new SPIFFSEditor(WLED_FS));//http_username,http_password));
+      editHandler = &pCONT_web->server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
       #else
-      editHandler = &server.addHandler(new SPIFFSEditor("","",WLED_FS));//http_username,http_password));
+      editHandler = &server.addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
       #endif
     #else
       editHandler = &pCONT_web->server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -1048,8 +1048,8 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 // // //     }
 // // //   }
 // // //   else if (CMND_WEBLOG == command_code) {
-// // //     if ((pCONT_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (pCONT_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { pCONT_set->Settings.weblog_level = pCONT_set->XdrvMailbox.payload; }
-// // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.weblog_level);
+// // //     if ((pCONT_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (pCONT_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { pCONT_set->Settings.logging.web_level = pCONT_set->XdrvMailbox.payload; }
+// // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.logging.web_level);
 // // //   }
 // // //   else if (CMND_WEBREFRESH == command_code) {
 // // //     if ((pCONT_set->XdrvMailbox.payload > 999) && (pCONT_set->XdrvMailbox.payload <= 10000)) { pCONT_set->Settings.web_refresh = pCONT_set->XdrvMailbox.payload; }

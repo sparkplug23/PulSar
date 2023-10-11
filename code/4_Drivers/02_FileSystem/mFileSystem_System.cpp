@@ -1,0 +1,229 @@
+/**
+ * @file mFileSystem.cpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2023-10-07
+ * 
+ * There are two types of filesystems:
+ * 
+ * 1) Internal flash filesystem
+ * 2) SD Card filesystem
+ * https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html
+ * @copyright Copyright (c) 2023
+ * 
+ * Step 1: build now and be able to view files on the SD card in the webui editor
+ * 
+ */
+
+#include "mFileSystem.h"
+
+#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+
+/**
+ * @brief 
+ * 
+ * Three files are needed:
+ * "/config_system.json" -- to be moved to flash later
+ * "/config_modules.json"
+ * "/config_secure.json"
+ * 
+ * 
+ */
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void mFileSystem::JsonFile_Save__Stored_Module()
+{
+  
+  ALOG_INF( PSTR("JsonFile_Save__Stored_Module") );
+
+  const char* file_path = "/config_module.json";
+  char buffer[100] = {0};
+
+  File file;  
+  // Open file for writing, if it does not exist, create it
+  // Seek is placed at the start of the file, contents will be overwriten
+  file = FILE_SYSTEM.open(file_path, "w+");
+  
+  if(!file) 
+  {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+    return;
+  }
+
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return;
+  }
+ 
+  JBI->Start();
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JBI->Add(PSTR("millis"), millis());
+    pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID);
+  JBI->End();
+
+  file.print(JBI->GetBufferPtr());
+  file.close();
+    
+  ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+
+  JBI->ReleaseLock();
+
+}
+
+/**
+ * @brief Test if file exists, if not, load default template from progmem if it exists
+ * 
+ */
+void mFileSystem::JsonFile_Load__Stored_Module_Or_Default_Template()
+{
+
+  DEBUG_LINE_HERE;
+
+  bool force_default_template = false; // ie on reset
+ 
+  if(!JsonFile_Load__Stored_Module() || force_default_template){
+    ALOG_INF(PSTR("No config_module.json file found, loading default template from progmem"));
+    pCONT->Tasker_Interface(FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID);
+  }
+
+  DEBUG_LINE_HERE;
+
+}
+
+
+bool mFileSystem::JsonFile_Load__Stored_Module()
+{
+  
+  ALOG_INF( PSTR("JsonFile_Load__Stored_Module") );
+
+  File file;  
+  const char* file_path = "/config_module.json";
+  
+  // Open file for read only
+  file = FILE_SYSTEM.open(file_path, "r");
+  
+  if (!file) {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+    return false;
+  }
+
+  Serial.printf("Read from file [%d]: \n\r", file.available());
+
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return false;
+  }
+ 
+  // Read into local buffer, this should be locked from async access using buffer class method
+  D_DATA_BUFFER_CLEAR();
+  uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
+  file.read(buffer_p, file.available());
+  file.close();
+  
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  JBI->ReleaseLock();
+
+  return true;
+  
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void mFileSystem::JsonFile_Save__Stored_Secure()
+{
+  
+  ALOG_INF( PSTR("JsonFile_Save__Stored_Secure") );
+
+  const char* file_path = "/config_secure.json";
+  char buffer[100] = {0};
+
+  File file;  
+  // Open file for writing, if it does not exist, create it
+  // Seek is placed at the start of the file, contents will be overwriten
+  file = FILE_SYSTEM.open(file_path, "w+");
+  
+  if(!file) 
+  {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+    return;
+  }
+
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return;
+  }
+ 
+  JBI->Start();
+    JBI->Add(PM_JSON_UTC_TIME, pCONT_time->GetDateAndTimeCtr(DT_UTC, buffer, sizeof(buffer)));
+    JBI->Add(PSTR("millis"), millis());
+    pCONT->Tasker_Interface(FUNC_FILESYSTEM_APPEND_JSON__Stored_Secure__ID);
+  JBI->End();
+
+  file.print(JBI->GetBufferPtr());
+  file.close();
+    
+  ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+
+  JBI->ReleaseLock();
+
+}
+
+void mFileSystem::JsonFile_Load__Stored_Secure()
+{
+  
+  ALOG_INF( PSTR("JsonFile_Load__Stored_Secure") );
+
+  File file;  
+  const char* file_path = "/config_secure.json";
+  
+  // Open file for read only
+  file = FILE_SYSTEM.open(file_path, "r");
+  
+  if (!file) {
+    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+    return;
+  }
+
+  Serial.printf("Read from file [%d]: \n\r", file.available());
+
+  if(!JBI->RequestLock(GetModuleUniqueID())){
+    return;
+  }
+ 
+  // Read into local buffer, this should be locked from async access using buffer class method
+  D_DATA_BUFFER_CLEAR();
+  uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
+  file.read(buffer_p, file.available());
+  file.close();
+  
+  data_buffer.payload.len = strlen(data_buffer.payload.ctr);
+
+  ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.len, data_buffer.payload.ctr);
+
+  pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
+
+  JBI->ReleaseLock();
+  
+}
+
+
+#endif // USE_MODULE_DRIVERS_FILESYSTEM

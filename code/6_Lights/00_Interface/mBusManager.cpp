@@ -72,6 +72,77 @@ uint32_t Bus::autoWhiteCalc(uint32_t c)
 }
 
 
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH__CTR) "WS2812_1CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH_X3__CTR) "WS2812_1CH_X3";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_2CH_X3__CTR) "WS2812_2CH_X3";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_WWA__CTR) "WS2812_WWA";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_RGB__CTR) "WS2812_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__GS8608__CTR) "GS8608";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2811_400KHZ__CTR) "WS2811_400KHZ";
+DEFINE_PGM_CTR(PM_BUSTYPE__TM1829__CTR) "TM1829";
+DEFINE_PGM_CTR(PM_BUSTYPE__SK6812_RGBW__CTR) "SK6812_RGBW";
+DEFINE_PGM_CTR(PM_BUSTYPE__TM1814__CTR) "TM1814";
+DEFINE_PGM_CTR(PM_BUSTYPE__ONOFF__CTR) "ONOFF";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_1CH__CTR) "ANALOG_1CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_2CH__CTR) "ANALOG_2CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_3CH__CTR) "ANALOG_3CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_4CH__CTR) "ANALOG_4CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__ANALOG_5CH__CTR) "ANALOG_5CH";
+DEFINE_PGM_CTR(PM_BUSTYPE__WS2801__CTR) "WS2801";
+DEFINE_PGM_CTR(PM_BUSTYPE__APA102__CTR) "APA102";
+DEFINE_PGM_CTR(PM_BUSTYPE__LPD8806__CTR) "LPD8806";
+DEFINE_PGM_CTR(PM_BUSTYPE__P9813__CTR) "P9813";
+DEFINE_PGM_CTR(PM_BUSTYPE__LPD6803__CTR) "LPD6803";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGB__CTR) "NET_DDP_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_E131_RGB__CTR) "NET_E131_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_ARTNET_RGB__CTR) "NET_ARTNET_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__NET_DDP_RGBW__CTR) "NET_DDP_RGBW";
+DEFINE_PGM_CTR(PM_BUSTYPE__RESERVED__CTR) "RESERVED";
+
+
+
+const char* Bus::getTypeName()
+{
+  switch(getType()){
+    default:
+    //Digital types (data pin only) (16-31)
+    case BUSTYPE_WS2812_1CH:          return PM_BUSTYPE__WS2812_1CH__CTR;
+    case BUSTYPE_WS2812_1CH_X3:          return PM_BUSTYPE__WS2812_1CH_X3__CTR;
+    case BUSTYPE_WS2812_2CH_X3:          return PM_BUSTYPE__WS2812_2CH_X3__CTR;
+    case BUSTYPE_WS2812_WWA:          return PM_BUSTYPE__WS2812_WWA__CTR;
+    case BUSTYPE_WS2812_RGB:          return PM_BUSTYPE__WS2812_RGB__CTR;
+    case BUSTYPE_GS8608:          return PM_BUSTYPE__GS8608__CTR;
+    case BUSTYPE_WS2811_400KHZ:          return PM_BUSTYPE__WS2811_400KHZ__CTR;
+    case BUSTYPE_TM1829:          return PM_BUSTYPE__TM1829__CTR;
+    case BUSTYPE_SK6812_RGBW:          return PM_BUSTYPE__SK6812_RGBW__CTR;
+    case BUSTYPE_TM1814:          return PM_BUSTYPE__TM1814__CTR;
+    //"Analog" types (PWM) (32-47)
+    case BUSTYPE_ONOFF:          return PM_BUSTYPE__ONOFF__CTR;
+    case BUSTYPE_ANALOG_1CH:          return PM_BUSTYPE__ANALOG_1CH__CTR;
+    case BUSTYPE_ANALOG_2CH:          return PM_BUSTYPE__ANALOG_2CH__CTR;
+    case BUSTYPE_ANALOG_3CH:          return PM_BUSTYPE__ANALOG_3CH__CTR;
+    case BUSTYPE_ANALOG_4CH:          return PM_BUSTYPE__ANALOG_4CH__CTR;
+    case BUSTYPE_ANALOG_5CH:          return PM_BUSTYPE__ANALOG_5CH__CTR;
+    //Digital types (data + clock / SPI) (48-63)
+    case BUSTYPE_WS2801:          return PM_BUSTYPE__WS2801__CTR;
+    case BUSTYPE_APA102:          return PM_BUSTYPE__APA102__CTR;
+    case BUSTYPE_LPD8806:          return PM_BUSTYPE__LPD8806__CTR;
+    case BUSTYPE_P9813:          return PM_BUSTYPE__P9813__CTR;
+    case BUSTYPE_LPD6803:          return PM_BUSTYPE__LPD6803__CTR;
+    //Network types (master broadcast) (80-95)
+    case BUSTYPE_NET_DDP_RGB:       return PM_BUSTYPE__NET_DDP_RGB__CTR;
+    case BUSTYPE_NET_E131_RGB:      return PM_BUSTYPE__NET_E131_RGB__CTR;
+    case BUSTYPE_NET_ARTNET_RGB:    return PM_BUSTYPE__NET_ARTNET_RGB__CTR;
+    case BUSTYPE_NET_DDP_RGBW:      return PM_BUSTYPE__NET_DDP_RGBW__CTR;
+    case BUSTYPE_RESERVED:          return PM_BUSTYPE__RESERVED__CTR;
+  }
+}
+
+
+
+
+
+
 /*****************************************************************************************************************************************************************
  ***************************************************************************************************************************************************************** 
  ** BusDigital *************************************************************************************************************************************************** 
@@ -375,7 +446,7 @@ void BusPwm::show()
   for(uint8_t ii=0;ii<numPins;ii++)
   {
     colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, pCONT_set->Settings.pwm_range, pCONT_iLight->pwm_min, pCONT_iLight->pwm_max) : 0; 
-    pwm_value = bitRead(pCONT_set->pwm_inverted, ii) ? pCONT_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
+    pwm_value = bitRead(pCONT_set->runtime.pwm_inverted, ii) ? pCONT_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
     ALOG_DBM(PSTR("BusPwm[%d]::pwm_value[%d] %d"), pCONT_lAni->getCurrSegmentId(), ii, pwm_value);
     #ifdef ESP8266
     analogWrite(_pins[ii], pwm_value);
@@ -718,6 +789,26 @@ uint16_t BusManager::getTotalLength() {
   for (uint8_t i=0; i<numBusses; i++) len += busses[i]->getLength();
   return len;
 }
+
+
+
+const char* BusManager::getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len)
+{
+  Serial.println(_colorOrder.data, BIN);
+
+  if(len>=5)
+  {
+    if(_colorOrder.red < 5) buffer[_colorOrder.red] = 'r';
+    if(_colorOrder.green < 5) buffer[_colorOrder.green] = 'g';
+    if(_colorOrder.blue < 5) buffer[_colorOrder.blue] = 'b';
+    if(_colorOrder.white_cold < 5) buffer[_colorOrder.white_cold] = 'c';
+    if(_colorOrder.white_warm < 5) buffer[_colorOrder.white_warm] = 'w';
+  }
+  return buffer;
+}
+
+
+
 
 // Bus static member definition
 int16_t Bus::_cct = -1; // Phase out

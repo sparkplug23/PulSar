@@ -63,10 +63,12 @@ class JsonBuilder{
     JsonBuilder(){};
     
     struct WRITER_POINTERS{
-      char*     buffer = nullptr;
+      char*     buffer      = nullptr;
       uint16_t  buffer_size = 0;
-      uint16_t length;// = nullptr;
+      uint16_t  length      = 0;
     }writer;
+
+    uint16_t locked_by_module_unique_id = 0;
 
   public:
     // External function to get instance
@@ -77,12 +79,50 @@ class JsonBuilder{
     char* GetBufferPtr();
     char* GetPtr();
     uint16_t GetLength();
-    uint16_t* GetLengthPtr();
     uint16_t GetBufferSize();
 
+    bool RequestLock(uint16_t module_unique_id)
+    {
+
+      unsigned long now = millis();
+
+      while (locked_by_module_unique_id && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+      if (millis()-now >= 1000) {
+        DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
+        DEBUG_PRINT(locked_by_module_unique_id);
+        DEBUG_PRINTLN(")");
+        return false; // waiting time-outed
+      }
+
+      locked_by_module_unique_id = module_unique_id;
+      DEBUG_PRINT(F("JSON buffer locked. ("));
+      DEBUG_PRINT(locked_by_module_unique_id);
+      DEBUG_PRINTLN(")");
+
+      // fileDoc = &doc;  // used for applying presets (presets.cpp)
+      // doc.clear();
+
+      return true;
+
+    }
+
+    void ReleaseLock()
+    {
+
+      DEBUG_PRINT(F("JSON buffer released. ("));
+      DEBUG_PRINT(locked_by_module_unique_id);
+      DEBUG_PRINTLN(")");
+
+      locked_by_module_unique_id = 0;
+    }
+
     void Start(char* _buffer, uint16_t _length, uint16_t _buffer_size);
-    void Start();
+    void Start(bool override_lock = false);
     bool End();
+
+    void Write(const char* buff);
+    void Write_P(const char* formatP, ...);
 
     void Object_Start(const char* key);
     void Level_Start_P(const char* keyP, ...);

@@ -901,7 +901,7 @@
 // // // //     }
 // // // //   }
 // // // //   else if (CMND_WEBLOG == command_code) {
-// // // //     if ((pCONT_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (pCONT_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { pCONT_set->Settings.weblog_level = pCONT_set->XdrvMailbox.payload; }
+// // // //     if ((pCONT_set->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (pCONT_set->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { pCONT_set->Settings.logging.web_level = pCONT_set->XdrvMailbox.payload; }
 // // // //     pCONT_sup->Response_P(S_JSON_COMMAND_NVALUE, command, pCONT_set->Settings.weblog_level);
 // // // //   }
 // // // //   else if (CMND_WEBREFRESH == command_code) {

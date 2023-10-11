@@ -2,6 +2,10 @@
 
 /***
  * Introduce a ringbuffer for sdcard writter, hence as long as the sdcard is open, anything written to buffer will be flushed to sdcard
+ 
+ This needs phased out into filesystem
+ The special parts that allow ringbuffer to SD fast write should be moved into a controller (using filesystem and UART drivers)
+ 
  * */
 
 

@@ -16,7 +16,8 @@
 /**
  * DEVICE_TYPE CORE: Any testbeds related to core system
  * */
-#define DEVICE_TESTBED__SETTINGS_STORING
+// #define DEVICE_TESTBED__SETTINGS_STORING
+// #define DEVICE_TESTBED__FILESYSTEM
 
 
 /**
@@ -2611,6 +2612,51 @@
   
 #endif
 
+
+
+
+#ifdef DEVICE_TESTBED__FILESYSTEM
+  #define DEVICENAME_CTR          "testbed_filesystem"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Filesystem"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+  #define DEVICENAME_ROOMHINT_CTR "Example"
+
+  /***********************************
+   * SECTION: Core Configs
+  ************************************/     
+  #define USE_MODULE_DRIVERS_FILESYSTEM
+    #define WLED_ENABLE_FS_EDITOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
 
 
 

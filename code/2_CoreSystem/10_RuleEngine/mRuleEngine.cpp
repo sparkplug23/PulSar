@@ -138,7 +138,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   pCONT->Tasker_Interface(FUNC_JSON_COMMAND_ID);
   
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
-  pCONT_set->boot_status.rules_template_parse_success = 1;
+  pCONT_set->runtime.boot_status.rules_template_parse_success = 1;
   #endif //USE_RULES_TEMPLATE
 
   

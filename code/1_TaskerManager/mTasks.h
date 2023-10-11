@@ -16,6 +16,8 @@ enum TASKER_FUNCTION_TYPES {
   FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
   FUNC_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
 
+  FUNC_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID, // progmem is only loaded when file system is reset
+
 
   FUNC_SETTINGS_DEFAULT,   // Use defaults in code
   FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT,   // Use defaults in code
@@ -144,7 +146,9 @@ enum TASKER_FUNCTION_TYPES {
   /**
    * @brief Response Tasks
    **/
-  FUNC_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID,
+  FUNC_FILESYSTEM_APPEND_JSON__CONFIG_MODULES__ID,
+  FUNC_FILESYSTEM_APPEND_JSON__Stored_Secure__ID,
+  FUNC_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID, // Temporary, will be replaced with flash settings
 
   /**
    * @brief Rules

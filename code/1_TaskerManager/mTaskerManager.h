@@ -144,12 +144,12 @@
 
     //Filesystem to use for preset and config files. SPIFFS or LittleFS on ESP8266, SPIFFS only on ESP32 (now using LITTLEFS port by lorol)
     #ifdef ESP8266
-      #define WLED_FS LittleFS
+      #define FILE_SYSTEM LittleFS
     #else
       #ifdef LOROL_LITTLEFS
-        #define WLED_FS LITTLEFS
+        #define FILE_SYSTEM LITTLEFS
       #else
-        #define WLED_FS LittleFS
+        #define FILE_SYSTEM LittleFS
       #endif
     #endif
 

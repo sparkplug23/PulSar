@@ -62,7 +62,7 @@ void MQTTConnection::EverySecond()
     ALOG_INF(PSTR("MqttIsConnected == FALSE"));
     #endif
 
-    pCONT_set->global_state.mqtt_down = 1;
+    pCONT_set->runtime.global_state.mqtt_down = 1;
     uptime_seconds = 0;
     downtime_counter++;
 
@@ -89,7 +89,7 @@ void MQTTConnection::EverySecond()
     #ifdef ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
     ALOG_INF(PSTR("MqttIsConnected == TRUE"));
     #endif
-    pCONT_set->global_state.mqtt_down = 0;
+    pCONT_set->runtime.global_state.mqtt_down = 0;
     downtime_counter = 0;
     uptime_seconds++;
   }  
@@ -105,7 +105,7 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   connected = false;
   retry_counter = pCONT_set->Settings.mqtt_retry;
-  pCONT_set->global_state.mqtt_down = 1;
+  pCONT_set->runtime.global_state.mqtt_down = 1;
 
   if(pubsub!=nullptr)
   {
@@ -202,7 +202,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
   }
 
   if(data_buffer.flags.waiting){data_buffer.flags.waiting = false;
-    // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.seriallog_level) {
+    // if (LOG_LEVEL_DEBUG_MORE <= pCONT_set->Settings.logging.serial_level) {
       LoggingLevels level = LOG_LEVEL_DEBUG_MORE;
       #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
       level = LOG_LEVEL_TEST;

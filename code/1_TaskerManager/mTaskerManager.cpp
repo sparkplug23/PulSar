@@ -151,7 +151,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     if(function != last_function){
       uint8_t boot_percentage = map(function,0,FUNC_ON_BOOT_COMPLETE,0,100);
       //5% = 1 bar, 20 bars total [B                   ]
-      //if(pCONT_set->Settings.seriallog_level >= LOG_LEVEL_INFO){
+      //if(pCONT_set->Settings.logging.serial_level >= LOG_LEVEL_INFO){
       #ifndef DISABLE_SERIAL_LOGGING
       DEBUG_PRINTF("[");
       for(uint8_t percent=0;percent<100;percent+=5){  
@@ -170,7 +170,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
   #endif // ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
 
 
-  if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->flag_boot_complete = true; }
+  if(function == FUNC_ON_BOOT_COMPLETE){ pCONT_set->runtime.flag_boot_complete = true; }
   
   #ifdef ENABLE_ADVANCED_DEBUGGING
     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST D_FUNCTION_TASKER_INTERFACE " FINISHED"));

@@ -40,8 +40,8 @@ void mSupport::parse_JSONCommand(JsonParserObject obj){
     char buffer[100];
     // const char* name = jtok.getStr();  //["loglevel"];
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""), jtok.getStr());
-    pCONT_set->Settings.seriallog_level = pCONT_log->SetLogLevelIDbyName(jtok.getStr());
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""), pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.seriallog_level,buffer,sizeof(buffer)));
+    pCONT_set->Settings.logging.serial_level = pCONT_log->SetLogLevelIDbyName(jtok.getStr());
+    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""), pCONT_log->GetLogLevelNamebyID(pCONT_set->Settings.logging.serial_level,buffer,sizeof(buffer)));
     // Add save log here
     data_buffer.isserviced++;
   }
@@ -85,7 +85,7 @@ void mSupport::parse_JSONCommand(JsonParserObject obj){
   // if(obj.containsKey("loglevel")){
   //   const char* name = obj["loglevel"];
   //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"loglevel\":\"%s\""),name);
-  //   pCONT_set->Settings.seriallog_level = pCONT->mso->SetLogLevelIDbyName(name);
+  //   pCONT_set->Settings.logging.serial_level = pCONT->mso->SetLogLevelIDbyName(name);
   //   // Add save log here
   //   data_buffer.isserviced++;
   // }

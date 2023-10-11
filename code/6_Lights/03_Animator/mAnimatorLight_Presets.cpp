@@ -246,7 +246,7 @@ bool mAnimatorLight::getPresetName(byte index, String& name)
 void mAnimatorLight::initPresetsFile()
 {
   
-  if (WLED_FS.exists(getFileName()))
+  if (FILE_SYSTEM.exists(getFileName()))
   {
     ALOG_INF(PSTR("initPresetsFile() -- already exists, exiting"));   
     return;
@@ -255,7 +255,7 @@ void mAnimatorLight::initPresetsFile()
   StaticJsonDocument<64> doc;
   JsonObject sObj = doc.to<JsonObject>();
   sObj.createNestedObject("0");
-  File f = WLED_FS.open(getFileName(), "w");
+  File f = FILE_SYSTEM.open(getFileName(), "w");
   
   ALOG_INF(PSTR("initPresetsFile() -- creating init file"));
 

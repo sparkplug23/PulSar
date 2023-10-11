@@ -161,6 +161,7 @@ class Bus {
     inline  uint16_t getStart() { return _start; }
     inline  void     setStart(uint16_t start) { _start = start; }
     inline  uint8_t  getType() { return _type; }
+    const char* getTypeName();// { return _type; }
     inline  bool     isOk() { return _valid; }
     inline  bool     isOffRefreshRequired() { return _needsRefresh; }
             bool     containsPixel(uint16_t pix) { return pix >= _start && pix < _start+_len; }
@@ -423,6 +424,8 @@ class BusManager
     {
       return numBusses;
     }
+
+    const char* getColourOrderName(COLOUR_ORDER_T _colorOrder, char* buffer, uint8_t len);
 
     Bus* busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
 

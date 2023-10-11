@@ -226,6 +226,8 @@ class mAnimatorLight :
 
     bool doInitBusses = false; // debug
 
+    void FileSystem_JsonAppend_Save_Module();
+
  
     #ifndef STRIP_OUTPUT_REPEATED_LENGTH
       #define STRIP_OUTPUT_REPEATED_LENGTH 20
@@ -1656,7 +1658,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
   void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
   int8_t GetFlasherFunctionIDbyName(const char* f);
   const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
-  const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen);
+  const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found = false);
 
   void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
 
@@ -2112,6 +2114,11 @@ typedef struct Segment_New {
       stopY  = sStopY;
     }
 
+    /**
+     * @brief NOTE: copy, such as "for(auto seg:segments)" will require creation and destruction of the segment everytime in huge blocks and for performance reasons index iteration is preferred 
+     * 
+     * @param orig 
+     */
     Segment_New(const Segment_New &orig) // copy constructor
      {
       Serial.println(F("-- Copy segment constructor --"));
@@ -2148,11 +2155,11 @@ typedef struct Segment_New {
     {
 
       #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
-      Serial.print(F("Destroying segment:"));
-      if (name) Serial.printf(" %s (%p)", name, name);
-      if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
-      if (leds) Serial.printf(" [%u]", length()*sizeof(CRGB));
-      Serial.println();
+        Serial.print(F("Destroying segment:"));
+        if (name) Serial.printf(" %s (%p)", name, name);
+        if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
+        if (leds) Serial.printf(" [%u]", length()*sizeof(CRGB));
+        Serial.println();
       #endif
       if (!Segment_New::_globalLeds && leds) free(leds);
       if (name) delete[] name;

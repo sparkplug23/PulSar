@@ -234,6 +234,7 @@ class mInterfaceLight :
     void parseJSONObject__BusConfig(JsonParserObject obj); 
         
     void Template_Load();
+    void Template_Load_DefaultConfig();
 
     void parse_JSONCommand(JsonParserObject obj);
 
@@ -249,6 +250,8 @@ class mInterfaceLight :
     BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
     void BusManager_Create_DefaultSingleNeoPixel();
     void BusManager_Create_DefaultSinglePWM_5CH();
+
+    void FileSystem_JsonAppend_Save_Module();
 
     #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
     uint16_t change8to10(uint8_t v);

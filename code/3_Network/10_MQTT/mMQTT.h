@@ -470,7 +470,7 @@ Serial.flush();
       
       // Sanity check
       if(handler_ptr == nullptr){
-        Serial.println("handler_ptr == nullptr");
+        Serial.println("handler_ptr == nullptr"); Serial.flush(); 
         return;
       }
 
@@ -491,13 +491,10 @@ Serial.flush();
         Serial.println("MQTTHandler_Command::Blocked");
         return;
       }
-
-
-
             
-      // #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-      // Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
-      // #endif // ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+      #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+      Serial.printf("MQTTHandler_Command::postfix_topic=%S %d\n\r",handler_ptr->postfix_topic, class_id); Serial.flush(); 
+      #endif // ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
 
       if(handler_ptr->flags.PeriodicEnabled){
         if(ABS_FUNCTION(millis()-handler_ptr->tSavedLastSent)>=handler_ptr->tRateSecs*1000){ 
@@ -514,7 +511,6 @@ Serial.flush();
           }
 
           #endif
-
 
         }
       }
@@ -560,9 +556,9 @@ Serial.flush();
             #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
               if(packet_successfully_sent)
               {
-                // #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+                #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
                 Serial.printf("^^^^^^^^^^^^^^^^^^^ packet_successfully_sent %s DONE \n\r",handler_ptr->postfix_topic);
-                // #endif
+                #endif
                 #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
                 con->debug_stats.payload_publish_sent++;
                 con->debug_stats.payload_publish_success_percentage = (float)con->debug_stats.payload_publish_sent/(float)(con->debug_stats.payload_publish_missed+con->debug_stats.payload_publish_sent);
@@ -574,9 +570,9 @@ Serial.flush();
               }
               else
               {
-                // #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
+                #ifdef ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
                 Serial.printf("------------------- packet_successfully_sent %s ERROR\n\r",handler_ptr->postfix_topic);
-                // #endif
+                #endif
                 #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
                 con->debug_stats.payload_publish_missed++;
                 con->debug_stats.payload_publish_success_percentage = (float)con->debug_stats.payload_publish_sent/(float)(con->debug_stats.payload_publish_missed+con->debug_stats.payload_publish_sent);

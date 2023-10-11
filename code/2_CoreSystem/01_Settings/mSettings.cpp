@@ -49,17 +49,17 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
      * Decounter until saving.
      * This is used when I want to force save data after an update has happened, but want the storage event to be delayed so it doesn't slow the event (eg relay set, mqtt response)
      * */
-    if(settings_save_decounter_seconds_delayed_save)
-    {
-      settings_save_decounter_seconds_delayed_save--;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-      AddLog(LOG_LEVEL_TEST, PSTR("settings_save_decounter_seconds_delayed_save = %d"), settings_save_decounter_seconds_delayed_save);
-    #endif // ENABLE_LOG_LEVEL_INFO
-      if(settings_save_decounter_seconds_delayed_save==0)
-      {
-        pCONT_set->SettingsSaveAll();
-      }
-    }
+    // if(runtime.settings_save_decounter_seconds_delayed_save)
+    // {
+    //   runtime.settings_save_decounter_seconds_delayed_save--;
+    // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   AddLog(LOG_LEVEL_TEST, PSTR("settings_save_decounter_seconds_delayed_save = %d"), runtime.settings_save_decounter_seconds_delayed_save);
+    // #endif // ENABLE_LOG_LEVEL_INFO
+    //   if(runtime.settings_save_decounter_seconds_delayed_save==0)
+    //   {
+    //     pCONT_set->SettingsSaveAll();
+    //   }
+    // }
 
 /**
  * @brief I will implement this, but its another receovery option not related the RTC Fastboot
@@ -79,7 +79,7 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
 // SystemSettings_DefaultBody_Network();
 
-       // AddLog(LOG_LEVEL_TEST,PSTR("sizeof(SYSCFG)=%d %%"),map(sizeof(SYSCFG),0,4095,0,100));
+       // AddLog(LOG_LEVEL_TEST,PSTR("sizeof(SETTINGS)=%d %%"),map(sizeof(SETTINGS),0,4095,0,100));
 
 
        
@@ -91,29 +91,47 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
     }break;
 
     case FUNC_EVERY_MINUTE:
-    // Change to saving using counter later, Settings.save_data
+
+      
+      #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+        // Copy Settings as Last Known Good if no changes have been saved since 30 minutes
+        if (!runtime.settings_lkg && (pCONT_time->UtcTime() > START_VALID_UTC_TIME) && (Settings.cfg_timestamp < pCONT_time->UtcTime() - (3 * 60))) 
+        {
+          pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (const uint8_t*)&Settings, sizeof(SETTINGS));
+          runtime.settings_lkg = true;
+        }
+        else
+        {
+          ALOG_INF(PSTR("UtcTime()%d > START_VALID_UTC_TIME%d) && (Settings.cfg_timestamp%d < UtcTime() - (30 * 60)) %d"), 
+            pCONT_time->UtcTime(),
+            START_VALID_UTC_TIME,
+            Settings.cfg_timestamp,
+            pCONT_time->UtcTime() - (3 * 60)
+         );
+        }
+      #endif // USE_MODULE_DRIVERS_FILESYSTEM
+
+      
+    break;
+    case FUNC_EVERY_HOUR:
 
       #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
-      // Update Settings with local module values that need saving
-      pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
-
-      // pCONT_set->SettingsSave(1);
-      pCONT_set->SettingsSaveAll();
-
+        #ifdef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+        pCONT_set->SettingsSaveAll();
+        #endif
       #else 
-      
-    #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_INFO
       DEBUG_PRINTLN("SettingsSave dis");
-      
-    #endif // ifdef ENABLE_LOG_LEVEL_INFO
+      #endif // ifdef ENABLE_LOG_LEVEL_INFO
       #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
 
-      // Serial.println("FUNC_EVERY_MINUTE");
-      
-// #ifdef DISABLE_SETTINGS_SAVING_BUG
-      // pCONT_set->SettingsSave(1);
-    // #endif
-    break;
+
+
+
+    break;   
+
+
+
     case FUNC_ON_BOOT_SUCCESSFUL:
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
 
@@ -180,17 +198,20 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj){//}, uint8_t pa
 
 
     break;
-    case FUNC_EVERY_FIVE_MINUTE:
+    // case FUNC_EVERY_FIVE_MINUTE:
 
-      ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
+    //   ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT " = %d"), Settings.bootcount);
 
-    break;
+    // break;
     
     /************
      * COMMANDS SECTION * 
     *******************/
     case FUNC_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
+    break;
+    case FUNC_FILESYSTEM_APPEND_JSON__CONFIG_SETTINGS__ID:
+      JsonAppend_Settings();
     break;
 
     /************
@@ -314,8 +335,8 @@ void mSettings::Function_Template_Load(){
   //DEBUG_PRINTF("mSettings::Function_Template_Load"); Serial.flush();
   #endif
 
-  boot_status.function_template_parse_success = 0;
-  boot_status.rules_template_parse_success = 0;
+  runtime.boot_status.function_template_parse_success = 0;
+  runtime.boot_status.rules_template_parse_success = 0;
 
   #ifdef USE_FUNCTION_TEMPLATE  
   // Read into local
@@ -332,7 +353,7 @@ void mSettings::Function_Template_Load(){
 
   delay(1000);
 
-  boot_status.function_template_parse_success = 1;
+  runtime.boot_status.function_template_parse_success = 1;
   #endif //USE_FUNCTION_TEMPLATE
   
 }
@@ -356,6 +377,16 @@ int16_t mSettings::GetFunctionIDbyFriendlyName(const char* c){
 
 
   return -1;
+}
+
+void mSettings::JsonAppend_Settings()
+{
+
+  // JBI->Object_Start_F(GetModuleFriendlyName());  //json file parser will pass them to the modules, but should strip out the level_object from commands
+    JBI->Add("BootCount", Settings.bootcount);
+    JBI->Add("FastBootCount", RtcFastboot.fast_reboot_count);
+  // JBI->Object_End();
+
 }
 
 
@@ -657,8 +688,8 @@ void mSettings::SettingsLoad_CheckSuccessful(){
   memcpy(Settings.mqtt.topic,pCONT_set->Settings.system_name.device,strlen(pCONT_set->Settings.system_name.device));
   
   // Configure hostname 
-  memset(my_hostname,0,sizeof(my_hostname));
-  sprintf(my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
+  memset(runtime.my_hostname,0,sizeof(runtime.my_hostname));
+  sprintf(runtime.my_hostname,PSTR("%s"),pCONT_set->Settings.system_name.device);
 
   //Only load wifi here or else set fallback
 

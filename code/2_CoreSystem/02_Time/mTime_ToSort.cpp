@@ -110,10 +110,8 @@ void mTime::init(void){
 bool mTime::CheckOrStartNTPService(){
 
   #ifdef USE_MODULE_NETWORK_WIFI
-  // if(pCONT_wif->WifiCheckIpConnected()){
 
-
-  if(!pCONT_set->global_state.wifi_down){
+  if(!pCONT_set->runtime.global_state.wifi_down){
     // If just connected, and not already started
     if(!settings.timeclient_is_started){ 
       // timeClient->begin();
@@ -316,9 +314,9 @@ void mTime::TickRTCVariablesWithUptime(void){
  */
 void mTime::RtcSetTime(uint32_t epoch)
 {
-  if (epoch < START_VALID_TIME) {  // 2016-01-01
+  if (epoch < START_VALID_UTC_TIME) {  // 2016-01-01
     Rtc.user_time_entry = false;
-    pCONT_set->ntp_force_sync = true;
+    pCONT_set->runtime.ntp_force_sync = true;
   } else {
     Rtc.user_time_entry = true;
     Rtc.utc_time = epoch -1;    // Will be corrected by RtcSecond
@@ -1182,7 +1180,7 @@ const char* mTime::GetDT(uint32_t time, char* buffer, uint8_t buflen)
 
 bool  mTime::IsDst(void) //is daylight savings time
 {
-  if (Rtc.time_timezone == pCONT_set->Settings.toffset[1]) {
+  if (Rtc.time_timezone == toffset[1]) {
     return true;
   }
   return false;
@@ -1324,10 +1322,6 @@ const char* mTime::GetDOWShortctr(uint8_t Wday, char* buffer){
  *          Timezone by Jack Christensen (https://github.com/JChristensen/Timezone)
 \*********************************************************************************************/
 
-uint32_t UtcTime(void)
-{
-  // return Rtc.utc_time;
-}
 
 uint32_t LocalTime(void)
 {
@@ -1639,7 +1633,7 @@ void mTime::BreakTime(uint32_t time_input, datetime_t &tm)
   tm.month = month + 1;      // jan is month 1
   tm.Wday = time + 1;         // day of month
   tm.Mday = time + 1;         // day of month
-  tm.valid = (time_input > START_VALID_TIME);  // 2016-01-01
+  tm.valid = (time_input > START_VALID_UTC_TIME);  // 2016-01-01
 }
 
 uint32_t mTime::MakeTime(datetime_t &tm)
@@ -1683,38 +1677,38 @@ void mTime::RtcSecond(void)
   Rtc.millis = millis();
 
   if (!Rtc.user_time_entry) {
-    if (!pCONT_set->global_state.network_down) {
-      uint8_t uptime_minute = (pCONT_set->uptime / 60) % 60;  // 0 .. 59
+    if (!pCONT_set->runtime.global_state.network_down) {
+      uint8_t uptime_minute = (uptime.seconds_nonreset / 60) % 60;  // 0 .. 59
       // Serial.printf("uptime_minute=%d\n\r",uptime_minute);
       if ((Rtc.ntp_sync_minute > 59) && (uptime_minute > 2)) {
         Rtc.ntp_sync_minute = 1;                   // If sync prepare for a new cycle
       }
-      uint8_t offset = (pCONT_set->uptime < 30) ? RtcTime.second : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;  // First try ASAP to sync. If fails try once every 60 seconds based on chip id
+      uint8_t offset = (uptime.seconds_nonreset < 30) ? RtcTime.second : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;  // First try ASAP to sync. If fails try once every 60 seconds based on chip id
       
-      // Serial.printf("uptime%d,offset=%d\n\r",pCONT_set->uptime,offset);
+      // Serial.printf("uptime%d,offset=%d\n\r",uptime.seconds_nonrese,offset);
       
       if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                          // Never synced
                                             (Rtc.ntp_sync_minute == uptime_minute))) ||       // Re-sync every hour
-                                              pCONT_set->ntp_force_sync ) ) {                             // Forced sync
+                                              pCONT_set->runtime.ntp_force_sync ) ) {                             // Forced sync
         // Rtc.ntp_time = sntp_get_current_timestamp();
 
 
 
-        if (Rtc.ntp_time > START_VALID_TIME) {  // Fix NTP bug in core 2.4.1/Sdeclination_of_sun 2.2.1 (returns Thu Jan 01 08:00:10 1970 after power on)
-          pCONT_set->ntp_force_sync = false;
+        if (Rtc.ntp_time > START_VALID_UTC_TIME) {  // Fix NTP bug in core 2.4.1/Sdeclination_of_sun 2.2.1 (returns Thu Jan 01 08:00:10 1970 after power on)
+          pCONT_set->runtime.ntp_force_sync = false;
           Rtc.utc_time = Rtc.ntp_time;
           Rtc.last_sync = Rtc.ntp_time;
           Rtc.ntp_sync_minute = 60;  // Sync so block further requests
           if (Rtc.restart_time == 0) {
-            Rtc.restart_time = Rtc.utc_time - pCONT_set->uptime;  // save first ntp time as restart time
+            Rtc.restart_time = Rtc.utc_time - uptime.seconds_nonreset;  // save first ntp time as restart time
           }
           BreakTime(Rtc.utc_time, tmpTime);
           RtcTime.year = tmpTime.year + 1970;
           /**
            * Convert moments of DST change in seconds
            * */
-          Rtc.daylight_saving_time = RuleToTime(pCONT_set->Settings.tflag[1], RtcTime.year);
-          Rtc.standard_time = RuleToTime(pCONT_set->Settings.tflag[0], RtcTime.year);
+          Rtc.daylight_saving_time = RuleToTime(tflag[1], RtcTime.year);
+          Rtc.standard_time = RuleToTime(tflag[0], RtcTime.year);
 
           // Do not use AddLog_P2 here (interrupt routine) if syslog or mqttlog is enabled. UDP/TCP will force exception 9
           // AddLog(LOG_LEVEL_DEBUG, PSTR("NTP: " D_UTC_TIME " %s, " D_DST_TIME " %s, " D_STD_TIME " %s"),
@@ -1744,7 +1738,7 @@ void mTime::RtcSecond(void)
 
 
 
-  if (Rtc.local_time > START_VALID_TIME) // 2016-01-01
+  if (Rtc.local_time > START_VALID_UTC_TIME) // 2016-01-01
   {  
     #ifdef DEBUG_MODULE_TIME_STD
     AddLog(LOG_LEVEL_INFO, PSTR("Rtc local_time Valid"));
@@ -1765,13 +1759,13 @@ void mTime::RtcSecond(void)
       AddLog(LOG_LEVEL_INFO, PSTR("timezone == 99, so DST set by location"));
       #endif
 
-      int32_t dstoffset = pCONT_set->Settings.toffset[1] * SECS_PER_MIN;
-      int32_t stdoffset = pCONT_set->Settings.toffset[0] * SECS_PER_MIN;
+      int32_t dstoffset = toffset[1] * SECS_PER_MIN;
+      int32_t stdoffset = toffset[0] * SECS_PER_MIN;
       
       // AddLog(LOG_LEVEL_TEST,PSTR("Daylight Saving Time dstoffset=%d"),dstoffset);
       // AddLog(LOG_LEVEL_TEST,PSTR("Standard Time stdoffset=%d"),stdoffset);
 
-      if (pCONT_set->Settings.tflag[1].hemis) 
+      if (tflag[1].hemis) 
       {
         // Southern hemisphere
         if ((Rtc.utc_time >= (Rtc.standard_time - dstoffset)) && (Rtc.utc_time < (Rtc.daylight_saving_time - stdoffset))) 
@@ -1952,7 +1946,7 @@ void mTime::WifiPollNtp() {
   // DEBUG_LINE_HERE;
   
   // if (TasmotaGlobal.global_state.network_down || Rtc.user_time_entry) { return; }
-  if(pCONT_set->global_state.wifi_down){ 
+  if(pCONT_set->runtime.global_state.wifi_down){ 
     
     #ifdef ENABLE_LOG_LEVEL_WARN
     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_TIME "global_state.wifi_down"));
@@ -1964,22 +1958,22 @@ void mTime::WifiPollNtp() {
     
     // AddLog(LOG_LEVEL_TEST, PSTR("gWifiPollNtp here"));
 
-  uint8_t uptime_minute = (pCONT_set->uptime / 60) % 60;  // 0 .. 59
+  uint8_t uptime_minute = (uptime.seconds_nonreset / 60) % 60;  // 0 .. 59
   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
     ntp_sync_minute = 1;                 // If sync prepare for a new cycle
   }
   // First try ASAP to sync. If fails try once every 60 seconds based on chip id
-  uint8_t offset = (pCONT_set->uptime < 30) ? RtcTime.second : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
+  uint8_t offset = (uptime.seconds_nonreset < 30) ? RtcTime.second : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
-       pCONT_set->ntp_force_sync ) ) {                                          // Forced sync
+       pCONT_set->runtime.ntp_force_sync ) ) {                                          // Forced sync
 //  AddLog(LOG_LEVEL_TEST, PSTR("WifiPollNtp Sync Attempt"));
 
-    pCONT_set->ntp_force_sync = false;
+    pCONT_set->runtime.ntp_force_sync = false;
     uint32_t ntp_time = WifiGetNtp();
     // AddLog(LOG_LEVEL_TEST, PSTR(DEBUG_INSERT_PAGE_BREAK "ntp_time=%d"),ntp_time);
 
-    if (ntp_time > START_VALID_TIME) {
+    if (ntp_time > START_VALID_UTC_TIME) {
       Rtc.utc_time = ntp_time;
       Rtc.ntp_time = ntp_time; //me
       ntp_sync_minute = 60;             // Sync so block further requests

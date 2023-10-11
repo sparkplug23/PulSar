@@ -47,6 +47,7 @@
 // #include "FS.h"
 // #include "SD_MMC.h"
 
+
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mFileSystem :
@@ -60,6 +61,14 @@ class mFileSystem :
 
     int8_t Tasker_Web(uint8_t function);
 
+    void FileWrite_Test();
+    
+    void JsonFile_Save__Stored_Module();
+    bool JsonFile_Load__Stored_Module();
+    void JsonFile_Load__Stored_Module_Or_Default_Template();
+
+    void JsonFile_Save__Stored_Secure();
+    void JsonFile_Load__Stored_Secure();
     
 
     static const char* PM_MODULE_DRIVERS_FILESYSTEM_CTR;
@@ -67,6 +76,7 @@ class mFileSystem :
     PGM_P GetModuleName(){         return PM_MODULE_DRIVERS_FILESYSTEM_CTR; }
     PGM_P GetModuleFriendlyName(){ return PM_MODULE_DRIVERS_FILESYSTEM_FRIENDLY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_FILESYSTEM_ID; }
+
 
     
 // saves 80 bytes of flash, makes the UI cleaner for folders containing lots of files.
@@ -128,11 +138,11 @@ ufsfree   free size in kB
 */
 
 // Global file system pointer
-FS *ufsp;
+FS *ufsp = nullptr;
 // Flash file system pointer
-FS *ffsp;
+FS *ffsp = nullptr;
 // Local pointer for file managment
-FS *dfsp;
+FS *dfsp = nullptr;
 
 char ufs_path[48];
 File ufs_upload_file;

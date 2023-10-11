@@ -3,91 +3,46 @@
 
 #include "2_CoreSystem/06_Support/mSupport.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define EEPROM_LOCATION (SPI_FLASH_SEC_SIZE * 200)
+uint32_t settings_location = EEPROM_LOCATION;
+uint32_t settings_crc32 = 0;
+const uint8_t CFG_ROTATES = 7;      // Number of flash sectors used (handles uploads)
+
 
 void mSettings::SettingsSaveAll(void)
 {
-  Serial.println("SettingsSaveAll");
+  #ifndef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  ALOG_ERR(PSTR(D_LOG_SETTINGS "SettingsSaveAll: Not enabled"));
+  #endif
+
+  snprintf(Settings.settings_time_ctr, sizeof(Settings.settings_time_ctr), "%02d:%02d:%02d", pCONT_time->RtcTime.hour, pCONT_time->RtcTime.minute, pCONT_time->RtcTime.second);
+
+  Serial.println("SettingsSaveAll -- should only be called prior to planned reboot/restart; OTA start/commanded");
   // if (Settings.flag_system.save_state) {
   //   Settings.power = power;
   // } else {
   //   Settings.power = 0;
   // }
   pCONT->Tasker_Interface(FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE);
-#ifdef USE_EEPROM
-  EepromCommit();
-#endif
+  
   SettingsSave(1);
 }
 
-// /*********************************************************************************************\
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-//  * Config Save - Save parameters to Flash ONLY if any parameter has changed
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
-// \*********************************************************************************************/
+
+uint32_t mSettings::SettingsRead(void *data, size_t size) 
+{
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  if (pCONT_mfile->TfsLoadFile(TASM_FILE_SETTINGS, (uint8_t*)data, size)) 
+  {
+    return 2;
+  }
+  #endif
+//   if (NvmLoad("main", "Settings", data, size)) {
+//     return 1;
+//   };
+  return 0;
+}
 
 
 /***
@@ -96,16 +51,23 @@ void mSettings::SettingsSaveAll(void)
  * - Adding that settings first gets read into a local temporary copy, then a version merges the loaded values into values I want to overwrite.
  *    This is so I can slowly add what I like to have saved in memory until I can trust it full
  * */
-void mSettings::SettingsLoad(void) {
+void mSettings::SettingsLoad(void) 
+{
+  
+  #ifndef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  ALOG_ERR(PSTR(D_LOG_SETTINGS "SettingsLoad: Not enabled"));
+  #endif
+
   
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD ));
   #endif// ENABLE_LOG_LEVEL_INFO
 
-  #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
-
-
-  #ifdef ESP8266
+  /****************************************************************************************************************************************************
+  ** Check if SETTINGS_HOLDER value has changed from code build, and thus stored settings should be erased ********************************************
+  ****************************************************************************************************************************************************/
+  
+  #ifdef ESP8266  
     // Load configuration from optional file and flash (eeprom and 7 additonal slots) if first valid load does not stop_flash_rotate
     // Activated with version 8.4.0.2 - Fails to read any config before version 6.6.0.11
     settings_location = 0;
@@ -148,313 +110,163 @@ void mSettings::SettingsLoad(void) {
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu"), settings_location, Settings->save_flag);
       }
     }
-  #endif  // ESP8266
-
+  #endif // ESP8266
   #ifdef ESP32
-    uint32_t source = pCONT_sup->SettingsRead(Settings, sizeof(TSettings));
+    // No temp settings, just fully load as if invalid reset will occur and defaults will be loaded
+    uint32_t source = SettingsRead(&Settings, sizeof(SETTINGS));
     if (source) {
       settings_location = 1;
-      if (Settings->cfg_holder == (uint16_t)CFG_HOLDER) {
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Loaded from %s, " D_COUNT " %lu"), (2 == source)?"File":"NVS", Settings->save_flag);
+      if (Settings.cfg_holder == (uint16_t)SETTINGS_HOLDER) {
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Loaded from %s, " D_COUNT " %lu"), (2 == source)?"File":"NVS", Settings.save_flag);
+      }
+      if(Settings.cfg_size != sizeof(SETTINGS)) {
+        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_CONFIG "Settings size does not match (%d|%d), load invalid"), Settings.cfg_size, sizeof(SETTINGS));
+        settings_location = 0; //force default settings load
       }
     }
   #endif  // ESP32
 
-  #ifndef FIRMWARE_MINIMAL
-    if ((0 == settings_location) || (Settings->cfg_holder != (uint16_t)CFG_HOLDER)) {  // Init defaults if cfg_holder differs from user settings in my_user_config.h
-  //  if ((0 == settings_location) || (Settings->cfg_size != sizeof(TSettings)) || (Settings->cfg_holder != (uint16_t)CFG_HOLDER)) {  // Init defaults if cfg_holder differs from user settings in my_user_config.h
-  #ifdef USE_UFILESYS
-      if (TfsLoadFile(TASM_FILE_SETTINGS_LKG, (uint8_t*)Settings, sizeof(TSettings)) && (Settings->cfg_crc32 == GetSettingsCrc32())) {
-        settings_location = 1;
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Loaded from LKG File, " D_COUNT " %lu"), Settings->save_flag);
-      } else
-  #endif  // USE_UFILESYS
+  /****************************************************************************************************************************************************
+  ** If stored settings should be erased to defaults (using file or code inits) ********************************************
+  ****************************************************************************************************************************************************/
+
+  if ((0 == settings_location) || (Settings.cfg_holder != (uint16_t)SETTINGS_HOLDER)) {  // Init defaults if cfg_holder differs from user settings in my_user_config.h
+    /**
+     * @brief Two cases may be true here:
+     *  (1) IF the original settings file is correct, but no code change occured. THEN use backup settings file to recover, but cfg_size must still match
+     *  (2) IF the settings holder has been changed to indicate code change, THEN use code defaults and ignored saved settings. This is essentially a factory reset.
+     */
+    bool settings_reset_by_defaults = false;
+    
+    #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    /**
+     * Load as temporary settings, to enable testing of cfg_size 
+     **/
+    SETTINGS settings_temp_load;
+    if (pCONT_mfile->TfsLoadFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (uint8_t*)&settings_temp_load, sizeof(SETTINGS))) 
+    {
+      if(settings_temp_load.cfg_size == sizeof(SETTINGS))
       {
-        SettingsDefault();
+        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Loaded from LKG File, " D_COUNT " %lu"), Settings.save_flag);
+        memcpy(&Settings, &settings_temp_load, sizeof(SETTINGS));
+      }
+      else
+      {
+        AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_CONFIG "LKG Settings size does not match (%d|%d), load invalid"), settings_temp_load.cfg_size, sizeof(SETTINGS));
+        settings_reset_by_defaults = true;
+      }
+    } 
+    #endif  // USE_MODULE_DRIVERS_FILESYSTEM
+
+    if(settings_reset_by_defaults)
+    {
+      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_CONFIG "Settings reseting to DEFAULT"));
+      SettingsDefault();
+      runtime.settings_holder_hardcorded_stored_changed = true;
+    }
+
+  }
+  settings_crc32 = GetSettingsCrc32();
+
+  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
+  RtcSettingsLoad(1);
+  #endif // ENABLE_DEVFEATURE_RTC_SETTINGS
+
+}
+
+
+
+
+void mSettings::SettingsWrite(const void *pSettings, unsigned nSettingsLen) 
+{
+
+DEBUG_LINE_HERE;
+  #ifdef USE_MODULE_DRIVERS_FILESYSTEM
+  pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)pSettings, nSettingsLen);
+  #endif // USE_MODULE_DRIVERS_FILESYSTEM
+  
+  // NvmSave("main", "Settings", pSettings, nSettingsLen);
+
+}
+
+/* Save configuration in eeprom or one of 7 slots below
+ *
+ * rotate 0 = Save in next flash slot
+ * rotate 1 = Save only in eeprom flash slot until SetOption12 0 or restart
+ * rotate 2 = Save in eeprom flash slot, erase next flash slots and continue depending on stop_flash_rotate
+ * stop_flash_rotate 0 = Allow flash slot rotation (SetOption12 0)
+ * stop_flash_rotate 1 = Allow only eeprom flash slot use (SetOption12 1)
+ */
+void mSettings::SettingsSave(uint8_t rotate)
+{
+  #ifndef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  ALOG_ERR(PSTR(D_LOG_SETTINGS "SettingsSave: Not enabled"));
+  #endif
+
+  if ((GetSettingsCrc32() != settings_crc32) || rotate) {
+    if (1 == rotate) {                                 // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
+      runtime.stop_flash_rotate = 1;
+    }
+
+    if (runtime.stop_flash_rotate || (2 == rotate)) {  // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
+      settings_location = EEPROM_LOCATION;
+    } else {                                           // Rotate flash slots
+      if (settings_location == EEPROM_LOCATION) {
+        settings_location = SETTINGS_LOCATION;
+      } else {
+        settings_location--;
+      }
+      if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
+        settings_location = EEPROM_LOCATION;
       }
     }
-    settings_crc32 = GetSettingsCrc32();
-  #endif  // FIRMWARE_MINIMAL
 
-  RtcSettingsLoad(1);
+    Settings.save_flag++;
+    if (pCONT_time->Rtc.utc_time > START_VALID_UTC_TIME) {
+      Settings.cfg_timestamp = pCONT_time->Rtc.utc_time;
+    } else {
+      Settings.cfg_timestamp++;
+    }
+    Settings.cfg_size = sizeof(SETTINGS);
+    Settings.cfg_crc32 = GetSettingsCrc32();
+#ifdef USE_COUNTER
+    CounterInterruptDisable(true);  // may be to disable all interrupts?
+#endif
 
+#ifdef ESP8266
+#ifdef USE_MODULE_DRIVERS_FILESYSTEM
+    pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)Settings, sizeof(SETTINGS));
+#endif  // USE_MODULE_DRIVERS_FILESYSTEM
+    if (ESP.flashEraseSector(settings_location)) {
+      ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)Settings, sizeof(SETTINGS));
+    }
 
-#endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
+    if (!TasmotaGlobal.stop_flash_rotate && rotate) {  // SetOption12 - (Settings) Switch between dynamic (0) or fixed (1) slot flash save location
+      for (uint32_t i = 0; i < CFG_ROTATES; i++) {
+        ESP.flashEraseSector(SETTINGS_LOCATION -i);    // Delete previous configurations by resetting to 0xFF
+        delay(1);
+      }
+    }
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(SETTINGS));
+#endif  // ESP8266
+#ifdef ESP32
+    SettingsWrite(&Settings, sizeof(SETTINGS));
+    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "Saved, " D_COUNT " %d, " D_BYTES " %d"), Settings.save_flag, sizeof(SETTINGS));
+#endif  // ESP32
 
-
-
-
-
-
-
-
-//   #ifdef ESP8266
-//   settings_location = 0;
-//   uint32_t save_flag = 0;
-//   uint32_t flash_location = SETTINGS_LOCATION;
-
-//   /**
-//    * Local copy, used to read in, check against, and only then commit what I want by merging into working struct
-//    * */
-//   SYSCFG Settings_Temporary;
-
-// // DEBUG_LINE_HERE;
-
-//   /***
-//    * Search for valid save location, and check for validity of saved data
-//    * */
-
-// uint32_t i = 0;
-//   // for (uint32_t i = 0; i < CFG_ROTATES; i++) {              // Read all config pages in search of valid and latest
-
-//     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings_Temporary, sizeof(Settings_Temporary));
-    
-//     // #ifdef ENABLE_LOG_LEVEL_INFO
-//     // AddLog(LOG_LEVEL_TEST, PSTR("\n\r"
-//     //     "cfg_holder\t\t\t%d\n\r"
-//     //     "cfg_size\t\t\t%d\n\r"
-//     //     "save_flag\t\t\t%d\n\r"
-//     //     "version\t\t\t%d\n\r"
-//     //     "bootcount\t\t\t%d\n\r"
-//     //     "cfg_crc\t\t\t%d\n\r"
-//     //     //Test data
-//     //     "%d:%d:%d:%d"
-//     //   ),
-//     //     Settings_Temporary.cfg_holder,
-//     //     Settings_Temporary.cfg_size,
-//     //     Settings_Temporary.save_flag,
-//     //     Settings_Temporary.version,
-//     //     Settings_Temporary.bootcount,
-//     //     Settings_Temporary.cfg_crc
-//     //     //Testdata
-//     //     ,Settings.animation_settings.xmas_controller_params[0]
-//     //     ,Settings.animation_settings.xmas_controller_params[1]
-//     //     ,Settings.animation_settings.xmas_controller_params[2]
-//     //     ,Settings.animation_settings.xmas_controller_params[3]
-//     // );
-//     // #endif// ENABLE_LOG_LEVEL_INFO
-
-// // DEBUG_LINE_HERE;
-
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings_Temporary.bootcount,Settings_Temporary.version);
-//     #endif // ENABLE_LOG_LEVEL_INFO
-
-//     if ((Settings_Temporary.cfg_crc32 != 0xFFFFFFFF) && (Settings_Temporary.cfg_crc32 != 0x00000000))// && (Settings_Temporary.cfg_crc32 == GetSettingsCrc32())) 
-//     {
-
-// // DEBUG_LINE_HERE;
-
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     // Since these are not equal, something is wrong
-//     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc32()| %d==%d"),Settings_Temporary.cfg_crc32,GetSettingsCrc32());
-//     if(Settings_Temporary.cfg_crc32 != GetSettingsCrc32())
-//     {
-//       AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD DEBUG_INSERT_PAGE_BREAK "CRC32 ERROR cfg_crc==GetSettingsCrc32()| %d==%d"),Settings_Temporary.cfg_crc32,GetSettingsCrc32());
-//     }
-//     #endif // ENABLE_LOG_LEVEL_INFO
-      
-//       if (Settings_Temporary.save_flag > save_flag) {                 // Find latest page based on incrementing save_flag
-//         #ifdef ENABLE_LOG_LEVEL_INFO
-//         AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Settings_Temporary.save_flag > save_flag %d>%d"),Settings_Temporary.save_flag,save_flag);
-//         #endif // ENABLE_LOG_LEVEL_INFO
-        
-//         save_flag = Settings_Temporary.save_flag;
-//         settings_location = flash_location;
-//         // if (Settings_Temporary.flag_system.stop_flash_rotate && (0 == i)) {  // Stop if only eeprom area should be used and it is valid
-//         //   #ifdef ENABLE_LOG_LEVEL_INFO
-//         //   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD " Settings_Temporary.flag_system.stop_flash_rotate && (0 == i)"));
-//         //   #endif // ENABLE_LOG_LEVEL_INFO
-//         //   break;
-//         // }
-//       }
-//     }
-//     // flash_location--;
-//     // delay(1);
-//   // }
-
-
-
-//   /**
-//    * Assuming we have valid read, then re-read the entire data
-//    * */
-//   if (settings_location > 0) {
-    
-//   //   AddLog(LOG_LEVEL_TEST, PSTR("BEFORE READ\n\r"
-//   //     "cfg_holder\t\t\t%d\n\r"
-//   //     "cfg_size\t\t\t%d\n\r"
-//   //     "save_flag\t\t\t%d\n\r"
-//   //     "version\t\t\t%d\n\r"
-//   //     "bootcount\t\t\t%d\n\r"
-//   //     "cfg_crc\t\t\t%d\n\r"
-//   //   ),
-//   //     Settings_Temporary.cfg_holder,
-//   //     Settings_Temporary.cfg_size,
-//   //     Settings_Temporary.save_flag,
-//   //     Settings_Temporary.version,
-//   //     Settings_Temporary.bootcount,
-//   //     Settings_Temporary.cfg_crc
-//   // );
-//     ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
-//   //   AddLog(LOG_LEVEL_TEST, PSTR("AFTER READ\n\r"
-//   //     "cfg_holder\t\t\t%d\n\r"
-//   //     "cfg_size\t\t\t%d\n\r"
-//   //     "save_flag\t\t\t%d\n\r"
-//   //     "version\t\t\t%d\n\r"
-//   //     "bootcount\t\t\t%d\n\r"
-//   //     "cfg_crc\t\t\t%d\n\r"
-//   //   ),
-//   //     Settings_Temporary.cfg_holder,
-//   //     Settings_Temporary.cfg_size,
-//   //     Settings_Temporary.save_flag,
-//   //     Settings_Temporary.version,
-//   //     Settings_Temporary.bootcount,
-//   //     Settings_Temporary.cfg_crc
-//   // );
-    
-//       // AddLog(LOG_LEVEL_INFO, PSTR("\n\r\r\n\r\r\n\r\r\n\r\r LOAD param5=%d:%d:%d:%d:%d:%d"), 
-//       // Settings.animation_settings.xmas_controller_params[0],Settings.animation_settings.xmas_controller_params[1],Settings.animation_settings.xmas_controller_params[2],Settings.animation_settings.xmas_controller_params[3],Settings.animation_settings.xmas_controller_params[4],Settings.animation_settings.xmas_controller_params[5]);
-//   // delay(5000);
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_TEST, PSTR(D_LOG_CONFIG D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu " D_JSON_BOOTCOUNT " %d"), settings_location, Settings_Temporary.save_flag, Settings_Temporary.bootcount);
-//     #endif // ENABLE_LOG_LEVEL_INFO
-//   }
-
-  
-
-
-
-// // #else  // ESP32
-// //   SettingsRead(&Settings, sizeof(Settings));
-// //   AddLog_P2(LOG_LEVEL_NONE, PSTR(D_LOG_CONFIG "Loaded, " D_COUNT " %lu"), Settings.save_flag);
-// // #endif  // ESP8266 - ESP32
-
-
-//   /***
-//    * Merging desired changes only
-//    * */
-//   #ifdef ENABLE_LOG_LEVEL_INFO
-//   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "Merging loaded settings into local settings"));
-//   #endif // ENABLE_LOG_LEVEL_INFO
-
-//   SettingsMerge(&Settings, &Settings_Temporary);
-
-//     // #ifdef ENABLE_LOG_LEVEL_INFO
-//     // AddLog(LOG_LEVEL_TEST, PSTR("AFTER SettingsMerge\n\r"
-//     //     "cfg_holder\t\t\t%d\n\r"
-//     //     "cfg_size\t\t\t%d\n\r"
-//     //     "save_flag\t\t\t%d\n\r"
-//     //     "version\t\t\t%d\n\r"
-//     //     "bootcount\t\t\t%d\n\r"
-//     //     "cfg_crc\t\t\t%d\n\r"
-//     //     //Test data
-//     //     "%d:%d:%d:%d"
-//     //   ),
-//     //     Settings_Temporary.cfg_holder,
-//     //     Settings_Temporary.cfg_size,
-//     //     Settings_Temporary.save_flag,
-//     //     Settings_Temporary.version,
-//     //     Settings_Temporary.bootcount,
-//     //     Settings_Temporary.cfg_crc
-//     //     //Testdata
-//     //     ,Settings.animation_settings.xmas_controller_params[0]
-//     //     ,Settings.animation_settings.xmas_controller_params[1]
-//     //     ,Settings.animation_settings.xmas_controller_params[2]
-//     //     ,Settings.animation_settings.xmas_controller_params[3]
-//     // );
-
-//     // #endif // ENABLE_LOG_LEVEL_INFO
-    
-// #ifndef FIRMWARE_MINIMAL
-
-// /***
-//  * If something was bad with the read, fall back to defaults
-//  * */
-//   if ((0 == settings_location) || (Settings_Temporary.cfg_holder != (uint16_t)SETTINGS_HOLDER)) {  // Init defaults if cfg_holder differs from user settings in my_user_config.h
-//       // DEBUG_LINE_HERE;
-//     //Settings_Temporary.seriallog_level = LOG_LEVEL_ALL;
-//     pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
-    
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing"),Settings.cfg_holder,SETTINGS_HOLDER);
-//     #endif // ENABLE_LOG_LEVEL_INFO
-
-//     SettingsDefault();
-//   }else{
-//       // DEBUG_LINE_HERE;
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " " D_JSON_SUCCESSFUL ));
-//     #endif // ENABLE_LOG_LEVEL_INFO
-//   }
-//       // DEBUG_LINE_HERE;
-//   settings_crc32 = GetSettingsCrc32();
-// #endif  // FIRMWARE_MINIMAL
-
-//   #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-//   RtcSettingsLoad(1);
-//   #endif
-
-//       // DEBUG_LINE_HERE;
-//   #endif //  ESP8266
-
-//   #ifdef ENABLE_DEVFEATURE_ADVANCED_SETTINGS_SAVE_DEBUG
-  
-//       // AddLog(LOG_LEVEL_INFO, PSTR("LOAD param1=%d"), Settings.animation_settings.xmas_controller_params[0]);
-//   // delay(5000);
-//   #endif
-}
-
-
-/***
- * Until settings are correctly saving in memory and long term tested, only the values transferred here will be loaded from memory and overwrite the defaults
- * Caution: Wifi/mqtt must remain hardcoded, so NOT transferred here
- * */
-void mSettings::SettingsMerge(SYSCFG* s, SYSCFG* l)
-{
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CONFIG "SettingsMerge: Only using loaded settings currently tested %d"), l->animation_settings.xmas_controller_params[0]);
-  #endif // ENABLE_LOG_LEVEL_INFO
-
-  // Header
-  s->cfg_holder = l->cfg_holder;
-  s->cfg_size = l->cfg_size;
-  s->save_flag = l->save_flag;
-  s->version = l->version;
-  s->bootcount = l->bootcount;
-  s->cfg_crc = l->cfg_crc;
-
-  // Xmas Controller
-  // s->animation_settings.xmas_controller_params[0] = l->animation_settings.xmas_controller_params[0];
-  // s->animation_settings.xmas_controller_params[1] = l->animation_settings.xmas_controller_params[1];
-  // s->animation_settings.xmas_controller_params[2] = l->animation_settings.xmas_controller_params[2];
-  // s->animation_settings.xmas_controller_params[3] = l->animation_settings.xmas_controller_params[3];
-  // s->animation_settings.xmas_controller_params[4] = l->animation_settings.xmas_controller_params[4];
-  // s->animation_settings.xmas_controller_params[5] = l->animation_settings.xmas_controller_params[5];
-
-}
-
-uint16_t mSettings::GetCfgCrc16(uint8_t *bytes, uint32_t size)
-{
-  uint16_t crc = 0;
-
-  for (uint32_t i = 0; i < size; i++) {
-    if ((i < 14) || (i > 15)) { crc += bytes[i]*(i+1); }  // Skip crc
+    settings_crc32 = Settings.cfg_crc32;
   }
-  return crc;
-}
 
-uint16_t mSettings::GetSettingsCrc(void)
-{
-  // Fix miscalculation if previous Settings was 3584 and current Settings is 4096 between 0x06060007 and 0x0606000A
-  uint32_t size = /*((Settings.version < 0x06060007) || (Settings.version > 0x0606000A)) ? 3584 :*/ sizeof(Settings);
-  return GetCfgCrc16((uint8_t*)&Settings, size);
+  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
+  RtcSettingsSave();
+  #endif
+  
 }
 
 uint32_t mSettings::GetCfgCrc32(uint8_t *bytes, uint32_t size)
 {
   // https://create.stephan-brumme.com/crc32/#bitwise
   uint32_t crc = 0;
-
   while (size--) {
     crc ^= *bytes++;
     for (uint32_t j = 0; j < 8; j++) {
@@ -470,137 +282,13 @@ uint32_t mSettings::GetSettingsCrc32(void)
 }
 
 
-
-void mSettings::SettingsSave(uint8_t rotate)
-{
-
-// Serial.println("SettingsSave NOT return");
-//   return;
-  
-    #ifdef ESP8266
-/* Save configuration in eeprom or one of 7 slots below
- *
- * rotate 0 = Save in next flash slot
- * rotate 1 = Save only in eeprom flash slot until SetOption12 0 or restart
- * rotate 2 = Save in eeprom flash slot, erase next flash slots and continue depending on stop_flash_rotate
- * stop_flash_rotate 0 = Allow flash slot rotation (SetOption12 0)
- * stop_flash_rotate 1 = Allow only eeprom flash slot use (SetOption12 1)
- */
-// #ifndef FIRMWARE_MINIMAL
-  // UpdateBackwardCompatibility();
-  if ((GetSettingsCrc32() != settings_crc32) || rotate) {
-    
-    // if (1 == rotate) 
-    // {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
-    //   stop_flash_rotate = 1;
-    //   #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
-    //   #endif// ENABLE_LOG_LEVEL_INFO
-    // }
-    // if (2 == rotate) 
-    // {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
-    //   settings_location = SETTINGS_LOCATION +1;
-    //   #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
-    //   #endif// ENABLE_LOG_LEVEL_INFO
-    // }
-
-    // if (stop_flash_rotate) {
-    //   settings_location = SETTINGS_LOCATION;
-    // } else {
-    //   settings_location--;
-    //   #ifdef ENABLE_LOG_LEVEL_INFO
-    //   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
-    //   #endif// ENABLE_LOG_LEVEL_INFO
-
-    //   if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
-    //     settings_location = SETTINGS_LOCATION;
-    //     #ifdef ENABLE_LOG_LEVEL_INFO
-    //     AddLog(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
-    //     #endif // ENABLE_LOG_LEVEL_INFO
-    //   }
-    // }
-    settings_location = SETTINGS_LOCATION; // tmp fix, no rotations
-
-    Settings.save_flag++;
-    // if (UtcTime() > START_VALID_TIME) {
-    //   Settings.cfg_timestamp = UtcTime();
-    // } else {
-    //   Settings.cfg_timestamp++;
-    // }
-    Settings.cfg_size  = sizeof(Settings);
-    Settings.cfg_crc   = GetSettingsCrc();  // Keep for backward compatibility in case of fall-back just after upgrade
-    Settings.cfg_crc32 = GetSettingsCrc32();
-
-    
-    // AddLog(LOG_LEVEL_INFO, PSTR("\n\r\r\n\r\r\n\r\r\n\r\rSAVING param1=%d"), Settings.animation_settings.xmas_controller_params[0]);
-
-
-// #ifdef ESP8266
-    if (ESP.flashEraseSector(settings_location)) {
-      //DEBUG_LINE_HERE;
-      // Settings.animation_settings.xmas_controller_params[5] = 5;
-
-      ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
-      
-    
-      //AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ESP.flashWrite %d %d"),stop_flash_rotate,rotate);
-
-      // TestSettingsLoad();
-
-      // delay(1000);
-
-
-
-    }else{
-      
-      // DEBUG_LINE_HERE;
-    }
-
-    if (!stop_flash_rotate && rotate) {
-      // DEBUG_LINE_HERE;
-      for (uint32_t i = 1; i < CFG_ROTATES; i++) 
-      {
-        // DEBUG_LINE_HERE;
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("ESP.flashEraseSector(settings_location -i);"));
-    #endif // ENABLE_LOG_LEVEL_INFO
-        ESP.flashEraseSector(settings_location -i);  // Delete previous configurations by resetting to 0xFF
-        delay(1);
-      }
-    }else{      
-      // DEBUG_LINE_HERE;
-    }
-
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d BootCount %d"), settings_location, Settings.save_flag, sizeof(Settings), Settings.bootcount);
-    #endif// ENABLE_LOG_LEVEL_INFO
-// #else  // ESP32
-//     SettingsWrite(&Settings, sizeof(Settings));
-//     AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_CONFIG "Saved, " D_COUNT " %d, " D_BYTES " %d"), Settings.save_flag, sizeof(Settings));
-// #endif  // ESP8266
-
-    settings_crc32 = Settings.cfg_crc32;
-  }
-
-
-// #endif  // FIRMWARE_MINIMAL
-
-  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-  RtcSettingsSave();
-  #endif
-
-  
-  #endif //  ESP8266
-}
-
 /**
  * Test load and print critical test points from primary storage location
  * */
 void mSettings::TestSettingsLoad()
 {
     #ifdef ESP8266
-  SYSCFG settings_tmp;
+  SETTINGS settings_tmp;
 
   settings_location = SETTINGS_LOCATION;
   
@@ -645,259 +333,11 @@ void mSettings::TestSettings_ShowLocal_Header()
       Settings.save_flag,
       Settings.version,
       Settings.bootcount,
-      Settings.cfg_crc
+      0
   );
     #endif// ENABLE_LOG_LEVEL_INFO
   
 }
-
-
-// #else // ENABLE_DEVFEATURE_SETTINGS_V2
-
-
-// void mSettings::SettingsLoad(void)
-// {
-//   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD));
-
-//   // Load configuration from eeprom or one of 7 slots below if first valid load does not stop_flash_rotate
-//   struct SYSCFGH {
-//     uint16_t cfg_holder;                     // 000
-//     uint16_t cfg_size;                       // 002
-//     unsigned long save_flag;                 // 004
-//   } _SettingsH;
-//   unsigned long save_flag = 0;
-
-//   Settings.flag_system.stop_flash_rotate = 1;// temp measure
-
-//   settings_location = 0;
-//   uint32_t flash_location = SETTINGS_LOCATION +1; //next memory location
-
-//   uint16_t cfg_holder = 0;
-
-  
-//   for (uint8_t i = 0; i < CFG_ROTATES; i++) {
-//     flash_location--;
-//     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-
-//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " i=%d bootcount=%d version=%X"),i,Settings.bootcount,Settings.version);
-
-//     // if(Settings.version != 0xFFFFFFFF){
-//     //   AddLog(LOG_LEVEL_TEST,PSTR("i=%d version=%X DOES NOT EQUAL tversion=%X"),i,Settings.version,0xFFFFFFFF);
-//     // }else{
-//     //   AddLog(LOG_LEVEL_TEST,PSTR("ELSE ELSE i=%d version=%X tversion=%X"),i,Settings.version,0xFFFFFFFF);
-//     //   //break;// test
-//     // }
-
-//     bool valid = false;
-//     if((Settings.version > 0x06000000)&&(Settings.version != 0xFFFFFFFF)) {
-//       //AddLog(LOG_LEVEL_TEST,PSTR("ESP.flashRead %i IF"),i);
-//       bool almost_valid = (Settings.cfg_crc == GetSettingsCrc());
-//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " cfg_crc==GetSettingsCrc()| %d==%d"),Settings.cfg_crc,GetSettingsCrc());
-//       // Sometimes CRC on pages below FB, overwritten by OTA, is fine but Settings are still invalid. So check cfg_holder too
-//       if (almost_valid && (0 == cfg_holder)) { cfg_holder = Settings.cfg_holder; }  // At FB always active cfg_holder
-//       valid = (cfg_holder == Settings.cfg_holder);
-//     } else {
-
-
-//       ESP.flashRead((flash_location -1) * SPI_FLASH_SEC_SIZE, (uint32*)&_SettingsH, sizeof(SYSCFGH));
-//       valid = (Settings.cfg_holder == _SettingsH.cfg_holder);
-//       if(Settings.cfg_holder == 65535){
-//         // catch when memory is all 1's and not 0
-//         valid = false;
-//       }
-//       AddLog(LOG_LEVEL_TEST,PSTR("flashRead ELSE %d %d %d"),valid,Settings.cfg_holder,_SettingsH.cfg_holder);
-//     }
-//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " ESP.flashRead valid=%d"),valid);
-//     if (valid) {
-//       AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " Settings.save_flag > save_flag %d>%d"),Settings.save_flag,save_flag);
-//       if (Settings.save_flag > save_flag) {
-//         save_flag = Settings.save_flag;
-//         settings_location = flash_location;
-//         if (Settings.flag_system.stop_flash_rotate && (0 == i)) {  // Stop only if eeprom area should be used and it is valid
-//           break;
-//         }
-//       }
-//     }
-
-//     delay(1);
-//   }
-
-// /*
-// #else  // CFG_RESILIENT
-//   // Activated with version 8.4.0.2 - Fails to read any config before version 6.6.0.11
-//   settings_location = 0;
-//   uint32_t save_flag = 0;
-//   uint32_t flash_location = SETTINGS_LOCATION;
-//   for (uint32_t i = 0; i < CFG_ROTATES; i++) {              // Read all config pages in search of valid and latest
-//     ESP.flashRead(flash_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
-//     if ((Settings.cfg_crc32 != 0xFFFFFFFF) && (Settings.cfg_crc32 != 0x00000000) && (Settings.cfg_crc32 == GetSettingsCrc32())) {
-//       if (Settings.save_flag > save_flag) {                 // Find latest page based on incrementing save_flag
-//         save_flag = Settings.save_flag;
-//         settings_location = flash_location;
-//         if (Settings.flag.stop_flash_rotate && (0 == i)) {  // Stop if only eeprom area should be used and it is valid
-//           break;
-//         }
-//       }
-//     }
-//     flash_location--;
-//     delay(1);
-//   }
-//   */
-  
-//   if (settings_location > 0) {
-//     ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD D_LOADED_FROM_FLASH_AT " %X, " D_COUNT " %lu" D_BOOT_COUNT " %d"), settings_location, Settings.save_flag, Settings.bootcount);
-//   }
-//   // else{    
-//   //   AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD " %s>%d"), "settings_location",settings_location);
-//   // }
-
-//   #ifndef FIRMWARE_MINIMAL
-//   if (!settings_location || (Settings.cfg_holder != (uint16_t)SETTINGS_HOLDER)) {  // Init defaults if cfg_holder differs from user settings in .h
-//     //Settings.seriallog_level = LOG_LEVEL_ALL;
-//     pCONT_set->Settings.seriallog_level = pCONT_set->seriallog_level_during_boot;
-    
-//     AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_MEMORY D_LOAD "cfg_holder(%d) != SETTINGS_HOLDER(%d), Erasing settings"),Settings.cfg_holder,SETTINGS_HOLDER);
-
-//     // Clear system defaults
-//     SettingsDefault();
-
-//   }
-//   settings_crc = GetSettingsCrc();
-//   #endif  // FIRMWARE_MINIMAL
-
-//   RtcSettingsLoad();
-  
-// }
-
-
-// // uint16_t mSettings::GetSettingsCrc(void)
-// // {
-// //   uint16_t crc = 0;
-// //   uint8_t *bytes = (uint8_t*)&Settings;
-
-// //   for (uint16_t i = 0; i < sizeof(SYSCFG); i++) {
-// //     if ((i < 14) || (i > 15)) { crc += bytes[i]*(i+1); }  // Skip crc
-// //   }
-// //   return crc;
-// // }
-
-
-// void mSettings::SettingsSave(uint8_t rotate)
-// { 
-
-  
-
-// // return ;
-// // #endif
-
-//   // Serial.print("SettingsSave> ");Serial.println(rotate);
-//   /* Save configuration in eeprom or one of 7 slots below
-//  *
-//  * rotate 0 = Save in next flash slot
-//  * rotate 1 = Save only in eeprom flash slot until SetOption12 0 or restart
-//  * rotate 2 = Save in eeprom flash slot, erase next flash slots and continue depending on stop_flash_rotate
-//  * stop_flash_rotate 0 = Allow flash slot rotation (SetOption12 0)
-//  * stop_flash_rotate 1 = Allow only eeprom flash slot use (SetOption12 1)
-//  */
-// //DEBUG_LINE_HERE;
-// // #ifndef FIRMWARE_MINIMAL
-//   if ((GetSettingsCrc() != settings_crc) || rotate) {
-// //DEBUG_LINE_HERE;
-//     if (1 == rotate) {   // Use eeprom flash slot only and disable flash rotate from now on (upgrade)
-//       stop_flash_rotate = 1;
-//       //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " stop_flash_rotate"));//(upgrade) Use eeprom flash slot only and disable flash rotate from now on"));
-//     }
-//     if (2 == rotate) {   // Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off (default)
-//       settings_location = SETTINGS_LOCATION +1;
-//       //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " (default) Use eeprom flash slot and erase next flash slots if stop_flash_rotate is off(%d) (default)"),stop_flash_rotate);
-//     }
-//     if (stop_flash_rotate) {
-//       settings_location = SETTINGS_LOCATION;
-//     } else {
-//       settings_location--;
-//       //AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location=%d"),settings_location);
-//       if (settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)) {
-//         settings_location = SETTINGS_LOCATION;
-//       //AddLog(LOG_LEVEL_TEST,PSTR("settings_location <= (SETTINGS_LOCATION - CFG_ROTATES)"));
-//       }
-//     }
-//     Settings.save_flag++;
-//     Settings.cfg_size = sizeof(SYSCFG);
-//     Settings.cfg_crc = GetSettingsCrc();
-
-// //DEBUG_LINE_HERE;
-// // #ifdef USE_EEPROM
-// //     if (SPIFFS_END == settings_location) {
-// //       uint8_t* flash_buffer;
-// //       flash_buffer = new uint8_t[SPI_FLASH_SEC_SIZE];
-// //       if (eeprom_data && eeprom_size) {
-// //         size_t flash_offset = SPI_FLASH_SEC_SIZE - eeprom_size;
-// //         memcpy(flash_buffer + flash_offset, eeprom_data, eeprom_size);  // Write dirty EEPROM data
-// //       } else {
-// //         ESP.flashRead(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)flash_buffer, SPI_FLASH_SEC_SIZE);   // Read EEPROM area
-// //       }
-// //       memcpy(flash_buffer, &Settings, sizeof(Settings));
-// //       ESP.flashEraseSector(settings_location);
-// //       ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)flash_buffer, SPI_FLASH_SEC_SIZE);
-// //       delete[] flash_buffer;
-// //     } else {
-// //       ESP.flashEraseSector(settings_location);
-// //       ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-// //     }
-// // #else
-
-// // ESP.wdtFeed();
-// // ESP.wdtDisable();
-// //DEBUG_LINE_HERE;
-//     // settings_location = SETTINGS_LOCATION;
-// //     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE " settings_location <= (SETTINGS_LOCATION - CFG_ROTATES) %lu"),settings_location);
-
-// // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " ENTERING UNSAFE AREA %d"),settings_location);
-
-// // Serial.flush();
-// // delay(1000);
-
-// //DEBUG_LINE_HERE;
-
-// #ifdef ENABLE_FLASH_ERASE_SECTOR_CURRENTLY_BUG
-//   if (ESP.flashEraseSector(settings_location)) {
-//     ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(Settings));
-//   }
-// #endif
-
-// // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_SAVE " LEAVING UNSAFE AREA %d"),settings_location);
-// // ESP.wdtFeed();
-// // delay(1000);
-
-//     // ESP.flashEraseSector(settings_location);
-// // //DEBUG_LINE_HERE;
-// //     ESP.flashWrite(settings_location * SPI_FLASH_SEC_SIZE, (uint32*)&Settings, sizeof(SYSCFG));
-// //DEBUG_LINE_HERE;
-// // #endif  // USE_EEPROM
-
-//     if (!stop_flash_rotate && rotate) {
-//       for (uint8_t i = 1; i < CFG_ROTATES; i++) {
-// //DEBUG_LINE_HERE;
-//         ESP.flashEraseSector(settings_location -i);  // Delete previous configurations by resetting to 0xFF
-//         delay(1);
-//       }
-//     }
-
-//     AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_MEMORY D_SAVE D_LOG_CONFIG D_SAVED_TO_FLASH_AT " %X, " D_COUNT " %d, " D_BYTES " %d"), settings_location, Settings.save_flag, sizeof(SYSCFG));
-
-//     settings_crc = Settings.cfg_crc;
-//   }
-// // #endif  // FIRMWARE_MINIMAL
-// //DEBUG_LINE_HERE;
-//   RtcSettingsSave();
-
-// }
-
-
-
-// #endif // ENABLE_DEVFEATURE_SETTINGS_V2
-
 
 
 uint32_t mSettings::GetSettingsAddress(void)
@@ -926,7 +366,7 @@ void mSettings::SettingsErase(uint8_t type)
     _sectorEnd = SETTINGS_LOCATION +5;
   }
 
-  bool _serialoutput = (LOG_LEVEL_DEBUG_MORE <= seriallog_level);
+  bool _serialoutput = (LOG_LEVEL_DEBUG_MORE <= runtime.seriallog_level);
 
     #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " %d " D_UNIT_SECTORS), _sectorEnd - _sectorStart);
