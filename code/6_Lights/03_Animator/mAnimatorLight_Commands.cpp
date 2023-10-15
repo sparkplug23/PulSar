@@ -1664,9 +1664,9 @@ void mAnimatorLight::parsesub_json_object_notification_shortcut(JsonParserObject
 void mAnimatorLight::CommandSet_ColourTypeID(uint8_t id, uint8_t segment_index)
 {
   
-  SEGMENT_I(segment_index).colour_type = (RgbcctColor::ColourType)id;
+  SEGMENT_I(segment_index).colour_type__used_in_effect_generate = (RgbcctColor::ColourType)id;
 
-  ALOG_INF(PSTR("ColourType = %d"),SEGMENT_I(segment_index).colour_type);
+  ALOG_INF(PSTR("ColourType = %d"),SEGMENT_I(segment_index).colour_type__used_in_effect_generate);
 
 }
 

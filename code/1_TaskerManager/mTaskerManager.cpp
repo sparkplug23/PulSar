@@ -89,7 +89,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       {
       #endif
         AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TIS_%d\t %02d %02d T:%S\tM:%S"), millis(), switch_index, i, 
-        pCONT_set->GetTaskName(function, buffer_taskname), 
+        GetTaskName(function, buffer_taskname), 
         GetModuleFriendlyName(switch_index));      
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
       }
@@ -124,7 +124,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     #endif
     #if defined(ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS)
       if(this_millis > ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS){
-        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TASKER @@@@@@@@@@@@@@@@@@ %d ms %s %S"), millis()-start_millis, pCONT_set->GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
+        AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "TASKER @@@@@@@@@@@@@@@@@@ %d ms %s %S"), millis()-start_millis, GetTaskName(function, buffer_taskname), GetModuleFriendlyName(switch_index));
       }
     #endif
 
@@ -158,7 +158,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
         if(percent<boot_percentage){ Serial.print((char)219); }else{ DEBUG_PRINTF(" "); }
       }      
       #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage,pCONT_set->GetTaskName(function, buffer_taskname));
+      DEBUG_PRINTF("] %03d %s\n\r",boot_percentage, GetTaskName(function, buffer_taskname));
       #else
       DEBUG_PRINTF("] %03d\n\r",boot_percentage);
       #endif // ENABLE_DEBUG_FUNCTION_NAMES
@@ -664,3 +664,108 @@ PGM_P mTaskerManager::GetModuleName(uint8_t id)
   return PM_SEARCH_NOMATCH;
 }
   
+
+
+  
+#ifdef ENABLE_DEBUG_FUNCTION_NAMES
+
+// should be moved into task.h
+
+// Switch case should be faster than getext progmem
+// Use progmem WITHOUT buffer for speed improvements, should be read as expected progmem and handled that way
+const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
+
+  switch(task){
+    default:
+                                                      return PM_SEARCH_NOMATCH;
+    case FUNC_POINTER_INIT:                           return PM_FUNC_POINTER_INIT_CTR;
+    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:                          return PM_FUNC_TEMPLATE_LOAD_CTR;
+    // case FUNC_MODULE_INIT:                            return PM_FUNC_MODULE_INIT_CTR;
+    case FUNC_PRE_INIT:                               return PM_FUNC_PRE_INIT_CTR;
+    case FUNC_INIT:                                   return PM_FUNC_INIT_CTR;
+    case FUNC_CONFIGURE_MODULES_FOR_DEVICE:           return PM_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR;
+    case FUNC_LOOP:                                   return PM_FUNC_LOOP_CTR;
+    case FUNC_EVERY_50_MSECOND:                       return PM_FUNC_EVERY_50_MSECOND_CTR;
+    case FUNC_EVERY_100_MSECOND:                      return PM_FUNC_EVERY_100_MSECOND_CTR;
+    case FUNC_EVERY_250_MSECOND:                      return PM_FUNC_EVERY_250_MSECOND_CTR;
+    case FUNC_EVERY_SECOND:                           return PM_FUNC_EVERY_SECOND_CTR;
+    case FUNC_EVERY_MINUTE:                           return PM_FUNC_EVERY_MINUTE_CTR; 
+    case FUNC_EVERY_HOUR:                             return PM_FUNC_EVERY_HOUR_CTR; 
+    case FUNC_EVERY_MIDNIGHT:                         return PM_FUNC_EVERY_MIDNIGHT_CTR;
+    case FUNC_EVERY_MIDDAY:                           return PM_FUNC_EVERY_MIDDAY_CTR;
+    case FUNC_ON_BOOT_SUCCESSFUL:                     return PM_FUNC_ON_SUCCESSFUL_BOOT_CTR;
+    case FUNC_UPTIME_10_SECONDS:                      return PM_FUNC_UPTIME_10_SECONDS_CTR;
+    case FUNC_UPTIME_1_MINUTES:                       return PM_FUNC_UPTIME_1_MINUTES_CTR;
+    case FUNC_UPTIME_10_MINUTES:                      return PM_FUNC_UPTIME_10_MINUTES_CTR;
+    case FUNC_UPTIME_60_MINUTES:                      return PM_FUNC_UPTIME_60_MINUTES_CTR;
+    // case FUNC_RESTART_SPLASH_INFORMATION:             return PM_FUNC_RESTART_SPLASH_INFORMATION_CTR;
+    // case FUNC_PREP_BEFORE_TELEPERIOD:                 return PM_FUNC_PREP_BEFORE_TELEPERIOD_CTR;
+    case FUNC_JSON_APPEND:                            return PM_FUNC_JSON_APPEND_CTR;
+    case FUNC_SAVE_BEFORE_RESTART:                    return PM_FUNC_SAVE_BEFORE_RESTART_CTR;
+    case FUNC_SETTINGS_DEFAULT:                       return PM_FUNC_SETTINGS_DEFAULT_CTR;
+    case FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES:    return PM_FUNC_SETTINGS_PRELOAD_DEFAULT_IN_MODULES_CTR;
+    case FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_FUNC_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
+    case FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_FUNC_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
+    case FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE:       return PM_FUNC_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
+    case FUNC_FUNCTION_LAMBDA_INIT:                   return PM_FUNC_FUNCTION_LAMBDA_INIT_CTR;
+    case FUNC_FUNCTION_LAMBDA_LOOP:                   return PM_FUNC_FUNCTION_LAMBDA_LOOP_CTR;
+    // case FUNC_COMMAND:                                return PM_FUNC_COMMAND_CTR;
+    // case FUNC_COMMAND_SENSOR:                         return PM_FUNC_COMMAND_SENSOR_CTR;
+    // case FUNC_COMMAND_DRIVER:                         return PM_FUNC_COMMAND_DRIVER_CTR;
+    // case FUNC_JSON_COMMAND:                           return PM_FUNC_JSON_COMMAND_CTR;
+    // case FUNC_JSON_COMMAND_OBJECT:                    return PM_FUNC_JSON_COMMAND_OBJECT_CTR;
+    case FUNC_WIFI_CONNECTED:                         return PM_FUNC_WIFI_CONNECTED_CTR;
+    case FUNC_WIFI_DISCONNECTED:                      return PM_FUNC_WIFI_DISCONNECTED_CTR;
+    case FUNC_MQTT_SUBSCRIBE:                         return PM_FUNC_MQTT_SUBSCRIBE_CTR;
+    // case FUNC_MQTT_INIT:                              return PM_FUNC_MQTT_INIT_CTR;
+    case FUNC_MQTT_CONNECTED:                         return PM_FUNC_MQTT_CONNECTED_CTR;
+    case FUNC_MQTT_DISCONNECTED:                      return PM_FUNC_MQTT_DISCONNECTED_CTR;
+    case FUNC_MQTT_COMMAND:                           return PM_FUNC_MQTT_COMMAND_CTR;
+    case FUNC_MQTT_SENDER:                            return PM_FUNC_MQTT_SENDER_CTR;
+    case FUNC_MQTT_HANDLERS_INIT:                     return PM_FUNC_MQTT_HANDLERS_INIT_CTR;
+    case FUNC_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_FUNC_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
+    case FUNC_SET_POWER:                              return PM_FUNC_SET_POWER_CTR;
+    case FUNC_SET_DEVICE_POWER:                       return PM_FUNC_SET_DEVICE_POWER_CTR;
+    case FUNC_SHOW_SENSOR:                            return PM_FUNC_SHOW_SENSOR_CTR;
+    case FUNC_RULES_PROCESS:                          return PM_FUNC_RULES_PROCESS_CTR;
+    case FUNC_SERIAL:                                 return PM_FUNC_SERIAL_CTR;
+    case FUNC_FREE_MEM:                               return PM_FUNC_FREE_MEM_CTR;
+    case FUNC_BUTTON_PRESSED:                         return PM_FUNC_BUTTON_PRESSED_CTR;
+    case FUNC_ENERGY_RESET:                           return PM_FUNC_ENERGY_RESET_CTR;
+    case FUNC_SENSOR_UPDATED:                         return PM_FUNC_SENSOR_UPDATED_CTR;
+    case FUNC_STATUS_MESSAGE_APPEND:                  return PM_FUNC_STATUS_MESSAGE_APPEND_CTR;
+    case FUNC_JSON_HARDWARE_APPEND:                   return PM_FUNC_JSON_HARDWARE_APPEND_CTR;
+    case FUNC_SET_CHANNELS:                           return PM_FUNC_SET_CHANNELS_CTR;
+    case FUNC_WEB_ADD_MAIN_BUTTON:                    return PM_FUNC_WEB_ADD_MAIN_BUTTON_CTR;
+    case FUNC_WEB_ADD_BUTTON:                         return PM_FUNC_WEB_ADD_BUTTON_CTR;
+    case FUNC_WEB_ADD_BUTTON_SYSTEM_SETTINGS:         return PM_FUNC_WEB_ADD_BUTTON_SYSTEM_SETTINGS_CTR;
+    case FUNC_WEB_ADD_HANDLER:                        return PM_FUNC_WEB_ADD_HANDLER_CTR;
+    case FUNC_WEB_ROOT_SEND_STYLE:                    return PM_FUNC_WEB_ROOT_SEND_STYLE_CTR;
+    case FUNC_WEB_ROOT_SEND_SCRIPT:                   return PM_FUNC_WEB_ROOT_SEND_SCRIPT_CTR;
+    case FUNC_WEB_ROOT_SCRIPT_JSON_FETCH_MODULEPARSING:return PM_FUNC_WEB_ROOT_SCRIPT_JSON_FETCH_MODULEPARSING_CTR;
+    case FUNC_WEB_ROOT_SEND_BODY:                     return PM_FUNC_WEB_ROOT_SEND_BODY_CTR;
+    case FUNC_WEB_ROOT_SEND_STATUS:                   return PM_FUNC_WEB_ROOT_SEND_STATUS_CTR;
+    case FUNC_WEB_ADD_ROOT_SHOWS:                     return PM_FUNC_WEB_ADD_ROOT_SHOWS_CTR;
+    case FUNC_WEB_ADD_JSON_FETCH_RESULT:              return PM_FUNC_WEB_ADD_JSON_FETCH_RESULT_CTR;
+    case FUNC_WEB_ADD_JSON_DATA_FETCH_URL:            return PM_FUNC_WEB_ADD_JSON_DATA_FETCH_URL_CTR;
+    case FUNC_WEB_ADD_ROOT_TABLE_ROWS:                return PM_FUNC_WEB_ADD_ROOT_TABLE_ROWS_CTR;
+    case FUNC_WEB_ADD_ROOT_SCRIPT:                    return PM_FUNC_WEB_ADD_ROOT_SCRIPT_CTR;
+    case FUNC_WEB_ADD_ROOT_STYLE:                     return PM_FUNC_WEB_ADD_ROOT_STYLE_CTR;
+    // case FUNC_WEB_APPEND_LOADTIME_ROOT_URLS:          return PM_FUNC_WEB_APPEND_LOADTIME_ROOT_URLS_CTR;
+    // case FUNC_WEB_APPEND_LOADTIME_ROOT_RATES:         return PM_FUNC_WEB_APPEND_LOADTIME_ROOT_RATES_CTR;
+    case FUNC_WEB_APPEND_RUNTIME_ROOT_URLS:           return PM_FUNC_WEB_APPEND_RUNTIME_ROOT_URLS_CTR;
+    // case FUNC_WEB_APPEND_RUNTIME_ROOT_RATES:          return PM_FUNC_WEB_APPEND_RUNTIME_ROOT_RATES_CTR;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED: return PM_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED_CTR;
+    case FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:    return PM_FUNC_WEB_APPEND_ROOT_STATUS_TABLE_FORCED_CTR;
+    case FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS:       return PM_FUNC_WEB_APPEND_ROOT_ADD_MAIN_BUTTONS_CTR;
+    case FUNC_WEB_APPEND_ROOT_BUTTONS:                return PM_FUNC_WEB_APPEND_ROOT_BUTTONS_CTR;
+    case FUNC_WEB_PAGEINFORMATION_SEND_MODULE:        return PM_FUNC_WEB_PAGEINFORMATION_SEND_MODULE_CTR;
+    case FUNC_WEB_COMMAND:                            return PM_FUNC_WEB_COMMAND_CTR;
+    // case FUNC_CHECK_POINTERS:                         return PM_FUNC_CHECK_POINTERS_CTR;
+    case FUNC_WEB_SYSTEM_INFO:                        return PM_FUNC_WEB_SYSTEM_INFO_CTR;
+    case FUNC_DEBUG_CONFIGURE:                        return PM_FUNC_DEBUG_CONFIGURE_CTR;
+  }
+
+}
+
+    #endif // ENABLE_DEBUG_FUNCTION_NAMES

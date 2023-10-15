@@ -243,6 +243,7 @@
 #define BUSTYPE_TM1829              25
 #define BUSTYPE_SK6812_RGBW         30
 #define BUSTYPE_TM1814              31
+
 //"Analog" types (PWM) (32-47)
 #define BUSTYPE_ONOFF               40            //binary output (relays etc.)
 #define BUSTYPE_ANALOG_1CH          41            //single channel PWM. Uses value of brightest RGBW channel

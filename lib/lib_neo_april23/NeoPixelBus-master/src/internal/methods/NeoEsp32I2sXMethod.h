@@ -541,11 +541,15 @@ public:
 
     void Initialize()
     {
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
         _bus.Initialize(_pin, T_SPEED::I2sSampleRate, T_INVERT::Inverted);
 
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
         _data = static_cast<uint8_t*>(malloc(_sizeData));
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
         if (_data == nullptr)
         {
+            Serial.println("front buffer memory allocation failure");
             log_e("front buffer memory allocation failure");
         }
         // data cleared later in Begin()

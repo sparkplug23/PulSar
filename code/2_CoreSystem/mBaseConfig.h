@@ -146,7 +146,7 @@ With latest version, all longer term shared debug features should be added here 
                                                           //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
 
   #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   /***********************************
    * SECTION: Lighting Configs: Features
@@ -162,7 +162,9 @@ With latest version, all longer term shared debug features should be added here 
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
   #ifndef ENABLE_DEVFEATURE_LIGHT_ESP32_RMT_METHOD_AS_PRIMARY
+  #ifndef ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_PARALLEL_CHANNELS_AS_PRIMARY_METHOD
   #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD // To switch between I2S and RMT as primary channels
+  #endif
   #endif
 
   #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE

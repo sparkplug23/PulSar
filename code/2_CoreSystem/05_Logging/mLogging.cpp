@@ -231,7 +231,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         isconnected ? 'Y' : 'N',
         pCONT_time->uptime.minute, pCONT_time->uptime.second,
         pCONT_log->GetLogLevelNameShortbyID(loglevel, level_buffer, sizeof(level_buffer)),
-        log_data
+        pCONT_log->log_data
       );
     #else
 

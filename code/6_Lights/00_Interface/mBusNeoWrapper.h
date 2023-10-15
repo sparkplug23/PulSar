@@ -67,39 +67,44 @@ enum EM_BUS_TYPE
   BUSTYPE__32_I0_NEO_3__ID = 22,
   BUSTYPE__32_I1_NEO_3__ID = 23,
   BUSTYPE__32_BB_NEO_3__ID = 24,  // bitbangging on ESP32 not recommended
+  BUSTYPE__32_I2S1P_3__ID,
   // RGBW
-  BUSTYPE__32_RN_NEO_4__ID = 25,
-  BUSTYPE__32_I0_NEO_4__ID = 26,
-  BUSTYPE__32_I1_NEO_4__ID = 27,
-  BUSTYPE__32_BB_NEO_4__ID = 28,  // bitbangging on ESP32 not recommended
+  BUSTYPE__32_RN_NEO_4__ID,
+  BUSTYPE__32_I0_NEO_4__ID,
+  BUSTYPE__32_I1_NEO_4__ID,
+  BUSTYPE__32_BB_NEO_4__ID,  // bitbangging on ESP32 not recommended
+  BUSTYPE__32_I2S1P_4__ID,
   // 400Kbps
-  BUSTYPE__32_RN_400_3__ID = 29,
-  BUSTYPE__32_I0_400_3__ID = 30,
-  BUSTYPE__32_I1_400_3__ID = 31,
-  BUSTYPE__32_BB_400_3__ID = 32,  // bitbangging on ESP32 not recommended
+  BUSTYPE__32_RN_400_3__ID,
+  BUSTYPE__32_I0_400_3__ID,
+  BUSTYPE__32_I1_400_3__ID,
+  BUSTYPE__32_BB_400_3__ID,  // bitbangging on ESP32 not recommended
+
+
+
   // TM1814 (RGBW)
-  BUSTYPE__32_RN_TM1_4__ID = 33,
-  BUSTYPE__32_I0_TM1_4__ID = 34,
-  BUSTYPE__32_I1_TM1_4__ID = 35,
+  BUSTYPE__32_RN_TM1_4__ID,
+  BUSTYPE__32_I0_TM1_4__ID,
+  BUSTYPE__32_I1_TM1_4__ID,
   // TM1829 (RGB)
-  BUSTYPE__32_RN_TM2_3__ID = 36,
-  BUSTYPE__32_I0_TM2_3__ID = 37,
-  BUSTYPE__32_I1_TM2_3__ID = 38,
+  BUSTYPE__32_RN_TM2_3__ID,
+  BUSTYPE__32_I0_TM2_3__ID,
+  BUSTYPE__32_I1_TM2_3__ID,
   // APA102
-  BUSTYPE__HS_DOT_3__ID = 39, // hardware SPI
-  BUSTYPE__SS_DOT_3__ID = 40, // soft SPI
+  BUSTYPE__HS_DOT_3__ID, // hardware SPI
+  BUSTYPE__SS_DOT_3__ID, // soft SPI
   // LPD8806
-  BUSTYPE__HS_LPD_3__ID = 41,
-  BUSTYPE__SS_LPD_3__ID = 42,
+  BUSTYPE__HS_LPD_3__ID,
+  BUSTYPE__SS_LPD_3__ID,
   // WS2801
-  BUSTYPE__HS_WS1_3__ID = 43,
-  BUSTYPE__SS_WS1_3__ID = 44,
+  BUSTYPE__HS_WS1_3__ID,
+  BUSTYPE__SS_WS1_3__ID,
   // P9813
-  BUSTYPE__HS_P98_3__ID = 45,
-  BUSTYPE__SS_P98_3__ID = 46,
+  BUSTYPE__HS_P98_3__ID,
+  BUSTYPE__SS_P98_3__ID,
   // LPD6803
-  BUSTYPE__HS_LPO_3__ID = 47,
-  BUSTYPE__SS_LPO_3__ID = 48
+  BUSTYPE__HS_LPO_3__ID,
+  BUSTYPE__SS_LPO_3__ID
 };
 
 
@@ -142,6 +147,12 @@ enum EM_BUS_TYPE
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
 #define NEOPIXELBUS_32_I1_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod>
 #endif
+#ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS   // New parallel output
+#define NEOPIXELBUS_32_I2S1P_NEO_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod>
+#endif
+
+
+
 //RGBW
 #define NEOPIXELBUS_32_RN_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32RmtNWs2812xMethod>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
@@ -150,6 +161,13 @@ enum EM_BUS_TYPE
 #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
 #define NEOPIXELBUS_32_I1_NEO_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1800KbpsMethod>
 #endif
+#ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS   // New parallel output
+#define NEOPIXELBUS_32_I2S1P_NEO_4 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Sk6812Method>
+#endif
+
+
+
+
 //400Kbps
 #define NEOPIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtN400KbpsMethod>
 #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
@@ -265,6 +283,21 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_3*>(busPtr))->Begin(); break;
       #endif
+
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: 
+      
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
+      (static_cast<NEOPIXELBUS_32_I2S1P_NEO_3*>(busPtr))->Begin(); 
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
+      
+      
+      
+      
+      break;
+      #endif
+
+
       case BUSTYPE__32_RN_NEO_4__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_4*>(busPtr))->Begin(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_4*>(busPtr))->Begin(); break;
@@ -272,6 +305,12 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_4*>(busPtr))->Begin(); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: (static_cast<NEOPIXELBUS_32_I2S1P_NEO_4*>(busPtr))->Begin(); break;
+      #endif
+
+
+
       case BUSTYPE__32_RN_400_3__ID: (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->Begin(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->Begin(); break;
@@ -337,9 +376,22 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_3__ID: busPtr = new NEOPIXELBUS_32_I0_NEO_3(len, pins[0]); break;
       #endif
+      
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: busPtr = new NEOPIXELBUS_32_I1_NEO_3(len, pins[0]); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: 
+      busPtr = new NEOPIXELBUS_32_I2S1P_NEO_3(len, pins[0]);
+      
+      Serial.printf("DEBUG HERE make sure I get this correct: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
+      
+       break;
+      #endif
+
+
+
+
       case BUSTYPE__32_RN_NEO_4__ID: busPtr = new NEOPIXELBUS_32_RN_NEO_4(len, pins[0], (NeoBusChannel)channel); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: busPtr = new NEOPIXELBUS_32_I0_NEO_4(len, pins[0]); break;
@@ -347,6 +399,13 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: busPtr = new NEOPIXELBUS_32_I1_NEO_4(len, pins[0]); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: busPtr = new NEOPIXELBUS_32_I2S1P_NEO_4(len, pins[0]); break;
+      #endif
+
+
+
+
       case BUSTYPE__32_RN_400_3__ID: busPtr = new NEOPIXELBUS_32_RN_400_3(len, pins[0], (NeoBusChannel)channel); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: busPtr = new NEOPIXELBUS_32_I0_400_3(len, pins[0]); break;
@@ -377,7 +436,9 @@ class PolyBus {
       // case BUSTYPE__HS_P98_3__ID: busPtr = new NEOPIXELBUS_HS_P98_3(len, pins[1], pins[0]); break;
       // case BUSTYPE__SS_P98_3__ID: busPtr = new NEOPIXELBUS_SS_P98_3(len, pins[1], pins[0]); break;
     }
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
     begin(busPtr, busType, pins);
+      Serial.printf("DEBUG HERE: ");Serial.print(__FILE__);Serial.println(__LINE__);Serial.flush();
     return busPtr;
   };
   static void show(void* busPtr, uint8_t busType) 
@@ -411,13 +472,29 @@ class PolyBus {
       // case BUSTYPE__8266_BB_TM2_3__ID: (static_cast<NEOPIXELBUS_8266_BB_TM2_4*>(busPtr))->Show(); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
-      case BUSTYPE__32_RN_NEO_3__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->Show(); break;
+      case BUSTYPE__32_RN_NEO_3__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_3*>(busPtr))->Show(); 
+      
+      
+      // Serial.println("never here BUSTYPE__32_RN_NEO_3__ID");
+      
+      break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_3__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_3*>(busPtr))->Show(); break;
       #endif
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_3*>(busPtr))->Show(); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: (static_cast<NEOPIXELBUS_32_I2S1P_NEO_3*>(busPtr))->Show(); 
+      
+      
+      // Serial.println("BUSTYPE__32_I2S1P_3__ID");
+      
+      break;
+      #endif
+
+
+
       case BUSTYPE__32_RN_NEO_4__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_4*>(busPtr))->Show(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_4*>(busPtr))->Show(); break;
@@ -425,6 +502,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_4*>(busPtr))->Show(); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: (static_cast<NEOPIXELBUS_32_I2S1P_NEO_4*>(busPtr))->Show(); break;
+      #endif
+
+
       case BUSTYPE__32_RN_400_3__ID: (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->Show(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->Show(); break;
@@ -494,6 +576,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: return (static_cast<NEOPIXELBUS_32_I1_NEO_3*>(busPtr))->CanShow(); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: return (static_cast<NEOPIXELBUS_32_I2S1P_NEO_3*>(busPtr))->CanShow(); break;
+      #endif
+
+
       case BUSTYPE__32_RN_NEO_4__ID: return (static_cast<NEOPIXELBUS_32_RN_NEO_4*>(busPtr))->CanShow(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: return (static_cast<NEOPIXELBUS_32_I0_NEO_4*>(busPtr))->CanShow(); break;
@@ -501,6 +588,12 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: return (static_cast<NEOPIXELBUS_32_I1_NEO_4*>(busPtr))->CanShow(); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: return (static_cast<NEOPIXELBUS_32_I2S1P_NEO_4*>(busPtr))->CanShow(); break;
+      #endif
+
+
+
       case BUSTYPE__32_RN_400_3__ID: return (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->CanShow(); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: return (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->CanShow(); break;
@@ -609,6 +702,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: (static_cast<NEOPIXELBUS_32_I2S1P_NEO_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #endif
+
+
       case BUSTYPE__32_RN_NEO_4__ID: (static_cast<NEOPIXELBUS_32_RN_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: (static_cast<NEOPIXELBUS_32_I0_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
@@ -616,6 +714,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: (static_cast<NEOPIXELBUS_32_I1_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: (static_cast<NEOPIXELBUS_32_I2S1P_NEO_4*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
+      #endif
+
+
       case BUSTYPE__32_RN_400_3__ID: (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->SetPixelColor(pix, colour_hardware); break;
@@ -686,6 +789,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: col = (static_cast<NEOPIXELBUS_32_I1_NEO_3*>(busPtr))->GetPixelColor(pix); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: col = (static_cast<NEOPIXELBUS_32_I2S1P_NEO_3*>(busPtr))->GetPixelColor(pix); break;
+      #endif
+
+
       case BUSTYPE__32_RN_NEO_4__ID: col = (static_cast<NEOPIXELBUS_32_RN_NEO_4*>(busPtr))->GetPixelColor(pix); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: col = (static_cast<NEOPIXELBUS_32_I0_NEO_4*>(busPtr))->GetPixelColor(pix); break;
@@ -693,6 +801,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: col = (static_cast<NEOPIXELBUS_32_I1_NEO_4*>(busPtr))->GetPixelColor(pix); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: col = (static_cast<NEOPIXELBUS_32_I2S1P_NEO_4*>(busPtr))->GetPixelColor(pix); break;
+      #endif
+
+
       case BUSTYPE__32_RN_400_3__ID: col = (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr))->GetPixelColor(pix); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: col = (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr))->GetPixelColor(pix); break;
@@ -784,6 +897,10 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_3__ID: delete (static_cast<NEOPIXELBUS_32_I1_NEO_3*>(busPtr)); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_3__ID: delete (static_cast<NEOPIXELBUS_32_I2S1P_NEO_3*>(busPtr)); break;
+      #endif
+
       case BUSTYPE__32_RN_NEO_4__ID: delete (static_cast<NEOPIXELBUS_32_RN_NEO_4*>(busPtr)); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_NEO_4__ID: delete (static_cast<NEOPIXELBUS_32_I0_NEO_4*>(busPtr)); break;
@@ -791,6 +908,11 @@ class PolyBus {
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
       case BUSTYPE__32_I1_NEO_4__ID: delete (static_cast<NEOPIXELBUS_32_I1_NEO_4*>(busPtr)); break;
       #endif
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I2S1P_4__ID: delete (static_cast<NEOPIXELBUS_32_I2S1P_NEO_4*>(busPtr)); break;
+      #endif
+
+
       case BUSTYPE__32_RN_400_3__ID: delete (static_cast<NEOPIXELBUS_32_RN_400_3*>(busPtr)); break;
       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
       case BUSTYPE__32_I0_400_3__ID: delete (static_cast<NEOPIXELBUS_32_I0_400_3*>(busPtr)); break;
@@ -851,35 +973,35 @@ class PolyBus {
       return t;
     } else {
       #ifdef ESP8266
-      uint8_t offset = pins[0] -1; //for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
-      if (offset > 3) offset = 3;
+      uint8_t offset_method_inside_group = pins[0] -1; //for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
+      if (offset_method_inside_group > 3) offset_method_inside_group = 3;
       switch (busType) {
         case BUSTYPE_WS2812_RGB:
         case BUSTYPE_WS2812_WWA:
-          return BUSTYPE__8266_U0_NEO_3__ID + offset;
+          return BUSTYPE__8266_U0_NEO_3__ID + offset_method_inside_group;
         case BUSTYPE_SK6812_RGBW:
-          return BUSTYPE__8266_U0_NEO_4__ID + offset;
+          return BUSTYPE__8266_U0_NEO_4__ID + offset_method_inside_group;
         case BUSTYPE_WS2811_400KHZ:
-          return BUSTYPE__8266_U0_400_3__ID + offset;
+          return BUSTYPE__8266_U0_400_3__ID + offset_method_inside_group;
         case BUSTYPE_TM1814:
-          return BUSTYPE__8266_U0_TM1_4__ID + offset;
+          return BUSTYPE__8266_U0_TM1_4__ID + offset_method_inside_group;
         case BUSTYPE_TM1829:
-          return BUSTYPE__8266_U0_TM2_3__ID + offset;
+          return BUSTYPE__8266_U0_TM2_3__ID + offset_method_inside_group;
       }
       #else //ESP32
-      uint8_t offset = 0; //0 = RMT (num 0-7) 8 = I2S0 9 = I2S1
+      uint8_t offset_method_inside_group = 0; //0 = RMT (num 0-7) 8 = I2S0 9 = I2S1
       #if defined(CONFIG_IDF_TARGET_ESP32S2)
       // ESP32-S2 only has 4 RMT channels
       if (num > 4) return I_NONE;
-      if (num > 3) offset = 1;  // only one I2S
+      if (num > 3) offset_method_inside_group = 1;  // only one I2S
       #elif defined(CONFIG_IDF_TARGET_ESP32C3)
       // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
       if (num > 1) return I_NONE;
-      //if (num > 1) offset = 1; // I2S not supported yet (only 1 I2S)
+      //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
       #elif defined(CONFIG_IDF_TARGET_ESP32S3)
       // On ESP32-S3 only the first 4 RMT channels are usable for transmitting
       if (num > 3) return I_NONE;
-      //if (num > 3) offset = num -4; // I2S not supported yet
+      //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
       #else
         
         #ifdef ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
@@ -887,36 +1009,45 @@ class PolyBus {
         // RMT0 to 7 as 2 to 9
         if(num < 2)
         {
-          offset = num + 1; // to skip that RMT was entered first in enum
+          offset_method_inside_group = num + 1; // to skip that RMT was entered first in enum
         }
         else
         if(num < 9)
         {
-          offset = num - 7;
+          offset_method_inside_group = num - 7;
         }
         else
         {
           return BUSTYPE__NONE__ID;
         }
+        #elif defined(ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_PARALLEL_CHANNELS_AS_PRIMARY_METHOD)
+
+
+        // Assume a max of 8 pins supported for now, using the I2S1 (which supports 8) and maybe later I2S0 (which supports 16)
+        offset_method_inside_group = 4; //handled inside library automatically for I2S1 types, fix // = num; // no difference between 0 through 7 index
+      
+        // I may want to introduce all 8 together? or, should it be that when >8 is needed, switch modes to be I2S0?
+
+
         #else // ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
         // standard ESP32 has 8 RMT and 2 I2S channels
         if (num > 9) return BUSTYPE__NONE__ID;
-        if (num > 7) offset = num -7;
+        if (num > 7) offset_method_inside_group = num -7;
         #endif // ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
       #endif
       switch (busType) {
         case BUSTYPE_WS2812_RGB:
         case BUSTYPE_WS2812_WWA:
-          return BUSTYPE__32_RN_NEO_3__ID + offset;
+          return BUSTYPE__32_RN_NEO_3__ID + offset_method_inside_group;
         case BUSTYPE_SK6812_RGBW:
-          return BUSTYPE__32_RN_NEO_4__ID + offset;
+          return BUSTYPE__32_RN_NEO_4__ID + offset_method_inside_group;
         case BUSTYPE_WS2811_400KHZ:
-          return BUSTYPE__32_RN_400_3__ID + offset;
+          return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
         case BUSTYPE_TM1814:
-          return BUSTYPE__32_RN_TM1_4__ID + offset;
+          return BUSTYPE__32_RN_TM1_4__ID + offset_method_inside_group;
         case BUSTYPE_TM1829:
-          return BUSTYPE__32_RN_TM2_3__ID + offset;
+          return BUSTYPE__32_RN_TM2_3__ID + offset_method_inside_group;
       }
       #endif
     }

@@ -365,9 +365,6 @@ class mSettings :
     uint16_t GetClassSize(){ return sizeof(mSettings); };
     #endif
 
-    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-    const char* GetTaskName(uint8_t task, char* buffer);
-    #endif
 
 
   #ifdef ESP8266

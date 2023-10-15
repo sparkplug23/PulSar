@@ -156,10 +156,11 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug
  **/
 #include "6_Lights/03_Animator/mAnimatorLight_ProgMem_Defines.h"
 
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 #define ARDUINOJSON_DECODE_UNICODE 0
 #include "3_Network/21_WebServer/AsyncJson-v6.h"
 #include "3_Network/21_WebServer/ArduinoJson-v6.h"
+
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 #include "6_Lights/03_Animator/mWebUI_Headers.h" // Not inside the class
 #endif
 
@@ -630,8 +631,11 @@ class mAnimatorLight :
     #define MAX_SEGMENT_DATA 2048
     #else
     // #define MAX_SEGMENT_DATA 8192
-    #define MAX_SEGMENT_DATA 12000//6*2000
+    // Really this value should be split across all segments, since I may want one very large (2000+) pixel or many smaller segments but multiples of them.
+    #define MAX_SEGMENT_DATA 19000 //6*MAX_PIXELS = 
     #endif
+
+    // #define ANIMATOR_UNSET() (seg.anim_function_callback == nullptr)
 
     #define FLASH_COUNT 4 
     #define LED_SKIP_AMOUNT  0
@@ -729,8 +733,11 @@ bool writeObjectToFile(const char* file, const char* key, JsonDocument* content)
 bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
 bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
 void updateFSInfo();
+
+#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 String getContentType(AsyncWebServerRequest* request, String filename);
 bool handleFileRead(AsyncWebServerRequest* request, String path);
+#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 #else
 
@@ -1550,8 +1557,6 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=tru
 
 
   // Temporary helper functions to be cleaned up and converted
-  void blur(uint8_t blur_amount, bool set_brightness = false);
-  void fade_out(uint8_t rate, bool set_brightness = false);
   uint32_t crgb_to_col(CRGB fastled);
   CRGB col_to_crgb(uint32_t);
   uint8_t get_random_wheel_index(uint8_t pos);
@@ -1759,7 +1764,7 @@ typedef struct Segment_New {
      * Rename this one to "AnimationColourType" "animation_colour_type"
      * @NOTE: minimal/default should be RGB, only when white channels are needed should that also be computed
      **/
-    RgbcctColor::ColourType colour_type = RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID; 
+    RgbcctColor::ColourType colour_type__used_in_effect_generate = RgbcctColor::ColourType::COLOUR_TYPE__RGB__ID; 
 
     /**
      * @brief Stores at least 5 full RgbcctColours with all internal manipulations as needed
@@ -2204,6 +2209,20 @@ typedef struct Segment_New {
     uint8_t differs(Segment_New& b) const;
     void    refreshLightCapabilities(void);
 
+    
+uint32_t color_blend(uint32_t color1, uint32_t color2, uint16_t blend, bool b16 = false);
+uint32_t color_add(uint32_t c1, uint32_t c2);
+void setRandomColor(byte* rgb);
+void colorHStoRGB(uint16_t hue, byte sat, byte* rgb);
+void colorKtoRGB(uint16_t kelvin, byte* rgb);
+void colorCTtoRGB(uint16_t mired, byte* rgb);
+void colorXYtoRGB(float x, float y, byte* rgb);
+void colorRGBtoXY(byte* rgb, float* xy);
+void colorFromDecOrHexString(byte* rgb, char* in);
+bool colorFromHexString(byte* rgb, const char* in);
+
+
+
     // runtime data functions
     inline uint16_t dataSize(void) const { return _dataLen; }
     bool allocateData(size_t len);
@@ -2240,9 +2259,9 @@ typedef struct Segment_New {
   
 
     // 1D support functions (some implement 2D as well)
-    void blur(uint8_t);
+    void blur(uint8_t bluramount, bool set_brightness = false);
     void fill(uint32_t c);
-    void fade_out(uint8_t r);
+    void fade_out(uint8_t r, bool set_brightness = false);
     void fadeToBlackBy(uint8_t fadeBy);
     void blendPixelColor(int n, uint32_t color, uint8_t blend);
     void blendPixelColor(int n, CRGB c, uint8_t blend)            { blendPixelColor(n, RGBW32(c.r,c.g,c.b,0), blend); }
@@ -2595,240 +2614,245 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
     #ifdef ENABLE_DEVFEATURE_LIGHT__HYPERION
     // uint16_t udpRgbPort = 19446; // Hyperion port
 
-#define WLED_GLOBAL
-#define _INIT(x) = x
-# define _INIT_N(x)
+    #define WLED_GLOBAL
+    #define _INIT(x) = x
+    # define _INIT_N(x)
 
 
-// //if true, a segment per bus will be created on boot and LED settings save
-// //if false, only one segment spanning the total LEDs is created,
-// //but not on LED settings save if there is more than one segment currently
-// bool autoSegments    _INIT(false);
-// bool correctWB       _INIT(false); // CCT color correction of RGB color
-// bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
-// bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
-// bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
-// float gammaCorrectVal _INIT(2.8f); // gamma correction value
+    // //if true, a segment per bus will be created on boot and LED settings save
+    // //if false, only one segment spanning the total LEDs is created,
+    // //but not on LED settings save if there is more than one segment currently
+    // bool autoSegments    _INIT(false);
+    // bool correctWB       _INIT(false); // CCT color correction of RGB color
+    // bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
+    // bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
+    // bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
+    // float gammaCorrectVal _INIT(2.8f); // gamma correction value
 
-// byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
-// byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
-// byte briS     _INIT(128);                     // default brightness
+    // byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
+    // byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
+    // byte briS     _INIT(128);                     // default brightness
 
-// byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
-// byte nightlightDelayMins _INIT(60);
-// byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
-// bool fadeTransition      _INIT(true);   // enable crossfading color transition
-// uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
+    // byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
+    // byte nightlightDelayMins _INIT(60);
+    // byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
+    // bool fadeTransition      _INIT(true);   // enable crossfading color transition
+    // uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
 
-Toki toki _INIT(Toki());
-
-
-// // nightlight
-// bool nightlightActive _INIT(false);
-// bool nightlightActiveOld _INIT(false);
-// uint32_t nightlightDelayMs _INIT(10);
-// byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
-// unsigned long nightlightStartTime;
-// byte briNlT _INIT(0);                     // current nightlight brightness
-// byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
-
-// // udp interface objects
-WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
-// WiFiUDP ntpUdp;
-// // ESPAsyncE131 e131 _INIT_N(((handleE131Packet)));
-// // ESPAsyncE131 ddp  _INIT_N(((handleE131Packet)));
-bool e131NewData _INIT(false);
-
-// uint16_t udpPort    _INIT(21324); // WLED notifier default port
-// uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
-
-// bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
-// bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
-// bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
-// bool notifyMacro  _INIT(false);                       // send notification for macro
-// bool notifyHue    _INIT(true);                        // send notification if Hue light changes
-
-// //Notifier callMode
-// #define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
-// #define CALL_MODE_DIRECT_CHANGE  1
-// #define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
-// #define CALL_MODE_NOTIFICATION   3
-// #define CALL_MODE_NIGHTLIGHT     4
-// #define CALL_MODE_NO_NOTIFY      5
-// #define CALL_MODE_FX_CHANGED     6     //no longer used
-// #define CALL_MODE_HUE            7
-// #define CALL_MODE_PRESET_CYCLE   8
-// #define CALL_MODE_BLYNK          9     //no longer used
-// #define CALL_MODE_ALEXA         10
-// #define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
-// #define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
-
-// // notifications
-// bool notifyDirectDefault _INIT(notifyDirect);
-// bool receiveNotifications _INIT(true);
-// unsigned long notificationSentTime _INIT(0);
-// byte notificationSentCallMode _INIT(CALL_MODE_INIT);
-// uint8_t notificationCount _INIT(0);
+    Toki toki _INIT(Toki());
 
 
-// uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
-// int arlsOffset _INIT(0);                              // realtime LED offset
-// bool receiveDirect _INIT(true);                       // receive UDP realtime
-// bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
-// bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
+    // // nightlight
+    // bool nightlightActive _INIT(false);
+    // bool nightlightActiveOld _INIT(false);
+    // uint32_t nightlightDelayMs _INIT(10);
+    // byte nightlightDelayMinsDefault _INIT(nightlightDelayMins);
+    // unsigned long nightlightStartTime;
+    // byte briNlT _INIT(0);                     // current nightlight brightness
+    // byte colNlT[] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
+
+    // // udp interface objects
+    WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
+    // WiFiUDP ntpUdp;
+    // // ESPAsyncE131 e131 _INIT_N(((handleE131Packet)));
+    // // ESPAsyncE131 ddp  _INIT_N(((handleE131Packet)));
+    bool e131NewData _INIT(false);
+
+    // uint16_t udpPort    _INIT(21324); // WLED notifier default port
+    // uint16_t udpPort2   _INIT(65506); // WLED notifier supplemental port
+
+    // bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
+    // bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
+    // bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
+    // bool notifyMacro  _INIT(false);                       // send notification for macro
+    // bool notifyHue    _INIT(true);                        // send notification if Hue light changes
+
+    // //Notifier callMode
+    // #define CALL_MODE_INIT           0     //no updates on init, can be used to disable updates
+    // #define CALL_MODE_DIRECT_CHANGE  1
+    // #define CALL_MODE_BUTTON         2     //default button actions applied to selected segments
+    // #define CALL_MODE_NOTIFICATION   3
+    // #define CALL_MODE_NIGHTLIGHT     4
+    // #define CALL_MODE_NO_NOTIFY      5
+    // #define CALL_MODE_FX_CHANGED     6     //no longer used
+    // #define CALL_MODE_HUE            7
+    // #define CALL_MODE_PRESET_CYCLE   8
+    // #define CALL_MODE_BLYNK          9     //no longer used
+    // #define CALL_MODE_ALEXA         10
+    // #define CALL_MODE_WS_SEND       11     //special call mode, not for notifier, updates websocket only
+    // #define CALL_MODE_BUTTON_PRESET 12     //button/IR JSON preset/macro
+
+    // // notifications
+    // bool notifyDirectDefault _INIT(notifyDirect);
+    // bool receiveNotifications _INIT(true);
+    // unsigned long notificationSentTime _INIT(0);
+    // byte notificationSentCallMode _INIT(CALL_MODE_INIT);
+    // uint8_t notificationCount _INIT(0);
 
 
-// // LED CONFIG
-// bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
-// byte bootPreset   _INIT(0);                   // save preset to load after power-up
-
-// byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
-
-
-// uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
-// uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
-// bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
-// bool receiveNotificationColor      _INIT(true);       // apply color
-// bool receiveNotificationEffects    _INIT(true);       // apply effects setup
-// bool receiveSegmentOptions         _INIT(false);      // apply segment options
-// bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
-// // bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
-// // bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
-// // bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
-// // bool notifyMacro  _INIT(false);                       // send notification for macro
-// // bool notifyHue    _INIT(true);                        // send notification if Hue light changes
-// uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
-
-// // network
-// bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
+    // uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime mode before returning to normal mode
+    // int arlsOffset _INIT(0);                              // realtime LED offset
+    // bool receiveDirect _INIT(true);                       // receive UDP realtime
+    // bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
+    // bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
 
 
-// // brightness
-// unsigned long lastOnTime _INIT(0);
-// bool offMode             _INIT(!turnOnAtBoot);
-// byte bri                 _INIT(briS);          // global brightness (set)
-// byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
-// byte briT                _INIT(0);             // global brightness during transition
-// byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
-// byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
+    // // LED CONFIG
+    // bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
+    // byte bootPreset   _INIT(0);                   // save preset to load after power-up
+
+    // byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
 
 
+    // uint8_t syncGroups    _INIT(0x01);                    // sync groups this instance syncs (bit mapped)
+    // uint8_t receiveGroups _INIT(0x01);                    // sync receive groups this instance belongs to (bit mapped)
+    // bool receiveNotificationBrightness _INIT(true);       // apply brightness from incoming notifications
+    // bool receiveNotificationColor      _INIT(true);       // apply color
+    // bool receiveNotificationEffects    _INIT(true);       // apply effects setup
+    // bool receiveSegmentOptions         _INIT(false);      // apply segment options
+    // bool receiveSegmentBounds          _INIT(false);      // apply segment bounds (start, stop, offset)
+    // // bool notifyDirect _INIT(false);                       // send notification if change via UI or HTTP API
+    // // bool notifyButton _INIT(false);                       // send if updated by button or infrared remote
+    // // bool notifyAlexa  _INIT(false);                       // send notification if updated via Alexa
+    // // bool notifyMacro  _INIT(false);                       // send notification for macro
+    // // bool notifyHue    _INIT(true);                        // send notification if Hue light changes
+    // uint8_t udpNumRetries _INIT(0);                       // Number of times a UDP sync message is retransmitted. Increase to increase reliability
+
+    // // network
+    // bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);
 
 
-// // transitions
-// bool          transitionActive        _INIT(false);
-// uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
-// uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
-// unsigned long transitionStartTime;
-// float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
-// bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
-// uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
-
-    
-// // User Interface CONFIG
-// #ifndef SERVERNAME
-// char serverDescription[33] _INIT("WLED");  // Name of module - use default
-// #else
-// char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
-// #endif
-// bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
-// bool simplifiedUI          _INIT(false);   // enable simplified UI
-// byte cacheInvalidate       _INIT(0);   
-
-///////////////////////////////////////////////////////////////////////////////////////
-
-// presets
-byte currentPreset _INIT(0);
-
-byte errorFlag _INIT(0);
-
-
-// bool stateChanged _INIT(false);
-
-  // //colors.cpp
-  // // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
-  // class NeoGammaWLEDMethod {
-  //   public:
-  //     static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
-  //     static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
-  //     static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
-  //     static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
-  //   private:
-  //     const uint8_t gammaT[256] = {
-  //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-  //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-  //         1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-  //         2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-  //         5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-  //       10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-  //       17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-  //       25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-  //       37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-  //       51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-  //       69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-  //       90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-  //       115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-  //       144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-  //       177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-  //       215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-
-
-  // };
-  // #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
-  // #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
-
-// //gamma 2.8 lookup table used for color correction
-// uint8_t NeoGammaWLEDMethod::gammaT[256] = {
-//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-//     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
-//     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
-//     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
-//     5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
-//    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
-//    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
-//    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
-//    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
-//    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
-//    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
-//    90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
-//   115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
-//   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
-//   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
-//   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
-
-#include <map>
-#include <IPAddress.h>
-
-#define NODE_TYPE_ID_UNDEFINED        0
-#define NODE_TYPE_ID_ESP8266         82
-#define NODE_TYPE_ID_ESP32           32
-#define NODE_TYPE_ID_ESP32S2         33
-#define NODE_TYPE_ID_ESP32S3         34
-#define NODE_TYPE_ID_ESP32C3         35
-
-/*********************************************************************************************\
-* NodeStruct
-\*********************************************************************************************/
-struct NodeStruct
-{
-  String    nodeName;
-  IPAddress ip;
-  uint8_t   age;
-  uint8_t   nodeType;
-  uint32_t  build;
-
-  NodeStruct() : age(0), nodeType(0), build(0)
-  {
-    for (uint8_t i = 0; i < 4; ++i) { ip[i] = 0; }
-  }
-};
-typedef std::map<uint8_t, NodeStruct> NodesMap;
+    // // brightness
+    // unsigned long lastOnTime _INIT(0);
+    // bool offMode             _INIT(!turnOnAtBoot);
+    // byte bri                 _INIT(briS);          // global brightness (set)
+    // byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
+    // byte briT                _INIT(0);             // global brightness during transition
+    // byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
+    // byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
 
 
 
 
+    // // transitions
+    // bool          transitionActive        _INIT(false);
+    // uint16_t      transitionDelayDefault  _INIT(transitionDelay); // default transition time (storec in cfg.json)
+    // uint16_t      transitionDelayTemp     _INIT(transitionDelay); // actual transition duration (overrides transitionDelay in certain cases)
+    // unsigned long transitionStartTime;
+    // float         tperLast                _INIT(0.0f);            // crossfade transition progress, 0.0f - 1.0f
+    // bool          jsonTransitionOnce      _INIT(false);           // flag to override transitionDelay (playlist, JSON API: "live" & "seg":{"i"} & "tt")
+    // uint8_t       randomPaletteChangeTime _INIT(5);               // amount of time [s] between random palette changes (min: 1s, max: 255s)
 
-    #endif
+        
+    // // User Interface CONFIG
+    // #ifndef SERVERNAME
+    // char serverDescription[33] _INIT("WLED");  // Name of module - use default
+    // #else
+    // char serverDescription[33] _INIT(SERVERNAME);  // use predefined name
+    // #endif
+    // bool syncToggleReceive     _INIT(false);   // UIs which only have a single button for sync should toggle send+receive if this is true, only send otherwise
+    // bool simplifiedUI          _INIT(false);   // enable simplified UI
+    // byte cacheInvalidate       _INIT(0);   
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+    // presets
+    byte currentPreset _INIT(0);
+
+    byte errorFlag _INIT(0);
+
+
+    // bool stateChanged _INIT(false);
+
+      // //colors.cpp
+      // // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
+      // class NeoGammaWLEDMethod {
+      //   public:
+      //     static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
+      //     static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
+      //     static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
+      //     static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
+      //   private:
+      //     const uint8_t gammaT[256] = {
+      //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+      //         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+      //         1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+      //         2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+      //         5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+      //       10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+      //       17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+      //       25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+      //       37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+      //       51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+      //       69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+      //       90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+      //       115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+      //       144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+      //       177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+      //       215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
+
+      // };
+      // #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
+      // #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
+
+    // //gamma 2.8 lookup table used for color correction
+    // uint8_t NeoGammaWLEDMethod::gammaT[256] = {
+    //     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    //     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+    //     1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    //     2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+    //     5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+    //    10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+    //    17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+    //    25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+    //    37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+    //    51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+    //    69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+    //    90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+    //   115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+    //   144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+    //   177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+    //   215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
+    #include <map>
+    #include <IPAddress.h>
+
+    #define NODE_TYPE_ID_UNDEFINED        0
+    #define NODE_TYPE_ID_ESP8266         82
+    #define NODE_TYPE_ID_ESP32           32
+    #define NODE_TYPE_ID_ESP32S2         33
+    #define NODE_TYPE_ID_ESP32S3         34
+    #define NODE_TYPE_ID_ESP32C3         35
+
+    /*********************************************************************************************\
+    * NodeStruct
+    \*********************************************************************************************/
+    struct NodeStruct
+    {
+      String    nodeName;
+      IPAddress ip;
+      uint8_t   age;
+      uint8_t   nodeType;
+      uint32_t  build;
+
+      NodeStruct() : age(0), nodeType(0), build(0)
+      {
+        for (uint8_t i = 0; i < 4; ++i) { ip[i] = 0; }
+      }
+    };
+    typedef std::map<uint8_t, NodeStruct> NodesMap;
+
+
+
+
+
+    #endif // ENABLE_DEVFEATURE_LIGHT__HYPERION
+
+
+    #define ARDUINOJSON_DECODE_UNICODE 0
+    #include "3_Network/21_WebServer/AsyncJson-v6.h"
+    #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
 
     /**
@@ -2881,17 +2905,14 @@ void sappend(char stype, const char* key, int val);
 
 
 
-
-
+#ifdef USE_MODULE_NETWORK_WEBSERVER23
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveSettings(AsyncWebServerRequest* request, bool post = false);
-
 bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
 void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
-
-
 void serveIndex(AsyncWebServerRequest* request);
 void getSettingsJS(byte subPage, char* dest);
+#endif // USE_MODULE_NETWORK_WEBSERVER23
 
 
 void serializeSegment(JsonObject& root, mAnimatorLight::Segment_New& seg, byte id, bool forPreset = false, bool segmentBounds = true);
@@ -2902,10 +2923,6 @@ void serializeModeData(JsonArray root);
 void serializePalettes(JsonObject root, int page);
 
 
-
-    #define ARDUINOJSON_DECODE_UNICODE 0
-    #include "3_Network/21_WebServer/AsyncJson-v6.h"
-    #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
     
 //Notifier callMode

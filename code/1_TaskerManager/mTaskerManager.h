@@ -1149,6 +1149,9 @@ class mTaskerManager{
 
     uint16_t GetClassCount();
 
+    #ifdef ENABLE_DEBUG_FUNCTION_NAMES
+    const char* GetTaskName(uint8_t task, char* buffer);
+    #endif
     
     uint16_t GetEnumNumber_UsingModuleUniqueID(uint16_t unique_id);
 
