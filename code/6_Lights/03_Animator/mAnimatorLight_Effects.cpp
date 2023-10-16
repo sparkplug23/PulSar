@@ -6494,7 +6494,7 @@ void mAnimatorLight::EffectAnim__Fireworks()
     SEGMENT.params_internal.aux1 = UINT16_MAX;
   }
 
-  SEGMENT.fade_out(128, SET_BRIGHTNESS);
+  SEGMENT.fade_out(128);
 
   bool valid1 = (SEGMENT.params_internal.aux0 < width*height);
   bool valid2 = (SEGMENT.params_internal.aux1 < width*height);
@@ -8071,7 +8071,7 @@ void mAnimatorLight::EffectAnim__Multi_Comet()
   }
   if (!SEGMENT.allocateData(sizeof(uint16_t) * 8)){return;}
   
-  SEGMENT.fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
+  SEGMENT.fade_out(SEGMENT.intensity());
   
   uint16_t* comets = reinterpret_cast<uint16_t*>(SEGMENT.data);
 
@@ -10173,7 +10173,7 @@ void mAnimatorLight::EffectAnim__Base_Larson_Scanner(bool dual)
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) +8);
   uint16_t index = counter * SEGLEN  >> 16;
 
-  SEGMENT.fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
+  SEGMENT.fade_out(SEGMENT.intensity());
 
   if (SEGMENT.step > index && SEGMENT.step - index > SEGLEN/2) {
     SEGMENT.params_internal.aux0 = !SEGMENT.params_internal.aux0;
@@ -10391,7 +10391,7 @@ void mAnimatorLight::EffectAnim__Comet()
   uint16_t index = counter * SEGLEN >> 16;
   if (SEGMENT.call == 0) SEGMENT.params_internal.aux0 = index;
 
-  SEGMENT.fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
+  SEGMENT.fade_out(SEGMENT.intensity());
 
   SEGMENT.SetPixelColor( index, SEGMENT.GetPaletteColour(index, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE) );
   
@@ -10524,7 +10524,7 @@ static const char PM_EFFECT_CONFIG__BOUNCINGBALLS[] PROGMEM = "Gravity,# of ball
 void mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
 {
 
-  SEGMENT.fade_out(SEGMENT.intensity(), SET_BRIGHTNESS);
+  SEGMENT.fade_out(SEGMENT.intensity());
   uint16_t pos = beatsin16(SEGMENT.speed()/10,0,SEGLEN-1);
   if (SEGMENT.call == 0) SEGMENT.params_internal.aux0 = pos;
   uint32_t color1 = SEGMENT.GetPaletteColour(pos, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_OFF, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE).getU32();

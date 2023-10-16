@@ -1337,7 +1337,7 @@ void mAnimatorLight::AnimationProcess_LinearBlend_Dynamic_Buffer(const Animation
     // AddLog(LOG_LEVEL_TEST, PSTR("SI%d,seg_len%d, RGB[%d] %d,%d,%d,%d,%d"),_segment_index_primary,SEGMENT.virtualLength(),  pixel, updatedColor.R, updatedColor.G, updatedColor.B, updatedColor.W1, updatedColor.W2);
 
   // DEBUG_PIN3_SET(0);
-    SEGMENT.SetPixelColor(pixel, updatedColor);
+    SEGMENT.SetPixelColor(pixel, updatedColor, BRIGHTNESS_ALREADY_SET);
   // DEBUG_PIN3_SET(1);
 
   }
@@ -1374,7 +1374,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Dynamic_Buffer(co
   ){  
     // ALOG_INF(PSTR("SEGMENT.pixel =%d"), pixel);
     // updatedColor.setChannelsRaw(255,0,0,1,2);
-    SEGMENT.SetPixelColor(pixel, updatedColor, false);
+    SEGMENT.SetPixelColor(pixel, updatedColor, SET_BRIGHTNESS);
   }
   
 }
@@ -1403,7 +1403,7 @@ void mAnimatorLight::AnimationProcess_SingleColour_LinearBlend_Between_RgbcctSeg
                 pixel++
   ){  
     // ALOG_INF(PSTR("SEGMENT.pixel =%d"), pixel);
-    SEGMENT.SetPixelColor(pixel, updatedColor, false);
+    SEGMENT.SetPixelColor(pixel, updatedColor, SET_BRIGHTNESS);
   }
   
 }
@@ -2939,7 +2939,7 @@ void mAnimatorLight::Segment_New::fadePixelColor(uint16_t n, uint8_t fade) {
 /*
  * fade out function, higher rate = quicker fade
  */
-void mAnimatorLight::Segment_New::fade_out(uint8_t rate, bool set_brightness) {
+void mAnimatorLight::Segment_New::fade_out(uint8_t rate) {
   const uint16_t cols = is2D() ? virtualWidth() : virtualLength();
   const uint16_t rows = virtualHeight(); // will be 1 for 1D
 
@@ -2972,8 +2972,8 @@ void mAnimatorLight::Segment_New::fade_out(uint8_t rate, bool set_brightness) {
       gdelta += (g2 == g1) ? 0 : (g2 > g1) ? 1 : -1;
       bdelta += (b2 == b1) ? 0 : (b2 > b1) ? 1 : -1;
 
-      if (is2D()) setPixelColorXY(x, y, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta, set_brightness);
-      else        setPixelColor(x, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta, set_brightness);
+      if (is2D()) setPixelColorXY(x, y, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
+      else        setPixelColor(x, r1 + rdelta, g1 + gdelta, b1 + bdelta, w1 + wdelta);
     }
   }
 }
@@ -3015,7 +3015,7 @@ uint32_t mAnimatorLight::Segment_New::color_blend(uint32_t color1, uint32_t colo
 
   uint32_t w3 = ((w2 * blend) + (w1 * (blendmax - blend))) >> shift;
   uint32_t r3 = ((r2 * blend) + (r1 * (blendmax - blend))) >> shift;
-  uint32_t g3 = ((g2 * blend) + (g1 * (blendmax - blend))) >> shift;
+  uint32_t g3 = ((g2 * blend) + (g1 * (blendmax - blend))) >> shift; 
   uint32_t b3 = ((b2 * blend) + (b1 * (blendmax - blend))) >> shift;
 
   return RGBW32(r3, g3, b3, w3);
@@ -3230,7 +3230,7 @@ bool mAnimatorLight::Segment_New::colorFromHexString(byte* rgb, const char* in) 
 /*
  * blurs segment content, source: FastLED colorutils.cpp
  */
-void mAnimatorLight::Segment_New::blur(uint8_t blur_amount, bool set_brightness)
+void mAnimatorLight::Segment_New::blur(uint8_t blur_amount)
 {
 #ifndef WLED_DISABLE_2D
   if (is2D()) {
@@ -3257,9 +3257,9 @@ void mAnimatorLight::Segment_New::blur(uint8_t blur_amount, bool set_brightness)
       uint8_t r = R(c);
       uint8_t g = G(c);
       uint8_t b = B(c);
-      setPixelColor(i-1, qadd8(r, part.red), qadd8(g, part.green), qadd8(b, part.blue), set_brightness);
+      setPixelColor(i-1, qadd8(r, part.red), qadd8(g, part.green), qadd8(b, part.blue));
     }
-    setPixelColor(i,cur.red, cur.green, cur.blue, set_brightness);
+    setPixelColor(i,cur.red, cur.green, cur.blue);
     carryover = part;
   }
 }
@@ -3392,7 +3392,6 @@ void mAnimatorLight::finalizeInit(void)
 
   //segments are created in makeAutoSegments();
   loadCustomPalettes(); // (re)load all custom palettes
-  // deserializeMap();     // (re)load default ledmap
   
   ALOG_INF(PSTR("mAnimatorLight::finalizeInit_PreInit:\n\r bus_manager->getNumBusses() D%d"), pCONT_iLight->bus_manager->getNumBusses());
 
@@ -4041,67 +4040,6 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
 }
 
 
-//load custom mapping table from JSON file (called from finalizeInit() or deserializeState())
-void mAnimatorLight::deserializeMap(uint8_t n) {
-  // if (isMatrix) return; // 2D support creates its own ledmap
-
-  // char fileName[32];
-  // strcpy_P(fileName, PSTR("/ledmap"));
-  // if (n) sprintf(fileName +7, "%d", n);
-  // strcat(fileName, ".json");
-  // bool isFile = FILE_SYSTEM.exists(fileName);
-
-  // if (!isFile) {
-  //   // erase custom mapping if selecting nonexistent ledmap.json (n==0)
-  //   if (!n && customMappingTable != nullptr) {
-  //     customMappingSize = 0;
-  //     delete[] customMappingTable;
-  //     customMappingTable = nullptr;
-  //   }
-  //   return;
-  // }
-
-  // if (!requestJSONBufferLock(7)) return;
-
-  // DEBUG_PRINT(F("Reading LED map from "));
-  // DEBUG_PRINTLN(fileName);
-
-  // if (!readObjectFromFile(fileName, nullptr, &doc)) {
-  //   releaseJSONBufferLock();
-  //   return; //if file does not exist just exit
-  // }
-
-  // // erase old custom ledmap
-  // if (customMappingTable != nullptr) {
-  //   customMappingSize = 0;
-  //   delete[] customMappingTable;
-  //   customMappingTable = nullptr;
-  // }
-
-  // JsonArray map = doc[F("map")];
-  // if (!map.isNull() && map.size()) {  // not an empty map
-  //   customMappingSize  = map.size();
-  //   customMappingTable = new uint16_t[customMappingSize];
-  //   for (uint16_t i=0; i<customMappingSize; i++) {
-  //     customMappingTable[i] = (uint16_t) map[i];
-  //   }
-  // }
-
-  // releaseJSONBufferLock();
-}
-
-
-void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor_All(RgbcctColor colour)
-{
-  // for(uint16_t pixel = 0; pixel < pCONT_lAni->settings.light_size_count; pixel++){
-  //   SetPixelColor(pixel, colour);
-  // }
-  // pCONT_iLight->ShowInterface();
-  
-  // if(bus_manager){ bus_manager->show(); }
-}
-
-
 void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool segment_brightness_needs_applied)
 {
   SetPixelColor(indexPixel, RgbColor(red,green,blue), segment_brightness_needs_applied);
@@ -4127,7 +4065,7 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, u
  * @param color_internal 
  * @param segment_brightness_needs_applied 
  */
-void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, bool segment_brightness_needs_applied)
+void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, RgbcctColor color_internal, bool flag_brightness_already_applied)
 {
 
   int vStrip = indexPixel>>16; // hack to allow running on virtual strips (2D segment columns/rows)
@@ -4178,19 +4116,29 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
     }
   #endif
 
-  // if (leds) leds[i] = col; // custom led mapping
-
-  // uint16_t len = length();
-
 
   /**
-   * @brief Apply brightness if required
-   * 
-   */
-  if(segment_brightness_needs_applied){
-    // uint8_t _bri_t = currentBri(on ? opacity : 0);
+   * @brief 
+   * 2023 method had the original WLED effects request brightness applied at the end, however, this is adding function call complexity
+   * 2024 version will now assume brightness must always be applied (and keeps WLED effects closer to original), and my own methods must report "brightness_ALREADY_applied" and thus the brightness will not be applied twice
+   *
+   * DEFAULT: brightness is applied
+   **/
+  if(flag_brightness_already_applied == false)
+  {
+
+    // if(indexPixel==0) Serial.println("Applying brightness here");
+    
+    /**
+     * @brief Apply "GLOBAL" brightness to the colour
+     * 
+     */
     uint8_t brightness = pCONT_iLight->getBriRGB_Global();
 
+    /**
+     * @brief Apply "SEGMENT" brightness to the colour ALSO (rescale global brightness value, this is similar to WLED opacity)
+     * 
+     */
     if(_brightness_rgb!=255)
     {
       brightness = scale8(brightness, _brightness_rgb);
@@ -4203,14 +4151,10 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
     color_internal.W2 = scale8(color_internal.W2, brightness);
     
   }
-
-
-  // ALOG_INF(PSTR("Segment brightness should already be applied inside the segment, unless the segment_brightness_needs_applied for WLED methods is applying the segment "));
-
-
-
-
-
+  else
+  {    
+    // if(indexPixel==0)  Serial.println("NOOOOOOOOOOOOOOOT Applying brightness here");
+  }
 
   /**
    * @brief Apply Pixel hardware colour mapping from internal to hardware order

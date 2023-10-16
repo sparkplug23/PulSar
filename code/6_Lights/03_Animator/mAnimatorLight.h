@@ -602,7 +602,9 @@ class mAnimatorLight :
 
     #define MIN_SHOW_DELAY   (_frametime < 16 ? 8 : 15)
 
+    // Nicer code names than true/false for what the function of that flag means
     #define SET_BRIGHTNESS true
+    #define BRIGHTNESS_ALREADY_SET true
 
     // options
     // bit    7: segment is in transition mode
@@ -2250,18 +2252,17 @@ bool colorFromHexString(byte* rgb, const char* in);
     void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
     uint32_t getPixelColor(int i);
     
-    
-    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool brightness_needs_applied = false);// uint16_t segment_length = 0);
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);       
-    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool brightness_needs_applied = false);  
-    void SetPixelColor(uint16_t indexPixel, uint32_t color, bool brightness_needs_applied = false);//, uint16_t segment_length = 0);
-    void SetPixelColor_All(RgbcctColor colour);
-  
+    
+    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool flag_brightness_already_applied = false);// uint16_t segment_length = 0);
+    void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool flag_brightness_already_applied = false);  
+    void SetPixelColor(uint16_t indexPixel, uint32_t color, bool flag_brightness_already_applied = false);//, uint16_t segment_length = 0);
+    
 
     // 1D support functions (some implement 2D as well)
-    void blur(uint8_t bluramount, bool set_brightness = false);
+    void blur(uint8_t bluramount);
     void fill(uint32_t c);
-    void fade_out(uint8_t r, bool set_brightness = false);
+    void fade_out(uint8_t r);
     void fadeToBlackBy(uint8_t fadeBy);
     void blendPixelColor(int n, uint32_t color, uint8_t blend);
     void blendPixelColor(int n, CRGB c, uint8_t blend)            { blendPixelColor(n, RGBW32(c.r,c.g,c.b,0), blend); }
@@ -2435,8 +2436,7 @@ RgbcctColor ColourBlend(RgbcctColor color1, RgbcctColor color2, uint8_t blend);
       fixInvalidSegments(),
       setPixelColor(int n, uint32_t c),
       show(void),
-      setTargetFps(uint8_t fps),
-      deserializeMap(uint8_t n=0);
+      setTargetFps(uint8_t fps);
 
     // using public variables to reduce code size increase due to inline function getSegment() (with bounds checking)
     // and color transitions

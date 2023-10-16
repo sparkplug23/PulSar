@@ -88,8 +88,9 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L8__ESP32_ROOM_METAL_144LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L9__ESP8266_WEBUI_OPTIM_3LEDS
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L10__ESP32__7SEGMENTCLOCK
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER    // Outside Tree Tester
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L11__ESP32_LARGE_SINGLE_PIN_TESTER    // Outside Tree Tester
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L12__ESP32_LARGE_SINGLE_PIN_TESTER_WITH_DEBUG_PINS // Timing Tester
+#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__L13__ESP32_OUTSIDE_TREE
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4471,6 +4472,412 @@
 
 
 
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__L13__ESP32_OUTSIDE_TREE
+  #define DEVICENAME_CTR          "testgroup_lighting_L13"
+  #define USE_LIGHTING_TEMPLATE__PALETTE_TESTING_METAL
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED   "192.168.1.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+  // #define USE_MODULE_DRIVERS_FILESYSTEM
+  //   #define WLED_ENABLE_FS_EDITOR
+  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING
+  //   #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
+
+    
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define USE_MODULE_NETWORK_WEBSERVER23
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
+
+  #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_PARALLEL_CHANNELS_AS_PRIMARY_METHOD
+  // #define ENABLE_DEVFEATURE_LIGHT_ESP32_RMT_METHOD_AS_PRIMARY
+
+    // #define USE_DEVFEATURE_PRESETS_MANUALUSERCUSTOM_OUTSIDETREE // view so I can replicate in json
+    // #define ENABLE_DEVFEATURE_DEBUG_GARGAE_PIXEL_OUTPUT
+
+  // #define USE_LIGHTING_TEMPLATE_DEFAULT
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE_DEFAULT) 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":200
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       200
+  //     ],
+  //     "ColourPalette":"*Two Colours",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 0,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 5,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
+
+  // // #define USE_LIGHTING_TEMPLATE_DEFAULT
+  // // DEFINE_PGM_CTR(LIGHTING_TEMPLATE_DEFAULT) 
+  // /***
+  //  * 2000 test
+  // */
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":250,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":14,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":500,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":27,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":750,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":23,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1000,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":22,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1250,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":21,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1500,
+  //       "Length":250
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1750,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       2000
+  //     ],
+  //     "ColourPalette":"*Two Colours",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 20,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+
+
+  // #define USE_LIGHTING_TEMPLATE_DEFAULT
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE_DEFAULT) 
+  /***
+   * 2000 test
+  */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":27,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":300
+      },
+      {
+        "Pin":26,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":300,
+        "Length":300
+      },
+      {
+        "Pin":25,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":300
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":900,
+        "Length":300
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":300
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1500,
+        "Length":250
+      },
+      {
+        "Pin":22,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":300
+      },
+      {
+        "Pin":23,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2100,
+        "Length":300
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        2400
+      ],
+      "ColourPalette":"*Two Colours",
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":100,
+        "BrightnessRGB":5
+      },
+      "Effects": {
+        "Function": 1,
+        "Speed":127,
+        "Intensity":255
+      },
+      "Transition": {
+        "TimeMs": 900,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  
+  // // #define USE_LIGHTING_TEMPLATE_DEFAULT
+  // // DEFINE_PGM_CTR(LIGHTING_TEMPLATE_DEFAULT) 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":14,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":27,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       400
+  //     ],
+  //     "ColourPalette":"*Two Colours",
+  //     "SegColour0": {
+  //       "Hue": 0,
+  //       "Sat":100,
+  //       "BrightnessRGB":5
+  //     },
+  //     "Effects": {
+  //       "Function": 1,
+  //       "Speed":1,
+  //       "Intensity":255
+  //     },
+  //     "Transition": {
+  //       "TimeMs": 0,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_JSON_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_JSON_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_JSON_GPIO_FUNCTION "\":{" 
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      #endif
+    "},"
+    "\"" D_JSON_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_JSON_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+#endif // DEVICE_TESTBED_LIGHT_SEGMENT_ESP32__MULTIPIN
 
 
 
