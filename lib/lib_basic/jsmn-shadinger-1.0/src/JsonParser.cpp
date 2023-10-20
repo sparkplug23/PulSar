@@ -568,7 +568,7 @@ const char * JsonParserObject::getStr(const char * needle) const {
   return getStr(needle, "");
 }
 
-void JsonParser::parse(char * json_in) {
+void JsonParser::parse(char* json_in) {
   k_current_json_buffer = "";
   if (nullptr == json_in) { return; }
   _json = json_in;

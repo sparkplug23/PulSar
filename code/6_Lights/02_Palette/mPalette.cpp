@@ -978,14 +978,22 @@ uint8_t mPalette::GetColourMapSizeByPaletteID(uint8_t palette_id){
 
 
 
-uint16_t mPalette::GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit)
+uint16_t 
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::GetNumberOfColoursInPalette(uint16_t palette_id, uint8_t pixel_width_contrained_limit)
 {
   STATIC_PALETTE pal = static_palettes[palette_id];
   return GetNumberOfColoursFromEncoded(pal.encoding, pal.data_length);
 }
 
 
-uint16_t mPalette::GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding, uint8_t data_in_palette)
+uint16_t  
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding, uint8_t data_in_palette)
 {
   uint16_t encoded_colour_width = GetEncodedColourWidth(encoding);
   return data_in_palette/encoded_colour_width;   
@@ -999,7 +1007,11 @@ uint16_t mPalette::GetNumberOfColoursFromEncoded(PALETTE_ENCODING_DATA encoding,
  * @param pixel_width_contrained_limit 
  * @return uint16_t 
  */
-uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
+uint8_t  
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
 {
 
   uint16_t encoded_colour_width = 0;

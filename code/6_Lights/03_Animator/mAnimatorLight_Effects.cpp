@@ -1092,7 +1092,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette_New()
         
         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         
-        SEGMENT.SetPixelColor(pixel, colour, false);
+        SEGMENT.SetPixelColor(pixel, colour, BRIGHTNESS_ALREADY_SET);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
         ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
@@ -1175,7 +1175,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette()
         
         colour = ApplyBrightnesstoDesiredColourWithGamma(colour, SEGMENT.getBrightnessRGB_WithGlobalApplied());
         
-        SEGMENT.SetPixelColor(pixel, colour, false);
+        SEGMENT.SetPixelColor(pixel, colour, BRIGHTNESS_ALREADY_SET);
 
         #ifdef ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
         ALOG_INF( PSTR("sIndexIO=%d %d,%d\t%d,pC %d, R%d"), SEGIDX, SEGMENT.pixel_range.start, SEGMENT.pixel_range.stop, pixel, GetNumberOfColoursInPalette(mPaletteI->static_palettes.ptr), colour.R );
@@ -5676,11 +5676,11 @@ void mAnimatorLight::EffectAnim__Tri_Static_Pattern()
   {
 
     if ( currSeg % 3 == 0 ) {
-      SEGMENT.SetPixelColor(i, GetSegmentColour(0, SEGIDX), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(i, GetSegmentColour(0, SEGIDX));
     } else if( currSeg % 3 == 1) {
-      SEGMENT.SetPixelColor(i, GetSegmentColour(1, SEGIDX), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(i, GetSegmentColour(1, SEGIDX));
     } else {
-      SEGMENT.SetPixelColor(i, (GetSegmentColour(2, SEGIDX).CalculateBrightness() > 0 ? GetSegmentColour(2, SEGIDX) : WHITE), SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(i, (GetSegmentColour(2, SEGIDX).CalculateBrightness() > 0 ? GetSegmentColour(2, SEGIDX) : WHITE));
     }   
 
     currSegCount += 1;
@@ -5835,11 +5835,11 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
 
     if (i < ledIndex) 
     {
-      SEGMENT.SetPixelColor(indexPixel, back ? col_wipe : col_base, true);
+      SEGMENT.SetPixelColor(indexPixel, back ? col_wipe : col_base);
     } else
     {
-      SEGMENT.SetPixelColor(indexPixel, back ? col_base : col_wipe, true);
-      if (i == ledIndex) SEGMENT.SetPixelColor(indexPixel, ColourBlend(back ? col_base : col_wipe, back ? col_wipe : col_base, rem), true);
+      SEGMENT.SetPixelColor(indexPixel, back ? col_base : col_wipe);
+      if (i == ledIndex) SEGMENT.SetPixelColor(indexPixel, ColourBlend(back ? col_base : col_wipe, back ? col_wipe : col_base, rem));
     }
   } 
 
@@ -6648,7 +6648,7 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst()
         if (start == end) end++;
         if (end > SEGLEN) end = SEGLEN;    
         for (int p = start; p < end; p++) {
-          SEGMENT.SetPixelColor(p, c.r, c.g, c.b, SET_BRIGHTNESS);
+          SEGMENT.SetPixelColor(p, c.r, c.g, c.b);
         }
       }
     }
@@ -6769,7 +6769,7 @@ void mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows()
         if (start == end) end++;
         if (end > SEGLEN) end = SEGLEN;    
         for (int p = start; p < end; p++) {
-          SEGMENT.SetPixelColor(p, c.r, c.g, c.b, SET_BRIGHTNESS);
+          SEGMENT.SetPixelColor(p, c.r, c.g, c.b);
         }
       }
     }
@@ -6834,7 +6834,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks()
     // launch 
     if (flare->vel > 12 * gravity) {
       // flare
-      SEGMENT.SetPixelColor(int(flare->pos),flare->col,flare->col,flare->col, SET_BRIGHTNESS);
+      SEGMENT.SetPixelColor(int(flare->pos),flare->col,flare->col,flare->col);
   
       flare->pos += flare->vel;
       flare->pos = constrain(flare->pos, 0, SEGLEN-1);
@@ -6889,7 +6889,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks()
             c.g = qsub8(c.g, cooling);
             c.b = qsub8(c.b, cooling * 2);
           }
-          SEGMENT.SetPixelColor(int(sparks[i].pos), c.red, c.green, c.blue, SET_BRIGHTNESS);
+          SEGMENT.SetPixelColor(int(sparks[i].pos), c.red, c.green, c.blue);
         }
       }
       dying_gravity *= .99; // as sparks burn out they fall slower
@@ -6967,7 +6967,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
     // // launch 
     // if (flare->vel > 12 * gravity) {
     //   // flare
-    //   SEGMENT.SetPixelColor(int(flare->pos),flare->col,flare->col,flare->col, SET_BRIGHTNESS);
+    //   SEGMENT.SetPixelColor(int(flare->pos),flare->col,flare->col,flare->col);
   
       flare->pos += flare->vel;
       flare->pos = constrain(flare->pos, 0, SEGLEN-1);
@@ -7033,7 +7033,7 @@ void mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch()
             c.g = qsub8(c.g, cooling);
             c.b = qsub8(c.b, cooling * 2);
           }
-          SEGMENT.SetPixelColor(int(sparks[i].pos), c.red, c.green, c.blue, SET_BRIGHTNESS);
+          SEGMENT.SetPixelColor(int(sparks[i].pos), c.red, c.green, c.blue);
         }
       }
       dying_gravity *= .99; // as sparks burn out they fall slower
@@ -7081,9 +7081,9 @@ void mAnimatorLight::EffectAnim__Rain()
     //shift all leds right
     RgbcctColor ctemp = SEGMENT.GetPixelColor(0);
     for(uint16_t i = 0; i < SEGLEN; i++) {
-      SEGMENT.SetPixelColor(i, SEGMENT.GetPixelColor(i+1), true);
+      SEGMENT.SetPixelColor(i, SEGMENT.GetPixelColor(i+1));
     }
-    SEGMENT.SetPixelColor(SEGLEN - 1, ctemp, true);
+    SEGMENT.SetPixelColor(SEGLEN - 1, ctemp);
     SEGMENT.params_internal.aux0++;
     SEGMENT.params_internal.aux1++;
     if (SEGMENT.params_internal.aux0 == 0)      SEGMENT.params_internal.aux0 = UINT16_MAX;
@@ -9083,19 +9083,19 @@ void mAnimatorLight::EffectAnim__Percent()
   if (percent < 100) {
     for (uint16_t i = 0; i < SEGLEN; i++) {
 	  	if (i < SEGMENT.step) {
-        SEGMENT.SetPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE), SET_BRIGHTNESS);
+        SEGMENT.SetPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE));
 	  	}
 	  	else {
-        SEGMENT.SetPixelColor(i, SEGCOLOR_U32(1), SET_BRIGHTNESS);
+        SEGMENT.SetPixelColor(i, SEGCOLOR_U32(1));
 	  	}
 	  }
   } else {
     for (uint16_t i = 0; i < SEGLEN; i++) {
 	  	if (i < (SEGLEN - SEGMENT.step)) {
-        SEGMENT.SetPixelColor(i, SEGCOLOR_U32(1), SET_BRIGHTNESS);
+        SEGMENT.SetPixelColor(i, SEGCOLOR_U32(1));
 	  	}
 	  	else {
-        SEGMENT.SetPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE), SET_BRIGHTNESS);
+        SEGMENT.SetPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE));
 	  	}
 	  }
   }
@@ -9451,8 +9451,7 @@ void mAnimatorLight::EffectAnim__Static_Pattern()
 
   for (uint16_t i = 0; i < SEGLEN; i++) {
     SEGMENT.SetPixelColor(i, 
-      (drawingLit) ? RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE)) : SEGCOLOR_U32(1),
-      true
+      (drawingLit) ? RgbcctColor::GetU32Colour(SEGMENT.GetPaletteColour(i, PALETTE_INDEX_SPANS_SEGLEN_ON, PALETTE_WRAP_ON, PALETTE_DISCRETE_OFF, NO_ENCODED_VALUE)) : SEGCOLOR_U32(1)
     );
     cnt++;
     if (cnt >= ((drawingLit) ? lit : unlit)) {
@@ -10591,31 +10590,31 @@ void mAnimatorLight::EffectAnim__Drip()
 {
 
 
-  fill(SEGCOLOR_U32(0));
-  for(int i=0;i<505;i++)
-  {
-    if(i%10==0)
-    {
-      SEGMENT.SetPixelColor(i, RgbcctColor(20,20,20,0,0));// water source
-    }
-  }
-  SEGMENT.SetPixelColor(0,   RgbcctColor(255,0,0,0,0));// water source
-  SEGMENT.SetPixelColor(1,   RgbcctColor(0,25,0,0,0));// water source
-  SEGMENT.SetPixelColor(2,   RgbcctColor(25,0,0,0,0));// water source
-  SEGMENT.SetPixelColor(100, RgbcctColor(0,255,0,0,0));// water source
-  SEGMENT.SetPixelColor(200, RgbcctColor(0,0,255,0,0));// water source
-  SEGMENT.SetPixelColor(300, RgbcctColor(255,0,255,0,0));// water source
-  SEGMENT.SetPixelColor(400, RgbcctColor(0,255,255,0,0));// water source
-  SEGMENT.SetPixelColor(500, RgbcctColor(255,255,20,0,0));// water source
-  SEGMENT.SetPixelColor(600, RgbcctColor(100,0,0,0,0));// water source
-  SEGMENT.SetPixelColor(700, RgbcctColor(0,100,0,0,0));// water source
-  SEGMENT.SetPixelColor(750, RgbcctColor(0,100,100,0,0));// water source
-  SEGMENT.SetPixelColor(757, RgbcctColor(5,0,5,0,0));// water source
-  SEGMENT.SetPixelColor(800, RgbcctColor(0,0,100,0,0));// water source
-  SEGMENT.SetPixelColor(900, RgbcctColor(25,0,25,0,0));// water source
-  SEGMENT.transition.rate_ms = FRAMETIME_MS;
-  SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
-  return;
+  // fill(SEGCOLOR_U32(0));
+  // for(int i=0;i<505;i++)
+  // {
+  //   if(i%10==0)
+  //   {
+  //     SEGMENT.SetPixelColor(i, RgbcctColor(20,20,20,0,0));// water source
+  //   }
+  // }
+  // SEGMENT.SetPixelColor(0,   RgbcctColor(255,0,0,0,0));// water source
+  // SEGMENT.SetPixelColor(1,   RgbcctColor(0,25,0,0,0));// water source
+  // SEGMENT.SetPixelColor(2,   RgbcctColor(25,0,0,0,0));// water source
+  // SEGMENT.SetPixelColor(100, RgbcctColor(0,255,0,0,0));// water source
+  // SEGMENT.SetPixelColor(200, RgbcctColor(0,0,255,0,0));// water source
+  // SEGMENT.SetPixelColor(300, RgbcctColor(255,0,255,0,0));// water source
+  // SEGMENT.SetPixelColor(400, RgbcctColor(0,255,255,0,0));// water source
+  // SEGMENT.SetPixelColor(500, RgbcctColor(255,255,20,0,0));// water source
+  // SEGMENT.SetPixelColor(600, RgbcctColor(100,0,0,0,0));// water source
+  // SEGMENT.SetPixelColor(700, RgbcctColor(0,100,0,0,0));// water source
+  // SEGMENT.SetPixelColor(750, RgbcctColor(0,100,100,0,0));// water source
+  // SEGMENT.SetPixelColor(757, RgbcctColor(5,0,5,0,0));// water source
+  // SEGMENT.SetPixelColor(800, RgbcctColor(0,0,100,0,0));// water source
+  // SEGMENT.SetPixelColor(900, RgbcctColor(25,0,25,0,0));// water source
+  // SEGMENT.transition.rate_ms = FRAMETIME_MS;
+  // SET_ANIMATION_DOES_NOT_REQUIRE_NEOPIXEL_ANIMATOR();
+  // return;
 
 
 

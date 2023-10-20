@@ -288,7 +288,7 @@ public:
   // constructor, parse the json buffer
   // Warning: the buffer is modified in the process (in-place parsing)
   // Input: `json_in` can be nullptr, but CANNOT be in PROGMEM (remember we need to change characters in-place)
-  JsonParser(char * json_in);
+  JsonParser(char* json_in);
 
   // destructor
   ~JsonParser();

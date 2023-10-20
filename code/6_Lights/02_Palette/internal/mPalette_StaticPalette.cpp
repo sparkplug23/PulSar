@@ -54,7 +54,11 @@ uint8_t mPalette::GetColoursInCRGB16Palette(uint16_t palette_id)
  * @param seg_i 
  * @return RgbcctColor 
  */
-RgbcctColor mPalette::Get_Encoded_StaticPalette_Colour(
+RgbcctColor  
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::Get_Encoded_StaticPalette_Colour(
   uint16_t palette_adjusted_id,
   uint8_t* palette_buffer,
   uint16_t _pixel_position,  
@@ -395,7 +399,11 @@ RgbcctColor mPalette::Get_Encoded_StaticPalette_Colour(
  * @param seg_i 
  * @return RgbcctColor 
  */
-RgbcctColor mPalette::Get_StaticPalette_Encoded_Colour_ReadBuffer(
+RgbcctColor  
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::Get_StaticPalette_Encoded_Colour_ReadBuffer(
   uint16_t palette_adjusted_id,
   uint8_t* palette_buffer,
   uint16_t _pixel_position,  
@@ -519,7 +527,11 @@ RgbcctColor mPalette::Get_StaticPalette_Encoded_Colour_255Index(
  * @param seg_i 
  * @return RgbcctColor 
  */
-RgbcctColor mPalette::Get_StaticPalette_Encoded_Colour_IterativeIndex(
+RgbcctColor  
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mPalette::Get_StaticPalette_Encoded_Colour_IterativeIndex(
   uint16_t palette_adjusted_id,
   uint8_t* palette_buffer,
   uint16_t colour_index,  

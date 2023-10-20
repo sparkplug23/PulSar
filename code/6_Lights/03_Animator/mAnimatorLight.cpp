@@ -580,7 +580,11 @@ mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_P
  * should load even be here? surely into palette container
  * 
  */
-void mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteLoaded* _palette_container)
+void  
+#ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
+IRAM_ATTR 
+#endif 
+mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteLoaded* _palette_container)
 {
 
   // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
@@ -4117,6 +4121,8 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
   #endif
 
 
+  // if(indexPixel==0) ALOG_INF(PSTR("flag_brightness_already_applied %d"), flag_brightness_already_applied);
+
   /**
    * @brief 
    * 2023 method had the original WLED effects request brightness applied at the end, however, this is adding function call complexity
@@ -4127,7 +4133,7 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
   if(flag_brightness_already_applied == false)
   {
 
-    // if(indexPixel==0) Serial.println("Applying brightness here");
+    // if(indexPixel==0) ALOG_INF(PSTR("Applying brightness here"));
     
     /**
      * @brief Apply "GLOBAL" brightness to the colour
@@ -4153,7 +4159,7 @@ void IRAM_ATTR mAnimatorLight::Segment_New::SetPixelColor(uint16_t indexPixel, R
   }
   else
   {    
-    // if(indexPixel==0)  Serial.println("NOOOOOOOOOOOOOOOT Applying brightness here");
+    // if(indexPixel==0) ALOG_INF(PSTR("NOOOOOOOOOOOOOOOT Applying brightness here"));
   }
 
   /**

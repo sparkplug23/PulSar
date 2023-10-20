@@ -2254,9 +2254,9 @@ bool colorFromHexString(byte* rgb, const char* in);
     
     RgbcctColor GetPixelColor(uint16_t indexPixel = 0);       
     
-    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool flag_brightness_already_applied = false);// uint16_t segment_length = 0);
+    void SetPixelColor(uint16_t indexPixel, RgbcctColor color, bool flag_brightness_already_applied = false);
     void SetPixelColor(uint16_t indexPixel, uint8_t red, uint8_t green, uint8_t blue, bool flag_brightness_already_applied = false);  
-    void SetPixelColor(uint16_t indexPixel, uint32_t color, bool flag_brightness_already_applied = false);//, uint16_t segment_length = 0);
+    void SetPixelColor(uint16_t indexPixel, uint32_t color, bool flag_brightness_already_applied = false);
     
 
     // 1D support functions (some implement 2D as well)

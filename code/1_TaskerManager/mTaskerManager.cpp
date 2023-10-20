@@ -6,7 +6,6 @@ mTaskerManager* mTaskerManager::instance = nullptr;
 int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_tasker)
 {
 
-
   int8_t result = 0;
 
   if(target_tasker){
@@ -22,38 +21,23 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     
     // Single parsing, for now, make copy as we are modifying the original with tokens, otherwise, no new copy when phased over
     obj = parser.getRootObject();   
-    if (!obj)
-    {
-      #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      AddLog(LOG_LEVEL_ERROR, PSTR(D_JSON_DESERIALIZATION_ERROR));
-      #endif //ENABLE_LOG_LEVEL_COMMANDS
+    if (!obj) {
+      ALOG_ERR(PM_JSON_DESERIALIZATION_ERROR);
       return 0;
-    }
-    else{
-      // ALOG_INF(PSTR("JSON_SERIALIZATION"));
     }
 
     for(uint8_t i=0;i<GetClassCount();i++)
     { 
-      // switch_index = target_tasker ? target_tasker : i;
-
       
-      if(target_tasker){
-        switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
-      }else{
-        switch_index = i; // Normally index is synonomous with enum list
-      }
-
-      // ALOG_INF(PSTR("JSON_SERIALIZATION"));  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "switch_index %d"),switch_index);  
-
+      switch_index = target_tasker ? GetEnumNumber_UsingModuleUniqueID(target_tasker) : i; // passed value module is in unique_module_id format
+      
       pModule[switch_index]->Tasker(function, obj);
-      if(target_tasker)
-      {
-        // #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-        AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"), target_tasker, GetModuleFriendlyName_WithUniqueID(target_tasker));  
-        // #endif // ENABLE_LOG_LEVEL_COMMANDS          
+
+      if(target_tasker) {
+        ALOG_DBG( PSTR(D_LOG_CLASSLIST "EXECUTED ONCE %d %s"), target_tasker, GetModuleFriendlyName_WithUniqueID(target_tasker) );
         break; 
       }
+
     }
     
     return 0; // needs to return via "Tasker"
@@ -72,12 +56,8 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
     // AddLog(LOG_LEVEL_TEST,PSTR(D_LOG_CLASSLIST "========================%d/%d"), i, GetClassCount());  
     
     // If target_tasker != 0, then use it, else, use indexed array
-    if(target_tasker){
-      switch_index = GetEnumNumber_UsingModuleUniqueID(target_tasker); // passed value module is in unique_module_id format
-    }else{
-      switch_index = i; // Normally index is synonomous with enum list
-    }
-
+    switch_index = target_tasker ? GetEnumNumber_UsingModuleUniqueID(target_tasker) : i; // passed value module is in unique_module_id format
+      
     #ifdef ENABLE_ADVANCED_DEBUGGING
     #ifdef ENABLE_DEBUG_FUNCTION_NAMES
       #ifdef ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS
@@ -98,8 +78,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       }
       #endif
     #endif // ENABLE_DEBUG_FUNCTION_NAMES
-    #endif // ENABLE_ADVANCED_DEBUGGING
-    
+    #endif // ENABLE_ADVANCED_DEBUGGING    
 
     #if defined(DEBUG_EXECUTION_TIME) || defined(ENABLE_ADVANCED_DEBUGGING)  || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
     uint32_t start_millis = millis();
@@ -142,7 +121,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       break; //only run for loop for the class set. if 0, rull all
     }
   
-  } //end for
+  } // end for
 
 
   #ifdef ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
@@ -166,7 +145,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t function, uint16_t target_taske
       //}
       last_function = function;
     }
-  }//flag_boot_complete
+  }
   #endif // ENABLE_DEVFEATURE_SHOW_BOOT_PROGRESS_ON_SERIAL
 
 
@@ -227,7 +206,7 @@ uint8_t mTaskerManager::Instance_Init(){
   addTasker(EM_MODULE_NETWORK_WIFI_ID, new mWiFi());
   #endif 
   #ifdef USE_MODULE_NETWORK_CELLULAR
-    addTasker(EM_MODULE__NETWORK_CELLULAR__ID, new mCellular());
+  addTasker(EM_MODULE__NETWORK_CELLULAR__ID, new mCellular());
   #endif
   #ifdef USE_MODULE_NETWORK_MQTT
   addTasker(EM_MODULE_NETWORK_MQTT_ID, new mMQTT());
@@ -250,7 +229,7 @@ uint8_t mTaskerManager::Instance_Init(){
     addTasker(EM_MODULE_DISPLAYS_OLED_SH1106_ID, new mOLED_SH1106());
   #endif
 
-  // Drivers (Range 40-129)
+  // Drivers
   #ifdef USE_MODULE_DRIVERS_INTERFACE
     addTasker(EM_MODULE_DRIVERS_INTERFACE_ID, new mDriverInterface());
   #endif
@@ -460,7 +439,7 @@ uint8_t mTaskerManager::Instance_Init(){
   #ifdef USE_MODULE_CONTROLLER_TREADMILL
     addTasker(EM_MODULE_CONTROLLER_TREADMILL_ID, new X());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_DOORCHIME //phasing out
+  #ifdef USE_MODULE_CONTROLLER_DOORCHIME
     addTasker(EM_MODULE_CONTROLLER_DOORBELL_ID, new mDoorBell());
   #endif
   #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
@@ -488,7 +467,7 @@ uint8_t mTaskerManager::Instance_Init(){
     addTasker(EM_MODULE_CONTROLLER_USERMOD_01_ID, new mUserMod_01());
   #endif
   
-  // Specialised Controllers
+  // Custom Controllers
   #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
     addTasker(EM_MODULE_CONTROLLER_RADIATORFAN_ID, new mRadiatorFan());
   #endif
@@ -536,8 +515,7 @@ uint16_t mTaskerManager::GetClassCount()
 uint16_t mTaskerManager::GetClassSizeByID(uint8_t class_id)
 {
   #ifdef USE_DEBUG_CLASS_SIZE
-  return pModule[class_id]->GetClassSize(); // can I maybe get the class size via its pointer, thus, removing the need for function callbacks
-  //return sizeof(&pModule[class_id]);// size of what it points to?
+  return pModule[class_id]->GetClassSize();
   #else
   return 0;
   #endif
@@ -679,8 +657,7 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     default:
                                                       return PM_SEARCH_NOMATCH;
     case FUNC_POINTER_INIT:                           return PM_FUNC_POINTER_INIT_CTR;
-    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:                          return PM_FUNC_TEMPLATE_LOAD_CTR;
-    // case FUNC_MODULE_INIT:                            return PM_FUNC_MODULE_INIT_CTR;
+    case FUNC_TEMPLATE_MODULE_LOAD_FROM_PROGMEM:      return PM_FUNC_TEMPLATE_LOAD_CTR;
     case FUNC_PRE_INIT:                               return PM_FUNC_PRE_INIT_CTR;
     case FUNC_INIT:                                   return PM_FUNC_INIT_CTR;
     case FUNC_CONFIGURE_MODULES_FOR_DEVICE:           return PM_FUNC_CONFIGURE_MODULES_FOR_DEVICE_CTR;
@@ -698,8 +675,6 @@ const char* mTaskerManager::GetTaskName(uint8_t task, char* buffer){
     case FUNC_UPTIME_1_MINUTES:                       return PM_FUNC_UPTIME_1_MINUTES_CTR;
     case FUNC_UPTIME_10_MINUTES:                      return PM_FUNC_UPTIME_10_MINUTES_CTR;
     case FUNC_UPTIME_60_MINUTES:                      return PM_FUNC_UPTIME_60_MINUTES_CTR;
-    // case FUNC_RESTART_SPLASH_INFORMATION:             return PM_FUNC_RESTART_SPLASH_INFORMATION_CTR;
-    // case FUNC_PREP_BEFORE_TELEPERIOD:                 return PM_FUNC_PREP_BEFORE_TELEPERIOD_CTR;
     case FUNC_JSON_APPEND:                            return PM_FUNC_JSON_APPEND_CTR;
     case FUNC_SAVE_BEFORE_RESTART:                    return PM_FUNC_SAVE_BEFORE_RESTART_CTR;
     case FUNC_SETTINGS_DEFAULT:                       return PM_FUNC_SETTINGS_DEFAULT_CTR;
