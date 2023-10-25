@@ -157,7 +157,7 @@ void mAnimatorLight::EffectAnim__Spanned_Static_Palette()
   SetSegment_AnimFunctionCallback( SEGIDX, [this](const AnimationParam& param){ this->AnimationProcess_LinearBlend_Dynamic_Buffer(param); } );
 
 }
-static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",,,,,Time,Rate;!,!,!,!,!;ra=1000,ti=300";
+static const char PM_EFFECT_CONFIG__SPANNED_PALETTE[] PROGMEM = ",!,,,,Time,Rate;!,!,!,!,!;ra=1000,ti=300";
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
@@ -6014,7 +6014,7 @@ void mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2, ui
   uint16_t counter = millis() * ((SEGMENT.speed() >> 2) + 1);
   uint16_t a = counter * SEGLEN  >> 16;
 
-  bool chase_random = (SEGMENT.effect_id == EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID);
+  bool chase_random = (SEGMENT.effect_id == EFFECTS_FUNCTION__CHASE_RANDOM__ID);
   if (chase_random) {
     if (a < SEGMENT.step) //we hit the start again, choose new color for Chase random
     {
@@ -13133,8 +13133,8 @@ void mAnimatorLight::LoadEffects()
   addEffect3(EFFECTS_FUNCTION__SLOW_GLOW__ID,                     &mAnimatorLight::EffectAnim__Slow_Glow,                       PM_EFFECTS_FUNCTION__SLOW_GLOW__NAME_CTR,                                      PM_EFFECT_CONFIG__SLOW_GLOW);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__NAME_CTR,                             PM_EFFECT_CONFIG__CANDLE_SINGLE);  
-  addEffect3(EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__WLED_CANDLE_MULTIPLE__NAME_CTR,                           PM_EFFECT_CONFIG__CANDLE_MULTIPLE);
+  addEffect3(EFFECTS_FUNCTION__CANDLE_SINGLE__ID,            &mAnimatorLight::EffectAnim__Candle_Single,                   PM_EFFECTS_FUNCTION__CANDLE_SINGLE__NAME_CTR,                             PM_EFFECT_CONFIG__CANDLE_SINGLE);  
+  addEffect3(EFFECTS_FUNCTION__CANDLE_MULTIPLE__ID,          &mAnimatorLight::EffectAnim__Candle_Multiple,                 PM_EFFECTS_FUNCTION__CANDLE_MULTIPLE__NAME_CTR,                           PM_EFFECT_CONFIG__CANDLE_MULTIPLE);
   #endif 
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect3(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,     &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,          PM_EFFECTS_FUNCTION__SHIMMERING_TWO_PALETTES__NAME_CTR,                        PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES);
@@ -13185,162 +13185,162 @@ void mAnimatorLight::LoadEffects()
    * Static
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__WLED_STATIC_PATTERN__NAME_CTR,              PM_EFFECT_CONFIG__STATIC_PATTERN);
-  addEffect3(EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__NAME_CTR,          PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
+  addEffect3(EFFECTS_FUNCTION__STATIC_PATTERN__ID,       &mAnimatorLight::EffectAnim__Static_Pattern,                        PM_EFFECTS_FUNCTION__STATIC_PATTERN__NAME_CTR,              PM_EFFECT_CONFIG__STATIC_PATTERN);
+  addEffect3(EFFECTS_FUNCTION__TRI_STATIC_PATTERN__ID,   &mAnimatorLight::EffectAnim__Tri_Static_Pattern,                    PM_EFFECTS_FUNCTION__TRI_STATIC_PATTERN__NAME_CTR,          PM_EFFECT_CONFIG__TRI_STATIC_PATTERN);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__WLED_SPOTS__ID,                &mAnimatorLight::EffectAnim__Spots,                                 PM_EFFECTS_FUNCTION__WLED_SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
+  addEffect3(EFFECTS_FUNCTION__SPOTS__ID,                &mAnimatorLight::EffectAnim__Spots,                                 PM_EFFECTS_FUNCTION__SPOTS__NAME_CTR,                       PM_EFFECT_CONFIG__SPOTS);
   #endif
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__WLED_PERCENT__NAME_CTR,                     PM_EFFECT_CONFIG__PERCENT);
+  addEffect3(EFFECTS_FUNCTION__PERCENT__ID,              &mAnimatorLight::EffectAnim__Percent,                               PM_EFFECTS_FUNCTION__PERCENT__NAME_CTR,                     PM_EFFECT_CONFIG__PERCENT);
   #endif
   /**
    * One Colour
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID,         &mAnimatorLight::EffectAnim__Random_Colour,                         PM_EFFECTS_FUNCTION__WLED_RANDOM_COLOR__NAME_CTR,                PM_EFFECT_CONFIG__RANDOM_COLOR);
+  addEffect3(EFFECTS_FUNCTION__RANDOM_COLOR__ID,         &mAnimatorLight::EffectAnim__Random_Colour,                         PM_EFFECTS_FUNCTION__RANDOM_COLOR__NAME_CTR,                PM_EFFECT_CONFIG__RANDOM_COLOR);
   #endif
   /**
    * Wipe/Sweep/Runners 
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID,           &mAnimatorLight::EffectAnim__Colour_Wipe,                           PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE__NAME_CTR,                  PM_EFFECT_CONFIG__COLOR_WIPE);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID,    &mAnimatorLight::EffectAnim__Colour_Wipe_Random,                    PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__NAME_CTR,           PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_WIPE_PALETTE__ID,   &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,                   PM_EFFECTS_FUNCTION__WLED_COLOR_WIPE_PALETTE__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID,          &mAnimatorLight::EffectAnim__Colour_Sweep,                          PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP__NAME_CTR,                 PM_EFFECT_CONFIG__COLOR_SWEEP);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID,   &mAnimatorLight::EffectAnim__Colour_Sweep_Random,                   PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLOR_SWEEP_PALETTE__ID,  &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,                  PM_EFFECTS_FUNCTION__WLED_COLOR_SWEEP_PALETTE__NAME_CTR,         PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE);
+  addEffect3(EFFECTS_FUNCTION__COLOR_WIPE__ID,           &mAnimatorLight::EffectAnim__Colour_Wipe,                           PM_EFFECTS_FUNCTION__COLOR_WIPE__NAME_CTR,                  PM_EFFECT_CONFIG__COLOR_WIPE);
+  addEffect3(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID,    &mAnimatorLight::EffectAnim__Colour_Wipe_Random,                    PM_EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__NAME_CTR,           PM_EFFECT_CONFIG__COLOR_WIPE_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__ID,   &mAnimatorLight::EffectAnim__Colour_Wipe_Palette,                   PM_EFFECTS_FUNCTION__COLOR_WIPE_PALETTE__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_WIPE_PALETTE);
+  addEffect3(EFFECTS_FUNCTION__COLOR_SWEEP__ID,          &mAnimatorLight::EffectAnim__Colour_Sweep,                          PM_EFFECTS_FUNCTION__COLOR_SWEEP__NAME_CTR,                 PM_EFFECT_CONFIG__COLOR_SWEEP);
+  addEffect3(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,   &mAnimatorLight::EffectAnim__Colour_Sweep_Random,                   PM_EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__NAME_CTR,          PM_EFFECT_CONFIG__COLOR_SWEEP_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,  &mAnimatorLight::EffectAnim__Colour_Sweep_Palette,                  PM_EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__NAME_CTR,         PM_EFFECT_CONFIG__COLOR_SWEEP_PALETTE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Fireworks
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  addEffect3(EFFECTS_FUNCTION__WLED_FIREWORKS__ID,                     &mAnimatorLight::EffectAnim__Fireworks,                    PM_EFFECTS_FUNCTION__WLED_FIREWORKS__NAME_CTR,                      PM_EFFECT_CONFIG__FIREWORKS);
-  addEffect3(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID,           &mAnimatorLight::EffectAnim__Exploding_Fireworks,          PM_EFFECTS_FUNCTION__WLED_EXPLODING_FIREWORKS__NAME_CTR,            PM_EFFECT_CONFIG__EXPLODING_FIREWORKS);
-  addEffect3(EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID,           &mAnimatorLight::EffectAnim__Fireworks_Starburst,          PM_EFFECTS_FUNCTION__WLED_STARBURST__NAME_CTR,                      PM_EFFECT_CONFIG__STARBURST);
-  addEffect3(EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID,     &mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows,    PM_EFFECTS_FUNCTION__WLED_STARBURST_GLOWS__NAME_CTR,                PM_EFFECT_CONFIG__STARBURST_GLOWS);
-  addEffect3(EFFECTS_FUNCTION__WLED_RAIN__ID,                          &mAnimatorLight::EffectAnim__Rain,                         PM_EFFECTS_FUNCTION__WLED_RAIN__NAME_CTR,                           PM_EFFECT_CONFIG__RAIN);
-  addEffect3(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID, &mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch, PM_EFFECTS_FUNCTION__WLED_EXPLODING_FIREWORKS_NO_LAUNCH__NAME_CTR,  PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH);
+  addEffect3(EFFECTS_FUNCTION__FIREWORKS__ID,                     &mAnimatorLight::EffectAnim__Fireworks,                    PM_EFFECTS_FUNCTION__FIREWORKS__NAME_CTR,                      PM_EFFECT_CONFIG__FIREWORKS);
+  addEffect3(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID,           &mAnimatorLight::EffectAnim__Exploding_Fireworks,          PM_EFFECTS_FUNCTION__EXPLODING_FIREWORKS__NAME_CTR,            PM_EFFECT_CONFIG__EXPLODING_FIREWORKS);
+  addEffect3(EFFECTS_FUNCTION__FIREWORKS_STARBURST__ID,           &mAnimatorLight::EffectAnim__Fireworks_Starburst,          PM_EFFECTS_FUNCTION__STARBURST__NAME_CTR,                      PM_EFFECT_CONFIG__STARBURST);
+  addEffect3(EFFECTS_FUNCTION__FIREWORKS_STARBURST_GLOWS__ID,     &mAnimatorLight::EffectAnim__Fireworks_Starburst_Glows,    PM_EFFECTS_FUNCTION__STARBURST_GLOWS__NAME_CTR,                PM_EFFECT_CONFIG__STARBURST_GLOWS);
+  addEffect3(EFFECTS_FUNCTION__RAIN__ID,                          &mAnimatorLight::EffectAnim__Rain,                         PM_EFFECTS_FUNCTION__RAIN__NAME_CTR,                           PM_EFFECT_CONFIG__RAIN);
+  addEffect3(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID, &mAnimatorLight::EffectAnim__Exploding_Fireworks_NoLaunch, PM_EFFECTS_FUNCTION__EXPLODING_FIREWORKS_NO_LAUNCH__NAME_CTR,  PM_EFFECT_CONFIG__EXPLODING_FIREWORKS_NOLAUNCH);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__ID,         &mAnimatorLight::EffectAnim__TriColour,          PM_EFFECTS_FUNCTION__WLED_TRICOLOR_WIPE__NAME_CTR,              PM_EFFECT_CONFIG__TRICOLOR_WIPE);
-  addEffect3(EFFECTS_FUNCTION__WLED_ANDROID__ID,               &mAnimatorLight::EffectAnim__Android,            PM_EFFECTS_FUNCTION__WLED_ANDROID__NAME_CTR,                    PM_EFFECT_CONFIG__ANDROID);
-  addEffect3(EFFECTS_FUNCTION__WLED_RUNNING_COLOR__ID,         &mAnimatorLight::EffectAnim__Running_Colour,     PM_EFFECTS_FUNCTION__WLED_RUNNING_COLOR__NAME_CTR,              PM_EFFECT_CONFIG__RUNNING_COLOR);
-  addEffect3(EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__ID,        &mAnimatorLight::EffectAnim__Running_Random,     PM_EFFECTS_FUNCTION__WLED_RUNNING_RANDOM__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_RANDOM);
-  addEffect3(EFFECTS_FUNCTION__WLED_GRADIENT__ID,              &mAnimatorLight::EffectAnim__Gradient,           PM_EFFECTS_FUNCTION__WLED_GRADIENT__NAME_CTR,                   PM_EFFECT_CONFIG__GRADIENT);
-  addEffect3(EFFECTS_FUNCTION__WLED_LOADING__ID,               &mAnimatorLight::EffectAnim__Loading,            PM_EFFECTS_FUNCTION__WLED_LOADING__NAME_CTR,                    PM_EFFECT_CONFIG__LOADING);
-  addEffect3(EFFECTS_FUNCTION__WLED_POLICE__ID,                &mAnimatorLight::EffectAnim__Police,             PM_EFFECTS_FUNCTION__WLED_POLICE__NAME_CTR,                     PM_EFFECT_CONFIG__POLICE);
-  addEffect3(EFFECTS_FUNCTION__WLED_POLICE_ALL__ID,            &mAnimatorLight::EffectAnim__Polce_All,          PM_EFFECTS_FUNCTION__WLED_POLICE_ALL__NAME_CTR,                 PM_EFFECT_CONFIG__POLICE_ALL);
-  addEffect3(EFFECTS_FUNCTION__WLED_TWO_DOTS__ID,              &mAnimatorLight::EffectAnim__Two_Dots,           PM_EFFECTS_FUNCTION__WLED_TWO_DOTS__NAME_CTR,                   PM_EFFECT_CONFIG__TWO_DOTS);
-  addEffect3(EFFECTS_FUNCTION__WLED_TWO_AREAS__ID,             &mAnimatorLight::EffectAnim__Two_Areas,          PM_EFFECTS_FUNCTION__WLED_TWO_AREAS__NAME_CTR,                  PM_EFFECT_CONFIG__TWO_AREAS);
-  addEffect3(EFFECTS_FUNCTION__WLED_MULTI_COMET__ID,           &mAnimatorLight::EffectAnim__Multi_Comet,        PM_EFFECTS_FUNCTION__WLED_MULTI_COMET__NAME_CTR,                PM_EFFECT_CONFIG__MULTI_COMET);
-  addEffect3(EFFECTS_FUNCTION__WLED_OSCILLATE__ID,             &mAnimatorLight::EffectAnim__Oscillate,          PM_EFFECTS_FUNCTION__WLED_OSCILLATE__NAME_CTR,                  PM_EFFECT_CONFIG__OSCILLATE);
-  addEffect3(EFFECTS_FUNCTION__WLED_BPM__ID,                   &mAnimatorLight::EffectAnim__BPM,                PM_EFFECTS_FUNCTION__WLED_BPM__NAME_CTR,                        PM_EFFECT_CONFIG__BPM);
-  addEffect3(EFFECTS_FUNCTION__WLED_JUGGLE__ID,                &mAnimatorLight::EffectAnim__Juggle,             PM_EFFECTS_FUNCTION__WLED_JUGGLE__NAME_CTR,                     PM_EFFECT_CONFIG__JUGGLES);
-  addEffect3(EFFECTS_FUNCTION__WLED_PALETTE__ID,               &mAnimatorLight::EffectAnim__Palette,            PM_EFFECTS_FUNCTION__WLED_PALETTE__NAME_CTR,                    PM_EFFECT_CONFIG__PALETTE);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLORWAVES__ID,            &mAnimatorLight::EffectAnim__ColourWaves,        PM_EFFECTS_FUNCTION__WLED_COLORWAVES__NAME_CTR,                 PM_EFFECT_CONFIG__COLORWAVES);
-  addEffect3(EFFECTS_FUNCTION__WLED_LAKE__ID,                  &mAnimatorLight::EffectAnim__Lake,               PM_EFFECTS_FUNCTION__WLED_LAKE__NAME_CTR,                       PM_EFFECT_CONFIG__LAKE);
-  addEffect3(EFFECTS_FUNCTION__WLED_GLITTER__ID,               &mAnimatorLight::EffectAnim__Glitter,            PM_EFFECTS_FUNCTION__WLED_GLITTER__NAME_CTR,                    PM_EFFECT_CONFIG__GLITTER);
-  addEffect3(EFFECTS_FUNCTION__WLED_METEOR__ID,                &mAnimatorLight::EffectAnim__Meteor,             PM_EFFECTS_FUNCTION__WLED_METEOR__NAME_CTR,                     PM_EFFECT_CONFIG__METEOR);
-  addEffect3(EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__ID,         &mAnimatorLight::EffectAnim__Metoer_Smooth,      PM_EFFECTS_FUNCTION__WLED_METEOR_SMOOTH__NAME_CTR,              PM_EFFECT_CONFIG__METEOR_SMOOTH);
-  addEffect3(EFFECTS_FUNCTION__WLED_PRIDE_2015__ID,            &mAnimatorLight::EffectAnim__Pride_2015,         PM_EFFECTS_FUNCTION__WLED_PRIDE_2015__NAME_CTR,                 PM_EFFECT_CONFIG__PRIDE_2015);
-  addEffect3(EFFECTS_FUNCTION__WLED_PACIFICA__ID,              &mAnimatorLight::EffectAnim__Pacifica,           PM_EFFECTS_FUNCTION__WLED_PACIFICA__NAME_CTR,                   PM_EFFECT_CONFIG__PACIFICA);
-  addEffect3(EFFECTS_FUNCTION__WLED_SUNRISE__ID,               &mAnimatorLight::EffectAnim__Sunrise,            PM_EFFECTS_FUNCTION__WLED_SUNRISE__NAME_CTR,                    PM_EFFECT_CONFIG__SUNRISE);
-  addEffect3(EFFECTS_FUNCTION__WLED_SINEWAVE__ID,              &mAnimatorLight::EffectAnim__Sinewave,           PM_EFFECTS_FUNCTION__WLED_SINEWAVE__NAME_CTR,                   PM_EFFECT_CONFIG__SINEWAVE);
-  addEffect3(EFFECTS_FUNCTION__WLED_FLOW__ID,                  &mAnimatorLight::EffectAnim__Flow,               PM_EFFECTS_FUNCTION__WLED_FLOW__NAME_CTR,                       PM_EFFECT_CONFIG__FLOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__ID,        &mAnimatorLight::EffectAnim__Running_Lights,     PM_EFFECTS_FUNCTION__WLED_RUNNING_LIGHTS__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_LIGHTS);
-  addEffect3(EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__ID,         &mAnimatorLight::EffectAnim__Rainbow_Cycle,      PM_EFFECTS_FUNCTION__WLED_RAINBOW_CYCLE__NAME_CTR,              PM_EFFECT_CONFIG__RAINBOW_CYCLE);
+  addEffect3(EFFECTS_FUNCTION__TRICOLOR_WIPE__ID,         &mAnimatorLight::EffectAnim__TriColour,          PM_EFFECTS_FUNCTION__TRICOLOR_WIPE__NAME_CTR,              PM_EFFECT_CONFIG__TRICOLOR_WIPE);
+  addEffect3(EFFECTS_FUNCTION__ANDROID__ID,               &mAnimatorLight::EffectAnim__Android,            PM_EFFECTS_FUNCTION__ANDROID__NAME_CTR,                    PM_EFFECT_CONFIG__ANDROID);
+  addEffect3(EFFECTS_FUNCTION__RUNNING_COLOR__ID,         &mAnimatorLight::EffectAnim__Running_Colour,     PM_EFFECTS_FUNCTION__RUNNING_COLOR__NAME_CTR,              PM_EFFECT_CONFIG__RUNNING_COLOR);
+  addEffect3(EFFECTS_FUNCTION__RUNNING_RANDOM__ID,        &mAnimatorLight::EffectAnim__Running_Random,     PM_EFFECTS_FUNCTION__RUNNING_RANDOM__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__GRADIENT__ID,              &mAnimatorLight::EffectAnim__Gradient,           PM_EFFECTS_FUNCTION__GRADIENT__NAME_CTR,                   PM_EFFECT_CONFIG__GRADIENT);
+  addEffect3(EFFECTS_FUNCTION__LOADING__ID,               &mAnimatorLight::EffectAnim__Loading,            PM_EFFECTS_FUNCTION__LOADING__NAME_CTR,                    PM_EFFECT_CONFIG__LOADING);
+  addEffect3(EFFECTS_FUNCTION__POLICE__ID,                &mAnimatorLight::EffectAnim__Police,             PM_EFFECTS_FUNCTION__POLICE__NAME_CTR,                     PM_EFFECT_CONFIG__POLICE);
+  addEffect3(EFFECTS_FUNCTION__POLICE_ALL__ID,            &mAnimatorLight::EffectAnim__Polce_All,          PM_EFFECTS_FUNCTION__POLICE_ALL__NAME_CTR,                 PM_EFFECT_CONFIG__POLICE_ALL);
+  addEffect3(EFFECTS_FUNCTION__TWO_DOTS__ID,              &mAnimatorLight::EffectAnim__Two_Dots,           PM_EFFECTS_FUNCTION__TWO_DOTS__NAME_CTR,                   PM_EFFECT_CONFIG__TWO_DOTS);
+  addEffect3(EFFECTS_FUNCTION__TWO_AREAS__ID,             &mAnimatorLight::EffectAnim__Two_Areas,          PM_EFFECTS_FUNCTION__TWO_AREAS__NAME_CTR,                  PM_EFFECT_CONFIG__TWO_AREAS);
+  addEffect3(EFFECTS_FUNCTION__MULTI_COMET__ID,           &mAnimatorLight::EffectAnim__Multi_Comet,        PM_EFFECTS_FUNCTION__MULTI_COMET__NAME_CTR,                PM_EFFECT_CONFIG__MULTI_COMET);
+  addEffect3(EFFECTS_FUNCTION__OSCILLATE__ID,             &mAnimatorLight::EffectAnim__Oscillate,          PM_EFFECTS_FUNCTION__OSCILLATE__NAME_CTR,                  PM_EFFECT_CONFIG__OSCILLATE);
+  addEffect3(EFFECTS_FUNCTION__BPM__ID,                   &mAnimatorLight::EffectAnim__BPM,                PM_EFFECTS_FUNCTION__BPM__NAME_CTR,                        PM_EFFECT_CONFIG__BPM);
+  addEffect3(EFFECTS_FUNCTION__JUGGLE__ID,                &mAnimatorLight::EffectAnim__Juggle,             PM_EFFECTS_FUNCTION__JUGGLE__NAME_CTR,                     PM_EFFECT_CONFIG__JUGGLES);
+  addEffect3(EFFECTS_FUNCTION__PALETTE__ID,               &mAnimatorLight::EffectAnim__Palette,            PM_EFFECTS_FUNCTION__PALETTE__NAME_CTR,                    PM_EFFECT_CONFIG__PALETTE);
+  addEffect3(EFFECTS_FUNCTION__COLORWAVES__ID,            &mAnimatorLight::EffectAnim__ColourWaves,        PM_EFFECTS_FUNCTION__COLORWAVES__NAME_CTR,                 PM_EFFECT_CONFIG__COLORWAVES);
+  addEffect3(EFFECTS_FUNCTION__LAKE__ID,                  &mAnimatorLight::EffectAnim__Lake,               PM_EFFECTS_FUNCTION__LAKE__NAME_CTR,                       PM_EFFECT_CONFIG__LAKE);
+  addEffect3(EFFECTS_FUNCTION__GLITTER__ID,               &mAnimatorLight::EffectAnim__Glitter,            PM_EFFECTS_FUNCTION__GLITTER__NAME_CTR,                    PM_EFFECT_CONFIG__GLITTER);
+  addEffect3(EFFECTS_FUNCTION__METEOR__ID,                &mAnimatorLight::EffectAnim__Meteor,             PM_EFFECTS_FUNCTION__METEOR__NAME_CTR,                     PM_EFFECT_CONFIG__METEOR);
+  addEffect3(EFFECTS_FUNCTION__METEOR_SMOOTH__ID,         &mAnimatorLight::EffectAnim__Metoer_Smooth,      PM_EFFECTS_FUNCTION__METEOR_SMOOTH__NAME_CTR,              PM_EFFECT_CONFIG__METEOR_SMOOTH);
+  addEffect3(EFFECTS_FUNCTION__PRIDE_2015__ID,            &mAnimatorLight::EffectAnim__Pride_2015,         PM_EFFECTS_FUNCTION__PRIDE_2015__NAME_CTR,                 PM_EFFECT_CONFIG__PRIDE_2015);
+  addEffect3(EFFECTS_FUNCTION__PACIFICA__ID,              &mAnimatorLight::EffectAnim__Pacifica,           PM_EFFECTS_FUNCTION__PACIFICA__NAME_CTR,                   PM_EFFECT_CONFIG__PACIFICA);
+  addEffect3(EFFECTS_FUNCTION__SUNRISE__ID,               &mAnimatorLight::EffectAnim__Sunrise,            PM_EFFECTS_FUNCTION__SUNRISE__NAME_CTR,                    PM_EFFECT_CONFIG__SUNRISE);
+  addEffect3(EFFECTS_FUNCTION__SINEWAVE__ID,              &mAnimatorLight::EffectAnim__Sinewave,           PM_EFFECTS_FUNCTION__SINEWAVE__NAME_CTR,                   PM_EFFECT_CONFIG__SINEWAVE);
+  addEffect3(EFFECTS_FUNCTION__FLOW__ID,                  &mAnimatorLight::EffectAnim__Flow,               PM_EFFECTS_FUNCTION__FLOW__NAME_CTR,                       PM_EFFECT_CONFIG__FLOW);
+  addEffect3(EFFECTS_FUNCTION__RUNNING_LIGHTS__ID,        &mAnimatorLight::EffectAnim__Running_Lights,     PM_EFFECTS_FUNCTION__RUNNING_LIGHTS__NAME_CTR,             PM_EFFECT_CONFIG__RUNNING_LIGHTS);
+  addEffect3(EFFECTS_FUNCTION__RAINBOW_CYCLE__ID,         &mAnimatorLight::EffectAnim__Rainbow_Cycle,      PM_EFFECTS_FUNCTION__RAINBOW_CYCLE__NAME_CTR,              PM_EFFECT_CONFIG__RAINBOW_CYCLE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Chase
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_COLOR__ID,           &mAnimatorLight::EffectAnim__Chase_Colour,          PM_EFFECTS_FUNCTION__WLED_CHASE_COLOR__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_COLOR);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_RANDOM__ID,          &mAnimatorLight::EffectAnim__Chase_Random,          PM_EFFECTS_FUNCTION__WLED_CHASE_RANDOM__NAME_CTR,            PM_EFFECT_CONFIG__CHASE_RANDOM);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__ID,         &mAnimatorLight::EffectAnim__Chase_Rainbow,         PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__CHASE_RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_FLASH__ID,           &mAnimatorLight::EffectAnim__Chase_Flash,           PM_EFFECTS_FUNCTION__WLED_CHASE_FLASH__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_FLASH);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__ID,    &mAnimatorLight::EffectAnim__Chase_Flash_Random,    PM_EFFECTS_FUNCTION__WLED_CHASE_FLASH_RANDOM__NAME_CTR,      PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__ID,   &mAnimatorLight::EffectAnim__Chase_Rainbow_White,   PM_EFFECTS_FUNCTION__WLED_CHASE_RAINBOW_WHITE__NAME_CTR,     PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_THEATER__ID,         &mAnimatorLight::EffectAnim__Chase_Theater,         PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE__NAME_CTR,           PM_EFFECT_CONFIG__THEATER_CHASE);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_THEATER_RAINBOW__ID, &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow, PM_EFFECTS_FUNCTION__WLED_THEATER_CHASE_RAINBOW__NAME_CTR,   PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHASE_TRICOLOR__ID,        &mAnimatorLight::EffectAnim__Chase_TriColour,       PM_EFFECTS_FUNCTION__WLED_TRICOLOR_CHASE__NAME_CTR,          PM_EFFECT_CONFIG__TRICOLOR_CHASE);
+  addEffect3(EFFECTS_FUNCTION__CHASE_COLOR__ID,           &mAnimatorLight::EffectAnim__Chase_Colour,          PM_EFFECTS_FUNCTION__CHASE_COLOR__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_COLOR);
+  addEffect3(EFFECTS_FUNCTION__CHASE_RANDOM__ID,          &mAnimatorLight::EffectAnim__Chase_Random,          PM_EFFECTS_FUNCTION__CHASE_RANDOM__NAME_CTR,            PM_EFFECT_CONFIG__CHASE_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__CHASE_RAINBOW__ID,         &mAnimatorLight::EffectAnim__Chase_Rainbow,         PM_EFFECTS_FUNCTION__CHASE_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__CHASE_RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__CHASE_FLASH__ID,           &mAnimatorLight::EffectAnim__Chase_Flash,           PM_EFFECTS_FUNCTION__CHASE_FLASH__NAME_CTR,             PM_EFFECT_CONFIG__CHASE_FLASH);
+  addEffect3(EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__ID,    &mAnimatorLight::EffectAnim__Chase_Flash_Random,    PM_EFFECTS_FUNCTION__CHASE_FLASH_RANDOM__NAME_CTR,      PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__ID,   &mAnimatorLight::EffectAnim__Chase_Rainbow_White,   PM_EFFECTS_FUNCTION__CHASE_RAINBOW_WHITE__NAME_CTR,     PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE);
+  addEffect3(EFFECTS_FUNCTION__CHASE_THEATER__ID,         &mAnimatorLight::EffectAnim__Chase_Theater,         PM_EFFECTS_FUNCTION__THEATER_CHASE__NAME_CTR,           PM_EFFECT_CONFIG__THEATER_CHASE);
+  addEffect3(EFFECTS_FUNCTION__CHASE_THEATER_RAINBOW__ID, &mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow, PM_EFFECTS_FUNCTION__THEATER_CHASE_RAINBOW__NAME_CTR,   PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__CHASE_TRICOLOR__ID,        &mAnimatorLight::EffectAnim__Chase_TriColour,       PM_EFFECTS_FUNCTION__TRICOLOR_CHASE__NAME_CTR,          PM_EFFECT_CONFIG__TRICOLOR_CHASE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    *  Breathe/Fade/Pulse
    **/    
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_BREATH__ID,                &mAnimatorLight::EffectAnim__Breath,                PM_EFFECTS_FUNCTION__WLED_BREATH__NAME_CTR,                  PM_EFFECT_CONFIG__BREATH);
-  addEffect3(EFFECTS_FUNCTION__WLED_FADE__ID,                  &mAnimatorLight::EffectAnim__Fade,                  PM_EFFECTS_FUNCTION__WLED_FADE__NAME_CTR,                    PM_EFFECT_CONFIG__FADE);
-  addEffect3(EFFECTS_FUNCTION__WLED_FADE_TRICOLOR__ID,         &mAnimatorLight::EffectAnim__Fade_TriColour,        PM_EFFECTS_FUNCTION__WLED_TRICOLOR_FADE__NAME_CTR,           PM_EFFECT_CONFIG__TRICOLOR_FADE);
-  addEffect3(EFFECTS_FUNCTION__WLED_FADE_SPOTS__ID,            &mAnimatorLight::EffectAnim__Fade_Spots,            PM_EFFECTS_FUNCTION__WLED_SPOTS_FADE__NAME_CTR,              PM_EFFECT_CONFIG__SPOTS_FADE);
+  addEffect3(EFFECTS_FUNCTION__BREATH__ID,                &mAnimatorLight::EffectAnim__Breath,                PM_EFFECTS_FUNCTION__BREATH__NAME_CTR,                  PM_EFFECT_CONFIG__BREATH);
+  addEffect3(EFFECTS_FUNCTION__FADE__ID,                  &mAnimatorLight::EffectAnim__Fade,                  PM_EFFECTS_FUNCTION__FADE__NAME_CTR,                    PM_EFFECT_CONFIG__FADE);
+  addEffect3(EFFECTS_FUNCTION__FADE_TRICOLOR__ID,         &mAnimatorLight::EffectAnim__Fade_TriColour,        PM_EFFECTS_FUNCTION__TRICOLOR_FADE__NAME_CTR,           PM_EFFECT_CONFIG__TRICOLOR_FADE);
+  addEffect3(EFFECTS_FUNCTION__FADE_SPOTS__ID,            &mAnimatorLight::EffectAnim__Fade_Spots,            PM_EFFECTS_FUNCTION__SPOTS_FADE__NAME_CTR,              PM_EFFECT_CONFIG__SPOTS_FADE);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Sparkle/Twinkle
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_SOLID_GLITTER__ID,   &mAnimatorLight::EffectAnim__Solid_Glitter,               PM_EFFECTS_FUNCTION__WLED_SOLID_GLITTER__NAME_CTR,           PM_EFFECT_CONFIG__SOLID_GLITTER);
-  addEffect3(EFFECTS_FUNCTION__WLED_POPCORN__ID,         &mAnimatorLight::EffectAnim__Popcorn,                     PM_EFFECTS_FUNCTION__WLED_POPCORN__NAME_CTR,                 PM_EFFECT_CONFIG__POPCORN);
-  addEffect3(EFFECTS_FUNCTION__WLED_PLASMA__ID,          &mAnimatorLight::EffectAnim__Plasma,                      PM_EFFECTS_FUNCTION__WLED_PLASMA__NAME_CTR,                  PM_EFFECT_CONFIG__PLASMA);
-  addEffect3(EFFECTS_FUNCTION__WLED_SPARKLE__ID,         &mAnimatorLight::EffectAnim__Sparkle,                     PM_EFFECTS_FUNCTION__WLED_SPARKLE__NAME_CTR,                 PM_EFFECT_CONFIG__SPARKLE);
-  addEffect3(EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Flash,               PM_EFFECTS_FUNCTION__WLED_FLASH_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__FLASH_SPARKLE);
-  addEffect3(EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Hyper,               PM_EFFECTS_FUNCTION__WLED_HYPER_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__HYPER_SPARKLE);
-  addEffect3(EFFECTS_FUNCTION__WLED_TWINKLE__ID,         &mAnimatorLight::EffectAnim__Twinkle,                     PM_EFFECTS_FUNCTION__WLED_TWINKLE__NAME_CTR,                 PM_EFFECT_CONFIG__TWINKLE);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLORTWINKLE__ID,    &mAnimatorLight::EffectAnim__Twinkle_Colour,              PM_EFFECTS_FUNCTION__WLED_COLORTWINKLE__NAME_CTR,            PM_EFFECT_CONFIG__COLORTWINKLE);
-  addEffect3(EFFECTS_FUNCTION__WLED_TWINKLEFOX__ID,      &mAnimatorLight::EffectAnim__Twinkle_Fox,                 PM_EFFECTS_FUNCTION__WLED_TWINKLEFOX__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLEFOX);
-  addEffect3(EFFECTS_FUNCTION__WLED_TWINKLECAT__ID,      &mAnimatorLight::EffectAnim__Twinkle_Cat,                 PM_EFFECTS_FUNCTION__WLED_TWINKLECAT__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLECAT);
-  addEffect3(EFFECTS_FUNCTION__WLED_TWINKLEUP__ID,       &mAnimatorLight::EffectAnim__Twinkle_Up,                  PM_EFFECTS_FUNCTION__WLED_TWINKLEUP__NAME_CTR,               PM_EFFECT_CONFIG__TWINKLEUP);
-  addEffect3(EFFECTS_FUNCTION__WLED_SAW__ID,             &mAnimatorLight::EffectAnim__Saw,                         PM_EFFECTS_FUNCTION__WLED_SAW__NAME_CTR,                     PM_EFFECT_CONFIG__SAW);
-  addEffect3(EFFECTS_FUNCTION__WLED_DISSOLVE__ID,        &mAnimatorLight::EffectAnim__Dissolve,                    PM_EFFECTS_FUNCTION__WLED_DISSOLVE__NAME_CTR,                PM_EFFECT_CONFIG__DISSOLVE);
-  addEffect3(EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__ID, &mAnimatorLight::EffectAnim__Dissolve_Random,             PM_EFFECTS_FUNCTION__WLED_DISSOLVE_RANDOM__NAME_CTR,         PM_EFFECT_CONFIG__DISSOLVE_RANDOM);
-  addEffect3(EFFECTS_FUNCTION__WLED_COLORFUL__ID,        &mAnimatorLight::EffectAnim__ColourFul,                   PM_EFFECTS_FUNCTION__WLED_COLORFUL__NAME_CTR,                PM_EFFECT_CONFIG__COLORFUL);
-  addEffect3(EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__ID,   &mAnimatorLight::EffectAnim__Traffic_Light,               PM_EFFECTS_FUNCTION__WLED_TRAFFIC_LIGHT__NAME_CTR,           PM_EFFECT_CONFIG__TRAFFIC_LIGHT);
+  addEffect3(EFFECTS_FUNCTION__SOLID_GLITTER__ID,   &mAnimatorLight::EffectAnim__Solid_Glitter,               PM_EFFECTS_FUNCTION__SOLID_GLITTER__NAME_CTR,           PM_EFFECT_CONFIG__SOLID_GLITTER);
+  addEffect3(EFFECTS_FUNCTION__POPCORN__ID,         &mAnimatorLight::EffectAnim__Popcorn,                     PM_EFFECTS_FUNCTION__POPCORN__NAME_CTR,                 PM_EFFECT_CONFIG__POPCORN);
+  addEffect3(EFFECTS_FUNCTION__PLASMA__ID,          &mAnimatorLight::EffectAnim__Plasma,                      PM_EFFECTS_FUNCTION__PLASMA__NAME_CTR,                  PM_EFFECT_CONFIG__PLASMA);
+  addEffect3(EFFECTS_FUNCTION__SPARKLE__ID,         &mAnimatorLight::EffectAnim__Sparkle,                     PM_EFFECTS_FUNCTION__SPARKLE__NAME_CTR,                 PM_EFFECT_CONFIG__SPARKLE);
+  addEffect3(EFFECTS_FUNCTION__FLASH_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Flash,               PM_EFFECTS_FUNCTION__FLASH_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__FLASH_SPARKLE);
+  addEffect3(EFFECTS_FUNCTION__HYPER_SPARKLE__ID,   &mAnimatorLight::EffectAnim__Sparkle_Hyper,               PM_EFFECTS_FUNCTION__HYPER_SPARKLE__NAME_CTR,           PM_EFFECT_CONFIG__HYPER_SPARKLE);
+  addEffect3(EFFECTS_FUNCTION__TWINKLE__ID,         &mAnimatorLight::EffectAnim__Twinkle,                     PM_EFFECTS_FUNCTION__TWINKLE__NAME_CTR,                 PM_EFFECT_CONFIG__TWINKLE);
+  addEffect3(EFFECTS_FUNCTION__COLORTWINKLE__ID,    &mAnimatorLight::EffectAnim__Twinkle_Colour,              PM_EFFECTS_FUNCTION__COLORTWINKLE__NAME_CTR,            PM_EFFECT_CONFIG__COLORTWINKLE);
+  addEffect3(EFFECTS_FUNCTION__TWINKLEFOX__ID,      &mAnimatorLight::EffectAnim__Twinkle_Fox,                 PM_EFFECTS_FUNCTION__TWINKLEFOX__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLEFOX);
+  addEffect3(EFFECTS_FUNCTION__TWINKLECAT__ID,      &mAnimatorLight::EffectAnim__Twinkle_Cat,                 PM_EFFECTS_FUNCTION__TWINKLECAT__NAME_CTR,              PM_EFFECT_CONFIG__TWINKLECAT);
+  addEffect3(EFFECTS_FUNCTION__TWINKLEUP__ID,       &mAnimatorLight::EffectAnim__Twinkle_Up,                  PM_EFFECTS_FUNCTION__TWINKLEUP__NAME_CTR,               PM_EFFECT_CONFIG__TWINKLEUP);
+  addEffect3(EFFECTS_FUNCTION__SAW__ID,             &mAnimatorLight::EffectAnim__Saw,                         PM_EFFECTS_FUNCTION__SAW__NAME_CTR,                     PM_EFFECT_CONFIG__SAW);
+  addEffect3(EFFECTS_FUNCTION__DISSOLVE__ID,        &mAnimatorLight::EffectAnim__Dissolve,                    PM_EFFECTS_FUNCTION__DISSOLVE__NAME_CTR,                PM_EFFECT_CONFIG__DISSOLVE);
+  addEffect3(EFFECTS_FUNCTION__DISSOLVE_RANDOM__ID, &mAnimatorLight::EffectAnim__Dissolve_Random,             PM_EFFECTS_FUNCTION__DISSOLVE_RANDOM__NAME_CTR,         PM_EFFECT_CONFIG__DISSOLVE_RANDOM);
+  addEffect3(EFFECTS_FUNCTION__COLORFUL__ID,        &mAnimatorLight::EffectAnim__ColourFul,                   PM_EFFECTS_FUNCTION__COLORFUL__NAME_CTR,                PM_EFFECT_CONFIG__COLORFUL);
+  addEffect3(EFFECTS_FUNCTION__TRAFFIC_LIGHT__ID,   &mAnimatorLight::EffectAnim__Traffic_Light,               PM_EFFECTS_FUNCTION__TRAFFIC_LIGHT__NAME_CTR,           PM_EFFECT_CONFIG__TRAFFIC_LIGHT);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Blink/Strobe
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_BLINK__ID,           &mAnimatorLight::EffectAnim__Blink,                       PM_EFFECTS_FUNCTION__WLED_BLINK__NAME_CTR,                   PM_EFFECT_CONFIG__BLINK);
-  addEffect3(EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__ID,   &mAnimatorLight::EffectAnim__Blink_Rainbow,               PM_EFFECTS_FUNCTION__WLED_BLINK_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__BLINK_RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_STROBE__ID,          &mAnimatorLight::EffectAnim__Strobe,                      PM_EFFECTS_FUNCTION__WLED_STROBE__NAME_CTR,                  PM_EFFECT_CONFIG__STROBE);
-  addEffect3(EFFECTS_FUNCTION__WLED_MULTI_STROBE__ID,    &mAnimatorLight::EffectAnim__Strobe_Multi,                PM_EFFECTS_FUNCTION__WLED_MULTI_STROBE__NAME_CTR,            PM_EFFECT_CONFIG__MULTI_STROBE);
-  addEffect3(EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__ID,  &mAnimatorLight::EffectAnim__Strobe_Rainbow,              PM_EFFECTS_FUNCTION__WLED_STROBE_RAINBOW__NAME_CTR,          PM_EFFECT_CONFIG__STROBE_RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_RAINBOW__ID,         &mAnimatorLight::EffectAnim__Rainbow,                     PM_EFFECTS_FUNCTION__WLED_RAINBOW__NAME_CTR,                 PM_EFFECT_CONFIG__RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_LIGHTNING__ID,       &mAnimatorLight::EffectAnim__Lightning,                   PM_EFFECTS_FUNCTION__WLED_LIGHTNING__NAME_CTR,               PM_EFFECT_CONFIG__LIGHTNING);
-  addEffect3(EFFECTS_FUNCTION__WLED_FIRE_2012__ID,       &mAnimatorLight::EffectAnim__Fire_2012,                   PM_EFFECTS_FUNCTION__WLED_FIRE_2012__NAME_CTR,               PM_EFFECT_CONFIG__FIRE_2012);
-  addEffect3(EFFECTS_FUNCTION__WLED_RAILWAY__ID,         &mAnimatorLight::EffectAnim__Railway,                     PM_EFFECTS_FUNCTION__WLED_RAILWAY__NAME_CTR,                 PM_EFFECT_CONFIG__RAILWAY);
-  addEffect3(EFFECTS_FUNCTION__WLED_HEARTBEAT__ID,       &mAnimatorLight::EffectAnim__Heartbeat,                   PM_EFFECTS_FUNCTION__WLED_HEARTBEAT__NAME_CTR,               PM_EFFECT_CONFIG__HEARTBEAT);
+  addEffect3(EFFECTS_FUNCTION__BLINK__ID,           &mAnimatorLight::EffectAnim__Blink,                       PM_EFFECTS_FUNCTION__BLINK__NAME_CTR,                   PM_EFFECT_CONFIG__BLINK);
+  addEffect3(EFFECTS_FUNCTION__BLINK_RAINBOW__ID,   &mAnimatorLight::EffectAnim__Blink_Rainbow,               PM_EFFECTS_FUNCTION__BLINK_RAINBOW__NAME_CTR,           PM_EFFECT_CONFIG__BLINK_RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__STROBE__ID,          &mAnimatorLight::EffectAnim__Strobe,                      PM_EFFECTS_FUNCTION__STROBE__NAME_CTR,                  PM_EFFECT_CONFIG__STROBE);
+  addEffect3(EFFECTS_FUNCTION__MULTI_STROBE__ID,    &mAnimatorLight::EffectAnim__Strobe_Multi,                PM_EFFECTS_FUNCTION__MULTI_STROBE__NAME_CTR,            PM_EFFECT_CONFIG__MULTI_STROBE);
+  addEffect3(EFFECTS_FUNCTION__STROBE_RAINBOW__ID,  &mAnimatorLight::EffectAnim__Strobe_Rainbow,              PM_EFFECTS_FUNCTION__STROBE_RAINBOW__NAME_CTR,          PM_EFFECT_CONFIG__STROBE_RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__RAINBOW__ID,         &mAnimatorLight::EffectAnim__Rainbow,                     PM_EFFECTS_FUNCTION__RAINBOW__NAME_CTR,                 PM_EFFECT_CONFIG__RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__LIGHTNING__ID,       &mAnimatorLight::EffectAnim__Lightning,                   PM_EFFECTS_FUNCTION__LIGHTNING__NAME_CTR,               PM_EFFECT_CONFIG__LIGHTNING);
+  addEffect3(EFFECTS_FUNCTION__FIRE_2012__ID,       &mAnimatorLight::EffectAnim__Fire_2012,                   PM_EFFECTS_FUNCTION__FIRE_2012__NAME_CTR,               PM_EFFECT_CONFIG__FIRE_2012);
+  addEffect3(EFFECTS_FUNCTION__RAILWAY__ID,         &mAnimatorLight::EffectAnim__Railway,                     PM_EFFECTS_FUNCTION__RAILWAY__NAME_CTR,                 PM_EFFECT_CONFIG__RAILWAY);
+  addEffect3(EFFECTS_FUNCTION__HEARTBEAT__ID,       &mAnimatorLight::EffectAnim__Heartbeat,                   PM_EFFECTS_FUNCTION__HEARTBEAT__NAME_CTR,               PM_EFFECT_CONFIG__HEARTBEAT);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Noise
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_FILLNOISE8__ID,      &mAnimatorLight::EffectAnim__FillNoise8,                  PM_EFFECTS_FUNCTION__WLED_FILLNOISE8__NAME_CTR,              PM_EFFECT_CONFIG__FILLNOISE8);
-  addEffect3(EFFECTS_FUNCTION__WLED_NOISE16_1__ID,       &mAnimatorLight::EffectAnim__Noise16_1,                   PM_EFFECTS_FUNCTION__WLED_NOISE16_1__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_1);
-  addEffect3(EFFECTS_FUNCTION__WLED_NOISE16_2__ID,       &mAnimatorLight::EffectAnim__Noise16_2,                   PM_EFFECTS_FUNCTION__WLED_NOISE16_2__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_2);
-  addEffect3(EFFECTS_FUNCTION__WLED_NOISE16_3__ID,       &mAnimatorLight::EffectAnim__Noise16_3,                   PM_EFFECTS_FUNCTION__WLED_NOISE16_3__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_3);
-  addEffect3(EFFECTS_FUNCTION__WLED_NOISE16_4__ID,       &mAnimatorLight::EffectAnim__Noise16_4,                   PM_EFFECTS_FUNCTION__WLED_NOISE16_4__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_4);
-  addEffect3(EFFECTS_FUNCTION__WLED_NOISEPAL__ID,        &mAnimatorLight::EffectAnim__Noise_Pal,                   PM_EFFECTS_FUNCTION__WLED_NOISEPAL__NAME_CTR,                PM_EFFECT_CONFIG__NOISEPAL);
-  addEffect3(EFFECTS_FUNCTION__WLED_PHASEDNOISE__ID,     &mAnimatorLight::EffectAnim__PhasedNoise,                 PM_EFFECTS_FUNCTION__WLED_PHASEDNOISE__NAME_CTR,             PM_EFFECT_CONFIG__PHASEDNOISE);
-  addEffect3(EFFECTS_FUNCTION__WLED_PHASED__ID,          &mAnimatorLight::EffectAnim__Phased,                      PM_EFFECTS_FUNCTION__WLED_PHASED__NAME_CTR,                  PM_EFFECT_CONFIG__PHASED);
+  addEffect3(EFFECTS_FUNCTION__FILLNOISE8__ID,      &mAnimatorLight::EffectAnim__FillNoise8,                  PM_EFFECTS_FUNCTION__FILLNOISE8__NAME_CTR,              PM_EFFECT_CONFIG__FILLNOISE8);
+  addEffect3(EFFECTS_FUNCTION__NOISE16_1__ID,       &mAnimatorLight::EffectAnim__Noise16_1,                   PM_EFFECTS_FUNCTION__NOISE16_1__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_1);
+  addEffect3(EFFECTS_FUNCTION__NOISE16_2__ID,       &mAnimatorLight::EffectAnim__Noise16_2,                   PM_EFFECTS_FUNCTION__NOISE16_2__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_2);
+  addEffect3(EFFECTS_FUNCTION__NOISE16_3__ID,       &mAnimatorLight::EffectAnim__Noise16_3,                   PM_EFFECTS_FUNCTION__NOISE16_3__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_3);
+  addEffect3(EFFECTS_FUNCTION__NOISE16_4__ID,       &mAnimatorLight::EffectAnim__Noise16_4,                   PM_EFFECTS_FUNCTION__NOISE16_4__NAME_CTR,               PM_EFFECT_CONFIG__NOISE16_4);
+  addEffect3(EFFECTS_FUNCTION__NOISEPAL__ID,        &mAnimatorLight::EffectAnim__Noise_Pal,                   PM_EFFECTS_FUNCTION__NOISEPAL__NAME_CTR,                PM_EFFECT_CONFIG__NOISEPAL);
+  addEffect3(EFFECTS_FUNCTION__PHASEDNOISE__ID,     &mAnimatorLight::EffectAnim__PhasedNoise,                 PM_EFFECTS_FUNCTION__PHASEDNOISE__NAME_CTR,             PM_EFFECT_CONFIG__PHASEDNOISE);
+  addEffect3(EFFECTS_FUNCTION__PHASED__ID,          &mAnimatorLight::EffectAnim__Phased,                      PM_EFFECTS_FUNCTION__PHASED__NAME_CTR,                  PM_EFFECT_CONFIG__PHASED);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   /**
    * Scan
    **/
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  addEffect3(EFFECTS_FUNCTION__WLED_SCAN__ID,                &mAnimatorLight::EffectAnim__Scan,                    PM_EFFECTS_FUNCTION__WLED_SCAN__NAME_CTR,                    PM_EFFECT_CONFIG__SCAN);
-  addEffect3(EFFECTS_FUNCTION__WLED_DUAL_SCAN__ID,           &mAnimatorLight::EffectAnim__Scan_Dual,               PM_EFFECTS_FUNCTION__WLED_DUAL_SCAN__NAME_CTR,               PM_EFFECT_CONFIG__DUAL_SCAN);
-  addEffect3(EFFECTS_FUNCTION__WLED_LARSON_SCANNER__ID,      &mAnimatorLight::EffectAnim__Larson_Scanner,          PM_EFFECTS_FUNCTION__WLED_LARSON_SCANNER__NAME_CTR,          PM_EFFECT_CONFIG__LARSON_SCANNER);
-  addEffect3(EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__ID, &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,     PM_EFFECTS_FUNCTION__WLED_DUAL_LARSON_SCANNER__NAME_CTR,     PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER);
-  addEffect3(EFFECTS_FUNCTION__WLED_ICU__ID,                 &mAnimatorLight::EffectAnim__ICU,                     PM_EFFECTS_FUNCTION__WLED_ICU__NAME_CTR,                     PM_EFFECT_CONFIG__ICU);
-  addEffect3(EFFECTS_FUNCTION__WLED_RIPPLE__ID,              &mAnimatorLight::EffectAnim__Ripple,                  PM_EFFECTS_FUNCTION__WLED_RIPPLE__NAME_CTR,                  PM_EFFECT_CONFIG__RIPPLE);
-  addEffect3(EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__ID,      &mAnimatorLight::EffectAnim__Ripple_Rainbow,          PM_EFFECTS_FUNCTION__WLED_RIPPLE_RAINBOW__NAME_CTR,          PM_EFFECT_CONFIG__RIPPLE_RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_COMET__ID,               &mAnimatorLight::EffectAnim__Comet,                   PM_EFFECTS_FUNCTION__WLED_COMET__NAME_CTR,                   PM_EFFECT_CONFIG__COMET);
-  addEffect3(EFFECTS_FUNCTION__WLED_CHUNCHUN__ID,            &mAnimatorLight::EffectAnim__Chunchun,                PM_EFFECTS_FUNCTION__WLED_CHUNCHUN__NAME_CTR,                PM_EFFECT_CONFIG__CHUNCHUN);
-  addEffect3(EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__ID,       &mAnimatorLight::EffectAnim__Bouncing_Balls,          PM_EFFECTS_FUNCTION__WLED_BOUNCINGBALLS__NAME_CTR,           PM_EFFECT_CONFIG__BOUNCINGBALLS);
-  addEffect3(EFFECTS_FUNCTION__WLED_SINELON__ID,             &mAnimatorLight::EffectAnim__Sinelon,                 PM_EFFECTS_FUNCTION__WLED_SINELON__NAME_CTR,                 PM_EFFECT_CONFIG__SINELON);
-  addEffect3(EFFECTS_FUNCTION__WLED_SINELON_DUAL__ID,        &mAnimatorLight::EffectAnim__Sinelon_Dual,            PM_EFFECTS_FUNCTION__WLED_SINELON_DUAL__NAME_CTR,            PM_EFFECT_CONFIG__SINELON_DUAL);
-  addEffect3(EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__ID,     &mAnimatorLight::EffectAnim__Sinelon_Rainbow,         PM_EFFECTS_FUNCTION__WLED_SINELON_RAINBOW__NAME_CTR,         PM_EFFECT_CONFIG__SINELON_RAINBOW);
-  addEffect3(EFFECTS_FUNCTION__WLED_DRIP__ID,                &mAnimatorLight::EffectAnim__Drip,                    PM_EFFECTS_FUNCTION__WLED_DRIP__NAME_CTR,                    PM_EFFECT_CONFIG__DRIP);
+  addEffect3(EFFECTS_FUNCTION__SCAN__ID,                &mAnimatorLight::EffectAnim__Scan,                    PM_EFFECTS_FUNCTION__SCAN__NAME_CTR,                    PM_EFFECT_CONFIG__SCAN);
+  addEffect3(EFFECTS_FUNCTION__DUAL_SCAN__ID,           &mAnimatorLight::EffectAnim__Scan_Dual,               PM_EFFECTS_FUNCTION__DUAL_SCAN__NAME_CTR,               PM_EFFECT_CONFIG__DUAL_SCAN);
+  addEffect3(EFFECTS_FUNCTION__LARSON_SCANNER__ID,      &mAnimatorLight::EffectAnim__Larson_Scanner,          PM_EFFECTS_FUNCTION__LARSON_SCANNER__NAME_CTR,          PM_EFFECT_CONFIG__LARSON_SCANNER);
+  addEffect3(EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__ID, &mAnimatorLight::EffectAnim__Larson_Scanner_Dual,     PM_EFFECTS_FUNCTION__DUAL_LARSON_SCANNER__NAME_CTR,     PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER);
+  addEffect3(EFFECTS_FUNCTION__ICU__ID,                 &mAnimatorLight::EffectAnim__ICU,                     PM_EFFECTS_FUNCTION__ICU__NAME_CTR,                     PM_EFFECT_CONFIG__ICU);
+  addEffect3(EFFECTS_FUNCTION__RIPPLE__ID,              &mAnimatorLight::EffectAnim__Ripple,                  PM_EFFECTS_FUNCTION__RIPPLE__NAME_CTR,                  PM_EFFECT_CONFIG__RIPPLE);
+  addEffect3(EFFECTS_FUNCTION__RIPPLE_RAINBOW__ID,      &mAnimatorLight::EffectAnim__Ripple_Rainbow,          PM_EFFECTS_FUNCTION__RIPPLE_RAINBOW__NAME_CTR,          PM_EFFECT_CONFIG__RIPPLE_RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__COMET__ID,               &mAnimatorLight::EffectAnim__Comet,                   PM_EFFECTS_FUNCTION__COMET__NAME_CTR,                   PM_EFFECT_CONFIG__COMET);
+  addEffect3(EFFECTS_FUNCTION__CHUNCHUN__ID,            &mAnimatorLight::EffectAnim__Chunchun,                PM_EFFECTS_FUNCTION__CHUNCHUN__NAME_CTR,                PM_EFFECT_CONFIG__CHUNCHUN);
+  addEffect3(EFFECTS_FUNCTION__BOUNCINGBALLS__ID,       &mAnimatorLight::EffectAnim__Bouncing_Balls,          PM_EFFECTS_FUNCTION__BOUNCINGBALLS__NAME_CTR,           PM_EFFECT_CONFIG__BOUNCINGBALLS);
+  addEffect3(EFFECTS_FUNCTION__SINELON__ID,             &mAnimatorLight::EffectAnim__Sinelon,                 PM_EFFECTS_FUNCTION__SINELON__NAME_CTR,                 PM_EFFECT_CONFIG__SINELON);
+  addEffect3(EFFECTS_FUNCTION__SINELON_DUAL__ID,        &mAnimatorLight::EffectAnim__Sinelon_Dual,            PM_EFFECTS_FUNCTION__SINELON_DUAL__NAME_CTR,            PM_EFFECT_CONFIG__SINELON_DUAL);
+  addEffect3(EFFECTS_FUNCTION__SINELON_RAINBOW__ID,     &mAnimatorLight::EffectAnim__Sinelon_Rainbow,         PM_EFFECTS_FUNCTION__SINELON_RAINBOW__NAME_CTR,         PM_EFFECT_CONFIG__SINELON_RAINBOW);
+  addEffect3(EFFECTS_FUNCTION__DRIP__ID,                &mAnimatorLight::EffectAnim__Drip,                    PM_EFFECTS_FUNCTION__DRIP__NAME_CTR,                    PM_EFFECT_CONFIG__DRIP);
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
   addEffect3(EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,                                     &mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01,                                               PM_EFFECTS_FUNCTION__SUNPOSITIONS__SUNRISE_ALARM_01__NAME_CTR,                                          PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01); 

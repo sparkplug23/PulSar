@@ -1061,7 +1061,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_STATIC__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__STATIC__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1078,7 +1078,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_STATIC_PATTERN__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__STATIC_PATTERN__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1098,7 +1098,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY_SECONDARY_TERTIARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_TRI_STATIC_PATTERN__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__TRI_STATIC_PATTERN__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 1;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1115,7 +1115,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 1);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_PERCENT__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__PERCENT__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 127;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1132,7 +1132,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_RANDOM_COLOR__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__RANDOM_COLOR__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1149,7 +1149,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 1);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_COLOR_WIPE__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__COLOR_WIPE__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1166,7 +1166,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 127;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1179,7 +1179,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 1);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_COLOR_SWEEP__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__COLOR_SWEEP__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1200,7 +1200,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIREWORKS__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__FIREWORKS__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 255;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1217,7 +1217,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 100;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1234,7 +1234,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__FIREWORKS_STARBURST__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 100;
 //   SEGMENT_I(seg_idx).transition.time_ms = 25;
 //   SEGMENT_I(seg_idx).transition.rate_ms = 25;
@@ -1251,7 +1251,7 @@
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID;
-//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_RAIN__ID;
+//   SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__RAIN__ID;
 //   SEGMENT_I(seg_idx).intensity_value = 100;
 //   SEGMENT_I(seg_idx).transition.time_ms = FRAMETIME_MS;
 //   SEGMENT_I(seg_idx).transition.rate_ms = FRAMETIME_MS;
@@ -1272,7 +1272,7 @@
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_CANDLE_SINGLE__ID;
+//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__CANDLE_SINGLE__ID;
 //   // SEGMENT_I(seg_idx).intensity_value = 255;
 //   // SEGMENT_I(seg_idx).transition.time_ms = FRAMETIME_MS;
 //   // SEGMENT_I(seg_idx).transition.rate_ms = FRAMETIME_MS;
@@ -1289,7 +1289,7 @@
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_CANDLE_MULTI__ID;
+//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__CANDLE_MULTI__ID;
 //   // SEGMENT_I(seg_idx).intensity_value = 255;
 //   // SEGMENT_I(seg_idx).transition.time_ms = FRAMETIME_MS;
 //   // SEGMENT_I(seg_idx).transition.rate_ms = FRAMETIME_MS;
@@ -1306,7 +1306,7 @@
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_FIRE_FLICKER__ID;
+//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__FIRE_FLICKER__ID;
 //   // SEGMENT_I(seg_idx).intensity_value = 255;
 //   // SEGMENT_I(seg_idx).transition.time_ms = FRAMETIME_MS;
 //   // SEGMENT_I(seg_idx).transition.rate_ms = FRAMETIME_MS;
@@ -1323,7 +1323,7 @@
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_MIRROR, 0);
 //   // SEGMENT_I(seg_idx).setOption(SEG_OPTION_REVERSED, 0);
 //   // SEGMENT_I(seg_idx).palette.id = mPalette::PALETTELIST_VARIABLE_CRGBPALETTE16__BASIC_COLOURS_PRIMARY__ID;
-//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID;
+//   // SEGMENT_I(seg_idx).effect_id = EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID;
 //   // SEGMENT_I(seg_idx).intensity_value = 255;
 //   // SEGMENT_I(seg_idx).transition.time_ms = FRAMETIME_MS;
 //   // SEGMENT_I(seg_idx).transition.rate_ms = FRAMETIME_MS;

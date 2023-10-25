@@ -2275,7 +2275,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         count++;
       } while ( u.index != 255);
 
-      ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
+      // ALOG_INF(PSTR("palette_id%d,count=%d"),palette_id,count);
 
       u = *ent;
       int indexstart = 0;
@@ -2407,6 +2407,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
               &encoded_gradient
             );
             // Serial.println(encoded_gradient);
+            DEBUG_LINE_HERE;
 
             /**
              * @brief 

@@ -732,6 +732,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
                           CHSV(random8(), 192, random8(128, 255)),
                           CHSV(random8(), 255, random8(128, 255))
           );
+          //ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , SEGMENT_I(segment_index).params_internal.aux3 , new_colour_rate_ms);
           SEGMENT_I(segment_index).params_internal.aux3 = millis();
         }
       }
@@ -848,6 +849,7 @@ mAnimatorLight::LoadPalette(uint8_t palette_id, uint8_t segment_index, mPaletteL
     } // END switch
     
   }
+  //DEBUG_LINE_HERE;
 
 }
 
@@ -1584,6 +1586,8 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
       ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
       return palette_colour_count;
     }
+    
+    // ALOG_INF(PSTR("============  pal.data_length/encoded_colour_width %d %d"),  pal.data_length, encoded_colour_width);
   
     palette_colour_count = pal.data_length/encoded_colour_width; 
  
@@ -1604,6 +1608,13 @@ uint8_t mAnimatorLight::GetNumberOfColoursInPalette(uint16_t palette_id)
   if(
     (palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
   ){  
+    palette_colour_count = 1;    
+  }
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
+  ){  
+    ALOG_DBM(PSTR("Temporary fix, needs its own palette count"));
     palette_colour_count = 1;    
   }
   else
@@ -3975,6 +3986,19 @@ mAnimatorLight::Segment_New::GetPaletteColour(
   {
     pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   }
+  /**
+   * @brief These functions always need called as they are dynamic
+   * I should make this a check here, if palette is dynamic, then load everytime
+   * 
+   * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
+   * ie have a new tSaved_DynamicUpdate 
+   */
+  if(
+    (palette.id >= mPalette::PALETTELIST_DYNAMIC_CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID) && 
+    (palette.id <= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
+  ){
+    pCONT_lAni->LoadPalette(palette.id, pCONT_lAni->getCurrSegmentId());  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
+  }
 
   return mPaletteI->GetColourFromPreloadedPaletteBuffer_2023(
     palette.id,
@@ -4011,7 +4035,7 @@ uint8_t mAnimatorLight::Segment_New::GetPaletteDiscreteWidth()
  */
 RgbcctColor 
 #ifdef ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-IRAM_ATTR 
+IRAM_ATTR #error
 #endif 
 mAnimatorLight::GetColourFromUnloadedPalette2(
   uint16_t palette_id,
@@ -4027,7 +4051,11 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
    * @brief Load palette into temporary buffer first, then handle using the default function 
    **/
   mPaletteLoaded palette_container_temp = mPaletteLoaded();
+  DEBUG_LINE_HERE;
   pCONT_lAni->LoadPalette(palette_id, 0, &palette_container_temp);
+  DEBUG_LINE_HERE;
+
+  uint8_t segment_index = 0; //force as zero when just getting unloaded for webui. This is because active_Segment_index can change in async loop
   
   RgbcctColor colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_2023(
     palette_id,
@@ -4038,6 +4066,7 @@ mAnimatorLight::GetColourFromUnloadedPalette2(
     flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
     flag_crgb_exact_colour
   );
+  DEBUG_LINE_HERE;
 
   return colour;
 

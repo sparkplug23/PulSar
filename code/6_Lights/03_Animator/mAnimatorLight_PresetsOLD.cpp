@@ -852,7 +852,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 
-    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID);
+    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID);
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
@@ -1004,7 +1004,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
   
-    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID);
+    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID);
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
@@ -1013,7 +1013,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
   }else
   /**
    * @brief
-   * Effect: EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID
+   * Effect: EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID
    * Palette: Christmas Colourful for Outside Tree (New, Extreme Colours, With Warm Tone)
    * 
    * I want the one that sweeps from top to bottom only, not back again (always top down for a "waterfall/choc fountain" effect)
@@ -1024,7 +1024,7 @@ void mAnimatorLight::LoadPreset_OutsideFrontTree_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 
-    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID);
+    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID);
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
@@ -1117,7 +1117,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 
-    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID);
+    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID);
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(23);
@@ -1227,7 +1227,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
   
-    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID);
+    CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID);
     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_06__ID);
     CommandSet_Animation_Transition_Time_Ms(0);
     CommandSet_Animation_Transition_Rate_Ms(1000);
@@ -1249,7 +1249,7 @@ void mAnimatorLight::LoadPreset_ManualTesting_ByID(uint8_t id)
   }else
   /**
    * @brief
-   * Effect: EFFECTS_FUNCTION__WLED_COLOR_SWEEP_RANDOM__ID
+   * Effect: EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID
    * Palette: Christmas Colourful for Outside Tree (New, Extreme Colours, With Warm Tone)
    * 
    */

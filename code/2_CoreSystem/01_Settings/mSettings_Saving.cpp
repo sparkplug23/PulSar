@@ -32,15 +32,18 @@ void mSettings::SettingsSaveAll(void)
 
 uint32_t mSettings::SettingsRead(void *data, size_t size) 
 {
+  DEBUG_LINE_HERE;
   #ifdef USE_MODULE_DRIVERS_FILESYSTEM
   if (pCONT_mfile->TfsLoadFile(TASM_FILE_SETTINGS, (uint8_t*)data, size)) 
   {
+  DEBUG_LINE_HERE;
     return 2;
   }
   #endif
 //   if (NvmLoad("main", "Settings", data, size)) {
 //     return 1;
 //   };
+  DEBUG_LINE_HERE;
   return 0;
 }
 
@@ -58,6 +61,7 @@ void mSettings::SettingsLoad(void)
   ALOG_ERR(PSTR(D_LOG_SETTINGS "SettingsLoad: Not enabled"));
   #endif
 
+  DEBUG_LINE_HERE;
   
   #ifdef ENABLE_LOG_LEVEL_INFO
   AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_MEMORY D_LOAD ));
@@ -185,6 +189,9 @@ DEBUG_LINE_HERE;
   pCONT_mfile->TfsSaveFile(TASM_FILE_SETTINGS, (const uint8_t*)pSettings, nSettingsLen);
   #endif // USE_MODULE_DRIVERS_FILESYSTEM
   
+
+DEBUG_LINE_HERE;
+
   // NvmSave("main", "Settings", pSettings, nSettingsLen);
 
 }

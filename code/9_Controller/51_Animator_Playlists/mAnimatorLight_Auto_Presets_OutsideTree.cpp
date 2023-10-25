@@ -148,7 +148,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 // make my own for this
-    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID);
+    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_STARBURST_GLOWS__ID);
     // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(100); 
@@ -253,7 +253,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 
-    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID);
+    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID);
     // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23); 
@@ -272,7 +272,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 
-    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID);
+    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID);
     // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23); 
@@ -291,7 +291,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
     (true) // Time Allowed, true for always
   ){
 
-    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID);
+    // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID);
     // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC__CHRISTMAS_SNOWY_COLOURS_02__ID);
     // CommandSet_Animation_Transition_Time_Ms(0);
     // CommandSet_Animation_Transition_Rate_Ms(23); 
@@ -456,7 +456,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 //     (true) // Time Allowed, true for always
 //   ){
     
-//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_SHIMMERING_PALETTE__ID);
+//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__SHIMMERING_PALETTE__ID);
 //     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
 //     CommandSet_Animation_Transition_Time_Ms(0);
 //     CommandSet_Animation_Transition_Rate_Ms(23);    
@@ -545,7 +545,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 //     (true) // Time Allowed, true for always
 //   ){
 // // make my own for this
-//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_STARBURST_GLOWS__ID);
+//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_STARBURST_GLOWS__ID);
 //     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
 //     CommandSet_Animation_Transition_Time_Ms(0);
 //     CommandSet_Animation_Transition_Rate_Ms(100); 
@@ -668,7 +668,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 // // }
 
 
-//     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID);
+//     // CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID);
 //     // CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
 //     // CommandSet_Animation_Transition_Time_Ms(0);
 //     // CommandSet_Animation_Transition_Rate_Ms(23); 
@@ -677,7 +677,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 //     // SEGMENT_I(0).grouping = 1;
 //     // CommandSet_Global_BrtRGB_255(255);
 
-//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_COLOR_WIPE_RANDOM__ID);
+//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__COLOR_WIPE_RANDOM__ID);
 //     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
 //     CommandSet_Animation_Transition_Time_Ms(0);
 //     CommandSet_Animation_Transition_Rate_Ms(23); 
@@ -696,7 +696,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 //     (true) // Time Allowed, true for always
 //   ){
 
-//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING__ID);
+//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING__ID);
 //     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
 //     CommandSet_Animation_Transition_Time_Ms(0);
 //     CommandSet_Animation_Transition_Rate_Ms(23); 
@@ -715,7 +715,7 @@ void mAnimatorLight::LoadPreset_ManualUserCustom_ByID(uint8_t id)
 //     (true) // Time Allowed, true for always
 //   ){
 
-//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__WLED_FIREWORKS_EXPLODING_NO_LAUNCH__ID);
+//     CommandSet_Flasher_FunctionID(EFFECTS_FUNCTION__FIREWORKS_EXPLODING_NO_LAUNCH__ID);
 //     CommandSet_PaletteID(mPalette::PALETTELIST_STATIC_CHRISTMAS_24__ID);
 //     CommandSet_Animation_Transition_Time_Ms(0);
 //     CommandSet_Animation_Transition_Rate_Ms(23); 

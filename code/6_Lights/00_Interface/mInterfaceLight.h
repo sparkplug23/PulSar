@@ -80,7 +80,7 @@ public:
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
-#include "6_Lights/00_Interface/mInterfaceLight_Defines.h"
+#include "6_Lights/03_Animator/EffectNames/defines.h"
 
 #include "JsonParser.h"
 

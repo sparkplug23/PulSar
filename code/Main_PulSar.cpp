@@ -539,9 +539,11 @@ DEBUG_LINE_HERE;
  ** File System : Load after settings for now, so this method overrides any defaults   ******
  ********************************************************************************************/
 
+  #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
     pCONT_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
   #endif
+  #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
 
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work

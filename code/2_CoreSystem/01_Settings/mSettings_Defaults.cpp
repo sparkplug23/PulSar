@@ -42,6 +42,9 @@ void mSettings::SettingsDefault(void)
 
   // After defaults are loaded everything should immediately be saved
   SettingsSaveAll();
+  
+  
+  DEBUG_LINE_HERE;
     
 }
 

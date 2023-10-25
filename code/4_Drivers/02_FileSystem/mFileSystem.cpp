@@ -55,8 +55,10 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
       // JsonFile_Save__Stored_Secure();
     break;  
     case FUNC_EVERY_FIVE_MINUTE:
+      #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
       JsonFile_Save__Stored_Module();
       JsonFile_Save__Stored_Secure();
+      #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
     break;
     /************
      * COMMANDS SECTION * 
@@ -359,6 +361,7 @@ uint32_t mFileSystem::UfsInfo(uint32_t sel, uint32_t type) {
 
 bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len) 
 {
+  DEBUG_LINE_HERE;
   if (!ffs_type) { return false; }
 
   File file = ffsp->open(fname, "r");
@@ -371,6 +374,7 @@ bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len)
   if (len > flen) { len = flen; }           // Adjust requested length to smaller file length
   file.read(buf, len);
   file.close();
+  DEBUG_LINE_HERE;
   return true;
 }
 
@@ -378,6 +382,8 @@ bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len)
 bool mFileSystem::TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len) 
 {
   
+
+DEBUG_LINE_HERE;
   if (!ffs_type) { return false; }
   
   #ifdef USE_WEBCAM
@@ -386,13 +392,19 @@ bool mFileSystem::TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t le
   
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "ffsp %s"), fname);
 
+
+DEBUG_LINE_HERE;
   File file = ffsp->open(fname, "w");
   
+
+DEBUG_LINE_HERE;
   if (!file) 
   {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_FILESYSTEM "Save failed"));
     return false;
   } 
+
+DEBUG_LINE_HERE;
     
   // This will timeout on ESP32-webcam, but now solved with WcInterrupt(0) in support_esp.ino
   file.write(buf, len);     
